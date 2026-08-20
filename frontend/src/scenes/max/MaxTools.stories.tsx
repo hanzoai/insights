@@ -83,7 +83,7 @@ export const PlanningComponent: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -141,7 +141,7 @@ export const ReasoningComponent: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -271,7 +271,7 @@ export const TaskExecutionComponent: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -296,7 +296,7 @@ export const TaskExecutionComponent: Story = {
                     ),
             },
             get: {
-                '/api/environments/:team_id/conversations/in_progress/': async () => {
+                '/v1/environments/:team_id/conversations/in_progress/': async () => {
                     await delay('infinite')
                     return new HttpResponse()
                 },
@@ -399,7 +399,7 @@ export const TaskExecutionWithFailure: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -449,7 +449,7 @@ export const MultiVisualizationInThread: Story = {
         // Mock the queries endpoint to return dummy data
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/query/:kind/': () => [
+                '/v1/environments/:team_id/query/:kind/': () => [
                     200,
                     {
                         results: [[100, 120, 130, 140, 150]],
@@ -458,7 +458,7 @@ export const MultiVisualizationInThread: Story = {
                         insightsql: 'SELECT count() FROM events',
                     },
                 ],
-                '/api/environments/:team_id/conversations/': () => {
+                '/v1/environments/:team_id/conversations/': () => {
                     const humanMsg = {
                         type: AssistantMessageType.Human,
                         content: 'Analyze our product metrics comprehensively',
@@ -555,7 +555,7 @@ export const ThreadWithSQLQueryOverflow: Story = {
     render: () => {
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () => new HttpResponse(sqlQueryResponseChunk),
+                '/v1/environments/:team_id/conversations/': () => new HttpResponse(sqlQueryResponseChunk),
             },
         })
 
@@ -655,7 +655,7 @@ export const SearchSessionRecordingsEmpty: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -757,7 +757,7 @@ export const SearchSessionRecordingsWithResults: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -799,7 +799,7 @@ export const SearchSessionRecordingsWithResults: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/session_recordings': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings': ({ request }) => {
                     const version = new URL(request.url).searchParams.get('version')
                     return [
                         200,
@@ -857,7 +857,7 @@ export const SearchErrorTrackingIssuesEmpty: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -980,7 +980,7 @@ export const SearchErrorTrackingIssuesWithResults: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -1079,7 +1079,7 @@ export const DangerousOperationPendingApproval: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -1097,7 +1097,7 @@ export const DangerousOperationPendingApproval: Story = {
                     ),
             },
             get: {
-                [`/api/environments/:team_id/conversations/${CONVERSATION_ID}/`]: () => [
+                [`/v1/environments/:team_id/conversations/${CONVERSATION_ID}/`]: () => [
                     200,
                     {
                         id: CONVERSATION_ID,
@@ -1267,7 +1267,7 @@ The following services will need to be notified:
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -1285,7 +1285,7 @@ The following services will need to be notified:
                     ),
             },
             get: {
-                [`/api/environments/:team_id/conversations/${CONVERSATION_ID}/`]: () => [
+                [`/v1/environments/:team_id/conversations/${CONVERSATION_ID}/`]: () => [
                     200,
                     {
                         id: CONVERSATION_ID,
@@ -1364,7 +1364,7 @@ export const NotebookArtifactMarkdownOnly: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -1451,7 +1451,7 @@ export const NotebookArtifactWithVisualizations: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -1559,7 +1559,7 @@ export const NotebookArtifactMixedContent: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -1651,7 +1651,7 @@ export const NotebookArtifactWithLoadingAndErrors: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',

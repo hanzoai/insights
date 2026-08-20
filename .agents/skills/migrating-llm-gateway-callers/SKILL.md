@@ -42,7 +42,7 @@ Read [migration examples](references/migration-examples.md) for verified PRs cov
 
 1. Use `build_openai_client`, `build_async_openai_client`, or `build_async_anthropic_client` from `insights/llm/gateway_client.py` for Django callers when possible.
 2. Use the slugless Go base URL. Do not carry a Python `/{product}/` path into the Go URL.
-3. Use a supported `phs_` or `pha_` credential with `llm_gateway:read`. Do not weaken auth or expose a shared secret to an untrusted runtime.
+3. Use a supported `sk-` or `at-` credential with `llm_gateway:read`. Do not weaken auth or expose a shared secret to an untrusted runtime.
 4. Send event labels in one `X-Insights-Properties` JSON object. Use the dedicated distinct ID and trace ID headers where required.
 5. Treat `ai_product` as telemetry only. Do not use it to replace trusted product auth or billing policy.
 6. Confirm the canonical model and API shape against the Go model catalog.
@@ -53,7 +53,7 @@ For sandbox callers, follow the existing `SANDBOX_AI_GATEWAY_URL` and product ro
 
 For internal products, check with the AI gateway team before adding deployment variables or secrets so existing shared configuration can be reused.
 
-If the target process does not have a Go credential, enable the `ai-gateway` feature flag for the intended paying team, then create a `phs_` project secret in the Insights dashboard with `llm_gateway:read` and wire it through the existing deployment secret mechanism. Credential creation is normal migration work, not a parity exception.
+If the target process does not have a Go credential, enable the `ai-gateway` feature flag for the intended paying team, then create a `sk-` project secret in the Insights dashboard with `llm_gateway:read` and wire it through the existing deployment secret mechanism. Credential creation is normal migration work, not a parity exception.
 
 ## Update tests and docs
 

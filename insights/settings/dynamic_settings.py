@@ -169,12 +169,12 @@ CONSTANCE_CONFIG = {
     ),
     "SUPPORT_SLACK_APP_CLIENT_ID": (
         get_from_env("SUPPORT_SLACK_APP_CLIENT_ID", default=""),
-        "Used to enable the 'Add to Slack' button for the SupportHog Slack app.",
+        "Used to enable the 'Add to Slack' button for the Support Slack app.",
         str,
     ),
     "SUPPORT_SLACK_APP_CLIENT_SECRET": (
         get_from_env("SUPPORT_SLACK_APP_CLIENT_SECRET", default=""),
-        "Used by the SupportHog Slack OAuth callback to exchange authorization codes.",
+        "Used by the Support Slack OAuth callback to exchange authorization codes.",
         str,
     ),
     "SUPPORT_SLACK_SIGNING_SECRET": (
@@ -184,18 +184,18 @@ CONSTANCE_CONFIG = {
     ),
     "SUPPORT_TEAMS_APP_ID": (
         get_from_env("SUPPORT_TEAMS_APP_ID", default=""),
-        "Azure AD Application (client) ID for the SupportHog Teams bot. Shared across all tenants.",
+        "Azure AD Application (client) ID for the Support Teams bot. Shared across all tenants.",
         str,
     ),
     "SUPPORT_TEAMS_APP_SECRET": (
         get_from_env("SUPPORT_TEAMS_APP_SECRET", default=""),
-        "Azure AD client secret for the SupportHog Teams bot.",
+        "Azure AD client secret for the Support Teams bot.",
         str,
     ),
     "SUPPORT_TEAMS_APP_TENANT_ID": (
         get_from_env("SUPPORT_TEAMS_APP_TENANT_ID", default=""),
         (
-            "Azure AD tenant ID where the SupportHog Teams bot app is registered. "
+            "Azure AD tenant ID where the Support Teams bot app is registered. "
             "Set this only if the Azure Bot resource was created as SingleTenant. "
             "Leave empty for MultiTenant bots (default)."
         ),
@@ -204,7 +204,7 @@ CONSTANCE_CONFIG = {
     "SUPPORT_TEAMS_CATALOG_APP_ID": (
         get_from_env("SUPPORT_TEAMS_CATALOG_APP_ID", default=""),
         (
-            "Teams catalog app id (GUID) for the published SupportHog manifest. This is the id "
+            "Teams catalog app id (GUID) for the published Support manifest. This is the id "
             "Microsoft assigns when the manifest is listed in the Teams Store (AppSource) or uploaded "
             "to an org catalog — different from SUPPORT_TEAMS_APP_ID, which is the bot's Azure AD "
             "client id. Required for programmatic install via Graph /teams/{id}/installedApps."

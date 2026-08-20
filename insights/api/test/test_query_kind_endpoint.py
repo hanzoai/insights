@@ -6,8 +6,8 @@ from parameterized import parameterized
 class TestQueryKindEndpoint(APIBaseTest):
     @parameterized.expand(
         [
-            ("environment", "/api/environments/{team_id}/query/InsightsQLQuery/"),
-            ("project", "/api/projects/{team_id}/query/InsightsQLQuery/"),
+            ("environment", "/v1/environments/{team_id}/query/InsightsQLQuery/"),
+            ("project", "/v1/projects/{team_id}/query/InsightsQLQuery/"),
         ]
     )
     def test_query_kind_endpoint_accepts_post(self, _name: str, url_template: str) -> None:
@@ -21,8 +21,8 @@ class TestQueryKindEndpoint(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("environment", "/api/environments/{team_id}/query/InsightsQLQuery/"),
-            ("project", "/api/projects/{team_id}/query/InsightsQLQuery/"),
+            ("environment", "/v1/environments/{team_id}/query/InsightsQLQuery/"),
+            ("project", "/v1/projects/{team_id}/query/InsightsQLQuery/"),
         ]
     )
     def test_query_kind_endpoint_rejects_mismatch(self, _name: str, url_template: str) -> None:
@@ -37,8 +37,8 @@ class TestQueryKindEndpoint(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("environment", "/api/environments/{team_id}/query/upgrade/"),
-            ("project", "/api/projects/{team_id}/query/upgrade/"),
+            ("environment", "/v1/environments/{team_id}/query/upgrade/"),
+            ("project", "/v1/projects/{team_id}/query/upgrade/"),
         ]
     )
     def test_reserved_query_routes_are_not_treated_as_query_kind(self, _name: str, url_template: str) -> None:

@@ -1,6 +1,6 @@
 """SQL eval cases for the sandboxed coding agent.
 
-Intent mirrors ``ee/hogai/eval/ci/eval_sql.py`` — the CI version drives the
+Intent mirrors ``ee/scriptai/eval/ci/eval_sql.py`` — the CI version drives the
 LangGraph chat agent in ``AgentMode.SQL`` (which forces the SQL path), this
 version exercises the same questions end-to-end through the sandboxed agent
 + Insights MCP tools and judges the InsightsQL the agent ran via the

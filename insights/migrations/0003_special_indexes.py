@@ -7,45 +7,51 @@ class Migration(migrations.Migration):
     unique-partial) that makemigrations cannot express. Captured verbatim from
     live insights so a fresh migrate reaches EXACT schema parity. Depends on all
     app leaves so every target table exists. Columns first, then their indexes.
+
+    The capture cannot tell a column Django owns from one it does not, and it swept in
+    `endpoints_endpoint.saved_query_id`, which `endpoints.0003` adds as a plain AddField.
+    `IF NOT EXISTS` kept this migration from failing but not the other one: on a fresh
+    build this got there first and `endpoints.0003` died at `column "saved_query_id" of
+    relation "endpoints_endpoint" already exists`. The column and its index are gone from
+    here; `endpoints` owns them. It is the only column in this file that any Django
+    migration also adds.
     """
 
     dependencies = [
-        ('admin', '0003_logentry_add_action_flag_choices'),
-        ('analytics_platform', '0002_preaggregation_job_expires_at'),
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('axes', '0009_add_session_hash'),
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('conversations', '0002_ticket_ticket_number'),
-        ('customer_analytics', '0002_customer_profile_config'),
-        ('data_modeling', '0002_edge_edge_unique_within_dag'),
-        ('data_warehouse', '0002_cleanup_datawarehouse_contenttypes'),
-        ('early_access_features', '0002_alter_earlyaccessfeature_options_and_more'),
-        ('endpoints', '0002_endpoint_cache_age_seconds'),
-        ('error_tracking', '0002_issue_cohort_reference'),
-        ('insights', '0002_managed_tables'),
-        ('insights_ai', '0001_initial'),
-        ('live_debugger', '0001_initial'),
-        ('llm_analytics', '0001_initial_migration'),
-        ('marketing_analytics', '0001_add_marketing_analytics_goal_mapping'),
-        ('notebooks', '0001_migrate_notebooks_models'),
-        ('oauth2_provider', '0012_add_token_checksum'),
-        ('otp_static', '0003_add_timestamps'),
-        ('otp_totp', '0003_add_timestamps'),
-        ('product_tours', '0001_initial'),
-        ('social_django', '0016_alter_usersocialauth_extra_data'),
-        ('tasks', '0001_initial'),
-        ('two_factor', '0001_squashed_0008_delete_phonedevice'),
-        ('user_interviews', '0001_initial'),
-        ('workflows', '0001_insightsflowbatchjob')
+        ("admin", "0003_logentry_add_action_flag_choices"),
+        ("analytics_platform", "0002_preaggregation_job_expires_at"),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("conversations", "0002_ticket_ticket_number"),
+        ("customer_analytics", "0002_customer_profile_config"),
+        ("data_modeling", "0002_edge_edge_unique_within_dag"),
+        ("data_warehouse", "0002_cleanup_datawarehouse_contenttypes"),
+        ("early_access_features", "0002_alter_earlyaccessfeature_options_and_more"),
+        ("endpoints", "0002_endpoint_cache_age_seconds"),
+        ("error_tracking", "0002_issue_cohort_reference"),
+        ("insights", "0002_managed_tables"),
+        ("insights_ai", "0001_initial"),
+        ("live_debugger", "0001_initial"),
+        ("llm_analytics", "0001_initial_migration"),
+        ("marketing_analytics", "0001_add_marketing_analytics_goal_mapping"),
+        ("notebooks", "0001_migrate_notebooks_models"),
+        ("oauth2_provider", "0012_add_token_checksum"),
+        ("otp_static", "0003_add_timestamps"),
+        ("otp_totp", "0003_add_timestamps"),
+        ("product_tours", "0001_initial"),
+        ("social_django", "0016_alter_usersocialauth_extra_data"),
+        ("tasks", "0001_initial"),
+        ("user_interviews", "0001_initial"),
+        ("workflows", "0001_insightsflowbatchjob"),
     ]
 
     operations = [
-        migrations.RunSQL(sql=r"""
+        migrations.RunSQL(
+            sql=r"""
 ALTER TABLE public.endpoints_endpoint ADD COLUMN IF NOT EXISTS "cache_age_seconds" integer;
 ALTER TABLE public.endpoints_endpoint ADD COLUMN IF NOT EXISTS "description" text;
 ALTER TABLE public.endpoints_endpoint ADD COLUMN IF NOT EXISTS "parameters" jsonb;
 ALTER TABLE public.endpoints_endpoint ADD COLUMN IF NOT EXISTS "query" jsonb;
-ALTER TABLE public.endpoints_endpoint ADD COLUMN IF NOT EXISTS "saved_query_id" uuid;
 ALTER TABLE public.insights_conversations_ticket ADD COLUMN IF NOT EXISTS "assigned_to_id" integer;
 ALTER TABLE public.insights_task_run ADD COLUMN IF NOT EXISTS "current_stage_id" uuid;
 ALTER TABLE public.insights_task_run ADD COLUMN IF NOT EXISTS "log" jsonb;
@@ -57,7 +63,6 @@ ALTER TABLE public.insights_task ADD COLUMN IF NOT EXISTS "position" integer;
 ALTER TABLE public.insights_task ADD COLUMN IF NOT EXISTS "repository_config" jsonb;
 ALTER TABLE public.insights_task ADD COLUMN IF NOT EXISTS "workflow_id" uuid;
 
-CREATE INDEX IF NOT EXISTS endpoints_endpoint_saved_query_id_23649aa9 ON public.endpoints_endpoint USING btree (saved_query_id);
 CREATE INDEX IF NOT EXISTS idx_activitylog_featureflag_updates ON public.insights_activitylog USING btree (team_id, item_id, created_at DESC) WHERE (((scope)::text = 'FeatureFlag'::text) AND ((activity)::text = 'updated'::text));
 CREATE INDEX IF NOT EXISTS idx_alog_detail_gin_path_ops ON public.insights_activitylog USING gin (detail jsonb_path_ops);
 CREATE INDEX IF NOT EXISTS idx_alog_org_detail_exists ON public.insights_activitylog USING btree (organization_id) WHERE ((detail IS NOT NULL) AND (jsonb_typeof(detail) = 'object'::text));
@@ -77,8 +82,8 @@ CREATE INDEX IF NOT EXISTS insights_task_workflow_id_34ce9690 ON public.insights
 CREATE UNIQUE INDEX IF NOT EXISTS team_secret_api_token_backup_unique_idx ON public.insights_team USING btree (secret_api_token_backup);
 CREATE UNIQUE INDEX IF NOT EXISTS team_secret_api_token_unique_idx ON public.insights_team USING btree (secret_api_token);
 CREATE UNIQUE INDEX IF NOT EXISTS unique_pending_job_per_range ON public.analytics_platform_preaggregationjob USING btree (team_id, query_hash, time_range_start, time_range_end) WHERE ((status)::text = 'pending'::text);
-""", reverse_sql=r"""
-DROP INDEX IF EXISTS endpoints_endpoint_saved_query_id_23649aa9;
+""",
+            reverse_sql=r"""
 DROP INDEX IF EXISTS idx_activitylog_featureflag_updates;
 DROP INDEX IF EXISTS idx_alog_detail_gin_path_ops;
 DROP INDEX IF EXISTS idx_alog_org_detail_exists;
@@ -98,5 +103,6 @@ DROP INDEX IF EXISTS insights_task_workflow_id_34ce9690;
 DROP INDEX IF EXISTS team_secret_api_token_backup_unique_idx;
 DROP INDEX IF EXISTS team_secret_api_token_unique_idx;
 DROP INDEX IF EXISTS unique_pending_job_per_range;
-"""),
+""",
+        ),
     ]

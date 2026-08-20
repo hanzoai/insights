@@ -3,7 +3,7 @@ import { router } from 'kea-router'
 
 import { Button, Table, TableColumns, Link } from '@hanzo/elements'
 
-import { SleepingHog } from 'lib/components/mascots'
+import { SleepingScript } from 'lib/components/mascots'
 import { TZLabel } from 'lib/components/TZLabel'
 import { Spinner } from 'lib/elements/Spinner'
 import { humanFriendlyNumber } from 'lib/utils/numbers'
@@ -101,7 +101,7 @@ function EmptyRuns(): JSX.Element {
     const everyMatch = action?.alert_config?.frequency === 'every_match'
     return (
         <div className="flex flex-col items-center text-center gap-3 py-10">
-            <SleepingHog className="w-40 h-40" />
+            <SleepingScript className="w-40 h-40" />
             <h3 className="m-0">{isAlert ? 'Your alert is live' : 'Your digest is live'}</h3>
             <p className="text-muted max-w-md">
                 {isAlert

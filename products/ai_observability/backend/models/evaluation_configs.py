@@ -9,7 +9,7 @@ class EvaluationType(models.TextChoices):
     """How the evaluation is performed"""
 
     LLM_JUDGE = "llm_judge", "LLM as a judge"
-    HOG = "script", "Script"
+    SCRIPT = "script", "Script"
     SENTIMENT = "sentiment", "Sentiment analysis"
 
 
@@ -33,7 +33,7 @@ class LLMJudgeConfig(BaseModel):
         return v.strip()
 
 
-class HogEvalConfig(BaseModel):
+class ScriptEvalConfig(BaseModel):
     """Configuration for Script code evaluations"""
 
     source: str = Field(..., min_length=1, description="Script source code")
@@ -240,13 +240,13 @@ def validate_target_config(target: str, target_config: dict) -> dict:
 # Mapping: (evaluation_type, output_type) -> (evaluation_config_model, output_config_model)
 EVALUATION_CONFIG_MODELS: dict[tuple[str, str], tuple[type[BaseModel], type[BaseModel]]] = {
     (EvaluationType.LLM_JUDGE.value, OutputType.BOOLEAN.value): (LLMJudgeConfig, BooleanOutputConfig),
-    (EvaluationType.HOG.value, OutputType.BOOLEAN.value): (HogEvalConfig, BooleanOutputConfig),
+    (EvaluationType.SCRIPT.value, OutputType.BOOLEAN.value): (ScriptEvalConfig, BooleanOutputConfig),
     (EvaluationType.SENTIMENT.value, OutputType.SENTIMENT.value): (SentimentEvalConfig, SentimentOutputConfig),
 }
 
 EVALUATION_CONFIG_CONTENT_KEYS: dict[str, str] = {
     EvaluationType.LLM_JUDGE.value: "prompt",
-    EvaluationType.HOG.value: "source",
+    EvaluationType.SCRIPT.value: "source",
     EvaluationType.SENTIMENT.value: "source",
 }
 

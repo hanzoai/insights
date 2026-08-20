@@ -21,7 +21,7 @@ from rest_framework.serializers import BaseSerializer
 
 from insights.api.app_metrics2 import AppMetricsMixin
 from insights.api.forbid_destroy_model import ForbidDestroyModel
-from insights.api.hog_invocation_rerun import HogInvocationRerunRequestSerializer, HogInvocationRerunResponseSerializer
+from insights.api.script_invocation_rerun import ScriptInvocationRerunRequestSerializer, ScriptInvocationRerunResponseSerializer
 from insights.api.log_entries import LogEntryMixin
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import SearchMatchTypeSerializerMixin, UserBasicSerializer
@@ -29,11 +29,11 @@ from insights.api.utils import action, log_activity_from_viewset
 from insights.cdp.services.icons import CDPIconsService
 from insights.cdp.site_functions import get_transpiled_function
 from insights.cdp.validation import (
-    InsightsFunctionFiltersSerializer,
     InputsSchemaItemSerializer,
     InputsSerializer,
+    InsightsFunctionFiltersSerializer,
     MappingsSerializer,
-    compile_hog,
+    compile_script,
     generate_template_bytecode,
 )
 from insights.event_usage import AGENT_EVENT_SOURCES, get_event_source
@@ -48,7 +48,7 @@ from insights.helpers.trigram_search import (
 )
 from insights.models import Team
 from insights.models.activity_logging.activity_log import Change, Detail, log_activity
-from insights.plugins.plugin_server_api import create_hog_invocation_test, rerun_hog_invocations
+from insights.plugins.plugin_server_api import create_script_invocation_test, rerun_script_invocations
 
 from products.cdp.backend.api.insights_function_template import InsightsFunctionTemplateSerializer
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
@@ -65,7 +65,7 @@ from products.cdp.backend.models.insights_functions.utils import humanize_insigh
 from products.cdp.backend.models.plugin import TranspilerError
 from products.cdp.backend.services.revisions import use_destinations_revisions
 
-# Maximum size of HOG code as a string in bytes (100KB)
+# Maximum size of Script code as a string in bytes (100KB)
 MAX_FN_CODE_SIZE_BYTES = 100 * 1024
 # Maximum number of transformation functions per team
 MAX_TRANSFORMATIONS_PER_TEAM = 20
@@ -116,7 +116,7 @@ CREATE_ENABLED_MESSAGE = (
 # would change. Signing the live timestamp too is what stops a publish from silently discarding a
 # concurrent web edit: the draft is a full snapshot, so it overwrites whatever landed since.
 PUBLISH_CONFIRM_TOKEN_MAX_AGE = timedelta(minutes=15)
-_PUBLISH_CONFIRM_SALT = "hogfunction-publish"
+_PUBLISH_CONFIRM_SALT = "insightsfunction-publish"
 
 
 def _publish_confirm_value(insights_function: InsightsFunction) -> str:
@@ -437,7 +437,9 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
             return
         if attrs.get("enabled", self.instance.enabled) is not True:
             return
-        template = InsightsFunctionTemplate.get_template(self.instance.template_id) if self.instance.template_id else None
+        template = (
+            InsightsFunctionTemplate.get_template(self.instance.template_id) if self.instance.template_id else None
+        )
         if template is not None and template.status == "hidden":
             raise serializers.ValidationError(
                 {
@@ -536,7 +538,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
     def validate(self, attrs):
         team = self.context["get_team"]()
         attrs["team"] = team  # NOTE: This has to be done at this level
-        hog_type = self.context["function_type"]
+        script_type = self.context["function_type"]
         is_create = self.context.get("is_create") or (
             self.context.get("view") and self.context["view"].action == "create"
         )
@@ -545,7 +547,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
 
         # Existing functions keep working (and can be updated/disabled) if the flag is
         # later turned off; only creation is gated.
-        if is_create and hog_type == InsightsFunctionType.TRANSFORMATION_LOG:
+        if is_create and script_type == InsightsFunctionType.TRANSFORMATION_LOG:
             if not hanzo_insights.feature_enabled(
                 LOGS_TRANSFORMATIONS_FEATURE_FLAG,
                 str(team.uuid),
@@ -562,7 +564,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
 
         # Check for transformation limit per team when the function will be enabled
         # We allow unlimited creation of disabled transformations as they don't run during ingestion
-        enabled_cap = MAX_ENABLED_FUNCTIONS_PER_TEAM_BY_TYPE.get(hog_type)
+        enabled_cap = MAX_ENABLED_FUNCTIONS_PER_TEAM_BY_TYPE.get(script_type)
         if enabled_cap is not None:
             # The cap covers the effective post-update state: restoring a soft-deleted
             # enabled function ({"deleted": false} with no "enabled" key) re-enters the
@@ -576,13 +578,13 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
             if apply_limit:
                 # Count enabled and non-deleted functions of the same type
                 transformation_count = InsightsFunction.objects.filter(
-                    team=team, type=hog_type, deleted=False, enabled=True
+                    team=team, type=script_type, deleted=False, enabled=True
                 ).count()
 
                 if transformation_count >= enabled_cap:
                     raise serializers.ValidationError(
                         {
-                            "type": f"Maximum of {enabled_cap} enabled {humanize_insights_function_type(hog_type)} functions allowed per team. Please contact support if you need this limit increased, or disable some existing ones."
+                            "type": f"Maximum of {enabled_cap} enabled {humanize_insights_function_type(script_type)} functions allowed per team. Please contact support if you need this limit increased, or disable some existing ones."
                         }
                     )
 
@@ -592,20 +594,20 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
                 attrs["filters"].pop("events", None)
                 attrs["filters"].pop("actions", None)
 
-            if hog_type not in ["site_destination", "destination"]:
+            if script_type not in ["site_destination", "destination"]:
                 raise serializers.ValidationError({"mappings": "Mappings are only allowed for destinations."})
 
         if "script" in attrs:
             # First check the raw code size before trying to compile/transpile it
-            hog_code_size = len(attrs["script"].encode("utf-8"))
-            if hog_code_size > MAX_FN_CODE_SIZE_BYTES:
+            script_code_size = len(attrs["script"].encode("utf-8"))
+            if script_code_size > MAX_FN_CODE_SIZE_BYTES:
                 raise serializers.ValidationError(
                     {
-                        "script": f"HOG code exceeds maximum size of {MAX_FN_CODE_SIZE_BYTES // 1024}KB. Please simplify your code or contact support if you need this limit increased."
+                        "script": f"Script code exceeds maximum size of {MAX_FN_CODE_SIZE_BYTES // 1024}KB. Please simplify your code or contact support if you need this limit increased."
                     }
                 )
 
-            if hog_type in TYPES_WITH_JAVASCRIPT_SOURCE:
+            if script_type in TYPES_WITH_JAVASCRIPT_SOURCE:
                 try:
                     # Validate transpilation using the model instance
                     attrs["transpiled"] = get_transpiled_function(
@@ -620,7 +622,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
                     raise serializers.ValidationError({"script": "Error in TypeScript code"})
                 attrs["bytecode"] = None
             else:
-                attrs["bytecode"] = compile_hog(attrs["script"], hog_type)
+                attrs["bytecode"] = compile_script(attrs["script"], script_type)
                 attrs["transpiled"] = None
 
         if is_create:
@@ -697,10 +699,10 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
             # For non-transformation types, just create normally
             return super().create(validated_data=validated_data)
 
-    def _get_highest_execution_order(self, team_id: int, hog_type: str) -> int:
+    def _get_highest_execution_order(self, team_id: int, script_type: str) -> int:
         """Get the highest execution_order among functions of the same type in a team."""
         highest_order = (
-            InsightsFunction.objects.filter(team_id=team_id, type=hog_type, deleted=False)
+            InsightsFunction.objects.filter(team_id=team_id, type=script_type, deleted=False)
             .order_by("-execution_order")
             .values_list("execution_order", flat=True)
             .first()
@@ -986,7 +988,7 @@ class InsightsFunctionViewSet(
             return Response([])
 
         icons = CDPIconsService().list_icons(
-            query, icon_url_base="/api/projects/@current/insights_functions/icon/?id=", team_id=self.team_id
+            query, icon_url_base="/v1/projects/@current/insights_functions/icon/?id=", team_id=self.team_id
         )
 
         return Response(icons)
@@ -1046,7 +1048,7 @@ class InsightsFunctionViewSet(
         # Remove the team from the config
         configuration.pop("team")
 
-        res = create_hog_invocation_test(
+        res = create_script_invocation_test(
             team_id=self.team_id,
             insights_function_id=str(insights_function.id) if insights_function else "new",
             payload=serializer.validated_data,
@@ -1058,15 +1060,15 @@ class InsightsFunctionViewSet(
         return Response(res.json())
 
     @extend_schema(
-        request=HogInvocationRerunRequestSerializer,
-        responses={200: HogInvocationRerunResponseSerializer, 400: HogInvocationRerunResponseSerializer},
+        request=ScriptInvocationRerunRequestSerializer,
+        responses={200: ScriptInvocationRerunResponseSerializer, 400: ScriptInvocationRerunResponseSerializer},
     )
     @action(detail=True, methods=["POST"])
     def rerun(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """
         Rerun past invocations of this script function from their stored payloads.
 
-        The CDP worker reads matching rows from the `hog_invocation_results`
+        The CDP worker reads matching rows from the `invocations`
         Datastore table, rehydrates the invocation from the stored
         `invocation_globals`, and re-enqueues onto cyclotron. Each rerun
         run reuses the original `invocation_id` with `is_retry=1` set on the
@@ -1095,7 +1097,7 @@ class InsightsFunctionViewSet(
                 status=400,
             )
 
-        serializer = HogInvocationRerunRequestSerializer(data=request.data)
+        serializer = ScriptInvocationRerunRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         # `serializer.data` runs `to_representation`, which converts the
@@ -1103,7 +1105,7 @@ class InsightsFunctionViewSet(
         # ISO-8601 strings — `requests.post(json=...)` can't serialize raw
         # `datetime` objects, so passing `validated_data` would 500 every
         # filter-mode rerun before the request even left Django.
-        res = rerun_hog_invocations(
+        res = rerun_script_invocations(
             team_id=self.team_id,
             function_kind="insights_function",
             function_id=str(insights_function.id),
@@ -1127,7 +1129,8 @@ class InsightsFunctionViewSet(
         # everywhere else in this file.
         if (
             serializer.validated_data.get("enabled")
-            and (serializer.validated_data.get("type") or InsightsFunctionType.DESTINATION) == InsightsFunctionType.DESTINATION
+            and (serializer.validated_data.get("type") or InsightsFunctionType.DESTINATION)
+            == InsightsFunctionType.DESTINATION
             and self._is_agent_request(self.request)
             and use_destinations_revisions(self.team)
         ):
@@ -1322,7 +1325,9 @@ class InsightsFunctionViewSet(
             detail_type=humanize_insights_function_type(serializer.instance.type),
         )
 
-    @extend_schema(request=InsightsFunctionPublishRequestSerializer, responses={200: InsightsFunctionPublishResponseSerializer})
+    @extend_schema(
+        request=InsightsFunctionPublishRequestSerializer, responses={200: InsightsFunctionPublishResponseSerializer}
+    )
     @action(detail=True, methods=["POST"])
     def publish(self, request: Request, *args, **kwargs):
         # Promote the staged draft to the live config. Two-step by design: a call without confirm only
@@ -1475,7 +1480,9 @@ class InsightsFunctionViewSet(
             raise exceptions.ValidationError(REVISIONS_DISABLED_MESSAGE)
         instance = self.get_object()
         queryset = (
-            InsightsFunctionRevision.objects.filter(insights_function=instance).order_by("-version").select_related("created_by")
+            InsightsFunctionRevision.objects.filter(insights_function=instance)
+            .order_by("-version")
+            .select_related("created_by")
         )
         page = self.paginate_queryset(queryset)
         return self.get_paginated_response(InsightsFunctionRevisionBasicSerializer(page, many=True).data)
@@ -1519,7 +1526,9 @@ class InsightsFunctionViewSet(
             # nosemgrep: idor-lookup-without-team (re-fetch of already-authorized instance, locked for update)
             locked = InsightsFunction.objects.select_for_update().get(pk=instance.pk)
             try:
-                revision = InsightsFunctionRevision.objects.get(insights_function_id=locked.pk, version=int(version or 0))
+                revision = InsightsFunctionRevision.objects.get(
+                    insights_function_id=locked.pk, version=int(version or 0)
+                )
             except InsightsFunctionRevision.DoesNotExist:
                 raise exceptions.NotFound("No such revision for this function.")
             if locked.draft and not param_serializer.validated_data["overwrite"]:
@@ -1578,7 +1587,7 @@ class InsightsFunctionViewSet(
             types = {f.type for f in functions.values()}
             if len(types) > 1:
                 raise exceptions.ValidationError("Cannot rearrange functions of different types in one request")
-            hog_type = types.pop()
+            script_type = types.pop()
 
             # Update orders and create activity logs
             from django.contrib.auth.models import AnonymousUser
@@ -1621,7 +1630,7 @@ class InsightsFunctionViewSet(
                     function.save(update_fields=["execution_order", "updated_at"])
 
         # Get final ordered list in a single query
-        transformations = InsightsFunction.objects.filter(team=team, type=hog_type, deleted=False).order_by(
+        transformations = InsightsFunction.objects.filter(team=team, type=script_type, deleted=False).order_by(
             "execution_order"
         )
 

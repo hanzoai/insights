@@ -25,19 +25,19 @@ import { CategorySelect } from 'products/workflows/frontend/OptOuts/CategorySele
 
 import { workflowLogic } from '../../workflowLogic'
 import { InsightsFlowPropertyFilters } from '../filters/InsightsFlowFilters'
-import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { flowEditorLogic } from '../flowEditorLogic'
 import { useInsightsFlowStep } from '../steps/InsightsFlowSteps'
 import { isEmailAction, isOptOutEligibleAction, isScheduleTrigger } from '../steps/types'
 import type { InsightsFlowAction } from '../types'
-import { hogFlowOutputMappingLogic } from './hogFlowOutputMappingLogic'
+import { flowOutputMappingLogic } from './flowOutputMappingLogic'
 import { OutputTestResultTree } from './OutputTestResultTree'
 
 export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
-    const { selectedNode, workflow, categories, categoriesLoading } = useValues(hogFlowEditorLogic)
-    const { setWorkflowAction, setMode } = useActions(hogFlowEditorLogic)
+    const { selectedNode, workflow, categories, categoriesLoading } = useValues(flowEditorLogic)
+    const { setWorkflowAction, setMode } = useActions(flowEditorLogic)
     const { logicProps } = useValues(workflowLogic)
     const { mappings, pendingPath, testLoading, testError, testResultData, shakePickButton, pendingSuggestions } =
-        useValues(hogFlowOutputMappingLogic(logicProps))
+        useValues(flowOutputMappingLogic(logicProps))
     const {
         setSelectedActionId,
         setMappings,
@@ -49,7 +49,7 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
         cancelPendingPath,
         runOutputTest,
         applySuggestion,
-    } = useActions(hogFlowOutputMappingLogic(logicProps))
+    } = useActions(flowOutputMappingLogic(logicProps))
 
     useEffect(() => {
         setSelectedActionId(selectedNode?.data.id ?? null)

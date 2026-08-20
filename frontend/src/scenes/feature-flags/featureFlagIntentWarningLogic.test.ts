@@ -21,8 +21,8 @@ describe('featureFlagIntentWarningLogic', () => {
 
         useMocks({
             get: {
-                '/api/projects/:team_id/feature_flags/': () => [200, { results: [], count: 0 }],
-                '/api/projects/:team_id/cohorts/': () => [200, { results: [], count: 0 }],
+                '/v1/projects/:team_id/feature_flags/': () => [200, { results: [], count: 0 }],
+                '/v1/projects/:team_id/cohorts/': () => [200, { results: [], count: 0 }],
             },
         })
 

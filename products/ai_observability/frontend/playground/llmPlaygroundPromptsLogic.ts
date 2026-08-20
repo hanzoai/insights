@@ -1232,7 +1232,7 @@ export const llmPlaygroundPromptsLogic = kea<llmPlaygroundPromptsLogicType>([
                         }
                         // nosemgrep: prefer-codegen-api
                         const fetchedEvaluation = await api.get<EvaluationConfig>(
-                            `/api/environments/${teamId}/evaluations/${payload.sourceEvaluationId}/`
+                            `/v1/environments/${teamId}/evaluations/${payload.sourceEvaluationId}/`
                         )
                         actions.setSourceNames(null, fetchedEvaluation.name ?? null, promptId)
                         if (fetchedEvaluation.evaluation_type === 'llm_judge') {
@@ -1425,7 +1425,7 @@ export const llmPlaygroundPromptsLogic = kea<llmPlaygroundPromptsLogicType>([
             }
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.update(`/api/environments/${teamId}/evaluations/${linkedSource.evaluationId}/`, {
+                await api.update(`/v1/environments/${teamId}/evaluations/${linkedSource.evaluationId}/`, {
                     evaluation_config: { prompt: prompt.systemPrompt },
                     ...(modelConfig ? { model_configuration: modelConfig } : {}),
                 })
@@ -1505,7 +1505,7 @@ export const llmPlaygroundPromptsLogic = kea<llmPlaygroundPromptsLogicType>([
             }
             try {
                 // nosemgrep: prefer-codegen-api
-                const created = await api.create<EvaluationConfig>(`/api/environments/${teamId}/evaluations/`, {
+                const created = await api.create<EvaluationConfig>(`/v1/environments/${teamId}/evaluations/`, {
                     name,
                     evaluation_type: 'llm_judge',
                     evaluation_config: { prompt: prompt.systemPrompt },

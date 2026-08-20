@@ -160,7 +160,7 @@ export class PlaywrightSetup {
      */
     async callSetupEndpoint(setupType: string, options: PlaywrightSetupOptions = {}): Promise<TestSetupResponse> {
         const { data = {}, throwOnError = true, baseURL, maxRetries = 3 } = options
-        const url = `${baseURL || this.baseURL}/api/setup_test/${setupType}/`
+        const url = `${baseURL || this.baseURL}/v1/setup_test/${setupType}/`
 
         let lastError: Error | undefined
 
@@ -278,7 +278,7 @@ export class PlaywrightSetup {
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             let response: APIResponse
             try {
-                response = await page.request.post(`${this.baseURL}/api/login/`, {
+                response = await page.request.post(`${this.baseURL}/v1/login/`, {
                     data: { email: workspace.user_email, password: LOGIN_PASSWORD },
                 })
             } catch (e) {

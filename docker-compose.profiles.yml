@@ -54,7 +54,7 @@ services:
     objectstorage-azure:
         profiles: [azure]
 
-    # Coordination - etcd for PersonHog and Kafka partition assignment
+    # Coordination - etcd for personinsights and Kafka partition assignment
     etcd:
         profiles: [etcd]
 

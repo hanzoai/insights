@@ -227,7 +227,7 @@ class TestImpactEndpoints(_ImpactTestCase):
         scanner = self._make_scanner(ScannerType.MONITOR)
         self._make_observation(scanner, session_id="s1", distinct_id="u1")
 
-        resp = self.client.get(f"/api/environments/{self.team.id}/vision/scanners/{scanner.id}/impact/")
+        resp = self.client.get(f"/v1/environments/{self.team.id}/vision/scanners/{scanner.id}/impact/")
 
         assert resp.status_code == 200, resp.json()
         assert resp.json() == {
@@ -243,7 +243,7 @@ class TestImpactEndpoints(_ImpactTestCase):
 
         with patch.object(Cohort, "insert_users_by_list", autospec=True, side_effect=_fake_insert(1)):
             resp = self.client.post(
-                f"/api/environments/{self.team.id}/vision/scanners/{scanner.id}/affected_cohort/",
+                f"/v1/environments/{self.team.id}/vision/scanners/{scanner.id}/affected_cohort/",
                 {"window_days": 7},
             )
 
@@ -257,7 +257,7 @@ class TestImpactEndpoints(_ImpactTestCase):
         scanner = self._make_scanner(ScannerType.MONITOR)
 
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/vision/scanners/{scanner.id}/affected_cohort/",
+            f"/v1/environments/{self.team.id}/vision/scanners/{scanner.id}/affected_cohort/",
             {},
         )
 
@@ -266,7 +266,7 @@ class TestImpactEndpoints(_ImpactTestCase):
     def test_impact_400_when_qualifier_invalid_for_type(self) -> None:
         scanner = self._make_scanner(ScannerType.SUMMARIZER)
 
-        resp = self.client.get(f"/api/environments/{self.team.id}/vision/scanners/{scanner.id}/impact/")
+        resp = self.client.get(f"/v1/environments/{self.team.id}/vision/scanners/{scanner.id}/impact/")
 
         assert resp.status_code == 400
 
@@ -276,7 +276,7 @@ class TestImpactEndpoints(_ImpactTestCase):
         self._make_observation(scanner, session_id="s2", distinct_id="u2", result={"model_output": {"tags": ["ux"]}})
 
         resp = self.client.get(
-            f"/api/environments/{self.team.id}/vision/scanners/{scanner.id}/impact/",
+            f"/v1/environments/{self.team.id}/vision/scanners/{scanner.id}/impact/",
             {"tag": "bug", "window_days": "7"},
         )
 

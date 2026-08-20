@@ -36,7 +36,7 @@ class TestComputePersona(SimpleTestCase):
             (
                 "boundary_25_is_not_low_traffic",
                 _digest(visitors=_metric(25)),
-                "steady_hog",
+                "steady_script",
             ),
             (
                 "goals_up_is_conversion_machine",
@@ -60,13 +60,13 @@ class TestComputePersona(SimpleTestCase):
                 "crowd_favorite",
             ),
             (
-                "search_engine_source_is_search_hog",
+                "search_engine_source_is_search_script",
                 _digest(
                     visitors=_metric(100, percent=5, direction="Up"),
                     top_pages=[{"path": "/", "visitors": 10, "change": None}],
                     top_sources=[{"name": "google.com", "visitors": 40, "change": None}],
                 ),
-                "search_hog",
+                "search_script",
             ),
             (
                 "social_source_is_word_of_mouth",
@@ -109,9 +109,9 @@ class TestComputePersona(SimpleTestCase):
                 "rising_star",
             ),
             (
-                "flat_week_is_steady_hog",
+                "flat_week_is_steady_script",
                 _digest(visitors=_metric(100)),
-                "steady_hog",
+                "steady_script",
             ),
         ]
     )

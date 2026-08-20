@@ -14,7 +14,7 @@ function r(e) {
 //#endregion
 //#region src/data-viz.ts
 var i = [
-	["#1d4aff"],
+	["#3d3d3d"],
 	["#621da6", "#7f26d9"],
 	["#42827e", "#3e7a76"],
 	["#ce0e74", "#bf0d6c"],

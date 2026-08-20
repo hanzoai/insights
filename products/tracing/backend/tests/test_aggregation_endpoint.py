@@ -27,7 +27,7 @@ class TestTraceSpansAggregationEndpoint(_TraceSpansTestBase):
             end_str = (base_ts + dt.timedelta(milliseconds=cls.TOTAL_NAMES - i)).strftime("%Y-%m-%d %H:%M:%S.%f")
             rows.append(
                 f"('019e8770-0000-0000-0000-{i:012d}', {cls.team.id}, '{_b64(i.to_bytes(16, 'big'))}', "
-                f"'{_b64(i.to_bytes(8, 'big'))}', '', 'GET /api/thing/{i}', 2, "
+                f"'{_b64(i.to_bytes(8, 'big'))}', '', 'GET /v1/thing/{i}', 2, "
                 f"'{start_str}', '{end_str}', '{start_str}', 0, '{cls.SERVICE}')"
             )
         sync_execute(
@@ -38,7 +38,7 @@ class TestTraceSpansAggregationEndpoint(_TraceSpansTestBase):
     def _aggregate(self, **query_fields) -> dict:
         query: dict = {"dateRange": {"date_from": DATE_FROM, "date_to": DATE_TO}, **query_fields}
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/aggregate/",
+            f"/v1/projects/{self.team.id}/tracing/spans/aggregate/",
             {"query": query},
             format="json",
         )

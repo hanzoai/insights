@@ -1,5 +1,4 @@
 import uuid
-import datetime
 from datetime import timedelta
 from typing import cast
 from urllib.parse import quote, unquote
@@ -10,8 +9,6 @@ from insights.test.base import APIBaseTest, NonAtomicBaseTest
 from unittest import mock
 from unittest.mock import ANY, patch
 
-from django.contrib.auth.tokens import default_token_generator
-from django.core import mail
 from django.core.cache import cache
 from django.db import connection
 from django.test import SimpleTestCase
@@ -19,18 +16,13 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 from django.utils.text import slugify
 
-from django_otp.plugins.otp_static.models import StaticDevice
-from django_otp.plugins.otp_totp.models import TOTPDevice
 from parameterized import parameterized
 from rest_framework import status
-from social_django.models import UserSocialAuth
 
-from insights.api.email_verification import email_verification_token_generator
 from insights.api.oauth.toolbar_service import ToolbarOAuthState, build_toolbar_oauth_state, new_state_nonce
 from insights.api.user import UserSerializer
 from insights.constants import AvailableFeature
 from insights.models import Team, User
-from insights.models.instance_setting import set_instance_setting
 from insights.models.oauth import OAuthAccessToken, OAuthApplication, OAuthGrant, OAuthRefreshToken
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.organization_domain import OrganizationDomain
@@ -87,7 +79,7 @@ class TestUserAPI(APIBaseTest):
     # RETRIEVING USER
 
     def test_retrieve_current_user(self):
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -96,10 +88,10 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(response_data["distinct_id"], self.user.distinct_id)
         self.assertEqual(response_data["first_name"], self.user.first_name)
         self.assertEqual(response_data["email"], self.user.email)
-        self.assertEqual(response_data["has_password"], True)
         self.assertEqual(response_data["is_staff"], False)
         self.assertNotIn("password", response_data)
         self.assertNotIn("current_password", response_data)
+        self.assertNotIn("has_password", response_data)
         self.assertNotIn("set_current_team", response_data)
         self.assertEqual(response_data["team"]["id"], self.team.id)
         self.assertEqual(response_data["team"]["name"], self.team.name)
@@ -149,7 +141,7 @@ class TestUserAPI(APIBaseTest):
         def me_membership_queries(user: User) -> tuple[int, dict]:
             self.client.force_login(user)
             with CaptureQueriesContext(connection) as ctx:
-                response = self.client.get("/api/users/@me/")
+                response = self.client.get("/v1/users/@me/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             count = sum(
                 1
@@ -207,7 +199,7 @@ class TestUserAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         pending_invites = response.json()["pending_invites"]
@@ -227,7 +219,7 @@ class TestUserAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["pending_invites"]), 1)
 
@@ -243,7 +235,7 @@ class TestUserAPI(APIBaseTest):
                 created_by=self.user,
             )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["pending_invites"]), 0)
 
@@ -251,7 +243,7 @@ class TestUserAPI(APIBaseTest):
         self.user.mascot_config = None
         self.user.save()
 
-        response = self.client.get(f"/api/users/@me/mascot_config/")
+        response = self.client.get(f"/v1/users/@me/mascot_config/")
         assert response.status_code == status.HTTP_200_OK
         # the front end assumes it will _always_ get JSON
         assert response.json() == {}
@@ -260,7 +252,7 @@ class TestUserAPI(APIBaseTest):
         self.user.mascot_config = {"a bag": "of data"}
         self.user.save()
 
-        response = self.client.get(f"/api/users/@me/mascot_config/")
+        response = self.client.get(f"/v1/users/@me/mascot_config/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"a bag": "of data"}
 
@@ -273,7 +265,7 @@ class TestUserAPI(APIBaseTest):
             },
         }
 
-        response = self.client.patch("/api/users/@me/", {"ui_configuration": configuration})
+        response = self.client.patch("/v1/users/@me/", {"ui_configuration": configuration})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["ui_configuration"], configuration)
@@ -284,7 +276,7 @@ class TestUserAPI(APIBaseTest):
         configuration_before = self.user.ui_configuration
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"ui_configuration": {"version": 1, "sidebar": {"items": {"bogus": {"visible": False}}}}},
         )
 
@@ -295,7 +287,7 @@ class TestUserAPI(APIBaseTest):
 
     def test_users_me_includes_active_realtime_notification_types(self):
         self.client.force_login(self.user)
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         body = response.json()
         assert "active_realtime_notification_types" in body
@@ -327,7 +319,7 @@ class TestUserAPI(APIBaseTest):
             PersonalAPIKey.objects.create(
                 user=self.user,
                 label="Test key",
-                secure_value=hash_key_value("phx_test_value_1234567890"),
+                secure_value=hash_key_value("sk-test_value_1234567890"),
                 scopes=["*"],
             )
         if with_passkey:
@@ -340,7 +332,7 @@ class TestUserAPI(APIBaseTest):
                 transports=["internal"],
                 verified=True,
             )
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         assert response.json()["requires_credential_review"] is expected
 
@@ -358,7 +350,7 @@ class TestUserAPI(APIBaseTest):
             transports=["internal"],
             verified=False,
         )
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         assert response.json()["requires_credential_review"] is True
 
@@ -367,30 +359,30 @@ class TestUserAPI(APIBaseTest):
         PersonalAPIKey.objects.create(
             user=self.user,
             label="Test key",
-            secure_value=hash_key_value("phx_test_value_1234567890"),
+            secure_value=hash_key_value("sk-test_value_1234567890"),
             scopes=["*"],
         )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.json()["requires_credential_review"] is True
 
-        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        response = self.client.post("/v1/users/@me/credentials_review_complete/")
         assert response.status_code == 204
 
         refreshed = User.objects.get(pk=self.user.pk)
         assert refreshed.credentials_reviewed_at is not None
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.json()["requires_credential_review"] is False
 
         first_ts = refreshed.credentials_reviewed_at
-        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        response = self.client.post("/v1/users/@me/credentials_review_complete/")
         assert response.status_code == 204
         assert User.objects.get(pk=self.user.pk).credentials_reviewed_at == first_ts
 
     def test_credentials_review_complete_requires_auth(self):
         self.client.logout()
-        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        response = self.client.post("/v1/users/@me/credentials_review_complete/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_credentials_review_complete_rejects_personal_api_key_auth(self):
@@ -408,7 +400,7 @@ class TestUserAPI(APIBaseTest):
 
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key_value}")
-        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        response = self.client.post("/v1/users/@me/credentials_review_complete/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
         assert User.objects.get(pk=self.user.pk).credentials_reviewed_at is None
@@ -417,13 +409,13 @@ class TestUserAPI(APIBaseTest):
         """
         At this moment only the current user can be retrieved from this endpoint.
         """
-        response = self.client.get("/api/users/")
+        response = self.client.get("/v1/users/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["uuid"], str(self.user.uuid))
 
         user = self._create_user("newtest@hanzo.ai")
-        response = self.client.get(f"/api/users/{user.uuid}")
+        response = self.client.get(f"/v1/users/{user.uuid}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -437,7 +429,7 @@ class TestUserAPI(APIBaseTest):
 
     def test_unauthenticated_user_cannot_fetch_endpoint(self):
         self.client.logout()
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json(), self.unauthenticated_response())
 
@@ -450,7 +442,7 @@ class TestUserAPI(APIBaseTest):
         user.current_team = team
         user.save(update_fields=["current_team"])
 
-        response = self.client.get(f"/api/users/?email={user.email}")
+        response = self.client.get(f"/v1/users/?email={user.email}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 0, "Should not return users from another orgs")
@@ -471,7 +463,7 @@ class TestUserAPI(APIBaseTest):
         user.current_team = team
         user.save(update_fields=["current_team"])
 
-        response = self.client.get(f"/api/users/?email={user.email}")
+        response = self.client.get(f"/v1/users/?email={user.email}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1, "Admin users should be able to list users from other orgs")
@@ -483,12 +475,12 @@ class TestUserAPI(APIBaseTest):
 
     def test_creating_users_on_this_endpoint_is_not_supported(self):
         """
-        At this moment we don't support creating users on this endpoint. Refer to /api/signup or
-        /api/organization/@current/members to add users.
+        At this moment we don't support creating users on this endpoint. Refer to /v1/signup or
+        /v1/organization/@current/members to add users.
         """
         count = User.objects.count()
 
-        response = self.client.post("/api/users/", {"first_name": "James", "email": "test+james@hanzo.ai"})
+        response = self.client.post("/v1/users/", {"first_name": "James", "email": "test+james@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(response.json(), self.method_not_allowed_response("POST"))
 
@@ -503,7 +495,7 @@ class TestUserAPI(APIBaseTest):
         user = self._create_user("old@hanzo.ai", password="12345678")
         self.client.force_login(user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "first_name": "Cooper",
                 "anonymize_data": True,
@@ -564,32 +556,13 @@ class TestUserAPI(APIBaseTest):
         )
 
     @patch("hanzo_insights.capture")
-    def test_user_can_cancel_own_email_change_request(self, _mock_capture):
-        self.user.pending_email = "another@email.com"
-        self.user.save()
-
-        response = self.client.patch("/api/users/cancel_email_change_request")
-
-        response_data = response.json()
-        assert response.status_code == status.HTTP_200_OK
-        assert response_data["pending_email"] is None
-
-    @patch("hanzo_insights.capture")
-    def test_user_cannot_cancel_email_change_request_if_it_doesnt_exist(self, _mock_capture):
-        # Fire a call to the endpoint without priming the User with a pending_email field
-
-        response = self.client.patch("/api/users/cancel_email_change_request")
-
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_dashboard_must_be_in_current_team(self, _mock_capture):
         a_third_team = Team.objects.create(name="A Third Team", organization=self.organization)
 
         dashboard_one = Dashboard.objects.create(team=a_third_team, name="Dashboard 1")
 
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {
                 "user": 12345,
@@ -603,7 +576,7 @@ class TestUserAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_dashboard_must_exist(self, _mock_capture):
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {"user": 12345, "team": 12345, "dashboard": 12345, "scene": "Person"},
         )
@@ -612,7 +585,7 @@ class TestUserAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_must_send_dashboard(self, _mock_capture):
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {"user": 12345, "team": 12345, "scene": "Person"},
         )
@@ -623,7 +596,7 @@ class TestUserAPI(APIBaseTest):
         dashboard_one = Dashboard.objects.create(team=self.team, name="Dashboard 1")
 
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {
                 "user": 12345,
@@ -689,7 +662,7 @@ class TestUserAPI(APIBaseTest):
         self, scene: str, dashboard: Dashboard, user: User, expected_choices: list[dict]
     ) -> None:
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {
                 "user": 12345,
@@ -703,351 +676,8 @@ class TestUserAPI(APIBaseTest):
         assert response_data["uuid"] == str(user.uuid)
         assert response_data["scene_personalisation"] == expected_choices
 
-    @patch("insights.api.user.is_email_available", return_value=False)
-    @patch("insights.tasks.email.send_email_change_emails.delay")
-    def test_no_notifications_when_user_email_is_changed_and_email_not_available(
-        self, mock_send_email_change_emails, mock_is_email_available
-    ):
-        self.user.email = "alpha@example.com"
-        self.user.save()
-
-        response = self.client.patch(
-            "/api/users/@me/",
-            {
-                "email": "beta@example.com",
-            },
-        )
-        response_data = response.json()
-        self.user.refresh_from_db()
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response_data["email"] == "beta@example.com"
-        assert self.user.email == "beta@example.com"
-        mock_is_email_available.assert_called_once()
-        mock_send_email_change_emails.assert_not_called()
-
-    @patch("insights.api.user.is_email_available", return_value=True)
-    @patch("insights.tasks.email.send_email_change_emails.delay")
-    @patch("insights.api.email_verification.send_email_verification")
-    def test_notifications_sent_when_user_email_is_changed_and_email_available(
-        self,
-        mock_send_email_verification,
-        mock_send_email_change_emails,
-        mock_is_email_available,
-    ):
-        """Test that when a user updates their email, they receive a verification email before the switch actually happens."""
-        self.user.email = "alpha@example.com"
-        self.user.save()
-        with self.is_cloud(True):
-            with freeze_time("2020-01-01T21:37:00+00:00"):
-                response = self.client.patch(
-                    "/api/users/@me/",
-                    {
-                        "email": "beta@example.com",
-                    },
-                )
-            response_data = response.json()
-            self.user.refresh_from_db()
-
-            assert response.status_code == status.HTTP_200_OK
-            assert response_data["email"] == "alpha@example.com"
-            assert response_data["pending_email"] == "beta@example.com"
-            assert self.user.email == "alpha@example.com"
-            assert self.user.pending_email == "beta@example.com"
-
-            mock_is_email_available.assert_called_once()
-            mock_send_email_verification.assert_called_once()
-
-            token = email_verification_token_generator.make_token(self.user)
-            with freeze_time("2020-01-01T21:37:00+00:00"):
-                response = self.client.post(
-                    f"/api/users/verify_email/",
-                    {"uuid": self.user.uuid, "token": token},
-                )
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-            self.user.refresh_from_db()
-            assert self.user.email == "beta@example.com"
-            self.assertIsNone(self.user.pending_email)
-            mock_is_email_available.assert_called_once()
-            mock_send_email_change_emails.assert_called_once_with(
-                "2020-01-01T21:37:00+00:00",
-                self.user.first_name,
-                "alpha@example.com",
-                "beta@example.com",
-            )
-
-    @parameterized.expand(
-        [
-            ("single_google", [("google-oauth2", "google-sub-1")]),
-            (
-                "multiple_providers",
-                [
-                    ("google-oauth2", "google-sub-1"),
-                    ("google-oauth2", "google-sub-2"),
-                    ("github", "octocat"),
-                    ("gitlab", "12345"),
-                ],
-            ),
-        ]
-    )
-    def test_verified_email_change_removes_social_auth_connections(self, _, social_auths: list[tuple[str, str]]):
-        self.user.email = "alpha@example.com"
-        self.user.save()
-
-        social_auth_ids = [
-            UserSocialAuth.objects.create(user=self.user, provider=provider, uid=uid).id
-            for provider, uid in social_auths
-        ]
-        other_user = User.objects.create_user("other@example.com", "pwd1234*", "Other")
-        other_user_social_auth_id = UserSocialAuth.objects.create(
-            user=other_user, provider="google-oauth2", uid="other-google-sub"
-        ).id
-
-        with (
-            patch("insights.api.user.is_email_available", return_value=True) as mock_is_email_available,
-            patch("insights.tasks.email.send_email_change_emails.delay") as mock_send_email_change_emails,
-            patch("insights.api.email_verification.send_email_verification") as mock_send_email_verification,
-        ):
-            with self.is_cloud(True):
-                response = self.client.patch(
-                    "/api/users/@me/",
-                    {
-                        "email": "beta@example.com",
-                    },
-                )
-
-            assert response.status_code == status.HTTP_200_OK
-            mock_is_email_available.assert_called_once()
-            mock_send_email_verification.assert_called_once()
-
-            token = email_verification_token_generator.make_token(self.user)
-            response = self.client.post(
-                "/api/users/verify_email/",
-                {"uuid": self.user.uuid, "token": token},
-            )
-            assert response.status_code == status.HTTP_200_OK
-
-            self.user.refresh_from_db()
-            assert self.user.email == "beta@example.com"
-            assert self.user.pending_email is None
-            for social_auth_id in social_auth_ids:
-                assert not UserSocialAuth.objects.filter(id=social_auth_id).exists()
-            assert UserSocialAuth.objects.filter(id=other_user_social_auth_id).exists()
-            mock_send_email_change_emails.assert_called_once_with(
-                ANY,
-                self.user.first_name,
-                "alpha@example.com",
-                "beta@example.com",
-            )
-
-    @parameterized.expand(
-        [
-            ("current_email_enforced", "alpha@example.com", "sso_enforced_current_email"),
-            ("new_email_enforced", "beta@example.com", "sso_enforced_new_email"),
-        ]
-    )
-    @patch("insights.api.user.is_email_available", return_value=True)
-    @patch("insights.tasks.email.send_email_change_emails.delay")
-    def test_email_change_blocked_when_sso_is_enforced(
-        self,
-        _,
-        enforced_email: str,
-        expected_code: str,
-        mock_send_email_change_emails,
-        mock_is_email_available,
-    ):
-        self.user.email = "alpha@example.com"
-        self.user.save()
-
-        with patch(
-            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
-            side_effect=lambda email, organization=None: "google-oauth2" if email == enforced_email else None,
-        ):
-            with self.is_cloud(True):
-                response = self.client.patch("/api/users/@me/", {"email": "beta@example.com"})
-
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["code"] == expected_code
-        self.user.refresh_from_db()
-        assert self.user.email == "alpha@example.com"
-        assert self.user.pending_email is None
-        mock_send_email_change_emails.assert_not_called()
-
-    @patch("insights.api.user.is_email_available", return_value=True)
-    @patch("insights.api.user.EmailVerifier.send_verification_email")
-    def test_email_change_allowed_between_two_sso_enforced_domains_of_same_org(
-        self,
-        mock_send_email_verification,
-        mock_is_email_available,
-    ):
-        self.user.email = "alice@example.com"
-        self.user.save()
-        for domain in ("example.com", "example.org"):
-            OrganizationDomain.objects.create(
-                organization=self.organization,
-                domain=domain,
-                verified_at=timezone.now(),
-                sso_enforcement="google-oauth2",
-            )
-
-        with patch(
-            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
-            side_effect=lambda email, organization=None: (
-                "google-oauth2" if email.split("@")[-1] in ("example.com", "example.org") else None
-            ),
-        ):
-            with self.is_cloud(True):
-                response = self.client.patch("/api/users/@me/", {"email": "alice@example.org"})
-
-        assert response.status_code == status.HTTP_200_OK
-        self.user.refresh_from_db()
-        assert self.user.pending_email == "alice@example.org"
-        mock_send_email_verification.assert_called_once()
-
-    @patch("insights.api.user.is_email_available", return_value=True)
-    @patch("insights.tasks.email.send_email_change_emails.delay")
-    def test_email_change_blocked_to_sso_enforced_domain_of_another_org(
-        self,
-        mock_send_email_change_emails,
-        mock_is_email_available,
-    ):
-        self.user.email = "alice@example.com"
-        self.user.save()
-        OrganizationDomain.objects.create(
-            organization=self.organization,
-            domain="example.com",
-            verified_at=timezone.now(),
-            sso_enforcement="google-oauth2",
-        )
-        other_org = Organization.objects.create(name="Attacker Org")
-        OrganizationDomain.objects.create(
-            organization=other_org,
-            domain="example.net",
-            verified_at=timezone.now(),
-            sso_enforcement="google-oauth2",
-        )
-
-        with patch(
-            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
-            side_effect=lambda email, organization=None: (
-                "google-oauth2" if email.split("@")[-1] in ("example.com", "example.net") else None
-            ),
-        ):
-            with self.is_cloud(True):
-                response = self.client.patch("/api/users/@me/", {"email": "alice@example.net"})
-
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["code"] == "sso_enforced_current_email"
-        self.user.refresh_from_db()
-        assert self.user.email == "alice@example.com"
-        assert self.user.pending_email is None
-
-    @patch("insights.tasks.email.send_email_change_emails.delay")
-    def test_verify_email_without_pending_email_keeps_social_auth_connections(self, mock_send_email_change_emails):
-        social_auth = UserSocialAuth.objects.create(
-            user=self.user,
-            provider="google-oauth2",
-            uid="google-sub-1",
-        )
-
-        token = email_verification_token_generator.make_token(self.user)
-        response = self.client.post(
-            "/api/users/verify_email/",
-            {"uuid": self.user.uuid, "token": token},
-        )
-
-        assert response.status_code == status.HTTP_200_OK
-        self.user.refresh_from_db()
-        assert UserSocialAuth.objects.filter(id=social_auth.id).exists()
-        mock_send_email_change_emails.assert_not_called()
-
-    @patch("insights.api.user.login")
-    @patch("insights.tasks.email.send_email_change_emails.delay")
-    def test_email_change_verification_skips_auto_login_for_sso_enforced_domain(self, _, mock_login):
-        self.user.pending_email = "alice@example.com"
-        self.user.save()
-
-        with patch(
-            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
-            side_effect=lambda email, organization=None: "google-oauth2" if email == "alice@example.com" else None,
-        ):
-            token = email_verification_token_generator.make_token(self.user)
-            response = self.client.post("/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json()["requires_sso"] is True
-        self.user.refresh_from_db()
-        assert self.user.email == "alice@example.com"
-        # No password-backend session is handed out for an SSO-enforced account; they must log in via SSO.
-        mock_login.assert_not_called()
-
-    @patch("insights.api.user.login")
-    @patch("insights.tasks.email.send_email_change_emails.delay")
-    def test_initial_email_verification_skips_auto_login_for_sso_enforced_domain(self, _, mock_login):
-        self.user.email = "alice@example.com"
-        self.user.pending_email = None
-        self.user.save()
-
-        with patch(
-            "insights.models.organization_domain.OrganizationDomainManager.get_sso_enforcement_for_email_address",
-            side_effect=lambda email, organization=None: "google-oauth2" if email == "alice@example.com" else None,
-        ):
-            token = email_verification_token_generator.make_token(self.user)
-            response = self.client.post("/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json()["requires_sso"] is True
-        mock_login.assert_not_called()
-
-    @patch("insights.api.user.login")
-    def test_email_verification_skips_auto_login_for_blocked_member(self, mock_login):
-        # A blocked member gets their email verified but no session; only blocked admins get the
-        # gated session (covered in the password login tests).
-        self.client.logout()
-        # The class fixture joins the user to a second organization; drop it so no organization
-        # admits them and the blocked path is the one exercised.
-        OrganizationMembership.objects.filter(user=self.user).exclude(organization=self.organization).delete()
-        self.organization.enforce_verified_domains = True
-        self.organization.save()
-        OrganizationDomain.objects.create(
-            domain="hogflix.com", organization=self.organization, verified_at=timezone.now()
-        )
-
-        token = email_verification_token_generator.make_token(self.user)
-        response = self.client.post("/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json()["requires_login"] is True
-        self.user.refresh_from_db()
-        assert self.user.is_email_verified is True
-        mock_login.assert_not_called()
-
-    @patch("insights.api.user.is_email_available", return_value=True)
-    @patch("insights.tasks.email.send_email_change_emails.delay")
-    def test_no_notifications_when_user_email_is_changed_and_only_case_differs(
-        self, mock_send_email_change_emails, mock_is_email_available
-    ):
-        self.user.email = "alpha@example.com"
-        self.user.save()
-
-        response = self.client.patch(
-            "/api/users/@me/",
-            {
-                "email": "ALPHA@example.com",
-            },
-        )
-        response_data = response.json()
-        self.user.refresh_from_db()
-
-        assert response.status_code == status.HTTP_200_OK
-        assert response_data["email"] == "ALPHA@example.com"
-        assert self.user.email == "ALPHA@example.com"
-        mock_is_email_available.assert_not_called()
-        mock_send_email_change_emails.assert_not_called()
-
     def test_cannot_upgrade_yourself_to_staff_user(self):
-        response = self.client.patch("/api/users/@me/", {"is_staff": True})
+        response = self.client.patch("/v1/users/@me/", {"is_staff": True})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
@@ -1060,7 +690,7 @@ class TestUserAPI(APIBaseTest):
 
     @patch("hanzo_insights.capture")
     def test_can_update_current_organization(self, mock_capture):
-        response = self.client.patch("/api/users/@me/", {"set_current_organization": str(self.new_org.id)})
+        response = self.client.patch("/v1/users/@me/", {"set_current_organization": str(self.new_org.id)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["organization"]["id"], str(self.new_org.id))
@@ -1088,7 +718,7 @@ class TestUserAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_can_update_current_project(self, mock_capture):
         team = Team.objects.create(name="Local Team", organization=self.new_org)
-        response = self.client.patch("/api/users/@me/", {"set_current_team": team.id})
+        response = self.client.patch("/v1/users/@me/", {"set_current_team": team.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["team"]["id"], team.id)
@@ -1119,7 +749,7 @@ class TestUserAPI(APIBaseTest):
         self.user.join(organization=org)
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "set_current_team": team.id,
                 "set_current_organization": self.organization.id,
@@ -1141,13 +771,13 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(self.user.current_organization, org)
 
     def test_cannot_switch_current_organization_into_one_that_blocks_the_member(self):
-        # /api/users/@me/ is on the enforcement whitelist, so the switch must refuse on its own —
+        # /v1/users/@me/ is on the enforcement whitelist, so the switch must refuse on its own —
         # otherwise a blocked member could point their session back at the org that moved them off.
         blocking_org = Organization.objects.create(name="Enforcing org", enforce_verified_domains=True)
         OrganizationMembership.objects.create(organization=blocking_org, user=self.user)
-        OrganizationDomain.objects.create(domain="hogflix.com", organization=blocking_org, verified_at=timezone.now())
+        OrganizationDomain.objects.create(domain="scriptflix.com", organization=blocking_org, verified_at=timezone.now())
 
-        response = self.client.patch("/api/users/@me/", {"set_current_organization": str(blocking_org.id)})
+        response = self.client.patch("/v1/users/@me/", {"set_current_organization": str(blocking_org.id)})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["code"], "verified_domain_required")
@@ -1157,7 +787,7 @@ class TestUserAPI(APIBaseTest):
     def test_cannot_set_an_organization_without_permissions(self):
         org = Organization.objects.create(name="Isolated Org")
 
-        response = self.client.patch("/api/users/@me/", {"set_current_organization": org.id})
+        response = self.client.patch("/v1/users/@me/", {"set_current_organization": org.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1175,7 +805,7 @@ class TestUserAPI(APIBaseTest):
         org = Organization.objects.create(name="Isolated Org")
         team = Team.objects.create(name="Isolated Team", organization=org)
 
-        response = self.client.patch("/api/users/@me/", {"set_current_team": team.id})
+        response = self.client.patch("/v1/users/@me/", {"set_current_team": team.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1190,7 +820,7 @@ class TestUserAPI(APIBaseTest):
         self._assert_current_org_and_team_unchanged()
 
     def test_cannot_set_a_non_existent_org_or_team(self):
-        response = self.client.patch("/api/users/@me/", {"set_current_team": 3983838})
+        response = self.client.patch("/v1/users/@me/", {"set_current_team": 3983838})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1203,7 +833,7 @@ class TestUserAPI(APIBaseTest):
         )
 
         _uuid = str(uuid.uuid4())
-        response = self.client.patch("/api/users/@me/", {"set_current_organization": _uuid})
+        response = self.client.patch("/v1/users/@me/", {"set_current_organization": _uuid})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1230,7 +860,7 @@ class TestUserAPI(APIBaseTest):
         self.user.current_team = None
         self.user.save()
 
-        response = self.client.get("/api/users/@me/").json()
+        response = self.client.get("/v1/users/@me/").json()
         self.assertEqual(response["team"]["id"], team2.pk)
 
     def test_team_property_does_not_save_when_no_teams_found(self):
@@ -1332,248 +962,43 @@ class TestUserAPI(APIBaseTest):
             self.assertIn(result_organization, [self.organization, new_org])
             self.assertEqual(self.user.current_organization, result_organization)
 
-    @patch("hanzo_insights.capture")
-    @patch("insights.tasks.email.send_password_changed_email.delay")
-    def test_user_can_update_password(self, mock_send_password_changed_email, mock_capture):
-        user = self._create_user("bob@hanzo.ai", password="A12345678")
-        self.client.force_login(user)
-
-        response = self.client.patch(
-            "/api/users/@me/",
-            {"current_password": "A12345678", "password": "a_new_password"},
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["email"], "bob@hanzo.ai")
-        self.assertNotIn("password", response_data)
-        self.assertNotIn("current_password", response_data)
-
-        # Assert session is still valid
-        get_response = self.client.get("/api/users/@me/")
-        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-
-        # Password was successfully changed
-        user.refresh_from_db()
-        self.assertTrue(user.check_password("a_new_password"))
-
-        mock_capture.assert_any_call(
-            event="user updated",
-            distinct_id=user.distinct_id,
-            properties={"updated_attrs": ["password"], "$set": mock.ANY},
-            groups={
-                "instance": ANY,
-                "organization": str(self.team.organization_id),
-                "project": str(self.team.uuid),
-            },
-        )
-
-        # User can log in with new password
-        response = self.client.post("/api/login", {"email": "bob@hanzo.ai", "password": "a_new_password"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Assert password changed email was sent
-        mock_send_password_changed_email.assert_called_once_with(user.id)
-
-    @patch("hanzo_insights.capture")
-    @patch("insights.tasks.email.send_password_changed_email.delay")
-    def test_user_with_no_password_set_can_set_password(self, mock_send_password_changed_email, mock_capture):
-        user = self._create_user("no_password@hanzo.ai", password=None)
-        self.client.force_login(user)
-
-        response = self.client.patch(
-            "/api/users/@me/",
-            {"password": "a_new_password"},  # note we don't send current password
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["email"], "no_password@hanzo.ai")
-        self.assertNotIn("password", response_data)
-        self.assertNotIn("current_password", response_data)
-
-        # Assert session is still valid
-        get_response = self.client.get("/api/users/@me/")
-        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-
-        # Password was successfully changed
-        user.refresh_from_db()
-        self.assertTrue(user.check_password("a_new_password"))
-
-        mock_capture.assert_any_call(
-            event="user updated",
-            distinct_id=user.distinct_id,
-            properties={"updated_attrs": ["password"], "$set": mock.ANY},
-            groups={
-                "instance": ANY,
-                "organization": str(self.team.organization_id),
-                "project": str(self.team.uuid),
-            },
-        )
-
-        # User can log in with new password
-        response = self.client.post(
-            "/api/login",
-            {"email": "no_password@hanzo.ai", "password": "a_new_password"},
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Assert password changed email was sent
-        mock_send_password_changed_email.assert_called_once_with(user.id)
-
-    @patch("insights.tasks.email.send_password_changed_email.delay")
-    def test_user_with_unusable_password_set_can_set_password(self, mock_send_password_changed_email):
-        user = self._create_user("no_password@hanzo.ai", password="123456789")
-        user.set_unusable_password()
-        user.save()
-        self.client.force_login(user)
-
-        response = self.client.patch("/api/users/@me/", {"password": "a_new_password"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Assert session is still valid
-        get_response = self.client.get("/api/users/@me/")
-        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-
-        # Password was successfully changed
-        user.refresh_from_db()
-        self.assertTrue(user.check_password("a_new_password"))
-
-    @patch("hanzo_insights.capture")
-    def test_cannot_update_to_insecure_password(self, mock_capture):
-        response = self.client.patch(
-            "/api/users/@me/",
-            {"current_password": self.CONFIG_PASSWORD, "password": "123"},
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "invalid_input",
-                "detail": "This password is too short. It must contain at least 8 characters.",
-                "attr": "password",
-            },
-        )
-
-        # Assert session is still valid
-        get_response = self.client.get("/api/users/@me/")
-        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-
-        # Password was not changed
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password(self.CONFIG_PASSWORD))
-        # The GET on /api/users/@me/ fires the inline identify ("update user properties")
-        # via UserSerializer.to_representation. The 4xx PATCH must NOT fire "user updated"
-        # because the update was rejected.
-        update_calls = [c for c in mock_capture.call_args_list if c.kwargs.get("event") == "user updated"]
-        assert update_calls == []
-
-    def test_user_cannot_update_password_without_current_password(self):
-        response = self.client.patch("/api/users/@me/", {"password": "12345678"})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "required",
-                "detail": "This field is required when updating your password.",
-                "attr": "current_password",
-            },
-        )
-
-        # Password was not changed
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password(self.CONFIG_PASSWORD))
-
-    def test_user_cannot_update_password_with_incorrect_current_password(self):
-        response = self.client.patch("/api/users/@me/", {"current_password": "wrong", "password": "12345678"})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "incorrect_password",
-                "detail": "Your current password is incorrect.",
-                "attr": "current_password",
-            },
-        )
-
-        # Password was not changed
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password(self.CONFIG_PASSWORD))
-
-    @patch("insights.api.user.send_password_changed_email.delay")
-    def test_user_without_password_can_set_password(self, mock_send_email):
-        # Create a user without a password (e.g., SSO user)
-        self.user.set_unusable_password()
-        self.user.save()
-
-        # Re-authenticate with force_login since password is now unusable
-        self.client.force_login(self.user)
-
-        # User should be able to set password without providing current_password
-        # Use a strong password that meets validation requirements
-        new_password = "NewSecurePassword123!"
-        response = self.client.patch("/api/users/@me/", {"password": new_password})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Password should be set
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.has_usable_password())
-        self.assertTrue(self.user.check_password(new_password))
-
     def test_unauthenticated_user_cannot_update_anything(self):
         self.client.logout()
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "id": str(self.user.uuid),
-                "email": "new@hanzo.ai",
-                "password": "hijacked",
-                "current_password": self.CONFIG_PASSWORD,
+                "first_name": "Hijacked",
             },
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json(), self.unauthenticated_response())
 
         self.user.refresh_from_db()
-        self.assertNotEqual(self.user.email, "new@hanzo.ai")
-        self.assertFalse(self.user.check_password("hijacked"))
-
-    def test_user_cannot_update_password_with_incorrect_current_password_and_ratelimit_to_prevent_attacks(self):
-        for _ in range(7):
-            response = self.client.patch("/api/users/@me/", {"current_password": "wrong", "password": "12345678"})
-        self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
-        self.assertLessEqual(
-            {"attr": None, "code": "throttled", "type": "throttled_error"}.items(),
-            response.json().items(),
-        )
-
-        # Password was not changed
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password(self.CONFIG_PASSWORD))
+        self.assertNotEqual(self.user.first_name, "Hijacked")
 
     def test_no_ratelimit_for_get_requests_for_users(self):
         for _ in range(6):
-            response = self.client.get("/api/users/@me/")
+            response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         for _ in range(4):
             # below rate limit, so shouldn't be throttled
-            response = self.client.patch("/api/users/@me/", {"current_password": "wrong", "password": "12345678"})
+            response = self.client.patch("/v1/users/@me/", {"role_at_organization": "not-a-real-role"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         for _ in range(2):
-            response = self.client.get("/api/users/@me/")
+            response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         for _ in range(2):
             # finally above rate limit, so should be throttled
-            response = self.client.patch("/api/users/@me/", {"current_password": "wrong", "password": "12345678"})
+            response = self.client.patch("/v1/users/@me/", {"role_at_organization": "not-a-real-role"})
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
-    def test_no_ratelimit_for_updates_that_are_not_password_changes(self):
+    def test_no_ratelimit_for_ordinary_updates(self):
         for _ in range(10):
-            response = self.client.patch("/api/users/@me/", {"organization_name": "new name"})
+            response = self.client.patch("/v1/users/@me/", {"organization_name": "new name"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_cannot_delete_user_with_organization_memberships(self):
@@ -1585,7 +1010,7 @@ class TestUserAPI(APIBaseTest):
 
         assert OrganizationMembership.objects.filter(user=user, organization=self.new_org).exists()
 
-        response = self.client.delete(f"/api/users/@me/")
+        response = self.client.delete(f"/v1/users/@me/")
         assert response.status_code == status.HTTP_409_CONFLICT
 
     @patch("hanzo_insights.capture")
@@ -1602,7 +1027,7 @@ class TestUserAPI(APIBaseTest):
 
         assert not OrganizationMembership.objects.filter(user=user).exists()
 
-        response = self.client.delete(f"/api/users/@me/")
+        response = self.client.delete(f"/v1/users/@me/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not User.objects.filter(uuid=user.uuid).exists()
 
@@ -1623,7 +1048,7 @@ class TestUserAPI(APIBaseTest):
 
         self.client.force_login(user)
 
-        response = self.client.delete(f"/api/users/{user_with_no_org_memberships.uuid}/")
+        response = self.client.delete(f"/v1/users/{user_with_no_org_memberships.uuid}/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert User.objects.filter(uuid=user_with_no_org_memberships.uuid).exists()
 
@@ -1636,7 +1061,7 @@ class TestUserAPI(APIBaseTest):
 
         self.client.force_login(user)
 
-        response = self.client.delete(f"/api/users/{user_with_org_memberships.uuid}/")
+        response = self.client.delete(f"/v1/users/{user_with_org_memberships.uuid}/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert User.objects.filter(uuid=user_with_org_memberships.uuid).exists()
 
@@ -1656,7 +1081,7 @@ class TestUserAPI(APIBaseTest):
         self.client.logout()
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key_value}")
-        response = self.client.delete(f"/api/users/@me/")
+        response = self.client.delete(f"/v1/users/@me/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_redirect_user_to_site_with_toolbar(self):
@@ -1664,7 +1089,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010"
+            "/v1/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010"
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         locationHeader = response.headers.get("location", "not found")
@@ -1680,7 +1105,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&generateOnly=1"
+            "/v1/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&generateOnly=1"
         )
         assert response.status_code == status.HTTP_200_OK
         assert (
@@ -1693,7 +1118,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&generateOnly=0"
+            "/v1/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&generateOnly=0"
         )
         assert response.status_code == status.HTTP_302_FOUND
 
@@ -1702,7 +1127,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=edit-experiment&experimentId=12&appUrl=http%3A%2F%2F127.0.0.1%3A8010"
+            "/v1/user/redirect_to_site/?userIntent=edit-experiment&experimentId=12&appUrl=http%3A%2F%2F127.0.0.1%3A8010"
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         locationHeader = response.headers.get("location", "not found")
@@ -1722,13 +1147,13 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         def assert_allowed_url(url):
-            response = self.client.get(f"/api/user/redirect_to_site/?appUrl={quote(url)}")
+            response = self.client.get(f"/v1/user/redirect_to_site/?appUrl={quote(url)}")
             location = cast(str | None, response.headers.get("location")) or ""
             self.assertEqual(response.status_code, status.HTTP_302_FOUND)
             self.assertTrue(f"{url}#__insights=" in location)
 
         def assert_forbidden_url(url):
-            response = self.client.get(f"/api/user/redirect_to_site/?appUrl={quote(url)}")
+            response = self.client.get(f"/v1/user/redirect_to_site/?appUrl={quote(url)}")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             self.assertEqual(response.headers.get("location"), None)
 
@@ -1774,7 +1199,7 @@ class TestUserAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
+            "/v1/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1804,7 +1229,7 @@ class TestUserAPI(APIBaseTest):
 
         with self.settings(INTERNAL_REQUEST_TOKEN="test-internal-token"):
             response = self.client.post(
-                "/api/user/prepare_toolbar_preloaded_flags/",
+                "/v1/user/prepare_toolbar_preloaded_flags/",
                 {"distinct_id": "user123"},
                 content_type="application/json",
             )
@@ -1822,7 +1247,7 @@ class TestUserAPI(APIBaseTest):
         cache_key = "toolbar_flags_test-key-456"
         cache.set(cache_key, cache_data, timeout=300)
 
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key-456")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=test-key-456")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -1830,7 +1255,7 @@ class TestUserAPI(APIBaseTest):
 
     def test_get_toolbar_preloaded_flags_returns_404_for_missing_key(self):
         """Test that get_toolbar_preloaded_flags returns 404 for expired/missing cache key"""
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=nonexistent-key")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=nonexistent-key")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("error", response.json())
@@ -1847,7 +1272,7 @@ class TestUserAPI(APIBaseTest):
         cache.set(cache_key, cache_data, timeout=300)
 
         # Try to access with current user (who belongs to self.team, not other_team)
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key-789")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=test-key-789")
 
         # Should be forbidden
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -1858,7 +1283,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&toolbarFlagsKey=test-key-789"
+            "/v1/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&toolbarFlagsKey=test-key-789"
         )
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
@@ -1879,21 +1304,22 @@ class TestUserAPI(APIBaseTest):
             "date_joined": "2021-01-01T00:00:00Z",
             "uuid": str(uuid.uuid4()),
             "distinct_id": "distinct_id",
-            "pending_email": "changed@example.com",
+            # The identity provider owns the address; the API must never write it.
+            "email": "changed@example.com",
             "is_email_verified": True,
         }
 
-        initial_user = self.client.get("/api/users/@me/").json()
+        initial_user = self.client.get("/v1/users/@me/").json()
 
         for field, value in fields.items():
-            response = self.client.patch("/api/users/@me/", {field: value})
+            response = self.client.patch("/v1/users/@me/", {field: value})
             assert response.json()[field] == initial_user[field], (
                 f"Updating field '{field}' to '{value}' worked when it shouldn't! Was {initial_user[field]} and is now {response.json()[field]}"
             )
 
     def test_can_update_notification_settings(self):
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "plugin_disabled": False,
@@ -1951,13 +1377,13 @@ class TestUserAPI(APIBaseTest):
     def test_notification_settings_project_settings_are_merged_not_replaced(self):
         # First update
         response = self.client.patch(
-            "/api/users/@me/", {"notification_settings": {"project_weekly_digest_disabled": {123: True}}}
+            "/v1/users/@me/", {"notification_settings": {"project_weekly_digest_disabled": {123: True}}}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Second update with different project
         response = self.client.patch(
-            "/api/users/@me/", {"notification_settings": {"project_weekly_digest_disabled": {456: True}}}
+            "/v1/users/@me/", {"notification_settings": {"project_weekly_digest_disabled": {456: True}}}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1969,7 +1395,7 @@ class TestUserAPI(APIBaseTest):
     def test_notification_settings_organization_member_join_settings_are_merged_not_replaced(self):
         # First update
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "organization_member_join_email_disabled": {"00000000-0000-0000-0000-000000000001": True}
@@ -1980,7 +1406,7 @@ class TestUserAPI(APIBaseTest):
 
         # Second update with different organization
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "organization_member_join_email_disabled": {"00000000-0000-0000-0000-000000000002": True}
@@ -2005,7 +1431,7 @@ class TestUserAPI(APIBaseTest):
     def test_realtime_notifications_disabled_accepts_valid_payload(self):
         self.client.force_login(self.user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "realtime_notifications_disabled": {"comment_mention": {str(self.team.id): True}}
@@ -2031,7 +1457,7 @@ class TestUserAPI(APIBaseTest):
     def test_realtime_notifications_disabled_rejects_invalid_payload(self, _name, payload, expected_message_substr):
         self.client.force_login(self.user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {"realtime_notifications_disabled": payload}},
             format="json",
         )
@@ -2043,7 +1469,7 @@ class TestUserAPI(APIBaseTest):
         self.user.save()
         self.client.force_login(self.user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {"realtime_notifications_disabled": {"comment_mention": {"1": False}}}},
             format="json",
         )
@@ -2064,7 +1490,7 @@ class TestUserAPI(APIBaseTest):
         self.user.save()
         self.client.force_login(self.user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {"realtime_notifications_disabled": {"comment_mention": {"9": True}}}},
             format="json",
         )
@@ -2106,7 +1532,7 @@ class TestUserAPI(APIBaseTest):
         self.client.force_login(self.user)
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {patched_key: patched_value}},
             format="json",
         )
@@ -2131,7 +1557,7 @@ class TestUserAPI(APIBaseTest):
             "",
         ]:
             response = self.client.patch(
-                "/api/users/@me/",
+                "/v1/users/@me/",
                 {"notification_settings": {"pipeline_notifications_disabled": {bad_key: True}}},
             )
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, f"key {bad_key!r} was accepted")
@@ -2144,7 +1570,7 @@ class TestUserAPI(APIBaseTest):
             "plugin_config:42",
         ]:
             response = self.client.patch(
-                "/api/users/@me/",
+                "/v1/users/@me/",
                 {"notification_settings": {"pipeline_notifications_disabled": {good_key: True}}},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, f"key {good_key!r} was rejected")
@@ -2154,14 +1580,14 @@ class TestUserAPI(APIBaseTest):
 
         too_many = {f"insights_function:fake-{i}": True for i in range(MAX_PIPELINE_NOTIFICATIONS + 1)}
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {"pipeline_notifications_disabled": too_many}},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("more than", response.json()["detail"])
 
     def test_invalid_notification_settings_returns_error(self):
-        response = self.client.patch("/api/users/@me/", {"notification_settings": {"invalid_key": True}})
+        response = self.client.patch("/v1/users/@me/", {"notification_settings": {"invalid_key": True}})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -2175,7 +1601,7 @@ class TestUserAPI(APIBaseTest):
 
     def test_notification_settings_wrong_type_returns_error(self):
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "project_weekly_digest_disabled": {"123": "not a boolean"}  # This should be True or False
@@ -2194,7 +1620,7 @@ class TestUserAPI(APIBaseTest):
         )
 
     def test_can_disable_all_notifications(self):
-        response = self.client.patch("/api/users/@me/", {"notification_settings": {"all_weekly_digest_disabled": True}})
+        response = self.client.patch("/v1/users/@me/", {"notification_settings": {"all_weekly_digest_disabled": True}})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(
@@ -2296,12 +1722,12 @@ class TestToolbarAccessControl(APIBaseTest):
     def test_redirect_to_site_denied_without_toolbar_access(self):
         self._deny_toolbar_access()
 
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_redirect_to_site_allowed_with_default_access(self):
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
@@ -2312,7 +1738,7 @@ class TestToolbarAccessControl(APIBaseTest):
         new_user = User.objects.create_user(email="no-team@hanzo.ai", password="testpass123", first_name="")
         self.client.force_login(new_user)
 
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -2331,7 +1757,7 @@ class TestToolbarAccessControl(APIBaseTest):
         cache.set("toolbar_flags_test-key", {"feature_flags": {"a-flag": True}, "team_id": self.team.id}, timeout=300)
         self._deny_toolbar_access()
 
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=test-key")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -2341,7 +1767,7 @@ class TestToolbarAccessControl(APIBaseTest):
         self._deny_toolbar_access()
 
         response = self.client.post(
-            "/api/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
+            "/v1/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -2419,7 +1845,7 @@ class TestToolbarAccessControl(APIBaseTest):
 
         with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
             response = self.client.post(
-                "/api/user/toolbar_oauth_refresh/",
+                "/v1/user/toolbar_oauth_refresh/",
                 {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
                 content_type="application/json",
             )
@@ -2453,7 +1879,7 @@ class TestToolbarAccessControl(APIBaseTest):
 
         with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
             response = self.client.post(
-                "/api/user/toolbar_oauth_refresh/",
+                "/v1/user/toolbar_oauth_refresh/",
                 {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
                 content_type="application/json",
             )
@@ -2465,9 +1891,7 @@ class TestToolbarAccessControl(APIBaseTest):
         """A refresh token with no scoped team (e.g. one minted before grants were narrowed to a
         single verified team) must be denied rather than allowed through - the check fails closed
         when it can't resolve exactly one scoped team to verify access against."""
-        no_team_user = User.objects.create_user(
-            email="no-team-refresh@hanzo.ai", password="testpass123", first_name=""
-        )
+        no_team_user = User.objects.create_user(email="no-team-refresh@hanzo.ai", password="testpass123", first_name="")
         oauth_app = OAuthApplication.objects.create(
             name="Test Toolbar OAuth App",
             client_id="test_toolbar_client_id_no_team",
@@ -2485,7 +1909,7 @@ class TestToolbarAccessControl(APIBaseTest):
 
         with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
             response = self.client.post(
-                "/api/user/toolbar_oauth_refresh/",
+                "/v1/user/toolbar_oauth_refresh/",
                 {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
                 content_type="application/json",
             )
@@ -2519,14 +1943,14 @@ class TestSessionAuthEndpoints(APIBaseTest):
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.api_key_value}")
 
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
 
     def test_redirect_to_site_works_with_session_auth(self):
         """Session authentication should still work for redirect_to_site."""
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
@@ -2536,7 +1960,7 @@ class TestSessionAuthEndpoints(APIBaseTest):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.api_key_value}")
 
         response = self.client.post(
-            "/api/user/prepare_toolbar_preloaded_flags/",
+            "/v1/user/prepare_toolbar_preloaded_flags/",
             {"distinct_id": "test-user"},
             format="json",
         )
@@ -2549,7 +1973,7 @@ class TestSessionAuthEndpoints(APIBaseTest):
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.api_key_value}")
 
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=test-key")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
@@ -2570,7 +1994,7 @@ class TestStaffUserAPI(APIBaseTest):
         cls.user.save()
 
     def test_can_list_staff_users(self):
-        response = self.client.get("/api/users/?is_staff=true")
+        response = self.client.get("/v1/users/?is_staff=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["count"], 1)
@@ -2581,7 +2005,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.get("/api/users")
+        response = self.client.get("/v1/users")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["uuid"], str(self.user.uuid))
@@ -2591,7 +2015,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.assertEqual(user.is_staff, False)
 
         # User becomes staff
-        response = self.client.patch(f"/api/users/{user.uuid}/", {"is_staff": True})
+        response = self.client.patch(f"/v1/users/{user.uuid}/", {"is_staff": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["is_staff"], True)
@@ -2599,7 +2023,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.assertEqual(user.is_staff, True)
 
         # User is no longer staff
-        response = self.client.patch(f"/api/users/{user.uuid}/", {"is_staff": False})
+        response = self.client.patch(f"/v1/users/{user.uuid}/", {"is_staff": False})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["is_staff"], False)
@@ -2612,7 +2036,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.patch(f"/api/users/{user.uuid}/", {"is_staff": True})
+        response = self.client.patch(f"/v1/users/{user.uuid}/", {"is_staff": True})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -2628,631 +2052,12 @@ class TestStaffUserAPI(APIBaseTest):
         self.assertEqual(user.is_staff, False)
 
 
-class TestEmailVerificationAPI(APIBaseTest):
-    CONFIG_AUTO_LOGIN = False
-
-    def setUp(self):
-        # prevent throttling of user requests to pass on from one test
-        # to the next
-        cache.clear()
-        super().setUp()
-
-        set_instance_setting("EMAIL_HOST", "localhost")
-
-        self.other_user = self._create_user("otheruser@hanzo.ai", password="12345678")
-        assert not self.other_user.is_email_verified
-        assert not self.other_user.is_email_verified
-
-    # Email verification request
-
-    @patch("hanzo_insights.capture")
-    def test_user_can_request_verification_email(self, mock_capture):
-        set_instance_setting("EMAIL_HOST", "localhost")
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
-            response = self.client.post(f"/api/users/request_email_verification/", {"uuid": self.user.uuid})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.content.decode(), '{"success":true}')
-        self.assertSetEqual({",".join(outmail.to) for outmail in mail.outbox}, {self.CONFIG_EMAIL})
-
-        self.assertEqual(mail.outbox[0].subject, "Verify your email address")
-        self.assertEqual(mail.outbox[0].body, "")  # no plain-text version support yet
-
-        html_message = mail.outbox[0].alternatives[0][0]  # type: ignore
-        self.validate_basic_html(
-            html_message,
-            "https://my.insights.net",
-            preheader="Please follow the link inside to verify your account.",
-        )
-        link_index = html_message.find("https://my.insights.net/verify_email")
-        reset_link = html_message[link_index : html_message.find('"', link_index)]
-        token = reset_link.replace("https://my.insights.net/verify_email/", "").replace(f"{self.user.uuid}/", "")
-
-        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # check is_email_verified is changed to True
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.is_email_verified)
-
-        # assert events were captured
-        mock_capture.assert_any_call(
-            event="user logged in",
-            distinct_id=self.user.distinct_id,
-            properties={"social_provider": ""},
-            groups={
-                "instance": ANY,
-                "organization": str(self.team.organization_id),
-                "project": str(self.team.uuid),
-            },
-        )
-        mock_capture.assert_any_call(
-            event="user verified email",
-            distinct_id=self.user.distinct_id,
-            properties={"$set": ANY},
-        )
-
-        mock_capture.assert_any_call(
-            event="verification email sent",
-            distinct_id=self.user.distinct_id,
-            groups={
-                "organization": str(self.team.organization_id),
-            },
-        )
-        self.assertEqual(mock_capture.call_count, 3)
-
-    def test_cant_verify_if_email_is_not_configured(self):
-        set_instance_setting("EMAIL_HOST", "")
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            response = self.client.post(f"/api/users/request_email_verification/", {"uuid": self.user.uuid})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "email_not_available",
-                "detail": "Cannot verify email address because email is not configured for your instance. Please contact your administrator.",
-                "attr": None,
-            },
-        )
-
-    def test_cant_verify_more_than_six_times(self):
-        set_instance_setting("EMAIL_HOST", "localhost")
-
-        for i in range(7):
-            with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
-                response = self.client.post(
-                    f"/api/users/request_email_verification/",
-                    {"uuid": self.user.uuid},
-                )
-            if i < 6:
-                self.assertEqual(response.status_code, status.HTTP_200_OK)
-            else:
-                # Fourth request should fail
-                self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
-                self.assertLessEqual(
-                    {"attr": None, "code": "throttled", "type": "throttled_error"}.items(),
-                    response.json().items(),
-                )
-
-        # Three emails should be sent, fourth should not
-        self.assertEqual(len(mail.outbox), 6)
-
-    # Token validation
-
-    def test_can_validate_email_verification_token(self):
-        token = email_verification_token_generator.make_token(self.user)
-        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_cant_validate_email_verification_token_without_a_token(self):
-        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "required",
-                "detail": "This field is required.",
-                "attr": "token",
-            },
-        )
-
-    def test_invalid_verification_token_returns_error(self):
-        valid_token = default_token_generator.make_token(self.user)
-
-        with freeze_time(timezone.now() - datetime.timedelta(seconds=86_401)):
-            # tokens expire after one day
-            expired_token = default_token_generator.make_token(self.user)
-
-        for token in [
-            valid_token[:-1],
-            "not_even_trying",
-            self.user.uuid,
-            expired_token,
-        ]:
-            response = self.client.post(
-                f"/api/users/verify_email/",
-                {"uuid": self.user.uuid, "token": token},
-            )
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(
-                response.json(),
-                {
-                    "type": "validation_error",
-                    "code": "invalid_token",
-                    "detail": "This verification token is invalid or has expired.",
-                    "attr": "token",
-                },
-            )
-
-    def test_can_only_validate_email_token_one_time(self):
-        token = email_verification_token_generator.make_token(self.user)
-        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "invalid_token",
-                "detail": "This verification token is invalid or has expired.",
-                "attr": "token",
-            },
-        )
-
-    def test_email_verification_logs_in_user(self):
-        token = email_verification_token_generator.make_token(self.user)
-
-        self.client.logout()
-        assert self.client.get("/api/users/@me/").status_code == 401
-        session_user_id = self.client.session.get("_auth_user_id")
-        assert session_user_id is None
-
-        # NOTE: Posting sets the session user id but doesn't log in the test client hence we just check the session id
-        self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-        session_user_id = self.client.session.get("_auth_user_id")
-        assert session_user_id == str(self.user.id)
-
-    def test_email_verification_logs_in_correctuser(self):
-        other_token = email_verification_token_generator.make_token(self.other_user)
-        self.client.logout()
-        assert self.client.session.get("_auth_user_id") is None
-
-        # NOTE: The user id in path should basically be ignored
-        self.client.post(f"/api/users/verify_email/", {"uuid": self.other_user.uuid, "token": other_token})
-        session_user_id = self.client.session.get("_auth_user_id")
-        assert session_user_id == str(self.other_user.id)
-
-    def test_email_verification_does_not_apply_to_current_logged_in_user(self):
-        other_token = email_verification_token_generator.make_token(self.other_user)
-
-        res = self.client.post(f"/api/users/verify_email/", {"uuid": self.other_user.uuid, "token": other_token})
-        assert res.status_code == status.HTTP_200_OK
-        self.user.refresh_from_db()
-        self.other_user.refresh_from_db()
-        # Should now be logged in as other user
-        assert self.client.session.get("_auth_user_id") == str(self.other_user.id)
-        assert not self.user.is_email_verified
-        assert self.other_user.is_email_verified
-
-    def test_email_verification_fails_if_using_other_accounts_token(self):
-        token = email_verification_token_generator.make_token(self.user)
-        other_token = email_verification_token_generator.make_token(self.other_user)
-        self.client.logout()
-
-        assert (
-            self.client.post(f"/api/users/verify_email/", {"uuid": self.other_user.uuid, "token": token}).status_code
-            == status.HTTP_400_BAD_REQUEST
-        )
-
-        assert (
-            self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": other_token}).status_code
-            == status.HTTP_400_BAD_REQUEST
-        )
-
-    def test_does_not_apply_pending_email_for_old_tokens(self):
-        self.client.logout()
-
-        token = email_verification_token_generator.make_token(self.user)
-        self.user.pending_email = "new@hanzo.ai"
-        self.user.save()
-
-        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert self.user.email != "new@hanzo.ai"
-        assert self.user.pending_email == "new@hanzo.ai"
-
-        token = email_verification_token_generator.make_token(self.user)
-        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-        assert response.status_code == status.HTTP_200_OK
-        self.user.refresh_from_db()
-        assert self.user.email == "new@hanzo.ai"
-        assert self.user.pending_email is None
-
-    def test_email_verification_does_not_log_in_user_with_2fa_totp(self):
-        # If the user has a TOTP device configured, verifying their email must
-        # NOT silently establish an authenticated session — otherwise an
-        # attacker with access to the email inbox could bypass 2FA entirely.
-        TOTPDevice.objects.create(user=self.user, name="default", confirmed=True)
-
-        token = email_verification_token_generator.make_token(self.user)
-        self.client.logout()
-        assert self.client.session.get("_auth_user_id") is None
-
-        response = self.client.post(f"/api/users/verify_email/", {"uuid": self.user.uuid, "token": token})
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == {"success": True, "token": token, "requires_2fa": True}
-
-        # Email should still be marked verified, but the session must remain unauthenticated.
-        self.user.refresh_from_db()
-        assert self.user.is_email_verified
-        assert self.client.session.get("_auth_user_id") is None
-
-    def test_cant_request_verification_for_already_verified_email(self):
-        self.user.is_email_verified = True
-        self.user.save()
-
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            response = self.client.post(f"/api/users/request_email_verification/", {"uuid": self.user.uuid})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "already_verified",
-                "detail": "Email is already verified.",
-                "attr": None,
-            },
-        )
-        # No email should have been sent for an already-verified address.
-        self.assertEqual(len(mail.outbox), 0)
-
-    def test_can_request_verification_for_pending_email_change(self):
-        # An already-verified user who initiated an email change still needs to
-        # verify the new address — re-requesting the verification link must work.
-        self.user.is_email_verified = True
-        self.user.pending_email = "new-address@hanzo.ai"
-        self.user.save()
-
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
-            response = self.client.post(f"/api/users/request_email_verification/", {"uuid": self.user.uuid})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].to, ["new-address@hanzo.ai"])
-
-
-class TestUserTwoFactor(APIBaseTest):
+class TestUserOAuthAccess(APIBaseTest):
     def setUp(self):
         super().setUp()
         # prevent throttling of user requests to pass on from one test
         # to the next
         cache.clear()
-
-    @patch("insights.api.user.TOTPDeviceForm")
-    def test_two_factor_start_setup(self, mock_totp_form):
-        response = self.client.get(f"/api/users/@me/two_factor_start_setup/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {"success": True, "secret": ANY})
-
-        # Verify session contains required keys
-        self.assertIn("django_two_factor-hex", self.client.session)
-        self.assertIn("django_two_factor-qr_secret_key", self.client.session)
-        self.assertEqual(len(self.client.session["django_two_factor-hex"]), 40)  # 20 bytes hex = 40 chars
-
-    @patch("insights.api.user.send_two_factor_auth_enabled_email")
-    @patch("insights.api.user.TOTPDeviceForm")
-    def test_two_factor_validation_with_valid_token(self, mock_totp_form, mock_send_email):
-        # Setup form mock
-        mock_form_instance = mock_totp_form.return_value
-        mock_form_instance.is_valid.return_value = True
-
-        # Setup session state
-        session = self.client.session
-        session["django_two_factor-hex"] = "1234567890abcdef1234"
-        session.save()
-
-        response = self.client.post(f"/api/users/@me/two_factor_validate/", {"token": "123456"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {"success": True})
-
-        # Verify form was created with correct params
-        mock_totp_form.assert_called_once_with("1234567890abcdef1234", self.user, data={"token": "123456"})
-        mock_form_instance.save.assert_called_once()
-
-        # Verify email was triggered
-        mock_send_email.delay.assert_called_once_with(self.user.id)
-
-    @patch("insights.api.user.TOTPDeviceForm")
-    def test_two_factor_validation_with_invalid_token(self, mock_totp_form):
-        # Setup form mock to fail validation
-        mock_form_instance = mock_totp_form.return_value
-        mock_form_instance.is_valid.return_value = False
-
-        # Setup session state
-        session = self.client.session
-        session["django_two_factor-hex"] = "1234567890abcdef1234"
-        session.save()
-
-        response = self.client.post(f"/api/users/@me/two_factor_validate/", {"token": "invalid"})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "token_invalid",
-                "detail": "Token is not valid",
-                "attr": None,
-            },
-        )
-
-    def test_two_factor_status_when_disabled(self):
-        response = self.client.get(f"/api/users/@me/two_factor_status/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.json(),
-            {
-                "is_enabled": False,
-                "backup_codes": [],
-                "method": None,
-                "has_passkeys": False,
-                "has_totp": False,
-                "passkeys_enabled_for_2fa": False,
-            },
-        )
-
-    @patch("insights.api.user.default_device")
-    def test_two_factor_status_when_enabled(self, mock_default_device):
-        # Mock TOTP device
-        totp_device = TOTPDevice.objects.create(user=self.user, name="default")
-        mock_default_device.return_value = totp_device
-
-        # Create backup codes
-        static_device = StaticDevice.objects.create(user=self.user, name="backup")
-        static_device.token_set.create(token="123456")
-        static_device.token_set.create(token="789012")
-
-        response = self.client.get(f"/api/users/@me/two_factor_status/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.json(),
-            {
-                "is_enabled": True,
-                "backup_codes": ["123456", "789012"],
-                "method": "TOTP",
-                "has_passkeys": False,
-                "has_totp": True,
-                "passkeys_enabled_for_2fa": False,
-            },
-        )
-
-    def test_two_factor_status_with_passkeys_only(self):
-        """Test two_factor_status when user has passkeys but no TOTP"""
-        from insights.models.webauthn_credential import WebauthnCredential
-
-        WebauthnCredential.objects.create(
-            user=self.user,
-            credential_id=b"test-credential-id",
-            label="Test Passkey",
-            public_key=b"test-public-key",
-            algorithm=-7,
-            counter=0,
-            transports=["internal"],
-            verified=True,
-        )
-        # Enable passkeys for 2FA
-        self.user.passkeys_enabled_for_2fa = True
-        self.user.save()
-
-        response = self.client.get(f"/api/users/@me/two_factor_status/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.json(),
-            {
-                "is_enabled": True,
-                "backup_codes": [],
-                "method": "passkey",
-                "has_passkeys": True,
-                "has_totp": False,
-                "passkeys_enabled_for_2fa": True,
-            },
-        )
-
-    def test_two_factor_status_with_both_totp_and_passkeys(self):
-        """Test two_factor_status when user has both TOTP and passkeys (TOTP takes precedence)"""
-        from insights.models.webauthn_credential import WebauthnCredential
-
-        # Create TOTP device
-        totp_device = TOTPDevice.objects.create(user=self.user, name="default")
-
-        # Create passkey
-        WebauthnCredential.objects.create(
-            user=self.user,
-            credential_id=b"test-credential-id",
-            label="Test Passkey",
-            public_key=b"test-public-key",
-            algorithm=-7,
-            counter=0,
-            transports=["internal"],
-            verified=True,
-        )
-        # Enable passkeys for 2FA
-        self.user.passkeys_enabled_for_2fa = True
-        self.user.save()
-
-        # Create backup codes
-        static_device = StaticDevice.objects.create(user=self.user, name="backup")
-        static_device.token_set.create(token="123456")
-
-        with patch("insights.api.user.default_device", return_value=totp_device):
-            response = self.client.get(f"/api/users/@me/two_factor_status/")
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(
-                response.json(),
-                {
-                    "is_enabled": True,
-                    "backup_codes": ["123456"],
-                    "method": "TOTP",
-                    "has_passkeys": True,
-                    "has_totp": True,
-                    "passkeys_enabled_for_2fa": True,
-                },
-            )
-
-    def test_two_factor_status_with_unverified_passkeys(self):
-        """Test two_factor_status when user has unverified passkeys (should not count as 2FA)"""
-        from insights.models.webauthn_credential import WebauthnCredential
-
-        WebauthnCredential.objects.create(
-            user=self.user,
-            credential_id=b"test-credential-id",
-            label="Test Passkey",
-            public_key=b"test-public-key",
-            algorithm=-7,
-            counter=0,
-            transports=["internal"],
-            verified=False,  # Unverified
-        )
-
-        response = self.client.get(f"/api/users/@me/two_factor_status/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.json(),
-            {
-                "is_enabled": False,
-                "backup_codes": [],
-                "method": None,
-                "has_passkeys": False,
-                "has_totp": False,
-                "passkeys_enabled_for_2fa": False,
-            },
-        )
-
-    def test_two_factor_status_with_passkeys_disabled_for_2fa(self):
-        """Test two_factor_status when user has passkeys but passkeys_enabled_for_2fa is False"""
-        from insights.models.webauthn_credential import WebauthnCredential
-
-        WebauthnCredential.objects.create(
-            user=self.user,
-            credential_id=b"test-credential-id",
-            label="Test Passkey",
-            public_key=b"test-public-key",
-            algorithm=-7,
-            counter=0,
-            transports=["internal"],
-            verified=True,
-        )
-        # Ensure passkeys_enabled_for_2fa is False (default)
-        self.user.passkeys_enabled_for_2fa = False
-        self.user.save()
-
-        response = self.client.get(f"/api/users/@me/two_factor_status/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.json(),
-            {
-                "is_enabled": False,
-                "backup_codes": [],
-                "method": None,
-                "has_passkeys": True,
-                "has_totp": False,
-                "passkeys_enabled_for_2fa": False,
-            },
-        )
-
-    @parameterized.expand(
-        [
-            # name, has_totp, passkey_state, passkeys_enabled_for_2fa, expected_is_2fa_enabled
-            ("no_factor", False, None, False, False),
-            ("totp_only", True, None, False, True),
-            ("passkey_enabled_for_2fa", False, "verified", True, True),
-            ("passkey_present_but_disabled_for_2fa", False, "verified", False, False),
-            ("unverified_passkey_enabled_for_2fa", False, "unverified", True, False),
-        ]
-    )
-    def test_user_me_is_2fa_enabled(
-        self,
-        _name: str,
-        has_totp: bool,
-        passkey_state: str | None,
-        passkeys_enabled_for_2fa: bool,
-        expected_is_2fa_enabled: bool,
-    ):
-        """
-        /api/users/@me/.is_2fa_enabled must reflect passkey-2FA, not only TOTP — otherwise the
-        frontend keeps reopening the enforce-2FA setup modal even after the user has a passkey
-        configured as their second factor.
-        """
-        from insights.models.webauthn_credential import WebauthnCredential
-
-        if has_totp:
-            TOTPDevice.objects.create(user=self.user, name="default", confirmed=True)
-        if passkey_state is not None:
-            WebauthnCredential.objects.create(
-                user=self.user,
-                credential_id=b"cred",
-                label="Test Passkey",
-                public_key=b"pk",
-                algorithm=-7,
-                counter=0,
-                transports=["internal"],
-                verified=(passkey_state == "verified"),
-            )
-        self.user.passkeys_enabled_for_2fa = passkeys_enabled_for_2fa
-        self.user.save(update_fields=["passkeys_enabled_for_2fa"])
-
-        response = self.client.get("/api/users/@me/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()["is_2fa_enabled"], expected_is_2fa_enabled)
-
-    @patch("insights.api.user.default_device")
-    def test_two_factor_backup_codes_generation(self, mock_default_device):
-        # Mock TOTP device to simulate 2FA being enabled
-        totp_device = TOTPDevice.objects.create(user=self.user, name="default")
-        mock_default_device.return_value = totp_device
-
-        response = self.client.post(f"/api/users/@me/two_factor_backup_codes/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        backup_codes = response.json()["backup_codes"]
-        self.assertEqual(len(backup_codes), 10)  # Verify 10 backup codes are generated
-
-        # Verify codes are stored in database
-        static_device = StaticDevice.objects.get(user=self.user)
-        stored_codes = [token.token for token in static_device.token_set.all()]
-        self.assertEqual(sorted(backup_codes), sorted(stored_codes))
-
-    def test_two_factor_backup_codes_requires_2fa_enabled(self):
-        response = self.client.post(f"/api/users/@me/two_factor_backup_codes/")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json(),
-            {
-                "type": "validation_error",
-                "code": "2fa_not_enabled",
-                "detail": "2FA must be enabled first",
-                "attr": None,
-            },
-        )
-
-    @patch("insights.api.user.send_two_factor_auth_disabled_email")
-    def test_two_factor_disable(self, mock_send_email):
-        # Setup 2FA devices
-        TOTPDevice.objects.create(user=self.user, name="default")
-        static_device = StaticDevice.objects.create(user=self.user, name="backup")
-        static_device.token_set.create(token="123456")
-
-        response = self.client.post(f"/api/users/@me/two_factor_disable/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {"success": True})
-
-        # Verify all 2FA devices are removed
-        self.assertEqual(TOTPDevice.objects.filter(user=self.user).count(), 0)
-        self.assertEqual(StaticDevice.objects.filter(user=self.user).count(), 0)
-
-        # Verify email was triggered
-        mock_send_email.delay.assert_called_once_with(self.user.id)
 
     def test_team_scoped_oauth_token_with_user_read_can_access_me_endpoint(self):
         oauth_app = OAuthApplication.objects.create(
@@ -3274,7 +2079,7 @@ class TestUserTwoFactor(APIBaseTest):
             scoped_teams=[self.team.id],
         )
 
-        response = self.client.get("/api/users/@me/", headers={"authorization": f"Bearer {access_token.token}"})
+        response = self.client.get("/v1/users/@me/", headers={"authorization": f"Bearer {access_token.token}"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -3302,26 +2107,26 @@ class TestUserDeletionAfterOrgDeletion(NonAtomicBaseTest):
         self.client.force_login(user)
 
         # User belongs to exactly one organization
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["organizations"]) == 1
 
         # Cannot delete account while still a member of an organization
-        response = self.client.delete("/api/users/@me/")
+        response = self.client.delete("/v1/users/@me/")
         assert response.status_code == status.HTTP_409_CONFLICT
 
         # Delete the organization (runs the deletion workflow to completion)
         with execute_deletion_workflows_inline():
-            response = self.client.delete(f"/api/organizations/{org.id}")
+            response = self.client.delete(f"/v1/organizations/{org.id}")
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         # The membership cascade removed the user's memberships, so they now see zero organizations
         assert not OrganizationMembership.objects.filter(user=user).exists()
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["organizations"]) == 0
 
         # Now the user can delete their account
-        response = self.client.delete("/api/users/@me/")
+        response = self.client.delete("/v1/users/@me/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not User.objects.filter(pk=user.pk).exists()

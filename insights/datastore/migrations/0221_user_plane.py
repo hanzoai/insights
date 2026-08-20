@@ -61,12 +61,13 @@ from insights.models.event.plane import (
     USER_ALIAS_MV_SQL,
     USER_BACKFILL_SQL,
     USER_MV_SQL,
-    provisioned,
 )
 
 # ONE reading of the app's records, so every view this migration creates routes
 # the same way. See the routing note in `plane.py`.
-ROUTING = provisioned()
+# Routing is gone: the org IS the tenant, so there is no org -> project map to
+# read and these builders take no argument. Keeping the old call shape here
+# broke the import of EVERY datastore migration, so nothing could run at all.
 
 operations = [
     # Recreate so a changed projection takes effect on re-run.
@@ -75,7 +76,7 @@ operations = [
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        USER_MV_SQL(ROUTING),
+        USER_MV_SQL(),
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
@@ -83,17 +84,17 @@ operations = [
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        USER_ALIAS_MV_SQL(ROUTING),
+        USER_ALIAS_MV_SQL(),
         node_roles=[NodeRole.DATA],
     ),
     # The views are live first, so a backfill only ever overlaps them, and the
     # overlap collapses.
     run_sql_with_exceptions(
-        USER_BACKFILL_SQL(ROUTING),
+        USER_BACKFILL_SQL(),
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        USER_ALIAS_BACKFILL_SQL(ROUTING),
+        USER_ALIAS_BACKFILL_SQL(),
         node_roles=[NodeRole.DATA],
     ),
 ]

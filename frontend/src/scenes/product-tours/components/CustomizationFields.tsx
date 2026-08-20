@@ -1,5 +1,5 @@
-import { IconX } from '@hanzo/icons'
 import { Button, Select } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { ColorPicker } from 'lib/elements/Color/ColorPicker'
 import { Field } from 'lib/elements/Field'
@@ -8,7 +8,7 @@ import { WEB_SAFE_FONTS } from 'scenes/surveys/constants'
 export const COLOR_PRESETS = [
     '#ffffff',
     '#1d1f27',
-    '#1d4aff',
+    '#3b82f6',
     '#f3f4f6',
     '#e5e7eb',
     '#ef4444',
@@ -51,12 +51,7 @@ export function ColorPickerField({
                 />
                 <span className="text-xs text-secondary font-mono">{displayValue}</span>
                 {showNone && (
-                    <Button
-                        type="tertiary"
-                        size="xsmall"
-                        icon={<IconX />}
-                        onClick={() => onChange('transparent')}
-                    />
+                    <Button type="tertiary" size="xsmall" icon={<IconX />} onClick={() => onChange('transparent')} />
                 )}
             </div>
         </Field.Pure>

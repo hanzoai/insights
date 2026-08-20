@@ -26,7 +26,7 @@ const emailHtml = `<!DOCTYPE html>
   <p>We're researching <strong>creating insights with the MCP integration</strong> and your perspective would be really valuable. Got 5&ndash;10 minutes for a quick voice conversation?</p>
   <p>It's a casual call with an AI interviewer &mdash; not a sales call, just research. You can do it whenever's convenient in the next few days.</p>
   <p style="text-align: center; margin: 32px 0;">
-    <a href="#" target="_blank" style="background: #1d4aff; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Start the interview</a>
+    <a href="#" target="_blank" style="background: #000000; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Start the interview</a>
   </p>
   <p style="font-size: 12px; color: #888;">Or paste this link into your browser: <a href="#">https://us.hanzo.ai/interview/preview</a></p>
   <p>Thanks!<br />The Insights team</p>

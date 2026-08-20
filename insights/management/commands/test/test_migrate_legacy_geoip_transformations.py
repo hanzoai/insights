@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from django.core.management import call_command
 
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_script
 
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
@@ -75,7 +75,7 @@ class TestMigrateLegacyGeoipTransformations(BaseTest):
         self.legacy_function.refresh_from_db()
         assert self.legacy_function.template_id == "template-geoip"
         assert self.legacy_function.script == GEOIP_TEMPLATE_CODE
-        assert self.legacy_function.bytecode == compile_hog(GEOIP_TEMPLATE_CODE, "transformation")
+        assert self.legacy_function.bytecode == compile_script(GEOIP_TEMPLATE_CODE, "transformation")
         assert self.legacy_function.insights_function_template_id == self.template.id
         assert self.legacy_function.icon_url == "/static/transformations/geoip.png"
 

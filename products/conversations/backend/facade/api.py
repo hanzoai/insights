@@ -1,7 +1,7 @@
 """
 Facade API for conversations.
 
-The only conversations surface other products may import. Wraps the SupportHog
+The only conversations surface other products may import. Wraps the Support
 Slack integration behind contract types so callers never touch slack_sdk or the
 team's Slack credentials directly.
 """
@@ -30,7 +30,7 @@ from products.conversations.backend.support_slack_channels import (
 
 
 class SupportMessageSendError(Exception):
-    """Slack rejected a SupportHog bot message.
+    """Slack rejected a Support bot message.
 
     ``code`` is the Slack error code (e.g. ``not_in_channel``); ``retry_after`` carries
     the requested wait in seconds when Slack rate-limited the post, else None.
@@ -43,7 +43,7 @@ class SupportMessageSendError(Exception):
 
 
 def list_support_bot_channels(team_id: int, *, members_only: bool = False) -> list[SupportChannel]:
-    """Slack channels the SupportHog bot can see for this team, sorted by name.
+    """Slack channels the Support bot can see for this team, sorted by name.
 
     With ``members_only=True``, only channels the bot belongs to (the ones it can
     post to). Raises :class:`SupportSlackNotConfigured` when the bot isn't connected
@@ -64,7 +64,7 @@ def list_support_bot_channels(team_id: int, *, members_only: bool = False) -> li
 
 
 def post_support_message(team_id: int, channel_id: str, text: str) -> str:
-    """Post ``text`` to a Slack channel as the SupportHog bot, applying the team's
+    """Post ``text`` to a Slack channel as the Support bot, applying the team's
     configured bot display name and icon. Returns the posted message's Slack ts.
 
     Raises :class:`SupportSlackNotConfigured` when the bot isn't connected and

@@ -1,8 +1,30 @@
 #!/bin/bash
 set -e
 
-if [ -z "$INSIGHTS_SKIP_MIGRATION_CHECKS" ]; then
-	python manage.py migrate --check
-	python manage.py migrate_datastore --check
-	python manage.py run_async_migrations --check
+if [ -n "$INSIGHTS_SKIP_MIGRATION_CHECKS" ]; then
+	exit 0
+fi
+
+# Local schema first: cheap, and a mismatch here means this process would serve 500s.
+python manage.py migrate --check
+python manage.py run_async_migrations --check
+
+# The three ledger checks answer "is every migration recorded applied", which is a different
+# question from "does the database have what the models declare". Production served for a long
+# time with eleven absent tables while that passed, because those rows had been faked past a
+# failure and a migration recorded as applied can never run again. This reads the schema.
+python manage.py schema_drift
+
+# The datastore is a separate process on a separate node. An unapplied migration there should
+# stop a boot; the store being briefly unreachable should NOT -- otherwise a datastore incident
+# (one lasted hours on 2026-08-09) takes the entire web tier down with it, turning "analytics is
+# unavailable" into "the product is unavailable", and leaving no running pod to exec into. The
+# two failures are worth distinguishing.
+if ! datastore_out=$(python manage.py migrate_datastore --check 2>&1); then
+	if printf '%s' "$datastore_out" | grep -qiE 'connection|refused|timed out|timeout|unreachable|resolve|gaierror|memory limit'; then
+		printf 'migrate-check: datastore unreachable, continuing: %s\n' "$(printf '%s' "$datastore_out" | tail -1)" >&2
+	else
+		printf '%s\n' "$datastore_out" >&2
+		exit 1
+	fi
 fi

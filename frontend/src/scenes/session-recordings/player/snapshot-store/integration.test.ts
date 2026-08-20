@@ -1,4 +1,4 @@
-import { EventType, IncrementalSource } from 'insights-js/rrweb-types'
+import { EventType, IncrementalSource } from '@hanzo/insights-rrweb-types'
 
 import { LoadBatch, SnapshotStore } from '@hanzo/replay-shared'
 

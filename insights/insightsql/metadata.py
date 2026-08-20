@@ -4,7 +4,7 @@ from django.conf import settings
 
 from pydantic import BaseModel
 
-from insights.schema import HogLanguage, InsightsQLMetadata, InsightsQLMetadataResponse, InsightsQLNotice, InsightsQLQuery
+from insights.schema import ScriptLanguage, InsightsQLMetadata, InsightsQLMetadataResponse, InsightsQLNotice, InsightsQLQuery
 
 from insights.insightsql import ast
 from insights.insightsql.base import AST
@@ -81,20 +81,20 @@ def get_insightsql_metadata(
             debug=query.debug or False,
             globals=query.globals,
         )
-        if query.language == HogLanguage.HOG:
+        if query.language == ScriptLanguage.SCRIPT:
             program = parse_program(query.query)
             create_bytecode(program, supported_functions={"fetch", "insightsCapture"}, args=[], context=context)
-        elif query.language == HogLanguage.INSIGHTS_TEMPLATE:
+        elif query.language == ScriptLanguage.SCRIPT_TEMPLATE:
             string = parse_string_template(query.query)
             create_bytecode(string, supported_functions={"fetch", "insightsCapture"}, args=[], context=context)
-        elif query.language == HogLanguage.INSIGHTS_QL_EXPR:
+        elif query.language == ScriptLanguage.INSIGHTS_QL_EXPR:
             node = parse_expr(query.query)
             if query.sourceQuery is not None:
                 source_query = get_query_runner(query=query.sourceQuery, team=team).to_query()
                 process_expr_on_table(node, context=context, source_query=source_query)
             else:
                 process_expr_on_table(node, context=context)
-        elif query.language == HogLanguage.INSIGHTS_QL:
+        elif query.language == ScriptLanguage.INSIGHTS_QL:
             if not insightsql_ast:
                 insightsql_ast = parse_select(query.query)
                 finder = find_placeholders(insightsql_ast)
@@ -154,7 +154,7 @@ def get_insightsql_metadata(
             response.isValid = len(response.errors) == 0
 
     # We add a magic "F'" start prefix to get Antlr into the right parsing mode, subtract it now
-    if query.language == HogLanguage.INSIGHTS_TEMPLATE:
+    if query.language == ScriptLanguage.SCRIPT_TEMPLATE:
         for err in response.errors:
             if err.start is not None and err.end is not None and err.start > 0:
                 err.start -= 2
@@ -171,7 +171,7 @@ def enrich_insightsql_validation_error(
 ) -> tuple[str, dict | None]:
     """When a InsightsQLQuery fails, run it through metadata resolution to collect
     structured error positions, table references, and any fix hints. Returns a
-    (possibly enriched) detail string and a dict suitable for exceptions_hog's
+    (possibly enriched) detail string and a dict suitable for exceptions_script's
     ``extra`` attribute — or ``(original_detail, None)`` when enrichment isn't
     applicable or fails.
     """
@@ -182,7 +182,7 @@ def enrich_insightsql_validation_error(
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query=query.query,
                 modifiers=query.modifiers,
                 filters=query.filters,

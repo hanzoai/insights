@@ -40,7 +40,7 @@ class OrganizationPersonalAPIKeySerializer(serializers.ModelSerializer):
     )
     mask_value = serializers.CharField(
         read_only=True,
-        help_text="Masked, display-safe hint of the key value (e.g. 'phx_***1234'). Not the secret. "
+        help_text="Masked, display-safe hint of the key value (e.g. 'sk-***1234'). Not the secret. "
         "The owner sees the same masked value in their own settings, so it can be used to identify a key.",
     )
     scopes = serializers.ListField(

@@ -1,6 +1,4 @@
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 
 import {
     WIDGET_LIST_COUNT_EVENTS,
@@ -16,7 +14,7 @@ import {
     type ActivityEventsWidgetEvent,
 } from './ActivityEventsWidgetRow'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngMascot()
 
 export type ActivityEventsWidgetResult = {
     results?: ActivityEventsWidgetEvent[]

@@ -93,7 +93,7 @@ class InsightsConfig(AppConfig):
             hanzo_insights.capture_exception_code_variables = True  # ty: ignore[invalid-assignment]
 
         if settings.E2E_TESTING:
-            hanzo_insights.api_key = "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"  # ty: ignore[invalid-assignment]
+            hanzo_insights.api_key = "pk-ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"  # ty: ignore[invalid-assignment]
             hanzo_insights.personal_api_key = None
         elif settings.TEST or os.environ.get("OPT_OUT_CAPTURE", False):
             hanzo_insights.disabled = True  # ty: ignore[invalid-assignment]

@@ -6,9 +6,9 @@ import { AddressInfo } from 'net'
 import { CyclotronInvocationQueueParametersFetchType } from '~/cdp/schema/cyclotron'
 import { logger } from '~/common/utils/logger'
 
-import { HogExecutorAsyncService } from '../../../src/cdp/services/script-executor-async.service'
-import { HogExecutorService } from '../../../src/cdp/services/script-executor.service'
-import { HogInputsService } from '../../../src/cdp/services/script-inputs.service'
+import { ScriptExecutorAsyncService } from '../../../src/cdp/services/script-executor-async.service'
+import { ScriptExecutorService } from '../../../src/cdp/services/script-executor.service'
+import { ScriptInputsService } from '../../../src/cdp/services/script-inputs.service'
 import { RecipientsManagerService } from '../../../src/cdp/services/managers/recipients-manager.service'
 import { TeamWorkflowsConfigService } from '../../../src/cdp/services/managers/team-workflows-config.service'
 import { EmailService } from '../../../src/cdp/services/messaging/email.service'
@@ -23,9 +23,9 @@ import { Hub } from '../../../src/types'
 import { createHub } from '~/common/utils/db/hub'
 import { parseJSON } from '~/common/utils/json-parse'
 import { promisifyCallback } from '~/common/utils/utils'
-import { compileHog } from '../templates/compiler'
+import { compileScript } from '../templates/compiler'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
-import { createExampleInvocation, createHogExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
+import { createExampleInvocation, createScriptExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
 import { isConnectionLevelError } from '../utils/cdp-fetch'
 import { EXTEND_OBJECT_KEY } from './script-inputs.service'
 import { SELF_LOOP_DEPTH_PROPERTY, selfLoopGuardCounter } from './self-loop-guard'
@@ -52,7 +52,7 @@ const cleanLogs = (logs: string[]): string[] => {
 
 describe('Script Executor', () => {
     jest.setTimeout(1000)
-    let executor: HogExecutorAsyncService
+    let executor: ScriptExecutorAsyncService
     let hub: Hub
 
     beforeEach(async () => {
@@ -60,7 +60,7 @@ describe('Script Executor', () => {
         jest.spyOn(Date, 'now').mockReturnValue(fixedTime.toMillis())
 
         hub = await createHub()
-        const hogInputsService = new HogInputsService(
+        const scriptInputsService = new ScriptInputsService(
             hub.integrationManager,
             new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL),
             hub.encryptedFields
@@ -84,8 +84,8 @@ describe('Script Executor', () => {
             new RecipientsManagerService(hub.postgres)
         )
         const recipientTokensService = new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL)
-        executor = new HogExecutorAsyncService(
-            new HogExecutorService({ executionTimeoutMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, hogInputsService),
+        executor = new ScriptExecutorAsyncService(
+            new ScriptExecutorService({ executionTimeoutMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, scriptInputsService),
             {
                 googleAdwordsDeveloperToken: hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
                 fetchRetries: hub.CDP_FETCH_RETRIES,
@@ -95,7 +95,7 @@ describe('Script Executor', () => {
             },
             {
                 teamManager: hub.teamManager,
-                hogInputsService,
+                scriptInputsService,
                 emailService,
                 recipientTokensService,
                 // No push sends in this suite - the push queue type is covered by push-notification.service.test.ts
@@ -105,7 +105,7 @@ describe('Script Executor', () => {
     })
 
     afterEach(() => {
-        // Ensure any spies (e.g., execHog, Math.random, Date.now) are restored between tests
+        // Ensure any spies (e.g., execScript, Math.random, Date.now) are restored between tests
         jest.restoreAllMocks()
     })
 
@@ -121,7 +121,7 @@ describe('Script Executor', () => {
                 ],
             }
 
-            const values = executor.hogExecutor.getSensitiveValues(insightsFunction, inputs)
+            const values = executor.scriptExecutor.getSensitiveValues(insightsFunction, inputs)
 
             // Without integration_multi + array handling these secrets leak into team-visible logs.
             expect(values).toContain('fcm-secret-token')
@@ -366,7 +366,7 @@ describe('Script Executor', () => {
             const script = `return inputs.gclid`
             const mappingFn = createInsightsFunction({
                 script,
-                bytecode: await compileHog(script),
+                bytecode: await compileScript(script),
                 ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 inputs_schema: [],
                 mappings: [
@@ -376,7 +376,7 @@ describe('Script Executor', () => {
                             gclid: {
                                 order: 0,
                                 value: '{person.properties.gclid ?? person.properties.$initial_gclid}',
-                                bytecode: await compileHog(
+                                bytecode: await compileScript(
                                     'return person.properties.gclid ?? person.properties.$initial_gclid'
                                 ),
                             },
@@ -456,8 +456,8 @@ describe('Script Executor', () => {
                 ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
-            const hogExecModule = require('../utils/script-exec')
-            jest.spyOn(hogExecModule, 'execHog').mockResolvedValue({
+            const scriptExecModule = require('../utils/script-exec')
+            jest.spyOn(scriptExecModule, 'execScript').mockResolvedValue({
                 execResult: {
                     finished: true,
                     result: null, // falsy value
@@ -523,7 +523,7 @@ describe('Script Executor', () => {
                 ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 groups: {},
                 event: {
                     distinct_id: '',
@@ -547,7 +547,7 @@ describe('Script Executor', () => {
                 ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 groups: {},
                 event: {
                     properties: {
@@ -578,7 +578,7 @@ describe('Script Executor', () => {
                 ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 groups: {},
                 event: {
                     properties: {
@@ -598,9 +598,9 @@ describe('Script Executor', () => {
     })
 
     describe('insightsGetTicket and insightsUpdateTicket', () => {
-        const mockExecHogForAsyncFunction = (asyncFunctionName: string, asyncFunctionArgs: any[]) => {
-            const hogExecModule = require('../utils/script-exec')
-            jest.spyOn(hogExecModule, 'execHog').mockResolvedValue({
+        const mockExecScriptForAsyncFunction = (asyncFunctionName: string, asyncFunctionArgs: any[]) => {
+            const scriptExecModule = require('../utils/script-exec')
+            jest.spyOn(scriptExecModule, 'execScript').mockResolvedValue({
                 execResult: {
                     finished: false,
                     asyncFunctionName,
@@ -629,13 +629,13 @@ describe('Script Executor', () => {
                 secret_api_token: 'test-secret-token',
             } as any)
 
-            mockExecHogForAsyncFunction('insightsGetTicket', [{ ticket_id: 'test-ticket-123' }])
+            mockExecScriptForAsyncFunction('insightsGetTicket', [{ ticket_id: 'test-ticket-123' }])
 
             const result = await executor.execute(createTicketInvocation())
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/conversations/external/ticket/test-ticket-123`,
+                url: `${hub.SITE_URL}/v1/conversations/external/ticket/test-ticket-123`,
                 method: 'GET',
                 headers: { Authorization: 'Bearer test-secret-token' },
             })
@@ -647,7 +647,7 @@ describe('Script Executor', () => {
                 secret_api_token: 'test-secret-token',
             } as any)
 
-            mockExecHogForAsyncFunction('insightsUpdateTicket', [
+            mockExecScriptForAsyncFunction('insightsUpdateTicket', [
                 { ticket_id: 'test-ticket-456', updates: { status: 'resolved', priority: 'high' } },
             ])
 
@@ -655,7 +655,7 @@ describe('Script Executor', () => {
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/conversations/external/ticket/test-ticket-456`,
+                url: `${hub.SITE_URL}/v1/conversations/external/ticket/test-ticket-456`,
                 method: 'PATCH',
                 body: JSON.stringify({ status: 'resolved', priority: 'high' }),
                 headers: {
@@ -671,7 +671,7 @@ describe('Script Executor', () => {
                 secret_api_token: 'test-secret-token',
             } as any)
 
-            mockExecHogForAsyncFunction('insightsGetTicket', [{}])
+            mockExecScriptForAsyncFunction('insightsGetTicket', [{}])
 
             const result = await executor.execute(createTicketInvocation())
             expect(result.error).toContain("missing 'ticket_id'")
@@ -683,7 +683,7 @@ describe('Script Executor', () => {
                 secret_api_token: 'test-secret-token',
             } as any)
 
-            mockExecHogForAsyncFunction('insightsUpdateTicket', [{ updates: { status: 'resolved' } }])
+            mockExecScriptForAsyncFunction('insightsUpdateTicket', [{ updates: { status: 'resolved' } }])
 
             const result = await executor.execute(createTicketInvocation())
             expect(result.error).toContain("missing 'ticket_id'")
@@ -692,7 +692,7 @@ describe('Script Executor', () => {
         it('insightsGetTicket errors when team is not found', async () => {
             jest.spyOn(hub.teamManager, 'getTeam').mockResolvedValue(null)
 
-            mockExecHogForAsyncFunction('insightsGetTicket', [{ ticket_id: 'test-ticket-123' }])
+            mockExecScriptForAsyncFunction('insightsGetTicket', [{ ticket_id: 'test-ticket-123' }])
 
             const result = await executor.execute(createTicketInvocation())
             expect(result.error).toContain('Team 1 not found')
@@ -700,9 +700,9 @@ describe('Script Executor', () => {
     })
 
     describe('insightsGetAccount', () => {
-        const mockExecHogForAsyncFunction = (asyncFunctionName: string, asyncFunctionArgs: any[]) => {
-            const hogExecModule = require('../utils/script-exec')
-            jest.spyOn(hogExecModule, 'execHog').mockResolvedValue({
+        const mockExecScriptForAsyncFunction = (asyncFunctionName: string, asyncFunctionArgs: any[]) => {
+            const scriptExecModule = require('../utils/script-exec')
+            jest.spyOn(scriptExecModule, 'execScript').mockResolvedValue({
                 execResult: {
                     finished: false,
                     asyncFunctionName,
@@ -730,13 +730,13 @@ describe('Script Executor', () => {
                 secret_api_token: 'test-secret-token',
             } as any)
 
-            mockExecHogForAsyncFunction('insightsGetAccount', [{ external_id: 'acme corp/1' }])
+            mockExecScriptForAsyncFunction('insightsGetAccount', [{ external_id: 'acme corp/1' }])
 
             const result = await executor.execute(createAccountInvocation())
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/customer_analytics/external/account?external_id=acme%20corp%2F1`,
+                url: `${hub.SITE_URL}/v1/customer_analytics/external/account?external_id=acme%20corp%2F1`,
                 method: 'GET',
                 headers: { Authorization: 'Bearer test-secret-token' },
             })
@@ -748,7 +748,7 @@ describe('Script Executor', () => {
                 secret_api_token: 'test-secret-token',
             } as any)
 
-            mockExecHogForAsyncFunction('insightsGetAccount', [{}])
+            mockExecScriptForAsyncFunction('insightsGetAccount', [{}])
 
             const result = await executor.execute(createAccountInvocation())
             expect(result.error).toContain("missing 'external_id'")
@@ -757,7 +757,7 @@ describe('Script Executor', () => {
         it('insightsGetAccount errors when team is not found', async () => {
             jest.spyOn(hub.teamManager, 'getTeam').mockResolvedValue(null)
 
-            mockExecHogForAsyncFunction('insightsGetAccount', [{ external_id: 'acme-1' }])
+            mockExecScriptForAsyncFunction('insightsGetAccount', [{ external_id: 'acme-1' }])
 
             const result = await executor.execute(createAccountInvocation())
             expect(result.error).toContain('Team 1 not found')
@@ -769,7 +769,7 @@ describe('Script Executor', () => {
                 secret_api_token: null,
             } as any)
 
-            mockExecHogForAsyncFunction('insightsGetAccount', [{ external_id: 'acme-1' }])
+            mockExecScriptForAsyncFunction('insightsGetAccount', [{ external_id: 'acme-1' }])
 
             const result = await executor.execute(createAccountInvocation())
             expect(result.error).toContain('has no secret API token configured')
@@ -784,7 +784,7 @@ describe('Script Executor', () => {
             const insightsModule = require('~/common/utils/insights')
             const captureExceptionSpy = jest.spyOn(insightsModule, 'captureException')
 
-            mockExecHogForAsyncFunction('insightsGetAccount', [{ external_id: 'acme-1' }])
+            mockExecScriptForAsyncFunction('insightsGetAccount', [{ external_id: 'acme-1' }])
             await executor.execute(createAccountInvocation())
 
             expect(captureExceptionSpy).toHaveBeenCalledWith(
@@ -802,7 +802,7 @@ describe('Script Executor', () => {
             const insightsModule = require('~/common/utils/insights')
             const captureExceptionSpy = jest.spyOn(insightsModule, 'captureException')
 
-            mockExecHogForAsyncFunction('insightsGetAccount', [{ external_id: 'acme-1' }])
+            mockExecScriptForAsyncFunction('insightsGetAccount', [{ external_id: 'acme-1' }])
             await executor.execute(createAccountInvocation())
 
             expect(captureExceptionSpy).not.toHaveBeenCalled()
@@ -814,7 +814,7 @@ describe('Script Executor', () => {
                 secret_api_token: 'test-secret-token',
             } as any)
 
-            mockExecHogForAsyncFunction('insightsUpdateAccount', [
+            mockExecScriptForAsyncFunction('insightsUpdateAccount', [
                 { external_id: 'acme-1', updates: { tags: ['enterprise'], tags_mode: 'add' } },
             ])
 
@@ -822,7 +822,7 @@ describe('Script Executor', () => {
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/customer_analytics/external/account`,
+                url: `${hub.SITE_URL}/v1/customer_analytics/external/account`,
                 method: 'PATCH',
                 body: JSON.stringify({ external_id: 'acme-1', tags: ['enterprise'], tags_mode: 'add' }),
                 headers: {
@@ -838,7 +838,7 @@ describe('Script Executor', () => {
                 secret_api_token: 'test-secret-token',
             } as any)
 
-            mockExecHogForAsyncFunction('insightsUpdateAccount', [{ updates: { tags: ['enterprise'] } }])
+            mockExecScriptForAsyncFunction('insightsUpdateAccount', [{ updates: { tags: ['enterprise'] } }])
 
             const result = await executor.execute(createAccountInvocation())
             expect(result.error).toContain("missing 'external_id'")
@@ -847,7 +847,7 @@ describe('Script Executor', () => {
 
     describe('produceToWarehouseWebhooks', () => {
         const buildInvocation = async (code: string): Promise<CyclotronJobInvocationInsightsFunction> => {
-            const bytecode = await compileHog(code)
+            const bytecode = await compileScript(code)
             return createExampleInvocation(createInsightsFunction({ bytecode }), { inputs: {} })
         }
 
@@ -1545,7 +1545,7 @@ describe('Script Executor', () => {
                 },
             }
 
-            jest.spyOn(executor['deps'].hogInputsService, 'loadIntegrationInputs').mockResolvedValue(
+            jest.spyOn(executor['deps'].scriptInputsService, 'loadIntegrationInputs').mockResolvedValue(
                 mockIntegrationInputs
             )
 
@@ -1786,7 +1786,7 @@ describe('Script Executor', () => {
         })
 
         describe('self-loop guard', () => {
-            const OWN_TOKEN = 'phc_synthetic_own_0000000000000000'
+            const OWN_TOKEN = 'pk-synthetic_own_0000000000000000'
             const INGEST_URL = 'https://us.i.hanzo.ai/capture/'
 
             const mockOwnTeam = (): void => {
@@ -1966,7 +1966,7 @@ describe('Script Executor', () => {
 
             const invocation: CyclotronJobInvocationInsightsFunction = {
                 ...createExampleInvocation(insightsFunction),
-                queue: 'hogflow',
+                queue: 'flow',
                 queueParameters: {
                     type: 'email',
                     to: { email: 'user@example.com' },
@@ -1982,7 +1982,7 @@ describe('Script Executor', () => {
 
             expect(result.finished).toBe(false)
             expect(result.invocation.queue).toBe('email')
-            expect(result.invocation.queueMetadata?.originQueue).toBe('hogflow')
+            expect(result.invocation.queueMetadata?.originQueue).toBe('flow')
             expect(result.metrics).toContainEqual(
                 expect.objectContaining({
                     metric_name: 'email_queued',

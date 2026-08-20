@@ -6,7 +6,9 @@ from unittest.mock import patch
 
 from django.test import override_settings
 
+from insights import iam
 from insights.llm.gateway_client import (
+    GatewayUnavailable,
     Product,
     build_async_anthropic_client,
     build_async_openai_client,
@@ -19,249 +21,193 @@ from insights.llm.gateway_client import (
 )
 
 AI_GATEWAY_URL = "https://ai-gateway.example/v1"
-AI_GATEWAY_KEY = "phs_project_secret"
+AI_GATEWAY_ROOT = "https://ai-gateway.example"
+AI_GATEWAY_KEY = "sk-project_secret"  # what IAM hands back, not a configured value
+
+
+@pytest.fixture(autouse=True)
+def _iam_issues_a_token():
+    """The gateway bearer is an IAM token, so every gateway test needs IAM to answer."""
+    with patch("insights.llm.gateway_client.iam.service_token", return_value=AI_GATEWAY_KEY):
+        yield
+
+
 TEAM_42_TRACE_ID = "30a04c7a-98b4-5119-8597-8c696e44a270"
 
 
-class TestGetLlmClient:
-    @pytest.mark.parametrize("product", get_args(Product))
-    def test_valid_products(self, product: str):
-        assert product in get_args(Product)
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_raises_when_gateway_url_missing(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = ""
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        with pytest.raises(ValueError, match="LLM_GATEWAY_URL and an API key must be configured"):
-            get_llm_client(product="django", team_id=1)
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_raises_when_gateway_api_key_missing(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = ""
-
-        with pytest.raises(ValueError, match="LLM_GATEWAY_URL and an API key must be configured"):
-            get_llm_client(product="django", team_id=1)
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_returns_client_with_correct_base_url(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_llm_client(product="django", team_id=1)
-
-        assert str(client.base_url) == "http://gateway:8080/django/v1/"
-        assert client.api_key == "test-key"
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_uses_explicit_api_key(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "shared-key"
-
-        client = get_llm_client(product="custom_image_scans", team_id=1, api_key="server-minted-token")
-
-        assert client.api_key == "server-minted-token"
-
-    @pytest.mark.parametrize(
-        "product,expected_path",
-        [
-            ("django", "/django/v1/"),
-            ("llm_gateway", "/llm_gateway/v1/"),
-            ("insights_code", "/insights_code/v1/"),
-            ("wizard", "/wizard/v1/"),
-            ("signals", "/signals/v1/"),
-        ],
-    )
-    @patch("insights.llm.gateway_client.settings")
-    def test_product_in_base_url(self, mock_settings, product: Product, expected_path: str):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_llm_client(product=product, team_id=1)
-
-        assert expected_path in str(client.base_url)
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_strips_trailing_slash_from_gateway_url(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080/"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_llm_client(product="django", team_id=1)
-
-        assert str(client.base_url) == "http://gateway:8080/django/v1/"
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_attaches_team_id_default_header(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_llm_client(product="signals", team_id=42)
-
-        assert client.default_headers.get("x-insights-property-team_id") == "42"
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_async_client_attaches_team_id_default_header(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_async_llm_client(product="signals", team_id=42)
-
-        assert client.default_headers.get("x-insights-property-team_id") == "42"
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_no_team_id_header_when_team_id_omitted(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_llm_client(product="django")
-
-        assert client.default_headers.get("x-insights-property-team_id") is None
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_product_defaults_to_django(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_llm_client()
-
-        assert str(client.base_url) == "http://gateway:8080/django/v1/"
-
-
-class TestGetAsyncAnthropicGatewayClient:
-    @patch("insights.llm.gateway_client.settings")
-    def test_raises_when_gateway_unconfigured(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = ""
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        with pytest.raises(ValueError, match="LLM_GATEWAY_URL and LLM_GATEWAY_API_KEY must be configured"):
-            get_async_anthropic_gateway_client(product="signals", team_id=1)
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_base_url_omits_v1_suffix(self, mock_settings):
-        # The Anthropic SDK appends /v1/messages itself, so the base_url stops at the product.
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080/"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_async_anthropic_gateway_client(product="signals", team_id=1)
-
-        assert str(client.base_url) == "http://gateway:8080/signals/"
-        assert client.api_key == "test-key"
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_attaches_team_id_default_header(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_async_anthropic_gateway_client(product="signals", team_id=42)
-
-        assert client.default_headers.get("x-insights-property-team_id") == "42"
-
-    @patch("insights.llm.gateway_client.settings")
-    def test_no_team_id_header_when_team_id_omitted(self, mock_settings):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_async_anthropic_gateway_client(product="signals")
-
-        assert client.default_headers.get("x-insights-property-team_id") is None
-
-    @pytest.mark.parametrize(
-        "use_bedrock_fallback, expected_header_value",
-        [
-            (True, "true"),
-            (False, None),
-        ],
-    )
-    @patch("insights.llm.gateway_client.settings")
-    def test_bedrock_fallback_header(self, mock_settings, use_bedrock_fallback: bool, expected_header_value):
-        mock_settings.LLM_GATEWAY_URL = "http://gateway:8080"
-        mock_settings.LLM_GATEWAY_API_KEY = "test-key"
-
-        client = get_async_anthropic_gateway_client(
-            product="signals", team_id=42, use_bedrock_fallback=use_bedrock_fallback
-        )
-
-        assert client.default_headers.get("x-insights-use-bedrock-fallback") == expected_header_value
+def _properties(client) -> dict:
+    """The labels a built client will send, decoded from its properties header."""
+    return json.loads(client._custom_headers["X-Insights-Properties"])
 
 
 class TestResolveAIGatewayConfig:
-    @override_settings(AI_GATEWAY_URL="", AI_GATEWAY_API_KEY="")
-    def test_returns_none_when_both_unset(self):
+    @override_settings(AI_GATEWAY_URL="")
+    def test_returns_none_when_url_unset(self):
         assert resolve_ai_gateway_config() is None
 
-    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL, AI_GATEWAY_API_KEY=AI_GATEWAY_KEY)
-    def test_returns_pair_when_both_set(self):
+    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL)
+    def test_uses_this_deployments_identity_when_nobody_is_acting(self):
         assert resolve_ai_gateway_config() == (AI_GATEWAY_URL, AI_GATEWAY_KEY)
 
-    @pytest.mark.parametrize(
-        "url,key,reason",
-        [
-            (AI_GATEWAY_URL, "", "must be set together"),
-            ("", AI_GATEWAY_KEY, "must be set together"),
-            ("https://ai-gateway.example", AI_GATEWAY_KEY, "OpenAI base path"),
-        ],
-    )
-    def test_misconfig_falls_back_to_none_and_logs(self, url, key, reason):
-        # Radu review: a misconfig logs and returns None so callers fall back, never raises.
+    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL)
+    def test_uses_the_acting_persons_identity_so_their_org_is_billed(self):
+        user = object()
+        with patch("insights.llm.gateway_client.iam.user_token", return_value="sk-alice") as user_token:
+            assert resolve_ai_gateway_config(user) == (AI_GATEWAY_URL, "sk-alice")
+        user_token.assert_called_once_with(user)
+
+    @override_settings(AI_GATEWAY_URL="https://ai-gateway.example")
+    def test_misconfigured_url_resolves_to_none_and_logs(self):
+        with patch("insights.llm.gateway_client.logger") as mock_logger:
+            assert resolve_ai_gateway_config() is None
+        mock_logger.warning.assert_called_once()
+        assert "OpenAI base path" in str(mock_logger.warning.call_args)
+
+    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL)
+    def test_no_identity_resolves_to_none_rather_than_calling_unauthenticated(self):
         with (
-            override_settings(AI_GATEWAY_URL=url, AI_GATEWAY_API_KEY=key),
+            patch("insights.llm.gateway_client.iam.service_token", side_effect=iam.IamUnavailable("IAM is down")),
             patch("insights.llm.gateway_client.logger") as mock_logger,
         ):
             assert resolve_ai_gateway_config() is None
-
         mock_logger.warning.assert_called_once()
-        assert reason in str(mock_logger.warning.call_args)
 
 
-class TestBuildOpenAIClient:
-    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL, AI_GATEWAY_API_KEY=AI_GATEWAY_KEY)
-    @patch("insights.llm.gateway_client.httpx.Client")
-    @patch("insights.llm.gateway_client.OpenAI")
-    def test_gateway_mode_routes_to_slugless_go_gateway_with_ai_product(self, mock_openai, mock_httpx):
-        result = build_openai_client("llma_summarization", ai_product="aio_summarization")
+class TestEveryClientRefusesWithoutAGateway:
+    """No client may answer from anywhere but the gateway.
 
-        mock_httpx.assert_called_once_with(trust_env=False)
-        mock_openai.assert_called_once_with(
-            api_key=AI_GATEWAY_KEY,
-            base_url=AI_GATEWAY_URL,
-            default_headers={"X-Insights-Properties": json.dumps({"ai_product": "aio_summarization"})},
-            http_client=mock_httpx.return_value,
+    The failure has to be loud: a client that quietly fell back to a key in the
+    environment would bill one tenant for every tenant's work, and an answer from
+    outside the estate is worse than no answer.
+    """
+
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda: get_llm_client(product="django"),
+            lambda: get_async_llm_client(product="django"),
+            lambda: get_async_anthropic_gateway_client(product="django"),
+            lambda: build_openai_client("django", ai_product="tagged"),
+            lambda: build_async_openai_client("django", ai_product="tagged"),
+            lambda: build_async_anthropic_client("django", ai_product="tagged"),
+        ],
+    )
+    @override_settings(AI_GATEWAY_URL="")
+    def test_raises_when_gateway_unset(self, build):
+        with pytest.raises(GatewayUnavailable):
+            build()
+
+    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL)
+    def test_raises_when_iam_will_not_issue_a_token(self):
+        with patch("insights.llm.gateway_client.iam.service_token", side_effect=iam.IamUnavailable("IAM is down")):
+            with pytest.raises(GatewayUnavailable):
+                get_llm_client(product="django")
+
+    @override_settings(AI_GATEWAY_URL="https://ai-gateway.example")
+    def test_raises_when_gateway_url_is_missing_the_v1_base(self):
+        with pytest.raises(GatewayUnavailable):
+            get_llm_client(product="django")
+
+
+@override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL)
+class TestGetLlmClient:
+    @pytest.mark.parametrize("product", get_args(Product))
+    def test_every_declared_product_is_accepted(self, product: str):
+        assert get_llm_client(product=product) is not None
+
+    def test_bearer_is_the_iam_token_never_a_configured_key(self):
+        assert get_llm_client(product="django").api_key == AI_GATEWAY_KEY
+
+    def test_base_url_is_the_gateway(self):
+        assert str(get_llm_client(product="django").base_url).rstrip("/") == AI_GATEWAY_URL
+
+    def test_product_is_not_a_route_so_it_never_reaches_the_url(self):
+        # The gateway is slugless: the product is a label on the generation, not a path.
+        assert str(get_llm_client(product="signals").base_url).rstrip("/") == AI_GATEWAY_URL
+
+    def test_an_explicit_credential_overrides_the_deployment_identity(self):
+        # A caller holding a narrower, server-minted token uses it rather than ours.
+        assert get_llm_client(product="custom_image_scans", api_key="server-minted-token").api_key == (
+            "server-minted-token"
         )
-        assert result is mock_openai.return_value
 
-    @override_settings(AI_GATEWAY_URL="", AI_GATEWAY_API_KEY="")
-    @patch("insights.llm.gateway_client.get_llm_client")
-    def test_falls_back_to_python_gateway_when_unset(self, mock_get_llm_client):
-        result = build_openai_client("llma_summarization", ai_product="aio_summarization")
+    def test_the_calling_product_labels_the_generation(self):
+        assert _properties(get_llm_client(product="signals"))["ai_product"] == "signals"
 
-        mock_get_llm_client.assert_called_once_with("llma_summarization")
-        assert result is mock_get_llm_client.return_value
+    def test_team_is_labelled_and_traced_when_attributed(self):
+        client = get_llm_client(product="signals", team_id=42)
+        assert _properties(client)["team_id"] == "42"
+        assert client._custom_headers["X-Insights-Trace-Id"] == TEAM_42_TRACE_ID
+
+    def test_no_trace_header_when_the_call_is_unattributed(self):
+        assert "X-Insights-Trace-Id" not in get_llm_client(product="signals")._custom_headers
+
+    def test_the_acting_person_is_billed_not_the_deployment(self):
+        user = object()
+        with patch("insights.llm.gateway_client.iam.user_token", return_value="sk-alice"):
+            assert get_llm_client(product="django", user=user).api_key == "sk-alice"
 
 
-class TestBuildAsyncOpenAIClient:
-    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL, AI_GATEWAY_API_KEY=AI_GATEWAY_KEY)
-    @patch("insights.llm.gateway_client.httpx.AsyncClient")
-    @patch("insights.llm.gateway_client.AsyncOpenAI")
-    def test_gateway_mode_routes_to_slugless_go_gateway_with_ai_product(self, mock_async_openai, mock_httpx):
-        result = build_async_openai_client("llma_eval_summary", ai_product="aio_eval_summary")
+@override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL)
+class TestGetAsyncLlmClient:
+    def test_matches_the_sync_client(self):
+        client = get_async_llm_client(product="signals", team_id=42)
+        assert client.api_key == AI_GATEWAY_KEY
+        assert str(client.base_url).rstrip("/") == AI_GATEWAY_URL
+        assert _properties(client)["team_id"] == "42"
 
-        mock_httpx.assert_called_once_with(trust_env=False)
-        mock_async_openai.assert_called_once_with(
-            api_key=AI_GATEWAY_KEY,
-            base_url=AI_GATEWAY_URL,
-            default_headers={"X-Insights-Properties": json.dumps({"ai_product": "aio_eval_summary"})},
-            http_client=mock_httpx.return_value,
+
+@override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL)
+class TestGetAsyncAnthropicGatewayClient:
+    def test_base_url_drops_v1_because_the_sdk_appends_it(self):
+        # The Anthropic SDK posts to {base_url}/v1/messages; keeping /v1 would double it.
+        assert str(get_async_anthropic_gateway_client(product="django").base_url).rstrip("/") == AI_GATEWAY_ROOT
+
+    def test_bearer_is_the_iam_token(self):
+        assert get_async_anthropic_gateway_client(product="django").api_key == AI_GATEWAY_KEY
+
+    def test_team_is_labelled_and_traced(self):
+        client = get_async_anthropic_gateway_client(product="signals", team_id=42)
+        assert _properties(client)["team_id"] == "42"
+        assert client._custom_headers["X-Insights-Trace-Id"] == TEAM_42_TRACE_ID
+
+
+@override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL)
+class TestBuildClientsTagTheGeneration:
+    """The build_* variants differ from get_* in one thing: the generation is tagged
+    with an explicit ai_product rather than with the calling product."""
+
+    def test_openai_client_carries_the_explicit_tag(self):
+        client = build_openai_client("signals", ai_product="signals_grouping")
+        assert str(client.base_url).rstrip("/") == AI_GATEWAY_URL
+        assert _properties(client)["ai_product"] == "signals_grouping"
+
+    def test_async_openai_client_carries_the_explicit_tag(self):
+        assert _properties(build_async_openai_client("signals", ai_product="signals_grouping"))["ai_product"] == (
+            "signals_grouping"
         )
-        assert result is mock_async_openai.return_value
 
-    @override_settings(AI_GATEWAY_URL="", AI_GATEWAY_API_KEY="")
-    @patch("insights.llm.gateway_client.get_async_llm_client")
-    def test_falls_back_to_python_async_gateway_when_unset(self, mock_get_async):
-        result = build_async_openai_client("llma_eval_summary", ai_product="aio_eval_summary")
+    def test_tag_defaults_to_the_calling_product(self):
+        assert _properties(build_openai_client("signals"))["ai_product"] == "signals"
 
-        mock_get_async.assert_called_once_with("llma_eval_summary")
-        assert result is mock_get_async.return_value
+    def test_anthropic_client_labels_product_stage_and_team(self):
+        client = build_async_anthropic_client(
+            "signals", ai_product="signals_grouping", ai_stage="match", team_id=42
+        )
+        assert str(client.base_url).rstrip("/") == AI_GATEWAY_ROOT
+        assert _properties(client) == {
+            "ai_product": "signals_grouping",
+            "ai_stage": "match",
+            "team_id": "42",
+        }
+        assert client._custom_headers["X-Insights-Trace-Id"] == TEAM_42_TRACE_ID
+
+    def test_anthropic_client_omits_stage_when_unset(self):
+        assert "ai_stage" not in _properties(build_async_anthropic_client("signals", ai_product="signals_grouping"))
+
+    def test_anthropic_client_omits_trace_when_unattributed(self):
+        client = build_async_anthropic_client("signals", ai_product="signals_grouping")
+        assert "X-Insights-Trace-Id" not in client._custom_headers
 
 
 class TestTeamTraceId:
@@ -276,7 +222,7 @@ class TestTeamTraceId:
             (487950, "78c3f90a-d69e-5fe6-b2b2-3f22a4d7ebb1"),
         ],
     )
-    def test_matches_python_gateway_derivation(self, team_id: int, expected: str):
+    def test_matches_the_ids_already_recorded_on_events(self, team_id: int, expected: str):
         assert team_trace_id(team_id) == expected
 
     def test_unattributed_call_has_no_trace_id(self):
@@ -284,82 +230,3 @@ class TestTeamTraceId:
 
     def test_distinct_teams_do_not_share_a_trace(self):
         assert team_trace_id(2) != team_trace_id(3)
-
-
-class TestBuildAsyncAnthropicClient:
-    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL, AI_GATEWAY_API_KEY=AI_GATEWAY_KEY)
-    @patch("insights.llm.gateway_client.httpx.AsyncClient")
-    @patch("insights.llm.gateway_client.AsyncAnthropic")
-    def test_gateway_mode_strips_v1_and_labels_product_stage_and_team(self, mock_anthropic, mock_httpx):
-        result = build_async_anthropic_client(
-            "signals", ai_product="signals_grouping", ai_stage="match", team_id=42, use_bedrock_fallback=True
-        )
-
-        mock_httpx.assert_called_once_with(trust_env=False)
-        mock_anthropic.assert_called_once_with(
-            api_key=AI_GATEWAY_KEY,
-            # The Anthropic SDK appends /v1/messages, so the /v1 OpenAI suffix is stripped.
-            base_url="https://ai-gateway.example",
-            # team_id rides as a property (usage report reads it) since the Go gateway drops the
-            # per-key header form.
-            default_headers={
-                "X-Insights-Properties": json.dumps(
-                    {"ai_product": "signals_grouping", "ai_stage": "match", "team_id": "42"}
-                ),
-                "X-Insights-Trace-Id": TEAM_42_TRACE_ID,
-            },
-            http_client=mock_httpx.return_value,
-        )
-        assert result is mock_anthropic.return_value
-
-    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL, AI_GATEWAY_API_KEY=AI_GATEWAY_KEY)
-    @patch("insights.llm.gateway_client.httpx.AsyncClient")
-    @patch("insights.llm.gateway_client.AsyncAnthropic")
-    def test_gateway_mode_omits_trace_header_when_team_id_unset(self, mock_anthropic, mock_httpx):
-        build_async_anthropic_client("signals", ai_product="signals_grouping", ai_stage="match")
-
-        _, kwargs = mock_anthropic.call_args
-        assert "X-Insights-Trace-Id" not in kwargs["default_headers"]
-
-    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL, AI_GATEWAY_API_KEY=AI_GATEWAY_KEY)
-    @patch("insights.llm.gateway_client.httpx.AsyncClient")
-    @patch("insights.llm.gateway_client.AsyncAnthropic")
-    def test_gateway_mode_sends_trace_header_alongside_properties(self, mock_anthropic, mock_httpx):
-        # The emission path replaces the properties blob per call and the gateway strips
-        # $-prefixed keys, so the trace has to ride its own header.
-        build_async_anthropic_client("signals", team_id=42)
-
-        _, kwargs = mock_anthropic.call_args
-        assert kwargs["default_headers"] == {
-            "X-Insights-Properties": json.dumps({"team_id": "42"}),
-            "X-Insights-Trace-Id": TEAM_42_TRACE_ID,
-        }
-
-    @override_settings(AI_GATEWAY_URL=AI_GATEWAY_URL, AI_GATEWAY_API_KEY=AI_GATEWAY_KEY)
-    @patch("insights.llm.gateway_client.httpx.AsyncClient")
-    @patch("insights.llm.gateway_client.AsyncAnthropic")
-    def test_gateway_mode_omits_stage_when_unset(self, mock_anthropic, mock_httpx):
-        build_async_anthropic_client("signals", ai_product="signals")
-
-        _, kwargs = mock_anthropic.call_args
-        assert kwargs["default_headers"] == {"X-Insights-Properties": json.dumps({"ai_product": "signals"})}
-
-    @override_settings(AI_GATEWAY_URL="", AI_GATEWAY_API_KEY="")
-    @patch("insights.llm.gateway_client.get_async_anthropic_gateway_client")
-    def test_falls_back_to_python_anthropic_gateway_when_unset(self, mock_get_anthropic):
-        result = build_async_anthropic_client(
-            "signals", ai_product="signals_grouping", ai_stage="match", team_id=42, use_bedrock_fallback=True
-        )
-
-        # Fallback keeps the Python-gateway signature: route-derived product plus the passthrough knobs.
-        mock_get_anthropic.assert_called_once_with("signals", team_id=42, use_bedrock_fallback=True)
-        assert result is mock_get_anthropic.return_value
-
-    @override_settings(AI_GATEWAY_URL="https://ai-gateway.example", AI_GATEWAY_API_KEY=AI_GATEWAY_KEY)
-    @patch("insights.llm.gateway_client.get_async_anthropic_gateway_client")
-    def test_misconfig_falls_back_to_python_anthropic_gateway(self, mock_get_anthropic):
-        # URL missing the /v1 base path is a misconfig: resolve returns None and the caller falls back.
-        result = build_async_anthropic_client("signals", ai_product="signals_grouping")
-
-        mock_get_anthropic.assert_called_once_with("signals", team_id=None, use_bedrock_fallback=False)
-        assert result is mock_get_anthropic.return_value

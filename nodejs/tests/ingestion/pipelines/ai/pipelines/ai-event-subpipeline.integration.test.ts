@@ -113,10 +113,10 @@ function buildPipeline(configOverrides: Partial<AiEventSubpipelineConfig> = {}) 
         groupTypeManager: {
             fetchGroupTypeIndex: jest.fn().mockResolvedValue(0),
         } as any,
-        hogTransformer: {
+        scriptTransformer: {
             transformEventAndProduceMessages: (event: PluginEvent) => Promise.resolve({ event, invocationResults: [] }),
         } as any,
-        topHog: (step) => step,
+        topFn: (step) => step,
         ...configOverrides,
     }
 
@@ -180,7 +180,7 @@ describe('AI event subpipeline integration', () => {
 
         const { pipeline, mockOutputs } = buildPipeline({
             // Script transform adds a property with un-normalized casing
-            hogTransformer: {
+            scriptTransformer: {
                 transformEventAndProduceMessages: (e: PluginEvent) =>
                     Promise.resolve({
                         event: { ...e, properties: { ...e.properties, $hog_transformed: true } },
@@ -252,7 +252,7 @@ describe('AI event subpipeline integration', () => {
         const event = createAiEvent()
 
         const { pipeline, mockOutputs } = buildPipeline({
-            hogTransformer: {
+            scriptTransformer: {
                 transformEventAndProduceMessages: () => Promise.resolve({ event: null, invocationResults: [{}] }),
             } as any,
         })

@@ -1,16 +1,15 @@
 import { useActions, useValues } from 'kea'
 
-import * as readingIsMagicPng from '@hanzo/brand/hoggies/png/reading-is-magic'
-import { IconOpenSidebar } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconOpenSidebar } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Sparkline } from 'lib/components/Sparkline'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { Table } from 'lib/elements/Table'
 import { Link } from 'lib/elements/Link'
+import { Table } from 'lib/elements/Table'
 import { sceneConfigurations } from 'scenes/scenes'
 import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -22,7 +21,7 @@ import { ProductKey } from '~/queries/schema/schema-general'
 
 import { IngestionWarning, IngestionWarningSummary, ingestionWarningsLogic } from './ingestionWarningsLogic'
 
-const MascotReadingIsMagic = pngHoggie(readingIsMagicPng)
+const MascotReadingIsMagic = pngMascot()
 
 export const WARNING_TYPE_TO_DESCRIPTION: Record<string, string> = {
     cannot_merge_already_identified: 'Refused to merge an already identified user',
@@ -359,7 +358,7 @@ export function IngestionWarningsView(): JSX.Element {
                     titleOverride="Nice! No ingestion warnings in the past 30 days"
                     description="Your incoming events look clean. If we detect any issues with your data, we'll show them here."
                     docsURL="https://hanzo.ai/docs/data/data-management#ingestion-warnings"
-                    customHog={MascotReadingIsMagic}
+                    customScript={MascotReadingIsMagic}
                     actionElementOverride={
                         <Button
                             type="primary"

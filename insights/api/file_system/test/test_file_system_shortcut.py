@@ -8,17 +8,16 @@ from parameterized import parameterized
 from rest_framework import status
 
 from insights.models import User
+from insights.models.ee_models import AccessControl
 from insights.models.file_system.file_system_shortcut import FileSystemShortcut
 
 from products.dashboards.backend.models.dashboard import Dashboard
 from products.product_analytics.backend.models.insight import Insight
 
-from insights.models.ee_models import AccessControl
-
 
 class TestFileSystemShortcutAPI(APIBaseTest):
     def test_list_shortcuts_initially_empty(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response_data = response.json()
         self.assertEqual(response_data["count"], 0)
@@ -26,7 +25,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
 
     def test_create_shortcut(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system_shortcut/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/",
             {"path": "Document.txt", "type": "doc-file"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
@@ -43,7 +42,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
             type="test-type",
             user=self.user,
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
         response_data = response.json()
@@ -57,7 +56,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         )
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/",
             {"path": "newfile.txt", "type": "new-type"},
         )
         self.assertEqual(update_response.status_code, status.HTTP_200_OK, update_response.json())
@@ -71,7 +70,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
 
     def test_delete_shortcut(self):
         shortcut_obj = FileSystemShortcut.objects.create(team=self.team, path="file.txt", type="temp", user=self.user)
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/")
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(FileSystemShortcut.objects.filter(pk=shortcut_obj.pk).exists())
 
@@ -82,7 +81,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         FileSystemShortcut.objects.create(team=self.team, path="file-tim.txt", type="temp", user=user1)
         FileSystemShortcut.objects.create(team=self.team, path="file-tom.txt", type="temp", user=user2)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response_data = response.json()
         self.assertEqual(response_data["count"], 1)
@@ -93,7 +92,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         FileSystemShortcut.objects.filter(pk=older.pk).update(created_at=timezone.now() - timedelta(days=1))
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/file_system_shortcut/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/",
             {"ordering": "-created_at"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -107,7 +106,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         # Explicit order wins over alphabetical.
         z_first = FileSystemShortcut.objects.create(team=self.team, path="Zebra", type="t", user=self.user, order=-1)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/")
         ids = [row["id"] for row in response.json()["results"]]
         self.assertEqual(ids, [str(z_first.id), str(a.id), str(b.id)])
 
@@ -115,14 +114,14 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         existing = FileSystemShortcut.objects.create(team=self.team, path="Existing", type="t", user=self.user, order=5)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system_shortcut/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/",
             {"path": "Aardvark", "type": "t"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
         new_id = response.json()["id"]
         self.assertEqual(response.json()["order"], 6)
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/")
         ids = [row["id"] for row in list_response.json()["results"]]
         self.assertEqual(ids, [str(existing.id), new_id])
 
@@ -142,7 +141,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         ordered = [shortcuts[i] for i in permutation]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system_shortcut/reorder/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/reorder/",
             {"ordered_ids": [str(s.id) for s in ordered]},
             format="json",
         )
@@ -158,7 +157,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         foreign = FileSystemShortcut.objects.create(team=self.team, path="Foreign", type="t", user=other_user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system_shortcut/reorder/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/reorder/",
             {"ordered_ids": [str(foreign.id)]},
             format="json",
         )
@@ -169,7 +168,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
 
     def test_reorder_rejects_empty_list(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system_shortcut/reorder/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/reorder/",
             {"ordered_ids": []},
             format="json",
         )
@@ -197,7 +196,7 @@ class TestFileSystemShortcutAccessLevels(APIBaseTest):
         )
         AccessControl.objects.create(team=self.team, resource="dashboard", resource_id=None, access_level="none")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         levels = {item["path"]: item["user_access_level"] for item in response.json()["results"]}
@@ -217,7 +216,7 @@ class TestFileSystemShortcutAccessLevels(APIBaseTest):
         )
         AccessControl.objects.create(team=self.team, resource="insight", resource_id=None, access_level="none")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         levels = {item["path"]: item["user_access_level"] for item in response.json()["results"]}

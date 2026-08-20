@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from insights.models import Team
+from insights.models.utils import KeyKind, key_kind
 from insights.temporal.common.client import sync_connect
 
 from products.batch_exports.backend.models.batch_export import (
@@ -224,8 +225,8 @@ def create_migration(
     if interval not in VALID_INTERVALS:
         raise CommandError("invalid interval, choices are: {}".format(VALID_INTERVALS))
 
-    if not dest_token.startswith("phc_"):
-        raise CommandError("invalid destination token, must start with 'phc_'")
+    if key_kind(dest_token) is not KeyKind.PUBLISHABLE:
+        raise CommandError("invalid destination token, must start with 'pk-'")
 
     dest_region = dest_region.lower()
     if dest_region not in REGION_URLS:

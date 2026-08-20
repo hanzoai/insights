@@ -1,11 +1,11 @@
 INSIGHTS_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT = """
 The user is currently editing or creating a Script transformation function. They expect your help with writing and tweaking Script code.
 
-IMPORTANT: This is currently your primary task. Therefore `create_hog_transformation_function` is currently your primary tool.
-Use `create_hog_transformation_function` when answering ANY requests remotely related to writing Script code or to transforming data (including filtering, mappings, inputs and other operations).
-It's very important to disregard other tools for these purposes - the user expects `create_hog_transformation_function`.
+IMPORTANT: This is currently your primary task. Therefore `create_script_transformation_function` is currently your primary tool.
+Use `create_script_transformation_function` when answering ANY requests remotely related to writing Script code or to transforming data (including filtering, mappings, inputs and other operations).
+It's very important to disregard other tools for these purposes - the user expects `create_script_transformation_function`.
 
-NOTE: When calling the `create_hog_transformation_function` tool, do not provide any response other than the tool call.
+NOTE: When calling the `create_script_transformation_function` tool, do not provide any response other than the tool call.
 
 After the tool completes, do NOT repeat the code, as the user can see it. Only summarize the changes, comprehensively, but in only one brief sentence.
 """
@@ -34,7 +34,7 @@ NOTE: When calling the `create_insights_function_filters` tool, do not provide a
 After the tool completes, do NOT repeat the filter configuration, as the user can see it. Only summarize the changes, comprehensively, but in only one brief sentence.
 """
 
-IDENTITY_MESSAGE_HOG = """Script is Insights's own programming language. You write Script code based on a prompt. You don't help with other knowledge.
+IDENTITY_MESSAGE_SCRIPT = """Script is Insights's own programming language. You write Script code based on a prompt. You don't help with other knowledge.
 
 Here is the Script standard library. Dont use any other functions since they are not supported in Script:
 
@@ -767,8 +767,8 @@ columnLambdaExpr:
     ;
 insightsqlxChildElement: insightsqlxTagElement | (LBRACE columnExpr RBRACE);
 insightsqlxTagElement
-    : LT identifier insightsqlxTagAttribute* SLASH GT                                          # HogqlxTagElementClosed
-    | LT identifier insightsqlxTagAttribute* GT insightsqlxChildElement* LT SLASH identifier GT     # HogqlxTagElementNested
+    : LT identifier insightsqlxTagAttribute* SLASH GT                                          # InsightsqlxTagElementClosed
+    | LT identifier insightsqlxTagAttribute* GT insightsqlxChildElement* LT SLASH identifier GT     # InsightsqlxTagElementNested
     ;
 insightsqlxTagAttribute
     :   identifier '=' string

@@ -51,7 +51,7 @@ class TestLegalDocumentAPI(APIBaseTest):
         super().setUp()
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
-        self.url = f"/api/organizations/{self.organization.id}/legal_documents/"
+        self.url = f"/v1/organizations/{self.organization.id}/legal_documents/"
 
     @parameterized.expand([("boost",), ("scale",), ("enterprise",)])
     @patch("products.legal_documents.backend.logic.BillingManager")
@@ -226,7 +226,7 @@ class TestLegalDocumentAPI(APIBaseTest):
         OrganizationMembership.objects.create(
             user=self.user, organization=other_org, level=OrganizationMembership.Level.ADMIN
         )
-        other_url = f"/api/organizations/{other_org.id}/legal_documents/"
+        other_url = f"/v1/organizations/{other_org.id}/legal_documents/"
         response = self.client.post(other_url, DPA_PAYLOAD, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -269,7 +269,7 @@ class TestLegalDocumentDownloadEndpoint(APIBaseTest):
             pandadoc_document_id="doc_123",
             created_by=self.user,
         )
-        self.url = f"/api/organizations/{self.organization.id}/legal_documents/{self.document.id}/download"
+        self.url = f"/v1/organizations/{self.organization.id}/legal_documents/{self.document.id}/download"
 
     def test_signed_document_returns_302_to_presigned_url(self) -> None:
         with patch(
@@ -294,7 +294,7 @@ class TestLegalDocumentDownloadEndpoint(APIBaseTest):
 
     def test_unknown_document_returns_404(self) -> None:
         bogus_url = (
-            f"/api/organizations/{self.organization.id}/legal_documents/00000000-0000-0000-0000-000000000000/download"
+            f"/v1/organizations/{self.organization.id}/legal_documents/00000000-0000-0000-0000-000000000000/download"
         )
         response = self.client.get(bogus_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -311,7 +311,7 @@ class TestLegalDocumentDownloadEndpoint(APIBaseTest):
             user=self.user, organization=other_org, level=OrganizationMembership.Level.ADMIN
         )
         # Same document id but accessed under the wrong org's path.
-        url = f"/api/organizations/{other_org.id}/legal_documents/{self.document.id}/download"
+        url = f"/v1/organizations/{other_org.id}/legal_documents/{self.document.id}/download"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -352,7 +352,7 @@ class TestLegalDocumentDeleteEndpoint(APIBaseTest):
             pandadoc_document_id="doc_123",
             created_by=self.user,
         )
-        self.url = f"/api/organizations/{self.organization.id}/legal_documents/{self.document.id}/"
+        self.url = f"/v1/organizations/{self.organization.id}/legal_documents/{self.document.id}/"
 
     @patch("products.legal_documents.backend.logic.pandadoc_client.PandaDocClient")
     def test_unsigned_document_deletes_and_voids_pandadoc(self, mock_pandadoc_cls) -> None:
@@ -366,7 +366,7 @@ class TestLegalDocumentDeleteEndpoint(APIBaseTest):
     def test_delete_frees_unique_constraint_so_new_dpa_can_be_created(self, _mock_pandadoc_cls) -> None:
         # The whole point of the feature: after deleting an unsigned DPA, a
         # second POST with a corrected signer should succeed.
-        list_url = f"/api/organizations/{self.organization.id}/legal_documents/"
+        list_url = f"/v1/organizations/{self.organization.id}/legal_documents/"
         blocked = self.client.post(list_url, DPA_PAYLOAD, format="json")
         self.assertEqual(blocked.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -404,7 +404,7 @@ class TestLegalDocumentDeleteEndpoint(APIBaseTest):
         ]
     )
     def test_nonexistent_or_invalid_pk_returns_404(self, _name: str, pk: str) -> None:
-        url = f"/api/organizations/{self.organization.id}/legal_documents/{pk}/"
+        url = f"/v1/organizations/{self.organization.id}/legal_documents/{pk}/"
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -417,7 +417,7 @@ class TestLegalDocumentDeleteEndpoint(APIBaseTest):
         OrganizationMembership.objects.create(
             user=self.user, organization=other_org, level=OrganizationMembership.Level.ADMIN
         )
-        url = f"/api/organizations/{other_org.id}/legal_documents/{self.document.id}/"
+        url = f"/v1/organizations/{other_org.id}/legal_documents/{self.document.id}/"
 
         response = self.client.delete(url)
 
@@ -485,7 +485,7 @@ class TestLegalDocumentPandaDocWebhook(APIBaseTest):
             pandadoc_document_id="doc_123",
             created_by=self.user,
         )
-        self.url = "/api/legal_documents/pandadoc"
+        self.url = "/v1/legal_documents/pandadoc"
         self.client.logout()
 
     def _completed_payload(self, pandadoc_document_id: str = "doc_123", template_id: str | None = None) -> list[dict]:
@@ -814,12 +814,12 @@ class TestLegalDocumentsSelfHostedGate(APIBaseTest):
         self.organization_membership.save()
 
     def test_list_404s_on_self_hosted(self) -> None:
-        response = self.client.get(f"/api/organizations/{self.organization.id}/legal_documents/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/legal_documents/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_404s_on_self_hosted(self) -> None:
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/legal_documents/", DPA_PAYLOAD, format="json"
+            f"/v1/organizations/{self.organization.id}/legal_documents/", DPA_PAYLOAD, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertFalse(LegalDocument.objects.exists())
@@ -834,7 +834,7 @@ class TestLegalDocumentsSelfHostedGate(APIBaseTest):
             company_address="1 Analytics Way",
             representative_email="ada@acme.example",
         )
-        response = self.client.delete(f"/api/organizations/{self.organization.id}/legal_documents/{document.id}/")
+        response = self.client.delete(f"/v1/organizations/{self.organization.id}/legal_documents/{document.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(LegalDocument.objects.filter(id=document.id).exists())
 
@@ -846,7 +846,7 @@ class TestLegalDocumentsSelfHostedGate(APIBaseTest):
         with self.settings(PANDADOC_WEBHOOK_SECRET=secret):
             response = self.client.generic(
                 "POST",
-                "/api/legal_documents/pandadoc",
+                "/v1/legal_documents/pandadoc",
                 data=body.decode("utf-8"),
                 content_type="application/json",
                 HTTP_X_PANDADOC_SIGNATURE=signature,

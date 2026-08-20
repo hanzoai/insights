@@ -14,7 +14,7 @@ import type { ChartTheme } from './types'
  * so the duplication can't silently drift — update both together.
  */
 export const DEFAULT_CHART_COLORS: readonly string[] = [
-    '#1d4aff',
+    '#3d3d3d',
     '#621da6',
     '#42827e',
     '#ce0e74',

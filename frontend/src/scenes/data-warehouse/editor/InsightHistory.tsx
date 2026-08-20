@@ -3,8 +3,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconRevert } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconRevert } from '@hanzo/icons'
 
 import { SkeletonLog } from 'lib/components/ActivityLog/ActivityLog'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
@@ -171,7 +171,7 @@ function SqlDiffViewer({ before, after }: { before: string; after: string }): JS
             <MonacoDiffEditor
                 original={before}
                 modified={after}
-                language="hogQL"
+                language="insightsQL"
                 width={width}
                 options={{
                     renderOverviewRuler: false,

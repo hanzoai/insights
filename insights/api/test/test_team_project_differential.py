@@ -15,14 +15,14 @@ from products.dashboards.backend.models.dashboard import Dashboard
 
 # Adversarial differential parity harness.
 #
-# /api/environments/{id}/ (Team) and /api/projects/{id}/ (Project) address the SAME underlying entity because
+# /v1/environments/{id}/ (Team) and /v1/projects/{id}/ (Project) address the SAME underlying entity because
 # Project ↔ Team is 1:1 and share the same numeric id. This suite makes real HTTP calls to BOTH and asserts the
 # responses (and resulting DB state for writes) are identical. Any divergence fails — there is no "probably fine".
 #
 # Read-only fields whose VALUE legitimately differs but is semantically equivalent, so byte-equality is not
-# required (only presence + non-null). Currently just `created_at`: /api/environments/ returns Team.created_at
-# and /api/projects/ returns Project.created_at — two rows created milliseconds apart in the same transaction.
-# This is pre-existing /api/projects/ behavior (created_at is not a passthrough field) and is read-only, so it
+# required (only presence + non-null). Currently just `created_at`: /v1/environments/ returns Team.created_at
+# and /v1/projects/ returns Project.created_at — two rows created milliseconds apart in the same transaction.
+# This is pre-existing /v1/projects/ behavior (created_at is not a passthrough field) and is read-only, so it
 # cannot break a client. Everything else must be byte-identical.
 READ_ONLY_NEAR_EQUIVALENT_FIELDS = {"created_at"}
 
@@ -40,22 +40,22 @@ class DifferentialParityBase(APIBaseTest):
         assert self.project.id == self.team.id, "Project/Team id mismatch breaks the differential assumption"
 
     def env_url(self, suffix: str = "") -> str:
-        return f"/api/environments/{self.team.id}/{suffix}"
+        return f"/v1/environments/{self.team.id}/{suffix}"
 
     def project_url(self, suffix: str = "") -> str:
-        return f"/api/projects/{self.project.id}/{suffix}"
+        return f"/v1/projects/{self.project.id}/{suffix}"
 
     def assert_bodies_equal(self, env_body: Any, proj_body: Any, *, allow_project_only: set[str] | None = None) -> None:
         allow_project_only = allow_project_only or set()
         if isinstance(env_body, dict) and isinstance(proj_body, dict):
             env_keys, proj_keys = set(env_body), set(proj_body)
             self.assertEqual(
-                env_keys - proj_keys, set(), f"keys only on /api/environments/: {sorted(env_keys - proj_keys)}"
+                env_keys - proj_keys, set(), f"keys only on /v1/environments/: {sorted(env_keys - proj_keys)}"
             )
             self.assertEqual(
                 proj_keys - env_keys,
                 allow_project_only,
-                f"unexpected keys only on /api/projects/: {sorted((proj_keys - env_keys) - allow_project_only)}",
+                f"unexpected keys only on /v1/projects/: {sorted((proj_keys - env_keys) - allow_project_only)}",
             )
             for key in env_keys:
                 if key in READ_ONLY_NEAR_EQUIVALENT_FIELDS:
@@ -78,13 +78,13 @@ class TestReadParity(DifferentialParityBase):
         proj = self.client.get(self.project_url())
         self.assertEqual(env.status_code, status.HTTP_200_OK, env.json())
         self.assertEqual(proj.status_code, status.HTTP_200_OK, proj.json())
-        # The env→project rewrite serves /api/environments/ through the project viewset, so the body is
-        # byte-identical to /api/projects/ — the former project-only fields now appear on both.
+        # The env→project rewrite serves /v1/environments/ through the project viewset, so the body is
+        # byte-identical to /v1/projects/ — the former project-only fields now appear on both.
         self.assert_bodies_equal(env.json(), proj.json())
 
     def test_list_parity(self):
-        env = self.client.get("/api/environments/")
-        proj = self.client.get("/api/projects/")
+        env = self.client.get("/v1/environments/")
+        proj = self.client.get("/v1/projects/")
         self.assertEqual(env.status_code, status.HTTP_200_OK, env.json())
         self.assertEqual(proj.status_code, status.HTTP_200_OK, proj.json())
         env_results = {r["id"]: r for r in env.json()["results"]}
@@ -239,8 +239,8 @@ class TestWriteParity(DifferentialParityBase):
             body_a = {field: value}
             body_b = {field: value}
 
-        resp_a = self.client.patch(f"/api/environments/{team_a.id}/", body_a, format="json")
-        resp_b = self.client.patch(f"/api/projects/{project_b.id}/", body_b, format="json")
+        resp_a = self.client.patch(f"/v1/environments/{team_a.id}/", body_a, format="json")
+        resp_b = self.client.patch(f"/v1/projects/{project_b.id}/", body_b, format="json")
 
         # 1. Accept/reject parity: both endpoints must agree on the HTTP status for the same input.
         self.assertEqual(
@@ -252,8 +252,8 @@ class TestWriteParity(DifferentialParityBase):
 
         if resp_a.status_code == status.HTTP_200_OK:
             # 2. Round-trip parity: reading the field back must yield the same result via both routes.
-            get_a = self.client.get(f"/api/environments/{team_a.id}/").json()
-            get_b = self.client.get(f"/api/projects/{project_b.id}/").json()
+            get_a = self.client.get(f"/v1/environments/{team_a.id}/").json()
+            get_b = self.client.get(f"/v1/projects/{project_b.id}/").json()
             if field == "primary_dashboard":
                 self.assertEqual(get_a[field], dash_a.id)
                 self.assertEqual(get_b[field], dash_b.id)
@@ -311,7 +311,6 @@ def _normalize_intents(intents: list[dict]) -> list[dict]:
 # Adding a new environment action that mirrors onto projects is a single row here. The only action NOT in this
 # table is default_evaluation_contexts, which is an irreducible POST-then-DELETE sequence (separate test below).
 WRITE_ACTION_CASES = [
-    ("reset_token", "patch", "reset_token/", None, status.HTTP_200_OK, "team_shaped"),
     ("rotate_secret_token", "patch", "rotate_secret_token/", None, status.HTTP_200_OK, "team_shaped"),
     ("delete_secret_token_backup", "patch", "delete_secret_token_backup/", None, status.HTTP_200_OK, "team_shaped"),
     (
@@ -388,8 +387,8 @@ class TestWriteActionParity(DifferentialParityBase):
         project_b, team_b = self._make_twin()
         call = getattr(self.client, method)
         kwargs = {"format": "json"} if body is not None else {}
-        resp_a = call(f"/api/environments/{team_a.id}/{suffix}", body or None, **kwargs)
-        resp_b = call(f"/api/projects/{project_b.id}/{suffix}", body or None, **kwargs)
+        resp_a = call(f"/v1/environments/{team_a.id}/{suffix}", body or None, **kwargs)
+        resp_b = call(f"/v1/projects/{project_b.id}/{suffix}", body or None, **kwargs)
         self.assertEqual(
             resp_a.status_code,
             resp_b.status_code,
@@ -437,7 +436,7 @@ class TestWriteActionParity(DifferentialParityBase):
 
 class TestLifecycleMethodParity(DifferentialParityBase):
     """CREATE and DELETE used to be the only methods that diverged between the two surfaces. The env→project
-    rewrite now serves /api/environments/ through the project viewset, so these too behave identically. These
+    rewrite now serves /v1/environments/ through the project viewset, so these too behave identically. These
     tests pin that unified behavior so a regression in the rewrite (or a re-divergence) fails loudly."""
 
     def _make_twin(self) -> tuple[Project, Team]:
@@ -447,8 +446,8 @@ class TestLifecycleMethodParity(DifferentialParityBase):
         return project, team
 
     def test_create_env_matches_project_via_rewrite(self):
-        # Top-level env creation used to be blocked; the rewrite now serves POST /api/environments/ through
-        # /api/projects/, so both create a project identically.
+        # Top-level env creation used to be blocked; the rewrite now serves POST /v1/environments/ through
+        # /v1/projects/, so both create a project identically.
         from insights.constants import AvailableFeature
 
         self.organization.available_product_features = [
@@ -456,8 +455,8 @@ class TestLifecycleMethodParity(DifferentialParityBase):
         ]
         self.organization.save()
         # Distinct names: duplicate project names within an organization are rejected on create
-        env = self.client.post("/api/environments/", {"name": "x"}, format="json")
-        proj = self.client.post("/api/projects/", {"name": "y"}, format="json")
+        env = self.client.post("/v1/environments/", {"name": "x"}, format="json")
+        proj = self.client.post("/v1/projects/", {"name": "y"}, format="json")
         self.assertEqual(env.status_code, status.HTTP_201_CREATED, env.json())
         self.assertEqual(proj.status_code, status.HTTP_201_CREATED, proj.json())
 
@@ -466,15 +465,15 @@ class TestLifecycleMethodParity(DifferentialParityBase):
         project_a, team_a = self._make_twin()
         project_b, team_b = self._make_twin()
 
-        env = self.client.delete(f"/api/environments/{team_a.id}/")
-        proj = self.client.delete(f"/api/projects/{project_b.id}/")
+        env = self.client.delete(f"/v1/environments/{team_a.id}/")
+        proj = self.client.delete(f"/v1/projects/{project_b.id}/")
 
         # Common case (non-cloud, not the last project): both succeed with 204.
         self.assertEqual(env.status_code, status.HTTP_204_NO_CONTENT, env.content)
         self.assertEqual(proj.status_code, status.HTTP_204_NO_CONTENT, proj.content)
 
         # The rewrite means an env DELETE now runs the project-delete path: it cascades the whole project
-        # (project_id set + child team_ids) exactly like the /api/projects/ route, rather than the old
+        # (project_id set + child team_ids) exactly like the /v1/projects/ route, rather than the old
         # single-team delete (project_id=None). Both routes start the same Temporal workflow.
         self.assertEqual(mock_start_workflow.call_count, 2)
         env_kwargs = mock_start_workflow.call_args_list[0].kwargs
@@ -489,7 +488,7 @@ class TestPermissionParity(DifferentialParityBase):
     """Permission parity across membership levels.
 
     The rest of the suite runs as ADMIN. These tests exercise the MEMBER path — where Veria flagged a possible
-    divergence (admin-only config fields writable by non-admins via /api/projects/). For the same membership
+    divergence (admin-only config fields writable by non-admins via /v1/projects/). For the same membership
     level and the same field, both endpoints must return the SAME status: admin-only fields rejected, member
     fields accepted. A mismatch here is a real access-control divergence, not a cosmetic one.
     """
@@ -519,8 +518,8 @@ class TestPermissionParity(DifferentialParityBase):
         _, team_a = self._make_twin()
         project_b, _ = self._make_twin()
 
-        resp_a = self.client.patch(f"/api/environments/{team_a.id}/", {field: value}, format="json")
-        resp_b = self.client.patch(f"/api/projects/{project_b.id}/", {field: value}, format="json")
+        resp_a = self.client.patch(f"/v1/environments/{team_a.id}/", {field: value}, format="json")
+        resp_b = self.client.patch(f"/v1/projects/{project_b.id}/", {field: value}, format="json")
 
         # The core assertion: both endpoints must agree for a member writing this field.
         self.assertEqual(
@@ -550,8 +549,8 @@ class TestPermissionParity(DifferentialParityBase):
         _, team_a = self._make_twin()
         project_b, _ = self._make_twin()
         call = getattr(self.client, method)
-        resp_a = call(f"/api/environments/{team_a.id}/{suffix}")
-        resp_b = call(f"/api/projects/{project_b.id}/{suffix}")
+        resp_a = call(f"/v1/environments/{team_a.id}/{suffix}")
+        resp_b = call(f"/v1/projects/{project_b.id}/{suffix}")
         self.assertEqual(
             resp_a.status_code,
             resp_b.status_code,

@@ -72,11 +72,11 @@ function createMockFetch(): typeof fetch {
         const path = new URL(url).pathname
 
         let body: unknown = {}
-        if (path.includes('/api/users/@me')) {
+        if (path.includes('/v1/users/@me')) {
             body = mockUserResponse
-        } else if (path.includes('/api/organizations')) {
+        } else if (path.includes('/v1/organizations')) {
             body = mockOrgsResponse
-        } else if (path.includes('/api/projects') || path.includes('/api/environments')) {
+        } else if (path.includes('/v1/projects') || path.includes('/v1/environments')) {
             body = mockProjectsResponse
         } else if (path.includes('/decide')) {
             body = { featureFlags: {} }
@@ -94,7 +94,7 @@ const WARM_USER_HASH = 'warm-user-for-profiling'
 function makeProps(overrides: Partial<RequestProperties> = {}): RequestProperties {
     return {
         userHash: WARM_USER_HASH,
-        apiToken: 'phx_test_token',
+        apiToken: 'sk-test_token',
         sessionId: 'sess-warm',
         mcpClientName: 'test-profiler',
         mcpClientVersion: '1.0.0',
@@ -180,7 +180,7 @@ describe('McpDispatcher profiling', () => {
         globalThis.fetch = createMockFetch()
 
         process.env.INSIGHTS_API_BASE_URL = 'http://localhost:19876'
-        process.env.INSIGHTS_ANALYTICS_API_KEY = 'phc_test'
+        process.env.INSIGHTS_ANALYTICS_API_KEY = 'pk-test'
         process.env.INSIGHTS_ANALYTICS_HOST = 'http://localhost:19876'
 
         const redis = new MockRedis()

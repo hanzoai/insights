@@ -31,7 +31,7 @@ use std::num::NonZeroU32;
 use std::sync::Arc;
 use std::time::Duration;
 
-const TOKEN: &str = "phc_ai_routing_test_token";
+const TOKEN: &str = "pk-ai_routing_test_token";
 const DISTINCT_ID: &str = "test_user";
 
 struct FixedTime {
@@ -261,7 +261,7 @@ fn allowlist(tokens: &[&str]) -> AiRouting {
 #[rstest]
 #[case::secondary(AiRouting::Secondary, false, DataType::AiEvents)]
 #[case::allowlisted_token(allowlist(&[TOKEN]), false, DataType::AiEvents)]
-#[case::unlisted_token(allowlist(&["phc_other"]), false, DataType::AnalyticsMain)]
+#[case::unlisted_token(allowlist(&["pk-other"]), false, DataType::AnalyticsMain)]
 #[case::full_percentage(AiRouting::SecondaryPercentage(100), false, DataType::AiEvents)]
 #[case::zero_percentage(AiRouting::SecondaryPercentage(0), false, DataType::AnalyticsMain)]
 #[case::primary_with_valve_armed(AiRouting::Primary, true, DataType::AnalyticsMain)]

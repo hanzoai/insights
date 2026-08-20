@@ -5,11 +5,11 @@ import { Skeleton, Tooltip } from '@hanzo/elements'
 
 import { humanFriendlyLargeNumber } from 'lib/utils/numbers'
 
-import { InsightsFlowEditorActionMetrics, hogFlowEditorLogic } from '../../hogFlowEditorLogic'
+import { InsightsFlowEditorActionMetrics, flowEditorLogic } from '../../flowEditorLogic'
 import { InsightsFlowAction } from '../../types'
 
 export function StepViewMetrics({ action }: { action: InsightsFlowAction }): JSX.Element {
-    const { actionMetricsById, actionMetricsByIdLoading } = useValues(hogFlowEditorLogic)
+    const { actionMetricsById, actionMetricsByIdLoading } = useValues(flowEditorLogic)
 
     const metrics: InsightsFlowEditorActionMetrics = actionMetricsById?.[action.id] ?? {
         actionId: action.id,

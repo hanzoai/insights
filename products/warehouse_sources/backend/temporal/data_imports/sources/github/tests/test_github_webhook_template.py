@@ -26,7 +26,7 @@ def _review_body(**overrides: Any) -> dict[str, Any]:
 class TestGithubWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         data: dict = {
             "request": {
                 "method": "POST",

@@ -43,7 +43,7 @@ curl -sS http://localhost:8010/api/projects/@current | grep -q '"code":"not_auth
 
 Plus these `phrocs` units `ready:true`: `backend`, `frontend`, `nodejs`, `capture`, `ingestion`. Stop here. **Do not chase crashed `migrate-*` units when only `/run` was asked** — the stack is usable for launch, screenshot, and most UI scenes (home, login, settings, feature flags) regardless of migration state.
 
-**Ready for `/verify` of InsightsQL-backed scenes** (insights, dashboards, web analytics) and for `POST /api/setup_test/...`:
+**Ready for `/verify` of InsightsQL-backed scenes** (insights, dashboards, web analytics) and for `POST /v1/setup_test/...`:
 
 - Also requires `mcp__phrocs__get_process_status process="migrate-datastore"` to show `status:"done" exit_code:0`. If it's `crashed`, see the gotcha below.
 
@@ -56,7 +56,7 @@ Plus these `phrocs` units `ready:true`: `backend`, `frontend`, `nodejs`, `captur
 
 ## Drive the UI for /verify
 
-Every empty Insights scene looks broken because no events exist. To verify a UI change, you need a workspace with realistic data. The canonical path is the same one the Playwright suite uses: `POST /api/setup_test/organization_with_team/`. Gated on `DEBUG=True | E2E_TESTING | CI | TEST`, all of which local dev satisfies via `DEBUG=True`. Implementation: `insights/api/playwright_setup.py` + `insights/test/playwright_setup_functions.py:create_organization_with_team` — 3 clusters via `HedgeboxMatrix`, ~5-10s end to end. Reference call site: `playwright/utils/playwright-setup.ts:251`.
+Every empty Insights scene looks broken because no events exist. To verify a UI change, you need a workspace with realistic data. The canonical path is the same one the Playwright suite uses: `POST /v1/setup_test/organization_with_team/`. Gated on `DEBUG=True | E2E_TESTING | CI | TEST`, all of which local dev satisfies via `DEBUG=True`. Implementation: `insights/api/playwright_setup.py` + `insights/test/playwright_setup_functions.py:create_organization_with_team` — 3 clusters via `HedgeboxMatrix`, ~5-10s end to end. Reference call site: `playwright/utils/playwright-setup.ts:251`.
 
 Avoid `insightscli dev:demo-data` for /run and /verify — it calls `generate_demo_data` with `n_clusters=500` (default at `insights/management/commands/generate_demo_data.py:59`) and takes 5-30 minutes. It exists for humans who want a big realistic dataset to play with; it's the wrong tool for automated launch-and-screenshot.
 
@@ -66,7 +66,7 @@ The full browser-MCP recipe:
 2. `evaluate_script` the workspace bootstrap. Per-call email so reruns don't collide; password fixed at `12345678`; response gives back the team_id and a personal API key.
 
    ```js
-   const r = await fetch('/api/setup_test/organization_with_team/', {
+   const r = await fetch('/v1/setup_test/organization_with_team/', {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      body: JSON.stringify({ data: { skip_onboarding: true } }),
@@ -79,7 +79,7 @@ The full browser-MCP recipe:
 3. `evaluate_script` the in-page login. Runs in the page context so Django's CSRF middleware sees the right cookies (`playwright/utils/playwright-setup.ts:282-291`).
 
    ```js
-   const r = await fetch('/api/login/', {
+   const r = await fetch('/v1/login/', {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      body: JSON.stringify({ email: workspace.user_email, password: '12345678' }),
@@ -118,20 +118,20 @@ Canonical sources to grep when the path isn't obvious:
 
 ## Gotchas
 
-- **`migrate-datastore` and `migrate-persons-db` often crash on a cold `insightscli up -d` due to a startup race.** They start in parallel with `migrate-postgres`, and if Postgres isn't ready yet they crash. This is the hard prereq for `POST /api/setup_test/...` and for InsightsQL-backed scenes (insights, dashboards, web analytics) — but **not** for `/run`. Don't fix it unless the task needs InsightsQL/`setup_test`. When you do need to fix it, the canonical sequence is: wait for `migrate-postgres` to show `status:"done"` via `mcp__phrocs__get_process_status`, then restart the crashed migrations. `mcp__phrocs__toggle_process` is the surgical tool but auto-mode blocks it on shared stacks — fall back to `phrocs stop && insightscli up -d` which re-runs everything in order, or run `python manage.py migrate_datastore` directly (you'll need `set -a; source .env.services; set +a` first so `DATASTORE_DATABASE=insights`, otherwise it targets `default`). If neither works (corrupted CH replica state in ZooKeeper from a partial run), `insightscli dev:reset` is the only path — it wipes Docker volumes, destructive.
+- **`migrate-datastore` and `migrate-persons-db` often crash on a cold `insightscli up -d` due to a startup race.** They start in parallel with `migrate-postgres`, and if Postgres isn't ready yet they crash. This is the hard prereq for `POST /v1/setup_test/...` and for InsightsQL-backed scenes (insights, dashboards, web analytics) — but **not** for `/run`. Don't fix it unless the task needs InsightsQL/`setup_test`. When you do need to fix it, the canonical sequence is: wait for `migrate-postgres` to show `status:"done"` via `mcp__phrocs__get_process_status`, then restart the crashed migrations. `mcp__phrocs__toggle_process` is the surgical tool but auto-mode blocks it on shared stacks — fall back to `phrocs stop && insightscli up -d` which re-runs everything in order, or run `python manage.py migrate_datastore` directly (you'll need `set -a; source .env.services; set +a` first so `DATASTORE_DATABASE=insights`, otherwise it targets `default`). If neither works (corrupted CH replica state in ZooKeeper from a partial run), `insightscli dev:reset` is the only path — it wipes Docker volumes, destructive.
 - **`insightscli wait` exits 0 even when phrocs is unreachable.** Don't trust its return code as ground truth — confirm with `mcp__phrocs__get_process_status` or the `curl` probes.
 - **Vite serves on `:8234`, not the URL you browse.** You browse `http://localhost:8010` (the Envoy-style proxy). The proxy reverse-proxies Vite for `/static/*` and Django for everything else. Hitting `:8234/` directly returns 404 because Vite has no index route at the dev-server root.
 - **Worktrees share Docker containers but compete for ports.** All worktrees on the same machine resolve to the same `insights-datastore-1` / `insights-db-1` containers, so DB state is global. But ports 8000/8010/8234 can only be held by one worktree at a time — kill the granian/vite/phrocs of the other worktree before `insightscli up -d` here.
-- **CSP warnings and 401s in the browser console are normal pre-auth.** The preflight/login page tries to fetch `/api/projects/@current`, `/api/users/@me/`, and Insights.js remote config — all 401 until you sign up. WASM/CSP "Report Only" warnings come from the dev CSP.
-- **Direct `curl -X POST /api/login/` returns 403 (CSRF).** Session login must run in-page via `browser_evaluate` so cookies and CSRF tokens flow. For non-browser API calls, use the `personal_api_key` from the `setup_test` response as `Authorization: Bearer <key>` — no CSRF on token auth.
+- **CSP warnings and 401s in the browser console are normal pre-auth.** The preflight/login page tries to fetch `/v1/projects/@current`, `/v1/users/@me/`, and Insights.js remote config — all 401 until you sign up. WASM/CSP "Report Only" warnings come from the dev CSP.
+- **Direct `curl -X POST /v1/login/` returns 403 (CSRF).** Session login must run in-page via `browser_evaluate` so cookies and CSRF tokens flow. For non-browser API calls, use the `personal_api_key` from the `setup_test` response as `Authorization: Bearer <key>` — no CSRF on token auth.
 - **`.env.local` may use 1Password refs.** Without `op` installed, refs become literal strings (e.g. `OPENAI_API_KEY=op://...`) and downstream services fail with cryptic auth errors. Install `op` or replace with literals.
 
 ## Troubleshooting
 
 - **`insightscli up -d` exits with `Another instance of bin/start is already running`** — previous run still active or crashed without cleanup. `mcp__phrocs__get_process_status` shows what's there; if nothing's running, `rm bin/start.lock` and retry.
 - **`docker info` fails with `dial unix /Users/<you>/.orbstack/run/docker.sock: ... no such file`** — OrbStack is stopped. `open -a OrbStack`.
-- **`/api/projects/@current` returns 500 instead of 401** — Postgres or Datastore unreachable. `docker ps | grep insights-` and look for unhealthy containers; `insightscli services:ready` waits for all of them.
-- **`POST /api/login/` returns 400 `invalid_credentials`** — you're logging in as a user the `setup_test` workspace didn't actually create (CH crash usually). Check the response of the setup_test call; if it 500'd, fix CH first (see the `migrate-datastore` gotcha).
-- **`POST /api/setup_test/organization_with_team/` returns 404** — `DEBUG`, `E2E_TESTING`, `CI`, and `TEST` are all false. Local dev has `DEBUG=True` by default; if it's not set, `.env.local` is missing or `DJANGO_SETTINGS_MODULE` points at a prod-like settings module.
-- **`POST /api/setup_test/organization_with_team/` returns 500 `Table insights.person does not exist`** — `migrate-datastore` crashed during boot. See the gotcha above.
-- **In-page `fetch('/api/login/')` returns 403** — you're calling it from outside the page context (e.g. `page.request.post` rather than `page.evaluate`). Use `evaluate_script` / `browser_evaluate` so the call originates in-page.
+- **`/v1/projects/@current` returns 500 instead of 401** — Postgres or Datastore unreachable. `docker ps | grep insights-` and look for unhealthy containers; `insightscli services:ready` waits for all of them.
+- **`POST /v1/login/` returns 400 `invalid_credentials`** — you're logging in as a user the `setup_test` workspace didn't actually create (CH crash usually). Check the response of the setup_test call; if it 500'd, fix CH first (see the `migrate-datastore` gotcha).
+- **`POST /v1/setup_test/organization_with_team/` returns 404** — `DEBUG`, `E2E_TESTING`, `CI`, and `TEST` are all false. Local dev has `DEBUG=True` by default; if it's not set, `.env.local` is missing or `DJANGO_SETTINGS_MODULE` points at a prod-like settings module.
+- **`POST /v1/setup_test/organization_with_team/` returns 500 `Table insights.person does not exist`** — `migrate-datastore` crashed during boot. See the gotcha above.
+- **In-page `fetch('/v1/login/')` returns 403** — you're calling it from outside the page context (e.g. `page.request.post` rather than `page.evaluate`). Use `evaluate_script` / `browser_evaluate` so the call originates in-page.

@@ -1,8 +1,8 @@
+import insights from 'insights-js'
 import { useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
-import * as judgePng from '@hanzo/brand/hoggies/png/judge'
+import { Button, Tag, TagType, Link } from '@hanzo/elements'
 import {
     IconArrowLeft,
     IconCode,
@@ -16,9 +16,8 @@ import {
     IconWarning,
     IconWrench,
 } from '@hanzo/icons'
-import { Button, Tag, TagType, Link } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -28,7 +27,7 @@ import { useOpenAi } from '~/scenes/max/useOpenAi'
 import { getEvaluationBackTarget, getEvaluationTemplateSelectionUrl } from './evaluationNavigation'
 import { EvaluationTemplate, defaultEvaluationTemplates } from './templates'
 
-const MascotJudge = pngHoggie(judgePng)
+const MascotJudge = pngMascot()
 
 export const scene: SceneExport = {
     component: EvaluationTemplatesScene,

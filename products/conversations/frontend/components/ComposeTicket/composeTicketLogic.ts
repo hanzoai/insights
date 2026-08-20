@@ -162,7 +162,7 @@ export const composeTicketLogic = kea<composeTicketLogicType>([
                 loadEmailConfigs: async (): Promise<EmailConfigStatus[]> => {
                     try {
                         // nosemgrep: prefer-codegen-api
-                        const response = await api.get('api/conversations/v1/email/status')
+                        const response = await api.get('v1/conversations/v1/email/status')
                         return response.configs || []
                     } catch {
                         return []

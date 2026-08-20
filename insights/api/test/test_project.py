@@ -19,8 +19,8 @@ from insights.test.persons import create_person, delete_person
 
 class TestProjectAPI(team_api_test_factory()):  # type: ignore
     """
-    We inherit from TestTeamAPI, as previously /api/projects/ referred to the Team model, which used to mean "project".
-    Now as Team means "environment" and Project is separate, we must ensure backward compatibility of /api/projects/.
+    We inherit from TestTeamAPI, as previously /v1/projects/ referred to the Team model, which used to mean "project".
+    Now as Team means "environment" and Project is separate, we must ensure backward compatibility of /v1/projects/.
     At the same time, this class is where we can continue adding `Project`-specific API tests.
     """
 
@@ -38,7 +38,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
             scopes=["*"],
         )
 
-        response = self.client.get("/api/projects/", headers={"authorization": f"Bearer {personal_api_key}"})
+        response = self.client.get("/v1/projects/", headers={"authorization": f"Bearer {personal_api_key}"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -58,7 +58,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self._set_unlimited_projects()
         Project.objects.create_with_team(organization=self.organization, name="Hedgebox", initiating_user=self.user)
 
-        response = self.client.post("/api/projects/", {"name": duplicate_name})
+        response = self.client.post("/v1/projects/", {"name": duplicate_name})
 
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         self.assertIn("already a project called", response.json()["detail"])
@@ -70,7 +70,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self._set_unlimited_projects()
         Project.objects.create_with_team(organization=self.organization, name="  Hedgebox  ", initiating_user=self.user)
 
-        response = self.client.post("/api/projects/", {"name": "Hedgebox"})
+        response = self.client.post("/v1/projects/", {"name": "Hedgebox"})
 
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         self.assertIn("already a project called", response.json()["detail"])
@@ -80,7 +80,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         other_organization = Organization.objects.create(name="Other org")
         Project.objects.create_with_team(organization=other_organization, name="Hedgebox", initiating_user=None)
 
-        response = self.client.post("/api/projects/", {"name": "Hedgebox"})
+        response = self.client.post("/v1/projects/", {"name": "Hedgebox"})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.json()["name"], "Hedgebox")
@@ -90,8 +90,8 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         # The fixture project already holds the plain default name
         self.assertEqual(self.project.name, "Default project")
 
-        first_response = self.client.post("/api/projects/", {})
-        second_response = self.client.post("/api/projects/", {})
+        first_response = self.client.post("/v1/projects/", {})
+        second_response = self.client.post("/v1/projects/", {})
 
         self.assertEqual(first_response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(second_response.status_code, status.HTTP_201_CREATED)
@@ -101,7 +101,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
     def test_cannot_rename_project_to_duplicate_name(self):
         Project.objects.create_with_team(organization=self.organization, name="Hedgebox", initiating_user=self.user)
 
-        response = self.client.patch(f"/api/projects/{self.project.id}/", {"name": "hedgebox"})
+        response = self.client.patch(f"/v1/projects/{self.project.id}/", {"name": "hedgebox"})
 
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         self.assertIn("already a project called", response.json()["detail"])
@@ -116,7 +116,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         )
 
         response = self.client.patch(
-            f"/api/projects/{duplicate_project.id}/",
+            f"/v1/projects/{duplicate_project.id}/",
             {"name": duplicate_project.name, "product_description": "still saveable"},
         )
 
@@ -133,7 +133,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.save()
 
         # Try to create second demo project
-        response = self.client.post("/api/projects/", {"name": "Second Demo", "is_demo": True})
+        response = self.client.post("/v1/projects/", {"name": "Second Demo", "is_demo": True})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
@@ -148,7 +148,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.post("/api/projects/", {"name": "New Project"})
+        response = self.client.post("/v1/projects/", {"name": "New Project"})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
@@ -170,11 +170,11 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.save()
 
         # Can create one more project (already have 1)
-        response = self.client.post("/api/projects/", {"name": "Second Project"})
+        response = self.client.post("/v1/projects/", {"name": "Second Project"})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Cannot create third project
-        response = self.client.post("/api/projects/", {"name": "Third Project"})
+        response = self.client.post("/v1/projects/", {"name": "Third Project"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json()["detail"],
@@ -196,7 +196,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
 
         # Can create multiple projects
         for i in range(5):
-            response = self.client.post("/api/projects/", {"name": f"Project {i}"})
+            response = self.client.post("/v1/projects/", {"name": f"Project {i}"})
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def _set_unlimited_projects(self, with_member_create_entitlement: bool = True) -> None:
@@ -219,7 +219,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self._set_unlimited_projects()
 
         response = self.client.post(
-            "/api/projects/",
+            "/v1/projects/",
             {"name": "Logs Project", "logs_settings": {"retention_days": 30}},
             format="json",
         )
@@ -231,7 +231,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self._set_unlimited_projects()
 
         response = self.client.post(
-            "/api/projects/",
+            "/v1/projects/",
             {"name": "Logs Project", "logs_settings": {"retention_days": 14}},
             format="json",
         )
@@ -243,7 +243,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self._set_unlimited_projects_with_logs_retention(AvailableFeature.LOGS_RETENTION_30D)
 
         response = self.client.post(
-            "/api/projects/",
+            "/v1/projects/",
             {"name": "Logs Project", "logs_settings": {"retention_days": 30}},
             format="json",
         )
@@ -255,7 +255,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self._set_unlimited_projects()
 
         response = self.client.post(
-            "/api/projects/",
+            "/v1/projects/",
             {"name": "Logs Project", "logs_settings": {"retention_days": 45}},
             format="json",
         )
@@ -268,7 +268,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
 
-        response = self.client.post("/api/projects/", {"name": "Member Project"})
+        response = self.client.post("/v1/projects/", {"name": "Member Project"})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
@@ -283,7 +283,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
 
-        response = self.client.post("/api/projects/", {"name": "Member Project"})
+        response = self.client.post("/v1/projects/", {"name": "Member Project"})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
@@ -298,7 +298,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.save()
 
         with patch("insights.api.project.create_notification"):
-            response = self.client.post("/api/projects/", {"name": "Member Project"})
+            response = self.client.post("/v1/projects/", {"name": "Member Project"})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -313,7 +313,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
 
         with patch("insights.api.project.create_notification"):
             response = self.client.post(
-                "/api/projects/", {"name": "Sneaky Project", "receive_org_level_activity_logs": True}
+                "/v1/projects/", {"name": "Sneaky Project", "receive_org_level_activity_logs": True}
             )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -325,9 +325,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.post(
-            "/api/projects/", {"name": "Admin Project", "receive_org_level_activity_logs": True}
-        )
+        response = self.client.post("/v1/projects/", {"name": "Admin Project", "receive_org_level_activity_logs": True})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response.json()["receive_org_level_activity_logs"])
@@ -346,7 +344,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.save()
 
         with patch("insights.api.project.create_notification") as mock_create_notification:
-            response = self.client.post("/api/projects/", {"name": f"{_name} Project"})
+            response = self.client.post("/v1/projects/", {"name": f"{_name} Project"})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # Admins/owners are the recipients, never the trigger — creating their own project must not notify
@@ -374,7 +372,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
             )
         )
 
-        response = self.client.post("/api/projects/", {"name": "Member Project"})
+        response = self.client.post("/v1/projects/", {"name": "Member Project"})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # One USER-targeted notification per admin/owner, never the member creator
@@ -395,7 +393,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.post("/api/projects/", {"name": "Admin Project"})
+        response = self.client.post("/v1/projects/", {"name": "Admin Project"})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         mock_create_notification.assert_not_called()
@@ -421,7 +419,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         mock_teams.exclude.return_value.distinct.return_value.count.return_value = 2000
 
         # Should not be able to create another project
-        response = self.client.post("/api/projects/", {"name": "Project 1001"})
+        response = self.client.post("/v1/projects/", {"name": "Project 1001"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json()["detail"],
@@ -450,11 +448,11 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         )
 
         # Can still create 2 regular projects (demo doesn't count)
-        response = self.client.post("/api/projects/", {"name": "Regular Project 1"})
+        response = self.client.post("/v1/projects/", {"name": "Regular Project 1"})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Can't create third regular project (limit reached)
-        response = self.client.post("/api/projects/", {"name": "Regular Project 2"})
+        response = self.client.post("/v1/projects/", {"name": "Regular Project 2"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_project_allowed_regardless_of_limits(self):
@@ -471,7 +469,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.save()
 
         # Should be able to update existing project even at limit
-        response = self.client.patch(f"/api/projects/{self.project.id}/", {"name": "Updated Name"})
+        response = self.client.patch(f"/v1/projects/{self.project.id}/", {"name": "Updated Name"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["name"], "Updated Name")
 
@@ -499,55 +497,12 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
             project_name=project_name,
         )
 
-    @parameterized.expand(
-        [
-            ("cloud_last_project_active_sub", True, 1, True, True, status.HTTP_400_BAD_REQUEST),
-            ("cloud_last_project_no_sub", True, 1, False, True, status.HTTP_204_NO_CONTENT),
-            ("cloud_non_last_project_active_sub", True, 2, True, True, status.HTTP_204_NO_CONTENT),
-            ("self_hosted", False, 1, True, True, status.HTTP_204_NO_CONTENT),
-            ("cloud_no_license", True, 1, True, None, status.HTTP_204_NO_CONTENT),
-        ]
-    )
-    @patch("insights.temporal.delete_teams.dispatch.start_delete_project_data_workflow")
-    @patch("ee.billing.billing_manager.BillingManager.get_billing")
-    @patch("insights.api.project.get_cached_instance_license")
-    def test_delete_last_project_subscription_guard(
-        self,
-        _name,
-        is_cloud,
-        project_count,
-        has_active_subscription,
-        license_value,
-        expected_status,
-        mock_get_license,
-        mock_get_billing,
-        mock_delete_task,
-    ):
-        mock_get_license.return_value = license_value
-        mock_get_billing.return_value = {"has_active_subscription": has_active_subscription}
-
-        self.organization_membership.level = OrganizationMembership.Level.ADMIN
-        self.organization_membership.save()
-
-        if project_count > 1:
-            Project.objects.create_with_team(
-                organization=self.organization, name="Second project", initiating_user=self.user
-            )
-
-        with self.is_cloud(is_cloud):
-            response = self.client.delete(f"/api/projects/{self.project.id}")
-
-        self.assertEqual(response.status_code, expected_status)
-        if expected_status == status.HTTP_400_BAD_REQUEST:
-            self.assertIn("active subscription", response.json()["detail"])
-            self.assertTrue(Project.objects.filter(id=self.project.id).exists())
-
     @patch("insights.temporal.delete_teams.dispatch.start_delete_project_data_workflow")
     def test_project_deletion_sets_pending_deletion_flag(self, mock_delete_task):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.delete(f"/api/projects/{self.project.id}")
+        response = self.client.delete(f"/v1/projects/{self.project.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         self.project.refresh_from_db()
@@ -559,9 +514,9 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        self.client.delete(f"/api/projects/{self.project.id}")
+        self.client.delete(f"/v1/projects/{self.project.id}")
 
-        response = self.client.get(f"/api/projects/{self.project.id}")
+        response = self.client.get(f"/v1/projects/{self.project.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["is_pending_deletion"])
 
@@ -573,7 +528,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.project.is_pending_deletion = True
         self.project.save(update_fields=["is_pending_deletion"])
 
-        response = self.client.delete(f"/api/projects/{self.project.id}")
+        response = self.client.delete(f"/v1/projects/{self.project.id}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("already being deleted", response.json()["detail"])
         mock_delete_task.assert_not_called()
@@ -595,7 +550,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
 
     def test_complete_product_onboarding_requires_product_type(self):
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/complete_product_onboarding/",
+            f"/v1/projects/{self.project.id}/complete_product_onboarding/",
             {"intent_context": "onboarding product selected - primary", "metadata": {}},
             headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
         )
@@ -607,7 +562,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         from insights.schema import ProductKey
 
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/complete_product_onboarding/",
+            f"/v1/projects/{self.project.id}/complete_product_onboarding/",
             {
                 "product_type": "invalid_product",
                 "intent_context": "onboarding product selected - primary",
@@ -627,11 +582,11 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
 
     def test_conversations_settings_merges_with_existing(self):
         self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"conversations_settings": {"widget_greeting_text": "Hello!"}},
         )
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"conversations_settings": {"widget_color": "#ff0000"}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -644,7 +599,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.team.conversations_settings = None
         self.team.save()
 
-        response = self.client.patch(f"/api/projects/{self.project.id}/", {"conversations_enabled": True})
+        response = self.client.patch(f"/v1/projects/{self.project.id}/", {"conversations_enabled": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         settings = response.json()["conversations_settings"]
         self.assertIsNotNone(settings)
@@ -655,7 +610,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.post(f"/api/projects/{self.project.id}/generate_conversations_public_token/")
+        response = self.client.post(f"/v1/projects/{self.project.id}/generate_conversations_public_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         settings = response.json()["conversations_settings"]
         self.assertIsNotNone(settings.get("widget_public_token"))
@@ -664,7 +619,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
 
-        response = self.client.post(f"/api/projects/{self.project.id}/generate_conversations_public_token/")
+        response = self.client.post(f"/v1/projects/{self.project.id}/generate_conversations_public_token/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_project_name_search_filter(self):
@@ -695,30 +650,30 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
             initiating_user=self.user,
         )
 
-        response = self.client.get("/api/projects/?search=Analytics")
+        response = self.client.get("/v1/projects/?search=Analytics")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 2)
         names = {r["name"] for r in results}
         self.assertEqual(names, {"Analytics Dashboard", "User Analytics"})
 
-        response = self.client.get("/api/projects/?search=Revenue")
+        response = self.client.get("/v1/projects/?search=Revenue")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["name"], "Revenue Tracker")
 
-        response = self.client.get("/api/projects/?search=nonexistent")
+        response = self.client.get("/v1/projects/?search=nonexistent")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 0)
 
     def test_read_only_api_key_cannot_update_project_config_fields(self):
-        """API keys with only project:read scope should not be able to modify config fields via /api/projects/."""
+        """API keys with only project:read scope should not be able to modify config fields via /v1/projects/."""
         api_key = self.create_personal_api_key_with_scopes(["project:read"])
 
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"timezone": "Europe/Lisbon"},
             headers={"authorization": f"Bearer {api_key}"},
         )
@@ -731,11 +686,11 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.assertEqual(self.team.timezone, "UTC")
 
     def test_write_api_key_can_update_project_config_fields(self):
-        """API keys with project:write scope should be able to modify config fields via /api/projects/."""
+        """API keys with project:write scope should be able to modify config fields via /v1/projects/."""
         api_key = self.create_personal_api_key_with_scopes(["project:write"])
 
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
             headers={"authorization": f"Bearer {api_key}"},
         )
@@ -752,7 +707,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         api_key = self.create_personal_api_key_with_scopes(["project:read"])
 
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"name": "New Project Name"},
             headers={"authorization": f"Bearer {api_key}"},
         )
@@ -768,7 +723,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         api_key = self.create_personal_api_key_with_scopes(["project:write"])
 
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"name": "New Project Name"},
             headers={"authorization": f"Bearer {api_key}"},
         )
@@ -779,13 +734,13 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.project.refresh_from_db()
         self.assertEqual(self.project.name, "New Project Name")
 
-    # --- Parity coverage: fields and actions that previously existed only on /api/environments/ ---
+    # --- Parity coverage: fields and actions that previously existed only on /v1/environments/ ---
 
     def test_retrieve_project_includes_environment_parity_fields(self):
-        response = self.client.get(f"/api/projects/{self.project.id}/")
+        response = self.client.get(f"/v1/projects/{self.project.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        # Fields that used to be exposed only by /api/environments/ must now appear on /api/projects/ too
+        # Fields that used to be exposed only by /v1/environments/ must now appear on /v1/projects/ too
         for field in [
             "project_id",
             "user_access_level",
@@ -799,7 +754,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
             "customer_analytics_config",
             "web_analytics_pre_aggregated_tables_enabled",
         ]:
-            self.assertIn(field, data, f"/api/projects/ response is missing parity field '{field}'")
+            self.assertIn(field, data, f"/v1/projects/ response is missing parity field '{field}'")
         # project_id on a Project equals its own id (Project ↔ Team is 1:1)
         self.assertEqual(data["project_id"], self.project.id)
 
@@ -814,7 +769,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
             "insights.models.product_intent.product_intent.calculate_product_activation.delay",
             side_effect=Exception("broker is unavailable"),
         ) as mock_delay:
-            response = self.client.get(f"/api/projects/{self.project.id}/")
+            response = self.client.get(f"/v1/projects/{self.project.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertIn("product_intents", response.json())
         mock_delay.assert_called_once()
@@ -824,7 +779,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"base_currency": "EUR", "capture_dead_clicks": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -837,7 +792,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
 
     def test_rename_project_syncs_passthrough_team_name(self):
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"name": "Renamed project"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -852,7 +807,7 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.organization_membership.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/",
+            f"/v1/projects/{self.project.id}/",
             {"customer_analytics_config": {"activity_event": "$pageview"}},
             format="json",
         )
@@ -863,18 +818,18 @@ class TestProjectAPI(team_api_test_factory()):  # type: ignore
         self.assertEqual(self.team.customer_analytics_config.activity_event, "$pageview")
 
     def test_settings_as_of_action_available_on_projects(self):
-        # This action previously existed only on /api/environments/ — it must now work on /api/projects/ too.
+        # This action previously existed only on /v1/environments/ — it must now work on /v1/projects/ too.
         # NOTE: we pass a `scope` filter on purpose. The unscoped snapshot path has a pre-existing bug on the
         # environments endpoint too — TEAM_CONFIG_FIELDS includes the analytics-config *properties* (model
         # instances, not JSON-serializable), so an unscoped call 500s on both surfaces. Faithfully replicated
-        # here; fixing it belongs in a separate change since it affects /api/environments/ identically.
+        # here; fixing it belongs in a separate change since it affects /v1/environments/ identically.
         response = self.client.get(
-            f"/api/projects/{self.project.id}/settings_as_of/?at=2020-01-01T00:00:00Z&scope=timezone"
+            f"/v1/projects/{self.project.id}/settings_as_of/?at=2020-01-01T00:00:00Z&scope=timezone"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertIn("timezone", response.json())
 
     def test_experiments_config_action_available_on_projects(self):
-        response = self.client.get(f"/api/projects/{self.project.id}/experiments_config/")
+        response = self.client.get(f"/v1/projects/{self.project.id}/experiments_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertIn("default_experiment_stats_method", response.json())

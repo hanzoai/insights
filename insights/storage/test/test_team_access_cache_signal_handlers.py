@@ -216,7 +216,7 @@ class TestCaptureOldSecretTokens(TestCase):
 class TestUpdateTeamAuthenticationCache(TestCase):
     @patch("insights.tasks.team_access_cache_tasks.invalidate_token_sync")
     def test_skips_created_teams(self, mock_sync):
-        instance = MagicMock(pk=1, api_token="phc_test")
+        instance = MagicMock(pk=1, api_token="pk-test")
         update_team_authentication_cache(instance, created=True)
         mock_sync.assert_not_called()
 
@@ -231,7 +231,7 @@ class TestUpdateTeamAuthenticationCache(TestCase):
     def test_invalidates_discarded_backup_on_rotation(self, mock_hash, mock_sync):
         mock_hash.return_value = "sha256$hashed_old_backup"
 
-        instance = MagicMock(pk=1, api_token="phc_test")
+        instance = MagicMock(pk=1, api_token="pk-test")
 
         instance._old_secret_api_token_backup = "old_backup_value"
         instance.secret_api_token_backup = "new_backup_value"
@@ -248,7 +248,7 @@ class TestUpdateTeamAuthenticationCache(TestCase):
     def test_invalidates_old_secret_on_direct_change(self, mock_hash, mock_sync):
         mock_hash.return_value = "sha256$hashed_old_secret"
 
-        instance = MagicMock(pk=1, api_token="phc_test")
+        instance = MagicMock(pk=1, api_token="pk-test")
 
         instance._old_secret_api_token = "old_secret_value"
         instance.secret_api_token = "new_secret_value"
@@ -264,7 +264,7 @@ class TestUpdateTeamAuthenticationCache(TestCase):
     def test_skips_old_secret_invalidation_when_it_becomes_backup(self, mock_sync):
         # During rotation: old primary -> new backup. The token is still valid,
         # so we must NOT invalidate it.
-        instance = MagicMock(pk=1, api_token="phc_test")
+        instance = MagicMock(pk=1, api_token="pk-test")
 
         instance._old_secret_api_token = "rotating_out_primary"
         instance.secret_api_token = "brand_new_primary"
@@ -282,7 +282,7 @@ class TestUpdateTeamAuthenticationCache(TestCase):
         # Only the discarded backup should be invalidated; the old primary (now backup) stays valid.
         mock_hash.return_value = "sha256$hashed_old_backup"
 
-        instance = MagicMock(pk=1, api_token="phc_test")
+        instance = MagicMock(pk=1, api_token="pk-test")
 
         instance._old_secret_api_token = "original_primary"
         instance.secret_api_token = "brand_new_primary"
@@ -298,7 +298,7 @@ class TestUpdateTeamAuthenticationCache(TestCase):
     @patch("insights.storage.team_access_cache_signal_handlers.hash_key_value")
     def test_captures_exception_on_failure(self, mock_hash, mock_capture):
         mock_hash.side_effect = Exception("Redis down")
-        instance = MagicMock(pk=1, api_token="phc_test")
+        instance = MagicMock(pk=1, api_token="pk-test")
 
         instance._old_secret_api_token = "old_value"
         instance.secret_api_token = "new_value"
@@ -313,13 +313,13 @@ class TestUpdateTeamAuthenticationCache(TestCase):
     def test_no_invalidation_when_old_values_not_captured(self, mock_sync):
         # When pre_save was not called, the _old_* attrs are absent.
         # SimpleNamespace gives a real __dict__; MagicMock stores attrs differently
-        instance = SimpleNamespace(pk=1, api_token="phc_test")
+        instance = SimpleNamespace(pk=1, api_token="pk-test")
         update_team_authentication_cache(instance, created=False)  # type: ignore[arg-type]
         mock_sync.assert_not_called()
 
     @patch("insights.tasks.team_access_cache_tasks.invalidate_token_sync")
     def test_no_invalidation_when_tokens_unchanged(self, mock_sync):
-        instance = MagicMock(pk=1, api_token="phc_test")
+        instance = MagicMock(pk=1, api_token="pk-test")
 
         instance._old_secret_api_token = "same_value"
         instance.secret_api_token = "same_value"
@@ -337,7 +337,7 @@ class TestUpdateTeamAuthenticationCache(TestCase):
         # only backup should be invalidated, not the unchanged primary
         mock_hash.return_value = "sha256$hashed_old_backup"
 
-        instance = MagicMock(pk=1, api_token="phc_test")
+        instance = MagicMock(pk=1, api_token="pk-test")
 
         instance._old_secret_api_token = "unchanged_token"
         instance.secret_api_token = "unchanged_token"
@@ -355,11 +355,11 @@ class TestUpdateTeamAuthenticationCacheOnDelete(TestCase):
     @patch("insights.storage.team_access_cache_signal_handlers.hash_key_value")
     def test_invalidates_both_secret_tokens(self, mock_hash, mock_sync):
         mock_hash.side_effect = lambda v, mode="sha256": f"sha256${v}_hashed"
-        instance = MagicMock(pk=42, secret_api_token="phs_main", secret_api_token_backup="phs_backup")
+        instance = MagicMock(pk=42, secret_api_token="sk-main", secret_api_token_backup="sk-backup")
         update_team_authentication_cache_on_delete(instance)
         assert mock_sync.call_count == 2
-        mock_sync.assert_any_call("sha256$phs_main_hashed")
-        mock_sync.assert_any_call("sha256$phs_backup_hashed")
+        mock_sync.assert_any_call("sha256$sk-main_hashed")
+        mock_sync.assert_any_call("sha256$sk-backup_hashed")
 
     @patch("insights.tasks.team_access_cache_tasks.invalidate_token_sync")
     def test_skips_instance_without_pk(self, mock_sync):
@@ -370,7 +370,7 @@ class TestUpdateTeamAuthenticationCacheOnDelete(TestCase):
     @patch("insights.tasks.team_access_cache_tasks.invalidate_token_sync")
     @patch("insights.storage.team_access_cache_signal_handlers.hash_key_value")
     def test_skips_empty_tokens(self, mock_hash, mock_sync):
-        instance = MagicMock(pk=42, secret_api_token="phs_main", secret_api_token_backup=None)
+        instance = MagicMock(pk=42, secret_api_token="sk-main", secret_api_token_backup=None)
         mock_hash.return_value = "sha256$hashed"
         update_team_authentication_cache_on_delete(instance)
         mock_sync.assert_called_once()
@@ -379,7 +379,7 @@ class TestUpdateTeamAuthenticationCacheOnDelete(TestCase):
     @patch("insights.storage.team_access_cache_signal_handlers.hash_key_value")
     def test_captures_exception_on_failure(self, mock_hash, mock_capture):
         mock_hash.side_effect = Exception("Redis down")
-        instance = MagicMock(pk=42, secret_api_token="phs_main", secret_api_token_backup=None)
+        instance = MagicMock(pk=42, secret_api_token="sk-main", secret_api_token_backup=None)
 
         update_team_authentication_cache_on_delete(instance)
 

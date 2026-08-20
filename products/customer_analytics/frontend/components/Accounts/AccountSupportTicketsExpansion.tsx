@@ -3,7 +3,7 @@ import insights from 'insights-js'
 
 import { Skeleton, Table, TableColumns, Tag, Link } from '@hanzo/elements'
 
-import { BigLeaguesHog } from 'lib/components/mascots'
+import { BigLeaguesScript } from 'lib/components/mascots'
 import { TZLabel } from 'lib/components/TZLabel'
 
 import { SupportTicketApi } from 'products/customer_analytics/frontend/generated/api.schemas'
@@ -17,7 +17,7 @@ const PAGE_SIZE = 10
 function SupportTicketsEmptyState({ title, detail }: { title: string; detail: string }): JSX.Element {
     return (
         <div className="flex flex-col items-center justify-center gap-2 p-8 text-center">
-            <BigLeaguesHog className="w-24 h-24" />
+            <BigLeaguesScript className="w-24 h-24" />
             <h4 className="mb-0">{title}</h4>
             <p className="text-secondary max-w-sm mb-0">{detail}</p>
         </div>

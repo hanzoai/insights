@@ -33,14 +33,14 @@ const meta: Meta<StoryProps> = {
                     cloud: true,
                     realm: 'cloud',
                 },
-                '/api/billing/': { products: [] },
-                '/api/projects/:id/integrations': { results: [] },
-                '/api/projects/:id/core_memory': { results: [] },
-                '/api/projects/:id/insights_functions': { results: [] },
-                '/api/projects/:id/pipeline_destination_configs': { results: [] },
-                '/api/organizations/:id/pipeline_destinations': { results: [] },
-                '/api/environments/:id/batch_exports': { results: [] },
-                '/api/environments/:id/default_evaluation_contexts/': {
+                '/v1/billing/': { products: [] },
+                '/v1/projects/:id/integrations': { results: [] },
+                '/v1/projects/:id/core_memory': { results: [] },
+                '/v1/projects/:id/insights_functions': { results: [] },
+                '/v1/projects/:id/pipeline_destination_configs': { results: [] },
+                '/v1/organizations/:id/pipeline_destinations': { results: [] },
+                '/v1/environments/:id/batch_exports': { results: [] },
+                '/v1/environments/:id/default_evaluation_contexts/': {
                     default_evaluation_contexts: [],
                     available_contexts: [],
                     hidden_contexts: [],
@@ -48,7 +48,7 @@ const meta: Meta<StoryProps> = {
                 },
             },
             patch: {
-                '/api/projects/:id': async ({ request }) => {
+                '/v1/projects/:id': async ({ request }) => {
                     // bounce the setting back as is
                     const newTeamSettings = { ...MOCK_DEFAULT_TEAM, ...((await request.json()) as object) }
                     return [200, newTeamSettings]

@@ -94,7 +94,7 @@ const renderInsightsCodeUsageBillingProduct = ({
 
     useStorybookMocks({
         get: {
-            '/api/billing/': billing,
+            '/v1/billing/': billing,
         },
     })
 
@@ -109,7 +109,7 @@ export const BillingProductWithoutAddons: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },
@@ -125,7 +125,7 @@ export const BillingProductWithAddons: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },
@@ -141,7 +141,7 @@ export const BillingProductWithStandalonePricingAddon: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },
@@ -183,7 +183,7 @@ export const BillingProductTemporarilyFree: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },
@@ -396,7 +396,7 @@ export const BillingProductInclusionOnlyWithAddon: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },
@@ -412,7 +412,7 @@ const renderPlatformAddonsStory = (scenario: Parameters<typeof makeBillingWithPl
     const billing = makeBillingWithPlatformAddons(billingJson, scenario)
     useStorybookMocks({
         get: {
-            '/api/billing/': billing,
+            '/v1/billing/': billing,
         },
     })
     const product = billing.products.find((p) => p.type === 'platform_and_support')

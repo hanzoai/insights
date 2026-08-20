@@ -50,11 +50,11 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
     uuid: MOCK_TEAM_UUID,
     organization: MOCK_ORGANIZATION_ID,
     api_token: 'default-team-api-token',
-    secret_api_token: 'phs_default-team-secret-api-token',
-    secret_api_token_backup: 'phs_default-team-secret-api-token-backup',
+    secret_api_token: 'sk-default-team-secret-api-token',
+    secret_api_token_backup: 'sk-default-team-secret-api-token-backup',
     app_urls: ['https://hanzo.ai/', 'https://app.hanzo.ai', 'https://example.com', 'http://127.0.0.1:*'],
     recording_domains: ['https://recordings.hanzo.ai/'],
-    name: 'MockHog App + Marketing',
+    name: 'MockScript App + Marketing',
     created_at: '2020-06-30T09:53:35.932534Z',
     updated_at: '2022-03-17T16:09:21.566253Z',
     anonymize_ips: false,
@@ -192,7 +192,7 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
 
 export const MOCK_DEFAULT_PROJECT: ProjectType = {
     id: MOCK_TEAM_ID,
-    name: 'MockHog App + Marketing',
+    name: 'MockScript App + Marketing',
     organization_id: MOCK_ORGANIZATION_ID,
     created_at: '2020-06-30T09:53:35.932534Z',
     is_pending_deletion: false,
@@ -201,8 +201,8 @@ export const MOCK_DEFAULT_PROJECT: ProjectType = {
 export const MOCK_DEFAULT_ORGANIZATION: OrganizationType = {
     customer_id: null,
     id: MOCK_ORGANIZATION_ID,
-    name: 'MockHog',
-    slug: 'mockhog-fstn',
+    name: 'MockScript',
+    slug: 'mockscript-fstn',
     created_at: '2020-09-24T15:05:01.254111Z',
     updated_at: '2022-01-03T13:50:55.369557Z',
     membership_level: OrganizationMembershipLevel.Admin,
@@ -257,7 +257,6 @@ export const MOCK_DEFAULT_USER: UserType = {
     is_staff: true,
     is_impersonated: false,
     is_email_verified: true,
-    is_2fa_enabled: false,
     has_social_auth: false,
     has_sso_enforcement: false,
     shortcut_position: 'above',
@@ -300,7 +299,6 @@ export const MOCK_DEFAULT_ORGANIZATION_MEMBER: OrganizationMemberType = {
     level: OrganizationMembershipLevel.Owner,
     joined_at: '2020-09-24T15:05:26.758796Z',
     updated_at: '2020-09-24T15:05:26.758837Z',
-    is_2fa_enabled: false,
     has_social_auth: false,
     last_login: '2020-09-24T15:05:26.758796Z',
 }
@@ -319,7 +317,6 @@ export const MOCK_SECOND_ORGANIZATION_MEMBER: OrganizationMemberType = {
     level: OrganizationMembershipLevel.Member,
     joined_at: '2021-03-11T19:11:11Z',
     updated_at: '2021-03-11T19:11:11Z',
-    is_2fa_enabled: false,
     has_social_auth: false,
     last_login: '2020-09-24T15:05:26.758796Z',
 }
@@ -415,7 +412,7 @@ export const MOCK_DATA_COLOR_THEMES: DataColorThemeModel[] = [
         id: 1,
         name: 'Default Theme',
         colors: [
-            '#1d4aff',
+            '#3d3d3d',
             '#621da6',
             '#42827e',
             '#ce0e74',

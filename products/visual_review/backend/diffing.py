@@ -1,7 +1,7 @@
 """
 Diff processing and classification for visual review.
 
-Uses pixelhog.compare() for single-pass pixelmatch + SSIM + thumbnail.
+Uses pixelscript.compare() for single-pass pixelmatch + SSIM + thumbnail.
 Classifies snapshots as genuinely changed or rendering noise.
 
 Called by the Celery task; all business logic lives here.
@@ -13,7 +13,7 @@ from django.db.models import Q
 
 import structlog
 from blake3 import blake3
-from pixelhog import thumbnail as pixelhog_thumbnail
+from pixelscript import thumbnail as pixelscript_thumbnail
 
 from .db import WRITER_DB
 from .diff import THUMB_HEIGHT, THUMB_WIDTH, CompareResult, compare_images
@@ -44,7 +44,7 @@ def classify_compare_result(result: CompareResult) -> ChangeKind | None:
     drives `_diff_snapshot` below; keeping it here means the production
     branch and the tests can't drift.
 
-    Size mismatch is *not* a kind — pixelhog pads to the largest dims and
+    Size mismatch is *not* a kind — pixelscript pads to the largest dims and
     we still get a real pixel/SSIM answer over that padded image. The fact
     that sizes differed is recorded separately on `DiffMetadata`.
     """
@@ -220,7 +220,7 @@ def _generate_thumbnail_for_new(snapshot: RunSnapshot) -> None:
         return
 
     try:
-        webp_bytes = pixelhog_thumbnail(current_bytes, width=THUMB_WIDTH, height=THUMB_HEIGHT)
+        webp_bytes = pixelscript_thumbnail(current_bytes, width=THUMB_WIDTH, height=THUMB_HEIGHT)
     except Exception:
         logger.warning(
             "visual_review.thumbnail_generation_failed",

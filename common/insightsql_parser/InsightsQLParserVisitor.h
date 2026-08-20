@@ -351,15 +351,15 @@ public:
 
     virtual std::any visitColumnsReplaceItem(InsightsQLParser::ColumnsReplaceItemContext *context) = 0;
 
-    virtual std::any visitHogqlxChildElement(InsightsQLParser::HogqlxChildElementContext *context) = 0;
+    virtual std::any visitInsightsqlxChildElement(InsightsQLParser::InsightsqlxChildElementContext *context) = 0;
 
-    virtual std::any visitHogqlxText(InsightsQLParser::HogqlxTextContext *context) = 0;
+    virtual std::any visitInsightsqlxText(InsightsQLParser::InsightsqlxTextContext *context) = 0;
 
-    virtual std::any visitHogqlxTagElementClosed(InsightsQLParser::HogqlxTagElementClosedContext *context) = 0;
+    virtual std::any visitInsightsqlxTagElementClosed(InsightsQLParser::InsightsqlxTagElementClosedContext *context) = 0;
 
-    virtual std::any visitHogqlxTagElementNested(InsightsQLParser::HogqlxTagElementNestedContext *context) = 0;
+    virtual std::any visitInsightsqlxTagElementNested(InsightsQLParser::InsightsqlxTagElementNestedContext *context) = 0;
 
-    virtual std::any visitHogqlxTagAttribute(InsightsQLParser::HogqlxTagAttributeContext *context) = 0;
+    virtual std::any visitInsightsqlxTagAttribute(InsightsQLParser::InsightsqlxTagAttributeContext *context) = 0;
 
     virtual std::any visitWithExprList(InsightsQLParser::WithExprListContext *context) = 0;
 

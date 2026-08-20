@@ -1,15 +1,14 @@
 import { useValues } from 'kea'
 import { type ReactNode, useMemo } from 'react'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
-import { IconClock } from '@hanzo/icons'
 import { Collapse, Divider, Tag, ProfilePicture, Spinner, Tooltip } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/PropertyFiltersDisplay'
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
-import { HogInvocations } from 'scenes/insights-functions/invocations/HogInvocations'
+import { ScriptInvocations } from 'scenes/insights-functions/invocations/ScriptInvocations'
 
 import { batchWorkflowJobsLogic } from './batchWorkflowJobsLogic'
 import { OccurrencesList } from './insightsflows/steps/components/OccurrencesList'
@@ -24,7 +23,7 @@ import { InsightsFlowBatchJob } from './insightsflows/types'
 import { renderWorkflowLogMessage } from './logs/log-utils'
 import { workflowLogic } from './workflowLogic'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngMascot()
 
 const STATUS_TAG_TYPE: Record<InsightsFlowBatchJob['status'], 'success' | 'danger' | 'warning' | 'default'> = {
     completed: 'success',
@@ -63,7 +62,7 @@ function BatchRunHeader({ job }: { job: InsightsFlowBatchJob }): JSX.Element {
     )
 }
 
-function BatchRunInvocations({ job, hogFlowId }: { job: InsightsFlowBatchJob; hogFlowId: string }): JSX.Element {
+function BatchRunInvocations({ job, flowId }: { job: InsightsFlowBatchJob; flowId: string }): JSX.Element {
     const { workflow } = useValues(workflowLogic)
 
     // Broadcasts can be older than the flat list's 24h default, so anchor the window
@@ -79,9 +78,9 @@ function BatchRunInvocations({ job, hogFlowId }: { job: InsightsFlowBatchJob; ho
                 />
             </div>
             <div className="flex flex-col gap-2">
-                <HogInvocations
-                    id={hogFlowId}
-                    functionKind="hog_flow"
+                <ScriptInvocations
+                    id={flowId}
+                    functionKind="script_flow"
                     parentRunId={job.id}
                     defaultDateFrom={defaultDateFrom}
                     compact
@@ -187,7 +186,7 @@ export function WorkflowBatchInvocations({ id }: { id: string }): JSX.Element {
                     panels={jobs.map((job) => ({
                         key: job.id,
                         header: <BatchRunHeader job={job} />,
-                        content: <BatchRunInvocations job={job} hogFlowId={id} />,
+                        content: <BatchRunInvocations job={job} flowId={id} />,
                     }))}
                 />
             </div>

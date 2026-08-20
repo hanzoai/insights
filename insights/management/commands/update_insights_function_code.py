@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 
 import structlog
 
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_script
 
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
@@ -143,24 +143,24 @@ class Command(BaseCommand):
                 if not destination.script:
                     continue
 
-                new_hog = destination.script
+                new_script = destination.script
                 for replacement in replaceOption["replacements"]:
-                    if replacement["from_string"] in new_hog:
-                        new_hog = new_hog.replace(replacement["from_string"], replacement["to_string"])
+                    if replacement["from_string"] in new_script:
+                        new_script = new_script.replace(replacement["from_string"], replacement["to_string"])
 
-                if new_hog == destination.script:
+                if new_script == destination.script:
                     continue
 
                 # A single destination with uncompilable (e.g. hand-edited) script must not abort the whole run.
                 try:
-                    new_bytecode = compile_hog(new_hog, destination.type)
+                    new_bytecode = compile_script(new_script, destination.type)
                 except Exception as e:
                     failed.append((str(destination.id), destination.team_id, destination.enabled, str(e)))
                     continue
 
                 updated_count += 1
                 if not dry_run:
-                    destination.script = new_hog
+                    destination.script = new_script
                     destination.bytecode = new_bytecode
                     destination.save(update_fields=["script", "bytecode"])
 

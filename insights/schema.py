@@ -123,18 +123,14 @@ from insights.schema_enums import (
     GoogleAdsTableKeywords as GoogleAdsTableKeywords,
     GradientScaleMode as GradientScaleMode,
     HeatmapSortOrder as HeatmapSortOrder,
-    MascotActorAccessoryOption as MascotActorAccessoryOption,
-    MascotActorColorOption as MascotActorColorOption,
-    MascotActorSkinOption as MascotActorSkinOption,
     HideViewedRecordings as HideViewedRecordings,
-    HogLanguage as HogLanguage,
-    InsightsQLAlertEvaluation as InsightsQLAlertEvaluation,
     HrefMatching as HrefMatching,
     InCohortVia as InCohortVia,
     InfinityValue as InfinityValue,
     InlineCohortCalculation as InlineCohortCalculation,
     InsightFilterProperty as InsightFilterProperty,
     InsightNodeKind as InsightNodeKind,
+    InsightsQLAlertEvaluation as InsightsQLAlertEvaluation,
     InsightThresholdType as InsightThresholdType,
     IntegrationKind as IntegrationKind,
     IntervalType as IntervalType,
@@ -162,6 +158,9 @@ from insights.schema_enums import (
     MarketingAnalyticsDrillDownLevel as MarketingAnalyticsDrillDownLevel,
     MarketingAnalyticsOrderByEnum as MarketingAnalyticsOrderByEnum,
     MarketingAnalyticsSchemaFieldTypes as MarketingAnalyticsSchemaFieldTypes,
+    MascotActorAccessoryOption as MascotActorAccessoryOption,
+    MascotActorColorOption as MascotActorColorOption,
+    MascotActorSkinOption as MascotActorSkinOption,
     MatchedOn as MatchedOn,
     MatchField as MatchField,
     MaterializationMode as MaterializationMode,
@@ -233,8 +232,10 @@ from insights.schema_enums import (
     RetentionReference as RetentionReference,
     RetentionType as RetentionType,
     Scale as Scale,
+    ScriptLanguage as ScriptLanguage,
     SessionAttributionGroupBy as SessionAttributionGroupBy,
     SessionsV2JoinMode as SessionsV2JoinMode,
+    SessionTableVersion as SessionTableVersion,
     SidebarDensity as SidebarDensity,
     SlackIntegrationScope as SlackIntegrationScope,
     SlackIntegrationScopeInReview as SlackIntegrationScopeInReview,
@@ -349,7 +350,7 @@ class AssistantDataVisualizationAxisDisplaySettings(BaseModel):
     )
     color: str | None = Field(
         default=None,
-        description="Custom color for this series as a hex string (e.g. `#1d4aff`).",
+        description="Custom color for this series as a hex string (e.g. `#3d3d3d`).",
     )
     displayType: DisplayType | None = Field(
         default=None,
@@ -563,8 +564,8 @@ class AssistantInsightsQLPropertyFilter(BaseModel):
     key: str = Field(
         ...,
         description=(
-            "A InsightsQL boolean expression used as a filter condition.\n\nExamples:\n-"
-            " Filter where a property exceeds a threshold:"
+            "A InsightsQL boolean expression used as a filter"
+            " condition.\n\nExamples:\n- Filter where a property exceeds a threshold:"
             " `toFloat(properties.load_time) > 5.0`\n- Filter with string matching:"
             " `properties.$current_url LIKE '%/pricing%'`\n- Filter with multiple"
             " conditions: `properties.$browser = 'Chrome' AND"
@@ -574,8 +575,8 @@ class AssistantInsightsQLPropertyFilter(BaseModel):
     type: Literal["insightsql"] = Field(
         default="insightsql",
         description=(
-            "Filter by a InsightsQL boolean expression for advanced filtering that can't be"
-            " expressed with standard property filters."
+            "Filter by a InsightsQL boolean expression for advanced filtering that"
+            " can't be expressed with standard property filters."
         ),
     )
 
@@ -616,16 +617,16 @@ class AssistantPathCleaningFilter(BaseModel):
         description=(
             "A human-readable alias that replaces matched path patterns in the"
             " visualization. For example, `/user/:id/profile` to replace"
-            " `/user/123/profile`. Uses Datastore `replaceRegexpAll` replacement"
-            " syntax — use `\\\\1` for capture group back-references."
+            " `/user/123/profile`. Uses Datastore `replaceRegexpAll` replacement syntax"
+            " — use `\\\\1` for capture group back-references."
         ),
     )
     regex: str = Field(
         ...,
         description=(
-            "A Datastore regex pattern to match against path values. Matched paths"
-            " will be replaced with the alias. For example, `\\/user\\/\\d+\\/profile`"
-            " to match any user profile URL."
+            "A Datastore regex pattern to match against path values. Matched paths will"
+            " be replaced with the alias. For example, `\\/user\\/\\d+\\/profile` to"
+            " match any user profile URL."
         ),
     )
 
@@ -1500,7 +1501,7 @@ class HeatmapGradientStop(BaseModel):
     value: float
 
 
-class HogCompileResponse(BaseModel):
+class ScriptCompileResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1518,7 +1519,7 @@ class InsightsQLVariable(BaseModel):
     variableId: str
 
 
-class HogQueryResponse(BaseModel):
+class ScriptQueryResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1998,7 +1999,7 @@ class MaxEvaluationContext(BaseModel):
     )
     description: str | None = None
     evaluation_type: EvaluationRuntime
-    hog_source: str | None = None
+    script_source: str | None = None
     id: str
     name: str | None = None
     type: Literal["evaluation"] = "evaluation"
@@ -3596,10 +3597,10 @@ class AssistantPathsFilter(BaseModel):
             " `$current_url`), with trailing slashes stripped. `$screen` - mobile"
             " screen views. Path values are screen names (from `$screen_name`)."
             " `custom_event` - custom events (any event not starting with `$`). Path"
-            " values are event names. `insightsql` - custom InsightsQL expression defined in"
-            " `pathsInsightsQLExpression`. Path values come from evaluating the expression."
-            " You can combine multiple types. If not specified, all events are included"
-            " without type filtering."
+            " values are event names. `insightsql` - custom InsightsQL expression"
+            " defined in `pathsInsightsQLExpression`. Path values come from evaluating"
+            " the expression. You can combine multiple types. If not specified, all"
+            " events are included without type filtering."
         ),
     )
     localPathCleaningFilters: list[AssistantPathCleaningFilter] | None = Field(
@@ -3668,9 +3669,9 @@ class AssistantPathsFilter(BaseModel):
     pathsInsightsQLExpression: str | None = Field(
         default=None,
         description=(
-            "A InsightsQL expression to use as the path item. Required when `insightsql` is"
-            " included in `includeEventTypes`. For example, `properties.$current_url`"
-            " to use the current URL as the path item."
+            "A InsightsQL expression to use as the path item. Required when"
+            " `insightsql` is included in `includeEventTypes`. For example,"
+            " `properties.$current_url` to use the current URL as the path item."
         ),
     )
     startPoint: str | None = Field(
@@ -4643,8 +4644,8 @@ class ExperimentApiEventSource(BaseModel):
     math_insightsql: str | None = Field(
         default=None,
         description=(
-            "InsightsQL aggregation expression. Required when math is 'insightsql' — without it"
-            " the metric silently falls back to a plain count/sum."
+            "InsightsQL aggregation expression. Required when math is 'insightsql' —"
+            " without it the metric silently falls back to a plain count/sum."
         ),
     )
     math_property: str | None = Field(
@@ -5122,8 +5123,9 @@ class InsightsQLQueryModifiers(BaseModel):
             " primary, cpp runs as a sampled shadow). `*_shadow` modes return the"
             " primary result and sample-compare against the other parser, reporting"
             " divergences without failing the request. The `rust_py_*` modes drive the"
-            " same hand-rolled Rust parser as `rust_*` but build `insights.insightsql.ast`"
-            " dataclass instances directly via PyO3, skipping the JSON round-trip."
+            " same hand-rolled Rust parser as `rust_*` but build"
+            " `insights.insightsql.ast` dataclass instances directly via PyO3, skipping"
+            " the JSON round-trip."
         ),
     )
     personsArgMaxVersion: PersonsArgMaxVersion | None = None
@@ -5150,6 +5152,7 @@ class InsightsQLQueryModifiers(BaseModel):
             " references one (e.g. `$entry_current_url`)."
         ),
     )
+    sessionTableVersion: SessionTableVersion | None = None
     sessionsV2JoinMode: SessionsV2JoinMode | None = None
     timings: bool | None = None
     typeAwareCastSimplification: bool | None = Field(
@@ -5178,14 +5181,16 @@ class InsightsQLQueryModifiers(BaseModel):
     )
 
 
-class HogQuery(BaseModel):
+class ScriptQuery(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     code: str | None = None
-    kind: Literal["HogQuery"] = "HogQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
-    response: HogQueryResponse | None = None
+    kind: Literal["ScriptQuery"] = "ScriptQuery"
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
+    response: ScriptQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
 
@@ -6141,7 +6146,10 @@ class SavedInsightNode(BaseModel):
     showExport: bool | None = Field(default=None, description="Show the export button")
     showFilters: bool | None = None
     showHeader: bool | None = None
-    showInsightsQLEditor: bool | None = Field(default=None, description="Include a InsightsQL query editor above InsightsQL tables")
+    showInsightsQLEditor: bool | None = Field(
+        default=None,
+        description="Include a InsightsQL query editor above InsightsQL tables",
+    )
     showLastComputation: bool | None = None
     showLastComputationRefresh: bool | None = None
     showOpenEditorButton: bool | None = Field(
@@ -6205,7 +6213,9 @@ class SessionAttributionExplorerQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6234,11 +6244,11 @@ class SessionAttributionExplorerQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -6257,7 +6267,9 @@ class SessionBatchEventsQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -6294,11 +6306,11 @@ class SessionBatchEventsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -6317,7 +6329,9 @@ class SessionQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6345,11 +6359,11 @@ class SessionQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -6427,7 +6441,9 @@ class SessionsQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6456,11 +6472,11 @@ class SessionsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -6477,7 +6493,9 @@ class SessionsTimelineQueryResponse(BaseModel):
     )
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6504,11 +6522,11 @@ class SessionsTimelineQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -6726,7 +6744,9 @@ class StickinessQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6753,11 +6773,11 @@ class StickinessQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -6767,7 +6787,9 @@ class SuggestedQuestionsQuery(BaseModel):
         extra="forbid",
     )
     kind: Literal["SuggestedQuestionsQuery"] = "SuggestedQuestionsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: SuggestedQuestionsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -7016,7 +7038,9 @@ class TestBasicQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7043,11 +7067,11 @@ class TestBasicQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7071,7 +7095,9 @@ class TestCachedBasicQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -7101,11 +7127,11 @@ class TestCachedBasicQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7136,7 +7162,9 @@ class TraceQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7164,11 +7192,11 @@ class TraceQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7188,7 +7216,9 @@ class TraceSpansAggregationQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7215,11 +7245,11 @@ class TraceSpansAggregationQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7239,7 +7269,9 @@ class TraceSpansAttributeBreakdownQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7266,11 +7298,11 @@ class TraceSpansAttributeBreakdownQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7288,7 +7320,9 @@ class TraceSpansQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -7317,11 +7351,11 @@ class TraceSpansQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7341,7 +7375,9 @@ class TraceSpansSymbolStatsQueryResponse(BaseModel):
         description=("Which bucketing was applied: `line` when no symbols were supplied, `symbol` otherwise."),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7368,11 +7404,11 @@ class TraceSpansSymbolStatsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7392,7 +7428,9 @@ class TraceSpansTreeQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7419,11 +7457,11 @@ class TraceSpansTreeQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7442,7 +7480,9 @@ class TracesQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7470,11 +7510,11 @@ class TracesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7644,7 +7684,9 @@ class TrendsQueryResponse(BaseModel):
     )
     hasMore: bool | None = Field(default=None, description="Wether more breakdown values are available.")
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7671,11 +7713,11 @@ class TrendsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7713,7 +7755,9 @@ class UsageMetricsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7740,11 +7784,11 @@ class UsageMetricsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7809,7 +7853,9 @@ class WebBotsTableQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7838,11 +7884,11 @@ class WebBotsTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7861,7 +7907,9 @@ class WebExternalClicksTableQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7891,11 +7939,11 @@ class WebExternalClicksTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7914,7 +7962,9 @@ class WebGoalsQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
@@ -7945,11 +7995,11 @@ class WebGoalsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -7965,7 +8015,9 @@ class WebNotableChangesQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7994,11 +8046,11 @@ class WebNotableChangesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -8016,7 +8068,9 @@ class WebOverviewQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -8045,11 +8099,11 @@ class WebOverviewQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -8067,7 +8121,9 @@ class WebPageURLSearchQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -8095,11 +8151,11 @@ class WebPageURLSearchQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -8118,7 +8174,9 @@ class WebStatsTableQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     preComputeStale: bool | None = Field(
         default=None,
@@ -8156,11 +8214,11 @@ class WebStatsTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -8219,7 +8277,9 @@ class AccountsQueryResponse(BaseModel):
         default=None,
         description=("When `metrics` is set on the query, the aggregated values in the same order."),
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -8248,11 +8308,11 @@ class AccountsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -8268,7 +8328,9 @@ class ActorsPropertyTaxonomyQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -8295,11 +8357,11 @@ class ActorsPropertyTaxonomyQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -8319,7 +8381,9 @@ class ActorsQueryResponse(BaseModel):
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int
     missing_actors_count: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -8348,11 +8412,11 @@ class ActorsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -8368,7 +8432,9 @@ class AnalyticsQueryResponseBase(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -8395,11 +8461,11 @@ class AnalyticsQueryResponseBase(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -9148,8 +9214,8 @@ class AssistantStickinessActionsNode(BaseModel):
     math_insightsql: str | None = Field(
         default=None,
         description=(
-            "Custom InsightsQL expression for aggregation. Use when the predefined `math`"
-            " types are not sufficient. When set, `math` must be set to"
+            "Custom InsightsQL expression for aggregation. Use when the predefined"
+            " `math` types are not sufficient. When set, `math` must be set to"
             " `insightsql`.\n\nExamples:\n- Sum a numeric property:"
             " `sum(toFloat(properties.$revenue))`\n- Average of a property:"
             " `avg(toFloat(properties.load_time))`\n- Count distinct values:"
@@ -9209,8 +9275,8 @@ class AssistantStickinessEventsNode(BaseModel):
     math_insightsql: str | None = Field(
         default=None,
         description=(
-            "Custom InsightsQL expression for aggregation. Use when the predefined `math`"
-            " types are not sufficient. When set, `math` must be set to"
+            "Custom InsightsQL expression for aggregation. Use when the predefined"
+            " `math` types are not sufficient. When set, `math` must be set to"
             " `insightsql`.\n\nExamples:\n- Sum a numeric property:"
             " `sum(toFloat(properties.$revenue))`\n- Average of a property:"
             " `avg(toFloat(properties.load_time))`\n- Count distinct values:"
@@ -9378,8 +9444,8 @@ class AssistantTrendsActionsNode(BaseModel):
     math_insightsql: str | None = Field(
         default=None,
         description=(
-            "Custom InsightsQL expression for aggregation. Use when the predefined `math`"
-            " types are not sufficient. When set, `math` must be set to"
+            "Custom InsightsQL expression for aggregation. Use when the predefined"
+            " `math` types are not sufficient. When set, `math` must be set to"
             " `insightsql`.\n\nExamples:\n- Sum a numeric property:"
             " `sum(toFloat(properties.$revenue))`\n- Average of a property:"
             " `avg(toFloat(properties.load_time))`\n- Count distinct values:"
@@ -9441,8 +9507,8 @@ class AssistantTrendsEventsNode(BaseModel):
     math_insightsql: str | None = Field(
         default=None,
         description=(
-            "Custom InsightsQL expression for aggregation. Use when the predefined `math`"
-            " types are not sufficient. When set, `math` must be set to"
+            "Custom InsightsQL expression for aggregation. Use when the predefined"
+            " `math` types are not sufficient. When set, `math` must be set to"
             " `insightsql`.\n\nExamples:\n- Sum a numeric property:"
             " `sum(toFloat(properties.$revenue))`\n- Average of a property:"
             " `avg(toFloat(properties.load_time))`\n- Count distinct values:"
@@ -9507,7 +9573,7 @@ class AssistantTrendsGroupNode(BaseModel):
     math_group_type_index: MathGroupTypeIndex | None = None
     math_insightsql: str | None = Field(
         default=None,
-        description="Custom InsightsQL aggregation. When set, `math` must be `insightsql`.",
+        description=("Custom InsightsQL aggregation. When set, `math` must be `insightsql`."),
     )
     math_multiplier: float | None = None
     math_property: str | None = None
@@ -9902,7 +9968,9 @@ class CachedAccountsQueryResponse(BaseModel):
         default=None,
         description=("When `metrics` is set on the query, the aggregated values in the same order."),
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int
     query_metadata: dict[str, Any] | None = None
@@ -9934,11 +10002,11 @@ class CachedAccountsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -9962,7 +10030,9 @@ class CachedActorsPropertyTaxonomyQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9992,11 +10062,11 @@ class CachedActorsPropertyTaxonomyQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10024,7 +10094,9 @@ class CachedActorsQueryResponse(BaseModel):
     last_refresh: AwareDatetime
     limit: int
     missing_actors_count: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int
     query_metadata: dict[str, Any] | None = None
@@ -10056,11 +10128,11 @@ class CachedActorsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10085,7 +10157,9 @@ class CachedCalendarHeatmapQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -10115,11 +10189,11 @@ class CachedCalendarHeatmapQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10145,7 +10219,9 @@ class CachedDocumentSimilarityQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -10176,11 +10252,11 @@ class CachedDocumentSimilarityQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10204,7 +10280,9 @@ class CachedEndpointsUsageOverviewQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -10234,11 +10312,11 @@ class CachedEndpointsUsageOverviewQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10265,7 +10343,9 @@ class CachedEndpointsUsageTableQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -10297,11 +10377,11 @@ class CachedEndpointsUsageTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10325,7 +10405,9 @@ class CachedEndpointsUsageTrendsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -10355,11 +10437,11 @@ class CachedEndpointsUsageTrendsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10383,7 +10465,9 @@ class CachedErrorTrackingBreakdownsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -10413,11 +10497,11 @@ class CachedErrorTrackingBreakdownsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10443,7 +10527,9 @@ class CachedErrorTrackingSimilarIssuesQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -10474,11 +10560,11 @@ class CachedErrorTrackingSimilarIssuesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10504,7 +10590,9 @@ class CachedEventTaxonomyQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -10535,11 +10623,11 @@ class CachedEventTaxonomyQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10566,7 +10654,9 @@ class CachedEventsQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
@@ -10599,11 +10689,11 @@ class CachedEventsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10661,7 +10751,9 @@ class CachedFunnelCorrelationResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -10693,11 +10785,11 @@ class CachedFunnelCorrelationResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10721,7 +10813,9 @@ class CachedFunnelsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -10758,11 +10852,11 @@ class CachedFunnelsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10790,7 +10884,9 @@ class CachedGroupsQueryResponse(BaseModel):
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     last_refresh: AwareDatetime
     limit: int
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int
     query_metadata: dict[str, Any] | None = None
@@ -10822,11 +10918,11 @@ class CachedGroupsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10850,7 +10946,9 @@ class CachedLifecycleQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -10880,11 +10978,11 @@ class CachedLifecycleQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10911,7 +11009,9 @@ class CachedLogsQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
@@ -10943,11 +11043,11 @@ class CachedLogsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -10971,7 +11071,9 @@ class CachedMCPHarnessBreakdownQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11001,11 +11103,11 @@ class CachedMCPHarnessBreakdownQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11029,7 +11131,9 @@ class CachedMCPToolCallBreakdownQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11059,11 +11163,11 @@ class CachedMCPToolCallBreakdownQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11087,7 +11191,9 @@ class CachedMCPToolCallsAndErrorsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11117,11 +11223,11 @@ class CachedMCPToolCallsAndErrorsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11145,7 +11251,9 @@ class CachedMCPToolCategoriesQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11175,11 +11283,11 @@ class CachedMCPToolCategoriesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11203,7 +11311,9 @@ class CachedMCPToolCategoryCountsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11233,11 +11343,11 @@ class CachedMCPToolCategoryCountsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11261,7 +11371,9 @@ class CachedMCPToolDailyStatsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11291,11 +11403,11 @@ class CachedMCPToolDailyStatsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11319,7 +11431,9 @@ class CachedMCPToolDescriptionsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11349,11 +11463,11 @@ class CachedMCPToolDescriptionsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11377,7 +11491,9 @@ class CachedMCPToolFailureOccurrencesQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11407,11 +11523,11 @@ class CachedMCPToolFailureOccurrencesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11435,7 +11551,9 @@ class CachedMCPToolFailuresQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11465,11 +11583,11 @@ class CachedMCPToolFailuresQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11493,7 +11611,9 @@ class CachedMCPToolNeighborsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11523,11 +11643,11 @@ class CachedMCPToolNeighborsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11551,7 +11671,9 @@ class CachedMCPToolQualityDailyStatsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11581,11 +11703,11 @@ class CachedMCPToolQualityDailyStatsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11609,7 +11731,9 @@ class CachedMCPToolQualityRowsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11639,11 +11763,11 @@ class CachedMCPToolQualityRowsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11667,7 +11791,9 @@ class CachedMCPToolSampleIntentsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11697,11 +11823,11 @@ class CachedMCPToolSampleIntentsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11725,7 +11851,9 @@ class CachedMCPToolStatsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11758,11 +11886,11 @@ class CachedMCPToolStatsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11786,7 +11914,9 @@ class CachedMCPToolTopUsersQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11816,11 +11946,11 @@ class CachedMCPToolTopUsersQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11844,7 +11974,9 @@ class CachedMarketingAnalyticsAggregatedQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -11875,11 +12007,11 @@ class CachedMarketingAnalyticsAggregatedQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11918,7 +12050,9 @@ class CachedMarketingAnalyticsAttributionPathsQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -11950,11 +12084,11 @@ class CachedMarketingAnalyticsAttributionPathsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -11995,7 +12129,9 @@ class CachedMarketingAnalyticsAttributionQueryResponse(BaseModel):
     last_refresh: AwareDatetime
     limit: int | None = None
     models: list[AttributionMode] = Field(..., description="Model order for the column groups.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -12031,11 +12167,11 @@ class CachedMarketingAnalyticsAttributionQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12062,7 +12198,9 @@ class CachedMarketingAnalyticsTableQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -12095,11 +12233,11 @@ class CachedMarketingAnalyticsTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12123,7 +12261,9 @@ class CachedMetricsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -12153,11 +12293,11 @@ class CachedMetricsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12184,7 +12324,9 @@ class CachedNonIntegratedConversionsTableQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -12217,11 +12359,11 @@ class CachedNonIntegratedConversionsTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12245,7 +12387,9 @@ class CachedPathsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -12275,11 +12419,11 @@ class CachedPathsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12303,7 +12447,9 @@ class CachedPropertyValuesQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -12333,11 +12479,11 @@ class CachedPropertyValuesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12362,7 +12508,9 @@ class CachedRecordingsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     next_cursor: str | None = Field(
         default=None,
@@ -12396,11 +12544,11 @@ class CachedRecordingsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12424,7 +12572,9 @@ class CachedRetentionQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -12454,11 +12604,11 @@ class CachedRetentionQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12485,7 +12635,9 @@ class CachedSessionAttributionExplorerQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -12517,11 +12669,11 @@ class CachedSessionAttributionExplorerQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12548,7 +12700,9 @@ class CachedSessionBatchEventsQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
@@ -12588,11 +12742,11 @@ class CachedSessionBatchEventsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12619,7 +12773,9 @@ class CachedSessionQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -12650,11 +12806,11 @@ class CachedSessionQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12681,7 +12837,9 @@ class CachedSessionsQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -12713,11 +12871,11 @@ class CachedSessionsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12742,7 +12900,9 @@ class CachedSessionsTimelineQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -12772,11 +12932,11 @@ class CachedSessionsTimelineQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12800,7 +12960,9 @@ class CachedStickinessQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -12830,11 +12992,11 @@ class CachedStickinessQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12886,7 +13048,9 @@ class CachedTeamTaxonomyQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -12917,11 +13081,11 @@ class CachedTeamTaxonomyQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -12987,7 +13151,9 @@ class CachedTraceQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -13018,11 +13184,11 @@ class CachedTraceQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13050,7 +13216,9 @@ class CachedTraceSpansAggregationQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -13080,11 +13248,11 @@ class CachedTraceSpansAggregationQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13112,7 +13280,9 @@ class CachedTraceSpansAttributeBreakdownQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -13142,11 +13312,11 @@ class CachedTraceSpansAttributeBreakdownQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13172,7 +13342,9 @@ class CachedTraceSpansQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
@@ -13204,11 +13376,11 @@ class CachedTraceSpansQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13236,7 +13408,9 @@ class CachedTraceSpansSymbolStatsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -13266,11 +13440,11 @@ class CachedTraceSpansSymbolStatsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13298,7 +13472,9 @@ class CachedTraceSpansTreeQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -13328,11 +13504,11 @@ class CachedTraceSpansTreeQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13359,7 +13535,9 @@ class CachedTracesQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -13390,11 +13568,11 @@ class CachedTracesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13420,7 +13598,9 @@ class CachedTrendsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -13450,11 +13630,11 @@ class CachedTrendsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13478,7 +13658,9 @@ class CachedUsageMetricsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -13508,11 +13690,11 @@ class CachedUsageMetricsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13536,7 +13718,9 @@ class CachedVectorSearchQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -13566,11 +13750,11 @@ class CachedVectorSearchQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13597,7 +13781,9 @@ class CachedWebBotsTableQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -13629,11 +13815,11 @@ class CachedWebBotsTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13660,7 +13846,9 @@ class CachedWebExternalClicksTableQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -13693,11 +13881,11 @@ class CachedWebExternalClicksTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13724,7 +13912,9 @@ class CachedWebGoalsQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
@@ -13758,11 +13948,11 @@ class CachedWebGoalsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13786,7 +13976,9 @@ class CachedWebNotableChangesQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_metadata: dict[str, Any] | None = None
@@ -13818,11 +14010,11 @@ class CachedWebNotableChangesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13848,7 +14040,9 @@ class CachedWebOverviewQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_metadata: dict[str, Any] | None = None
@@ -13880,11 +14074,11 @@ class CachedWebOverviewQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13910,7 +14104,9 @@ class CachedWebPageURLSearchQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_metadata: dict[str, Any] | None = None
@@ -13941,11 +14137,11 @@ class CachedWebPageURLSearchQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -13972,7 +14168,9 @@ class CachedWebStatsTableQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     preComputeStale: bool | None = Field(
@@ -14013,11 +14211,11 @@ class CachedWebStatsTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14041,7 +14239,9 @@ class CachedWebVitalsPathBreakdownQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_metadata: dict[str, Any] | None = None
@@ -14072,11 +14272,11 @@ class CachedWebVitalsPathBreakdownQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14093,7 +14293,9 @@ class CalendarHeatmapResponse(BaseModel):
     )
     hasMore: bool | None = Field(default=None, description="Wether more breakdown values are available.")
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -14120,11 +14322,11 @@ class CalendarHeatmapResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14402,7 +14604,9 @@ class Response(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -14432,11 +14636,11 @@ class Response(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14456,7 +14660,9 @@ class Response1(BaseModel):
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int
     missing_actors_count: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -14485,11 +14691,11 @@ class Response1(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14509,7 +14715,9 @@ class Response2(BaseModel):
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -14538,11 +14746,11 @@ class Response2(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14560,7 +14768,9 @@ class Response4(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -14589,11 +14799,11 @@ class Response4(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14612,7 +14822,9 @@ class Response5(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     preComputeStale: bool | None = Field(
         default=None,
@@ -14650,11 +14862,11 @@ class Response5(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14673,7 +14885,9 @@ class Response6(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -14703,11 +14917,11 @@ class Response6(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14726,7 +14940,9 @@ class Response7(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -14755,11 +14971,11 @@ class Response7(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14778,7 +14994,9 @@ class Response8(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
@@ -14809,11 +15027,11 @@ class Response8(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14829,7 +15047,9 @@ class Response9(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -14857,11 +15077,11 @@ class Response9(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14880,7 +15100,9 @@ class Response10(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -14909,11 +15131,11 @@ class Response10(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14932,7 +15154,9 @@ class Response11(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -14961,11 +15185,11 @@ class Response11(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -14984,7 +15208,9 @@ class Response12(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15014,11 +15240,11 @@ class Response12(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15034,7 +15260,9 @@ class Response13(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -15062,11 +15290,11 @@ class Response13(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15085,7 +15313,9 @@ class Response14(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15115,11 +15345,11 @@ class Response14(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15138,7 +15368,9 @@ class Response19(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15166,11 +15398,11 @@ class Response19(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15189,7 +15421,9 @@ class Response21(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15218,11 +15452,11 @@ class Response21(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15246,7 +15480,9 @@ class Response22(BaseModel):
         default=None,
         description=("When `metrics` is set on the query, the aggregated values in the same order."),
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15275,11 +15511,11 @@ class Response22(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15415,7 +15651,9 @@ class DocumentSimilarityQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15443,11 +15681,11 @@ class DocumentSimilarityQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15497,8 +15735,8 @@ class EndpointRunRequest(BaseModel):
         default=None,
         description=(
             "Variables to parameterize the endpoint query. The key is the variable name"
-            " and the value is the variable value.\n\nFor InsightsQL endpoints:   Keys must"
-            " match a variable `code_name` defined in the query (referenced as"
+            " and the value is the variable value.\n\nFor InsightsQL endpoints:   Keys"
+            " must match a variable `code_name` defined in the query (referenced as"
             ' `{variables.code_name}`).   Example: `{"event_name": "$pageview"}`\n\nFor'
             " non-materialized insight endpoints (e.g. TrendsQuery):   - `date_from`"
             " and `date_to` are built-in variables that filter the date range.    "
@@ -15526,7 +15764,9 @@ class EndpointsUsageOverviewQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -15553,11 +15793,11 @@ class EndpointsUsageOverviewQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15576,7 +15816,9 @@ class EndpointsUsageTableQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15605,11 +15847,11 @@ class EndpointsUsageTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15625,7 +15867,9 @@ class EndpointsUsageTrendsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -15652,11 +15896,11 @@ class EndpointsUsageTrendsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15708,7 +15952,9 @@ class ErrorTrackingBreakdownsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -15735,11 +15981,11 @@ class ErrorTrackingBreakdownsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15809,7 +16055,9 @@ class ErrorTrackingQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15837,11 +16085,11 @@ class ErrorTrackingQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15873,7 +16121,9 @@ class ErrorTrackingSimilarIssuesQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15901,11 +16151,11 @@ class ErrorTrackingSimilarIssuesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -15923,7 +16173,9 @@ class EventTaxonomyQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15951,11 +16203,11 @@ class EventTaxonomyQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16029,7 +16281,9 @@ class EventsQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -16059,11 +16313,11 @@ class EventsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16217,7 +16471,9 @@ class FunnelCorrelationResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -16246,11 +16502,11 @@ class FunnelCorrelationResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16388,7 +16644,9 @@ class FunnelsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -16422,11 +16680,11 @@ class FunnelsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16464,7 +16722,9 @@ class GroupsQueryResponse(BaseModel):
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -16493,11 +16753,11 @@ class GroupsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16564,7 +16824,9 @@ class InsightsQLQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
     metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -16624,7 +16886,9 @@ class InsightActorsQueryBase(BaseModel):
     )
     includeRecordings: bool | None = None
     kind: NodeKind
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: ActorsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -16744,7 +17008,9 @@ class LifecycleQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -16771,11 +17037,11 @@ class LifecycleQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16792,7 +17058,9 @@ class LogAttributesQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -16819,11 +17087,11 @@ class LogAttributesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16839,7 +17107,9 @@ class LogValuesQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -16866,11 +17136,11 @@ class LogValuesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16889,7 +17159,9 @@ class LogsQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -16918,11 +17190,11 @@ class LogsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -16956,7 +17228,9 @@ class MCPHarnessBreakdownQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -16983,11 +17257,11 @@ class MCPHarnessBreakdownQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17003,7 +17277,9 @@ class MCPToolCallBreakdownQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17030,11 +17306,11 @@ class MCPToolCallBreakdownQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17050,7 +17326,9 @@ class MCPToolCallsAndErrorsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17077,11 +17355,11 @@ class MCPToolCallsAndErrorsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17097,7 +17375,9 @@ class MCPToolCategoriesQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17124,11 +17404,11 @@ class MCPToolCategoriesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17144,7 +17424,9 @@ class MCPToolCategoryCountsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17171,11 +17453,11 @@ class MCPToolCategoryCountsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17191,7 +17473,9 @@ class MCPToolDailyStatsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17218,11 +17502,11 @@ class MCPToolDailyStatsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17238,7 +17522,9 @@ class MCPToolDescriptionsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17265,11 +17551,11 @@ class MCPToolDescriptionsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17285,7 +17571,9 @@ class MCPToolFailureOccurrencesQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17312,11 +17600,11 @@ class MCPToolFailureOccurrencesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17332,7 +17620,9 @@ class MCPToolFailuresQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17359,11 +17649,11 @@ class MCPToolFailuresQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17379,7 +17669,9 @@ class MCPToolNeighborsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17406,11 +17698,11 @@ class MCPToolNeighborsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17426,7 +17718,9 @@ class MCPToolQualityDailyStatsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17453,11 +17747,11 @@ class MCPToolQualityDailyStatsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17473,7 +17767,9 @@ class MCPToolQualityRowsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17500,11 +17796,11 @@ class MCPToolQualityRowsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17520,7 +17816,9 @@ class MCPToolSampleIntentsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17547,11 +17845,11 @@ class MCPToolSampleIntentsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17567,7 +17865,9 @@ class MCPToolStatsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17597,11 +17897,11 @@ class MCPToolStatsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17617,7 +17917,9 @@ class MCPToolTopUsersQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17644,11 +17946,11 @@ class MCPToolTopUsersQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17664,7 +17966,9 @@ class MarketingAnalyticsAggregatedQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17692,11 +17996,11 @@ class MarketingAnalyticsAggregatedQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17727,7 +18031,9 @@ class MarketingAnalyticsAttributionPathsQueryResponse(BaseModel):
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -17756,11 +18062,11 @@ class MarketingAnalyticsAttributionPathsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17793,7 +18099,9 @@ class MarketingAnalyticsAttributionQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
     models: list[AttributionMode] = Field(..., description="Model order for the column groups.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -17826,11 +18134,11 @@ class MarketingAnalyticsAttributionQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17862,7 +18170,9 @@ class MarketingAnalyticsTableQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -17892,11 +18202,11 @@ class MarketingAnalyticsTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -17935,7 +18245,9 @@ class MetricsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -17962,11 +18274,11 @@ class MetricsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18018,7 +18330,9 @@ class NonIntegratedConversionsTableQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18048,11 +18362,11 @@ class NonIntegratedConversionsTableQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18107,7 +18421,9 @@ class PathsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -18134,11 +18450,11 @@ class PathsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18155,7 +18471,9 @@ class PersonsNode(BaseModel):
     )
     kind: Literal["PersonsNode"] = "PersonsNode"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     properties: list[AnyPropertyFilterDiscriminated] | None = Field(
         default=None, description="Properties configurable in the interface"
@@ -18226,7 +18544,9 @@ class PropertyValuesQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -18253,11 +18573,11 @@ class PropertyValuesQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18276,7 +18596,9 @@ class QueryResponseAlternative1(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -18306,11 +18628,11 @@ class QueryResponseAlternative1(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18329,7 +18651,9 @@ class QueryResponseAlternative2(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18358,11 +18682,11 @@ class QueryResponseAlternative2(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18382,7 +18706,9 @@ class QueryResponseAlternative3(BaseModel):
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int
     missing_actors_count: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18411,11 +18737,11 @@ class QueryResponseAlternative3(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18435,7 +18761,9 @@ class QueryResponseAlternative4(BaseModel):
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18464,11 +18792,11 @@ class QueryResponseAlternative4(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18502,7 +18830,9 @@ class QueryResponseAlternative6(BaseModel):
     )
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -18529,11 +18859,11 @@ class QueryResponseAlternative6(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18555,7 +18885,9 @@ class QueryResponseAlternative8(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
     metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -18605,7 +18937,9 @@ class QueryResponseAlternative11(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18634,11 +18968,11 @@ class QueryResponseAlternative11(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18657,7 +18991,9 @@ class QueryResponseAlternative12(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18685,11 +19021,11 @@ class QueryResponseAlternative12(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18707,7 +19043,9 @@ class QueryResponseAlternative13(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18735,11 +19073,11 @@ class QueryResponseAlternative13(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18755,7 +19093,9 @@ class QueryResponseAlternative14(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -18782,11 +19122,11 @@ class QueryResponseAlternative14(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18804,7 +19144,9 @@ class QueryResponseAlternative20(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18832,11 +19174,11 @@ class QueryResponseAlternative20(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18854,7 +19196,9 @@ class QueryResponseAlternative21(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18883,11 +19227,11 @@ class QueryResponseAlternative21(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18906,7 +19250,9 @@ class QueryResponseAlternative22(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     preComputeStale: bool | None = Field(
         default=None,
@@ -18944,11 +19290,11 @@ class QueryResponseAlternative22(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -18967,7 +19313,9 @@ class QueryResponseAlternative23(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -18997,11 +19345,11 @@ class QueryResponseAlternative23(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19020,7 +19368,9 @@ class QueryResponseAlternative24(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19049,11 +19399,11 @@ class QueryResponseAlternative24(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19072,7 +19422,9 @@ class QueryResponseAlternative25(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
@@ -19103,11 +19455,11 @@ class QueryResponseAlternative25(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19123,7 +19475,9 @@ class QueryResponseAlternative26(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19151,11 +19505,11 @@ class QueryResponseAlternative26(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19173,7 +19527,9 @@ class QueryResponseAlternative27(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19201,11 +19557,11 @@ class QueryResponseAlternative27(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19221,7 +19577,9 @@ class QueryResponseAlternative29(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19250,11 +19608,11 @@ class QueryResponseAlternative29(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19273,7 +19631,9 @@ class QueryResponseAlternative30(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19303,11 +19663,11 @@ class QueryResponseAlternative30(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19323,7 +19683,9 @@ class QueryResponseAlternative31(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -19351,11 +19713,11 @@ class QueryResponseAlternative31(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19388,7 +19750,9 @@ class QueryResponseAlternative32(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
     models: list[AttributionMode] = Field(..., description="Model order for the column groups.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19421,11 +19785,11 @@ class QueryResponseAlternative32(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19456,7 +19820,9 @@ class QueryResponseAlternative33(BaseModel):
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19485,11 +19851,11 @@ class QueryResponseAlternative33(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19508,7 +19874,9 @@ class QueryResponseAlternative34(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19538,11 +19906,11 @@ class QueryResponseAlternative34(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19561,7 +19929,9 @@ class QueryResponseAlternative35(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -19591,11 +19961,11 @@ class QueryResponseAlternative35(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19615,7 +19985,9 @@ class QueryResponseAlternative36(BaseModel):
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int
     missing_actors_count: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19644,11 +20016,11 @@ class QueryResponseAlternative36(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19668,7 +20040,9 @@ class QueryResponseAlternative37(BaseModel):
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19697,11 +20071,11 @@ class QueryResponseAlternative37(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19723,7 +20097,9 @@ class QueryResponseAlternative38(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
     metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -19772,7 +20148,9 @@ class QueryResponseAlternative39(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19801,11 +20179,11 @@ class QueryResponseAlternative39(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19824,7 +20202,9 @@ class QueryResponseAlternative40(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     preComputeStale: bool | None = Field(
         default=None,
@@ -19862,11 +20242,11 @@ class QueryResponseAlternative40(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19885,7 +20265,9 @@ class QueryResponseAlternative41(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19915,11 +20297,11 @@ class QueryResponseAlternative41(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19938,7 +20320,9 @@ class QueryResponseAlternative42(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -19967,11 +20351,11 @@ class QueryResponseAlternative42(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -19990,7 +20374,9 @@ class QueryResponseAlternative43(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
@@ -20021,11 +20407,11 @@ class QueryResponseAlternative43(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20041,7 +20427,9 @@ class QueryResponseAlternative44(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20069,11 +20457,11 @@ class QueryResponseAlternative44(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20092,7 +20480,9 @@ class QueryResponseAlternative45(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20121,11 +20511,11 @@ class QueryResponseAlternative45(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20144,7 +20534,9 @@ class QueryResponseAlternative46(BaseModel):
     hasMore: bool | None = None
     insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20173,11 +20565,11 @@ class QueryResponseAlternative46(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20196,7 +20588,9 @@ class QueryResponseAlternative47(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20226,11 +20620,11 @@ class QueryResponseAlternative47(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20246,7 +20640,9 @@ class QueryResponseAlternative48(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -20274,11 +20670,11 @@ class QueryResponseAlternative48(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20297,7 +20693,9 @@ class QueryResponseAlternative49(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20327,11 +20725,11 @@ class QueryResponseAlternative49(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20350,7 +20748,9 @@ class QueryResponseAlternative50(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20378,11 +20778,11 @@ class QueryResponseAlternative50(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20401,7 +20801,9 @@ class QueryResponseAlternative54(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20429,11 +20831,11 @@ class QueryResponseAlternative54(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20452,7 +20854,9 @@ class QueryResponseAlternative56(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20481,11 +20885,11 @@ class QueryResponseAlternative56(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20509,7 +20913,9 @@ class QueryResponseAlternative57(BaseModel):
         default=None,
         description=("When `metrics` is set on the query, the aggregated values in the same order."),
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20538,11 +20944,11 @@ class QueryResponseAlternative57(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20560,7 +20966,9 @@ class QueryResponseAlternative58(BaseModel):
     )
     hasMore: bool | None = Field(default=None, description="Wether more breakdown values are available.")
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -20587,11 +20995,11 @@ class QueryResponseAlternative58(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20607,7 +21015,9 @@ class QueryResponseAlternative59(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -20641,11 +21051,11 @@ class QueryResponseAlternative59(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20661,7 +21071,9 @@ class QueryResponseAlternative60(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -20688,11 +21100,11 @@ class QueryResponseAlternative60(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20708,7 +21120,9 @@ class QueryResponseAlternative61(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -20735,11 +21149,11 @@ class QueryResponseAlternative61(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20755,7 +21169,9 @@ class QueryResponseAlternative62(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -20782,11 +21198,11 @@ class QueryResponseAlternative62(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20805,7 +21221,9 @@ class QueryResponseAlternative64(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -20834,11 +21252,11 @@ class QueryResponseAlternative64(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20855,7 +21273,9 @@ class QueryResponseAlternative66(BaseModel):
     )
     has_next: bool
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_cursor: str | None = Field(
         default=None,
         description=("Cursor for the next page. Contains the ordering value and session_id from the last record."),
@@ -20886,11 +21306,11 @@ class QueryResponseAlternative66(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20909,7 +21329,9 @@ class QueryResponseAlternative67(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -20938,11 +21360,11 @@ class QueryResponseAlternative67(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -20959,7 +21381,9 @@ class QueryResponseAlternative68(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -20986,11 +21410,11 @@ class QueryResponseAlternative68(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21006,7 +21430,9 @@ class QueryResponseAlternative69(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21033,11 +21459,11 @@ class QueryResponseAlternative69(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21053,7 +21479,9 @@ class QueryResponseAlternative70(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21080,11 +21508,11 @@ class QueryResponseAlternative70(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21102,7 +21530,9 @@ class QueryResponseAlternative71(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -21131,11 +21561,11 @@ class QueryResponseAlternative71(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21155,7 +21585,9 @@ class QueryResponseAlternative72(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21182,11 +21614,11 @@ class QueryResponseAlternative72(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21206,7 +21638,9 @@ class QueryResponseAlternative73(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21233,11 +21667,11 @@ class QueryResponseAlternative73(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21257,7 +21691,9 @@ class QueryResponseAlternative74(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21284,11 +21720,11 @@ class QueryResponseAlternative74(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21306,7 +21742,9 @@ class QueryResponseAlternative76(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -21334,11 +21772,11 @@ class QueryResponseAlternative76(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21356,7 +21794,9 @@ class QueryResponseAlternative77(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -21384,11 +21824,11 @@ class QueryResponseAlternative77(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21404,7 +21844,9 @@ class QueryResponseAlternative78(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21431,11 +21873,11 @@ class QueryResponseAlternative78(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21454,7 +21896,9 @@ class QueryResponseAlternative79(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -21482,11 +21926,11 @@ class QueryResponseAlternative79(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21502,7 +21946,9 @@ class QueryResponseAlternative83(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21529,11 +21975,11 @@ class QueryResponseAlternative83(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21549,7 +21995,9 @@ class QueryResponseAlternative84(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21576,11 +22024,11 @@ class QueryResponseAlternative84(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21604,7 +22052,9 @@ class QueryResponseAlternative85(BaseModel):
         default=None,
         description=("When `metrics` is set on the query, the aggregated values in the same order."),
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -21633,11 +22083,11 @@ class QueryResponseAlternative85(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21653,7 +22103,9 @@ class QueryResponseAlternative86(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21680,11 +22132,11 @@ class QueryResponseAlternative86(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21703,7 +22155,9 @@ class QueryResponseAlternative87(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -21732,11 +22186,11 @@ class QueryResponseAlternative87(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21752,7 +22206,9 @@ class QueryResponseAlternative88(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21779,11 +22235,11 @@ class QueryResponseAlternative88(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21799,7 +22255,9 @@ class QueryResponseAlternative89(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21826,11 +22284,11 @@ class QueryResponseAlternative89(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21846,7 +22304,9 @@ class QueryResponseAlternative90(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21873,11 +22333,11 @@ class QueryResponseAlternative90(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21893,7 +22353,9 @@ class QueryResponseAlternative91(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21920,11 +22382,11 @@ class QueryResponseAlternative91(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21940,7 +22402,9 @@ class QueryResponseAlternative92(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -21967,11 +22431,11 @@ class QueryResponseAlternative92(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -21987,7 +22451,9 @@ class QueryResponseAlternative93(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22014,11 +22480,11 @@ class QueryResponseAlternative93(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22034,7 +22500,9 @@ class QueryResponseAlternative94(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22061,11 +22529,11 @@ class QueryResponseAlternative94(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22081,7 +22549,9 @@ class QueryResponseAlternative95(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22111,11 +22581,11 @@ class QueryResponseAlternative95(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22131,7 +22601,9 @@ class QueryResponseAlternative96(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22158,11 +22630,11 @@ class QueryResponseAlternative96(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22178,7 +22650,9 @@ class QueryResponseAlternative97(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22205,11 +22679,11 @@ class QueryResponseAlternative97(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22225,7 +22699,9 @@ class QueryResponseAlternative98(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22252,11 +22728,11 @@ class QueryResponseAlternative98(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22272,7 +22748,9 @@ class QueryResponseAlternative99(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22299,11 +22777,11 @@ class QueryResponseAlternative99(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22319,7 +22797,9 @@ class QueryResponseAlternative100(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22346,11 +22826,11 @@ class QueryResponseAlternative100(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22366,7 +22846,9 @@ class QueryResponseAlternative101(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22393,11 +22875,11 @@ class QueryResponseAlternative101(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22413,7 +22895,9 @@ class QueryResponseAlternative102(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22440,11 +22924,11 @@ class QueryResponseAlternative102(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22460,7 +22944,9 @@ class QueryResponseAlternative103(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22487,11 +22973,11 @@ class QueryResponseAlternative103(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22507,7 +22993,9 @@ class QueryResponseAlternative104(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22534,11 +23022,11 @@ class QueryResponseAlternative104(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22555,7 +23043,9 @@ class RecordingsQueryResponse(BaseModel):
     )
     has_next: bool
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_cursor: str | None = Field(
         default=None,
         description=("Cursor for the next page. Contains the ordering value and session_id from the last record."),
@@ -22586,11 +23076,11 @@ class RecordingsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22703,7 +23193,9 @@ class RetentionQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -22730,11 +23222,11 @@ class RetentionQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22755,7 +23247,9 @@ class SessionAttributionExplorerQuery(BaseModel):
     groupBy: list[SessionAttributionGroupBy]
     kind: Literal["SessionAttributionExplorerQuery"] = "SessionAttributionExplorerQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     response: SessionAttributionExplorerQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -22773,7 +23267,9 @@ class SessionQuery(BaseModel):
     )
     kind: Literal["SessionQuery"] = "SessionQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     response: SessionQueryResponse | None = None
     sessionId: str
@@ -22794,7 +23290,9 @@ class SessionsTimelineQuery(BaseModel):
         description=("Only fetch sessions that started before this timestamp (default: '+5s')"),
     )
     kind: Literal["SessionsTimelineQuery"] = "SessionsTimelineQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     personId: str | None = Field(default=None, description="Fetch sessions only for a given person")
     response: SessionsTimelineQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -22842,7 +23340,9 @@ class TeamTaxonomyQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -22870,11 +23370,11 @@ class TeamTaxonomyQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -22906,7 +23406,9 @@ class TraceNeighborsQuery(BaseModel):
     filterSupportTraces: bool | None = None
     filterTestAccounts: bool | None = None
     kind: Literal["TraceNeighborsQuery"] = "TraceNeighborsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | None = Field(
         default=None, description="Properties configurable in the interface"
     )
@@ -22927,7 +23429,9 @@ class TraceQuery(BaseModel):
         description=("Include stored sentiment evaluation results for the trace and its generations."),
     )
     kind: Literal["TraceQuery"] = "TraceQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | None = Field(
         default=None, description="Properties configurable in the interface"
     )
@@ -22952,7 +23456,9 @@ class TraceSpansSymbolStatsQuery(BaseModel):
         ),
     )
     kind: Literal["TraceSpansSymbolStatsQuery"] = "TraceSpansSymbolStatsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: TraceSpansSymbolStatsQueryResponse | None = None
     symbols: list[SourceSymbol] | None = Field(
         default=None,
@@ -22983,7 +23489,9 @@ class TracesQuery(BaseModel):
     )
     kind: Literal["TracesQuery"] = "TracesQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     personId: str | None = Field(default=None, description="Person who performed the event")
     properties: list[AnyPropertyFilterDiscriminated] | None = Field(
@@ -23015,7 +23523,9 @@ class UsageMetricsQuery(BaseModel):
         description="Group type index. Required with group_key for group queries.",
     )
     kind: Literal["UsageMetricsQuery"] = "UsageMetricsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     person_id: str | None = Field(
         default=None,
         description=("Person ID to fetch metrics for. Mutually exclusive with group parameters."),
@@ -23044,7 +23554,9 @@ class VectorSearchQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -23071,11 +23583,11 @@ class VectorSearchQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -23129,7 +23641,9 @@ class WebBotsTableQuery(BaseModel):
     )
     kind: Literal["WebBotsTableQuery"] = "WebBotsTableQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebBotsTableQueryResponse | None = None
@@ -23166,7 +23680,9 @@ class WebExternalClicksTableQuery(BaseModel):
     )
     kind: Literal["WebExternalClicksTableQuery"] = "WebExternalClicksTableQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebExternalClicksTableQueryResponse | None = None
@@ -23204,7 +23720,9 @@ class WebGoalsQuery(BaseModel):
     )
     kind: Literal["WebGoalsQuery"] = "WebGoalsQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebGoalsQueryResponse | None = None
@@ -23249,7 +23767,9 @@ class WebNotableChangesQuery(BaseModel):
     )
     kind: Literal["WebNotableChangesQuery"] = "WebNotableChangesQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebNotableChangesQueryResponse | None = None
@@ -23285,7 +23805,9 @@ class WebOverviewQuery(BaseModel):
         description=("Interval for date range calculation (affects date_to rounding for hour vs day ranges)"),
     )
     kind: Literal["WebOverviewQuery"] = "WebOverviewQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebOverviewQueryResponse | None = None
@@ -23297,8 +23819,8 @@ class WebOverviewQuery(BaseModel):
         default=None,
         description=(
             "Opt this specific query into the web_overview_query precompute path."
-            " Requires the `web-analytics-precompute-toggle` Insights feature flag to be"
-            " on for the team's organization for the gate to pass. *"
+            " Requires the `web-analytics-precompute-toggle` Insights feature flag to"
+            " be on for the team's organization for the gate to pass. *"
         ),
     )
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -23330,7 +23852,9 @@ class WebPageURLSearchQuery(BaseModel):
     )
     kind: Literal["WebPageURLSearchQuery"] = "WebPageURLSearchQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebPageURLSearchQueryResponse | None = None
@@ -23374,7 +23898,9 @@ class WebStatsTableQuery(BaseModel):
     )
     kind: Literal["WebStatsTableQuery"] = "WebStatsTableQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
@@ -23414,7 +23940,9 @@ class WebVitalsPathBreakdownQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     preComputeStrategy: WebAnalyticsPreComputeStrategy | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -23442,11 +23970,11 @@ class WebVitalsPathBreakdownQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -23462,7 +23990,9 @@ class WebVitalsQueryResponse(BaseModel):
         ),
     )
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -23489,11 +24019,11 @@ class WebVitalsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -23519,8 +24049,8 @@ class AccountsQuery(BaseModel):
     filterExpression: str | None = Field(
         default=None,
         description=(
-            "Optional InsightsQL boolean expression AND-ed into the WHERE clause. Used by"
-            " the overview tile click-to-filter affordance."
+            "Optional InsightsQL boolean expression AND-ed into the WHERE clause. Used"
+            " by the overview tile click-to-filter affordance."
         ),
     )
     kind: Literal["AccountsQuery"] = "AccountsQuery"
@@ -23534,7 +24064,9 @@ class AccountsQuery(BaseModel):
             " only the aggregated values."
         ),
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     orderBy: list[str] | None = None
     response: AccountsQueryResponse | None = None
@@ -23589,7 +24121,9 @@ class ActorsPropertyTaxonomyQuery(BaseModel):
     groupTypeIndex: int | None = None
     kind: Literal["ActorsPropertyTaxonomyQuery"] = "ActorsPropertyTaxonomyQuery"
     maxPropertyValues: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[str]
     response: ActorsPropertyTaxonomyQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -23607,7 +24141,7 @@ class AnyEntityNodeDataWarehouseNode(RootModel[EventsNode | ActionsNode | DataWa
 class AnyResponseType(
     RootModel[
         dict[str, Any]
-        | HogQueryResponse
+        | ScriptQueryResponse
         | InsightsQLQueryResponse
         | InsightsQLMetadataResponse
         | InsightsQLAutocompleteResponse
@@ -23627,7 +24161,7 @@ class AnyResponseType(
 ):
     root: (
         dict[str, Any]
-        | HogQueryResponse
+        | ScriptQueryResponse
         | InsightsQLQueryResponse
         | InsightsQLMetadataResponse
         | InsightsQLAutocompleteResponse
@@ -23885,7 +24419,9 @@ class CachedErrorTrackingQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -23916,11 +24452,11 @@ class CachedErrorTrackingQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -23950,7 +24486,9 @@ class CachedInsightsQLQueryResponse(BaseModel):
     last_refresh: AwareDatetime
     limit: int | None = None
     metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
@@ -24074,7 +24612,9 @@ class CachedWebVitalsQueryResponse(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -24104,11 +24644,11 @@ class CachedWebVitalsQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -24161,7 +24701,9 @@ class Response3(BaseModel):
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
     metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -24211,7 +24753,9 @@ class Response15(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -24239,11 +24783,11 @@ class Response15(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -24258,7 +24802,9 @@ class DocumentSimilarityQuery(BaseModel):
     kind: Literal["DocumentSimilarityQuery"] = "DocumentSimilarityQuery"
     limit: int | None = None
     model: str
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     order_by: OrderBy
     order_direction: OrderDirection1
@@ -24280,7 +24826,9 @@ class EndpointsUsageOverviewQuery(BaseModel):
     endpointNames: list[str] | None = Field(default=None, description="Filter to specific endpoints by name")
     kind: Literal["EndpointsUsageOverviewQuery"] = "EndpointsUsageOverviewQuery"
     materializationType: MaterializationType | None = Field(default=None, description="Filter by materialization type")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: EndpointsUsageOverviewQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -24296,7 +24844,9 @@ class EndpointsUsageTableQuery(BaseModel):
     kind: Literal["EndpointsUsageTableQuery"] = "EndpointsUsageTableQuery"
     limit: int | None = None
     materializationType: MaterializationType | None = Field(default=None, description="Filter by materialization type")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     orderBy: list[EndpointsUsageOrderByField | EndpointsUsageOrderByDirection] | None = None
     response: EndpointsUsageTableQueryResponse | None = None
@@ -24318,7 +24868,9 @@ class EndpointsUsageTrendsQuery(BaseModel):
     kind: Literal["EndpointsUsageTrendsQuery"] = "EndpointsUsageTrendsQuery"
     materializationType: MaterializationType | None = Field(default=None, description="Filter by materialization type")
     metric: Metric = Field(..., description="Metric to trend")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: EndpointsUsageTrendsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -24359,7 +24911,9 @@ class ErrorTrackingBreakdownsQuery(BaseModel):
     issueId: str
     kind: Literal["ErrorTrackingBreakdownsQuery"] = "ErrorTrackingBreakdownsQuery"
     maxValuesPerProperty: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: ErrorTrackingBreakdownsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -24398,7 +24952,9 @@ class ErrorTrackingIssueCorrelationQueryResponse(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -24426,11 +24982,11 @@ class ErrorTrackingIssueCorrelationQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -24445,7 +25001,9 @@ class ErrorTrackingSimilarIssuesQuery(BaseModel):
     limit: int | None = None
     maxDistance: float | None = None
     modelName: EmbeddingModelName | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     rendering: str | None = None
     response: ErrorTrackingSimilarIssuesQueryResponse | None = None
@@ -24462,7 +25020,9 @@ class EventTaxonomyQuery(BaseModel):
     kind: Literal["EventTaxonomyQuery"] = "EventTaxonomyQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
     maxPropertyValues: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     properties: list[str] | None = None
     response: EventTaxonomyQueryResponse | None = None
@@ -24577,7 +25137,9 @@ class GroupsQuery(BaseModel):
     group_type_index: int
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     orderBy: list[str] | None = None
     properties: list[GroupPropertyFilter | InsightsQLPropertyFilter] | None = None
@@ -24603,7 +25165,9 @@ class InsightsQLQuery(BaseModel):
     explain: bool | None = None
     filters: InsightsQLFilters | None = None
     kind: Literal["InsightsQLQuery"] = "InsightsQLQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     name: str | None = Field(default=None, description="Client provided name of the query")
     query: str
     response: InsightsQLQueryResponse | None = None
@@ -24670,7 +25234,9 @@ class MCPHarnessBreakdownQuery(BaseModel):
     dateRange: DateRange | None = None
     filterTestAccounts: bool | None = None
     kind: Literal["MCPHarnessBreakdownQuery"] = "MCPHarnessBreakdownQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | None = None
     response: MCPHarnessBreakdownQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -24692,7 +25258,9 @@ class MCPToolCallBreakdownQuery(BaseModel):
         description=("Bucket granularity; the frontend passes getDefaultInterval. Defaults to day."),
     )
     kind: Literal["MCPToolCallBreakdownQuery"] = "MCPToolCallBreakdownQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | None = None
     response: MCPToolCallBreakdownQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -24710,7 +25278,9 @@ class MCPToolCallsAndErrorsQuery(BaseModel):
         description=("Bucket granularity; the frontend passes getDefaultInterval. Defaults to day."),
     )
     kind: Literal["MCPToolCallsAndErrorsQuery"] = "MCPToolCallsAndErrorsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | None = None
     response: MCPToolCallsAndErrorsQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -24723,7 +25293,9 @@ class MCPToolCategoriesQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolCategoriesQuery"] = "MCPToolCategoriesQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolCategoriesQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -24735,7 +25307,9 @@ class MCPToolCategoryCountsQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolCategoryCountsQuery"] = "MCPToolCategoryCountsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolCategoryCountsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -24755,7 +25329,9 @@ class MCPToolDailyStatsQuery(BaseModel):
         ),
     )
     kind: Literal["MCPToolDailyStatsQuery"] = "MCPToolDailyStatsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolDailyStatsQueryResponse | None = None
     tags: QueryLogTags | None = None
     toolName: str = Field(
@@ -24771,7 +25347,9 @@ class MCPToolDescriptionsQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolDescriptionsQuery"] = "MCPToolDescriptionsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolDescriptionsQueryResponse | None = None
     tags: QueryLogTags | None = None
     toolName: str = Field(
@@ -24797,7 +25375,9 @@ class MCPToolFailureOccurrencesQuery(BaseModel):
         description=('Raw $mcp_error_type bucket; "unknown" selects errored events without an error type.'),
     )
     kind: Literal["MCPToolFailureOccurrencesQuery"] = "MCPToolFailureOccurrencesQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolFailureOccurrencesQueryResponse | None = None
     tags: QueryLogTags | None = None
     toolName: str = Field(
@@ -24813,7 +25393,9 @@ class MCPToolFailuresQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolFailuresQuery"] = "MCPToolFailuresQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolFailuresQueryResponse | None = None
     tags: QueryLogTags | None = None
     toolName: str = Field(
@@ -24829,7 +25411,9 @@ class MCPToolNeighborsQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolNeighborsQuery"] = "MCPToolNeighborsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     neighborDirection: NeighborDirection = Field(
         ...,
         description=("Whether to count tools called immediately before or after the target tool."),
@@ -24857,7 +25441,9 @@ class MCPToolQualityDailyStatsQuery(BaseModel):
         description=("Bucket granularity; the frontend passes getDefaultInterval. Defaults to day."),
     )
     kind: Literal["MCPToolQualityDailyStatsQuery"] = "MCPToolQualityDailyStatsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolQualityDailyStatsQueryResponse | None = None
     tags: QueryLogTags | None = None
     toolName: str | None = Field(
@@ -24877,7 +25463,9 @@ class MCPToolQualityRowsQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolQualityRowsQuery"] = "MCPToolQualityRowsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolQualityRowsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -24889,7 +25477,9 @@ class MCPToolSampleIntentsQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolSampleIntentsQuery"] = "MCPToolSampleIntentsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolSampleIntentsQueryResponse | None = None
     tags: QueryLogTags | None = None
     toolName: str = Field(
@@ -24905,7 +25495,9 @@ class MCPToolStatsQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolStatsQuery"] = "MCPToolStatsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolStatsQueryResponse | None = None
     tags: QueryLogTags | None = None
     toolName: str = Field(
@@ -24921,7 +25513,9 @@ class MCPToolTopUsersQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["MCPToolTopUsersQuery"] = "MCPToolTopUsersQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MCPToolTopUsersQueryResponse | None = None
     tags: QueryLogTags | None = None
     toolName: str = Field(
@@ -24965,7 +25559,9 @@ class MarketingAnalyticsAggregatedQuery(BaseModel):
         description=("Interval for date range calculation (affects date_to rounding for hour vs day ranges)"),
     )
     kind: Literal["MarketingAnalyticsAggregatedQuery"] = "MarketingAnalyticsAggregatedQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: MarketingAnalyticsAggregatedQueryResponse | None = None
     sampling: WebAnalyticsSampling | None = None
@@ -25041,7 +25637,9 @@ class MarketingAnalyticsAttributionPathsQuery(BaseModel):
         default=None,
         description=("Only paths with at least this many touchpoints, counted before truncation."),
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: MarketingAnalyticsAttributionPathsQueryResponse | None = None
@@ -25117,7 +25715,9 @@ class MarketingAnalyticsAttributionQuery(BaseModel):
             " overriding the team's configured attribution window for this query only."
         ),
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: MarketingAnalyticsAttributionQueryResponse | None = None
@@ -25163,7 +25763,9 @@ class MarketingAnalyticsTableQuery(BaseModel):
     )
     kind: Literal["MarketingAnalyticsTableQuery"] = "MarketingAnalyticsTableQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[list[str | MarketingAnalyticsOrderByEnum]] | None = Field(
         default=None, description="Columns to order by - similar to EventsQuery format"
@@ -25265,7 +25867,9 @@ class MetricsQuery(BaseModel):
         ),
     )
     kind: Literal["MetricsQuery"] = "MetricsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: MetricsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -25301,7 +25905,9 @@ class NonIntegratedConversionsTableQuery(BaseModel):
     )
     kind: Literal["NonIntegratedConversionsTableQuery"] = "NonIntegratedConversionsTableQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[list[str | MarketingAnalyticsOrderByEnum]] | None = Field(
         default=None, description="Columns to order by"
@@ -25334,7 +25940,9 @@ class PropertyValuesQuery(BaseModel):
     event_names: list[str] | None = None
     is_column: bool | None = None
     kind: Literal["PropertyValuesQuery"] = "PropertyValuesQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     property_key: str
     property_type: PropertyType
     response: PropertyValuesQueryResponse | None = None
@@ -25357,7 +25965,9 @@ class QueryResponseAlternative15(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -25385,11 +25995,11 @@ class QueryResponseAlternative15(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -25424,7 +26034,9 @@ class RecordingsQuery(BaseModel):
     )
     kind: Literal["RecordingsQuery"] = "RecordingsQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     operand: FilterLogicalOperator | None = FilterLogicalOperator.AND_
     order: RecordingOrder | None = RecordingOrder.START_TIME
@@ -25468,7 +26080,9 @@ class RetentionQuery(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: Literal["RetentionQuery"] = "RetentionQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -25485,7 +26099,9 @@ class TeamTaxonomyQuery(BaseModel):
     )
     kind: Literal["TeamTaxonomyQuery"] = "TeamTaxonomyQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     response: TeamTaxonomyQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -25505,7 +26121,9 @@ class TraceSpansAggregationQuery(BaseModel):
     dateRange: DateRange
     filterGroup: PropertyGroupFilter | None = None
     kind: Literal["TraceSpansAggregationQuery"] = "TraceSpansAggregationQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: TraceSpansAggregationQueryResponse | None = None
     serviceNames: list[str] | None = None
     tags: QueryLogTags | None = None
@@ -25555,7 +26173,9 @@ class TraceSpansAttributeBreakdownQuery(BaseModel):
     )
     filterGroup: PropertyGroupFilter | None = None
     kind: Literal["TraceSpansAttributeBreakdownQuery"] = "TraceSpansAttributeBreakdownQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: TraceSpanBreakdownOrderBy | None = Field(
         default=None,
         description=("Order rows by span count or error count, descending. Defaults to count."),
@@ -25590,7 +26210,9 @@ class TraceSpansQuery(BaseModel):
     )
     kind: Literal["TraceSpansQuery"] = "TraceSpansQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     orderBy: TraceOrderColumn | None = Field(
         default=None,
@@ -25626,7 +26248,9 @@ class TraceSpansTreeQuery(BaseModel):
     dateRange: DateRange
     filterGroup: PropertyGroupFilter | None = None
     kind: Literal["TraceSpansTreeQuery"] = "TraceSpansTreeQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: TraceSpansTreeQueryResponse | None = None
     serviceName: str = Field(
         ...,
@@ -25656,7 +26280,9 @@ class VectorSearchQuery(BaseModel):
     embedding: list[float]
     embeddingVersion: float | None = None
     kind: Literal["VectorSearchQuery"] = "VectorSearchQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: VectorSearchQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -25688,7 +26314,9 @@ class WebVitalsPathBreakdownQuery(BaseModel):
     )
     kind: Literal["WebVitalsPathBreakdownQuery"] = "WebVitalsPathBreakdownQuery"
     metric: WebVitalsMetric
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     percentile: WebVitalsPercentile
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
@@ -25702,8 +26330,8 @@ class WebVitalsPathBreakdownQuery(BaseModel):
         default=None,
         description=(
             "Opt this specific query into the web vitals path breakdown precompute"
-            " path. Requires the `web-analytics-precompute-toggle` Insights feature flag"
-            " to be on for the team's organization for the gate to pass. *"
+            " path. Requires the `web-analytics-precompute-toggle` Insights feature"
+            " flag to be on for the team's organization for the gate to pass. *"
         ),
     )
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -25754,7 +26382,9 @@ class CachedErrorTrackingIssueCorrelationQueryResponse(BaseModel):
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -25785,11 +26415,11 @@ class CachedErrorTrackingIssueCorrelationQueryResponse(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -25808,7 +26438,9 @@ class Response16(BaseModel):
     hasMore: bool | None = None
     insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -25836,11 +26468,11 @@ class Response16(BaseModel):
             "Warnings about data warehouse sources referenced by the query whose"
             " latest sync failed, is paused, hit a billing limit, or is otherwise"
             " stale. Results may not reflect current source data. Accumulated"
-            " across every InsightsQL execution that contributes to this response — so"
-            " insights backed by warehouse tables (Trends, Funnels, etc.) receive"
-            " the same warnings as raw InsightsQL queries. Also carries access control"
-            " warnings when a system-table query filters out objects the user can't"
-            " access."
+            " across every InsightsQL execution that contributes to this response —"
+            " so insights backed by warehouse tables (Trends, Funnels, etc.)"
+            " receive the same warnings as raw InsightsQL queries. Also carries"
+            " access control warnings when a system-table query filters out objects"
+            " the user can't access."
         ),
     )
 
@@ -25966,7 +26598,9 @@ class ErrorTrackingIssueCorrelationQuery(BaseModel):
     )
     events: list[str]
     kind: Literal["ErrorTrackingIssueCorrelationQuery"] = "ErrorTrackingIssueCorrelationQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: ErrorTrackingIssueCorrelationQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -25985,7 +26619,9 @@ class ErrorTrackingQuery(BaseModel):
     issueId: str | None = Field(default=None, description="Filter to a specific error tracking issue by ID.")
     kind: Literal["ErrorTrackingQuery"] = "ErrorTrackingQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     orderBy: ErrorTrackingOrderBy = Field(..., description="Field to sort results by.")
     orderDirection: OrderDirection2 | None = Field(default=None, description="Sort direction.")
@@ -26029,7 +26665,9 @@ class ExperimentExposureQuery(BaseModel):
     feature_flag: dict[str, Any]
     holdout: ExperimentHoldoutType | None = None
     kind: Literal["ExperimentExposureQuery"] = "ExperimentExposureQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: ExperimentExposureQueryResponse | None = None
     start_date: str | None = None
     tags: QueryLogTags | None = None
@@ -26171,7 +26809,9 @@ class InsightsQueryBaseCalendarHeatmapResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26193,7 +26833,9 @@ class InsightsQueryBaseFunnelsQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26215,7 +26857,9 @@ class InsightsQueryBaseLifecycleQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26237,7 +26881,9 @@ class InsightsQueryBasePathsQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26259,7 +26905,9 @@ class InsightsQueryBaseRetentionQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26281,7 +26929,9 @@ class InsightsQueryBaseTrendsQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26300,7 +26950,9 @@ class LogAttributesQuery(BaseModel):
     filterGroup: PropertyGroupFilter | None = None
     kind: Literal["LogAttributesQuery"] = "LogAttributesQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     response: LogAttributesQueryResponse | None = None
     search: str | None = None
@@ -26324,7 +26976,9 @@ class LogValuesQuery(BaseModel):
     filterGroup: PropertyGroupFilter | None = None
     kind: Literal["LogValuesQuery"] = "LogValuesQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     response: LogValuesQueryResponse | None = None
     search: str | None = None
@@ -26370,7 +27024,9 @@ class LogsQuery(BaseModel):
     kind: Literal["LogsQuery"] = "LogsQuery"
     limit: int | None = None
     liveLogsCheckpoint: str | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     orderBy: LogsOrderBy | None = None
     personId: str | None = Field(default=None, description="Show logs for a given person")
@@ -26430,7 +27086,9 @@ class SessionsQuery(BaseModel):
     )
     kind: Literal["SessionsQuery"] = "SessionsQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[str] | None = Field(default=None, description="Columns to order by")
     personId: str | None = Field(default=None, description="Show sessions for a given person")
@@ -26467,7 +27125,9 @@ class CalendarHeatmapQuery(BaseModel):
         description=("Granularity of the response. Can be one of `hour`, `day`, `week` or `month`"),
     )
     kind: Literal["CalendarHeatmapQuery"] = "CalendarHeatmapQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26613,7 +27273,9 @@ class LifecycleQuery(BaseModel):
     lifecycleFilter: LifecycleFilter | None = Field(
         default=None, description="Properties specific to the lifecycle insight"
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26664,7 +27326,9 @@ class StickinessQuery(BaseModel):
         description=("How many intervals comprise a period. Only used for cohorts, otherwise default 1."),
     )
     kind: Literal["StickinessQuery"] = "StickinessQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -26808,7 +27472,9 @@ class StickinessActorsQuery(BaseModel):
     day: str | int | None = None
     includeRecordings: bool | None = None
     kind: Literal["StickinessActorsQuery"] = "StickinessActorsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     operator: StickinessOperator | None = None
     response: ActorsQueryResponse | None = None
     series: int | None = None
@@ -26847,7 +27513,9 @@ class TrendsQuery(BaseModel):
         description=("Granularity of the response. Can be one of `hour`, `day`, `week` or `month`"),
     )
     kind: Literal["TrendsQuery"] = "TrendsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -27040,7 +27708,9 @@ class DatabaseSchemaQuery(BaseModel):
         description="Optional direct external data source id for schema introspection",
     )
     kind: Literal["DatabaseSchemaQuery"] = "DatabaseSchemaQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: DatabaseSchemaQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -27079,9 +27749,9 @@ class EndpointRequest(BaseModel):
             " data aggregated across all values of that breakdown."
         ),
     )
-    query: InsightsQLQuery | TrendsQuery | RetentionQuery | LifecycleQuery | WebStatsTableQuery | WebOverviewQuery | None = (
-        None
-    )
+    query: (
+        InsightsQLQuery | TrendsQuery | RetentionQuery | LifecycleQuery | WebStatsTableQuery | WebOverviewQuery | None
+    ) = None
     tags: list[str] | None = Field(
         default=None,
         description=(
@@ -27119,7 +27789,9 @@ class ExperimentQuery(BaseModel):
     metric: ExperimentMeanMetric | ExperimentFunnelMetric | ExperimentRatioMetric | ExperimentRetentionMetric = Field(
         ..., discriminator="metric_type"
     )
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     name: str | None = None
     precomputation_mode: PrecomputationMode | None = None
     response: ExperimentQueryResponse | None = None
@@ -27167,7 +27839,9 @@ class FunnelsQuery(BaseModel):
         description=("Granularity of the response. Can be one of `hour`, `day`, `week` or `month`"),
     )
     kind: Literal["FunnelsQuery"] = "FunnelsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
     )
@@ -27555,7 +28229,9 @@ class ExperimentActorsQuery(BaseModel):
     )
     includeRecordings: bool | None = None
     kind: Literal["ExperimentActorsQuery"] = "ExperimentActorsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     multipleVariantHandling: MultipleVariantHandling | None = Field(
         default=None, description="How to handle users with multiple variant exposures."
     )
@@ -27594,7 +28270,9 @@ class ExperimentTrendsQuery(BaseModel):
     exposure_query: TrendsQuery | None = None
     fingerprint: str | None = None
     kind: Literal["ExperimentTrendsQuery"] = "ExperimentTrendsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     name: str | None = None
     response: ExperimentTrendsQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -27647,7 +28325,9 @@ class FunnelsActorsQuery(BaseModel):
     )
     includeRecordings: bool | None = None
     kind: Literal["FunnelsActorsQuery"] = "FunnelsActorsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: ActorsQueryResponse | None = None
     source: FunnelsQuery
     tags: QueryLogTags | None = None
@@ -27670,7 +28350,9 @@ class PathsQuery(BaseModel):
         description="Used for displaying paths in relation to funnel steps.",
     )
     kind: Literal["PathsQuery"] = "PathsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     pathsFilter: PathsFilter = Field(..., description="Properties specific to the paths insight")
     properties: list[AnyPropertyFilterDiscriminated] | PropertyGroupFilter | None = Field(
         default=[], description="Property filters for all series"
@@ -27779,7 +28461,9 @@ class ExperimentFunnelsQuery(BaseModel):
     fingerprint: str | None = None
     funnels_query: FunnelsQuery
     kind: Literal["ExperimentFunnelsQuery"] = "ExperimentFunnelsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     name: str | None = None
     response: ExperimentFunnelsQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -27888,7 +28572,9 @@ class WebVitalsQuery(BaseModel):
         description=("Interval for date range calculation (affects date_to rounding for hour vs day ranges)"),
     )
     kind: Literal["WebVitalsQuery"] = "WebVitalsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebGoalsQueryResponse | None = None
@@ -27940,7 +28626,9 @@ class FunnelCorrelationActorsQuery(BaseModel):
     funnelCorrelationPropertyValues: list[AnyPropertyFilterDiscriminated] | None = None
     includeRecordings: bool | None = None
     kind: Literal["FunnelCorrelationActorsQuery"] = "FunnelCorrelationActorsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: ActorsQueryResponse | None = None
     source: FunnelCorrelationQuery
     tags: QueryLogTags | None = None
@@ -27960,7 +28648,9 @@ class InsightActorsQuery(BaseModel):
         description="An interval selected out of available intervals in source query.",
     )
     kind: Literal["InsightActorsQuery"] = "InsightActorsQuery"
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     response: ActorsQueryResponse | None = None
     series: int | None = None
     source: (
@@ -28028,7 +28718,9 @@ class SessionBatchEventsQuery(BaseModel):
     )
     kind: Literal["SessionBatchEventsQuery"] = "SessionBatchEventsQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[str] | None = Field(default=None, description="Columns to order by")
     personId: str | None = Field(default=None, description="Show events for a given person")
@@ -28078,7 +28770,9 @@ class ActorsQuery(BaseModel):
     )
     kind: Literal["ActorsQuery"] = "ActorsQuery"
     limit: int | None = None
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = None
     orderBy: list[str] | None = None
     properties: (
@@ -28144,7 +28838,9 @@ class EventsQuery(BaseModel):
     )
     kind: Literal["EventsQuery"] = "EventsQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[str] | None = Field(default=None, description="Columns to order by")
     personId: str | None = Field(default=None, description="Show events for a given person")
@@ -28257,7 +28953,10 @@ class DataTableNode(BaseModel):
         description=("Include an events filter above the table to filter by multiple events (EventsQuery only)"),
     )
     showExport: bool | None = Field(default=None, description="Show the export button")
-    showInsightsQLEditor: bool | None = Field(default=None, description="Include a InsightsQL query editor above InsightsQL tables")
+    showInsightsQLEditor: bool | None = Field(
+        default=None,
+        description="Include a InsightsQL query editor above InsightsQL tables",
+    )
     showOpenEditorButton: bool | None = Field(
         default=None,
         description=("Show a button to open the current query as a new insight. (default: true)"),
@@ -28354,8 +29053,10 @@ class InsightsQLAutocomplete(BaseModel):
     filters: InsightsQLFilters | None = Field(default=None, description="Table to validate the expression against")
     globals: dict[str, Any] | None = Field(default=None, description="Global values in scope")
     kind: Literal["InsightsQLAutocomplete"] = "InsightsQLAutocomplete"
-    language: HogLanguage = Field(..., description="Language to validate")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    language: ScriptLanguage = Field(..., description="Language to validate")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query: str = Field(..., description="Query to validate")
     response: InsightsQLAutocompleteResponse | None = None
     sourceQuery: (
@@ -28369,7 +29070,7 @@ class InsightsQLAutocomplete(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28460,8 +29161,10 @@ class InsightsQLMetadata(BaseModel):
     filters: InsightsQLFilters | None = Field(default=None, description="Extra filters applied to query via {filters}")
     globals: dict[str, Any] | None = Field(default=None, description="Extra globals for the query")
     kind: Literal["InsightsQLMetadata"] = "InsightsQLMetadata"
-    language: HogLanguage = Field(..., description="Language to validate")
-    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    language: ScriptLanguage = Field(..., description="Language to validate")
+    modifiers: InsightsQLQueryModifiers | None = Field(
+        default=None, description="Modifiers used when performing the query"
+    )
     query: str = Field(..., description="Query to validate")
     response: InsightsQLMetadataResponse | None = None
     sourceQuery: (
@@ -28475,7 +29178,7 @@ class InsightsQLMetadata(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28595,7 +29298,7 @@ class MaxInsightContext(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28729,7 +29432,7 @@ class QueryRequest(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28813,10 +29516,10 @@ class QueryRequest(BaseModel):
         ...,
         description=(
             "Submit a JSON string representing a query for Insights data analysis, for"
-            ' example a InsightsQL query.\n\nExample payload:\n\n```\n\n{"query": {"kind":'
-            ' "InsightsQLQuery", "query": "select * from events limit 100"}}\n\n```\n\nFor'
-            " more details on InsightsQL queries, see the [Insights InsightsQL"
-            " documentation](/docs/insightsql#api-access)."
+            ' example a InsightsQL query.\n\nExample payload:\n\n```\n\n{"query":'
+            ' {"kind": "InsightsQLQuery", "query": "select * from events limit'
+            ' 100"}}\n\n```\n\nFor more details on InsightsQL queries, see the'
+            " [Insights InsightsQL documentation](/docs/insightsql#api-access)."
         ),
         discriminator="kind",
     )
@@ -28855,7 +29558,7 @@ class QuerySchemaRoot(
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -28951,7 +29654,7 @@ class QuerySchemaRoot(
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -29052,7 +29755,7 @@ class QueryUpgradeRequest(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -29153,7 +29856,7 @@ class QueryUpgradeResponse(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete
@@ -29436,7 +30139,7 @@ class VisualizationArtifactContent(BaseModel):
         | InsightActorsQuery
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
-        | HogQuery
+        | ScriptQuery
         | InsightsQLQuery
         | InsightsQLMetadata
         | InsightsQLAutocomplete

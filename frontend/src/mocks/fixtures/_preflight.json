@@ -13,9 +13,7 @@
     "realm": "hosted-datastore",
     "region": "US",
     "available_social_auth_providers": {
-        "github": false,
-        "gitlab": false,
-        "google-oauth2": false,
+        "oidc": false,
         "saml": false
     },
     "can_create_org": false,

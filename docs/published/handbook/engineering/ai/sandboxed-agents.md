@@ -398,7 +398,7 @@ The flow, driven from the Insights Desktop Environments → Cloud tab:
    that iterates inside the real VM base and maintains a declarative spec
    (`SandboxImageSpec`: `apt_packages`, `run_commands`, `env`) at `/tmp/workspace/image-spec.yaml`.
 2. "Save & build" reads the spec from the builder sandbox (or accepts it inline via
-   `POST /api/projects/:id/sandbox_custom_images/:id/build/`), then the
+   `POST /v1/projects/:id/sandbox_custom_images/:id/build/`), then the
    `build-sandbox-image` Temporal workflow runs an LLM security scan of the spec,
    builds it layered on the VM base, and publishes it as a Modal named image
    (`Image.publish()` / `Image.from_name()`).

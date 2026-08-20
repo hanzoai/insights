@@ -109,10 +109,10 @@ import type {
     TaggerCreateApi,
     TaggerUpdateApi,
     TaggersListParams,
-    TestHogRequestApi,
-    TestHogResponseApi,
-    TestHogTaggerRequestApi,
-    TestHogTaggerResponseApi,
+    TestScriptRequestApi,
+    TestScriptResponseApi,
+    TestScriptTaggerRequestApi,
+    TestScriptTaggerResponseApi,
     TextReprRequestApi,
     TextReprResponseApi,
     TraceReviewApi,
@@ -778,23 +778,23 @@ export const evaluationsDestroy = async (projectId: string, id: string, options?
     })
 }
 
-export const getEvaluationsTestHogCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/evaluations/test_hog/`
+export const getEvaluationsTestScriptCreateUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/evaluations/test_script/`
 }
 
 /**
  * Test Script evaluation code against sample events without saving.
  */
-export const evaluationsTestHogCreate = async (
+export const evaluationsTestScriptCreate = async (
     projectId: string,
-    testHogRequestApi: TestHogRequestApi,
+    testScriptRequestApi: TestScriptRequestApi,
     options?: RequestInit
-): Promise<TestHogResponseApi> => {
-    return apiMutator<TestHogResponseApi>(getEvaluationsTestHogCreateUrl(projectId), {
+): Promise<TestScriptResponseApi> => {
+    return apiMutator<TestScriptResponseApi>(getEvaluationsTestScriptCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(testHogRequestApi),
+        body: JSON.stringify(testScriptRequestApi),
     })
 }
 
@@ -2378,22 +2378,22 @@ export const taggersDestroy = async (projectId: string, id: string, options?: Re
     })
 }
 
-export const getTaggersTestHogCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/taggers/test_hog/`
+export const getTaggersTestScriptCreateUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/taggers/test_script/`
 }
 
 /**
  * Test Script tagger code against sample events without saving.
  */
-export const taggersTestHogCreate = async (
+export const taggersTestScriptCreate = async (
     projectId: string,
-    testHogTaggerRequestApi: TestHogTaggerRequestApi,
+    testScriptTaggerRequestApi: TestScriptTaggerRequestApi,
     options?: RequestInit
-): Promise<TestHogTaggerResponseApi> => {
-    return apiMutator<TestHogTaggerResponseApi>(getTaggersTestHogCreateUrl(projectId), {
+): Promise<TestScriptTaggerResponseApi> => {
+    return apiMutator<TestScriptTaggerResponseApi>(getTaggersTestScriptCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(testHogTaggerRequestApi),
+        body: JSON.stringify(testScriptTaggerRequestApi),
     })
 }

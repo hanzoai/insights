@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { createHogTransformerService } from '~/cdp/script-transformations/script-transformer.service'
+import { createScriptTransformerService } from '~/cdp/script-transformations/script-transformer.service'
 import { DatastoreGroupRepository } from '~/common/groups/repositories/datastore-group-repository'
 import { fetchDistinctIds } from '~/common/persons/repositories/test-helpers'
 import { parseJSON } from '~/common/utils/json-parse'
@@ -68,7 +68,7 @@ describe.each([
             outputs,
             datastoreGroupRepository: new DatastoreGroupRepository(outputs),
             aiSubpipelineFactory: createAiEventSubpipeline,
-            hogTransformer: createHogTransformerService(infra.config, {
+            scriptTransformer: createScriptTransformerService(infra.config, {
                 geoipService: infra.geoipService,
                 postgres: infra.postgres,
                 pubSub: infra.pubSub,

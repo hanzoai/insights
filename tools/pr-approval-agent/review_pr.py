@@ -149,7 +149,7 @@ def _is_retryable_error(err_msg: str) -> bool:
 
 
 # Reviewer bots put 👀 on a PR while reviewing and swap it for a verdict
-# reaction within minutes. Stamphog is usually triggered at the same moment
+# reaction within minutes. Stamp is usually triggered at the same moment
 # (label applied at PR open), so an 👀 at fetch time is almost always a race
 # with a bot mid-review, not a lasting state — poll until it clears instead
 # of refusing. Budget must leave room for the LLM review inside the
@@ -272,9 +272,9 @@ class Pipeline:
         return migration_check_pending(self.pr.check_runs, self.pr.file_paths)
 
     def _refuse_bot_author(self) -> str:
-        """Hard gate: stamphog never reviews bot-authored PRs.
+        """Hard gate: stamp never reviews bot-authored PRs.
 
-        A human applying the stamphog label can't override this — bot output
+        A human applying the stamp label can't override this — bot output
         isn't a trusted basis for an auto-approval. The workflow already gates
         the review job on a non-bot author; this is the defense-in-depth layer
         for any manual or out-of-band invocation.
@@ -283,13 +283,13 @@ class Pipeline:
         self.reviewer_output = {
             "verdict": "REFUSE",
             "reasoning": (
-                f"@{self.pr.author} is a bot — stamphog does not review "
+                f"@{self.pr.author} is a bot — stamp does not review "
                 "bot-authored PRs. This change needs a human reviewer."
             ),
             "risk": "unknown",
             "issues": [],
         }
-        print(f"\n{_fail('REFUSED')} — bot author (@{self.pr.author}); stamphog skips bot-authored PRs")
+        print(f"\n{_fail('REFUSED')} — bot author (@{self.pr.author}); stamp skips bot-authored PRs")
         self._capture_review_completed("DENIED", "BOT-AUTHOR")
         return self.final_verdict
 
@@ -311,7 +311,7 @@ class Pipeline:
         Returns None when no bot review is (or remains) in flight. Human 👀
         reactions are not waited on — humans take longer than any polling
         budget, and the LLM refuses over them with a clear message instead.
-        The WAIT verdict keeps the stamphog label (like ERROR) so the review
+        The WAIT verdict keeps the stamp label (like ERROR) so the review
         retries on the next push rather than demanding a human re-label.
         """
         bots = self._in_flight_bot_reviewers()
@@ -339,7 +339,7 @@ class Pipeline:
             "reasoning": (
                 f"{bot_list} still {'have' if len(bots) > 1 else 'has'} a review in flight (👀) after "
                 f"{BOT_REVIEW_WAIT_BUDGET_SECONDS // 60} minutes — not approving over an "
-                "unfinished review. The `stamphog` label has been kept; the review re-runs "
+                "unfinished review. The `stamp` label has been kept; the review re-runs "
                 "on the next push, or remove and re-apply the label once the reviewer finishes."
             ),
             "risk": "unknown",
@@ -356,7 +356,7 @@ class Pipeline:
             "reasoning": (
                 "The `Migration risk` check has not completed for this commit. "
                 "Wait for it to finish (visible in the PR's Checks tab), then "
-                "re-apply the `stamphog` label to retry."
+                "re-apply the `stamp` label to retry."
             ),
             "risk": "unknown",
             "issues": [],
@@ -743,7 +743,7 @@ class Pipeline:
                             "verdict": "ERROR",
                             "reasoning": (
                                 "The review agent couldn't reach its LLM backend — an infrastructure "
-                                "or credentials issue, not a problem with this PR. The `stamphog` label "
+                                "or credentials issue, not a problem with this PR. The `stamp` label "
                                 "has been kept; the review retries automatically on the next push, or "
                                 "re-apply the label once the backend recovers."
                             ),
@@ -757,7 +757,7 @@ class Pipeline:
                             "reasoning": (
                                 "The review agent could not complete its analysis for this PR "
                                 "(likely too complex for the allocated turn budget). "
-                                "The `stamphog` label has been kept; a human review is needed."
+                                "The `stamp` label has been kept; a human review is needed."
                             ),
                             "risk": "unknown",
                             "issues": [err_str],
@@ -799,7 +799,7 @@ class Pipeline:
         self._capture_review_completed(gate_verdict, llm_verdict)
 
     def _capture_review_completed(self, gate_verdict: str, llm_verdict: str) -> None:
-        """Send a stamphog_review_completed event with all verdict data."""
+        """Send a stamp_review_completed event with all verdict data."""
         if not _INSIGHTS_AVAILABLE:
             return
 
@@ -809,43 +809,43 @@ class Pipeline:
         prov = self.provenance
         hanzo_insights.capture(
             distinct_id=pr.author,
-            event="stamphog_review_completed",
+            event="stamp_review_completed",
             # Extras first so the base props win on collision: the hosted server stamps its
             # runtime/team context through this hook; absent in the Action, so Action events
             # are unchanged (no prop = action runtime).
             properties={
                 **analytics_extra_properties(),
-                "ai_product": "stamphog",
-                "stamphog_version": STAMPFN_VERSION,
-                "stamphog_commit": _head_commit_sha(),
-                "stamphog_pr_number": pr.number,
-                "stamphog_repo": pr.repo,
-                "stamphog_author": pr.author,
-                "stamphog_pr_title": pr.title,
-                "stamphog_tier": cl.get("tier", ""),
-                "stamphog_t1_subclass": cl.get("t1_subclass", ""),
-                "stamphog_breadth": cl.get("breadth", ""),
-                "stamphog_commit_type": cl.get("commit_type") or "",
-                "stamphog_files_changed": len(pr.files),
-                "stamphog_lines_total": pr.lines_total,
-                "stamphog_pr_reactions_count": len(pr.pr_reactions),
-                "stamphog_title_scrutiny_flags": cl.get("title_scrutiny_flags", []),
-                "stamphog_owner_teams": (cl.get("ownership") or {}).get("teams", []),
-                "stamphog_familiarity_band": fam.band if fam else "",
-                "stamphog_familiarity_blame_overlap_pct": round(fam.blame_overlap_pct, 1) if fam else None,
-                "stamphog_familiarity_prior_prs_in_paths": fam.prior_prs_in_paths if fam else None,
-                "stamphog_familiarity_days_since_last_touch": fam.days_since_last_touch if fam else None,
-                "stamphog_agent_authored": prov.agent_authored if prov else None,
-                "stamphog_agent_commit_count": prov.agent_commit_count if prov else None,
-                "stamphog_commit_count": prov.commit_count if prov else None,
-                "stamphog_generated_by": list(prov.generated_by) if prov else [],
-                "stamphog_task_ids": list(prov.task_ids) if prov else [],
-                "stamphog_gate_verdict": gate_verdict,
-                "stamphog_llm_verdict": llm_verdict,
-                "stamphog_final_verdict": self.final_verdict,
-                "stamphog_llm_reasoning": (self.reviewer_output or {}).get("reasoning", ""),
-                "stamphog_llm_risk": (self.reviewer_output or {}).get("risk", ""),
-                "stamphog_llm_issues": (self.reviewer_output or {}).get("issues", []),
+                "ai_product": "stamp",
+                "stamp_version": STAMPFN_VERSION,
+                "stamp_commit": _head_commit_sha(),
+                "stamp_pr_number": pr.number,
+                "stamp_repo": pr.repo,
+                "stamp_author": pr.author,
+                "stamp_pr_title": pr.title,
+                "stamp_tier": cl.get("tier", ""),
+                "stamp_t1_subclass": cl.get("t1_subclass", ""),
+                "stamp_breadth": cl.get("breadth", ""),
+                "stamp_commit_type": cl.get("commit_type") or "",
+                "stamp_files_changed": len(pr.files),
+                "stamp_lines_total": pr.lines_total,
+                "stamp_pr_reactions_count": len(pr.pr_reactions),
+                "stamp_title_scrutiny_flags": cl.get("title_scrutiny_flags", []),
+                "stamp_owner_teams": (cl.get("ownership") or {}).get("teams", []),
+                "stamp_familiarity_band": fam.band if fam else "",
+                "stamp_familiarity_blame_overlap_pct": round(fam.blame_overlap_pct, 1) if fam else None,
+                "stamp_familiarity_prior_prs_in_paths": fam.prior_prs_in_paths if fam else None,
+                "stamp_familiarity_days_since_last_touch": fam.days_since_last_touch if fam else None,
+                "stamp_agent_authored": prov.agent_authored if prov else None,
+                "stamp_agent_commit_count": prov.agent_commit_count if prov else None,
+                "stamp_commit_count": prov.commit_count if prov else None,
+                "stamp_generated_by": list(prov.generated_by) if prov else [],
+                "stamp_task_ids": list(prov.task_ids) if prov else [],
+                "stamp_gate_verdict": gate_verdict,
+                "stamp_llm_verdict": llm_verdict,
+                "stamp_final_verdict": self.final_verdict,
+                "stamp_llm_reasoning": (self.reviewer_output or {}).get("reasoning", ""),
+                "stamp_llm_risk": (self.reviewer_output or {}).get("risk", ""),
+                "stamp_llm_issues": (self.reviewer_output or {}).get("issues", []),
             },
         )
 
@@ -894,7 +894,7 @@ class Pipeline:
 
         rows = [f"| {g.gate} | {'✓' if g.passed else '✗'} | {g.message} |" for g in self.gate_results if g]
         rows.append(
-            f"| stamphog {STAMPFN_VERSION} |  | `.stamphog/policy.yml` @ `{_head_commit_sha()[:7]}`"
+            f"| stamp {STAMPFN_VERSION} |  | `.stamp/policy.yml` @ `{_head_commit_sha()[:7]}`"
             f" · reviewed head `{self.pr.head_sha[:7]}` |"
         )
         details = (
@@ -908,7 +908,7 @@ class Pipeline:
 
     def to_dict(self) -> dict:
         return {
-            "stamphog_version": STAMPFN_VERSION,
+            "stamp_version": STAMPFN_VERSION,
             "pr_number": self.pr.number,
             "repo": self.pr.repo,
             "title": self.pr.title,
@@ -938,7 +938,7 @@ class Pipeline:
             ],
             "policy": {
                 "commit_sha": _head_commit_sha(),
-                "policy_file": ".stamphog/policy.yml",
+                "policy_file": ".stamp/policy.yml",
                 "scopes": (
                     [
                         {"path": s.path, "max_files": s.max_files, "files": len(s.files)}

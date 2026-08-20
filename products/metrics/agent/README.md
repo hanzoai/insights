@@ -103,7 +103,7 @@ End-to-end against the local dev stack (requires `insightscli start` with captur
 ```sh
 docker build -t insights-metrics-agent:dev .
 docker run --rm \
-  -e INSIGHTS_API_KEY=phc_local \
+  -e INSIGHTS_API_KEY=pk-local \
   -e INSIGHTS_HOST=http://host.docker.internal:4320 \
   -e SCRAPE_TARGETS=host.docker.internal:6738 \
   -e SCRAPE_METRICS_PATH=/_metrics \

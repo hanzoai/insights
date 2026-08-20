@@ -46,14 +46,14 @@ class TestOtelMetrics(SimpleTestCase):
 
     @override_settings(
         OTEL_METRICS_EXPORT_URL="http://capture-logs.local/i/v1/metrics",
-        OTEL_METRICS_EXPORT_TOKEN="phc_test",
+        OTEL_METRICS_EXPORT_TOKEN="pk-test",
     )
     def test_configured_records_through_the_sdk_pipeline(self) -> None:
         exporters: list[_CapturingExporter] = []
 
         def _make_exporter(**kwargs: Any) -> _CapturingExporter:
             assert kwargs["endpoint"] == "http://capture-logs.local/i/v1/metrics"
-            assert kwargs["headers"] == {"authorization": "Bearer phc_test"}
+            assert kwargs["headers"] == {"authorization": "Bearer pk-test"}
             exporter = _CapturingExporter()
             exporters.append(exporter)
             return exporter

@@ -10,7 +10,7 @@ use crate::invocation_context::{current_invocation_id, InvocationContext};
 use crate::utils::homedir::insights_home_dir_if_available;
 
 const API_CLI_BUNDLE: &str = "insights-api-cli.mjs";
-const ANALYTICS_HOST: &str = "https://us.i.hanzo.ai";
+pub(crate) const ANALYTICS_HOST: &str = "https://us.i.hanzo.ai";
 
 include!(concat!(env!("OUT_DIR"), "/api_cli_bundle.rs"));
 

@@ -18,6 +18,7 @@ from insights.constants import AvailableFeature
 from insights.event_usage import EventSource
 from insights.models import Organization, OrganizationMembership, Team, User
 from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.ee_models import AccessControl
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.utils import generate_random_token_personal, hash_key_value
 from insights.test.fixtures import create_app_metric2
@@ -32,8 +33,6 @@ from products.workflows.backend.api.insights_flow import (
 )
 from products.workflows.backend.models.insights_flow.insights_flow import SUPPORTED_ACTION_TYPES, InsightsFlow
 from products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job import InsightsFlowBatchJob
-
-from insights.models.ee_models import AccessControl
 
 webhook_template = MOCK_NODE_TEMPLATES[0]
 
@@ -102,7 +101,7 @@ def _secret_input_template() -> dict:
 def _raw_encrypted_inputs(model_id) -> Optional[str]:
     # The stored (still-encrypted) column value, to prove secrets aren't persisted in plaintext.
     with connection.cursor() as cursor:
-        cursor.execute("SELECT encrypted_inputs FROM insights_hogflow WHERE id = %s", [str(model_id)])
+        cursor.execute("SELECT encrypted_inputs FROM insights_flow WHERE id = %s", [str(model_id)])
         row = cursor.fetchone()
     return row[0] if row else None
 
@@ -146,7 +145,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
 
-        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
@@ -158,7 +157,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         mock_emit.reset_mock()
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Renamed"},
         )
         assert update_response.status_code == 200, update_response.json()
@@ -170,7 +169,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         return response.json()["id"]
 
@@ -186,9 +185,11 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_list_search_matches_name_and_description(self, _name, search, expected_names):
         InsightsFlow.objects.create(team=self.team, name="Welcome email", created_by=self.user)
         InsightsFlow.objects.create(team=self.team, name="Password reset", created_by=self.user)
-        InsightsFlow.objects.create(team=self.team, name="Digest", description="quarterly summary", created_by=self.user)
+        InsightsFlow.objects.create(
+            team=self.team, name="Digest", description="quarterly summary", created_by=self.user
+        )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows?search={search}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows?search={search}")
         assert response.status_code == 200, response.json()
         assert {flow["name"] for flow in response.json()["results"]} == expected_names
 
@@ -197,7 +198,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         InsightsFlow.objects.create(team=self.team, name="Mine", created_by=self.user)
         InsightsFlow.objects.create(team=self.team, name="Theirs", created_by=other_user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows?created_by={other_user.uuid}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows?created_by={other_user.uuid}")
         assert response.status_code == 200, response.json()
         assert {flow["name"] for flow in response.json()["results"]} == {"Theirs"}
 
@@ -214,10 +215,10 @@ class TestInsightsFlowAPI(APIBaseTest):
                 },
             }
         )
-        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
 
-        mcp_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows", HTTP_X_INSIGHTS_CLIENT="mcp")
+        mcp_response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows", HTTP_X_INSIGHTS_CLIENT="mcp")
         assert mcp_response.status_code == 200, mcp_response.json()
         result = mcp_response.json()["results"][0]
         assert "actions" not in result
@@ -227,7 +228,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # The web app / raw API still get the full graph they rely on (e.g. client-side duplication) —
         # and it does carry the secret, proving the MCP omission above is the summary serializer at
         # work, not validation quietly dropping the header.
-        web_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows")
+        web_response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows")
         assert web_response.status_code == 200, web_response.json()
         assert "actions" in web_response.json()["results"][0]
         assert secret in web_response.content.decode()
@@ -252,7 +253,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             }
         ]
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": trigger_only},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -261,10 +262,12 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # Metadata stays editable over MCP, and the web builder keeps sending full graphs.
         mcp_rename = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": "Renamed"}, HTTP_X_INSIGHTS_CLIENT="mcp"
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"name": "Renamed"}, HTTP_X_INSIGHTS_CLIENT="mcp"
         )
         assert mcp_rename.status_code == 200, mcp_rename.json()
-        web_actions = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": trigger_only})
+        web_actions = self.client.patch(
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": trigger_only}
+        )
         assert web_actions.status_code == 200, web_actions.json()
 
     def test_invalid_action_input_error_carries_the_field_message(self):
@@ -274,7 +277,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         # handler envelope.
         insights_flow, _ = self._create_insights_flow_with_action({"template_id": "template-webhook", "inputs": {}})
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
 
         assert response.status_code == 400, response.json()
         body = response.json()
@@ -305,7 +310,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, action = self._create_insights_flow_with_action({"template_id": template_id, "inputs": {}})
         action["type"] = action_type
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
 
         assert response.status_code == 400, response.json()
         detail = response.json()["detail"]
@@ -319,7 +326,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, action = self._create_insights_flow_with_action({"inputs": _valid_email_inputs()})
         action["type"] = "function_email"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
 
         assert response.status_code == 201, response.json()
         stored = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -336,7 +345,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         action["type"] = "function_email"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
 
         assert response.status_code == 201, response.json()
         stored = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -360,7 +371,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         action["type"] = "function_email"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
 
         assert response.status_code == 201, response.json()
         stored = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -379,7 +392,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         action["type"] = "function_email"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
 
         assert response.status_code == 201, response.json()
         stored = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -399,7 +414,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         action["type"] = "function_email"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
 
         assert response.status_code == 400, response.json()
         assert "Ambiguous" in response.json()["detail"], response.json()
@@ -452,7 +469,9 @@ class TestInsightsFlowAPI(APIBaseTest):
             "edges": [{"from": "trigger_node", "to": "exit_node", "type": "continue"}],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
 
         assert response.status_code == 400, response.json()
         detail = response.json()["detail"]
@@ -473,7 +492,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # A client that based its edit on an older copy is rejected rather than clobbering the newer one.
         stale_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Stale edit", "base_updated_at": stale},
         )
         assert stale_response.status_code == 409, stale_response.json()
@@ -481,7 +500,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # A client whose base matches the current server copy proceeds.
         fresh_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Fresh edit", "base_updated_at": current},
         )
         assert fresh_response.status_code == 200, fresh_response.json()
@@ -495,7 +514,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert stale  # we hold a stale view but send no base
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Ungated edit"},
         )
         assert response.status_code == 200, response.json()
@@ -510,7 +529,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "+" not in naive and not naive.endswith("Z")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Naive base edit", "base_updated_at": naive},
         )
         assert response.status_code == 200, response.json()
@@ -522,7 +541,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions",
@@ -551,7 +570,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         trigger_action_expectation = {
             "id": "trigger_node",
@@ -609,7 +628,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         ]
     )
     def test_insights_flow_delay_validation_rejects_malformed_config(self, _name, bad_config):
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._make_delay_flow(bad_config))
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", self._make_delay_flow(bad_config))
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__config",
@@ -632,7 +651,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     )
     def test_insights_flow_delay_validation_accepts_canonical_config(self, _name, delay_duration):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows",
+            f"/v1/projects/{self.team.id}/insights_flows",
             self._make_delay_flow({"delay_duration": delay_duration}),
         )
         assert response.status_code == 201, response.json()
@@ -649,7 +668,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # whole flow row unparseable for the worker.
         flow = self._make_delay_flow({"delay_duration": "5m"})
         flow["actions"][1]["output_variable"] = sent
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", flow)
         assert response.status_code == 201, response.json()
         assert response.json()["actions"][1]["output_variable"] == stored
 
@@ -664,14 +683,14 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_output_variable_invalid_shapes_rejected(self, _name, sent):
         flow = self._make_delay_flow({"delay_duration": "5m"})
         flow["actions"][1]["output_variable"] = sent
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", flow)
         assert response.status_code == 400, response.json()
         assert "output_variable" in str(response.json())
 
     def test_insights_flow_delay_validation_lenient_for_drafts(self):
         # status omitted defaults to draft; draft mode lets users save WIP with invalid configs
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows",
+            f"/v1/projects/{self.team.id}/insights_flows",
             self._make_delay_flow({"inputs": {"duration": {"value": 1800}}}, status=None),
         )
         assert response.status_code == 201, response.json()
@@ -686,7 +705,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow["status"] = "active"
 
         # Check that the template is found but missing required inputs
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__template_id",
@@ -703,7 +722,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             }
         )
         insights_flow["status"] = "active"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__inputs__url",
@@ -722,12 +741,12 @@ class TestInsightsFlowAPI(APIBaseTest):
             }
         )
         action["name"] = "Send webhook"
-        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         # Status-only activation (the workflows list toggle) re-validates the stored actions
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+        response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert response.status_code == 400, response.json()
         detail = response.json()["detail"]
         assert "Send webhook" in detail, response.json()
@@ -746,14 +765,24 @@ class TestInsightsFlowAPI(APIBaseTest):
             "properties": [{"key": "event", "type": "event_metadata", "value": ["custom_event"], "operator": "exact"}]
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         insights_flow = InsightsFlow.objects.get(pk=response.json()["id"])
 
         assert insights_flow.trigger["filters"].get("bytecode") == ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11]
 
-        assert insights_flow.actions[1]["filters"].get("bytecode") == ["_H", 1, 32, "custom_event", 32, "event", 1, 1, 11]
+        assert insights_flow.actions[1]["filters"].get("bytecode") == [
+            "_H",
+            1,
+            32,
+            "custom_event",
+            32,
+            "event",
+            1,
+            1,
+            11,
+        ]
 
         assert insights_flow.actions[1]["config"]["inputs"] == {
             "url": {"order": 0, "value": "https://example.com", "bytecode": ["_H", 1, 32, "https://example.com"]}
@@ -795,7 +824,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "window_minutes": None,
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         conversion = response.json()["conversion"]
@@ -835,7 +864,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow["status"] = "active"
         insights_flow["conversion"] = {"filters": event_obj, "window_minutes": None}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conversion = response.json()["conversion"]
@@ -855,7 +884,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow["status"] = "active"
         insights_flow["conversion"] = {"filters": [], "window_minutes": 60, "bytecode": ["_H", 1, 32, "injected"]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conversion = response.json()["conversion"]
@@ -886,12 +915,12 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         insights_flow["status"] = "active"
 
-        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {
                 "conversion": {
                     "filters": [
@@ -972,7 +1001,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, conditional_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conditions = response.json()["actions"][1]["config"]["conditions"]
@@ -1005,7 +1034,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
         insights_flow = {"name": "Test Flow", "actions": [trigger_action, wait_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         wait = next(a for a in response.json()["actions"] if a["type"] == "wait_until_condition")
@@ -1033,7 +1062,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
         insights_flow = {"name": "Test Flow", "status": "active", "actions": [trigger_action, conditional_action]}
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert "filters" in response.json()["detail"]
 
@@ -1056,7 +1085,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
         # Default test client uses session auth → EventSource.WEB → lenient draft validation.
         insights_flow = {"name": "Test Flow", "status": "draft", "actions": [trigger_action, conditional_action]}
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
     @parameterized.expand(
@@ -1097,7 +1126,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
         insights_flow = {"name": "Test Flow", "status": "active", "actions": [trigger_action, branch_action]}
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert expected_key in response.json()["detail"]
 
@@ -1117,7 +1146,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
         insights_flow = {"name": "Test Flow", "status": "draft", "actions": [trigger_action, *branch_actions]}
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
     def test_insights_flow_single_condition_field(self):
@@ -1161,7 +1190,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         condition = response.json()["actions"][1]["config"]["condition"]
@@ -1224,7 +1253,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
         data = response.json()
@@ -1283,7 +1312,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         events = response.json()["actions"][1]["config"]["events"]
@@ -1346,7 +1375,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         events = response.json()["actions"][1]["config"]["events"]
@@ -1387,7 +1416,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         events = response.json()["actions"][1]["config"]["events"]
@@ -1439,7 +1468,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conversion_events = response.json()["conversion"]["events"]
@@ -1477,7 +1506,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conversion_events = response.json()["conversion"]["events"]
@@ -1522,7 +1551,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         filters = response.json()["conversion"]["events"][0]["filters"]
@@ -1535,17 +1564,17 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         assert response.json()["status"] == "draft"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "active"}
+            f"/v1/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "active"}
         )
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == "active"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "draft"}
+            f"/v1/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "draft"}
         )
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == "draft"
@@ -1554,10 +1583,10 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
-        activate = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+        activate = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert activate.status_code == 200, activate.json()
         return flow_id
 
@@ -1565,7 +1594,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_mcp_can_disable_active_workflow(self, _name, target_status):
         flow_id = self._create_active_insights_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": target_status},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -1576,10 +1605,10 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{create.json()['id']}",
+            f"/v1/projects/{self.team.id}/insights_flows/{create.json()['id']}",
             {"name": "Renamed via MCP"},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -1589,7 +1618,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_non_mcp_can_modify_active_workflow(self):
         flow_id = self._create_active_insights_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Renamed via UI"},
         )
         assert response.status_code == 200, response.json()
@@ -1600,7 +1629,9 @@ class TestInsightsFlowAPI(APIBaseTest):
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
         insights_flow["status"] = "active"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
         assert response.status_code == 400, response.json()
         assert "one-shot active workflows via MCP" in response.json()["detail"]
 
@@ -1608,7 +1639,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
         assert response.status_code == 201, response.json()
         assert response.json()["status"] == "draft"
 
@@ -1617,7 +1650,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
         insights_flow["status"] = "active"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["status"] == "active"
 
@@ -1627,10 +1660,10 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{create.json()['id']}",
+            f"/v1/projects/{self.team.id}/insights_flows/{create.json()['id']}",
             {"name": "Renamed", "status": "active"},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -1641,10 +1674,10 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{create.json()['id']}",
+            f"/v1/projects/{self.team.id}/insights_flows/{create.json()['id']}",
             {"name": "Renamed", "status": "active"},
         )
         assert response.status_code == 200, response.json()
@@ -1656,7 +1689,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
         insights_flow["edges"] = [{"from": "trigger_node", "to": "action_1", "type": "continue"}]
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["edges"] == [{"from": "trigger_node", "to": "action_1", "type": "continue"}]
 
@@ -1665,7 +1698,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
         insights_flow["edges"] = "not-an-array"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json()["attr"] == "edges"
 
@@ -1696,13 +1729,13 @@ class TestInsightsFlowAPI(APIBaseTest):
                 {"from": "action_1", "to": "exit_1", "type": "continue"},
             ],
         }
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", flow)
         assert create.status_code == 201, create.json()
         return create.json()["id"]
 
     def _patch_graph(self, flow_id: str, operations: list[dict], **extra):
         return self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": operations},
             HTTP_X_INSIGHTS_CLIENT="mcp",
             **extra,
@@ -1786,7 +1819,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_graph_non_mcp_can_edit_active_workflow(self):
         flow_id = self._create_active_insights_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "update_action", "id": "action_1", "patch": {"name": "Renamed via UI"}}]},
         )
         assert response.status_code == 200, response.json()
@@ -1820,16 +1853,18 @@ class TestInsightsFlowAPI(APIBaseTest):
         # Option B: the full create/PATCH path no longer hard-blocks on graph structure — only the surgical
         # /graph endpoint enforces. A dangling edge is logged, not rejected, so callers (incl. the web UI on
         # an active save) aren't trapped by pre-existing corruption.
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._flow_with_dangling_edge("active"))
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", self._flow_with_dangling_edge("active")
+        )
         assert response.status_code == 201, response.json()
 
     def test_full_patch_with_invalid_graph_is_lenient(self):
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._flow_with_dangling_edge("draft"))
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", self._flow_with_dangling_edge("draft"))
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
         # Re-saving the (already structurally-broken) flow as active must succeed — the user isn't blocked
         # from editing a workflow whose graph corruption they didn't introduce.
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+        response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert response.status_code == 200, response.json()
         assert InsightsFlow.objects.get(pk=flow_id).status == "active"
 
@@ -1895,7 +1930,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
 
@@ -1903,7 +1938,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             mock_invoke.return_value = MagicMock(status_code=200, json=lambda: {"status": "success"})
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/invocations/",
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/invocations/",
                 data={
                     "globals": {"event": {"event": "$pageview", "distinct_id": "test-distinct-id"}},
                     "mock_async_functions": True,
@@ -1956,7 +1991,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, conditional_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__non_field_errors",
@@ -1983,7 +2018,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["trigger"]["type"] == "batch"
         assert response.json()["trigger"]["filters"]["properties"][0]["key"] == "email"
@@ -2004,7 +2039,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
     def test_insights_flow_batch_trigger_filters_not_dict(self):
@@ -2024,7 +2059,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__filters",
@@ -2052,7 +2087,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__filters__properties",
@@ -2079,7 +2114,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         trigger = response.json()["trigger"]
         assert trigger["type"] == "data-warehouse-table"
@@ -2105,7 +2140,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__table_name",
@@ -2131,7 +2166,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
     def test_insights_flow_data_warehouse_table_trigger_filters_not_dict(self):
@@ -2152,7 +2187,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__filters",
@@ -2167,7 +2202,9 @@ class TestInsightsFlowAPI(APIBaseTest):
             ("random_cohort_branch", {"cohorts": [{"percentage": 50}]}),
         ]
     )
-    def test_insights_flow_data_warehouse_table_trigger_rejects_person_dependent_steps(self, action_type, action_config):
+    def test_insights_flow_data_warehouse_table_trigger_rejects_person_dependent_steps(
+        self, action_type, action_config
+    ):
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",
@@ -2191,7 +2228,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, person_dependent_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json()["attr"] == "actions"
         assert action_type in response.json()["detail"]
@@ -2221,7 +2258,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, person_dependent_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
     def test_insights_flow_data_warehouse_table_trigger_forces_exit_only_at_end(self):
@@ -2245,7 +2282,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["exit_condition"] == "exit_only_at_end"
 
@@ -2264,7 +2301,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
         insights_flow = {"name": "Test Batch Flow", "status": "active", "actions": [trigger_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert "event" in response.json()["detail"].lower()
 
@@ -2281,7 +2318,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
         insights_flow = {"name": "Test Batch Flow", "status": "draft", "actions": [trigger_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+        response = self.client.post(
+            f"/v1/projects/{self.team.id}/insights_flows", insights_flow, HTTP_X_INSIGHTS_CLIENT="mcp"
+        )
         assert response.status_code == 400, response.json()
         assert "event" in response.json()["detail"].lower()
 
@@ -2298,7 +2337,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         }
         insights_flow = {"name": "Test Batch Flow", "status": "active", "actions": [trigger_action]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
     def _post_batch_flow(self, filters: dict, status: str = "active"):
@@ -2309,7 +2348,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": {"type": "batch", "filters": filters},
         }
         insights_flow = {"name": "Test Batch Flow", "status": status, "actions": [trigger_action]}
-        return self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        return self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
     def _account_audience_provider(self, group_type: str | None = "account"):
         return patch(
@@ -2392,7 +2431,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             ) as mock_page,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/insights_flows/account_audience",
+                f"/v1/projects/{self.team.id}/internal/insights_flows/account_audience",
                 {"filters": {"audience_type": "accounts", "properties": []}, "cursor": "a0"},
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2409,7 +2448,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     def test_internal_account_audience_requires_internal_secret(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/internal/insights_flows/account_audience",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/account_audience",
             {"filters": {"audience_type": "accounts"}},
             format="json",
         )
@@ -2425,7 +2464,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_internal_account_audience_rejects_non_account_filters(self, _name, body):
         with self._account_audience_provider():
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/insights_flows/account_audience",
+                f"/v1/projects/{self.team.id}/internal/insights_flows/account_audience",
                 body,
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2436,7 +2475,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_internal_account_audience_requires_configured_group_type(self):
         with self._account_audience_provider(group_type=None):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/insights_flows/account_audience",
+                f"/v1/projects/{self.team.id}/internal/insights_flows/account_audience",
                 {"filters": {"audience_type": "accounts", "properties": []}},
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2451,7 +2490,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             ) as mock_count,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"audience_type": "accounts", "properties": []}},
                 format="json",
             )
@@ -2518,7 +2557,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
         insights_flow = {"name": "Test Batch Flow", "status": status, "actions": [trigger_action]}
-        return self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, **extra)
+        return self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow, **extra)
 
     @parameterized.expand(["batch", "schedule"])
     def test_insights_flow_audience_rejects_behavioral_cohort(self, trigger_type: str):
@@ -2581,7 +2620,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             },
         }
         insights_flow = {"name": "Test Event Flow", "status": status, "actions": [trigger_action]}
-        return self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow, **extra)
+        return self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow, **extra)
 
     def test_insights_flow_event_trigger_cohort_filter_rejected_for_mcp_draft(self):
         # Cohorts can't be evaluated in real-time event filters. Generalized strict validation rejects this
@@ -2615,7 +2654,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     def test_insights_flow_user_blast_radius_requires_filters(self):
         with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
-            response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/user_blast_radius", {})
+            response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius", {})
 
         assert response.status_code == 400, response.json()
         assert response.json().get("attr") == "filters"
@@ -2628,7 +2667,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             mock_get_user_blast_radius.return_value = BlastRadiusResult(affected=4, total=10)
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
             )
 
@@ -2640,9 +2679,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert body["limit"] > 0
 
     @override_settings(
-        HOGFLOW_BATCH_TRIGGER_LIMIT=5000,
-        HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
-        HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set(),
+        Flow_BATCH_TRIGGER_LIMIT=5000,
+        Flow_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
+        Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set(),
     )
     def test_insights_flow_user_blast_radius_returns_default_limit_for_unlisted_team(self):
         with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
@@ -2650,7 +2689,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
             mock_get_user_blast_radius.return_value = BlastRadiusResult(affected=0, total=0)
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
             )
 
@@ -2660,9 +2699,9 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_insights_flow_user_blast_radius_returns_elevated_limit_for_listed_team(self):
         with (
             override_settings(
-                HOGFLOW_BATCH_TRIGGER_LIMIT=5000,
-                HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
-                HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
+                Flow_BATCH_TRIGGER_LIMIT=5000,
+                Flow_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
+                Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
             ),
             patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius,
         ):
@@ -2670,7 +2709,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
             mock_get_user_blast_radius.return_value = BlastRadiusResult(affected=0, total=0)
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
             )
 
@@ -2685,7 +2724,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             label="insights_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["insights_flow:read"]
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+            f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
             {"filters": {"properties": []}},
             headers={"authorization": f"Bearer {key}"},
         )
@@ -2705,7 +2744,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
             mock_get_user_blast_radius.return_value = BlastRadiusResult(affected=1, total=10)
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
                 headers={"authorization": f"Bearer {key}"},
             )
@@ -2732,7 +2771,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # the condition reaches the blast-radius query (where it would otherwise 500).
         with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": properties}},
             )
 
@@ -2744,7 +2783,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_internal_user_blast_radius_rejects_flag_condition(self):
         with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/internal/insights_flows/user_blast_radius",
                 {"filters": {"properties": [{"key": "my-other-flag", "type": "flag", "value": "true"}]}},
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2760,7 +2799,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "products.workflows.backend.api.insights_flow.get_user_blast_radius_persons"
         ) as mock_get_user_blast_radius_persons:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
+                f"/v1/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
                 {"filters": {"properties": [{"key": "my-other-flag", "type": "flag", "value": "true"}]}},
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2791,7 +2830,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             ) as mock_legacy_query,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
+                f"/v1/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
                 {"filters": {"properties": []}, "dedupe_key": "email"},
                 format="json",
                 headers={"x-internal-api-secret": "test-secret-123"},
@@ -2834,7 +2873,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}, "dedupe_key": "email"},
             )
 
@@ -2853,7 +2892,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     def test_user_blast_radius_rejects_unsupported_dedupe_key(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+            f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
             {"filters": {"properties": []}, "dedupe_key": "phone"},
         )
 
@@ -2862,7 +2901,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     def test_internal_user_blast_radius_persons_rejects_unsupported_dedupe_key(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/user_blast_radius_persons",
             {"filters": {"properties": []}, "dedupe_key": "phone"},
             format="json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2880,7 +2919,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=insights_flow, status="active")
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
             {"status": "completed"},
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2901,7 +2940,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=insights_flow, status="completed")
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
             {"status": "failed"},
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2923,7 +2962,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         batch_job = InsightsFlowBatchJob.objects.create(team=self.team, insights_flow=insights_flow, status="active")
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
             {"status": "active"},  # not a terminal state
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2936,7 +2975,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     def test_internal_update_batch_job_status_returns_404_for_missing_job(self):
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/00000000-0000-0000-0000-000000000000/status",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/batch_jobs/00000000-0000-0000-0000-000000000000/status",
             {"status": "completed"},
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2948,7 +2987,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_internal_update_batch_job_status_returns_404_for_invalid_uuid(self):
         # `not-a-uuid` reaches UUIDField → ValidationError, must surface as 404 not 500.
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/not-a-uuid/status",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/batch_jobs/not-a-uuid/status",
             {"status": "completed"},
             content_type="application/json",
             headers={"x-internal-api-secret": "test-secret-123"},
@@ -2965,7 +3004,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # No INTERNAL_API_SECRET header → unauthenticated
         response = self.client.put(
-            f"/api/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/batch_jobs/{batch_job.id}/status",
             {"status": "completed"},
             content_type="application/json",
         )
@@ -3015,7 +3054,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": actions,
             "billable_action_types": ["fake_type", "another_fake"],  # Client tries to override
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         # Should have only unique billable types (deduped), client override ignored
@@ -3058,7 +3097,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         ]
 
         insights_flow = {"name": "Test Update Billable Types", "actions": initial_actions}
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
         assert response.json()["billable_action_types"] == ["function"]
@@ -3066,7 +3105,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # Update to remove function action (no billable actions left)
         updated_actions = [trigger_action]
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": updated_actions}
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": updated_actions}
         )
         assert update_response.status_code == 200, update_response.json()
         assert update_response.json()["billable_action_types"] == []
@@ -3096,7 +3135,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # Try to override billable_action_types in update - should be ignored and recomputed
         override_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {
                 "actions": complex_actions,
                 "billable_action_types": ["fake_type"],  # Try to override
@@ -3117,7 +3156,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "delay" in action_types  # Delay is present
         assert action_types.count("function") == 2  # Two function actions
 
-    @override_settings(HOGFLOW_BATCH_TRIGGER_LIMIT=5000, HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set())
+    @override_settings(Flow_BATCH_TRIGGER_LIMIT=5000, Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set())
     @patch(
         "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
@@ -3128,7 +3167,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "variables": [{"key": "first_name", "value": "Test"}],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data)
 
         assert response.status_code == 200, response.json()
         assert response.json()["insights_flow"] == flow_id
@@ -3145,11 +3184,11 @@ class TestInsightsFlowAPI(APIBaseTest):
         flow_id = self._create_active_insights_flow()
 
         with override_settings(
-            HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
-            HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
+            Flow_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
+            Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
                 {"variables": [{"key": "first_name", "value": "Test"}]},
             )
 
@@ -3169,12 +3208,12 @@ class TestInsightsFlowAPI(APIBaseTest):
         # (covered by the existing batch job tests, which run as WEB), and headless callers (raw API
         # keys) dispatch in one call - the gate targets agents, not automation.
         flow_id = self._create_active_insights_flow()
-        trigger_filters = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}").json()["trigger"][
+        trigger_filters = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}").json()["trigger"][
             "filters"
         ]
 
         no_token = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -3183,12 +3222,12 @@ class TestInsightsFlowAPI(APIBaseTest):
         mock_create_invocation.assert_not_called()
 
         narrow_preview = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+            f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
             {"filters": {"properties": [{"key": "email", "type": "person", "value": "x", "operator": "icontains"}]}},
         )
         assert narrow_preview.status_code == 200, narrow_preview.json()
         narrow_token = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {"confirm_token": narrow_preview.json()["confirm_token"]},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -3200,7 +3239,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # person-scope send the dispatch runs - it must not authorize it.
         group_semantics_token = mint_audience_confirm_token(self.team.id, trigger_filters, group_type_index=0)
         group_semantics = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {"confirm_token": group_semantics_token},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -3209,13 +3248,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         mock_create_invocation.assert_not_called()
 
         preview = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/user_blast_radius", {"filters": trigger_filters}
+            f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius", {"filters": trigger_filters}
         )
         assert preview.status_code == 200, preview.json()
         token = preview.json()["confirm_token"]
 
         dispatched = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             # Caller-supplied filters are ignored: the job snapshots the trigger filters it fans out to.
             {"filters": {"properties": []}, "confirm_token": token},
             HTTP_X_INSIGHTS_CLIENT="mcp",
@@ -3231,7 +3270,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # check could be sidestepped by scheduling the send instead.
         schedule_body = {"rrule": "FREQ=DAILY;INTERVAL=1", "starts_at": "2026-08-01T00:00:00Z"}
         no_token_schedule = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/schedules",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/schedules",
             schedule_body,
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -3239,7 +3278,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "workflows-blast-radius" in no_token_schedule.json()["detail"]
 
         scheduled = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/schedules",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/schedules",
             {**schedule_body, "confirm_token": token},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -3250,10 +3289,10 @@ class TestInsightsFlowAPI(APIBaseTest):
         draft_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        draft_create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", draft_flow)
+        draft_create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", draft_flow)
         assert draft_create.status_code == 201, draft_create.json()
         draft_schedule = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{draft_create.json()['id']}/schedules",
+            f"/v1/projects/{self.team.id}/insights_flows/{draft_create.json()['id']}/schedules",
             {**schedule_body, "confirm_token": token},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -3272,7 +3311,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         api_client = self.client_class()
         api_dispatch = api_client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {},
             headers={"authorization": f"Bearer {api_key}"},
         )
@@ -3284,10 +3323,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         # isn't enough - person:read is required, same as the blast-radius preview.
         write_only_key = generate_random_token_personal()
         PersonalAPIKey.objects.create(
-            label="write only", user=self.user, secure_value=hash_key_value(write_only_key), scopes=["insights_flow:write"]
+            label="write only",
+            user=self.user,
+            secure_value=hash_key_value(write_only_key),
+            scopes=["insights_flow:write"],
         )
         write_only = api_client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {},
             headers={"authorization": f"Bearer {write_only_key}"},
         )
@@ -3299,12 +3341,12 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}}
         )
-        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",
             {"variables": [{"key": "first_name", "value": "Test"}]},
         )
         assert response.status_code == 400, response.json()
@@ -3313,7 +3355,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_post_insights_flow_batch_jobs_endpoint_nonexistent_flow(self):
         batch_job_data = {"variables": [{"key": "first_name", "value": "Test"}]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/99999/batch_jobs", batch_job_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/99999/batch_jobs", batch_job_data)
 
         assert response.status_code == 404, response.json()
 
@@ -3330,17 +3372,17 @@ class TestInsightsFlowAPI(APIBaseTest):
         batch_job_data_2 = {"variables": [{"key": "first_name", "value": "Test2"}]}
 
         job_response_1 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data_1
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data_1
         )
         assert job_response_1.status_code == 200, job_response_1.json()
 
         job_response_2 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id_2}/batch_jobs", batch_job_data_2
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id_2}/batch_jobs", batch_job_data_2
         )
         assert job_response_2.status_code == 200, job_response_2.json()
 
         # Fetch jobs for the first flow
-        get_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs")
+        get_response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs")
         assert get_response.status_code == 200, get_response.json()
         jobs = get_response.json()
         assert len(jobs) == 1
@@ -3378,7 +3420,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action_without_filter],
         }
 
-        response_without = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow_without)
+        response_without = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow_without)
         assert response_without.status_code == 201, response_without.json()
 
         # Bytecode should just check for $pageview event
@@ -3405,7 +3447,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action_with_filter],
         }
 
-        response_with = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow_with)
+        response_with = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow_with)
         assert response_with.status_code == 201, response_with.json()
 
         # Bytecode should be in trigger.filters.bytecode
@@ -3434,7 +3476,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "properties": [{"key": "event", "type": "event_metadata", "value": ["custom_event"], "operator": "exact"}]
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         flow = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -3456,13 +3498,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         insights_flow["status"] = "draft"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
 
         # Activate the draft — re-validation should compile bytecodes
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "active"},
         )
         assert response.status_code == 200, response.json()
@@ -3482,7 +3524,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         insights_flow["status"] = "draft"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         flow = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -3498,7 +3540,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         params: dict = {"scope": "InsightsFlow", "page": 1, "limit": 20}
         if flow_id:
             params["item_id"] = flow_id
-        activity = self.client.get(f"/api/projects/{self.team.pk}/activity_log", data=params)
+        activity = self.client.get(f"/v1/projects/{self.team.pk}/activity_log", data=params)
         assert activity.status_code == status.HTTP_200_OK
         return activity.json().get("results")
 
@@ -3509,7 +3551,7 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         flow_id = response.json()["id"]
         flow_name = response.json()["name"]
@@ -3531,13 +3573,13 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         flow_id = response.json()["id"]
         original_name = response.json()["name"]
 
         new_name = "Updated Flow Name"
-        update_response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": new_name})
+        update_response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"name": new_name})
         assert update_response.status_code == status.HTTP_200_OK, update_response.json()
 
         activity = self._get_insights_flow_activity(flow_id)
@@ -3579,7 +3621,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["status"] == "draft"
 
@@ -3608,7 +3650,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
     def test_insights_flow_retrieve_does_not_leak_between_teams(self):
@@ -3624,12 +3666,12 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
 
         self.client.force_login(another_user)
-        create_response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{another_team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         self.client.force_login(self.user)
-        response = self.client.get(f"/api/projects/{another_team.id}/insights_flows/{flow_id}")
+        response = self.client.get(f"/v1/projects/{another_team.id}/insights_flows/{flow_id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_insights_flow_create_does_not_leak_between_teams(self):
@@ -3644,7 +3686,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
 
         self.client.force_login(self.user)
-        response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{another_team.id}/insights_flows", insights_flow)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_insights_flow_update_does_not_leak_between_teams(self):
@@ -3660,13 +3702,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
 
         self.client.force_login(another_user)
-        create_response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{another_team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         self.client.force_login(self.user)
         response = self.client.patch(
-            f"/api/projects/{another_team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{another_team.id}/insights_flows/{flow_id}",
             {"name": "updated by unauthorized user"},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -3684,12 +3726,12 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
 
         self.client.force_login(another_user)
-        create_response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{another_team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
         self.client.force_login(self.user)
-        response = self.client.delete(f"/api/projects/{another_team.id}/insights_flows/{flow_id}")
+        response = self.client.delete(f"/v1/projects/{another_team.id}/insights_flows/{flow_id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_insights_flow_draft_invalid_can_be_archived(self):
@@ -3717,13 +3759,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
         assert response.json()["status"] == "draft"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "archived"},
         )
         assert response.status_code == 200, response.json()
@@ -3754,12 +3796,12 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "active"},
         )
         assert response.status_code == 400, response.json()
@@ -3770,13 +3812,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         insights_flow["name"] = name
         insights_flow["status"] = flow_status
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         return response.json()["id"]
 
     def _archive_flow(self, flow_id: str) -> None:
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "archived"},
         )
         assert response.status_code == 200, response.json()
@@ -3787,7 +3829,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             self._archive_flow(fid)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
+            f"/v1/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": ids},
         )
         assert response.status_code == 200, response.json()
@@ -3799,7 +3841,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_delete_writes_deleted_activity_and_usage_event(self, mock_report):
         flow_id = self._create_flow(name="Doomed")
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/insights_flows/{flow_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}")
         assert response.status_code == 204, response.content
         assert not InsightsFlow.objects.filter(id=flow_id).exists()
 
@@ -3819,7 +3861,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         flow_id = self._create_flow(flow_status=flow_status)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
+            f"/v1/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": [flow_id]},
         )
         assert response.status_code == 200, response.json()
@@ -3832,7 +3874,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         self._archive_flow(archived_id)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
+            f"/v1/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": [draft_id, archived_id]},
         )
         assert response.status_code == 200, response.json()
@@ -3842,21 +3884,21 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     def test_bulk_delete_rejects_empty_ids(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
+            f"/v1/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": []},
         )
         assert response.status_code == 400
 
     def test_bulk_delete_rejects_missing_ids(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
+            f"/v1/projects/{self.team.id}/insights_flows/bulk_delete",
             {},
         )
         assert response.status_code == 400
 
     def test_bulk_delete_rejects_invalid_uuids(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
+            f"/v1/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": ["not-a-uuid", "also-bad"]},
         )
         assert response.status_code == 400
@@ -3870,14 +3912,14 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action(
             {"template_id": "template-webhook", "inputs": {"url": {"value": "https://example.com"}}},
         )
-        create_response = self.client.post(f"/api/projects/{another_team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{another_team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201
         flow_id = create_response.json()["id"]
-        self.client.patch(f"/api/projects/{another_team.id}/insights_flows/{flow_id}", {"status": "archived"})
+        self.client.patch(f"/v1/projects/{another_team.id}/insights_flows/{flow_id}", {"status": "archived"})
 
         self.client.force_login(self.user)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
+            f"/v1/projects/{self.team.id}/insights_flows/bulk_delete",
             {"ids": [flow_id]},
         )
         assert response.status_code == 200, response.json()
@@ -3895,15 +3937,17 @@ class TestInsightsFlowAPI(APIBaseTest):
         self._archive_flow(flow_id)
 
         with (
-            patch("products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers") as mock_reload,
+            patch(
+                "products.workflows.backend.models.insights_flow.insights_flow.reload_insights_flows_on_workers"
+            ) as mock_reload,
             self.captureOnCommitCallbacks(execute=True),
         ):
             if delete_mode == "single_delete":
-                response = self.client.delete(f"/api/projects/{self.team.id}/insights_flows/{flow_id}")
+                response = self.client.delete(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}")
                 assert response.status_code == 204, response.content
             else:
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/insights_flows/bulk_delete",
+                    f"/v1/projects/{self.team.id}/insights_flows/bulk_delete",
                     {"ids": [flow_id]},
                 )
                 assert response.status_code == 200, response.json()
@@ -3960,7 +4004,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     )
     def test_variables_validation(self, _name, variables, expected_status, expected_error):
         insights_flow = self._base_insights_flow_with_variables(variables)
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == expected_status, response.json()
         if expected_error:
             assert response.json()["detail"] == expected_error
@@ -4002,7 +4046,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "config": {"properties": {"onboarding_variant": "A"}},
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 400, response.json()
         detail = response.json()["detail"]
@@ -4029,7 +4073,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow, _ = self._create_insights_flow_with_action({})
         insights_flow["actions"][1] = {"id": "bad_node", "name": "Tag person", "type": action_type, "config": {}}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 400, response.json()
 
@@ -4040,7 +4084,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         secret = "dont-echo-me-9f3a"
         insights_flow["actions"][1] = {"id": "bad_node", "name": "Tag person", "type": {"k": secret}, "config": {}}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 400, response.json()
         assert secret not in response.json()["detail"]
@@ -4065,7 +4109,7 @@ class TestInsightsFlowGlobalStats(DatastoreTestMixin, APIBaseTest):
         self.flow_b = InsightsFlow.objects.create(team=self.team, name="Flow B")
 
     def _global(self, params=None):
-        return self.client.get(f"/api/projects/{self.team.id}/insights_flows/metrics/global/", params)
+        return self.client.get(f"/v1/projects/{self.team.id}/insights_flows/metrics/global/", params)
 
     def _seed(self, workflow_id, *, succeeded=0, failed=0, timestamp=None, team_id=None, app_source="insights_flow"):
         tid = team_id or self.team.pk
@@ -4150,7 +4194,7 @@ class TestInsightsFlowGlobalStats(DatastoreTestMixin, APIBaseTest):
             label="insights_flow only", user=self.user, secure_value=hash_key_value(key), scopes=["insights_flow:read"]
         )
         res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/metrics/global/",
+            f"/v1/projects/{self.team.id}/insights_flows/metrics/global/",
             headers={"authorization": f"Bearer {key}"},
         )
         assert res.status_code == status.HTTP_200_OK, res.json()
@@ -4191,17 +4235,17 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         return next(a for a in flow_json["actions"] if a["type"] == "function")["config"]["inputs"]
 
     def _create(self, api_key: str = "SUPER-SECRET") -> str:
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._flow_payload(api_key))
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", self._flow_payload(api_key))
         assert response.status_code == 201, response.json()
         return response.json()["id"]
 
     def test_secret_action_input_is_encrypted_at_rest_and_masked_on_read(self):
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", self._flow_payload())
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", self._flow_payload())
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
 
         # Masked on the create response and on retrieve; the non-secret input stays visible.
-        retrieve = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}")
+        retrieve = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}")
         for body in (create.json(), retrieve.json()):
             inputs = self._function_inputs(body)
             assert inputs["api_key"] == {"secret": True}
@@ -4226,7 +4270,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
 
         payload = self._flow_payload()
         self._function_inputs(payload)["api_key"] = api_key_input
-        patch_res = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", payload)
+        patch_res = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", payload)
         assert patch_res.status_code == 200, patch_res.json()
 
         flow = InsightsFlow.objects.get(id=flow_id)
@@ -4235,7 +4279,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
     def test_metadata_only_update_leaves_secret_intact(self):
         # A PATCH that carries no actions must not clear the stored secret.
         flow_id = self._create()
-        patch_res = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": "Renamed"})
+        patch_res = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"name": "Renamed"})
         assert patch_res.status_code == 200, patch_res.json()
         flow = InsightsFlow.objects.get(id=flow_id)
         assert flow.encrypted_inputs["action_1"]["api_key"]["value"] == "SUPER-SECRET"
@@ -4243,14 +4287,14 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
     def test_publish_promotes_draft_secret_to_live_without_wiping(self):
         flow_id = self._create()
         assert (
-            self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
+            self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
             == 200
         )
 
         # Stage a draft (via MCP) that rotates the secret; live must stay untouched until publish.
         # Uses the /graph endpoint which is the MCP-sanctioned path for action edits.
         stage = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {
@@ -4270,13 +4314,14 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         assert "ROTATED-IN-DRAFT" not in json.dumps(flow.draft)
 
         with patch(
-            "products.workflows.backend.api.insights_flow.get_insights_flow_in_flight_count", side_effect=Exception("down")
+            "products.workflows.backend.api.insights_flow.get_insights_flow_in_flight_count",
+            side_effect=Exception("down"),
         ):
-            confirm_token = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {}).json()[
-                "confirm_token"
-            ]
+            confirm_token = self.client.post(
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", {}
+            ).json()["confirm_token"]
         publish = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": confirm_token},
         )
         assert publish.status_code == 200, publish.json()
@@ -4289,10 +4334,10 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
     def test_activity_log_masks_secret_changes(self):
         flow_id = self._create()
         payload = self._flow_payload(api_key="ROTATED")
-        assert self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", payload).status_code == 200
+        assert self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", payload).status_code == 200
 
         activity = self.client.get(
-            f"/api/projects/{self.team.pk}/activity_log",
+            f"/v1/projects/{self.team.pk}/activity_log",
             data={"scope": "InsightsFlow", "item_id": flow_id, "page": "1", "limit": "20"},
         )
         assert activity.status_code == status.HTTP_200_OK
@@ -4310,13 +4355,14 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
 
     def _publish_confirmed(self, flow_id: str):
         with patch(
-            "products.workflows.backend.api.insights_flow.get_insights_flow_in_flight_count", side_effect=Exception("down")
+            "products.workflows.backend.api.insights_flow.get_insights_flow_in_flight_count",
+            side_effect=Exception("down"),
         ):
-            token = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {}).json()[
+            token = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", {}).json()[
                 "confirm_token"
             ]
         res = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": token},
         )
         assert res.status_code == 200, res.json()
@@ -4327,7 +4373,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # stay stripped, with the secret only in encrypted_inputs.
         flow_id = self._create()
         assert (
-            self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
+            self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
             == 200
         )
         flow = InsightsFlow.objects.get(id=flow_id)
@@ -4338,7 +4384,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
     def test_restore_reattaches_live_secret_not_historical(self):
         flow_id = self._create()
         assert (
-            self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
+            self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
             == 200
         )
 
@@ -4348,7 +4394,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # would never bump a version to restore.
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
                 {
                     "operations": [
                         {
@@ -4374,13 +4420,13 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         assert flow.encrypted_inputs["action_1"]["api_key"]["value"] == "ROTATED"
 
         # Restore the pre-rotation revision into the draft, then publish it.
-        restore = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
+        restore = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
         assert restore.status_code == 200, restore.json()
         flow.refresh_from_db()
         assert flow.draft_encrypted_inputs is None  # restore clears stale draft secrets
 
         # The restored revision snapshot never carried the secret in plaintext.
-        revision = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1").json()
+        revision = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1").json()
         rev_inputs = next(a for a in revision["content"]["actions"] if a["type"] == "function")["config"]["inputs"]
         assert "api_key" not in rev_inputs
 
@@ -4399,7 +4445,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # path - reject it outright on the normal write path (not just the /graph endpoint).
         payload = self._flow_payload()
         payload["actions"].append({**payload["actions"][1], "name": "dupe"})  # second action reuses action_1's id
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", payload)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", payload)
         assert response.status_code == 400, response.json()
         assert "Duplicate action id" in str(response.json())
 
@@ -4409,11 +4455,11 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # has to normalize both sides secret-free or every such save spuriously bumps the version.
         flow_id = self._create()
         assert (
-            self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
+            self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"}).status_code
             == 200
         )
         # GET returns the stored shape with the secret masked - exactly what a client resubmits.
-        masked_actions = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}").json()["actions"]
+        masked_actions = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}").json()["actions"]
         assert next(a for a in masked_actions if a["type"] == "function")["config"]["inputs"]["api_key"] == {
             "secret": True
         }
@@ -4421,7 +4467,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         # First resave settles any create-vs-update shape defaults; the second identical one is the no-op.
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": masked_actions}
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": masked_actions}
             ).status_code
             == 200
         )
@@ -4429,7 +4475,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
 
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": masked_actions}
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": masked_actions}
             ).status_code
             == 200
         )
@@ -4449,7 +4495,7 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         with patch("products.workflows.backend.api.insights_flow.create_insights_flow_invocation_test") as mock_invoke:
             mock_invoke.return_value = MagicMock(status_code=200, json=lambda: {"status": "success"})
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/invocations/",
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/invocations/",
                 data={
                     "globals": {"event": {"event": "$pageview", "distinct_id": "d"}},
                     "mock_async_functions": True,
@@ -4484,13 +4530,13 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
         )
 
         # Retrieve (full serializer, includes actions).
-        body = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow.id}").json()
+        body = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow.id}").json()
         assert body["trigger"]["inputs"]["api_key"] == {"secret": True}
         assert "TRIGGER-SECRET" not in json.dumps(body)
 
         # MCP list (summary serializer) omits actions but still returns trigger, so it can't re-derive
         # the mask from actions - the trigger must be masked independently or the secret leaks here.
-        listing = self.client.get(f"/api/projects/{self.team.id}/insights_flows", HTTP_X_INSIGHTS_CLIENT="mcp").json()
+        listing = self.client.get(f"/v1/projects/{self.team.id}/insights_flows", HTTP_X_INSIGHTS_CLIENT="mcp").json()
         row = next(r for r in listing["results"] if r["id"] == str(flow.id))
         assert "actions" not in row
         assert row["trigger"]["inputs"]["api_key"] == {"secret": True}
@@ -4539,13 +4585,13 @@ class TestInsightsFlowSecretInputs(APIBaseTest):
             },
         }
         resp = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow.id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow.id}",
             {"actions": [trigger, changed_action]},
         )
         assert resp.status_code == 200, resp.json()
 
         # The bootstrap revision (v1) snapshots the prior legacy state - it must not carry the plaintext.
-        revision = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow.id}/revisions/1").json()
+        revision = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow.id}/revisions/1").json()
         rev_inputs = next(a for a in revision["content"]["actions"] if a["type"] == "function")["config"]["inputs"]
         assert "api_key" not in rev_inputs
         assert "LEGACY-SECRET" not in json.dumps(revision)

@@ -13,7 +13,7 @@
         "uuid": "01787e47-55d7-0000-6976-b893a03aaba8",
         "organization": "01787e47-5558-0000-bae1-6bc513b42abe",
         "api_token": "dtrwW0uEC7LwVx64RmZmqog_XjU0nXWuEK1d1ZpjteQ",
-        "name": "Hogflix Demo App",
+        "name": "Scriptflix Demo App",
         "completed_snippet_onboarding": true,
         "ingested_event": true,
         "is_demo": true,
@@ -21,7 +21,7 @@
     },
     "organization": {
         "id": "01787e47-5558-0000-bae1-6bc513b42abe",
-        "name": "Hogflix Movies",
+        "name": "Scriptflix Movies",
         "created_at": "2021-03-29T13:58:27.416616Z",
         "updated_at": "2021-03-29T13:58:57.067131Z",
         "membership_level": 15,
@@ -32,7 +32,7 @@
                 "uuid": "01787e47-55d7-0000-6976-b893a03aaba8",
                 "organization": "01787e47-5558-0000-bae1-6bc513b42abe",
                 "api_token": "dtrwW0uEC7LwVx64RmZmqog_XjU0nXWuEK1d1ZpjteQ",
-                "name": "Hogflix Demo App",
+                "name": "Scriptflix Demo App",
                 "completed_snippet_onboarding": true,
                 "ingested_event": true,
                 "is_demo": true,
@@ -44,7 +44,7 @@
     "organizations": [
         {
             "id": "01787e47-5558-0000-bae1-6bc513b42abe",
-            "name": "Hogflix Movies"
+            "name": "Scriptflix Movies"
         }
     ]
 }

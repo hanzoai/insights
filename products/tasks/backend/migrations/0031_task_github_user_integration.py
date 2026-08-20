@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0001_initial"),
+        ("insights", "0005_user_integration_and_push_token"),
         ("tasks", "0030_taskautomation"),
     ]
 

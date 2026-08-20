@@ -35,7 +35,7 @@ class TestDataWarehouseAPI(APIBaseTest):
         mock_execute_insightsql_query.return_value = SimpleNamespace(results=[["alpha"], [["beta", "gamma"]], [True]])
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/data_warehouse/property_values?key=name&table_name={table.name}"
+            f"/v1/projects/{self.team.id}/data_warehouse/property_values?key=name&table_name={table.name}"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -49,7 +49,7 @@ class TestDataWarehouseAPI(APIBaseTest):
     @patch("products.data_warehouse.backend.presentation.views.data_warehouse.get_cached_instance_license")
     def test_basic_calculation_with_billing_data(self, mock_license, mock_billing_manager):
         """trackedBillingRows from billing; pending = db_total - tracked; totalRows = tracked + pending"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/total_rows_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/total_rows_stats"
 
         mock_billing_manager.return_value.get_billing.return_value = {
             "billing_period": {
@@ -85,7 +85,7 @@ class TestDataWarehouseAPI(APIBaseTest):
     @patch("products.data_warehouse.backend.presentation.views.data_warehouse.BillingManager")
     @patch("products.data_warehouse.backend.presentation.views.data_warehouse.get_cached_instance_license")
     def test_billing_exception_returns_500(self, mock_license, mock_billing_manager):
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/total_rows_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/total_rows_stats"
         mock_billing_manager.return_value.get_billing.side_effect = Exception("Billing service unavailable")
 
         response = self.client.get(endpoint)
@@ -96,7 +96,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_job_stats_default_7_days(self):
         """Test job_stats endpoint with default 7-day period"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/job_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/job_stats"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -142,7 +142,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_job_stats_1_day_hourly_breakdown(self):
         """Test job_stats endpoint with 1-day period returns hourly breakdown"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/job_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/job_stats"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -169,7 +169,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_job_stats_30_days(self):
         """Test job_stats endpoint with 30-day period"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/job_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/job_stats"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -207,7 +207,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_job_stats_invalid_days_parameter(self):
         """Test job_stats endpoint rejects invalid days parameter"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/job_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/job_stats"
 
         response = self.client.get(f"{endpoint}?days=14")
         self.assertEqual(response.status_code, 400)
@@ -219,7 +219,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_job_stats_excludes_old_jobs(self):
         """Test job_stats endpoint only includes jobs within the specified time range"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/job_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/job_stats"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -253,7 +253,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_job_stats_empty_state(self):
         """Test job_stats endpoint with no jobs"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/job_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/job_stats"
 
         response = self.client.get(endpoint)
         data = response.json()
@@ -268,7 +268,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_job_stats_breakdown_aggregation(self):
         """Test job_stats breakdown correctly aggregates jobs by time period"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/job_stats"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/job_stats"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -314,7 +314,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_running_activity_returns_only_running_jobs(self):
         """Test running_activity endpoint returns only running jobs"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/running_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/running_activity"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -349,7 +349,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_completed_activity_returns_only_completed_jobs(self):
         """Test completed_activity endpoint returns only jobs with status 'Completed'"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/completed_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/completed_activity"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -385,7 +385,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_running_activity_pagination(self):
         """Test running_activity endpoint pagination"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/running_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/running_activity"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -412,7 +412,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_completed_activity_pagination(self):
         """Test completed_activity endpoint pagination"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/completed_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/completed_activity"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -441,7 +441,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_running_activity_cutoff_days(self):
         """Test running_activity endpoint respects cutoff_days parameter"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/running_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/running_activity"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -472,7 +472,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_completed_activity_cutoff_days(self):
         """Test completed_activity endpoint respects cutoff_days parameter"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/completed_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/completed_activity"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -497,7 +497,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_running_activity_empty_state(self):
         """Test running_activity endpoint with no running jobs"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/running_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/running_activity"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -516,7 +516,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_completed_activity_empty_state(self):
         """Test completed_activity endpoint with no completed jobs"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/completed_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/completed_activity"
 
         source = ExternalDataSource.objects.create(
             source_id="test-id", connection_id="conn-id", destination_id="dest-id", team=self.team, source_type="Stripe"
@@ -535,7 +535,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_running_activity_ordering(self):
         """Test running_activity endpoint returns results ordered by created_at DESC"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/running_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/running_activity"
 
         for i in range(3):
             DataModelingJob.objects.create(team=self.team, status="Running", rows_materialized=100 + i)
@@ -549,7 +549,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_completed_activity_ordering(self):
         """Test completed_activity endpoint returns results ordered by created_at DESC"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/completed_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/completed_activity"
 
         for i in range(3):
             status = "Completed" if i % 2 == 0 else "Failed"
@@ -564,7 +564,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_running_activity_invalid_parameters(self):
         """Test running_activity endpoint rejects invalid parameters"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/running_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/running_activity"
 
         response = self.client.get(f"{endpoint}?limit=invalid")
         self.assertEqual(response.status_code, 400)
@@ -577,7 +577,7 @@ class TestDataWarehouseAPI(APIBaseTest):
 
     def test_completed_activity_invalid_parameters(self):
         """Test completed_activity endpoint rejects invalid parameters"""
-        endpoint = f"/api/projects/{self.team.id}/data_warehouse/completed_activity"
+        endpoint = f"/v1/projects/{self.team.id}/data_warehouse/completed_activity"
 
         response = self.client.get(f"{endpoint}?limit=invalid")
         self.assertEqual(response.status_code, 400)
@@ -589,7 +589,7 @@ class TestDataWarehouseAPI(APIBaseTest):
         self.assertEqual(response.status_code, 400)
 
     def test_data_ops_dashboard_creates_dashboard_on_first_call(self):
-        endpoint = f"/api/projects/{self.team.pk}/data_warehouse/data_ops_dashboard"
+        endpoint = f"/v1/projects/{self.team.pk}/data_warehouse/data_ops_dashboard"
 
         # Config is auto-created by the team extension signal, but starts with no dashboards
         config = TeamDataWarehouseConfig.objects.get(team=self.team)
@@ -611,7 +611,7 @@ class TestDataWarehouseAPI(APIBaseTest):
         self.assertEqual(config.overview_dashboards.filter(id=data["dashboard_id"]).count(), 1)
 
     def test_data_ops_dashboard_returns_existing_dashboard_on_subsequent_calls(self):
-        endpoint = f"/api/projects/{self.team.pk}/data_warehouse/data_ops_dashboard"
+        endpoint = f"/v1/projects/{self.team.pk}/data_warehouse/data_ops_dashboard"
 
         first_response = self.client.get(endpoint)
         self.assertEqual(first_response.status_code, 200)
@@ -624,7 +624,7 @@ class TestDataWarehouseAPI(APIBaseTest):
         self.assertEqual(Dashboard.objects.filter(team=self.team, name="Data ops overview").count(), 1)
 
     def test_data_ops_dashboard_seeds_starter_tile(self):
-        endpoint = f"/api/projects/{self.team.pk}/data_warehouse/data_ops_dashboard"
+        endpoint = f"/v1/projects/{self.team.pk}/data_warehouse/data_ops_dashboard"
 
         response = self.client.get(endpoint)
         self.assertEqual(response.status_code, 200)
@@ -642,7 +642,7 @@ class TestDataWarehouseAPI(APIBaseTest):
         self.assertTrue(source["compareFilter"]["compare"])
 
     def test_data_ops_dashboard_recreates_after_dashboard_deleted(self):
-        endpoint = f"/api/projects/{self.team.pk}/data_warehouse/data_ops_dashboard"
+        endpoint = f"/v1/projects/{self.team.pk}/data_warehouse/data_ops_dashboard"
 
         first_response = self.client.get(endpoint)
         first_id = first_response.json()["dashboard_id"]
@@ -670,7 +670,7 @@ class TestDataHealthIssuesPersonalAPIKey(APIBaseTest):
 
     def _get(self, value: str):
         return self.client.get(
-            f"/api/projects/{self.team.id}/data_warehouse/data_health_issues/",
+            f"/v1/projects/{self.team.id}/data_warehouse/data_health_issues/",
             headers={"authorization": f"Bearer {value}"},
         )
 

@@ -63,7 +63,7 @@ BASIC_TEXT = lambda text: {
 class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
     def _create_notebook_with_content(self, inner_content: list[dict[str, Any]], title: str = "the title") -> str:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             data={
                 "title": title,
                 "content": {
@@ -92,7 +92,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         ]
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?search={search_text}",
+            f"/v1/projects/{self.team.id}/notebooks?search={search_text}",
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -118,7 +118,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
             ]
 
             response = self.client.get(
-                f"/api/projects/{self.team.id}/notebooks?search={search_text}",
+                f"/v1/projects/{self.team.id}/notebooks?search={search_text}",
             )
             assert response.status_code == status.HTTP_200_OK
 
@@ -133,7 +133,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         other_users_notebook = Notebook.objects.create(team=self.team, created_by=other_user)
 
         results = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?user=true",
+            f"/v1/projects/{self.team.id}/notebooks?user=true",
         ).json()["results"]
 
         assert [r["short_id"] for r in results] == [
@@ -142,7 +142,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         ]
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?created_by={other_user.uuid}",
+            f"/v1/projects/{self.team.id}/notebooks?created_by={other_user.uuid}",
         )
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -160,37 +160,37 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         recording_content_notebook = self._create_notebook_with_content([RECORDING_CONTENT("recording_one")])
 
         # no filter
-        no_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks")
+        no_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks")
         assert len(no_filter_response.json()["results"]) == 6
 
         # filter by insight
-        insight_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks?contains=query:true")
+        insight_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains=query:true")
         assert [n["id"] for n in insight_filter_response.json()["results"]] == [insight_content_notebook]
 
         # filter by playlist
         playlist_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=recording-playlist:true"
+            f"/v1/projects/{self.team.id}/notebooks?contains=recording-playlist:true"
         )
         assert [n["id"] for n in playlist_filter_response.json()["results"]] == [playlist_content_notebook]
 
         # filter by feature flag
         feature_flag_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=feature-flag:true"
+            f"/v1/projects/{self.team.id}/notebooks?contains=feature-flag:true"
         )
         assert [n["id"] for n in feature_flag_filter_response.json()["results"]] == [feature_flag_content_notebook]
 
         # filter by person
-        person_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks?contains=person:true")
+        person_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains=person:true")
         assert [n["id"] for n in person_filter_response.json()["results"]] == [person_content_notebook]
 
         # filter by recording comment
         recording_comment_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=replay-timestamp:true"
+            f"/v1/projects/{self.team.id}/notebooks?contains=replay-timestamp:true"
         )
         assert [n["id"] for n in recording_comment_filter_response.json()["results"]] == [recording_comment_notebook]
 
         # filter by recording
-        recording_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks?contains=recording:true")
+        recording_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains=recording:true")
         assert [n["id"] for n in recording_filter_response.json()["results"]] == [recording_content_notebook]
 
     def test_filtering_by_abscence_of_types(self) -> None:
@@ -204,11 +204,11 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         recording_content_notebook = self._create_notebook_with_content([RECORDING_CONTENT("recording_one")])
 
         # no filter
-        no_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks")
+        no_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks")
         assert len(no_filter_response.json()["results"]) == 6
 
         # filter by insight
-        insight_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks?contains=query:false")
+        insight_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains=query:false")
         assert sorted([n["id"] for n in insight_filter_response.json()["results"]]) == sorted(
             [
                 playlist_content_notebook,
@@ -221,7 +221,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
 
         # filter by playlist
         playlist_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=recording-playlist:false"
+            f"/v1/projects/{self.team.id}/notebooks?contains=recording-playlist:false"
         )
         assert sorted([n["id"] for n in playlist_filter_response.json()["results"]]) == sorted(
             [
@@ -235,7 +235,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
 
         # filter by feature flag
         feature_flag_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=feature-flag:false"
+            f"/v1/projects/{self.team.id}/notebooks?contains=feature-flag:false"
         )
         assert sorted([n["id"] for n in feature_flag_filter_response.json()["results"]]) == sorted(
             [
@@ -248,7 +248,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         )
 
         # filter by person
-        person_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks?contains=person:false")
+        person_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains=person:false")
         assert sorted([n["id"] for n in person_filter_response.json()["results"]]) == sorted(
             [
                 playlist_content_notebook,
@@ -261,7 +261,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
 
         # filter by recording comment
         recording_comment_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=replay-timestamp:false"
+            f"/v1/projects/{self.team.id}/notebooks?contains=replay-timestamp:false"
         )
         assert sorted([n["id"] for n in recording_comment_filter_response.json()["results"]]) == sorted(
             [
@@ -274,7 +274,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         )
 
         # filter by recording
-        recording_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks?contains=recording:false")
+        recording_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains=recording:false")
         assert sorted([n["id"] for n in recording_filter_response.json()["results"]]) == sorted(
             [
                 playlist_content_notebook,
@@ -289,7 +289,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
     def test_filtering_by_just_the_target_name_is_truthy(self, target_name: str) -> None:
         insight_content_notebook_one = self._create_notebook_with_content([QUERY_CONTENT("insight_id_one")])
         _feature_flag_content_notebook_one = self._create_notebook_with_content([FEATURE_FLAG_CONTENT(1)])
-        filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks?contains={target_name}")
+        filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains={target_name}")
         assert sorted([n["id"] for n in filter_response.json()["results"]]) == sorted(
             [
                 insight_content_notebook_one,
@@ -323,12 +323,12 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         )
 
         # no filter
-        no_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks")
+        no_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks")
         assert len(no_filter_response.json()["results"]) == 11
 
         # filter by insight
         insight_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=query:insight_id_one"
+            f"/v1/projects/{self.team.id}/notebooks?contains=query:insight_id_one"
         )
         assert sorted([n["id"] for n in insight_filter_response.json()["results"]]) == sorted(
             [
@@ -337,9 +337,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         )
 
         # filter by feature flag
-        feature_flag_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=feature-flag:1"
-        )
+        feature_flag_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains=feature-flag:1")
         assert sorted([n["id"] for n in feature_flag_filter_response.json()["results"]]) == sorted(
             [
                 feature_flag_content_notebook_one,
@@ -347,9 +345,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         )
 
         # filter by person
-        person_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=person:person_id_one"
-        )
+        person_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks?contains=person:person_id_one")
         assert sorted([n["id"] for n in person_filter_response.json()["results"]]) == sorted(
             [
                 person_content_notebook_one,
@@ -358,7 +354,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
 
         # filter by recording comment
         recording_comment_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=replay-timestamp:session_recording_id_one"
+            f"/v1/projects/{self.team.id}/notebooks?contains=replay-timestamp:session_recording_id_one"
         )
         assert sorted([n["id"] for n in recording_comment_filter_response.json()["results"]]) == sorted(
             [
@@ -368,7 +364,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
 
         # filter by recording
         recording_filter_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=recording:session_recording_id_one"
+            f"/v1/projects/{self.team.id}/notebooks?contains=recording:session_recording_id_one"
         )
         assert sorted([n["id"] for n in recording_filter_response.json()["results"]]) == sorted(
             [
@@ -394,13 +390,13 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         with_recording_one_id = self._create_notebook_with_content(content_with_recording_one)
         with_recording_two_id = self._create_notebook_with_content(content_with_recording_two)
 
-        no_filter_response = self.client.get(f"/api/projects/{self.team.id}/notebooks")
+        no_filter_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks")
         assert sorted([n["id"] for n in no_filter_response.json()["results"]]) == sorted(
             [with_both_recording_id, with_recording_one_id, with_recording_two_id]
         )
 
         filter_recording_two_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=recording:recording_two"
+            f"/v1/projects/{self.team.id}/notebooks?contains=recording:recording_two"
         )
         assert [n["id"] for n in filter_recording_two_response.json()["results"]] == [
             with_recording_two_id,
@@ -408,18 +404,18 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
         ]
 
         filter_unmatched_recordings_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=recording:recording_three"
+            f"/v1/projects/{self.team.id}/notebooks?contains=recording:recording_three"
         )
         assert [n["id"] for n in filter_unmatched_recordings_response.json()["results"]] == []
 
         # with multiple match pairs
         filter_recording_should_not_match_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=recording:false,recording:recording_two"
+            f"/v1/projects/{self.team.id}/notebooks?contains=recording:false,recording:recording_two"
         )
         assert [n["id"] for n in filter_recording_should_not_match_response.json()["results"]] == []
 
         filter_recording_should_match_response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks?contains=recording:true recording:recording_two"
+            f"/v1/projects/{self.team.id}/notebooks?contains=recording:true recording:recording_two"
         )
         assert [n["id"] for n in filter_recording_should_match_response.json()["results"]] == [
             with_recording_two_id,

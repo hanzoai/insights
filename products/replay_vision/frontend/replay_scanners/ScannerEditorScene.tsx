@@ -2,22 +2,9 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 
-import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
-import * as imTheDriverPng from '@hanzo/brand/hoggies/png/im-the-driver'
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import * as xRayPng from '@hanzo/brand/hoggies/png/x-ray'
-import {
-    Button,
-    Input,
-    Select,
-    Switch,
-    Tag,
-    TextArea,
-    Link,
-    SpinnerOverlay,
-} from '@hanzo/elements'
+import { Button, Input, Select, Switch, Tag, TextArea, Link, SpinnerOverlay } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Dialog } from 'lib/elements/Dialog'
@@ -47,10 +34,10 @@ import {
 import { ScannerEditorStepper, STEP_LABELS } from './ScannerEditorStepper'
 import { MODEL_OPTIONS, SCANNER_TYPE_OPTIONS } from './types'
 
-const MascotConstruction2 = pngHoggie(construction2Png)
-const MascotImTheDriver = pngHoggie(imTheDriverPng)
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
-const MascotXRay = pngHoggie(xRayPng)
+const MascotConstruction2 = pngMascot()
+const MascotImTheDriver = pngMascot()
+const MascotMagnifyingGlass = pngMascot()
+const MascotXRay = pngMascot()
 
 export const scene: SceneExport = {
     component: ScannerEditorSceneComponent,
@@ -381,11 +368,7 @@ function EditorFooter({
                         Back to templates
                     </Button>
                 ) : prevStep ? (
-                    <Button
-                        type="tertiary"
-                        to={scannerStepUrl(prevStep, scannerId)}
-                        data-attr="vision-editor-back"
-                    >
+                    <Button type="tertiary" to={scannerStepUrl(prevStep, scannerId)} data-attr="vision-editor-back">
                         Back
                     </Button>
                 ) : null}

@@ -47,7 +47,7 @@ from insights.temporal.ai_observability.run_evaluation import (
 )
 from insights.temporal.ai_observability.run_session_evaluation import (
     ExecuteSessionEvaluationInputs,
-    execute_session_hog_eval_activity,
+    execute_session_script_eval_activity,
     execute_session_llm_judge_activity,
     session_fetch_lookback,
 )
@@ -56,7 +56,7 @@ from insights.temporal.ai_observability.run_trace_evaluation import (
     EmitTraceEvaluationEventInputs,
     ExecuteTraceEvaluationInputs,
     emit_trace_evaluation_event_activity,
-    execute_trace_hog_eval_activity,
+    execute_trace_script_eval_activity,
     execute_trace_llm_judge_activity,
 )
 from insights.temporal.common.base import InsightsWorkflow
@@ -475,7 +475,7 @@ class RunAggregateEvaluationWorkflow(InsightsWorkflow):
             )
             if evaluation_type == "script":
                 result = await temporalio.workflow.execute_activity(
-                    execute_session_hog_eval_activity,
+                    execute_session_script_eval_activity,
                     session_inputs,
                     # Longer than the trace equivalent: the fetch spans every trace of the session.
                     schedule_to_close_timeout=timedelta(minutes=5),
@@ -506,7 +506,7 @@ class RunAggregateEvaluationWorkflow(InsightsWorkflow):
                 # Unlike single-event script evals, this activity includes a Datastore fetch, so
                 # allow one retry for transient query failures (the bytecode is deterministic).
                 result = await temporalio.workflow.execute_activity(
-                    execute_trace_hog_eval_activity,
+                    execute_trace_script_eval_activity,
                     execute_inputs,
                     schedule_to_close_timeout=timedelta(minutes=2),
                     retry_policy=RetryPolicy(maximum_attempts=2),

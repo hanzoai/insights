@@ -27,7 +27,7 @@ describe('the authorized urls list logic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/trend/': ({ request }) => {
+                '/v1/environments/:team_id/insights/trend/': ({ request }) => {
                     if (JSON.parse(new URL(request.url).searchParams.get('events') || '[]')?.[0]?.throw) {
                         return [500, { status: 0, detail: 'error from the API' }]
                     }
@@ -35,7 +35,7 @@ describe('the authorized urls list logic', () => {
                 },
             },
             patch: {
-                '/api/projects/:team': [200, {}],
+                '/v1/projects/:team': [200, {}],
             },
         })
         initKeaTests()
@@ -51,7 +51,7 @@ describe('the authorized urls list logic', () => {
 
     it('encodes an app url correctly', () => {
         expect(appEditorUrl('http://127.0.0.1:8000')).toEqual(
-            '/api/user/redirect_to_site/?userIntent=add-action&uiHost=http%3A%2F%2Flocalhost&appUrl=http%3A%2F%2F127.0.0.1%3A8000'
+            '/v1/user/redirect_to_site/?userIntent=add-action&uiHost=http%3A%2F%2Flocalhost&appUrl=http%3A%2F%2F127.0.0.1%3A8000'
         )
     })
 
@@ -67,7 +67,7 @@ describe('the authorized urls list logic', () => {
 
     describe('applying a suggestion', () => {
         // Regression coverage: the `addUrl` listener must await `saveUrls` before triggering
-        // `markTaskAsCompleted`. Both send PATCHes to /api/environments/:id, and the `currentTeam`
+        // `markTaskAsCompleted`. Both send PATCHes to /v1/environments/:id, and the `currentTeam`
         // subscription in this logic replaces local `authorizedUrls` from whichever response lands
         // last. If the onboarding-tasks PATCH fires in parallel with the app_urls PATCH, its
         // response can carry a stale app_urls snapshot and wipe the just-added URL out of the UI.
@@ -92,7 +92,7 @@ describe('the authorized urls list logic', () => {
             await flushPromises()
 
             expect(api.update).toHaveBeenCalledWith(
-                `api/environments/${MOCK_TEAM_ID}`,
+                `v1/environments/${MOCK_TEAM_ID}`,
                 expect.objectContaining({
                     app_urls: expect.arrayContaining(['https://new-suggestion.example.com']),
                 })
@@ -236,7 +236,7 @@ describe('the authorized urls list logic', () => {
 
             expectLogic(logic, () => logic.actions.addUrl('http://*.example.com')).toFinishAllListeners()
 
-            expect(api.update).toHaveBeenCalledWith(`api/environments/${MOCK_TEAM_ID}`, {
+            expect(api.update).toHaveBeenCalledWith(`v1/environments/${MOCK_TEAM_ID}`, {
                 recording_domains: ['https://recordings.hanzo.ai/', 'http://*.example.com'],
             })
         })
@@ -284,11 +284,11 @@ describe('the authorized urls list logic', () => {
         })
 
         it('sets required action fields', () => {
-            const params = parseHash(directToolbarUrl('https://example.com', { token: 'phc_abc' }))
+            const params = parseHash(directToolbarUrl('https://example.com', { token: 'pk-abc' }))
             expect(params.action).toBe('ph_authorize')
             expect(params.toolbarVersion).toBe('toolbar')
             expect(params.instrument).toBe(true)
-            expect(params.token).toBe('phc_abc')
+            expect(params.token).toBe('pk-abc')
         })
 
         it('includes user identity fields', () => {

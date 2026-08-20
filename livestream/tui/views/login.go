@@ -17,7 +17,7 @@ type LoginView struct {
 func NewLoginView() *LoginView {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"})
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"})
 	return &LoginView{spinner: s}
 }
 
@@ -44,10 +44,10 @@ func (v *LoginView) UpdateSpinner(msg spinner.TickMsg) spinner.Model {
 func (v *LoginView) View() string {
 	titleStyle := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"})
+		Foreground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"})
 
 	urlStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#1D4AFF", Dark: "#1D4AFF"}).
+		Foreground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"}).
 		Underline(true)
 
 	mutedStyle := lipgloss.NewStyle().

@@ -229,7 +229,7 @@ CREATE DICTIONARY IF NOT EXISTS {exchange_rate_dictionary_name} {on_cluster_clau
     rate Decimal64({decimal_precision})
 )
 PRIMARY KEY currency
-SOURCE(DATASTORE(QUERY '{query}' USER '{datastore_user}' PASSWORD '{datastore_password}'))
+SOURCE(CLICKHOUSE(QUERY '{query}' USER '{datastore_user}' PASSWORD '{datastore_password}'))
 LIFETIME(MIN 3000 MAX 3600)
 LAYOUT(RANGE_HASHED(range_lookup_strategy 'max'))
 RANGE(MIN start_date MAX end_date)""".format(

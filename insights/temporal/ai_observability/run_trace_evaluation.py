@@ -36,11 +36,11 @@ from insights.models.team import Team
 from insights.sync import database_sync_to_async
 from insights.temporal.ai_observability.evaluation_errors import is_terminal_user_error_result
 from insights.temporal.ai_observability.evaluation_event_io import extract_event_io
-from insights.temporal.ai_observability.evaluation_hog import (
-    build_hog_event_global,
-    execute_hog_eval_bytecode,
-    finalize_hog_eval_result,
-    hog_bytecode_references_global,
+from insights.temporal.ai_observability.evaluation_script import (
+    build_script_event_global,
+    execute_script_eval_bytecode,
+    finalize_script_eval_result,
+    script_bytecode_references_global,
 )
 from insights.temporal.ai_observability.evaluation_llm_judge import (
     LLM_JUDGE_RETRY_POLICY,
@@ -246,8 +246,8 @@ def fetch_trace_for_evaluation(team_id: int, trace_id: str, window_start: dateti
 
 
 @dataclass
-class TraceHogTestResult:
-    """One trace's outcome from `run_hog_eval_over_recent_traces`, shaped for the editor test
+class TraceScriptTestResult:
+    """One trace's outcome from `run_script_eval_over_recent_traces`, shaped for the editor test
     endpoint and Max's authoring tool rather than for online emission."""
 
     trace_id: str
@@ -259,7 +259,7 @@ class TraceHogTestResult:
 
 
 @dataclass(frozen=True)
-class TraceHogTestSample:
+class TraceScriptTestSample:
     trace_id: str
     trigger_timestamp: datetime
 
@@ -281,7 +281,7 @@ def _sample_recent_traces(
     sample_count: int,
     date_from: datetime,
     date_to: datetime,
-) -> list[TraceHogTestSample]:
+) -> list[TraceScriptTestSample]:
     """Pick the most recent distinct trace ids whose *triggering* generation matches the
     evaluation's conditions — mirroring the online scheduler, which starts a trace-eval run
     from the first matching `$ai_generation`. Historical previews use that event timestamp as
@@ -327,11 +327,11 @@ def _sample_recent_traces(
         query=query,
         placeholders={"where_clause": ast.And(exprs=where_exprs)},
         team=team,
-        query_type="EvaluationTestHogTraceSample",
+        query_type="EvaluationTestScriptTraceSample",
         fall_back_to_events=True,
     )
     return [
-        TraceHogTestSample(trace_id=str(row[0]), trigger_timestamp=_coerce_trace_test_timestamp(row[1]))
+        TraceScriptTestSample(trace_id=str(row[0]), trigger_timestamp=_coerce_trace_test_timestamp(row[1]))
         for row in (response.results or [])
     ]
 
@@ -351,7 +351,7 @@ def _trace_io_preview(trace: LLMTrace) -> tuple[str, str]:
     return input_preview, output_preview
 
 
-def run_hog_eval_over_recent_traces(
+def run_script_eval_over_recent_traces(
     *,
     team: Team,
     bytecode: list[Any],
@@ -360,10 +360,10 @@ def run_hog_eval_over_recent_traces(
     allows_na: bool,
     window_seconds: int = TRACE_EVAL_DEFAULT_WINDOW_SECONDS,
     lookback_days: int = EVALUATION_TEST_LOOKBACK_DAYS,
-) -> list[TraceHogTestResult]:
+) -> list[TraceScriptTestResult]:
     """Sample recent traces matching the conditions and run trace-level Script bytecode against each.
 
-    Shared by the editor `test_hog` endpoint and Max's authoring tool so a trace-target eval is
+    Shared by the editor `test_script` endpoint and Max's authoring tool so a trace-target eval is
     previewed the same way it runs online — whole trace, trace globals — instead of against a
     single generation.
     """
@@ -380,14 +380,14 @@ def run_hog_eval_over_recent_traces(
         sample_date_to,
     )
 
-    results: list[TraceHogTestResult] = []
+    results: list[TraceScriptTestResult] = []
     for sample in trace_samples:
         trace_date_from = sample.trigger_timestamp - TRACE_EVENTS_LOOKBACK
         trace_date_to = sample.trigger_timestamp + window
         outcome = _fetch_trace(team, sample.trace_id, trace_date_from, trace_date_to)
         if outcome.skip_reason or outcome.trace is None:
             results.append(
-                TraceHogTestResult(
+                TraceScriptTestResult(
                     trace_id=sample.trace_id,
                     verdict=None,
                     reasoning="",
@@ -398,11 +398,11 @@ def run_hog_eval_over_recent_traces(
             )
             continue
 
-        globals_dict = build_trace_hog_globals(outcome.trace, sample.trace_id, bytecode=bytecode)
-        result = execute_hog_eval_bytecode(bytecode, globals_dict, allows_na=allows_na)
+        globals_dict = build_trace_script_globals(outcome.trace, sample.trace_id, bytecode=bytecode)
+        result = execute_script_eval_bytecode(bytecode, globals_dict, allows_na=allows_na)
         input_preview, output_preview = _trace_io_preview(outcome.trace)
         results.append(
-            TraceHogTestResult(
+            TraceScriptTestResult(
                 trace_id=sample.trace_id,
                 verdict=result["verdict"],
                 reasoning=result["reasoning"],
@@ -463,7 +463,7 @@ def format_trace_for_judge(trace: LLMTrace) -> str:
     return text
 
 
-def build_trace_hog_globals(trace: LLMTrace, trace_id: str, *, bytecode: list[Any] | None = None) -> dict[str, Any]:
+def build_trace_script_globals(trace: LLMTrace, trace_id: str, *, bytecode: list[Any] | None = None) -> dict[str, Any]:
     """Build Script globals for a trace-level eval.
 
     `events` and `trace` keep their original shapes for saved trace Script source. New target-independent
@@ -473,9 +473,9 @@ def build_trace_hog_globals(trace: LLMTrace, trace_id: str, *, bytecode: list[An
     builds the event collections it references, avoiding duplicate ScriptVM and worker memory cost.
     """
     trace_events = trace.events or []
-    references_target = bytecode is not None and hog_bytecode_references_global(bytecode, "target")
-    references_events = bytecode is not None and hog_bytecode_references_global(bytecode, "events")
-    references_evaluation_events = bytecode is not None and hog_bytecode_references_global(
+    references_target = bytecode is not None and script_bytecode_references_global(bytecode, "target")
+    references_events = bytecode is not None and script_bytecode_references_global(bytecode, "events")
+    references_evaluation_events = bytecode is not None and script_bytecode_references_global(
         bytecode, "evaluation_events"
     )
     can_skip_compatibility_events = (references_target or references_evaluation_events) and not references_events
@@ -491,7 +491,7 @@ def build_trace_hog_globals(trace: LLMTrace, trace_id: str, *, bytecode: list[An
         }
     if bytecode is None or not can_skip_compatibility_events:
         globals_dict["events"] = [
-            build_hog_event_global(
+            build_script_event_global(
                 event.event,
                 event.properties,
                 event_uuid=event.id,
@@ -502,7 +502,7 @@ def build_trace_hog_globals(trace: LLMTrace, trace_id: str, *, bytecode: list[An
         ]
     if bytecode is None or references_evaluation_events:
         globals_dict["evaluation_events"] = [
-            build_hog_event_global(
+            build_script_event_global(
                 event.event,
                 event.properties,
                 event_uuid=event.id,
@@ -555,7 +555,7 @@ def execute_trace_llm_judge_activity(inputs: ExecuteTraceEvaluationInputs) -> Ev
 
 
 @temporalio.activity.defn
-async def execute_trace_hog_eval_activity(inputs: ExecuteTraceEvaluationInputs) -> EvaluationActivityResult:
+async def execute_trace_script_eval_activity(inputs: ExecuteTraceEvaluationInputs) -> EvaluationActivityResult:
     """Fetch the whole trace and run Script bytecode against trace-level globals."""
     evaluation = inputs.evaluation
 
@@ -577,15 +577,15 @@ async def execute_trace_hog_eval_activity(inputs: ExecuteTraceEvaluationInputs) 
         )
         if outcome.skip_reason or outcome.trace is None:
             return None, outcome.skip_reason or "trace_not_found"
-        globals_dict = build_trace_hog_globals(outcome.trace, inputs.trace_id, bytecode=bytecode)
-        return execute_hog_eval_bytecode(bytecode, globals_dict, allows_na=allows_na), None
+        globals_dict = build_trace_script_globals(outcome.trace, inputs.trace_id, bytecode=bytecode)
+        return execute_script_eval_bytecode(bytecode, globals_dict, allows_na=allows_na), None
 
     result, skip_reason = await database_sync_to_async(_execute, thread_sensitive=False)()
 
     if skip_reason or result is None:
         return _build_trace_skip_result(allows_na, skip_reason or "trace_not_found")
 
-    return finalize_hog_eval_result(result, allows_na=allows_na, unit_label="trace")
+    return finalize_script_eval_result(result, allows_na=allows_na, unit_label="trace")
 
 
 @dataclass
@@ -726,7 +726,7 @@ class RunTraceEvaluationWorkflow(InsightsWorkflow):
             # Unlike single-event script evals, this activity includes a Datastore fetch, so
             # allow one retry for transient query failures (the bytecode is deterministic).
             result = await temporalio.workflow.execute_activity(
-                execute_trace_hog_eval_activity,
+                execute_trace_script_eval_activity,
                 execute_inputs,
                 schedule_to_close_timeout=timedelta(minutes=2),
                 retry_policy=RetryPolicy(maximum_attempts=2),

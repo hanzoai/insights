@@ -59,7 +59,7 @@ class InsightsFunctionTemplate(UUIDTModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "insights_hogfunctiontemplate"
+        db_table = "insights_function_template"
         unique_together = ("template_id", "sha")
         indexes = [
             models.Index(fields=["template_id", "sha"]),
@@ -136,10 +136,10 @@ class InsightsFunctionTemplate(UUIDTModel):
             self.bytecode = None
             return
         try:
-            from insights.cdp.validation import compile_hog
+            from insights.cdp.validation import compile_script
 
             # Compile the script code_language to bytecode and store it in the database field
-            self.bytecode = compile_hog(self.code, self.type)
+            self.bytecode = compile_script(self.code, self.type)
         except Exception as e:
             logger.error(
                 "Failed to compile template bytecode",

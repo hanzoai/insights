@@ -14,7 +14,7 @@ description = "The command line interface for Insights 🦔"
 homepage = "https://hanzo.ai"
 license = "MIT"
 edition = "2021"
-repository = "https://github.com/PostHog/posthog"
+repository = "https://github.com/hanzoai/insights"
 readme = "README.md"
 
 [[bin]]

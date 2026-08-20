@@ -13,7 +13,7 @@ import { GroupTypeManager } from '~/common/groups/group-type-manager'
 import { DatastoreGroupRepository } from '~/common/groups/repositories/datastore-group-repository'
 import { PostgresGroupRepository } from '~/common/groups/repositories/postgres-group-repository'
 import { KafkaProducerRegistry } from '~/common/outputs/kafka-producer-registry'
-import { PersonHogConfig, buildGroupRepository, buildPersonRepository, createPersonHogClient } from '~/common/personinsights'
+import { PersonFnConfig, buildGroupRepository, buildPersonRepository, createPersonFnClient } from '~/common/personinsights'
 import { PostgresPersonRepository } from '~/common/persons/repositories/postgres-person-repository'
 import { PostgresRouter } from '~/common/utils/db/postgres'
 import { createRedisPoolFromConfig } from '~/common/utils/db/redis'
@@ -43,7 +43,7 @@ import {
     createGroupProducePromises,
 } from '~/ingestion/common/steps/event-processing/flush-batch-stores-step'
 import { createKafkaDebugContext, createOkContext } from '~/ingestion/framework/helpers'
-import { TopHog } from '~/ingestion/framework/tophog'
+import { TopFn } from '~/ingestion/framework/topfn'
 import { createAiEventSubpipeline } from '~/ingestion/pipelines/ai'
 import {
     JoinedIngestionPipelineConfig,
@@ -55,10 +55,10 @@ import {
 import { createOutputsRegistry } from '~/ingestion/pipelines/analytics/outputs/registry'
 
 import {
-    HogTransformerService,
-    HogTransformerServiceConfig,
-    HogTransformerServiceDeps,
-    createHogTransformerService,
+    ScriptTransformerService,
+    ScriptTransformerServiceConfig,
+    ScriptTransformerServiceDeps,
+    createScriptTransformerService,
 } from '../cdp/script-transformations/script-transformer.service'
 import { EncryptedFields } from '../cdp/utils/encryption-utils'
 import { CommonConfig } from '../common/config'
@@ -94,14 +94,14 @@ import { BaseServerConfig, CleanupResources, NodeServer, ServerLifecycle } from 
 export type IngestionApiServerConfig = BaseServerConfig &
     IngestionConsumerConfig &
     IngestionOutputsConfig &
-    HogTransformerServiceConfig &
+    ScriptTransformerServiceConfig &
     KafkaUpstreamProducerEnvConfig &
     KafkaDownstreamProducerEnvConfig &
     KafkaBrokerConfig &
     DatabaseConnectionConfig &
     RedisConnectionsConfig &
     KafkaConsumerBaseConfig &
-    PersonHogConfig &
+    PersonFnConfig &
     Pick<
         CommonConfig,
         | 'LOG_LEVEL'
@@ -182,8 +182,8 @@ export class IngestionApiServer implements NodeServer {
         typeof createJoinedIngestionPipeline<JoinedIngestionPipelineInput, JoinedIngestionPipelineContext>
     >
     private promiseScheduler = new PromiseScheduler()
-    private hogTransformer!: HogTransformerService
-    private topHog!: TopHog
+    private scriptTransformer!: ScriptTransformerService
+    private topFn!: TopFn
     // Set in startServices when INGESTION_API_FEED_ORDER_SENTINEL_ENABLED.
     private feedOrderSentinel?: FeedOrderSentinel
 
@@ -243,7 +243,7 @@ export class IngestionApiServer implements NodeServer {
         const geoipService = new GeoIPService(this.config.MMDB_FILE_LOCATION)
         await geoipService.get()
 
-        const personinsightsClient = createPersonHogClient(this.config)
+        const personinsightsClient = createPersonFnClient(this.config)
         const clientLabel = this.config.PLUGIN_SERVER_MODE ?? 'unknown'
 
         const postgresPersonRepository = new PostgresPersonRepository(this.postgres, {
@@ -304,8 +304,8 @@ export class IngestionApiServer implements NodeServer {
             throw new Error(`Output topic verification failed for: ${topicFailures.join(', ')}`)
         }
 
-        // 5. HogTransformer
-        const hogTransformerDeps: HogTransformerServiceDeps = {
+        // 5. ScriptTransformer
+        const scriptTransformerDeps: ScriptTransformerServiceDeps = {
             geoipService,
             postgres: this.postgres,
             pubSub: this.pubsub,
@@ -313,8 +313,8 @@ export class IngestionApiServer implements NodeServer {
             integrationManager,
             monitoringOutputs: ingestionOutputs,
         }
-        this.hogTransformer = createHogTransformerService(this.config, hogTransformerDeps)
-        await this.hogTransformer.start()
+        this.scriptTransformer = createScriptTransformerService(this.config, scriptTransformerDeps)
+        await this.scriptTransformer.start()
 
         // 6. Pipeline dependencies
         const overflowRedisRepository = new RedisOverflowRepository({
@@ -374,12 +374,12 @@ export class IngestionApiServer implements NodeServer {
         })
         const groupStore = this.groupStore
 
-        this.topHog = new TopHog({
+        this.topFn = new TopFn({
             outputs: ingestionOutputs,
             pipeline: this.config.INGESTION_PIPELINE ?? 'unknown',
             lane: this.config.INGESTION_LANE ?? 'unknown',
         })
-        this.topHog.start()
+        this.topFn.start()
 
         // 7. Create the ingestion pipeline
         const joinedPipelineConfig: JoinedIngestionPipelineConfig = {
@@ -417,7 +417,7 @@ export class IngestionApiServer implements NodeServer {
         const joinedPipelineDeps: JoinedIngestionPipelineDeps = {
             personsStore,
             groupStore,
-            hogTransformer: this.hogTransformer,
+            scriptTransformer: this.scriptTransformer,
             aiSubpipelineFactory: createAiEventSubpipeline,
             eventFilterManager: eventFilterManagerStarted.value,
             eventIngestionRestrictionManager,
@@ -433,7 +433,7 @@ export class IngestionApiServer implements NodeServer {
             teamManager,
             cookielessManager: this.cookielessManager,
             groupTypeManager,
-            topHog: this.topHog,
+            topFn: this.topFn,
         }
         this.joinedPipeline = createJoinedIngestionPipeline(joinedPipelineConfig, joinedPipelineDeps)
 
@@ -448,8 +448,8 @@ export class IngestionApiServer implements NodeServer {
         const service: PluginServerService = {
             id: 'ingestion-api',
             onShutdown: async () => {
-                await this.topHog.stop()
-                await this.hogTransformer.stop()
+                await this.topFn.stop()
+                await this.scriptTransformer.stop()
                 await eventFilterManagerStarted.stop()
                 await stopEventIngestionRestrictionManager()
             },

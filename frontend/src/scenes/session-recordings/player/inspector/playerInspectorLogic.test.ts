@@ -53,9 +53,9 @@ describe('playerInspectorLogic', () => {
     beforeEach(() => {
         setupSessionRecordingTest({
             getMocks: {
-                '/api/environments/:team_id/session_recordings/1/': {},
-                '/api/projects/:team_id/experiments/session_context/': experimentContextResponse,
-                '/api/projects/:team/notebooks/recording_comments': {
+                '/v1/environments/:team_id/session_recordings/1/': {},
+                '/v1/projects/:team_id/experiments/session_context/': experimentContextResponse,
+                '/v1/projects/:team/notebooks/recording_comments': {
                     results: [
                         {
                             timeInRecording: 12,
@@ -66,7 +66,7 @@ describe('playerInspectorLogic', () => {
                         },
                     ],
                 },
-                '/api/projects/:team_id/comments': {
+                '/v1/projects/:team_id/comments': {
                     results: [
                         {
                             id: '019838f3-1bab-0000-fce8-04be1d6b6fe3',
@@ -342,7 +342,7 @@ describe('playerInspectorLogic', () => {
             const gate = new Promise<void>((resolve) => (releaseMatchingEvents = resolve))
             useMocks({
                 get: {
-                    '/api/environments/:team_id/session_recordings/matching_events': async () => {
+                    '/v1/environments/:team_id/session_recordings/matching_events': async () => {
                         await gate
                         return [200, { results: [{ uuid: 'matching-event', timestamp: '2025-01-01T00:00:10.000Z' }] }]
                     },

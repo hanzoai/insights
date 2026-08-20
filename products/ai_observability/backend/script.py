@@ -1,9 +1,9 @@
 from typing import Any, Literal
 
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_script
 
-AIObservabilityHogType = Literal["destination", "tagger"]
+AIObservabilityScriptType = Literal["destination", "tagger"]
 
 
-def compile_ai_observability_hog(source: str, hog_type: AIObservabilityHogType) -> list[Any]:
-    return compile_hog(source, hog_type, null_safe_comparisons=True)
+def compile_ai_observability_script(source: str, script_type: AIObservabilityScriptType) -> list[Any]:
+    return compile_script(source, script_type, null_safe_comparisons=True)

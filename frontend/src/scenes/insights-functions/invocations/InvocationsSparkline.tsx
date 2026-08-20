@@ -7,7 +7,7 @@ import { AnyScaleOptions, Sparkline } from 'lib/components/Sparkline'
 import { dayjs } from 'lib/dayjs'
 import { cn } from 'lib/utils/css-classes'
 
-import { SparklineData } from './hogInvocationsLogic'
+import { SparklineData } from './scriptInvocationsLogic'
 
 interface InvocationsSparklineProps {
     data: SparklineData | null

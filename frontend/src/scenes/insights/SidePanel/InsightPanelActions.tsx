@@ -48,7 +48,7 @@ export function InsightPanelActions({ insightLogicProps }: { insightLogicProps: 
     const { duplicateInsight, setInsightMetadata } = useActions(theInsightLogic)
 
     const theInsightDataLogic = insightDataLogic(insightProps)
-    const { query, hogQL, exportContext, hogQLVariables, canEditInSqlEditor } = useValues(theInsightDataLogic)
+    const { query, insightsQL, exportContext, insightsQLVariables, canEditInSqlEditor } = useValues(theInsightDataLogic)
 
     const { createStaticCohort } = useActions(exportsLogic)
     const { featureFlags } = useValues(featureFlagLogic)
@@ -71,7 +71,7 @@ export function InsightPanelActions({ insightLogicProps }: { insightLogicProps: 
     )
     const canExport = exportContext != null && insight.short_id != null
     const showCohort =
-        hogQL != null &&
+        insightsQL != null &&
         (isDataTableNode(query) || isDataVisualizationNode(query) || isInsightsQLQuery(query) || isEventsQuery(query))
 
     return (
@@ -196,7 +196,7 @@ export function InsightPanelActions({ insightLogicProps }: { insightLogicProps: 
 
             {canEditInSqlEditor && (
                 <Link
-                    to={urls.sqlEditor({ query: hogQL ?? undefined })}
+                    to={urls.sqlEditor({ query: insightsQL ?? undefined })}
                     buttonProps={{
                         'data-attr': `${RESOURCE_TYPE}-edit-sql`,
                         menuItem: true,
@@ -210,7 +210,7 @@ export function InsightPanelActions({ insightLogicProps }: { insightLogicProps: 
             {showCohort && (
                 <ButtonPrimitive
                     data-attr={`${RESOURCE_TYPE}-save-as-cohort`}
-                    onClick={() => openSaveAsCohortDialog(createStaticCohort, hogQL!, hogQLVariables)}
+                    onClick={() => openSaveAsCohortDialog(createStaticCohort, insightsQL!, insightsQLVariables)}
                     menuItem
                 >
                     <IconPeople />

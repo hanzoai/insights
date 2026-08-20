@@ -24,10 +24,10 @@ import { supportSettingsLogic } from './supportSettingsLogic'
 export function SlackSection(): JSX.Element {
     return (
         <SceneSection
-            title="SupportHog Slack bot"
+            title="Support Slack bot"
             description={
                 <>
-                    Add the SupportHog bot to your Slack workspace to create and manage support tickets directly from
+                    Add the Support bot to your Slack workspace to create and manage support tickets directly from
                     Slack messages.{' '}
                     <Link to="https://hanzo.ai/docs/support/slack" target="_blank">
                         Docs
@@ -88,7 +88,7 @@ function SlackChannelSection(): JSX.Element {
             <div>
                 <label className="font-medium">Connection</label>
                 <p className="text-xs text-muted-alt">
-                    Install the SupportHog bot in your Slack workspace to enable support ticket creation from channels,
+                    Install the Support bot in your Slack workspace to enable support ticket creation from channels,
                     mentions, and emoji reactions. This is separate from the main Insights Slack integration.
                 </p>
                 {!slackConnected && (
@@ -99,7 +99,7 @@ function SlackChannelSection(): JSX.Element {
                         disabledReason={adminRestrictionReason}
                         onClick={() => connectSlack(window.location.pathname)}
                     >
-                        Add SupportHog to Slack
+                        Add Support to Slack
                     </Button>
                 )}
                 {slackNeedsReconnect && (
@@ -113,7 +113,7 @@ function SlackChannelSection(): JSX.Element {
                         }}
                     >
                         Files sent in Slack won't appear on tickets, and images you send from Insights arrive as links
-                        instead of attachments. Reconnect SupportHog to give it access to files.
+                        instead of attachments. Reconnect Support to give it access to files.
                     </Banner>
                 )}
             </div>
@@ -125,7 +125,7 @@ function SlackChannelSection(): JSX.Element {
                             <label className="font-medium">Support channels</label>
                             <p className="text-xs text-muted-alt">
                                 Messages posted in any of these channels will automatically create support tickets.
-                                Thread replies become ticket messages. Make sure the SupportHog bot is invited to every
+                                Thread replies become ticket messages. Make sure the Support bot is invited to every
                                 selected channel.
                             </p>
                         </div>
@@ -156,7 +156,7 @@ function SlackChannelSection(): JSX.Element {
                         <div>
                             <label className="font-medium">Ticket nudges</label>
                             <p className="text-xs text-muted-alt">
-                                When enabled, SupportHog replies in-thread asking whether the customer wants to open a
+                                When enabled, Support replies in-thread asking whether the customer wants to open a
                                 ticket. This means customers don't have to remember the emoji reaction or @mention.
                                 'Support channels' will still have tickets created for every thread, and no nudge is
                                 sent.
@@ -176,7 +176,7 @@ function SlackChannelSection(): JSX.Element {
                                 <div>
                                     <label className="font-medium">Channel membership alerts</label>
                                     <p className="text-xs text-muted-alt">
-                                        Notify a channel when someone joins or leaves any channel the SupportHog bot is
+                                        Notify a channel when someone joins or leaves any channel the Support bot is
                                         in.
                                     </p>
                                 </div>
@@ -256,7 +256,7 @@ function SlackChannelSection(): JSX.Element {
                             <Input
                                 value={slackBotDisplayNameValue ?? slackBotDisplayName ?? ''}
                                 onChange={setSlackBotDisplayNameValue}
-                                placeholder="Display name (e.g. SupportHog)"
+                                placeholder="Display name (e.g. Support)"
                                 className="flex-1"
                             />
                         </div>
@@ -302,7 +302,7 @@ function SlackChannelSection(): JSX.Element {
                             disabledReason={adminRestrictionReason}
                             onClick={() => {
                                 Dialog.open({
-                                    title: 'Remove SupportHog bot?',
+                                    title: 'Remove Support bot?',
                                     description:
                                         'This will stop creating tickets from Slack messages. Existing tickets will not be affected.',
                                     primaryButton: {
@@ -314,7 +314,7 @@ function SlackChannelSection(): JSX.Element {
                                 })
                             }}
                         >
-                            Remove SupportHog bot
+                            Remove Support bot
                         </Button>
                     </div>
                 </>

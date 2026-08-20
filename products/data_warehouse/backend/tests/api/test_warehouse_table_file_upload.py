@@ -61,7 +61,7 @@ class _FakeS3:
 class TestWarehouseTableUploadFile(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/environments/{self.team.pk}/warehouse_tables/upload_file/"
+        self.url = f"/v1/environments/{self.team.pk}/warehouse_tables/upload_file/"
         self.s3 = _FakeS3()
 
     def _upload(self, **data):
@@ -184,8 +184,8 @@ class TestWarehouseTableUploadFile(APIBaseTest):
 class TestCreateTableFromUpload(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.upload_url = f"/api/environments/{self.team.pk}/warehouse_tables/upload_file/"
-        self.create_url = f"/api/environments/{self.team.pk}/warehouse_tables/create_from_upload/"
+        self.upload_url = f"/v1/environments/{self.team.pk}/warehouse_tables/upload_file/"
+        self.create_url = f"/v1/environments/{self.team.pk}/warehouse_tables/create_from_upload/"
 
     def _upload(self, filename: str = "orders.csv", file_format: str = "csv") -> str:
         with patch(f"{VIEW_MODULE}.get_s3_client", return_value=_FakeS3()):
@@ -322,7 +322,7 @@ class TestWarehouseTableDeleteRemovesHostedFile(APIBaseTest):
     def _delete(self, table: DataWarehouseTable) -> tuple[int, list[str]]:
         s3 = _FakeS3()
         with patch(f"{VIEW_MODULE}.get_s3_client", return_value=s3):
-            response = self.client.delete(f"/api/environments/{self.team.pk}/warehouse_tables/{table.id}")
+            response = self.client.delete(f"/v1/environments/{self.team.pk}/warehouse_tables/{table.id}")
         return response.status_code, s3.removed
 
     def test_deleting_a_hosted_upload_removes_its_backing_file(self) -> None:

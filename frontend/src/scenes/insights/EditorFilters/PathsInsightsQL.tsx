@@ -18,9 +18,9 @@ export function PathsInsightsQL({ insightProps }: EditorFilterProps): JSX.Elemen
             data-attr="paths-insightsql-expression"
             fullWidth
             onChange={(v, g) => {
-                const hogQl = taxonomicEventFilterToInsightsQL(g, v)
-                if (hogQl) {
-                    updateInsightFilter({ pathsInsightsQLExpression: hogQl })
+                const insightsQl = taxonomicEventFilterToInsightsQL(g, v)
+                if (insightsQl) {
+                    updateInsightFilter({ pathsInsightsQLExpression: insightsQl })
                 }
             }}
             groupTypes={[TaxonomicFilterGroupType.InsightsQLExpression]}

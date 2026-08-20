@@ -45,16 +45,16 @@ describe('taskTrackerSceneLogic', () => {
         runBody = null
         useMocks({
             get: {
-                '/api/projects/:team/tasks/': { results: [], count: 0 },
-                '/api/projects/:team/tasks/repositories/': { repositories: [] },
-                '/api/environments/:team/integrations/': { results: [] },
+                '/v1/projects/:team/tasks/': { results: [], count: 0 },
+                '/v1/projects/:team/tasks/repositories/': { repositories: [] },
+                '/v1/environments/:team/integrations/': { results: [] },
             },
             post: {
-                '/api/projects/:team/tasks/': async ({ request }) => {
+                '/v1/projects/:team/tasks/': async ({ request }) => {
                     createBody = (await request.json()) as Record<string, any>
                     return [200, { id: 'new-task', ...createBody }]
                 },
-                '/api/projects/:team/tasks/:id/run/': async ({ request }) => {
+                '/v1/projects/:team/tasks/:id/run/': async ({ request }) => {
                     runBody = (await request.json()) as Record<string, any>
                     return [200, { id: 'new-task', latest_run: 'run-1' }]
                 },
@@ -160,7 +160,7 @@ describe('taskTrackerSceneLogic', () => {
     it('restores the repository integration after a submit so the picker reappears', async () => {
         useMocks({
             get: {
-                '/api/environments/:team/integrations/': {
+                '/v1/environments/:team/integrations/': {
                     results: [{ id: 7, kind: 'github', display_name: 'acme/widgets', config: {} }],
                 },
             },
@@ -274,12 +274,12 @@ describe('taskTrackerSceneLogic', () => {
         let createCount = 0
         useMocks({
             post: {
-                '/api/projects/:team/tasks/': async ({ request }) => {
+                '/v1/projects/:team/tasks/': async ({ request }) => {
                     createCount++
                     createBody = (await request.json()) as Record<string, any>
                     return [200, { id: 'new-task', ...createBody }]
                 },
-                '/api/projects/:team/tasks/:id/run/': () => [200, { id: 'new-task' }],
+                '/v1/projects/:team/tasks/:id/run/': () => [200, { id: 'new-task' }],
             },
         })
 
@@ -313,12 +313,12 @@ describe('taskTrackerSceneLogic', () => {
             let createCount = 0
             useMocks({
                 post: {
-                    '/api/projects/:team/tasks/': async ({ request }) => {
+                    '/v1/projects/:team/tasks/': async ({ request }) => {
                         createCount++
                         createBody = (await request.json()) as Record<string, any>
                         return [200, { id: `task-${createCount}`, ...createBody }]
                     },
-                    '/api/projects/:team/tasks/:id/run/': () => [200, { id: 'run-1' }],
+                    '/v1/projects/:team/tasks/:id/run/': () => [200, { id: 'run-1' }],
                 },
             })
             logic.mount()

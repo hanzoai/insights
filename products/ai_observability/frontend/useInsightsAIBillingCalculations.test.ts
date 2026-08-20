@@ -35,7 +35,7 @@ describe('computeBillingTotals', () => {
         const tree = [
             makeNode({ $ai_billable: true, $ai_total_cost_usd: 10, ai_product: 'insights_ai' }),
             makeNode({ $ai_billable: true, $ai_total_cost_usd: 5 }), // untagged
-            makeNode({ $ai_billable: true, $ai_total_cost_usd: 5, ai_product: 'sherlockhog' }), // unbilled product
+            makeNode({ $ai_billable: true, $ai_total_cost_usd: 5, ai_product: 'sherlockscript' }), // unbilled product
         ]
 
         expect(computeBillingTotals(tree)).toEqual({ totalCostUsd: 10, markupUsd: 2 })

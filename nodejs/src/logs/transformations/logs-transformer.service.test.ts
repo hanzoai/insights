@@ -1,6 +1,6 @@
 import { InsightsFunctionManagerService } from '~/cdp/services/managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from '~/cdp/services/monitoring/script-function-monitoring.service'
-import { compileHog } from '~/cdp/templates/compiler'
+import { compileScript } from '~/cdp/templates/compiler'
 import { InsightsFunctionType } from '~/cdp/types'
 
 import type { LogRecord } from '../log-record-avro'
@@ -39,7 +39,7 @@ const createFunction = async (script: string, overrides: Partial<InsightsFunctio
         type: 'transformation_log',
         enabled: true,
         deleted: false,
-        bytecode: await compileHog(script),
+        bytecode: await compileScript(script),
         inputs: {},
         inputs_schema: [],
         encrypted_inputs: null,
@@ -80,7 +80,7 @@ describe('LogsTransformerService', () => {
         } as any
         config = {
             siteUrl: 'http://localhost:8010',
-            hogTimeoutMs: 10,
+            scriptTimeoutMs: 10,
             messageBudgetMs: 50,
             batchBudgetMs: 2000,
             maxErrorLogsPerFunctionPerMessage: 3,
@@ -301,7 +301,7 @@ describe('LogsTransformerService', () => {
                     inputs: {
                         svc: {
                             value: 'service = {record.service_name}',
-                            bytecode: await compileHog(`return f'service = {record.service_name}'`),
+                            bytecode: await compileScript(`return f'service = {record.service_name}'`),
                             order: 0,
                         },
                     },
@@ -329,7 +329,7 @@ describe('LogsTransformerService', () => {
                     encrypted_inputs: {
                         svc: {
                             value: 'service = {record.service_name}',
-                            bytecode: await compileHog(`return f'service = {record.service_name}'`),
+                            bytecode: await compileScript(`return f'service = {record.service_name}'`),
                             order: 0,
                         },
                     },
@@ -356,7 +356,7 @@ describe('LogsTransformerService', () => {
                     inputs: {
                         tag: {
                             value: '{record.missing.deeply.nested}',
-                            bytecode: await compileHog(`throw Error('template boom')`),
+                            bytecode: await compileScript(`throw Error('template boom')`),
                             order: 0,
                         },
                     },

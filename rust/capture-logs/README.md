@@ -49,11 +49,11 @@ The token is your Insights project token.
 |--------|---------|-----------------|
 | 200 | Accepted | — |
 | 400 | Body could not be decoded as OTLP protobuf or JSON | Permanent |
-| 401 | No token, or a token that cannot be a project API key (for example a `phx_` personal API key) | Permanent, so the client stops and surfaces the misconfiguration |
+| 401 | No token, or a token that cannot be a project API key (for example a `sk-` personal API key) | Permanent, so the client stops and surfaces the misconfiguration |
 | 413 | Body over `MAX_REQUEST_BODY_SIZE_BYTES` | Permanent |
 
 The 401 covers shape only: empty, over 64 characters, non-ASCII, containing a null byte, or
-prefixed `phx_`. None of those can be a project API key, so answering 200 and dropping the
+prefixed `sk-`. None of those can be a project API key, so answering 200 and dropping the
 records downstream only hides the misconfiguration from whoever is sending the data. This is
 the same check, and the same status, that event capture applies to the same input.
 

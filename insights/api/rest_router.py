@@ -21,7 +21,6 @@ from ..taxonomy import property_definition_api
 from . import (
     advanced_activity_logs,
     async_migration,
-    authentication,
     cimd_verification_token,
     cli_auth,
     comments,
@@ -62,7 +61,6 @@ from . import (
     user,
     user_home_settings,
     web_vitals,
-    webauthn,
     welcome,
 )
 from .column_configuration import ColumnConfigurationViewSet
@@ -335,19 +333,6 @@ organizations_router.register(
 )
 
 # General endpoints (shared across CH & PG)
-router.register(r"login", authentication.LoginViewSet, "login")
-router.register(r"login/dev", authentication.DevLoginViewSet, "login_dev")
-router.register(r"login/token", authentication.TwoFactorViewSet, "login_token")
-router.register(r"login/precheck", authentication.LoginPrecheckViewSet, "login_precheck")
-router.register(
-    r"login/code-based-verification", authentication.CodeBasedVerificationViewSet, "login_code_based_verification"
-)
-router.register(r"login/2fa/passkey", authentication.TwoFactorPasskeyViewSet, "login_2fa_passkey")
-router.register(r"webauthn/register", webauthn.WebAuthnRegistrationViewSet, "webauthn_register")
-router.register(r"webauthn/signup-register", webauthn.WebAuthnSignupRegistrationViewSet, "webauthn_signup_register")
-router.register(r"webauthn/login", webauthn.WebAuthnLoginViewSet, "webauthn_login")
-router.register(r"webauthn/credentials", webauthn.WebAuthnCredentialViewSet, "webauthn_credentials")
-router.register(r"reset", authentication.PasswordResetViewSet, "password_reset")
 users_router = router.register(r"users", user.UserViewSet, "users")
 users_router.register(
     r"integrations",
@@ -458,7 +443,7 @@ projects_router.register(
 
 projects_router.register(
     r"script",
-    script.HogViewSet,
+    script.ScriptViewSet,
     "script",
     ["team_id"],
 )

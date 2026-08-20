@@ -6,9 +6,9 @@ import "personinsights/types/v1/group.proto";
 import "personinsights/types/v1/cohort.proto";
 import "personinsights/types/v1/feature_flag.proto";
 
-// PersonHogService is the public API exposed by the router.
+// PersonService is the public API exposed by the router.
 // Clients call this service; the router handles backend selection and routing.
-service PersonHogService {
+service PersonService {
   // Person lookups by ID
   rpc GetPerson(personinsights.types.v1.GetPersonRequest) returns (personinsights.types.v1.GetPersonResponse);
   rpc GetPersons(personinsights.types.v1.GetPersonsRequest) returns (personinsights.types.v1.PersonsResponse);

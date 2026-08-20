@@ -58,12 +58,12 @@ describe('pulseLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/pulse/brief_configs/': { count: 0, results: [] },
-                '/api/projects/:team_id/pulse/briefs/': { count: 0, results: [] },
-                '/api/projects/:team_id/pulse/briefs/:id/': readyBrief,
+                '/v1/projects/:team_id/pulse/brief_configs/': { count: 0, results: [] },
+                '/v1/projects/:team_id/pulse/briefs/': { count: 0, results: [] },
+                '/v1/projects/:team_id/pulse/briefs/:id/': readyBrief,
             },
             post: {
-                '/api/projects/:team_id/pulse/briefs/generate/': () => [201, generatingBrief],
+                '/v1/projects/:team_id/pulse/briefs/generate/': () => [201, generatingBrief],
             },
         })
         initKeaTests()
@@ -107,7 +107,7 @@ describe('pulseLogic', () => {
     it('marks a brief failed after consecutive poll failures, then stops polling', async () => {
         const captureSpy = jest.spyOn(insights, 'capture')
         useMocks({
-            get: { '/api/projects/:team_id/pulse/briefs/:id/': () => [500, {}] },
+            get: { '/v1/projects/:team_id/pulse/briefs/:id/': () => [500, {}] },
         })
 
         await expectLogic(logic, () => {
@@ -142,7 +142,7 @@ describe('pulseLogic', () => {
         const briefBad: ProductBriefListApi = { ...generatingBrief, id: 'brief-bad' } as unknown as ProductBriefListApi
         useMocks({
             get: {
-                '/api/projects/:team_id/pulse/briefs/:id/': (info) =>
+                '/v1/projects/:team_id/pulse/briefs/:id/': (info) =>
                     info.request.url.includes('brief-bad') ? [500, {}] : [200, { ...briefOk, status: 'ready' }],
             },
         })
@@ -166,7 +166,7 @@ describe('pulseLogic', () => {
     it('surfaces the consent banner on an AI data processing 400 without starting polling', async () => {
         useMocks({
             post: {
-                '/api/projects/:team_id/pulse/briefs/generate/': () => [
+                '/v1/projects/:team_id/pulse/briefs/generate/': () => [
                     400,
                     {
                         type: 'validation_error',
@@ -196,7 +196,7 @@ describe('pulseLogic', () => {
         const infoSpy = jest.spyOn(toast, 'info')
         useMocks({
             post: {
-                '/api/projects/:team_id/pulse/briefs/generate/': () => [
+                '/v1/projects/:team_id/pulse/briefs/generate/': () => [
                     409,
                     { detail: 'Brief generation already in progress' },
                 ],
@@ -226,13 +226,13 @@ describe('pulseLogic', () => {
             const captured: Record<'post' | 'patch', Record<string, any> | null> = { post: null, patch: null }
             useMocks({
                 post: {
-                    '/api/projects/:team_id/pulse/brief_configs/': async (info) => {
+                    '/v1/projects/:team_id/pulse/brief_configs/': async (info) => {
                         captured.post = (await info.request.json()) as Record<string, any>
                         return [201, { ...existingConfig, ...captured.post, id: 'cfg-new' }]
                     },
                 },
                 patch: {
-                    '/api/projects/:team_id/pulse/brief_configs/:id/': async (info) => {
+                    '/v1/projects/:team_id/pulse/brief_configs/:id/': async (info) => {
                         captured.patch = (await info.request.json()) as Record<string, any>
                         return [200, { ...existingConfig, ...captured.patch }]
                     },
@@ -256,7 +256,7 @@ describe('pulseLogic', () => {
     it('keeps the config and clears the deleting state when delete fails', async () => {
         const errorSpy = jest.spyOn(toast, 'error')
         useMocks({
-            delete: { '/api/projects/:team_id/pulse/brief_configs/:id/': () => [500, {}] },
+            delete: { '/v1/projects/:team_id/pulse/brief_configs/:id/': () => [500, {}] },
         })
         await expectLogic(logic).toFinishAllListeners() // let the mount-time loads settle before seeding
         logic.actions.loadBriefConfigsSuccess([existingConfig])
@@ -272,7 +272,7 @@ describe('pulseLogic', () => {
 
     it('resets selection when the active config is deleted', async () => {
         useMocks({
-            delete: { '/api/projects/:team_id/pulse/brief_configs/:id/': () => [204] },
+            delete: { '/v1/projects/:team_id/pulse/brief_configs/:id/': () => [204] },
         })
         await expectLogic(logic).toFinishAllListeners() // let the mount-time loads settle before seeding
         logic.actions.loadBriefConfigsSuccess([existingConfig])

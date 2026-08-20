@@ -265,7 +265,7 @@ export function getDefaultCdpConfig(): CdpConfig {
         INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: KAFKA_LOG_ENTRIES,
         INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_PRODUCER: WARPSTREAM_INGESTION_PRODUCER,
         INSIGHTS_INVOCATION_RESULTS_TOPIC: KAFKA_FN_INVOCATION_RESULTS,
-        // Cyclotron Warpstream cluster — Datastore consumes hog_invocation_results
+        // Cyclotron Warpstream cluster — Datastore consumes invocations
         // from the warpstream_cyclotron named collection, so the producer must
         // target the same cluster.
         INSIGHTS_INVOCATION_RESULTS_PRODUCER: WARPSTREAM_CYCLOTRON_PRODUCER,
@@ -273,7 +273,7 @@ export function getDefaultCdpConfig(): CdpConfig {
         // Per-team rollout still happens at the call site.
         INSIGHTS_INVOCATION_RESULTS_ENABLED: isDevEnv() ? true : false,
         MESSAGE_ASSETS_TOPIC: KAFKA_MESSAGE_ASSETS,
-        // Same cyclotron Warpstream cluster as hog_invocation_results — Datastore
+        // Same cyclotron Warpstream cluster as invocations — Datastore
         // consumes message_assets from the warpstream_cyclotron named collection.
         MESSAGE_ASSETS_PRODUCER: WARPSTREAM_CYCLOTRON_PRODUCER,
         // Hard cap on rows a single rerun wrapper job will drain. Mirrors the
@@ -317,7 +317,7 @@ export function getDefaultCdpConfig(): CdpConfig {
         DESTINATION_MIGRATION_DIFFING_ENABLED: false,
 
         // Fallback cap used only when a batch-resolve API caller does not pass max_audience_size.
-        // Django's batch-job model always passes get_hogflow_batch_trigger_limit(team_id), so
+        // Django's batch-job model always passes get_flow_batch_trigger_limit(team_id), so
         // production batches use the per-team value from settings; this is only a safety net for
         // direct callers (tests, admin tools). Match the fleet-wide default in settings.web.py.
         CDP_BATCH_WORKFLOW_MAX_AUDIENCE_SIZE: 50000,
@@ -334,7 +334,7 @@ export function getDefaultCdpConfig(): CdpConfig {
         CYCLOTRON_NODE_JANITOR_STALL_BACKOFF_BASE_MS: 60000,
         CYCLOTRON_NODE_JANITOR_STALL_BACKOFF_MAX_MS: 600000,
         // Floor > the script flow cache's worst-case staleness (~6 min), so swept jobs
-        // always wake against post-edit config. Rate sized well under hogflow worker
+        // always wake against post-edit config. Rate sized well under flow worker
         // steady-state throughput: the past incident class here is an instantaneous
         // mass wake, so wakes are trickled (500k parked @ 200/s ≈ 42 min spread).
         // Dev/test default must match Django's (insights/settings/data_stores.py).

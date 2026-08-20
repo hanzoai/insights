@@ -26,7 +26,7 @@ hcl/
   roles/shared/            # objects on every role (query_log_archive path + custom_metrics_* sub-views + ops_query_log_archive_mv)
   roles/ops/shared/        # OPS objects on every OPS env
   roles/ops/prod/          # OPS objects on both prod envs only (the metrics suite)
-  roles/ops/<env>/         # per-env OPS overlay (sharded_tophog zoo_path, prod-us ProfileEvents2, dev prom_metrics); env ∈ local/dev/prod-us/prod-eu
+  roles/ops/<env>/         # per-env OPS overlay (sharded_topfn zoo_path, prod-us ProfileEvents2, dev prom_metrics); env ∈ local/dev/prod-us/prod-eu
   roles/logs/shared/       # LOGS objects on every LOGS env
   roles/logs/<env>/        # per-env LOGS overlay (kafka/zoo_path/distributed variants; traces on prod only); env ∈ dev/prod-us/prod-eu
   <layer>/sql/<object>.sql # view/MV query bodies extracted from a layer, referenced as query = file("sql/<object>.sql")

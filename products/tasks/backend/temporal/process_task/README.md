@@ -108,14 +108,14 @@ Environment variables consumed inside the sandbox:
 
 ## End-to-end flow
 
-1. `POST /api/projects/{team_id}/tasks/{task_id}/run/` — Creates a TaskRun (QUEUED), triggers workflow
+1. `POST /v1/projects/{team_id}/tasks/{task_id}/run/` — Creates a TaskRun (QUEUED), triggers workflow
 2. Temporal starts `process-task` workflow on the `tasks-task-queue` (or `development-task-queue` in DEBUG)
 3. **get_task_processing_context** — Loads task, validates state, returns `TaskProcessingContext`
 4. **update_task_run_status** — Sets status to IN_PROGRESS
 5. **get_sandbox_for_repository** — Gets GitHub token from integration, creates OAuth access token, provisions sandbox, clones repo (unless snapshot used), stores sandbox credentials in TaskRun.state
 6. **start_agent_server** — Starts `npx agent-server` in sandbox, polls `/health` until ready
 7. **wait_condition** — Workflow blocks with a 2-hour inactivity timeout, extended by `heartbeat` signals from the agent. Insights Desktop or the agent server signals completion via the API
-8. Agent server calls `PATCH /api/projects/{team_id}/task_runs/{run_id}/` with terminal status
+8. Agent server calls `PATCH /v1/projects/{team_id}/task_runs/{run_id}/` with terminal status
 9. API handler sends `complete_task(status, error_message)` signal to the Temporal workflow
    - A user can end the run early via `POST .../runs/{run_id}/cancel/`, which sends the same signal with status `cancelled`
    - For wizard cloud runs, the GitHub merge webhook sends the same signal with status `completed`, so the run ends at merge instead of riding out the sandbox TTL

@@ -543,7 +543,7 @@ def delete_release(team_id: int, release_id: str) -> bool:
 
 
 def _validate_rule_bytecode(bytecode: list[Any]) -> None:
-    from products.error_tracking.backend.scriptvm_stl import RUST_HOGVM_STL  # noqa: PLC0415
+    from products.error_tracking.backend.scriptvm_stl import RUST_SCRIPTVM_STL  # noqa: PLC0415
 
     from common.scriptvm.python.operation import Operation  # noqa: PLC0415 — keeps the heavy dep off the import path
 
@@ -554,7 +554,7 @@ def _validate_rule_bytecode(bytecode: list[Any]) -> None:
             name = bytecode[i + 1]
             if not isinstance(name, str):
                 raise ErrorTrackingInvalidBytecodeError(f"Expected string for global function name, got {type(name)}")
-            if name not in RUST_HOGVM_STL:
+            if name not in RUST_SCRIPTVM_STL:
                 raise ErrorTrackingInvalidBytecodeError(f"Unknown global function: {name}")
 
 

@@ -185,7 +185,7 @@ def _is_bot_mention(activity: dict) -> bool:
 _HELP_CARD_BODY = [
     {
         "type": "TextBlock",
-        "text": "\U0001f44b Hi, I'm SupportHog",
+        "text": "\U0001f44b Hi, I'm Support",
         "weight": "Bolder",
         "size": "Medium",
     },
@@ -194,7 +194,7 @@ _HELP_CARD_BODY = [
         "text": (
             "I turn Teams messages into Insights support tickets, so you don't have to log into four different systems at once to answer one question. \n\n"
             "You can open a new ticket anywhere by tagging me with an @mention. I'll sync replies from threads. You can set up dedicated support channels in Insights settings too!\n\n"
-            "Need help in the future? Just say '@SupportHog help' to get this message again."
+            "Need help in the future? Just say '@Support help' to get this message again."
         ),
         "wrap": True,
     },
@@ -283,7 +283,7 @@ def is_bot_added_event(activity: dict) -> bool:
     return any(m.get("id") == recipient_id for m in members_added)
 
 
-_GREETING_COMMANDS = frozenset({"hi", "hello", "hey", "hola", "yo", "help", "?", "start", "get started", "supporthog"})
+_GREETING_COMMANDS = frozenset({"hi", "hello", "hey", "hola", "yo", "help", "?", "start", "get started", "support"})
 
 
 def is_command_message(activity: dict) -> bool:

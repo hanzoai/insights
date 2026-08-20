@@ -144,7 +144,7 @@ export const healthCategoryDetailLogic = kea<healthCategoryDetailLogicType>([
                     }
 
                     const queryString = new URLSearchParams(params).toString()
-                    const url = `api/environments/${values.currentTeamIdStrict}/health_issues/?${queryString}`
+                    const url = `v1/environments/${values.currentTeamIdStrict}/health_issues/?${queryString}`
                     try {
                         return await api.get(url)
                     } catch {
@@ -243,7 +243,7 @@ export const healthCategoryDetailLogic = kea<healthCategoryDetailLogicType>([
         },
         dismissIssue: async ({ id }) => {
             try {
-                await api.update(`api/environments/${values.currentTeamIdStrict}/health_issues/${id}/`, {
+                await api.update(`v1/environments/${values.currentTeamIdStrict}/health_issues/${id}/`, {
                     dismissed: true,
                 })
                 actions.loadHealthIssues()
@@ -254,7 +254,7 @@ export const healthCategoryDetailLogic = kea<healthCategoryDetailLogicType>([
         },
         undismissIssue: async ({ id }) => {
             try {
-                await api.update(`api/environments/${values.currentTeamIdStrict}/health_issues/${id}/`, {
+                await api.update(`v1/environments/${values.currentTeamIdStrict}/health_issues/${id}/`, {
                     dismissed: false,
                 })
                 actions.loadHealthIssues()

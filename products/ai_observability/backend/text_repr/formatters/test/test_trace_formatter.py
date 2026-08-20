@@ -151,7 +151,7 @@ class TestGetEventSummary:
         summary = _get_event_summary(event)
         assert "evaluation" in summary
 
-    def test_evaluation_summary_includes_hog_runtime(self):
+    def test_evaluation_summary_includes_script_runtime(self):
         event = {
             "event": "$ai_evaluation",
             "properties": {

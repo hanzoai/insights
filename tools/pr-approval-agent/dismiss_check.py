@@ -6,14 +6,14 @@
 # ]
 # ///
 # ruff: noqa: T201
-"""Decide what to do with Stamphog's prior approval after a push.
+"""Decide what to do with Stamp's prior approval after a push.
 
 Reads `REPO`, `PR_NUMBER`, `HEAD_SHA`, `BASE_REF`, `GITHUB_WORKSPACE` from
 the environment and prints a single-line `Decision` JSON on stdout:
 
     {"dismiss_approval": bool, "run_review": bool, "reason": "...", "last_approved_sha": "..."}
 
-The two booleans are orthogonal so each downstream workflow job gates on
+The two booleans are ortscriptonal so each downstream workflow job gates on
 exactly the question it owns: the `dismiss` job reads `dismiss_approval`,
 the `review` job reads `run_review`. Decisions are constructed only via
 `Decision.retain`, `Decision.review_only`, `Decision.dismiss_and_review`,
@@ -36,10 +36,10 @@ from pathlib import Path
 
 from gates import is_trivial_at_dismiss_time
 
-# Stamphog now approves only as stamphog[bot] (the app), carrying the review
+# Stamp now approves only as stamp[bot] (the app), carrying the review
 # body. github-actions[bot] is kept here so legacy bodyless approvals from
 # before that change still count as a prior bot approval for the delta check.
-BOT_LOGINS = {"github-actions[bot]", "stamphog[bot]"}
+BOT_LOGINS = {"github-actions[bot]", "stamp[bot]"}
 
 
 class Reason(StrEnum):
@@ -146,7 +146,7 @@ def select_last_bot_approval(reviews: list[dict]) -> str | None:
 
 
 def find_last_approved_sha(repo: str, pr_number: int) -> str | None:
-    """Commit SHA of the most recent Stamphog-bot APPROVED review."""
+    """Commit SHA of the most recent Stamp-bot APPROVED review."""
     reviews = json.loads(_run("gh", "api", f"repos/{repo}/pulls/{pr_number}/reviews", "--paginate"))
     return select_last_bot_approval(reviews)
 

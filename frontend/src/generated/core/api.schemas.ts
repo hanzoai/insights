@@ -1017,7 +1017,7 @@ export const ExperimentMetricMathTypeApi = {
     Avg: 'avg',
     Dau: 'dau',
     UniqueGroup: 'unique_group',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 export type CalendarHeatmapMathTypeApi = (typeof CalendarHeatmapMathTypeApi)[keyof typeof CalendarHeatmapMathTypeApi]

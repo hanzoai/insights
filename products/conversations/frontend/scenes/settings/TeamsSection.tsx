@@ -33,7 +33,7 @@ export function TeamsSection(): JSX.Element {
             title="Microsoft Teams"
             description={
                 <>
-                    Connect the SupportHog bot to Microsoft Teams to create and manage support tickets from Teams
+                    Connect the Support bot to Microsoft Teams to create and manage support tickets from Teams
                     channel messages and @mentions.{' '}
                     <Link to="https://hanzo.ai/docs/support/teams" target="_blank">
                         Docs
@@ -169,14 +169,14 @@ function AddTeamsChannelRow({ adminRestrictionReason }: AddTeamsChannelRowProps)
             </div>
 
             {selectedTeamId && isInstalling && (
-                <Banner type="info">Installing SupportHog in the Teams group…</Banner>
+                <Banner type="info">Installing Support in the Teams group…</Banner>
             )}
 
             {selectedTeamId && needsOrgCatalog && (
                 <Banner type="warning" className="flex flex-col gap-2">
                     <div>
-                        <strong>SupportHog isn't available in your Microsoft tenant's app catalog.</strong> Your
-                        organisation's Teams admin needs to upload the SupportHog app package to your{' '}
+                        <strong>Support isn't available in your Microsoft tenant's app catalog.</strong> Your
+                        organisation's Teams admin needs to upload the Support app package to your{' '}
                         <Link to="https://hanzo.ai/docs/support/teams#org-catalog" target="_blank">
                             org catalog
                         </Link>{' '}
@@ -192,7 +192,7 @@ function AddTeamsChannelRow({ adminRestrictionReason }: AddTeamsChannelRowProps)
 
             {selectedTeamId && installError && (
                 <Banner type="error" className="flex flex-col gap-2">
-                    <div>Failed to install SupportHog into the selected Teams group.</div>
+                    <div>Failed to install Support into the selected Teams group.</div>
                     <div>
                         <Button type="primary" size="small" onClick={() => installTeamsApp(selectedTeamId)}>
                             Retry
@@ -263,7 +263,7 @@ function TeamsChannelSection(): JSX.Element {
                 <label className="font-medium">Connection</label>
                 <p className="text-xs text-muted-alt">
                     Connect your Microsoft Teams tenant to enable support ticket creation from channel messages and
-                    @mentions. Requires a Teams admin to authorize the SupportHog app.
+                    @mentions. Requires a Teams admin to authorize the Support app.
                 </p>
                 {!teamsConnected && (
                     <Button

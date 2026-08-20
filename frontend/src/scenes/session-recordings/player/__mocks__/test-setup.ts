@@ -61,19 +61,19 @@ function getDefaultMocks(
 } {
     return {
         get: {
-            '/api/environments/:team_id/session_recordings/:id/snapshots': createSnapshotMockHandler(snapshotSources),
-            '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            '/api/projects/:team_id/comments': EMPTY_PAGINATED_RESPONSE,
-            '/api/projects/:team/notebooks/recording_comments': EMPTY_PAGINATED_RESPONSE,
+            '/v1/environments/:team_id/session_recordings/:id/snapshots': createSnapshotMockHandler(snapshotSources),
+            '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+            '/v1/projects/:team_id/comments': EMPTY_PAGINATED_RESPONSE,
+            '/v1/projects/:team/notebooks/recording_comments': EMPTY_PAGINATED_RESPONSE,
         },
         post: {
-            '/api/environments/:team_id/query/:kind': customQueryHandler ?? recordingEventsJson,
+            '/v1/environments/:team_id/query/:kind': customQueryHandler ?? recordingEventsJson,
         },
         patch: {
-            '/api/environments/:team_id/session_recordings/:id': { success: true },
+            '/v1/environments/:team_id/session_recordings/:id': { success: true },
         },
         delete: {
-            '/api/environments/:team_id/session_recordings/:id': { success: true },
+            '/v1/environments/:team_id/session_recordings/:id': { success: true },
         },
     }
 }

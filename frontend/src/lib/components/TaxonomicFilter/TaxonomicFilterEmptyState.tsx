@@ -2,11 +2,10 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import type React from 'react'
 
-import * as construction2 from '@hanzo/brand/hoggies/png/construction-2'
-import { IconOpenSidebar, IconPlus } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconOpenSidebar, IconPlus } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { taxonomicFilterLogic } from 'lib/components/TaxonomicFilter/taxonomicFilterLogic'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
@@ -17,7 +16,7 @@ import { urls } from 'scenes/urls'
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'
 
-const MascotConstruction2 = pngHoggie(construction2)
+const MascotConstruction2 = pngMascot()
 
 function labelFor(key: string, type: TaxonomicFilterGroupType, fallback: string): string {
     return getCoreFilterDefinition(key, type)?.label ?? fallback
@@ -39,7 +38,14 @@ type TaxonomicFilterEmptyStateProps = {
     isLoading?: boolean
 }
 
-const EmptyState = ({ title, description, action, docsUrl, script: Script, groupType }: EmptyStateProps): JSX.Element => {
+const EmptyState = ({
+    title,
+    description,
+    action,
+    docsUrl,
+    script: Script,
+    groupType,
+}: EmptyStateProps): JSX.Element => {
     const { push } = useActions(router)
     const { addProductIntentForCrossSell } = useActions(teamLogic)
 

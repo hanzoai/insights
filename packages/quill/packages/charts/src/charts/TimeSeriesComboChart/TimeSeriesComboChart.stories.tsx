@@ -6,7 +6,7 @@ import { MONTHLY_LABELS } from '../time-series-fixtures'
 import { TimeSeriesComboChart } from './TimeSeriesComboChart'
 
 const meta: Meta = {
-    title: 'Components/HogCharts/TimeSeriesComboChart',
+    title: 'Components/ScriptCharts/TimeSeriesComboChart',
     parameters: { layout: 'centered' },
 }
 export default meta

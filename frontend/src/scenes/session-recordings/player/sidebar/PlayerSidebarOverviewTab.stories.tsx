@@ -28,8 +28,8 @@ const meta: Meta<OverviewTabProps> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/notebooks/recording_comments': { results: [] },
-                '/api/environments/:team_id/session_recordings': ({ request }) => {
+                '/v1/projects/:team_id/notebooks/recording_comments': { results: [] },
+                '/v1/environments/:team_id/session_recordings': ({ request }) => {
                     const version = new URL(request.url).searchParams.get('version')
                     return [
                         200,
@@ -40,8 +40,8 @@ const meta: Meta<OverviewTabProps> = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists': recordingPlaylists,
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id': ({ params }) => {
+                '/v1/projects/:team_id/session_recording_playlists': recordingPlaylists,
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id': ({ params }) => {
                     const playlistId = params.playlist_id
 
                     return [
@@ -89,12 +89,12 @@ const meta: Meta<OverviewTabProps> = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id/recordings': ({ params }) => {
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id/recordings': ({ params }) => {
                     const playlistId = params.playlist_id
                     const response = playlistId === '1234567' ? recordings : []
                     return [200, { has_next: false, results: response, version: 1 }]
                 },
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -112,7 +112,7 @@ const meta: Meta<OverviewTabProps> = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/session_recordings/:id': ({ params }) => {
+                '/v1/environments/:team_id/session_recordings/:id': ({ params }) => {
                     if (params.id === '12345') {
                         return [200, recordingMetaJson]
                     } else if (params.id === 'thirty_others') {
@@ -126,7 +126,7 @@ const meta: Meta<OverviewTabProps> = {
                     }
                     return [200, { ...recordingMetaJson, viewers: ['abcdefg'] }]
                 },
-                'api/projects/:team/notebooks': {
+                'v1/projects/:team/notebooks': {
                     count: 0,
                     next: null,
                     previous: null,
@@ -134,7 +134,7 @@ const meta: Meta<OverviewTabProps> = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
                     if (
                         body.query.kind === 'InsightsQLQuery' &&
@@ -166,7 +166,7 @@ const meta: Meta<OverviewTabProps> = {
                                         '',
                                         'mascot.io',
                                         'Spikeville',
-                                        'Hogington',
+                                        'Scriptington',
                                         'https://mascot.io/entry-page',
                                     ],
                                 ],

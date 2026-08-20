@@ -2,11 +2,10 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo } from 'react'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
-import { IconLetter } from '@hanzo/icons'
 import { Button, Collapse, Select, SelectOptions, ProfilePicture, Spinner } from '@hanzo/elements'
+import { IconLetter } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { getColorVar } from 'lib/colors'
 import { AppMetricsFilters } from 'lib/components/AppMetrics/AppMetricsFilters'
 import { appMetricsLogic } from 'lib/components/AppMetrics/appMetricsLogic'
@@ -25,7 +24,7 @@ import { WorkflowMetricCard } from './WorkflowMetricCard'
 import { WorkflowMetricsSummary } from './WorkflowMetricsSummary'
 import { type EmailMetric, METRIC_COLORS, buildEmailMetricInvocationSearchParams } from './workflowMetricsSummaryLogic'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngMascot()
 
 const OVERVIEW_OPTION_VALUE = '__workflow_overview__'
 
@@ -74,7 +73,7 @@ function WorkflowRunMetrics(props: WorkflowLogicProps): JSX.Element {
         loadOnChanges: true,
         loadOnMount: true,
         forceParams: {
-            appSource: 'hog_flow',
+            appSource: 'script_flow',
             appSourceId: props.id,
             breakdownBy: 'metric_name',
             instanceId,
@@ -246,7 +245,7 @@ function BatchJobMetrics({ job }: { job: InsightsFlowBatchJob }): JSX.Element {
             dateTo: jobEnd.toISOString(),
         },
         forceParams: {
-            appSource: 'hog_flow',
+            appSource: 'script_flow',
             appSourceId: job.id,
             breakdownBy: 'metric_name',
         },

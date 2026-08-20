@@ -247,7 +247,7 @@ class TestQueryCoalescer(TestCase):
 
 class TestQueryCoalescingMiddleware(DatastoreTestMixin, APIBaseTest):
     def _query_url(self):
-        return f"/api/environments/{self.team.id}/query/"
+        return f"/v1/environments/{self.team.id}/query/"
 
     def _query_payload(self):
         return {"query": {"kind": "EventsQuery", "select": ["event"]}}
@@ -405,7 +405,7 @@ class TestQueryCoalescingMiddleware(DatastoreTestMixin, APIBaseTest):
 
     def test_non_matching_path_skips_coalescing(self):
         with mock.patch("insights.api.query_coalescer.QueryCoalescer") as mock_cls:
-            self.client.get(f"/api/environments/{self.team.id}/annotations/")
+            self.client.get(f"/v1/environments/{self.team.id}/annotations/")
             mock_cls.assert_not_called()
 
     def test_follower_gets_replayed_5xx_response(self):
@@ -477,10 +477,10 @@ class TestQueryCoalescingMiddleware(DatastoreTestMixin, APIBaseTest):
 
     @parameterized.expand(
         [
-            ("query", "/api/environments/{team_id}/query/"),
-            ("insights_trend", "/api/environments/{team_id}/insights/trend/"),
-            ("insights_funnel", "/api/environments/{team_id}/insights/funnel/"),
-            ("insights_pk", "/api/environments/{team_id}/insights/123/"),
+            ("query", "/v1/environments/{team_id}/query/"),
+            ("insights_trend", "/v1/environments/{team_id}/insights/trend/"),
+            ("insights_funnel", "/v1/environments/{team_id}/insights/funnel/"),
+            ("insights_pk", "/v1/environments/{team_id}/insights/123/"),
         ]
     )
     def test_matching_paths_trigger_coalescing(self, _name, path_template):

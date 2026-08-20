@@ -19,6 +19,7 @@ from insights.schema import (
 
 from insights.constants import AvailableFeature
 from insights.models import User
+from insights.models.ee_models import AccessControl
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.sharing_configuration import SharingConfiguration
 from insights.models.utils import generate_random_token_personal, hash_key_value
@@ -28,8 +29,6 @@ from insights.shared_link_user import SharedLinkUser
 from products.metrics.backend.facade.enums import AttributeScope, FilterOp, MetricAggregation, MetricType
 from products.metrics.backend.insightsql_queries.metrics_query_runner import MetricsQueryRunner
 from products.metrics.backend.tests._seeder import seed_metric
-
-from insights.models.ee_models import AccessControl
 
 
 class TestMetricsQueryRunner(DatastoreTestMixin, APIBaseTest):
@@ -110,7 +109,7 @@ class TestMetricsQueryRunner(DatastoreTestMixin, APIBaseTest):
 
     def test_generic_query_endpoint_accepts_metrics_query(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/query/",
+            f"/v1/projects/{self.team.pk}/query/",
             {
                 "query": {
                     "kind": "MetricsQuery",
@@ -124,7 +123,7 @@ class TestMetricsQueryRunner(DatastoreTestMixin, APIBaseTest):
 
     def test_insight_saves_with_metrics_query(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/insights/",
+            f"/v1/projects/{self.team.pk}/insights/",
             {
                 "name": "queue depth",
                 "saved": True,
@@ -192,7 +191,7 @@ class TestMetricsQueryRunner(DatastoreTestMixin, APIBaseTest):
         PersonalAPIKey.objects.create(label="test", user=self.user, secure_value=hash_key_value(value), scopes=scopes)
 
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/query/",
+            f"/v1/projects/{self.team.pk}/query/",
             {
                 "query": {
                     "kind": "MetricsQuery",

@@ -81,7 +81,7 @@ const TEXT_PIECES = [
 
 const CODE_LINES = ['const a = 1', '', '```', '```js', 'x `y` z', '    indented', 'done']
 
-const LINK_HREFS = ['https://hanzo.ai/docs', 'https://en.wikipedia.org/wiki/Hog_(disambiguation)']
+const LINK_HREFS = ['https://hanzo.ai/docs', 'https://en.wikipedia.org/wiki/Script_(disambiguation)']
 
 const MARK_CHOICES: NotebookInlineMark[][] = [
     [],
@@ -469,7 +469,7 @@ describe('markdown round trip', () => {
 
     describe('links', () => {
         it('round-trips hrefs containing balanced parentheses', () => {
-            const href = 'https://en.wikipedia.org/wiki/Hog_(disambiguation)'
+            const href = 'https://en.wikipedia.org/wiki/Script_(disambiguation)'
             const document = makeDocument([paragraph([text('wiki', [{ type: 'link', href }])])])
             const result = roundTrip(document)
 
@@ -478,12 +478,12 @@ describe('markdown round trip', () => {
         })
 
         it('parses external links with unescaped balanced parentheses', () => {
-            const nodes = parseMarkdownNotebook('[wiki](https://en.wikipedia.org/wiki/Hog_(disambiguation)) end').nodes
+            const nodes = parseMarkdownNotebook('[wiki](https://en.wikipedia.org/wiki/Script_(disambiguation)) end').nodes
             const children = (nodes[0] as NotebookTextBlockNode).children
 
             expect(children[0].type === 'text' && children[0].marks?.[0]).toEqual({
                 type: 'link',
-                href: 'https://en.wikipedia.org/wiki/Hog_(disambiguation)',
+                href: 'https://en.wikipedia.org/wiki/Script_(disambiguation)',
             })
             expect(getNodeText(nodes[0])).toEqual('wiki end')
         })

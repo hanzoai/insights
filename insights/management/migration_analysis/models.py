@@ -51,7 +51,7 @@ class MigrationRisk:
     info_messages: list[str] = field(default_factory=list)  # Informational messages (not warnings)
     # Repo-relative path of the migration file. Set by the command layer when
     # a Django Migration object is loaded from disk; downstream consumers
-    # (CI checks, stamphog) use this to scope bypasses to files the analyzer
+    # (CI checks, stamp) use this to scope bypasses to files the analyzer
     # actually classified.
     file_path: str | None = None
 

@@ -4,7 +4,7 @@ import { expectLogic } from 'kea-test-utils'
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 
-import type { TestHogResponseApi } from '../generated/api.schemas'
+import type { TestScriptResponseApi } from '../generated/api.schemas'
 import { LLMProviderKey, llmProviderKeysLogic } from '../settings/llmProviderKeysLogic'
 import { EVALUATION_SUMMARY_MAX_RUNS } from './constants'
 import { evaluationReportLogic } from './evaluationReportLogic'
@@ -230,14 +230,14 @@ describe('llmEvaluationLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
-                '/api/environments/:teamId/llm_analytics/evaluation_config/': {
+                '/v1/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
+                '/v1/environments/:teamId/llm_analytics/evaluation_config/': {
                     active_provider_key: null,
                     created_at: '2024-01-01T00:00:00Z',
                     updated_at: '2024-01-01T00:00:00Z',
                 },
-                '/api/projects/:teamId/evaluations/:id/': mockEvaluation,
-                '/api/environments/:teamId/llm_analytics/models/': {
+                '/v1/projects/:teamId/evaluations/:id/': mockEvaluation,
+                '/v1/environments/:teamId/llm_analytics/models/': {
                     models: [{ id: 'gpt-5-mini' }, { id: 'gpt-5' }],
                 },
             },
@@ -391,7 +391,7 @@ return result`,
             await expectLogic(logic).toDispatchActions(['loadEvaluationSuccess'])
 
             logic.actions.setEvaluationType('script')
-            logic.actions.setHogSource('return length(events) > 5')
+            logic.actions.setScriptSource('return length(events) > 5')
             logic.actions.setEvaluationTarget('trace')
 
             await expectLogic(logic).toMatchValues({
@@ -1255,11 +1255,11 @@ return result`,
             })
         })
 
-        it('setHogSource updates source in script config', async () => {
+        it('setScriptSource updates source in script config', async () => {
             await expectLogic(logic).toDispatchActions(['loadEvaluationSuccess'])
 
             logic.actions.setEvaluationType('script')
-            logic.actions.setHogSource('return true')
+            logic.actions.setScriptSource('return true')
 
             await expectLogic(logic).toMatchValues({
                 evaluation: expect.objectContaining({
@@ -1278,12 +1278,12 @@ return result`,
             // Default source is non-empty -> valid
             await expectLogic(logic).toMatchValues({ formValid: true })
 
-            logic.actions.setHogSource('')
+            logic.actions.setScriptSource('')
 
             // Empty source -> invalid
             await expectLogic(logic).toMatchValues({ formValid: false })
 
-            logic.actions.setHogSource('return true')
+            logic.actions.setScriptSource('return true')
 
             // Non-empty source -> valid again
             await expectLogic(logic).toMatchValues({ formValid: true })
@@ -1295,7 +1295,7 @@ return result`,
             logic.actions.setEvaluationType('script')
             logic.actions.setEvaluationName('Valid Name')
             logic.actions.setTriggerConditions([{ id: 'c1', rollout_percentage: 50, properties: [] }])
-            logic.actions.setHogSource('   ')
+            logic.actions.setScriptSource('   ')
 
             await expectLogic(logic).toMatchValues({ formValid: false })
         })
@@ -1332,7 +1332,7 @@ return result`,
             await expectLogic(logic).toMatchValues({ hasUnsavedChanges: true })
         })
 
-        it('setHogSource marks unsaved changes', async () => {
+        it('setScriptSource marks unsaved changes', async () => {
             await expectLogic(logic).toDispatchActions(['loadEvaluationSuccess'])
 
             logic.actions.setEvaluationType('script')
@@ -1343,7 +1343,7 @@ return result`,
                 evaluation_config: { source: DEFAULT_FN_SOURCE },
             } as any)
 
-            logic.actions.setHogSource('return true')
+            logic.actions.setScriptSource('return true')
 
             await expectLogic(logic).toMatchValues({ hasUnsavedChanges: true })
         })
@@ -1408,7 +1408,7 @@ return result`,
             let requestBody: Record<string, unknown> | undefined
             useMocks({
                 post: {
-                    '/api/projects/:teamId/evaluations/test_hog/': async ({ request }) => {
+                    '/v1/projects/:teamId/evaluations/test_script/': async ({ request }) => {
                         requestBody = (await request.json()) as Record<string, unknown>
                         return {
                             results: [
@@ -1435,12 +1435,12 @@ return result`,
             logic.actions.setEvaluationType('script')
             logic.actions.setEvaluationTarget('trace')
             logic.actions.patchTargetConfig({ window_seconds: 120 })
-            logic.actions.testHogOnSample()
+            logic.actions.testScriptOnSample()
 
             await expectLogic(logic)
-                .toDispatchActions(['testHogOnSampleSuccess'])
+                .toDispatchActions(['testScriptOnSampleSuccess'])
                 .toMatchValues({
-                    hogTestResults: [expect.objectContaining({ sample_id: 'trace-1', sample_type: 'trace' })],
+                    scriptTestResults: [expect.objectContaining({ sample_id: 'trace-1', sample_type: 'trace' })],
                 })
             expect(requestBody).toMatchObject({
                 target: 'trace',
@@ -1448,17 +1448,17 @@ return result`,
             })
 
             logic.actions.patchTargetConfig({ window_seconds: 240 })
-            await expectLogic(logic).toMatchValues({ hogTestResults: null })
+            await expectLogic(logic).toMatchValues({ scriptTestResults: null })
         })
 
         it('does not restore results from a request whose target changed in flight', async () => {
-            let resolveRequest: (value: TestHogResponseApi) => void = () => {}
-            const pendingResponse = new Promise<TestHogResponseApi>((resolve) => {
+            let resolveRequest: (value: TestScriptResponseApi) => void = () => {}
+            const pendingResponse = new Promise<TestScriptResponseApi>((resolve) => {
                 resolveRequest = resolve
             })
             useMocks({
                 post: {
-                    '/api/projects/:teamId/evaluations/test_hog/': () => pendingResponse,
+                    '/v1/projects/:teamId/evaluations/test_script/': () => pendingResponse,
                 },
             })
             logic = llmEvaluationLogic({ evaluationId: 'new' })
@@ -1466,11 +1466,11 @@ return result`,
             await expectLogic(logic).toDispatchActions(['loadEvaluationSuccess'])
 
             logic.actions.setEvaluationType('script')
-            logic.actions.testHogOnSample()
-            await expectLogic(logic).toMatchValues({ hogTestResultsLoading: true })
+            logic.actions.testScriptOnSample()
+            await expectLogic(logic).toMatchValues({ scriptTestResultsLoading: true })
 
             logic.actions.setEvaluationTarget('trace')
-            await expectLogic(logic).toMatchValues({ hogTestResults: null })
+            await expectLogic(logic).toMatchValues({ scriptTestResults: null })
             resolveRequest({
                 results: [
                     {
@@ -1488,8 +1488,8 @@ return result`,
             })
 
             await expectLogic(logic)
-                .toDispatchActions(['testHogOnSampleSuccess'])
-                .toMatchValues({ hogTestResults: null })
+                .toDispatchActions(['testScriptOnSampleSuccess'])
+                .toMatchValues({ scriptTestResults: null })
         })
     })
 
@@ -1498,7 +1498,7 @@ return result`,
             let evaluationCreateCount = 0
             useMocks({
                 post: {
-                    '/api/projects/:teamId/evaluations/': () => {
+                    '/v1/projects/:teamId/evaluations/': () => {
                         evaluationCreateCount += 1
                         return mockEvaluation
                     },
@@ -1553,7 +1553,7 @@ return result`,
 
             useMocks({
                 get: {
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/': () => {
                         reportListRequestCount += 1
                         return reportListRequestCount === 1
                             ? initialReportsPromise
@@ -1561,14 +1561,14 @@ return result`,
                     },
                 },
                 patch: {
-                    '/api/projects/:teamId/evaluations/:id/': () => mockEvaluation,
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/:id/': () => {
+                    '/v1/projects/:teamId/evaluations/:id/': () => mockEvaluation,
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/:id/': () => {
                         reportWriteCount += 1
                         return mockEvaluationReport
                     },
                 },
                 post: {
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/': () => {
                         reportWriteCount += 1
                         return mockEvaluationReport
                     },
@@ -1609,23 +1609,23 @@ return result`,
 
             useMocks({
                 get: {
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/': () => {
                         reportListCount += 1
                         return { results: [mockEvaluationReport] }
                     },
                 },
                 post: {
-                    '/api/projects/:teamId/evaluations/': () => {
+                    '/v1/projects/:teamId/evaluations/': () => {
                         evaluationCreateCount += 1
                         return mockSentimentEvaluation
                     },
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/': () => {
                         reportCreateCount += 1
                         return mockEvaluationReport
                     },
                 },
                 patch: {
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/:id/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/:id/': () => {
                         reportUpdateCount += 1
                         return mockEvaluationReport
                     },
@@ -1661,16 +1661,16 @@ return result`,
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
-                    '/api/environments/:teamId/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
+                    '/v1/environments/:teamId/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                         created_at: '2024-01-01T00:00:00Z',
                         updated_at: '2024-01-01T00:00:00Z',
                     },
-                    '/api/projects/:teamId/evaluations/:id/': mockEvaluation,
+                    '/v1/projects/:teamId/evaluations/:id/': mockEvaluation,
                 },
                 patch: {
-                    '/api/projects/:teamId/evaluations/:id/': () => [
+                    '/v1/projects/:teamId/evaluations/:id/': () => [
                         400,
                         {
                             enabled: ['Add a provider API key to enable this evaluation.'],

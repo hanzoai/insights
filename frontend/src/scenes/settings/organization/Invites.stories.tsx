@@ -22,7 +22,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         ...MOCK_DEFAULT_USER,
@@ -31,7 +31,7 @@ const meta: Meta = {
                         },
                     },
                 ],
-                '/api/organizations/@current/': (): MockSignature => [
+                '/v1/organizations/@current/': (): MockSignature => [
                     200,
                     { ...MOCK_DEFAULT_ORGANIZATION, membership_level: OrganizationMembershipLevel.Owner },
                 ],
@@ -51,9 +51,7 @@ export const CurrentUserIsOwner: Story = {
                     cloud: false,
                     realm: 'hosted-datastore',
                     available_social_auth_providers: {
-                        github: false,
-                        gitlab: false,
-                        'google-oauth2': false,
+                        oidc: false,
                         saml: false,
                     },
                 },
@@ -71,13 +69,11 @@ export const CurrentUserIsAdmin: Story = {
                     cloud: false,
                     realm: 'hosted-datastore',
                     available_social_auth_providers: {
-                        github: false,
-                        gitlab: false,
-                        'google-oauth2': false,
+                        oidc: false,
                         saml: false,
                     },
                 },
-                '/api/organizations/@current/': (): MockSignature => [
+                '/v1/organizations/@current/': (): MockSignature => [
                     200,
                     { ...MOCK_DEFAULT_ORGANIZATION, membership_level: OrganizationMembershipLevel.Admin },
                 ],
@@ -95,13 +91,11 @@ export const CurrentUserIsMember: Story = {
                     cloud: false,
                     realm: 'hosted-datastore',
                     available_social_auth_providers: {
-                        github: false,
-                        gitlab: false,
-                        'google-oauth2': false,
+                        oidc: false,
                         saml: false,
                     },
                 },
-                '/api/organizations/@current/': (): MockSignature => [
+                '/v1/organizations/@current/': (): MockSignature => [
                     200,
                     { ...MOCK_DEFAULT_ORGANIZATION, membership_level: OrganizationMembershipLevel.Member },
                 ],

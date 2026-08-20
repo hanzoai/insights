@@ -19,7 +19,7 @@ Everything below fails closed for non-staff users: the tools never appear in the
 The `batch_import_support:read` scope is **hidden from the key-creation UI** and can never be granted through OAuth,
 so minting takes two steps — create the key normally, then add the hidden scope via Django admin:
 
-1. In the Insights UI on the region you want to inspect, go to **Settings → Personal API keys** and create a key with the **User: Read** scope and **no organization/project restriction** (the endpoint rejects scoped keys). Copy the `phx_...` value — it is shown only once.
+1. In the Insights UI on the region you want to inspect, go to **Settings → Personal API keys** and create a key with the **User: Read** scope and **no organization/project restriction** (the endpoint rejects scoped keys). Copy the `sk-...` value — it is shown only once.
 2. In Django admin (`/admin/insights/personalapikey/`), open your new key and add `batch_import_support:read` to its `scopes` list, then save. Do this **before** first using the key with MCP — the MCP server caches a token's scopes on first use.
 
 <details>
@@ -28,7 +28,7 @@ so minting takes two steps — create the key normally, then add the hidden scop
 While logged in, on any Insights app page:
 
 ```js
-await fetch('/api/personal_api_keys/', {
+await fetch('/v1/personal_api_keys/', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -45,10 +45,10 @@ If you get `sensitive_action_required_reauth`, key creation needs a recently-aut
 
 Rules that will bite you if skipped:
 
-- **Both scopes are required for MCP.** `batch_import_support:read` authorizes the endpoints; `user:read` lets MCP tool discovery confirm you are staff via `/api/users/@me/`. Without `user:read` the tools silently never appear (the check fails closed).
+- **Both scopes are required for MCP.** `batch_import_support:read` authorizes the endpoints; `user:read` lets MCP tool discovery confirm you are staff via `/v1/users/@me/`. Without `user:read` the tools silently never appear (the check fails closed).
 - **`*` (full access) does not work.** The backend rejects wildcard keys on this endpoint, and tool discovery requires the hidden scope to be listed explicitly.
 - **The key must be unscoped** — no `scoped_teams` / `scoped_organizations`. The endpoint is root-level and cross-team by design; scoped keys are rejected there.
-- **One key per region.** US and EU are separate deployments with separate users and keys — repeat the mint on each region you support. `user:read` also powers the region routing: the MCP server probes both regions with your token via `/api/users/@me/`, so a key missing it misroutes (defaults to US) on top of hiding the tools.
+- **One key per region.** US and EU are separate deployments with separate users and keys — repeat the mint on each region you support. `user:read` also powers the region routing: the MCP server probes both regions with your token via `/v1/users/@me/`, so a key missing it misroutes (defaults to US) on top of hiding the tools.
 
 ## Step 2: connect your MCP client
 
@@ -99,7 +99,7 @@ If the tools don't appear, check in order:
 ## How it's enforced (for the curious)
 
 The MCP-side filtering is presentation, not security: it exists so staff-only tools never pollute customer tool lists.
-The security boundary is the Django endpoint (`/api/managed_migrations_support/`), which requires an authenticated staff user plus the explicit scope, rejects wildcard keys, and audit-logs every read.
+The security boundary is the Django endpoint (`/v1/managed_migrations_support/`), which requires an authenticated staff user plus the explicit scope, rejects wildcard keys, and audit-logs every read.
 See `products/managed_migrations/backend/api/support_batch_imports.py` and `services/mcp/src/lib/staff-only-tools.ts`.
 
 For testing changes to any of this locally, use the [testing-mcp-tools-locally](../skills/testing-mcp-tools-locally/SKILL.md) skill.

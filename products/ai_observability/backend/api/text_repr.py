@@ -9,7 +9,7 @@ Architecture:
 - Python backend: Imports formatters directly (no API call needed)
 
 Endpoint:
-- POST /api/llm_analytics/text_repr/ - Stringify single event
+- POST /v1/llm_analytics/text_repr/ - Stringify single event
 """
 
 import json
@@ -266,7 +266,7 @@ The response includes the formatted text and metadata about the rendering.
         """
         Stringify a single LLM trace event.
 
-        POST /api/llm_analytics/text_repr/
+        POST /v1/llm_analytics/text_repr/
         """
         serializer = TextReprRequestSerializer(data=request.data)
         if not serializer.is_valid():

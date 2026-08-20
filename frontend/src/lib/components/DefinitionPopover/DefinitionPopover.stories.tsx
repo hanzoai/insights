@@ -143,9 +143,9 @@ const meta: Meta<StoryWrapperProps> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/event_definitions/:id': () => [200, mockEventDefinition],
-                '/api/projects/:team_id/property_definitions/:id': () => [200, mockPropertyDefinition],
-                '/api/projects/:team_id/actions/:id': () => [200, mockActionDefinition],
+                '/v1/projects/:team_id/event_definitions/:id': () => [200, mockEventDefinition],
+                '/v1/projects/:team_id/property_definitions/:id': () => [200, mockPropertyDefinition],
+                '/v1/projects/:team_id/actions/:id': () => [200, mockActionDefinition],
             },
         }),
     ],

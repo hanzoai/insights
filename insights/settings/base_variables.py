@@ -11,7 +11,7 @@ logger = structlog.get_logger(__name__)
 BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 IN_UNIT_TESTING: bool = get_from_env("IN_UNIT_TESTING", False, type_cast=str_to_bool)
-IN_EVAL_TESTING: bool = get_from_env("IN_EVAL_TESTING", False, type_cast=str_to_bool)  # Set in ee/hogai/eval/pytest.ini
+IN_EVAL_TESTING: bool = get_from_env("IN_EVAL_TESTING", False, type_cast=str_to_bool)  # Set in ee/scriptai/eval/pytest.ini
 DEBUG: bool = get_from_env("DEBUG", False, type_cast=str_to_bool)
 TEST = get_from_env(
     "TEST",
@@ -64,7 +64,7 @@ GITHUB_SECRET_ALERT_RELAY_URL: str | None = get_from_env("GITHUB_SECRET_ALERT_RE
 
 # Internal team on Insights Cloud US that receives `$ai_generation` /
 # `$ai_embedding` events emitted by Insights products (Insights Desktop,
-# background agents, etc). Used by /api/llm_analytics/personal_spend/.
+# background agents, etc). Used by /v1/llm_analytics/personal_spend/.
 # Override in tests via @override_settings to point at a per-test team.
 LLM_ANALYTICS_INTERNAL_TEAM_ID: int = 2
 

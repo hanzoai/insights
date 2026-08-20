@@ -375,34 +375,12 @@ DEFAULT_SURVEY_APPEARANCE = {
 
 LOGIN_METHODS = [
     {
-        "key": "password",
-        "display": "Email/password",
-        "backends": ["django.contrib.auth.backends.ModelBackend"],
-    },
-    {
-        "key": "google-oauth2",
-        "display": "Google OAuth",
-        "backends": ["google-oauth2", "ee.api.authentication.CustomGoogleOAuth2"],
-    },
-    {
-        "key": "github",
-        "display": "GitHub",
-        "backends": ["github"],
-    },
-    {
-        "key": "gitlab",
-        "display": "GitLab",
-        "backends": ["gitlab"],
-    },
-    {
-        "key": "saml",
-        "display": "SAML",
-        "backends": ["saml", "ee.api.authentication.MultitenantSAMLAuth"],
-    },
-    {
-        "key": "passkey",
-        "display": "Passkey",
-        "backends": ["insights.auth.WebauthnBackend"],
+        "key": "oidc",
+        "display": "Hanzo IAM",
+        # Two spellings reach this map: the session records the backend's dotted
+        # path (`_auth_user_backend`), while the social pipeline reports
+        # `backend.name`.
+        "backends": ["oidc", "social_core.backends.open_id_connect.OpenIdConnectAuth"],
     },
 ]
 

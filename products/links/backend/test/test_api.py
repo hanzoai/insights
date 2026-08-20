@@ -15,12 +15,12 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_create_link_success(self):
         data = {
             "redirect_url": "https://example.com",
-            "short_link_domain": "phog.gg",
+            "short_link_domain": "pscript.gg",
             "short_code": "test123",
             "description": "Test link",
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/links",
+            f"/v1/projects/{self.team.id}/links",
             data=data,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -35,27 +35,27 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             "description": "Test link",
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/links",
+            f"/v1/projects/{self.team.id}/links",
             data=data,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         json_response = str(response.json())
         self.assertIn("short_link_domain", json_response)
-        self.assertIn("Only phog.gg is allowed as a short link domain", json_response)
+        self.assertIn("Only pscript.gg is allowed as a short link domain", json_response)
 
     def test_list_links(self):
         # Create a link first
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="phog.gg",
+            short_link_domain="pscript.gg",
             short_code="test123",
             description="Test link",
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/links")
+        response = self.client.get(f"/v1/projects/{self.team.id}/links")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["short_code"], link.short_code)
@@ -64,13 +64,13 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="phog.gg",
+            short_link_domain="pscript.gg",
             short_code="test123",
             description="Test link",
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/links/{link.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/links/{link.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["short_code"], link.short_code)
 
@@ -78,7 +78,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="phog.gg",
+            short_link_domain="pscript.gg",
             short_code="test123",
             description="Test link",
             created_by=self.user,
@@ -86,13 +86,13 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         data = {
             "redirect_url": "https://updated.com",
-            "short_link_domain": "phog.gg",
+            "short_link_domain": "pscript.gg",
             "short_code": link.short_code,
             "description": "Updated link",
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/links/{link.id}",
+            f"/v1/projects/{self.team.id}/links/{link.id}",
             data=data,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -102,20 +102,20 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         link = Link.objects.create(
             team=self.team,
             redirect_url="https://example.com",
-            short_link_domain="phog.gg",
+            short_link_domain="pscript.gg",
             short_code="test123",
             description="Test link",
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/links/{link.id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/links/{link.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Link.objects.filter(id=link.id).exists())
 
     def test_unauthorized_access(self):
         # Create a new client without authentication
         client = APIClient()
-        response = client.get(f"/api/projects/{self.team.id}/links")
+        response = client.get(f"/v1/projects/{self.team.id}/links")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_link_team_isolation(self):
@@ -126,30 +126,30 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         link1 = Link.objects.create(
             team=self.team,
             redirect_url="https://example1.com",
-            short_link_domain="phog.gg",
+            short_link_domain="pscript.gg",
             short_code="test1",
             created_by=self.user,
         )
         _link2 = Link.objects.create(
             team=team2,
             redirect_url="https://example2.com",
-            short_link_domain="phog.gg",
+            short_link_domain="pscript.gg",
             short_code="test2",
             created_by=self.user,
         )
 
         # Should only see links from current team
-        response = self.client.get(f"/api/projects/{self.team.id}/links")
+        response = self.client.get(f"/v1/projects/{self.team.id}/links")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(str(response.json()["results"][0]["id"]), str(link1.id))
 
     def test_create_link_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/links",
+            f"/v1/projects/{self.team.id}/links",
             data={
                 "redirect_url": "https://example.com",
-                "short_link_domain": "phog.gg",
+                "short_link_domain": "pscript.gg",
                 "short_code": "test123",
                 "description": "Test link",
                 "_create_in_folder": "Special Folder/Links",

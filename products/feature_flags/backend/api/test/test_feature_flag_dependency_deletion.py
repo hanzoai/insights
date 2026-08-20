@@ -55,7 +55,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Try to delete base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"deleted": True},
             format="json",
         )
@@ -71,7 +71,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Should be able to delete it
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {"deleted": True},
             format="json",
         )
@@ -94,7 +94,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Should be able to delete base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"deleted": True},
             format="json",
         )
@@ -113,7 +113,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Should be able to delete base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"deleted": True},
             format="json",
         )
@@ -132,7 +132,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Try to delete base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"deleted": True},
             format="json",
         )
@@ -156,7 +156,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Try to delete flag B (middle of chain)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_b.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_b.id}/",
             {"deleted": True},
             format="json",
         )
@@ -166,7 +166,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Try to delete flag A (start of chain)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_a.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_a.id}/",
             {"deleted": True},
             format="json",
         )
@@ -176,7 +176,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Should be able to delete flag C (end of chain)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_c.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_c.id}/",
             {"deleted": True},
             format="json",
         )
@@ -213,7 +213,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Try to delete base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"deleted": True},
             format="json",
         )
@@ -253,7 +253,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
 
         # Should be able to delete base flag (other team's dependency shouldn't matter)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"deleted": True},
             format="json",
         )
@@ -265,7 +265,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
         flag = self.create_flag("standalone_flag")
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/dependent_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/dependent_flags/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -277,7 +277,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
         self.create_flag("dependent_flag", dependencies=[base_flag.id])
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/dependent_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/dependent_flags/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -291,7 +291,7 @@ class TestFeatureFlagDependencyDeletion(APIBaseTest):
         dependent_flag.save()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/dependent_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/dependent_flags/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

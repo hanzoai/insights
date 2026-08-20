@@ -136,7 +136,7 @@ export const resourcesAccessControlLogic = kea<resourcesAccessControlLogicType>(
                 updateResourceAccessControls: async ({ accessControls, saveType }) => {
                     for (const control of accessControls) {
                         await api.put<AccessControlTypeRole>(
-                            `api/projects/${values.currentProjectId}/resource_access_controls`,
+                            `v1/projects/${values.currentProjectId}/resource_access_controls`,
                             {
                                 ...control,
                             }

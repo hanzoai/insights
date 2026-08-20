@@ -5,13 +5,12 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import React from 'react'
 
-import { IconExternal, IconList } from '@hanzo/icons'
 import { Divider, Link } from '@hanzo/elements'
+import { IconExternal, IconList } from '@hanzo/icons'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { NotFound } from 'lib/components/NotFound'
 import { SupportedPlatforms } from 'lib/components/SupportedPlatforms/SupportedPlatforms'
-import { TimeSensitiveAuthenticationArea } from 'lib/components/TimeSensitiveAuthentication/TimeSensitiveAuthentication'
 import { IconLink } from 'lib/elements/icons'
 import { LinkPrimitive } from 'lib/elements/Link'
 import {
@@ -67,7 +66,6 @@ export function Settings({
     const {
         selectedSectionId,
         selectedSection,
-        selectedLevel,
         selectedSettingId,
         settings,
         isCompactNavigationOpen,
@@ -164,14 +162,6 @@ export function Settings({
         }, 250)
         return () => clearTimeout(timer)
     }, [selectedSectionId, isSearching])
-
-    // Environment and project settings don't require periodic re-authentication by default,
-    // so we avoid a needless re-authentication modal (see https://github.com/insights/insights/pull/22421).
-    // The exception is sections that opt in via `requiresReauthentication` — e.g. credential
-    // management — which prompt on navigation like user- and organization-level settings do.
-    const requiresReauthentication =
-        (selectedLevel !== 'environment' && selectedLevel !== 'project') || !!selectedSection?.requiresReauthentication
-    const AuthenticationAreaComponent = requiresReauthentication ? TimeSensitiveAuthenticationArea : React.Fragment
 
     const options: SettingOption[] = settingsInSidebar
         ? settings.map((s) => ({
@@ -398,16 +388,14 @@ export function Settings({
                     isFullScene && !hideSections && !isCompact && 'pl-[calc(var(--settings-nav-width)+2rem)]'
                 )}
             >
-                <AuthenticationAreaComponent>
-                    <div className="space-y-2">
-                        {headerSlot}
-                        {sectionAccessDeniedReason ? (
-                            <AccessDenied reason={sectionAccessDeniedReason} />
-                        ) : (
-                            <SettingsRenderer {...props} handleLocally={handleLocally} />
-                        )}
-                    </div>
-                </AuthenticationAreaComponent>
+                <div className="space-y-2">
+                    {headerSlot}
+                    {sectionAccessDeniedReason ? (
+                        <AccessDenied reason={sectionAccessDeniedReason} />
+                    ) : (
+                        <SettingsRenderer {...props} handleLocally={handleLocally} />
+                    )}
+                </div>
             </div>
         </div>
     )

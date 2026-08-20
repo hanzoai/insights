@@ -142,9 +142,9 @@ function FunnelDataWarehouseStepDefinitionPopoverContent({
             {activeField?.allowInsightsQL && activeFieldIsInsightsQL && (
                 <InsightsQLDropdown
                     className="mt-2"
-                    hogQLValue={activeFieldValue || ''}
+                    insightsQLValue={activeFieldValue || ''}
                     tableName={activeField.tableName || table.name}
-                    hogQLEditorPlaceholder={
+                    insightsQLEditorPlaceholder={
                         linkedTables
                             ? `Enter an SQL Expression, for example:\n- json_column.my_person_id\n- person_distinct_ids.person_id\n\nYou can also reference these linked tables: ${linkedTables.join(', ')}`
                             : `Enter an SQL Expression, for example:\n- json_column.my_person_id\n- person_distinct_ids.person_id`

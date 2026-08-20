@@ -16,7 +16,7 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { performQuery } from '~/queries/query'
 import {
     AnyDataNode,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLFilters,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
@@ -28,12 +28,17 @@ import { setLatestVersionsOnQuery } from '~/queries/utils'
 import type { FeatureFlagsSet } from '../logic/featureFlagLogic'
 import { getContextSourceQuery } from './sourceQueryUtils'
 
-const METADATA_LANGUAGES = [HogLanguage.script, HogLanguage.hogQL, HogLanguage.hogQLExpr, HogLanguage.hogTemplate]
+const METADATA_LANGUAGES = [
+    ScriptLanguage.script,
+    ScriptLanguage.insightsQL,
+    ScriptLanguage.insightsQLExpr,
+    ScriptLanguage.scriptTemplate,
+]
 const VIM_COMMAND_HISTORY_LIMIT = 50
 
 export interface ModelMarker extends editor.IMarkerData {
-    hogQLFix?: string
-    hogQLAIFixPrompt?: string
+    insightsQLFix?: string
+    insightsQLAIFixPrompt?: string
     start: number
     end: number
 }
@@ -137,7 +142,7 @@ export type codeEditorLogicType = MakeLogicType<
 >
 
 export const codeEditorLogic = kea<codeEditorLogicType>([
-    path(['lib', 'monaco', 'hogQLMetadataProvider']),
+    path(['lib', 'monaco', 'insightsQLMetadataProvider']),
     props({} as CodeEditorLogicProps),
     key((props) => props.key),
     actions({
@@ -153,7 +158,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
             {
                 reloadMetadata: async (_, breakpoint) => {
                     const model = props.editor?.getModel()
-                    if (!model || !props.monaco || !METADATA_LANGUAGES.includes(props.language as HogLanguage)) {
+                    if (!model || !props.monaco || !METADATA_LANGUAGES.includes(props.language as ScriptLanguage)) {
                         props.onMetadata?.(null)
                         return null
                     }
@@ -178,7 +183,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                         setLatestVersionsOnQuery(
                             {
                                 kind: NodeKind.InsightsQLMetadata,
-                                language: props.language as HogLanguage,
+                                language: props.language as ScriptLanguage,
                                 query: query,
                                 filters: props.metadataFilters,
                                 globals: props.globals,
@@ -220,8 +225,8 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                             endColumn: end.column,
                             message: error.message ?? 'Unknown error',
                             severity: severity,
-                            hogQLFix: error.fix?.startsWith('ai_prompt:') ? undefined : error.fix,
-                            hogQLAIFixPrompt: error.fix?.startsWith('ai_prompt:')
+                            insightsQLFix: error.fix?.startsWith('ai_prompt:') ? undefined : error.fix,
+                            insightsQLAIFixPrompt: error.fix?.startsWith('ai_prompt:')
                                 ? error.fix.slice('ai_prompt:'.length)
                                 : undefined,
                         }

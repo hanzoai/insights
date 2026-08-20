@@ -17,7 +17,7 @@ describe('updateFlagActiveInProject', () => {
     it('shows the approval toast and announces the change request on an approval-required 409', async () => {
         useMocks({
             patch: {
-                '/api/projects/:team_id/feature_flags/:id/': () => [409, { change_request_id: 'cr-1' }],
+                '/v1/projects/:team_id/feature_flags/:id/': () => [409, { change_request_id: 'cr-1' }],
             },
         })
 

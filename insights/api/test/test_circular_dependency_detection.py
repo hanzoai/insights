@@ -60,7 +60,7 @@ class TestCircularDependencyDetection(APIBaseTest):
             )
 
         return self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_id}/",
             {
                 "filters": {
                     "groups": [
@@ -118,7 +118,7 @@ class TestCircularDependencyDetection(APIBaseTest):
     def test_non_existent_flag_dependency(self):
         """Test that dependencies on non-existent flags are rejected."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Flag with non-existent dependency",
                 "key": "flag_with_missing_dep",
@@ -147,7 +147,7 @@ class TestCircularDependencyDetection(APIBaseTest):
     def test_invalid_flag_reference_string(self):
         """Test that string flag references are rejected."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Flag with string dependency",
                 "key": "flag_with_string_dep",
@@ -217,7 +217,7 @@ class TestCircularDependencyDetection(APIBaseTest):
 
         # Create flag with both flag dependency and person property
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Flag B",
                 "key": "flag_b",

@@ -445,7 +445,7 @@ class EvalGroupingPipeline:
                 ),
                 EvalMetric(
                     name="query_diversity",
-                    description="Average pairwise cosine distance between query embeddings (0 = identical, 1 = orthogonal)",
+                    description="Average pairwise cosine distance between query embeddings (0 = identical, 1 = ortscriptonal)",
                     result_type="numeric",
                     score=query_diversity,
                 ),

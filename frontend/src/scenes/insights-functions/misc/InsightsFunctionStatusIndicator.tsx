@@ -1,15 +1,15 @@
 import { Dropdown, Tag, TagProps } from '@hanzo/elements'
 
-import { InsightsFunctionType, HogWatcherState } from '~/types'
+import { InsightsFunctionType, ScriptWatcherState } from '~/types'
 
 type DisplayOptions = { tagType: TagProps['type']; display: string; description: JSX.Element }
-const displayMap: Record<HogWatcherState, DisplayOptions> = {
-    [HogWatcherState.healthy]: {
+const displayMap: Record<ScriptWatcherState, DisplayOptions> = {
+    [ScriptWatcherState.healthy]: {
         tagType: 'success',
         display: 'Active',
         description: <>The function is running as expected.</>,
     },
-    [HogWatcherState.overflowed]: {
+    [ScriptWatcherState.overflowed]: {
         tagType: 'caution',
         display: 'Degraded',
         description: (
@@ -19,7 +19,7 @@ const displayMap: Record<HogWatcherState, DisplayOptions> = {
             </>
         ),
     },
-    [HogWatcherState.disabled]: {
+    [ScriptWatcherState.disabled]: {
         tagType: 'danger',
         display: 'Disabled',
         description: (
@@ -29,7 +29,7 @@ const displayMap: Record<HogWatcherState, DisplayOptions> = {
             </>
         ),
     },
-    [HogWatcherState.forcefully_degraded]: {
+    [ScriptWatcherState.forcefully_degraded]: {
         tagType: 'caution',
         display: 'Degraded',
         description: (
@@ -39,7 +39,7 @@ const displayMap: Record<HogWatcherState, DisplayOptions> = {
             </>
         ),
     },
-    [HogWatcherState.forcefully_disabled]: {
+    [ScriptWatcherState.forcefully_disabled]: {
         tagType: 'danger',
         display: 'Disabled',
         description: <>The function has been forcefully disabled by a Insights admin. Please contact support.</>,

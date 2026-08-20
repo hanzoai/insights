@@ -252,7 +252,7 @@ class TestBuiltInAgentTaskAccess(BaseTaskAPITest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=application,
-            token=f"pha_task_agent_{uuid.uuid4().hex}",
+            token=f"at-task_agent_{uuid.uuid4().hex}",
             expires=django_timezone.now() + timedelta(hours=1),
             scope=f"task:read task:write {MCP_BUILT_IN_AGENT_SCOPE}",
             scoped_teams=[self.team.id],
@@ -265,9 +265,9 @@ class TestBuiltInAgentTaskAccess(BaseTaskAPITest):
         self.create_task()
         client = self._built_in_agent_client()
 
-        assert client.get("/api/projects/@current/tasks/").status_code == status.HTTP_200_OK
+        assert client.get("/v1/projects/@current/tasks/").status_code == status.HTTP_200_OK
         response = client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {"title": "Child task", "description": "Follow-up work"},
             format="json",
         )
@@ -280,7 +280,7 @@ class TestBuiltInAgentTaskAccess(BaseTaskAPITest):
 
         assert (
             client.post(
-                "/api/projects/@current/task_automations/",
+                "/v1/projects/@current/task_automations/",
                 {
                     "name": "Scheduled child",
                     "prompt": "Escape agent grants later",
@@ -293,7 +293,7 @@ class TestBuiltInAgentTaskAccess(BaseTaskAPITest):
             == status.HTTP_403_FORBIDDEN
         )
         assert (
-            client.post(f"/api/projects/@current/task_automations/{automation.id}/run/").status_code
+            client.post(f"/v1/projects/@current/task_automations/{automation.id}/run/").status_code
             == status.HTTP_403_FORBIDDEN
         )
         assert not TaskAutomation.objects.filter(task__title="Scheduled child").exists()
@@ -315,7 +315,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         self.create_task("Theirs", created_by=other_user)
         self._create_legacy_task("Legacy")
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         titles = sorted(task["title"] for task in response.json()["results"])
         self.assertEqual(titles, ["Legacy", "Mine"])
@@ -324,13 +324,13 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         other_user = self.create_organization_user("victim")
         task = self.create_task(created_by=other_user)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_legacy_unowned_task_is_visible(self):
         task = self._create_legacy_task()
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_retrieve_signal_report_task_owned_by_another_user_is_visible(self):
@@ -347,7 +347,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
             internal=True,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task.id))
 
@@ -366,7 +366,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         )
         mine = self.create_task("Mine", created_by=self.user)
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {t["id"] for t in response.json()["results"]}
         self.assertIn(str(mine.id), ids)
@@ -386,7 +386,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         )
         mine = self.create_task("Mine", created_by=self.user)
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {t["id"] for t in response.json()["results"]}
         self.assertIn(str(mine.id), ids)
@@ -405,7 +405,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         )
         mine = self.create_task("Mine", created_by=self.user)
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {t["id"] for t in response.json()["results"]}
         self.assertIn(str(mine.id), ids)
@@ -421,38 +421,38 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
             origin_product=Task.OriginProduct.SIGNALS_SCOUT,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task.id))
 
-    def test_retrieve_hogdesk_task_owned_by_another_user_is_visible(self):
-        # HogDesk Code threads are pinned to a support ticket via a shared ticket
+    def test_retrieve_desk_task_owned_by_another_user_is_visible(self):
+        # Desk Code threads are pinned to a support ticket via a shared ticket
         # tag; any agent opening the ticket must be able to load the same task.
-        other_user = self.create_organization_user("hogdesk-owner")
+        other_user = self.create_organization_user("desk-owner")
         task = Task.objects.create(
             team=self.team,
             created_by=other_user,
-            title="HogDesk Task",
+            title="Desk Task",
             description="Started from a support ticket",
-            origin_product=Task.OriginProduct.HOGDESK,
+            origin_product=Task.OriginProduct.Desk,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task.id))
 
-    def test_list_runs_hogdesk_task_owned_by_another_user_succeeds(self):
-        other_user = self.create_organization_user("hogdesk-owner")
+    def test_list_runs_desk_task_owned_by_another_user_succeeds(self):
+        other_user = self.create_organization_user("desk-owner")
         task = Task.objects.create(
             team=self.team,
             created_by=other_user,
-            title="HogDesk Task",
+            title="Desk Task",
             description="Started from a support ticket",
-            origin_product=Task.OriginProduct.HOGDESK,
+            origin_product=Task.OriginProduct.Desk,
         )
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.COMPLETED)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {r["id"] for r in response.json()["results"]}
         self.assertEqual(ids, {str(run.id)})
@@ -469,7 +469,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
             origin_product=Task.OriginProduct.EXPERIMENTS,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task.id))
 
@@ -487,7 +487,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         )
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"title": "Hijacked"},
             format="json",
         )
@@ -507,7 +507,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
             internal=True,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_runs_signal_report_task_owned_by_another_user_succeeds(self):
@@ -522,7 +522,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         )
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.COMPLETED)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {r["id"] for r in response.json()["results"]}
         self.assertEqual(ids, {str(run.id)})
@@ -538,7 +538,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         )
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.COMPLETED)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {r["id"] for r in response.json()["results"]}
         self.assertEqual(ids, {str(run.id)})
@@ -555,7 +555,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         )
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(run.id))
 
@@ -577,7 +577,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
             enabled=True,
         )
 
-        response = self.client.get(f"/api/projects/@current/task_automations/{automation.id}/")
+        response = self.client.get(f"/v1/projects/@current/task_automations/{automation.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(automation.id))
 
@@ -598,7 +598,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
             enabled=True,
         )
 
-        response = self.client.get(f"/api/projects/@current/task_automations/{automation.id}/")
+        response = self.client.get(f"/v1/projects/@current/task_automations/{automation.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_repositories_excludes_other_user_repos(self):
@@ -610,7 +610,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         theirs.repository = "victim/secret"
         theirs.save(update_fields=["repository"])
 
-        response = self.client.get("/api/projects/@current/tasks/repositories/")
+        response = self.client.get("/v1/projects/@current/tasks/repositories/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["repositories"], ["me/repo"])
 
@@ -620,7 +620,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         theirs = self.create_task("Theirs", created_by=other_user)
 
         response = self.client.post(
-            "/api/projects/@current/tasks/summaries/",
+            "/v1/projects/@current/tasks/summaries/",
             {"ids": [str(mine.id), str(theirs.id)]},
             format="json",
         )
@@ -633,7 +633,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         other_user = self.create_organization_user("victim")
         task = self.create_task(created_by=other_user)
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertFalse(TaskRun.objects.filter(task=task).exists())
         mock_workflow.assert_not_called()
@@ -643,7 +643,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         task = self.create_task(created_by=other_user, title="Original")
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"title": "Hijacked"},
             format="json",
         )
@@ -655,7 +655,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         other_user = self.create_organization_user("victim")
         task = self.create_task(created_by=other_user)
 
-        response = self.client.delete(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.delete(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         task.refresh_from_db()
         self.assertFalse(task.deleted)
@@ -665,7 +665,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         task = self.create_task(created_by=other_user)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/staged_artifacts/prepare_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/staged_artifacts/prepare_upload/",
             {"artifacts": [{"name": "x.txt", "type": "user_attachment", "size": 1}]},
             format="json",
         )
@@ -676,7 +676,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         task = self.create_task(created_by=other_user)
         TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.COMPLETED)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_run_for_other_user_task_returns_404(self):
@@ -684,7 +684,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         task = self.create_task(created_by=other_user)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {"environment": "cloud"},
             format="json",
         )
@@ -697,7 +697,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/command/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/command/",
             {"jsonrpc": "2.0", "method": "user_message", "params": {"content": "leak secrets"}},
             format="json",
         )
@@ -709,7 +709,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
             {"output": {"pr_url": "https://example.com/hijack"}},
             format="json",
         )
@@ -721,7 +721,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.get(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -742,7 +742,7 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
             enabled=True,
         )
 
-        response = self.client.post(f"/api/projects/@current/task_automations/{automation.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/task_automations/{automation.id}/run/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -775,7 +775,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         other_user = self.create_organization_user("teammate")
         task = self.create_task(created_by=other_user)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/?ph_debug=true")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/?ph_debug=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task.id))
 
@@ -785,7 +785,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         other_user = self.create_organization_user("teammate")
         task = self.create_task(created_by=other_user)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_still_excludes_other_user_tasks(self):
@@ -795,7 +795,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         mine = self.create_task("Mine", created_by=self.user)
         theirs = self.create_task("Theirs", created_by=other_user)
 
-        response = self.client.get("/api/projects/@current/tasks/?ph_debug=true")
+        response = self.client.get("/v1/projects/@current/tasks/?ph_debug=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {item["id"] for item in response.json()["results"]}
         assert str(mine.id) in ids
@@ -807,7 +807,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         theirs.repository = "team/repo"
         theirs.save(update_fields=["repository"])
 
-        response = self.client.get("/api/projects/@current/tasks/repositories/?ph_debug=true")
+        response = self.client.get("/v1/projects/@current/tasks/repositories/?ph_debug=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["repositories"], [])
 
@@ -816,7 +816,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         task = self.create_task(created_by=other_user)
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/?ph_debug=true")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/?ph_debug=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {item["id"] for item in response.json()["results"]}
         self.assertEqual(ids, {str(run.id)})
@@ -826,7 +826,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         task = self.create_task(created_by=other_user)
         TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_other_user_run_succeeds(self):
@@ -834,7 +834,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         task = self.create_task(created_by=other_user)
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/?ph_debug=true")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/?ph_debug=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(run.id))
 
@@ -846,7 +846,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.get(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/?ph_debug=true"
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/?ph_debug=true"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -857,7 +857,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         other_user = self.create_organization_user("teammate")
         task = self.create_task(created_by=other_user)
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/?ph_debug=true")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/?ph_debug=true")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_run_on_other_user_task_still_returns_404(self):
@@ -867,7 +867,7 @@ class TestTaskVisibilityInternalDebugTeamBypass(BaseTaskAPITest):
         task = self.create_task(created_by=other_user)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/?ph_debug=true",
+            f"/v1/projects/@current/tasks/{task.id}/runs/?ph_debug=true",
             {"environment": "cloud"},
             format="json",
         )
@@ -892,7 +892,7 @@ class TestTaskStaffVisibilityBypass(BaseTaskAPITest):
     def test_staff_all_team_tasks_filter_includes_other_user_tasks(self):
         theirs = self.create_task("Theirs", created_by=self.other_user)
 
-        response = self.client.get("/api/projects/@current/tasks/?all_team_tasks=true")
+        response = self.client.get("/v1/projects/@current/tasks/?all_team_tasks=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {item["id"] for item in response.json()["results"]}
         assert str(theirs.id) in ids
@@ -901,7 +901,7 @@ class TestTaskStaffVisibilityBypass(BaseTaskAPITest):
         # The filter is opt-in — the default list stays creator-scoped even for staff.
         theirs = self.create_task("Theirs", created_by=self.other_user)
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {item["id"] for item in response.json()["results"]}
         assert str(theirs.id) not in ids
@@ -911,7 +911,7 @@ class TestTaskStaffVisibilityBypass(BaseTaskAPITest):
         self.user.save(update_fields=["is_staff"])
         theirs = self.create_task("Theirs", created_by=self.other_user)
 
-        response = self.client.get("/api/projects/@current/tasks/?all_team_tasks=true")
+        response = self.client.get("/v1/projects/@current/tasks/?all_team_tasks=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {item["id"] for item in response.json()["results"]}
         assert str(theirs.id) not in ids
@@ -920,7 +920,7 @@ class TestTaskStaffVisibilityBypass(BaseTaskAPITest):
         # No opt-in param — a staff user opening a teammate's task by URL just works.
         task = self.create_task(created_by=self.other_user)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task.id))
 
@@ -929,14 +929,14 @@ class TestTaskStaffVisibilityBypass(BaseTaskAPITest):
         self.user.save(update_fields=["is_staff"])
         task = self.create_task(created_by=self.other_user)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_staff_list_runs_for_other_user_task_needs_no_ph_debug(self):
         task = self.create_task(created_by=self.other_user)
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = {item["id"] for item in response.json()["results"]}
         self.assertEqual(ids, {str(run.id)})
@@ -947,7 +947,7 @@ class TestTaskStaffVisibilityBypass(BaseTaskAPITest):
         task = self.create_task(created_by=self.other_user)
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("products.tasks.backend.temporal.client.execute_task_processing_workflow")
@@ -955,7 +955,7 @@ class TestTaskStaffVisibilityBypass(BaseTaskAPITest):
         # Read-only bypass — staff still can't drive another member's task.
         task = self.create_task(created_by=self.other_user)
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -993,7 +993,7 @@ class TestTaskVisibilityInternalDebugRegionGate(BaseTaskAPITest):
         task = self.create_task(created_by=other_user)
 
         with override_settings(CLOUD_DEPLOYMENT=deployment):
-            response = self.client.get(f"/api/projects/@current/tasks/{task.id}/?ph_debug=true")
+            response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/?ph_debug=true")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @parameterized.expand(
@@ -1005,7 +1005,7 @@ class TestTaskVisibilityInternalDebugRegionGate(BaseTaskAPITest):
     def test_slack_thread_context_403_off_us(self, _name: str, deployment: str | None) -> None:
         with override_settings(CLOUD_DEPLOYMENT=deployment):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/tasks/slack_thread_context/"
+                f"/v1/projects/{self.team.id}/tasks/slack_thread_context/"
                 "?url=https%3A%2F%2Finsights.slack.com%2Farchives%2FC0%2Fp1779956938619299"
             )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -1026,7 +1026,7 @@ class TestTaskAPI(BaseTaskAPITest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=application,
-            token=f"pha_task_{uuid.uuid4().hex}",
+            token=f"at-task_{uuid.uuid4().hex}",
             expires=django_timezone.now() + timedelta(hours=1),
             scope=scope,
             scoped_teams=[self.team.id],
@@ -1034,7 +1034,7 @@ class TestTaskAPI(BaseTaskAPITest):
         OAuthRefreshToken.objects.create(
             user=self.user,
             application=application,
-            token=f"phr_task_{uuid.uuid4().hex}",
+            token=f"rt-task_{uuid.uuid4().hex}",
             access_token=access_token,
         )
         client = APIClient()
@@ -1045,7 +1045,7 @@ class TestTaskAPI(BaseTaskAPITest):
         client = self._oauth_client(ARRAY_APP_CLIENT_ID_DEV)
 
         response = client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {"title": "Desktop task", "description": "Created in Desktop"},
             format="json",
         )
@@ -1067,7 +1067,7 @@ class TestTaskAPI(BaseTaskAPITest):
         client = self.client if client_id is None else self._oauth_client(client_id, scope=scope or "")
 
         response = client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {"title": "Other task", "description": "Not created in Desktop"},
             format="json",
         )
@@ -1091,9 +1091,9 @@ class TestTaskAPI(BaseTaskAPITest):
         )
         client = self._oauth_client(ARRAY_APP_CLIENT_ID_DEV)
 
-        self.assertEqual(client.get(f"/api/projects/@current/tasks/{task.id}/").status_code, status.HTTP_200_OK)
+        self.assertEqual(client.get(f"/v1/projects/@current/tasks/{task.id}/").status_code, status.HTTP_200_OK)
         response = client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"client_provenance": TaskClientProvenance.INSIGHTS_DESKTOP},
             format="json",
         )
@@ -1105,24 +1105,24 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_pin_state_is_persisted_per_user(self):
         task = self.create_task()
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/pin/", {"pinned": True}, format="json")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/pin/", {"pinned": True}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"task_id": str(task.id), "pinned": True})
         self.assertTrue(TaskPin.objects.filter(user=self.user, task=task).exists())
 
-        response = self.client.get("/api/projects/@current/tasks/pinned/")
+        response = self.client.get("/v1/projects/@current/tasks/pinned/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"task_ids": [str(task.id)]})
 
         other_user = self.create_organization_user()
         self.client.force_authenticate(other_user)
-        response = self.client.get("/api/projects/@current/tasks/pinned/")
+        response = self.client.get("/v1/projects/@current/tasks/pinned/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"task_ids": []})
 
     def test_setting_pin_state_is_idempotent(self):
         task = self.create_task()
-        url = f"/api/projects/@current/tasks/{task.id}/pin/"
+        url = f"/v1/projects/@current/tasks/{task.id}/pin/"
 
         self.client.post(url, {"pinned": True}, format="json")
         self.client.post(url, {"pinned": True}, format="json")
@@ -1136,16 +1136,16 @@ class TestTaskAPI(BaseTaskAPITest):
         other_user = self.create_organization_user()
         task = self.create_task(created_by=other_user)
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/pin/", {"pinned": True}, format="json")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/pin/", {"pinned": True}, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_pins_are_team_scoped_and_hidden_after_task_deletion(self):
         task = self.create_task()
-        self.client.post(f"/api/projects/@current/tasks/{task.id}/pin/", {"pinned": True}, format="json")
+        self.client.post(f"/v1/projects/@current/tasks/{task.id}/pin/", {"pinned": True}, format="json")
         task.deleted = True
         task.save(update_fields=["deleted"])
 
-        response = self.client.get("/api/projects/@current/tasks/pinned/")
+        response = self.client.get("/v1/projects/@current/tasks/pinned/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"task_ids": []})
 
@@ -1159,7 +1159,7 @@ class TestTaskAPI(BaseTaskAPITest):
             origin_product=Task.OriginProduct.USER_CREATED,
         )
         response = self.client.post(
-            f"/api/projects/@current/tasks/{other_task.id}/pin/", {"pinned": True}, format="json"
+            f"/v1/projects/@current/tasks/{other_task.id}/pin/", {"pinned": True}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -1167,7 +1167,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.create_task("Task 1")
         self.create_task("Task 2")
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -1186,7 +1186,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         # Task2 has no runs
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -1212,7 +1212,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.assertIsNone(task2_data["latest_run"])
 
     def test_list_tasks_latest_run_no_per_task_query(self):
-        url = "/api/projects/@current/tasks/"
+        url = "/v1/projects/@current/tasks/"
         task1 = self.create_task("Task 1")
         TaskRun.objects.create(task=task1, team=self.team, status=TaskRun.Status.QUEUED)
         TaskRun.objects.create(task=task1, team=self.team, status=TaskRun.Status.IN_PROGRESS)
@@ -1242,7 +1242,7 @@ class TestTaskAPI(BaseTaskAPITest):
         latest_run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get("/api/projects/@current/tasks/?limit=1")
+            response = self.client.get("/v1/projects/@current/tasks/?limit=1")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["results"][0]["latest_run"]["id"], str(latest_run.id))
@@ -1272,8 +1272,8 @@ class TestTaskAPI(BaseTaskAPITest):
             created_at=created_at,
         )
 
-        list_response = self.client.get("/api/projects/@current/tasks/?limit=1")
-        detail_response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        list_response = self.client.get("/v1/projects/@current/tasks/?limit=1")
+        detail_response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
 
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)
         self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
@@ -1286,8 +1286,8 @@ class TestTaskAPI(BaseTaskAPITest):
         valid_run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.QUEUED)
         TaskRun.objects.create(task=task, team=other_team, status=TaskRun.Status.IN_PROGRESS)
 
-        list_response = self.client.get("/api/projects/@current/tasks/?limit=1")
-        detail_response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        list_response = self.client.get("/v1/projects/@current/tasks/?limit=1")
+        detail_response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
 
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)
         self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
@@ -1301,7 +1301,7 @@ class TestTaskAPI(BaseTaskAPITest):
         TaskRun.objects.create(task=matching_task, team=self.team, stage="building")
         TaskRun.objects.create(task=other_task, team=self.team, stage="planning")
 
-        response = self.client.get("/api/projects/@current/tasks/?stage=building&limit=1")
+        response = self.client.get("/v1/projects/@current/tasks/?stage=building&limit=1")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -1322,7 +1322,7 @@ class TestTaskAPI(BaseTaskAPITest):
             self.create_task(f"Task {i}")
 
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get("/api/projects/@current/tasks/?limit=2")
+            response = self.client.get("/v1/projects/@current/tasks/?limit=2")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 4)
@@ -1337,7 +1337,7 @@ class TestTaskAPI(BaseTaskAPITest):
             task = self.create_task(f"Task {i}")
             TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/?limit={page_size}")
+        response = self.client.get(f"/v1/projects/@current/tasks/?limit={page_size}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), page_size)
@@ -1346,7 +1346,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_retrieve_task(self):
         task = self.create_task("Test Task")
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -1368,7 +1368,7 @@ class TestTaskAPI(BaseTaskAPITest):
             status=TaskRun.Status.IN_PROGRESS,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -1380,7 +1380,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_retrieve_task_without_runs(self):
         task = self.create_task("Test Task")
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -1389,7 +1389,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
     def test_create_task(self):
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Task",
                 "description": "New Description",
@@ -1422,7 +1422,7 @@ class TestTaskAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Cross-repo task",
                 "description": "Update both services",
@@ -1440,7 +1440,7 @@ class TestTaskAPI(BaseTaskAPITest):
         mock_find_warm_run.assert_not_called()
 
         update = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"repository": "insights/insights"},
             format="json",
         )
@@ -1459,7 +1459,7 @@ class TestTaskAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Invalid task",
                 "github_integration": integration.id,
@@ -1471,7 +1471,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Invalid legacy task",
                 "github_integration": integration.id,
@@ -1483,7 +1483,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
     def test_create_task_with_pi_runtime(self):
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Pi Task",
                 "description": "New Description",
@@ -1500,7 +1500,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task(runtime=Task.Runtime.ACP)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"runtime": Task.Runtime.PI},
             format="json",
         )
@@ -1515,7 +1515,7 @@ class TestTaskAPI(BaseTaskAPITest):
         # alone rejects an explicit null ("This field may not be null."), so these
         # fields carry allow_null=True. Regression for that 400.
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Task",
                 "description": "New Description",
@@ -1531,7 +1531,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
     def test_create_task_defaults_origin_product(self):
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Task",
                 "description": "New Description",
@@ -1547,17 +1547,17 @@ class TestTaskAPI(BaseTaskAPITest):
         task = Task.objects.get(id=data["id"])
         self.assertEqual(task.origin_product, Task.OriginProduct.USER_CREATED)
 
-    def test_create_task_with_hogdesk_origin_product(self):
-        # HogDesk creates Code tasks from a support ticket's Code chat with this
+    def test_create_task_with_desk_origin_product(self):
+        # Desk creates Code tasks from a support ticket's Code chat with this
         # origin. Ensure the value round-trips through the API — the serializer
         # validates origin_product against OriginProduct.choices and 400s an
         # unknown value, so this is the regression that guards the enum addition.
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Task",
                 "description": "New Description",
-                "origin_product": "hogdesk",
+                "origin_product": "desk",
                 "repository": "insights/insights",
             },
             format="json",
@@ -1565,14 +1565,14 @@ class TestTaskAPI(BaseTaskAPITest):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
-        self.assertEqual(data["origin_product"], Task.OriginProduct.HOGDESK)
+        self.assertEqual(data["origin_product"], Task.OriginProduct.Desk)
 
         task = Task.objects.get(id=data["id"])
-        self.assertEqual(task.origin_product, Task.OriginProduct.HOGDESK)
+        self.assertEqual(task.origin_product, Task.OriginProduct.Desk)
 
     def test_create_task_with_insights_ai_origin_product(self):
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Insights AI task",
                 "description": "Created from the Insights AI task tracker",
@@ -1597,7 +1597,7 @@ class TestTaskAPI(BaseTaskAPITest):
     )
     def test_create_task_rejects_server_created_origin(self, origin_product: Task.OriginProduct):
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Task",
                 "description": "New Description",
@@ -1613,7 +1613,7 @@ class TestTaskAPI(BaseTaskAPITest):
         user_integration = _grant_user_github_access(self.user)
 
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Task",
                 "description": "New Description",
@@ -1660,7 +1660,7 @@ class TestTaskAPI(BaseTaskAPITest):
         user_integration = _grant_user_github_access(other_user)
 
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Task",
                 "description": "New Description",
@@ -1680,7 +1680,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         report = SignalReport.objects.create(team=self.team)
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Signal Task",
                 "description": "From a signal report",
@@ -1738,7 +1738,7 @@ class TestTaskAPI(BaseTaskAPITest):
             )
 
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Signal Task",
                 "description": "From a signal report",
@@ -1761,7 +1761,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         report = SignalReport.objects.create(team=self.team)
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Discuss report",
                 "description": "Let's discuss this report",
@@ -1790,7 +1790,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         report = SignalReport.objects.create(team=self.team, title="Checkout errors spiked")
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Discuss report",
                 "description": _DISCUSS_PROMPT,
@@ -1812,7 +1812,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
     def _post_discussion_task(self, report_id, description=_DISCUSS_PROMPT):
         return self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Discuss report",
                 "description": description,
@@ -1881,7 +1881,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.client.logout()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tasks/",
+            f"/v1/projects/{self.team.id}/tasks/",
             {
                 "title": "Discuss report",
                 "description": _DISCUSS_PROMPT,
@@ -1948,7 +1948,7 @@ class TestTaskAPI(BaseTaskAPITest):
         # relationship records only the work-log artefact (no SignalReportTask gate row).
         report = SignalReport.objects.create(team=self.team)
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Research",
                 "description": "From a signal report",
@@ -1969,7 +1969,7 @@ class TestTaskAPI(BaseTaskAPITest):
         other_team = Team.objects.create(organization=self.organization, name="Other Team")
         report = SignalReport.objects.create(team=other_team)
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "Cross-team Task",
                 "description": "Should be rejected",
@@ -1984,7 +1984,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task("Mine")
         self.assertEqual(task.origin_product, Task.OriginProduct.USER_CREATED)
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"origin_product": "signal_report"},
             format="json",
         )
@@ -1998,7 +1998,7 @@ class TestTaskAPI(BaseTaskAPITest):
         report = SignalReport.objects.create(team=self.team)
         task = self.create_task("Mine")
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"signal_report": str(report.id)},
             format="json",
         )
@@ -2010,7 +2010,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task("Original Task")
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"title": "Updated Task"},
             format="json",
         )
@@ -2020,7 +2020,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_delete_task(self):
         task = self.create_task("Task to Delete")
 
-        response = self.client.delete(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.delete(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         task.refresh_from_db()
@@ -2043,7 +2043,7 @@ class TestTaskAPI(BaseTaskAPITest):
         archived_task.archived_at = django_timezone.now()
         archived_task.save(update_fields=["archived", "archived_at"])
 
-        url = "/api/projects/@current/tasks/"
+        url = "/v1/projects/@current/tasks/"
         if archived_param is not None:
             url = f"{url}?archived={archived_param}"
         response = self.client.get(url)
@@ -2063,7 +2063,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_list_tasks_rejects_invalid_archived_value(self):
         self.create_task("Active")
 
-        response = self.client.get("/api/projects/@current/tasks/?archived=foo")
+        response = self.client.get("/v1/projects/@current/tasks/?archived=foo")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_retrieve_archived_task_still_works(self):
@@ -2072,7 +2072,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task.archived_at = django_timezone.now()
         task.save(update_fields=["archived", "archived_at"])
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertTrue(data["archived"])
@@ -2084,7 +2084,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.assertIsNone(task.archived_at)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"archived": True},
             format="json",
         )
@@ -2104,7 +2104,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task.save(update_fields=["archived", "archived_at"])
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"archived": False},
             format="json",
         )
@@ -2125,7 +2125,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task.save(update_fields=["archived", "archived_at"])
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"archived": True},
             format="json",
         )
@@ -2140,7 +2140,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_run_endpoint_triggers_workflow(self, mock_workflow):
         task = self.create_task()
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -2168,7 +2168,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_run_endpoint_starts_pi_task(self, mock_workflow):
         task = self.create_task(runtime=Task.Runtime.PI)
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         run = task.runs.get()
@@ -2189,7 +2189,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task(runtime=Task.Runtime.PI)
         self.set_tasks_feature_flag(False)
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json()["error"], "Pi cloud runtime is disabled")
@@ -2208,7 +2208,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             payload,
             format="json",
         )
@@ -2228,7 +2228,7 @@ class TestTaskAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"sandbox_environment_id": str(sandbox_environment.id)},
             format="json",
         )
@@ -2268,7 +2268,7 @@ class TestTaskAPI(BaseTaskAPITest):
         }
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/{endpoint}/",
+            f"/v1/projects/@current/tasks/{task.id}/{endpoint}/",
             payload,
             format="json",
         )
@@ -2297,7 +2297,7 @@ class TestTaskAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"resume_from_run_id": str(previous_run.id)},
             format="json",
         )
@@ -2313,7 +2313,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"pending_user_message": "Read the attached file first"},
             format="json",
         )
@@ -2344,7 +2344,7 @@ class TestTaskAPI(BaseTaskAPITest):
         cache_task_staged_artifact(task, staged_artifact)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "pending_user_message": "Read the file first",
                 "pending_user_artifact_ids": ["artifact-123"],
@@ -2395,7 +2395,7 @@ class TestTaskAPI(BaseTaskAPITest):
         cache_task_staged_artifact(task, staged_artifact)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "pending_user_message": "Read the file first",
                 "pending_user_artifact_ids": ["artifact-123"],
@@ -2425,7 +2425,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "mode": "interactive",
@@ -2461,7 +2461,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task(runtime=Task.Runtime.PI)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "model": "gpt-5.6-terra",
@@ -2490,7 +2490,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task(runtime=Task.Runtime.PI)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "model": "gpt-5.6-terra",
@@ -2518,7 +2518,7 @@ class TestTaskAPI(BaseTaskAPITest):
         ]
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "mode": "interactive",
@@ -2544,7 +2544,7 @@ class TestTaskAPI(BaseTaskAPITest):
         servers = [{"type": "http", "name": "grafana", "url": "https://mcp.grafana.example.com/mcp", "headers": []}]
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"runtime_adapter": "claude", "model": "claude-sonnet-4-5", "imported_mcp_servers": servers},
             format="json",
         )
@@ -2561,7 +2561,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
         for url in ("http://192.168.1.4:8000/mcp", "http://10.0.0.5/mcp", "http://localhost:3001/mcp"):
             response = self.client.post(
-                f"/api/projects/@current/tasks/{task.id}/runs/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/",
                 {
                     "environment": "cloud",
                     "imported_mcp_servers": [{"type": "http", "name": "internal", "url": url, "headers": []}],
@@ -2616,7 +2616,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {"environment": "cloud", "imported_mcp_servers": servers},
             format="json",
         )
@@ -2630,7 +2630,7 @@ class TestTaskAPI(BaseTaskAPITest):
         servers = [{"name": "playwright"}, {"name": "internal-cli"}]
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "mode": "interactive",
@@ -2655,7 +2655,7 @@ class TestTaskAPI(BaseTaskAPITest):
         servers = [{"name": "playwright"}]
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"runtime_adapter": "claude", "model": "claude-sonnet-4-5", "relayed_mcp_servers": servers},
             format="json",
         )
@@ -2687,7 +2687,7 @@ class TestTaskAPI(BaseTaskAPITest):
             body["imported_mcp_servers"] = imported
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             body,
             format="json",
         )
@@ -2714,7 +2714,7 @@ class TestTaskAPI(BaseTaskAPITest):
             body["imported_mcp_servers"] = imported
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             body,
             format="json",
         )
@@ -2736,7 +2736,7 @@ class TestTaskAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "pr_authorship_mode": "user",
@@ -2755,7 +2755,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "pr_authorship_mode": "user",
@@ -2774,7 +2774,7 @@ class TestTaskAPI(BaseTaskAPITest):
         user_integration = _grant_user_github_access(self.user)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "pr_authorship_mode": "user",
@@ -2794,7 +2794,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task(created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {
                 "environment": "cloud",
                 "pr_authorship_mode": "user",
@@ -2829,7 +2829,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task_run.save(update_fields=["artifacts", "updated_at"])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/",
             {
                 "pending_user_message": "Read the file first",
                 "pending_user_artifact_ids": ["artifact-123"],
@@ -2854,7 +2854,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task(runtime=Task.Runtime.PI)
         task_run = task.create_run(environment=TaskRun.Environment.CLOUD)
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_workflow.assert_called_once()
@@ -2870,7 +2870,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task(runtime=Task.Runtime.PI)
         self.set_tasks_feature_flag(False)
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/runs/{uuid.uuid4()}/start/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/runs/{uuid.uuid4()}/start/")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         mock_workflow.assert_not_called()
@@ -2881,7 +2881,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task_run = task.create_run(environment=TaskRun.Environment.CLOUD)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/",
             {"pending_user_artifact_ids": ["artifact-123"]},
             format="json",
         )
@@ -2904,7 +2904,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task_run.save(update_fields=["status", "updated_at"])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/",
             {"pending_user_message": "Retry this"},
             format="json",
         )
@@ -2937,7 +2937,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         self.client.raise_request_exception = False
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{task_run.id}/start/",
             {
                 "pending_user_message": "Read the file first",
                 "pending_user_artifact_ids": ["artifact-123"],
@@ -2970,7 +2970,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"initial_permission_mode": mode, "runtime_adapter": "claude", "model": "claude-sonnet-4-6"},
             format="json",
         )
@@ -2984,7 +2984,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_run_endpoint_omits_initial_permission_mode_when_not_set(self, mock_workflow):
         task = self.create_task()
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/")
 
         assert response.status_code == status.HTTP_200_OK
         task_run = TaskRun.objects.get(id=response.json()["latest_run"]["id"])
@@ -2997,7 +2997,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"rtk_enabled": rtk_enabled},
             format="json",
         )
@@ -3011,7 +3011,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_run_endpoint_omits_rtk_enabled_when_not_set(self, mock_workflow):
         task = self.create_task()
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/")
 
         assert response.status_code == status.HTTP_200_OK
         task_run = TaskRun.objects.get(id=response.json()["latest_run"]["id"])
@@ -3023,7 +3023,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"initial_permission_mode": "invalid_mode"},
             format="json",
         )
@@ -3036,7 +3036,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "pending_user_message": "Start with this",
                 "initial_permission_mode": "plan",
@@ -3061,7 +3061,7 @@ class TestTaskAPI(BaseTaskAPITest):
         user_integration = _grant_user_github_access(self.user)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "branch": "main",
@@ -3090,7 +3090,7 @@ class TestTaskAPI(BaseTaskAPITest):
         github_user_token = "ghu_test_token"
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "branch": "main",
@@ -3115,7 +3115,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task.save(update_fields=["repository"])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "pr_authorship_mode": "user",
@@ -3149,7 +3149,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "runtime_adapter": runtime_adapter,
@@ -3177,7 +3177,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "runtime_adapter": "claude",
@@ -3200,7 +3200,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "runtime_adapter": "claude",
                 "model": "claude-sonnet-5",
@@ -3224,7 +3224,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "runtime_adapter": "codex",
@@ -3270,7 +3270,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "runtime_adapter": runtime_adapter,
@@ -3296,7 +3296,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task.save(update_fields=["repository"])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "pr_authorship_mode": "user",
@@ -3320,7 +3320,7 @@ class TestTaskAPI(BaseTaskAPITest):
         integration.save(update_fields=["config"])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "pr_authorship_mode": "user",
@@ -3347,7 +3347,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.client.force_authenticate(requester)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "pr_authorship_mode": "user",
@@ -3372,7 +3372,7 @@ class TestTaskAPI(BaseTaskAPITest):
         integration.save(update_fields=["sensitive_config"])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "pr_authorship_mode": "user",
@@ -3396,7 +3396,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             payload,
             format="json",
         )
@@ -3424,7 +3424,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "runtime_adapter": "codex",
                 "model": model,
@@ -3459,7 +3459,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "runtime_adapter": "claude",
                 "model": model,
@@ -3512,7 +3512,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "runtime_adapter": "claude",
                 "model": "claude-fable-5",
@@ -3533,7 +3533,7 @@ class TestTaskAPI(BaseTaskAPITest):
             ("low",),
             ("medium",),
             ("high",),
-            # xhigh is load-bearing: ReviewHog pins it for its one-shot and review runs.
+            # xhigh is load-bearing: Review pins it for its one-shot and review runs.
             ("xhigh",),
             ("ultracode",),
         ]
@@ -3545,7 +3545,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "runtime_adapter": "claude",
                 "model": "claude-sonnet-5",
@@ -3573,13 +3573,13 @@ class TestTaskAPI(BaseTaskAPITest):
         self, reasoning_effort, mock_workflow, mock_capture
     ):
         # claude-sonnet-4-6 supports low/medium/high but not xhigh/ultracode (claude-sonnet-5
-        # accepts the full set, ReviewHog pins its xhigh) - this pins the "Supported values:
+        # accepts the full set, Review pins its xhigh) - this pins the "Supported values:
         # <non-empty list>" message and confirms the rejection capture also fires for a model
         # with some supported efforts.
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "runtime_adapter": "claude",
                 "model": "claude-sonnet-4-6",
@@ -3621,7 +3621,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "runtime_adapter": "codex",
                 "model": "gpt-5.3-codex",
@@ -3641,7 +3641,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "pr_authorship_mode": "user",
@@ -3660,7 +3660,7 @@ class TestTaskAPI(BaseTaskAPITest):
         user_integration = _grant_user_github_access(self.user)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "pr_authorship_mode": "user",
@@ -3680,7 +3680,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task(created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "pr_authorship_mode": "user",
@@ -3720,7 +3720,7 @@ class TestTaskAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "resume_from_run_id": str(previous_run.id),
@@ -3761,7 +3761,7 @@ class TestTaskAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {
                 "mode": "interactive",
                 "resume_from_run_id": str(previous_run.id),
@@ -3785,7 +3785,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"sandbox_environment_id": "550e8400-e29b-41d4-a716-446655440000"},
             format="json",
         )
@@ -3819,7 +3819,7 @@ class TestTaskAPI(BaseTaskAPITest):
             )
             tasks.append(task)
 
-        response = self.client.get(f"/api/projects/@current/tasks/?{filter_param}={filter_value}")
+        response = self.client.get(f"/v1/projects/@current/tasks/?{filter_param}={filter_value}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -3833,7 +3833,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_delete_task_soft_deletes(self):
         task = self.create_task("Task to delete")
 
-        response = self.client.delete(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.delete(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         task.refresh_from_db()
@@ -3845,7 +3845,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task2 = self.create_task("Deleted Task")
         task2.soft_delete()
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -3856,7 +3856,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task("Deleted Task")
         task.soft_delete()
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @parameterized.expand(
@@ -3899,7 +3899,7 @@ class TestTaskAPI(BaseTaskAPITest):
             ),
         ]
 
-        url = "/api/projects/@current/tasks/"
+        url = "/v1/projects/@current/tasks/"
         if filter_user is not None:
             user = users[filter_user]
             assert user is not None
@@ -3951,7 +3951,7 @@ class TestTaskAPI(BaseTaskAPITest):
                 )
             )
 
-        url = "/api/projects/@current/tasks/"
+        url = "/v1/projects/@current/tasks/"
         if search_value is not None:
             url += f"?search={quote(search_value)}"
 
@@ -4005,7 +4005,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         tasks = [task_in_progress, task_completed, task_queued]
 
-        response = self.client.get(f"/api/projects/@current/tasks/?status={status_value}")
+        response = self.client.get(f"/v1/projects/@current/tasks/?status={status_value}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -4014,7 +4014,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.assertEqual(task_ids, expected_task_ids)
 
     def test_filter_by_status_rejects_unknown_value(self):
-        response = self.client.get("/api/projects/@current/tasks/?status=not_a_real_status")
+        response = self.client.get("/v1/projects/@current/tasks/?status=not_a_real_status")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_filter_by_status_uses_latest_run_not_any_run(self):
@@ -4030,7 +4030,7 @@ class TestTaskAPI(BaseTaskAPITest):
             created_at=base_time + timedelta(seconds=1),
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/?status={TaskRun.Status.COMPLETED}")
+        response = self.client.get(f"/v1/projects/@current/tasks/?status={TaskRun.Status.COMPLETED}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["results"], [])
 
@@ -4044,7 +4044,7 @@ class TestTaskAPI(BaseTaskAPITest):
         wrong_search = self.create_task("Other issue")
         TaskRun.objects.create(task=wrong_search, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/?search=payments&status={TaskRun.Status.IN_PROGRESS}")
+        response = self.client.get(f"/v1/projects/@current/tasks/?search=payments&status={TaskRun.Status.IN_PROGRESS}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual([t["id"] for t in data["results"]], [str(matching.id)])
@@ -4095,7 +4095,7 @@ class TestTaskAPI(BaseTaskAPITest):
         TaskRun.objects.create(task=wrong_status, team=self.team, status=TaskRun.Status.COMPLETED)
 
         response = self.client.get(
-            "/api/projects/@current/tasks/"
+            "/v1/projects/@current/tasks/"
             f"?search=login&repository=insights/insights&created_by={self.user.id}"
             f"&status={TaskRun.Status.IN_PROGRESS}"
         )
@@ -4132,7 +4132,7 @@ class TestTaskAPI(BaseTaskAPITest):
         for task in bulk:
             task.save()
 
-        response = self.client.get(f"/api/projects/@current/tasks/?created_by={self.user.id}")
+        response = self.client.get(f"/v1/projects/@current/tasks/?created_by={self.user.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
@@ -4174,7 +4174,7 @@ class TestTaskRepositoriesAction(BaseTaskAPITest):
             repository=None,
         )
 
-        response = self.client.get("/api/projects/@current/tasks/repositories/")
+        response = self.client.get("/v1/projects/@current/tasks/repositories/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
@@ -4199,7 +4199,7 @@ class TestTaskRepositoriesAction(BaseTaskAPITest):
         )
         deleted.soft_delete()
 
-        response = self.client.get("/api/projects/@current/tasks/repositories/")
+        response = self.client.get("/v1/projects/@current/tasks/repositories/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["repositories"], [active.repository])
 
@@ -4220,7 +4220,7 @@ class TestTaskRepositoriesAction(BaseTaskAPITest):
             internal=True,
         )
 
-        response = self.client.get("/api/projects/@current/tasks/repositories/")
+        response = self.client.get("/v1/projects/@current/tasks/repositories/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["repositories"], ["insights/public"])
 
@@ -4242,7 +4242,7 @@ class TestTaskRepositoriesAction(BaseTaskAPITest):
             repository="insights/not-mine",
         )
 
-        response = self.client.get("/api/projects/@current/tasks/repositories/")
+        response = self.client.get("/v1/projects/@current/tasks/repositories/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["repositories"], ["insights/mine"])
 
@@ -4260,7 +4260,7 @@ class TestTaskInternalFilterAPI(BaseTaskAPITest):
         )
 
     def test_list_excludes_internal_tasks_by_default(self):
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -4273,7 +4273,7 @@ class TestTaskInternalFilterAPI(BaseTaskAPITest):
         # not a staff/DEBUG gate (task visibility is the real access boundary).
         self.assertFalse(self.user.is_staff)
         with self.settings(DEBUG=False):
-            response = self.client.get("/api/projects/@current/tasks/?internal=true")
+            response = self.client.get("/v1/projects/@current/tasks/?internal=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -4282,7 +4282,7 @@ class TestTaskInternalFilterAPI(BaseTaskAPITest):
         self.assertIn(str(self.internal_task.id), task_ids)
 
     def test_list_internal_false_excludes_internal_tasks(self):
-        response = self.client.get("/api/projects/@current/tasks/?internal=false")
+        response = self.client.get("/v1/projects/@current/tasks/?internal=false")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -4295,7 +4295,7 @@ class TestTaskInternalFilterAPI(BaseTaskAPITest):
         # the internal flag is a default-visibility toggle, not an access gate (task visibility is).
         self.assertFalse(self.user.is_staff)
         with self.settings(DEBUG=False):
-            response = self.client.get("/api/projects/@current/tasks/?internal=all")
+            response = self.client.get("/v1/projects/@current/tasks/?internal=all")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         task_ids = [t["id"] for t in response.json()["results"]]
@@ -4303,18 +4303,18 @@ class TestTaskInternalFilterAPI(BaseTaskAPITest):
         self.assertIn(str(self.internal_task.id), task_ids)
 
     def test_internal_field_in_response(self):
-        response = self.client.get(f"/api/projects/@current/tasks/{self.external_task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{self.external_task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.json()["internal"])
 
     def test_retrieve_internal_task_by_id(self):
-        response = self.client.get(f"/api/projects/@current/tasks/{self.internal_task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{self.internal_task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["internal"])
 
     def test_internal_field_is_settable_on_create(self):
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {"title": "Internal Task via API", "description": "Created as internal", "internal": True},
             format="json",
         )
@@ -4323,7 +4323,7 @@ class TestTaskInternalFilterAPI(BaseTaskAPITest):
 
     def test_internal_field_defaults_to_false_on_create(self):
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {"title": "Normal Task", "description": "No internal flag"},
             format="json",
         )
@@ -4332,7 +4332,7 @@ class TestTaskInternalFilterAPI(BaseTaskAPITest):
 
 
 class TestTaskSummariesAPI(BaseTaskAPITest):
-    SUMMARIES_URL = "/api/projects/@current/tasks/summaries/"
+    SUMMARIES_URL = "/v1/projects/@current/tasks/summaries/"
     SUMMARY_FIELDS = {"id", "title", "repository", "created_at", "updated_at", "origin_product", "latest_run"}
 
     def post_summaries(self, ids):
@@ -4436,7 +4436,7 @@ class TestTaskSummariesAPI(BaseTaskAPITest):
 
         # Follow `next` cursor; combined results should equal the full set without duplicates.
         next_url = payload["next"]
-        next_path = next_url[next_url.index("/api/") :]
+        next_path = next_url[next_url.index("/v1/") :]
         response2 = self.client.post(next_path, {"ids": ids}, format="json")
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
         payload2 = response2.json()
@@ -4462,7 +4462,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
     @patch("products.tasks.backend.automation_service.sync_automation_schedule")
     def test_create_automation(self, mock_sync_schedule):
         response = self.client.post(
-            "/api/projects/@current/task_automations/",
+            "/v1/projects/@current/task_automations/",
             {
                 "name": "Daily PRs",
                 "prompt": "Check my GitHub PRs",
@@ -4494,7 +4494,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
         self.set_tasks_feature_flag(False)
 
         response = self.client.post(
-            "/api/projects/@current/task_automations/",
+            "/v1/projects/@current/task_automations/",
             {
                 "name": "Daily PRs",
                 "prompt": "Check my GitHub PRs",
@@ -4512,7 +4512,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
     def test_list_automations(self):
         automation = self.create_automation()
 
-        response = self.client.get("/api/projects/@current/task_automations/")
+        response = self.client.get("/v1/projects/@current/task_automations/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         payload = response.json()
@@ -4522,7 +4522,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
 
     def test_create_automation_rejects_invalid_timezone(self):
         response = self.client.post(
-            "/api/projects/@current/task_automations/",
+            "/v1/projects/@current/task_automations/",
             {
                 "name": "Daily PRs",
                 "prompt": "Check my GitHub PRs",
@@ -4546,7 +4546,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
 
     def test_create_automation_rejects_invalid_cron_expression(self):
         response = self.client.post(
-            "/api/projects/@current/task_automations/",
+            "/v1/projects/@current/task_automations/",
             {
                 "name": "Daily PRs",
                 "prompt": "Check my GitHub PRs",
@@ -4599,7 +4599,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
         automation = self.create_automation()
 
         response = self.client.patch(
-            f"/api/projects/@current/task_automations/{automation.id}/",
+            f"/v1/projects/@current/task_automations/{automation.id}/",
             {
                 "name": "Updated PR check",
                 "cron_expression": "30 14 * * *",
@@ -4629,7 +4629,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
         self.set_tasks_feature_flag(False)
 
         response = self.client.patch(
-            f"/api/projects/@current/task_automations/{automation.id}/",
+            f"/v1/projects/@current/task_automations/{automation.id}/",
             {"enabled": True},
             format="json",
         )
@@ -4662,7 +4662,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
     def test_delete_automation(self, mock_delete_schedule):
         automation = self.create_automation()
 
-        response = self.client.delete(f"/api/projects/@current/task_automations/{automation.id}/")
+        response = self.client.delete(f"/v1/projects/@current/task_automations/{automation.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         mock_delete_schedule.assert_called_once()
@@ -4672,7 +4672,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
     def test_run(self, mock_run_task_automation):
         automation = self.create_automation()
 
-        response = self.client.post(f"/api/projects/@current/task_automations/{automation.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/task_automations/{automation.id}/run/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_run_task_automation.assert_called_once_with(str(automation.id))
@@ -4682,7 +4682,7 @@ class TestTaskAutomationAPI(BaseTaskAPITest):
         self.set_tasks_feature_flag(False)
         automation = self.create_automation()
 
-        response = self.client.post(f"/api/projects/@current/task_automations/{automation.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/task_automations/{automation.id}/run/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_run_task_automation.assert_called_once_with(str(automation.id))
@@ -4723,7 +4723,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
     def test_list_runs_with_malformed_task_id_returns_404(self):
         # A non-UUID task id in the URL must 404, not 500 through the UUIDField filter.
-        response = self.client.get("/api/projects/@current/tasks/not-a-uuid/runs/")
+        response = self.client.get("/v1/projects/@current/tasks/not-a-uuid/runs/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @parameterized.expand(
@@ -4763,7 +4763,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
             run.save(update_fields=["output"])
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/{endpoint}",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/{endpoint}",
             {"output": {"pr_url": caller_pr_url, "pr_merged": True}},
             format="json",
         )
@@ -4789,7 +4789,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
                 {"output": {"pr_url": pr_url}},
                 format="json",
             )
@@ -4804,7 +4804,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
                 {"output": {"pr_url": pr_url}},
                 format="json",
             )
@@ -4828,7 +4828,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
                 {"output": {"pr_url": "https://github.com/insights/insights-js/pull/1"}},
                 format="json",
             )
@@ -4866,7 +4866,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
                 {"output": {"pr_url": pr_url}},
                 format="json",
             )
@@ -4895,7 +4895,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
                 {"output": {"pr_url": "https://github.com/insights/insights-js/pull/1"}},
                 format="json",
             )
@@ -4922,7 +4922,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
                 {"output": {"pr_url": pr_url}},
                 format="json",
             )
@@ -4936,7 +4936,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
                 {"output": {"pr_url": pr_url}},
                 format="json",
             )
@@ -4951,7 +4951,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "completed"},
             format="json",
         )
@@ -5017,7 +5017,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         # scopes) via pending_dispatch, or repoint the run at a costlier model (which for a run
         # routed to an unbilled gateway product is free spend). Non-protected keys still merge.
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {
                 "state": {
                     "github_credential_source": "server_integration",
@@ -5089,7 +5089,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         # Nor can a caller remove a protected key to force a fallback or unguarded path.
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {
                 "state": {},
                 "state_remove_keys": [
@@ -5143,7 +5143,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "completed"},
             format="json",
         )
@@ -5171,7 +5171,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
             state={"pr_authorship_mode": "bot"},
         )
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         run.refresh_from_db()
@@ -5191,7 +5191,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
             state={"pr_authorship_mode": "user"},
         )
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["code"], "github_authorization_required")
@@ -5212,7 +5212,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
             state={"pr_authorship_mode": "user"},
         )
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         task.refresh_from_db()
@@ -5234,7 +5234,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
             state={"pr_authorship_mode": "user"},
         )
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         task.refresh_from_db()
@@ -5252,7 +5252,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "failed", "error_message": "Something went wrong"},
             format="json",
         )
@@ -5273,7 +5273,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "cancelled"},
             format="json",
         )
@@ -5293,7 +5293,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "cancelled"},
             format="json",
         )
@@ -5309,7 +5309,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "completed"},
             format="json",
         )
@@ -5322,7 +5322,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.QUEUED)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "in_progress"},
             format="json",
         )
@@ -5336,7 +5336,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.COMPLETED)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "completed"},
             format="json",
         )
@@ -5359,7 +5359,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
             status=TaskRun.Status.COMPLETED,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5380,7 +5380,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         # Add some logs to S3
         run.append_log([{"type": "info", "message": "Test log output"}])
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5398,7 +5398,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run1 = TaskRun.objects.create(task=task1, team=self.team, status=TaskRun.Status.QUEUED)
         _run2 = TaskRun.objects.create(task=task2, team=self.team, status=TaskRun.Status.QUEUED)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task1.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task1.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5411,7 +5411,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         run2 = TaskRun.objects.create(task=task2, team=self.team, status=TaskRun.Status.QUEUED)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task1.id}/runs/{run2.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task1.id}/runs/{run2.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_append_log_entries(self):
@@ -5419,7 +5419,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {
                 "entries": [
                     {"type": "info", "message": "Starting task"},
@@ -5467,7 +5467,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
             {"output": {"pr_url": "https://github.com/org/repo/pull/1"}},
             format="json",
         )
@@ -5486,7 +5486,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/",
             {"output": {"pr_url": "https://github.com/org/repo/pull/1"}},
             format="json",
         )
@@ -5516,7 +5516,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"output": {"pr_url": "https://github.com/org/repo/pull/2"}, "status": "in_progress"},
             format="json",
         )
@@ -5537,7 +5537,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"output": {"pr_url": "https://github.com/org/repo/pull/2"}},
             format="json",
         )
@@ -5555,7 +5555,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {
                 "output": {
                     "pr_url": "https://github.com/org/repo/pull/2",
@@ -5597,7 +5597,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with patch("products.tasks.backend.presentation.views.api.TaskRunViewSet.get_object", return_value=stale_run):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
                 {"stage": "executing"},
                 format="json",
             )
@@ -5631,7 +5631,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         with patch("products.tasks.backend.presentation.views.api.TaskRunViewSet.get_object", return_value=stale_run):
             response = self.client.patch(
-                f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+                f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
                 {"state_remove_keys": ["pending_user_message", "pending_user_artifact_ids"]},
                 format="json",
             )
@@ -5667,7 +5667,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         mock_execute_relay.return_value = "relay-1"
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
             {"text": "Which license should I use?"},
             format="json",
         )
@@ -5721,7 +5721,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
             payload,
             format="json",
         )
@@ -5740,7 +5740,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
             {"text": "Which license should I use?"},
             format="json",
         )
@@ -5755,7 +5755,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.COMPLETED)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
             {"text": "Done"},
             format="json",
         )
@@ -5770,7 +5770,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
             {"text": "   "},
             format="json",
         )
@@ -5814,7 +5814,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/relay_message/",
             {"text": "hello"},
             format="json",
         )
@@ -5832,7 +5832,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         # Add first batch
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {"entries": [{"type": "info", "message": "Initial entry"}]},
             format="json",
         )
@@ -5840,7 +5840,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         # Add second batch
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {"entries": [{"type": "success", "message": "Task completed"}]},
             format="json",
         )
@@ -5864,7 +5864,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {"entries": []},
             format="json",
         )
@@ -5876,7 +5876,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {"entries": [{"type": "info", "message": "hello"}]},
             format="json",
         )
@@ -5902,7 +5902,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         }
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             payload,
             format="json",
         )
@@ -5943,7 +5943,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         }
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             payload,
             format="json",
         )
@@ -5977,7 +5977,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         }
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             {
                 "artifacts": [
                     {
@@ -6008,7 +6008,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             {
                 "artifacts": [
                     {
@@ -6032,7 +6032,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             {
                 "artifacts": [
                     {
@@ -6054,7 +6054,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         oversized_pdf = b"a" * (TASK_RUN_PDF_ARTIFACT_MAX_SIZE_BYTES + 1)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             {
                 "artifacts": [
                     {
@@ -6078,7 +6078,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             {"artifacts": []},
             format="json",
         )
@@ -6118,7 +6118,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         mock_integration_for_mapping.return_value = slack_integration
 
         create_response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
             {
                 "name": "user_activity_report.md",
                 "artifact_type": "document",
@@ -6137,13 +6137,13 @@ class TestTaskRunAPI(BaseTaskAPITest):
         self.assertEqual(artifact["versions"][0]["adapter"], TaskArtifact.Adapter.SLACK_CANVAS)
 
         open_response = self.client.get(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/{artifact['id']}/"
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/{artifact['id']}/"
         )
         self.assertEqual(open_response.status_code, status.HTTP_200_OK)
         self.assertEqual(open_response.json()["content"], "# Living report")
 
         edit_response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/{artifact['id']}/edit/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/{artifact['id']}/edit/",
             {"content": "# Updated report"},
             format="json",
         )
@@ -6160,7 +6160,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
             {
                 "name": "user_activity_report.md",
                 "artifact_type": "document",
@@ -6212,7 +6212,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
             {
                 "name": "report.xlsx",
                 "artifact_type": "spreadsheet",
@@ -6239,7 +6239,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
             {"name": "empty.md", "artifact_type": "document"},
             format="json",
         )
@@ -6256,7 +6256,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/prepare_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/prepare_upload/",
             {
                 "artifacts": [
                     {
@@ -6307,7 +6307,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         }
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/prepare_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/prepare_upload/",
             {
                 "artifacts": [
                     {
@@ -6333,7 +6333,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/prepare_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/prepare_upload/",
             {
                 "artifacts": [
                     {
@@ -6355,7 +6355,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/prepare_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/prepare_upload/",
             {
                 "artifacts": [
                     {
@@ -6377,7 +6377,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/staged_artifacts/prepare_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/staged_artifacts/prepare_upload/",
             {
                 "artifacts": [
                     {
@@ -6398,7 +6398,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/staged_artifacts/prepare_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/staged_artifacts/prepare_upload/",
             {
                 "artifacts": [
                     {
@@ -6425,7 +6425,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/staged_artifacts/prepare_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/staged_artifacts/prepare_upload/",
             {
                 "artifacts": [
                     {
@@ -6458,7 +6458,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         storage_path = f"tasks/artifacts/team_{self.team.id}/task_{task.id}/staged/{artifact_id}/spec.pdf"
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/staged_artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/staged_artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6489,7 +6489,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         artifact_id = uuid.uuid4().hex
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/staged_artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/staged_artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6521,7 +6521,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         artifact_id_2 = uuid.uuid4().hex
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/staged_artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/staged_artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6565,7 +6565,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         storage_path = f"{run.get_artifact_s3_prefix()}/{artifact_id[:8]}_spec.pdf"
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6603,7 +6603,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         artifact_id = uuid.uuid4().hex
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6649,7 +6649,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         new_storage_path = f"{run.get_artifact_s3_prefix()}/{new_artifact_id[:8]}_new.pdf"
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6695,7 +6695,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run.save(update_fields=["artifacts", "updated_at"])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6729,7 +6729,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         storage_path = f"{run.get_artifact_s3_prefix()}/{artifact_id[:8]}_missing.pdf"
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6758,7 +6758,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         storage_path = f"{run.get_artifact_s3_prefix()}/{artifact_id[:8]}_large.pdf"
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6790,7 +6790,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         artifact_id_2 = uuid.uuid4().hex
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/finalize_upload/",
             {
                 "artifacts": [
                     {
@@ -6837,7 +6837,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/presign/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/presign/",
             {"storage_path": "tasks/artifacts/team_1/task_2/run_3/plan.md"},
             format="json",
         )
@@ -6851,7 +6851,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS, artifacts=[])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/presign/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/presign/",
             {"storage_path": "unknown"},
             format="json",
         )
@@ -6879,7 +6879,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/download/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/download/",
             {"storage_path": storage_path},
             format="json",
         )
@@ -6895,7 +6895,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS, artifacts=[])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/download/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/download/",
             {"storage_path": "unknown"},
             format="json",
         )
@@ -6922,7 +6922,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/download/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/download/",
             {"storage_path": storage_path},
             format="json",
         )
@@ -6963,7 +6963,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{new_run.id}/artifacts/download/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{new_run.id}/artifacts/download/",
             {"storage_path": prior_storage_path},
             format="json",
         )
@@ -7191,7 +7191,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         mock_read.side_effect = fake_read
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{target.id}/logs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{target.id}/logs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.content.decode("utf-8").splitlines(), expected_lines)
 
@@ -7202,7 +7202,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -7229,7 +7229,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         public_key = get_sandbox_jwt_public_key()
@@ -7251,7 +7251,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         public_key = get_sandbox_jwt_public_key()
@@ -7273,7 +7273,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -7303,7 +7303,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
             self.settings(TASKS_AGENT_PROXY_PUBLIC_URL="https://agent-proxy.example.com", DEBUG=False),
             patch("products.tasks.backend.facade.api.hanzo_insights.feature_enabled", return_value=True),
         ):
-            response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
+            response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["stream_base_url"], "https://agent-proxy.example.com")
@@ -7324,7 +7324,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
                 side_effect=flag_enabled,
             ),
         ):
-            response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
+            response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.json()["stream_base_url"])
@@ -7343,7 +7343,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
                 side_effect=flag_enabled,
             ),
         ):
-            response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
+            response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["stream_base_url"], "https://agent-proxy.example.com")
@@ -7354,7 +7354,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         with self.settings(TASKS_AGENT_PROXY_PUBLIC_URL="http://localhost:8003", DEBUG=True):
-            response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
+            response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["stream_base_url"], "http://localhost:8003")
@@ -7376,7 +7376,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
                 side_effect=flag_enabled,
             ),
         ):
-            response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
+            response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream_token/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.json()["stream_base_url"])
@@ -7392,9 +7392,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
         other_run = TaskRun.objects.create(task=other_task, team=other_team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(
-            f"/api/projects/@current/tasks/{other_task.id}/runs/{other_run.id}/connection_token/"
-        )
+        response = self.client.get(f"/v1/projects/@current/tasks/{other_task.id}/runs/{other_run.id}/connection_token/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_stream_token_cannot_access_other_team_run(self):
@@ -7408,13 +7406,13 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
         other_run = TaskRun.objects.create(task=other_task, team=other_team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{other_task.id}/runs/{other_run.id}/stream_token/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{other_task.id}/runs/{other_run.id}/stream_token/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class TestTaskRunCancelAPI(BaseTaskAPITest):
     def _cancel_url(self, task, run) -> str:
-        return f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/cancel/"
+        return f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/cancel/"
 
     def _create_run(self, task, **kwargs) -> TaskRun:
         kwargs.setdefault("status", TaskRun.Status.IN_PROGRESS)
@@ -7608,7 +7606,7 @@ class TestTaskRunCancelAPI(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{uuid.uuid4()}/cancel/", {}, format="json"
+            f"/v1/projects/@current/tasks/{task.id}/runs/{uuid.uuid4()}/cancel/", {}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -7652,7 +7650,7 @@ class TestTaskRunSessionLogsAPI(BaseTaskAPITest):
         object_storage.write(run.log_url, content.encode("utf-8"))
 
     def _events_url(self, task, run):
-        return f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/session_logs/"
+        return f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/session_logs/"
 
     def test_session_logs_returns_all_entries_unfiltered(self):
         task = self.create_task()
@@ -7950,7 +7948,7 @@ class TestTaskRunSessionLogsAPI(BaseTaskAPITest):
 
 class TestTaskRunStreamAPI(BaseTaskAPITest):
     def _stream_url(self, task: Task, run: TaskRun, suffix: str = "") -> str:
-        return f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream/{suffix}"
+        return f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream/{suffix}"
 
     def _mark_stream_complete(self, run: TaskRun) -> None:
         async def _mark() -> None:
@@ -8091,7 +8089,7 @@ class TestTaskRunRedisStreamKeepalive(TestCase):
 
 class TestTaskRunStreamKeepaliveAPI(BaseTaskAPITest):
     def _stream_url(self, task: Task, run: TaskRun) -> str:
-        return f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream/"
+        return f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream/"
 
     def test_stream_emits_keepalive_while_waiting_for_stream_creation(self):
         task = self.create_task()
@@ -8172,7 +8170,7 @@ class TestTaskRunStreamKeepaliveAPI(BaseTaskAPITest):
 
 class TestTaskRunStreamConnectionCapAPI(BaseTaskAPITest):
     def _stream_url(self, task: Task, run: TaskRun) -> str:
-        return f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/stream/"
+        return f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/stream/"
 
     def _mark_stream_complete(self, run: TaskRun) -> None:
         async def _mark() -> None:
@@ -8332,14 +8330,14 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
     def test_check_access_flag_on_no_redemption(self):
         self.set_tasks_feature_flag(True)
 
-        response = self.client.get("/api/code/invites/check-access/")
+        response = self.client.get("/v1/code/invites/check-access/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["has_access"])
 
     def test_check_access_flag_off_no_redemption(self):
         self.set_tasks_feature_flag(False)
 
-        response = self.client.get("/api/code/invites/check-access/")
+        response = self.client.get("/v1/code/invites/check-access/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.json()["has_access"])
 
@@ -8348,7 +8346,7 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         invite = CodeInvite.objects.create(code="ACCESSCODE", max_redemptions=0, is_active=True)
         CodeInviteRedemption.objects.create(invite_code=invite, user=self.user)
 
-        response = self.client.get("/api/code/invites/check-access/")
+        response = self.client.get("/v1/code/invites/check-access/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["has_access"])
 
@@ -8359,11 +8357,11 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         self.client.force_authenticate(None)
 
         endpoints = [
-            ("/api/projects/@current/tasks/", "GET"),
-            (f"/api/projects/@current/tasks/{task.id}/", "GET"),
-            ("/api/projects/@current/task_automations/", "GET"),
-            (f"/api/projects/@current/task_automations/{automation.id}/", "GET"),
-            (f"/api/projects/@current/task_automations/{automation.id}/run/", "POST"),
+            ("/v1/projects/@current/tasks/", "GET"),
+            (f"/v1/projects/@current/tasks/{task.id}/", "GET"),
+            ("/v1/projects/@current/task_automations/", "GET"),
+            (f"/v1/projects/@current/task_automations/{automation.id}/", "GET"),
+            (f"/v1/projects/@current/task_automations/{automation.id}/run/", "POST"),
         ]
 
         for url, method in endpoints:
@@ -8380,17 +8378,17 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         )
 
         # Try to access other team's task
-        response = self.client.get(f"/api/projects/@current/tasks/{other_task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{other_task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Try to update other team's task
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{other_task.id}/", {"title": "Hacked Title"}, format="json"
+            f"/v1/projects/@current/tasks/{other_task.id}/", {"title": "Hacked Title"}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Try to delete other team's task
-        response = self.client.delete(f"/api/projects/@current/tasks/{other_task.id}/")
+        response = self.client.delete(f"/v1/projects/@current/tasks/{other_task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_cross_team_automation_access_forbidden(self):
@@ -8401,17 +8399,17 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
             user=self.other_user,
         )
 
-        response = self.client.get(f"/api/projects/@current/task_automations/{other_automation.id}/")
+        response = self.client.get(f"/v1/projects/@current/task_automations/{other_automation.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         response = self.client.patch(
-            f"/api/projects/@current/task_automations/{other_automation.id}/",
+            f"/v1/projects/@current/task_automations/{other_automation.id}/",
             {"name": "Hacked Automation"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        response = self.client.delete(f"/api/projects/@current/task_automations/{other_automation.id}/")
+        response = self.client.delete(f"/v1/projects/@current/task_automations/{other_automation.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_endpoints_only_return_team_resources(self):
@@ -8434,13 +8432,13 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         )
 
         # List tasks should only return my team's tasks
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         task_ids = [t["id"] for t in response.json()["results"]]
         self.assertIn(str(my_task.id), task_ids)
         self.assertNotIn(str(other_task.id), task_ids)
 
-        response = self.client.get("/api/projects/@current/task_automations/")
+        response = self.client.get("/v1/projects/@current/task_automations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         automation_ids = [a["id"] for a in response.json()["results"]]
         self.assertIn(str(my_automation.id), automation_ids)
@@ -8448,102 +8446,102 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
 
     @parameterized.expand(
         [
-            ("task:read", "GET", "/api/projects/@current/tasks/", True),
-            ("task:read", "GET", f"/api/projects/@current/tasks/{{task_id}}/", True),
-            ("task:read", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/", True),
-            ("task:read", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
-            ("task:read", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/connection_token/", False),
-            ("task:read", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/", True),
+            ("task:read", "GET", "/v1/projects/@current/tasks/", True),
+            ("task:read", "GET", f"/v1/projects/@current/tasks/{{task_id}}/", True),
+            ("task:read", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/", True),
+            ("task:read", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
+            ("task:read", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/connection_token/", False),
+            ("task:read", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/", True),
             (
                 "task:read",
                 "GET",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/",
                 True,
             ),
             (
                 "task:read",
                 "POST",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/",
                 False,
             ),
             (
                 "task:read",
                 "POST",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/edit/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/edit/",
                 False,
             ),
-            ("task:read", "GET", "/api/projects/@current/task_automations/", True),
-            ("task:read", "GET", "/api/projects/@current/task_automations/{automation_id}/", True),
-            ("task:read", "POST", "/api/projects/@current/tasks/", False),
-            ("task:read", "PATCH", f"/api/projects/@current/tasks/{{task_id}}/", False),
-            ("task:read", "DELETE", f"/api/projects/@current/tasks/{{task_id}}/", False),
-            ("task:read", "POST", f"/api/projects/@current/tasks/{{task_id}}/run/", False),
-            ("task:read", "POST", "/api/projects/@current/task_automations/", False),
-            ("task:write", "GET", "/api/projects/@current/tasks/", True),
-            ("task:write", "POST", "/api/projects/@current/tasks/", True),
-            ("task:write", "PATCH", f"/api/projects/@current/tasks/{{task_id}}/", True),
-            ("task:write", "DELETE", f"/api/projects/@current/tasks/{{task_id}}/", True),
-            ("task:write", "POST", f"/api/projects/@current/tasks/{{task_id}}/run/", True),
-            ("task:write", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/", True),
-            ("task:write", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
-            ("task:write", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/connection_token/", True),
-            ("task:write", "POST", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/start/", True),
+            ("task:read", "GET", "/v1/projects/@current/task_automations/", True),
+            ("task:read", "GET", "/v1/projects/@current/task_automations/{automation_id}/", True),
+            ("task:read", "POST", "/v1/projects/@current/tasks/", False),
+            ("task:read", "PATCH", f"/v1/projects/@current/tasks/{{task_id}}/", False),
+            ("task:read", "DELETE", f"/v1/projects/@current/tasks/{{task_id}}/", False),
+            ("task:read", "POST", f"/v1/projects/@current/tasks/{{task_id}}/run/", False),
+            ("task:read", "POST", "/v1/projects/@current/task_automations/", False),
+            ("task:write", "GET", "/v1/projects/@current/tasks/", True),
+            ("task:write", "POST", "/v1/projects/@current/tasks/", True),
+            ("task:write", "PATCH", f"/v1/projects/@current/tasks/{{task_id}}/", True),
+            ("task:write", "DELETE", f"/v1/projects/@current/tasks/{{task_id}}/", True),
+            ("task:write", "POST", f"/v1/projects/@current/tasks/{{task_id}}/run/", True),
+            ("task:write", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/", True),
+            ("task:write", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
+            ("task:write", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/connection_token/", True),
+            ("task:write", "POST", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/start/", True),
             (
                 "task:write",
                 "GET",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/",
                 True,
             ),
             (
                 "task:write",
                 "GET",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/",
                 True,
             ),
             (
                 "task:write",
                 "POST",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/",
                 True,
             ),
             (
                 "task:write",
                 "POST",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/edit/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/edit/",
                 True,
             ),
-            ("task:write", "GET", "/api/projects/@current/task_automations/", True),
-            ("task:write", "GET", "/api/projects/@current/task_automations/{automation_id}/", True),
-            ("task:write", "POST", "/api/projects/@current/task_automations/", True),
-            ("task:write", "PATCH", "/api/projects/@current/task_automations/{automation_id}/", True),
-            ("task:write", "DELETE", "/api/projects/@current/task_automations/{automation_id}/", True),
-            ("task:write", "POST", "/api/projects/@current/task_automations/{automation_id}/run/", True),
-            ("other_scope:read", "GET", "/api/projects/@current/tasks/", False),
-            ("other_scope:write", "POST", "/api/projects/@current/tasks/", False),
-            ("*", "GET", "/api/projects/@current/tasks/", True),
-            ("*", "POST", "/api/projects/@current/tasks/", True),
-            ("*", "POST", f"/api/projects/@current/tasks/{{task_id}}/run/", True),
-            ("*", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/", True),
-            ("*", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
-            ("*", "POST", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/start/", True),
-            ("*", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/", True),
+            ("task:write", "GET", "/v1/projects/@current/task_automations/", True),
+            ("task:write", "GET", "/v1/projects/@current/task_automations/{automation_id}/", True),
+            ("task:write", "POST", "/v1/projects/@current/task_automations/", True),
+            ("task:write", "PATCH", "/v1/projects/@current/task_automations/{automation_id}/", True),
+            ("task:write", "DELETE", "/v1/projects/@current/task_automations/{automation_id}/", True),
+            ("task:write", "POST", "/v1/projects/@current/task_automations/{automation_id}/run/", True),
+            ("other_scope:read", "GET", "/v1/projects/@current/tasks/", False),
+            ("other_scope:write", "POST", "/v1/projects/@current/tasks/", False),
+            ("*", "GET", "/v1/projects/@current/tasks/", True),
+            ("*", "POST", "/v1/projects/@current/tasks/", True),
+            ("*", "POST", f"/v1/projects/@current/tasks/{{task_id}}/run/", True),
+            ("*", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/", True),
+            ("*", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
+            ("*", "POST", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/start/", True),
+            ("*", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/", True),
             (
                 "*",
                 "GET",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/",
                 True,
             ),
-            ("*", "POST", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/", True),
+            ("*", "POST", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/", True),
             (
                 "*",
                 "POST",
-                f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/edit/",
+                f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/living_artifacts/{{artifact_id}}/edit/",
                 True,
             ),
-            ("*", "GET", "/api/projects/@current/task_automations/", True),
-            ("*", "GET", "/api/projects/@current/task_automations/{automation_id}/", True),
-            ("*", "POST", "/api/projects/@current/task_automations/", True),
-            ("*", "POST", "/api/projects/@current/task_automations/{automation_id}/run/", True),
+            ("*", "GET", "/v1/projects/@current/task_automations/", True),
+            ("*", "GET", "/v1/projects/@current/task_automations/{automation_id}/", True),
+            ("*", "POST", "/v1/projects/@current/task_automations/", True),
+            ("*", "POST", "/v1/projects/@current/task_automations/{automation_id}/run/", True),
         ]
     )
     def test_scoped_api_key_permissions(self, scope, method, url_template, should_have_access):
@@ -8570,13 +8568,13 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         self.client.force_authenticate(None)
 
         data = {}
-        if method == "POST" and url == "/api/projects/@current/tasks/":
+        if method == "POST" and url == "/v1/projects/@current/tasks/":
             data = {
                 "title": "New Task",
                 "description": "Description",
                 "origin_product": Task.OriginProduct.USER_CREATED,
             }
-        elif method == "POST" and url == "/api/projects/@current/task_automations/":
+        elif method == "POST" and url == "/v1/projects/@current/task_automations/":
             data = {
                 "name": "New Automation",
                 "prompt": "Check my PRs",
@@ -8654,7 +8652,7 @@ class TestTaskRunLivingArtifactChartAPI(BaseTaskAPITest):
 
     def _post_chart_to_run(self, scopes, body, *, task, run_id):
         return self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run_id}/living_artifacts/chart/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run_id}/living_artifacts/chart/",
             body,
             format="json",
             headers=self._auth_headers(scopes),
@@ -8678,7 +8676,7 @@ class TestTaskRunLivingArtifactChartAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
         self.client.force_authenticate(self.user)
         return self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/chart/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/chart/",
             body,
             format="json",
         )
@@ -8872,7 +8870,7 @@ class TestTaskRunLivingArtifactChartAPI(BaseTaskAPITest):
     def test_listing_artifacts_on_a_readable_run_still_allowed(self):
         task, run = self._teammates_experiments_run()
         response = self.client.get(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/living_artifacts/",
             headers=self._auth_headers(["task:read"]),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -8911,7 +8909,7 @@ class TestTaskRepositoryReadinessAPI(BaseTaskAPITest):
         }
 
         response = self.client.get(
-            "/api/projects/@current/tasks/repository_readiness/",
+            "/v1/projects/@current/tasks/repository_readiness/",
             {
                 "repository": "insights/insights",
                 "window_days": "7",
@@ -8924,14 +8922,14 @@ class TestTaskRepositoryReadinessAPI(BaseTaskAPITest):
         mock_compute.assert_called_once()
 
     def test_repository_readiness_requires_repository(self):
-        response = self.client.get("/api/projects/@current/tasks/repository_readiness/")
+        response = self.client.get("/v1/projects/@current/tasks/repository_readiness/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 @override_settings(SANDBOX_JWT_PRIVATE_KEY=TEST_RSA_PRIVATE_KEY)
 class TestTaskRunCommandAPI(BaseTaskAPITest):
     def _command_url(self, task, run):
-        return f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/command/"
+        return f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/command/"
 
     def _make_user_message(self, content="Hello agent", request_id="req-1"):
         return {
@@ -9186,7 +9184,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
         run.active_task_session = task_session
         run.save(update_fields=["active_task_session"])
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/task_session/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/task_session/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -9211,7 +9209,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
 
         response = self.client.generic(
             "POST",
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
             cast(str, content),
             content_type="application/octet-stream",
             HTTP_IF_MATCH='"none"',
@@ -9245,7 +9243,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
 
         response = self.client.generic(
             "POST",
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
             cast(str, b'{"type":"session","version":3}\n'),
             content_type="application/octet-stream",
             HTTP_IF_MATCH='"stale-hash"',
@@ -9272,7 +9270,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
 
         response = self.client.generic(
             "POST",
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
             cast(str, b'{"type":"session"}\n'),
             content_type="application/octet-stream",
             HTTP_IF_MATCH='"none"',
@@ -9295,7 +9293,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
 
         response = self.client.generic(
             "POST",
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
             cast(str, b""),
             content_type="application/octet-stream",
             HTTP_IF_MATCH='"none"',
@@ -9317,7 +9315,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
 
         response = self.client.generic(
             "POST",
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
             cast(str, b'{"type":"session"}\n'),
             content_type="application/octet-stream",
             HTTP_IF_MATCH='"none"',
@@ -9333,7 +9331,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
 
         response = self.client.generic(
             "POST",
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/task_session_sync/",
             cast(str, b"x"),
             content_type="application/octet-stream",
             CONTENT_LENGTH=str(tasks_facade.TASK_SESSION_MAX_SIZE_BYTES + 1),
@@ -9355,7 +9353,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
         run.save(update_fields=["active_task_session"])
         mock_download_url.return_value = "https://storage.example/session.jsonl"
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/task_session/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/task_session/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task_session.id))
@@ -10283,7 +10281,7 @@ class TestTaskRunCommandAPI(BaseTaskAPITest):
 
 
 class TestSandboxEnvironmentAPI(BaseTaskAPITest):
-    base_url = "/api/projects/@current/sandbox_environments/"
+    base_url = "/v1/projects/@current/sandbox_environments/"
 
     def detail_url(self, env_id):
         return f"{self.base_url}{env_id}/"
@@ -10523,7 +10521,7 @@ class TestSandboxEnvironmentAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"mode": "background", "sandbox_environment_id": str(env.id)},
             format="json",
         )
@@ -10540,7 +10538,7 @@ class TestSandboxEnvironmentAPI(BaseTaskAPITest):
         task.save()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"mode": "background", "sandbox_environment_id": str(uuid.uuid4())},
             format="json",
         )
@@ -10560,7 +10558,7 @@ class TestSandboxEnvironmentAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"mode": "background", "sandbox_environment_id": str(env.id)},
             format="json",
         )
@@ -10574,7 +10572,7 @@ class TestSandboxEnvironmentAPI(BaseTaskAPITest):
         task.save()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"mode": "background"},
             format="json",
         )
@@ -10606,7 +10604,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         self.set_tasks_feature_flag(False)
 
         response = self.client.post(
-            "/api/projects/@current/tasks/warm/",
+            "/v1/projects/@current/tasks/warm/",
             {"repository": "insights/insights", "github_integration": 123},
             format="json",
         )
@@ -10623,7 +10621,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"mode": "background"},
             format="json",
         )
@@ -10638,7 +10636,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"mode": "background"},
             format="json",
         )
@@ -10654,7 +10652,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {"environment": "cloud"},
             format="json",
         )
@@ -10671,7 +10669,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {"environment": "cloud"},
             format="json",
         )
@@ -10685,7 +10683,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {"environment": "local"},
             format="json",
         )
@@ -10701,7 +10699,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         run = self._cloud_run(task)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/start/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/start/",
             {},
             format="json",
         )
@@ -10723,7 +10721,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/resume_in_cloud/",
             {},
             format="json",
         )
@@ -10744,7 +10742,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"mode": "background"},
             format="json",
         )
@@ -10763,7 +10761,7 @@ class TestCloudUsageGate(BaseTaskAPITest):
         task = self.create_task()
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"mode": "background"},
             format="json",
         )
@@ -10870,7 +10868,7 @@ def _make_custom_image(*, team: Team, user: User, **kwargs) -> SandboxCustomImag
 
 
 class TestSandboxCustomImageAPI(BaseTaskAPITest):
-    base_url = "/api/projects/@current/sandbox_custom_images/"
+    base_url = "/v1/projects/@current/sandbox_custom_images/"
 
     def setUp(self):
         super().setUp()
@@ -11091,7 +11089,7 @@ class TestSandboxCustomImageAPI(BaseTaskAPITest):
         self.assertEqual(self.client.get(self.detail_url(other_image.id)).status_code, status.HTTP_404_NOT_FOUND)
 
         response = self.client.post(
-            "/api/projects/@current/sandbox_environments/",
+            "/v1/projects/@current/sandbox_environments/",
             {"name": "Env", "network_access_level": "full", "custom_image_id": str(other_image.id)},
             format="json",
         )
@@ -11106,7 +11104,7 @@ class TestSandboxCustomImageAPI(BaseTaskAPITest):
             modal_image_name="insights-sandbox-custom-1-abc:v1",
         )
         response = self.client.post(
-            "/api/projects/@current/sandbox_environments/",
+            "/v1/projects/@current/sandbox_environments/",
             {"name": "Env", "network_access_level": "full", "custom_image_id": str(image.id)},
             format="json",
         )
@@ -11118,7 +11116,7 @@ class TestSandboxCustomImageAPI(BaseTaskAPITest):
 
         env_id = data["id"]
         response = self.client.patch(
-            f"/api/projects/@current/sandbox_environments/{env_id}/", {"custom_image_id": None}, format="json"
+            f"/v1/projects/@current/sandbox_environments/{env_id}/", {"custom_image_id": None}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.json()["custom_image_id"])
@@ -11148,7 +11146,7 @@ class TestSandboxCustomImageAPI(BaseTaskAPITest):
             status.HTTP_403_FORBIDDEN,
         )
         response = self.client.post(
-            "/api/projects/@current/sandbox_environments/",
+            "/v1/projects/@current/sandbox_environments/",
             {"name": "Env", "network_access_level": "full", "custom_image_id": str(image.id)},
             format="json",
         )
@@ -11201,7 +11199,7 @@ class TestSandboxCustomImageAPI(BaseTaskAPITest):
         self.assertEqual(self.client.get(self.detail_url(private_image.id)).status_code, status.HTTP_404_NOT_FOUND)
 
         response = self.client.post(
-            "/api/projects/@current/sandbox_environments/",
+            "/v1/projects/@current/sandbox_environments/",
             {"name": "Env", "network_access_level": "full", "custom_image_id": str(private_image.id)},
             format="json",
         )
@@ -11256,7 +11254,7 @@ class TestSandboxCustomImageAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"custom_image_id": str(image.id)},
             format="json",
         )
@@ -11277,7 +11275,7 @@ class TestSandboxCustomImageAPI(BaseTaskAPITest):
         image = _make_custom_image(team=self.team, user=owner, name="bad-img", **image_kwargs)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/run/",
+            f"/v1/projects/@current/tasks/{task.id}/run/",
             {"custom_image_id": str(image.id)},
             format="json",
         )
@@ -11294,7 +11292,7 @@ class TestSandboxCustomImageAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/",
             {"environment": "cloud", "custom_image_id": str(image.id)},
             format="json",
         )
@@ -11384,7 +11382,7 @@ class TestTaskRunSlackTaskTeamControl(BaseTaskAPITest):
     ) -> None:
         task, run = self._create_run(origin_product=origin_product)
 
-        url = f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/"
+        url = f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/"
         if method == "patch":
             response = self.client.patch(url, {"output": {"marker": "from-teammate"}}, format="json")
         else:

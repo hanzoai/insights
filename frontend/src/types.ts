@@ -1,6 +1,6 @@
-import { LogicWrapper } from 'kea'
 import type { Insights, PropertyMatchType, SupportedWebVitalsMetrics } from 'insights-js'
-import { eventWithTime } from 'insights-js/rrweb-types'
+import { eventWithTime } from '@hanzo/insights-rrweb-types'
+import { LogicWrapper } from 'kea'
 import { ReactNode } from 'react'
 import { LayoutItem } from 'react-grid-layout'
 
@@ -257,15 +257,10 @@ export enum Region {
     DEV = 'DEV',
 }
 
-export type SSOProvider = 'google-oauth2' | 'github' | 'gitlab' | 'saml'
-export type LoginMethod = SSOProvider | 'password' | 'passkey' | null
-
-export interface AuthBackends {
-    'google-oauth2'?: boolean
-    gitlab?: boolean
-    github?: boolean
-    saml?: boolean
-}
+/** Backend names, as `/login/<backend>/` and `AUTHENTICATION_BACKENDS` spell them. */
+export type SSOProvider = 'oidc' | 'saml'
+/** Which providers the instance can start a handshake with, keyed by backend name. */
+export type AuthBackends = Partial<Record<SSOProvider, boolean>>
 
 export type ColumnChoice = string[] | 'DEFAULT'
 
@@ -302,7 +297,7 @@ export enum AccessControlResourceType {
     McpAnalytics = 'mcp_analytics',
     Metrics = 'metrics',
     Endpoint = 'endpoint',
-    Workflow = 'hog_flow',
+    Workflow = 'script_flow',
     EarlyAccessFeature = 'early_access_feature',
     ProductTour = 'product_tour',
     Experiment = 'experiment',
@@ -377,7 +372,6 @@ export interface UserType extends UserBaseType {
     realm?: Realm
     is_email_verified?: boolean | null
     pending_email?: string | null
-    is_2fa_enabled: boolean
     has_social_auth: boolean
     has_sso_enforcement: boolean
     shortcut_position: UserShortcutPosition
@@ -632,14 +626,12 @@ export interface BaseMemberType {
     last_login: string | null
     joined_at: string
     updated_at: string
-    is_2fa_enabled: boolean
     has_social_auth: boolean
 }
 
 export interface OrganizationMemberType extends BaseMemberType {
     /** Level at which the user is in the organization. */
     level: OrganizationMembershipLevel
-    is_2fa_enabled: boolean
 }
 
 export interface OrganizationMemberScopedApiKeysResponse {
@@ -1521,7 +1513,7 @@ export type DurationType = 'duration' | 'active_seconds' | 'inactive_seconds'
 /** The console method a recorded log entry came from.
  *
  * Declared here rather than imported. It used to come from
- * `insights-js/rrweb-plugin-console-record`, and that specifier resolves to
+ * `@hanzo/insights-rrweb-plugin-console-record`, and that specifier resolves to
  * nothing: `insights-js` is not a dependency, it is absent from node_modules,
  * and the root tsconfig maps only two of the fork's subpaths — `rrweb-types`
  * and `rrweb` — because the SDK fork publishes those as sibling packages. There
@@ -1711,7 +1703,7 @@ export type SearchableEntity =
     | 'event_definition'
     | 'experiment'
     | 'feature_flag'
-    | 'hog_flow'
+    | 'script_flow'
     | 'notebook'
     | 'property_definition'
     | 'survey'
@@ -3067,7 +3059,7 @@ export enum InsightType {
     PATHS = 'PATHS',
     JSON = 'JSON',
     SQL = 'SQL',
-    HOG = 'HOG',
+    SCRIPT = 'SCRIPT',
     WEB_ANALYTICS = 'WEB_ANALYTICS',
 }
 
@@ -4582,13 +4574,6 @@ export interface ScheduledChangeType {
     end_date: string | null
 }
 
-export interface PrevalidatedInvite {
-    id: string
-    target_email: string
-    first_name: string
-    organization_name: string
-}
-
 interface InstancePreferencesInterface {
     /** Whether debug queries option should be shown on the command palette. */
     debug_queries: boolean
@@ -4641,7 +4626,7 @@ export interface PreflightStatus {
     is_test?: boolean
     licensed_users_available?: number | null
     openai_available?: boolean
-    anthropic_available?: boolean
+    assistant_available?: boolean
     site_url?: string
     instance_preferences?: InstancePreferencesInterface
     buffer_conversion_seconds?: number
@@ -5801,7 +5786,7 @@ export const API_SCOPE_OBJECTS = [
     'group',
     'health_issue',
     'heatmap',
-    'hog_flow',
+    'script_flow',
     'insights_function',
     'ingestion_warning',
     'insight',
@@ -5837,7 +5822,7 @@ export const API_SCOPE_OBJECTS = [
     'query',
     'query_performance',
     'replay_scanner',
-    'review_hog',
+    'review',
     'revenue_analytics',
     'session_recording',
     'session_recording_playlist',
@@ -5845,7 +5830,7 @@ export const API_SCOPE_OBJECTS = [
     'signal_scout',
     'signal_scout_internal',
     'signal_scout_report',
-    'stamphog',
+    'stamp',
     'streamlit_app',
     'subscription',
     'survey',
@@ -7136,7 +7121,7 @@ export type OnboardingProduct = {
     capabilities?: string[]
     /** Title + problem pairs shown in the post-onboarding modal. Falls back to capabilities if absent. */
     valueProps?: { title: string; problem: string }[]
-    /** Mascot illustration for the post-onboarding modal. Falls back to SupermanHog if absent. */
+    /** Mascot illustration for the post-onboarding modal. Falls back to SupermanScript if absent. */
     mascot?: React.ComponentType<{ className?: string }>
 }
 
@@ -7317,7 +7302,10 @@ export type InsightsFunctionConfigurationType = Omit<
     script?: InsightsFunctionType['script'] // In the config it can be empty if using a template
     _create_in_folder?: string | null
 }
-export type InsightsFlowConfigurationType = Omit<InsightsFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
+export type InsightsFlowConfigurationType = Omit<
+    InsightsFlow,
+    'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'
+>
 export type CyclotronJobConfigurationType = InsightsFunctionConfigurationType | InsightsFlowConfigurationType
 
 export type InsightsFunctionSubTemplateType = Pick<
@@ -7360,7 +7348,7 @@ export type InsightsFunctionIconResponse = {
     url: string
 }
 
-export enum HogWatcherState {
+export enum ScriptWatcherState {
     healthy = 1,
     overflowed = 2,
     disabled = 3,
@@ -7369,7 +7357,7 @@ export enum HogWatcherState {
 }
 
 export type InsightsFunctionStatus = {
-    state: HogWatcherState
+    state: ScriptWatcherState
     tokens: number
 }
 

@@ -339,7 +339,7 @@ Output: {output_data}"""
     }
 
 
-def run_hog_tagger(bytecode: list, event_data: dict[str, Any], valid_tag_names: set[str]) -> dict[str, Any]:
+def run_script_tagger(bytecode: list, event_data: dict[str, Any], valid_tag_names: set[str]) -> dict[str, Any]:
     """Run compiled Script bytecode to tag a single event.
 
     The Script code should return a list of tag name strings.
@@ -414,7 +414,7 @@ def run_hog_tagger(bytecode: list, event_data: dict[str, Any], valid_tag_names: 
 
 
 @temporalio.activity.defn
-async def execute_hog_tagger_activity(tagger: dict[str, Any], event_data: dict[str, Any]) -> dict[str, Any]:
+async def execute_script_tagger_activity(tagger: dict[str, Any], event_data: dict[str, Any]) -> dict[str, Any]:
     """Execute Script code to tag the target event."""
     if tagger.get("tagger_type") != "script":
         raise ApplicationError(
@@ -431,7 +431,7 @@ async def execute_hog_tagger_activity(tagger: dict[str, Any], event_data: dict[s
     valid_tag_names = {tag["name"] for tag in tags_def}
 
     def _execute():
-        return run_hog_tagger(bytecode, event_data, valid_tag_names)
+        return run_script_tagger(bytecode, event_data, valid_tag_names)
 
     result = await database_sync_to_async(_execute, thread_sensitive=False)()
 
@@ -444,7 +444,7 @@ async def execute_hog_tagger_activity(tagger: dict[str, Any], event_data: dict[s
     return {
         "tags": result["tags"],
         "reasoning": result["reasoning"],
-        "is_hog": True,
+        "is_script": True,
     }
 
 
@@ -487,7 +487,7 @@ async def emit_tagger_event_activity(inputs: EmitTaggerEventInputs) -> None:
         properties: dict[str, Any] = {
             "$ai_tagger_id": tagger["id"],
             "$ai_tagger_name": tagger["name"],
-            "$ai_tagger_type": "script" if result.get("is_hog") else "llm",
+            "$ai_tagger_type": "script" if result.get("is_script") else "llm",
             "$ai_tags": result["tags"],
             "$ai_tag_count": len(result["tags"]),
             "$ai_tag_reasoning": result["reasoning"],
@@ -502,7 +502,7 @@ async def emit_tagger_event_activity(inputs: EmitTaggerEventInputs) -> None:
         # LLM-only attribution — Script taggers execute bytecode locally and have no
         # model/provider/key metadata, so omit these properties for Script runs rather
         # than falsely tagging them as gpt-5-mini/openai/insights-key.
-        if not result.get("is_hog"):
+        if not result.get("is_script"):
             properties.update(
                 {
                     "$ai_model": result.get("model", DEFAULT_TAGGER_MODEL),
@@ -601,7 +601,7 @@ class RunTaggerWorkflow(InsightsWorkflow):
         if tagger_type == "script":
             # Script taggers are deterministic — don't retry
             result = await temporalio.workflow.execute_activity(
-                execute_hog_tagger_activity,
+                execute_script_tagger_activity,
                 args=[tagger, inputs.event_data],
                 schedule_to_close_timeout=timedelta(seconds=30),
                 retry_policy=RetryPolicy(maximum_attempts=1),

@@ -43,8 +43,8 @@ const mockCohorts: CohortType[] = [
 ]
 
 const cohortApiMocks = {
-    '/api/projects/:team_id/actions/': toPaginatedResponse([]),
-    '/api/projects/:team_id/cohorts/': toPaginatedResponse(mockCohorts),
+    '/v1/projects/:team_id/actions/': toPaginatedResponse([]),
+    '/v1/projects/:team_id/cohorts/': toPaginatedResponse(mockCohorts),
 }
 
 export const CohortsList: Story = { parameters: { pageUrl: urls.cohorts() } }
@@ -53,14 +53,14 @@ export const CohortsWithData: Story = {
     parameters: { pageUrl: urls.cohorts() },
     decorators: [
         mswDecorator({
-            get: { '/api/projects/:team_id/cohorts/': toPaginatedResponse(mockCohorts) },
+            get: { '/v1/projects/:team_id/cohorts/': toPaginatedResponse(mockCohorts) },
         }),
     ],
 }
 
 export const CohortsEmpty: Story = {
     parameters: { pageUrl: urls.cohorts() },
-    decorators: [mswDecorator({ get: { '/api/projects/:team_id/cohorts/': toPaginatedResponse([]) } })],
+    decorators: [mswDecorator({ get: { '/v1/projects/:team_id/cohorts/': toPaginatedResponse([]) } })],
 }
 
 export const CohortNew: Story = {
@@ -70,10 +70,10 @@ export const CohortNew: Story = {
 
 export const CohortEditDynamic: Story = {
     parameters: { pageUrl: urls.cohort(1) },
-    decorators: [mswDecorator({ get: { '/api/projects/:team_id/cohorts/1/': mockCohorts[0], ...cohortApiMocks } })],
+    decorators: [mswDecorator({ get: { '/v1/projects/:team_id/cohorts/1/': mockCohorts[0], ...cohortApiMocks } })],
 }
 
 export const CohortEditStatic: Story = {
     parameters: { pageUrl: urls.cohort(3) },
-    decorators: [mswDecorator({ get: { '/api/projects/:team_id/cohorts/3/': mockCohorts[2], ...cohortApiMocks } })],
+    decorators: [mswDecorator({ get: { '/v1/projects/:team_id/cohorts/3/': mockCohorts[2], ...cohortApiMocks } })],
 }

@@ -651,7 +651,7 @@ class TestRichContentBlockNodes(SimpleTestCase):
         assert [item["type"] for item in list_node["content"]] == ["listItem", "listItem"]
         assert expected_content_line in content
 
-    def test_rich_content_to_html_renders_hogdesk_block_nodes(self) -> None:
+    def test_rich_content_to_html_renders_desk_block_nodes(self) -> None:
         doc = {
             "type": "doc",
             "content": [

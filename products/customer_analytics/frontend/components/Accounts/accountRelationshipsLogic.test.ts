@@ -11,7 +11,7 @@ import type {
 
 import { accountRelationshipsLogic } from './accountRelationshipsLogic'
 
-const RELATIONSHIPS_URL = '/api/projects/:team_id/accounts/:account_id/relationships/'
+const RELATIONSHIPS_URL = '/v1/projects/:team_id/accounts/:account_id/relationships/'
 
 const CSM: AccountRelationshipDefinitionApi = { id: 'def-1', name: 'CSM', description: null, is_single_holder: true }
 const AE: AccountRelationshipDefinitionApi = {

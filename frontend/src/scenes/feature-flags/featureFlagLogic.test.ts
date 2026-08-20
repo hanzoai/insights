@@ -212,11 +212,11 @@ describe('featureFlagLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
+                [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
                     200,
                     MOCK_FEATURE_FLAG,
                 ],
-                [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/status`]: () => [
+                [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/status`]: () => [
                     200,
                     MOCK_FEATURE_FLAG_STATUS,
                 ],
@@ -241,15 +241,15 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:projectId/feature_flags/': () => [
+                    '/v1/projects/:projectId/feature_flags/': () => [
                         200,
                         { results: [{ ...MOCK_FEATURE_FLAG, active: false }], count: 1 },
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
                         200,
                         { ...MOCK_FEATURE_FLAG, active: true },
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
@@ -279,7 +279,7 @@ describe('featureFlagLogic', () => {
         it('shows the friendly permission toast on a save-time 403', async () => {
             useMocks({
                 patch: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
                         403,
                         { type: 'authentication_error', code: 'permission_denied', detail: 'Nope' },
                     ],
@@ -300,7 +300,7 @@ describe('featureFlagLogic', () => {
         it('does not show the permission toast for other save errors', async () => {
             useMocks({
                 patch: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
                         500,
                         { type: 'server_error', detail: 'boom' },
                     ],
@@ -937,15 +937,15 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithExperiment.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithExperiment.id}/`]: () => [
                         200,
                         flagWithExperiment,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithExperiment.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithExperiment.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/experiments/${MOCK_EXPERIMENT.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/experiments/${MOCK_EXPERIMENT.id}/`]: () => [
                         200,
                         MOCK_EXPERIMENT,
                     ],
@@ -980,11 +980,11 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithoutExperiment.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithoutExperiment.id}/`]: () => [
                         200,
                         flagWithoutExperiment,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithoutExperiment.id}/status`]:
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithoutExperiment.id}/status`]:
                         () => [200, MOCK_FEATURE_FLAG_STATUS],
                 },
             })
@@ -1017,12 +1017,12 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
                         200,
                         MOCK_DEPENDENT_FLAGS,
                     ],
@@ -1050,12 +1050,12 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
                         200,
                         MOCK_DEPENDENT_FLAGS,
                     ],
@@ -1080,12 +1080,12 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
                         200,
                         [],
                     ],
@@ -1111,12 +1111,12 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
                         500,
                         { error: 'Internal server error' },
                     ],
@@ -1144,10 +1144,10 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/feature_flags/:feature_flag_key': () => [200, []],
+                    '/v1/organizations/:organization_id/feature_flags/:feature_flag_key': () => [200, []],
                 },
                 post: {
-                    '/api/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': async ({
+                    '/v1/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': async ({
                         request,
                     }) => {
                         capturedRequirementsBody = (await request.json()) as Record<string, unknown>
@@ -1163,7 +1163,7 @@ describe('featureFlagLogic', () => {
                             },
                         ]
                     },
-                    '/api/organizations/:organization_id/feature_flags/copy_flags': async ({ request }) => {
+                    '/v1/organizations/:organization_id/feature_flags/copy_flags': async ({ request }) => {
                         capturedCopyBody = (await request.json()) as Record<string, unknown>
                         return [
                             200,
@@ -1242,7 +1242,7 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': () => {
+                    '/v1/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': () => {
                         requirementsCallCount += 1
 
                         if (requirementsCallCount === 1) {
@@ -1324,10 +1324,10 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/feature_flags/:feature_flag_key': () => [200, []],
+                    '/v1/organizations/:organization_id/feature_flags/:feature_flag_key': () => [200, []],
                 },
                 post: {
-                    '/api/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': () => {
+                    '/v1/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': () => {
                         requirementsCallCount += 1
 
                         return [
@@ -1379,7 +1379,7 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': async ({
+                    '/v1/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': async ({
                         request,
                     }) => {
                         const body = (await request.json()) as { target_project_ids: number[] }
@@ -1470,7 +1470,7 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': async ({
+                    '/v1/organizations/:organization_id/feature_flags/copy_flags/dependency_requirements': async ({
                         request,
                     }) => {
                         const body = (await request.json()) as { target_project_ids: number[] }
@@ -1554,7 +1554,7 @@ describe('featureFlagLogic', () => {
             ...overrides,
         })
 
-        const schedulesUrl = `/api/projects/${MOCK_DEFAULT_PROJECT.id}/scheduled_changes`
+        const schedulesUrl = `/v1/projects/${MOCK_DEFAULT_PROJECT.id}/scheduled_changes`
 
         it.each([
             {
@@ -1670,7 +1670,7 @@ describe('featureFlagLogic', () => {
     })
 
     describe('default release conditions', () => {
-        const conditionsUrl = `/api/environments/${MOCK_DEFAULT_PROJECT.id}/default_release_conditions/`
+        const conditionsUrl = `/v1/environments/${MOCK_DEFAULT_PROJECT.id}/default_release_conditions/`
 
         it('applies org default groups to a new flag when default conditions are enabled', async () => {
             const DEFAULT_GROUP = { properties: [], rollout_percentage: 30, variant: null }
@@ -1738,7 +1738,7 @@ describe('featureFlagLogic', () => {
         beforeEach(() => {
             useMocks({
                 patch: {
-                    '/api/projects/:team_id/feature_flags/:id/': async ({ request, params }) => {
+                    '/v1/projects/:team_id/feature_flags/:id/': async ({ request, params }) => {
                         const body = (await request.json()) as { active: boolean }
                         return [200, { id: Number(params.id), active: body.active }]
                     },
@@ -1780,7 +1780,7 @@ describe('featureFlagLogic', () => {
         it('clears the in-flight marker and keeps state when the update fails', async () => {
             useMocks({
                 patch: {
-                    '/api/projects/:team_id/feature_flags/:id/': () => [403, { detail: 'No edit access' }],
+                    '/v1/projects/:team_id/feature_flags/:id/': () => [403, { detail: 'No edit access' }],
                 },
             })
             logic.actions.loadProjectsWithCurrentFlagSuccess([projectRow(MOCK_TEAM_ID, 1), projectRow(555, 42)])
@@ -1870,13 +1870,13 @@ describe('featureFlagLogic', () => {
     })
 
     describe('copyFlagSuccess', () => {
-        const copyFlagsUrl = `/api/organizations/${MOCK_ORGANIZATION_ID}/feature_flags/copy_flags/`
+        const copyFlagsUrl = `/v1/organizations/${MOCK_ORGANIZATION_ID}/feature_flags/copy_flags/`
 
         beforeEach(() => {
             useMocks({
                 get: {
                     // Hit by the loadProjectsWithCurrentFlag() the listener always triggers afterward.
-                    [`/api/organizations/${MOCK_ORGANIZATION_ID}/feature_flags/${MOCK_FEATURE_FLAG.key}/`]: () => [
+                    [`/v1/organizations/${MOCK_ORGANIZATION_ID}/feature_flags/${MOCK_FEATURE_FLAG.key}/`]: () => [
                         200,
                         [],
                     ],
@@ -2366,11 +2366,11 @@ describe('variant reordering', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
+                [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
                     200,
                     MOCK_FEATURE_FLAG,
                 ],
-                [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/status`]: () => [
+                [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/status`]: () => [
                     200,
                     MOCK_FEATURE_FLAG_STATUS,
                 ],

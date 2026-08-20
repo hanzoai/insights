@@ -2603,11 +2603,11 @@ def _checks_info(repo_root: Path) -> list[tuple[str, str]]:
 def _generated_config_path(repo_root: Path) -> Path:
     """Resolve the generated mprocs config phrocs renders, read-only.
 
-    Mirrors ``insightscli``'s lookup (the ``HOGLI_MPROCS_PATH`` override, else
+    Mirrors ``insightscli``'s lookup (the ``INSIGHTSCLI_MPROCS_PATH`` override, else
     ``.insights/.generated/mprocs.yaml`` at the repo root) without the worktree
     symlink-creating fallback — a diagnostic must not mutate the workspace.
     """
-    override = os.environ.get("HOGLI_MPROCS_PATH")
+    override = os.environ.get("INSIGHTSCLI_MPROCS_PATH")
     if override:
         return Path(override)
     return repo_root / ".insights" / ".generated" / "mprocs.yaml"

@@ -1,7 +1,7 @@
 """
 Object storage helpers for legal documents — kept separate from logic/ so
 admin.py (autodiscovered very early by django.contrib.admin) doesn't transitively
-pull ee.billing.BillingManager and trigger an import cycle.
+pull the logic module's heavier imports and trigger an import cycle.
 """
 
 from __future__ import annotations

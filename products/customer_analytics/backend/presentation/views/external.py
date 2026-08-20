@@ -317,9 +317,9 @@ class ExternalAccountErrorSerializer(serializers.Serializer):
 
 class ExternalAccountView(APIView):
     """
-    GET /api/customer_analytics/external/account?external_id=<external_id> — Fetch account data
-    POST /api/customer_analytics/external/account — Create an account (no-op if it already exists)
-    PATCH /api/customer_analytics/external/account — Update an account's role contacts and tags
+    GET /v1/customer_analytics/external/account?external_id=<external_id> — Fetch account data
+    POST /v1/customer_analytics/external/account — Create an account (no-op if it already exists)
+    PATCH /v1/customer_analytics/external/account — Update an account's role contacts and tags
 
     Authenticated via Bearer token (team secret_api_token) in Authorization header.
     """
@@ -499,13 +499,13 @@ class ExternalAccountListValidationErrorSerializer(serializers.Serializer):
 
 class ExternalAccountListView(APIView):
     """
-    GET /api/customer_analytics/external/accounts — List accounts with their relationship assignments
+    GET /v1/customer_analytics/external/accounts — List accounts with their relationship assignments
 
     Cursor-paginated by account id. ``assigned_only=true`` restricts the listing
     to accounts with at least one active relationship assignment, which is what
     the billing service's ownership sync consumes.
 
-    Authenticated via a project secret API key (Bearer ``phs_...``) carrying the
+    Authenticated via a project secret API key (Bearer ``sk-...``) carrying the
     ``account:read`` scope, not the team secret_api_token the sibling views
     accept. The team token is readable by any project member, so it must not
     grant this team-wide export; a PSAK is a service credential minted with an
@@ -624,7 +624,7 @@ def _custom_properties_error_response(result: contracts.ExternalAccountCustomPro
 
 class ExternalAccountCustomPropertiesView(APIView):
     """
-    PATCH /api/customer_analytics/external/account/custom_property_values — Set an account's custom
+    PATCH /v1/customer_analytics/external/account/custom_property_values — Set an account's custom
     property values, addressing each property by its definition id (UUID).
 
     Authenticated via Bearer token (team secret_api_token) in the Authorization header.

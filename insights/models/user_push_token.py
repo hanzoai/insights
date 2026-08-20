@@ -21,6 +21,10 @@ class UserPushToken(UUIDModel):
         "insights.User",
         on_delete=models.CASCADE,
         related_name="push_tokens",
+        # insights_user is read on virtually every request, and creating an FK
+        # constraint against it locks it against writes. No constraint, no lock;
+        # the cascade is enforced by Django's collector.
+        db_constraint=False,
     )
     token = models.TextField(
         help_text="Opaque push token issued by the platform push service (e.g. Expo push token).",

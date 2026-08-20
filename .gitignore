@@ -143,8 +143,11 @@ frontend/types/
 # Watchman cache
 .watchman-cookie-*
 
-# Dist release target dir
+# Dist release target dir. A pattern with a slash is anchored to this file's directory,
+# so `target/*` never covered rust/target/ -- 298 cargo build-state files were tracked
+# because of it. Name the nested one too.
 target/*
+rust/target/
 
 # Ignore user's Cursor rules
 .cursor/**/user*.mdc
@@ -229,3 +232,9 @@ rust/cohort-stream-processor/cohort-store/
 
 # Redis persistence snapshot dropped by a locally running redis-server
 dump.rdb
+
+# Compiled InsightsQL parser: build output, not source
+common/insightsql_parser/build/
+common/insightsql_parser/build_wasm/
+common/insightsql_parser/dist/
+common/insightsql_parser/*.so

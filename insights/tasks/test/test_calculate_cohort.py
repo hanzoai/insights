@@ -63,7 +63,7 @@ def calculate_cohort_test_factory(event_factory: Callable, person_factory: Calla
                 timestamp="2021-01-01T12:00:00Z",
             )
             response = self.client.post(
-                f"/api/projects/{self.team.id}/cohorts/?insight=STICKINESS&properties=%5B%5D&interval=day&display=ActionsLineGraph&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&shown_as=Stickiness&date_from=2021-01-01&entity_id=%24pageview&entity_type=events&stickiness_days=1&label=%24pageview",
+                f"/v1/projects/{self.team.id}/cohorts/?insight=STICKINESS&properties=%5B%5D&interval=day&display=ActionsLineGraph&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&shown_as=Stickiness&date_from=2021-01-01&entity_id=%24pageview&entity_type=events&stickiness_days=1&label=%24pageview",
                 {"name": "test", "is_static": True},
             ).json()
 
@@ -95,7 +95,7 @@ def calculate_cohort_test_factory(event_factory: Callable, person_factory: Calla
                 )
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/cohorts/?interval=day&display=ActionsLineGraph&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&properties=%5B%5D&entity_id=%24pageview&entity_type=events&date_from=2021-01-01&date_to=2021-01-01&label=%24pageview",
+                f"/v1/projects/{self.team.id}/cohorts/?interval=day&display=ActionsLineGraph&events=%5B%7B%22id%22%3A%22%24pageview%22%2C%22name%22%3A%22%24pageview%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&properties=%5B%5D&entity_id=%24pageview&entity_type=events&date_from=2021-01-01&date_to=2021-01-01&label=%24pageview",
                 {"name": "test", "is_static": True},
             ).json()
             cohort_id = response["id"]
@@ -1230,13 +1230,15 @@ class TestCohortCalculationTasks(APIBaseTest):
         with (
             patch("products.cohorts.backend.models.dependencies._on_cohort_changed") as mock_dep_cache,
             patch("products.feature_flags.backend.tasks.update_team_flags_cache") as mock_flags_cache,
-            patch("products.cdp.backend.tasks.insights_functions.refresh_affected_insights_functions") as mock_hog_refresh,
+            patch(
+                "products.cdp.backend.tasks.insights_functions.refresh_affected_insights_functions"
+            ) as mock_script_refresh,
         ):
             cohort._safe_save_cohort_state(team_id=self.team.pk, processing_error=None)
 
         mock_dep_cache.assert_not_called()
         mock_flags_cache.delay.assert_not_called()
-        mock_hog_refresh.delay.assert_not_called()
+        mock_script_refresh.delay.assert_not_called()
 
     def test_insert_cohort_from_query_count_updated_on_exception(self) -> None:
         from insights.tasks.calculate_cohort import insert_cohort_from_query

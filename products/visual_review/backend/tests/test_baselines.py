@@ -476,7 +476,7 @@ class TestBaselinesOverview(VisualReviewTeamScopedTestMixin, APIBaseTest):
         _mk_snapshot(run, identifier="card-one", artifact=artifact, metadata={"browser": "chromium"})
         _mk_snapshot(run, identifier="card-two")
 
-        url = f"/api/projects/{self.team.id}/visual_review/repos/{self.repo.id}/baselines/"
+        url = f"/v1/projects/{self.team.id}/visual_review/repos/{self.repo.id}/baselines/"
         response = self.client.get(url)
 
         assert response.status_code == 200
@@ -492,7 +492,7 @@ class TestBaselinesOverview(VisualReviewTeamScopedTestMixin, APIBaseTest):
         assert first["recent_drift_avg"] is None
 
     def test_endpoint_404_for_unknown_repo(self):
-        url = f"/api/projects/{self.team.id}/visual_review/repos/{uuid4()}/baselines/"
+        url = f"/v1/projects/{self.team.id}/visual_review/repos/{uuid4()}/baselines/"
         response = self.client.get(url)
         assert response.status_code == 404
 

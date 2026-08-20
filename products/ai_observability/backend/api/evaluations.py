@@ -30,11 +30,11 @@ from insights.permissions import AccessControlPermission
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 from insights.temporal.ai_observability.message_utils import extract_text_from_messages
 from insights.temporal.ai_observability.model_resolution import active_key_fallback
-from insights.temporal.ai_observability.run_evaluation import extract_event_io, run_hog_eval
-from insights.temporal.ai_observability.run_session_evaluation import run_hog_eval_over_recent_sessions
-from insights.temporal.ai_observability.run_trace_evaluation import run_hog_eval_over_recent_traces
+from insights.temporal.ai_observability.run_evaluation import extract_event_io, run_script_eval
+from insights.temporal.ai_observability.run_session_evaluation import run_script_eval_over_recent_sessions
+from insights.temporal.ai_observability.run_trace_evaluation import run_script_eval_over_recent_traces
 
-from ..script import compile_ai_observability_hog
+from ..script import compile_ai_observability_script
 from ..llm import DEFAULT_MODEL_BY_PROVIDER
 from ..models.evaluation_config import EvaluationConfig
 from ..models.evaluation_configs import (
@@ -720,7 +720,7 @@ class EvaluationListSerializer(EvaluationSerializer):
         read_only_fields = [f for f in EvaluationSerializer.Meta.read_only_fields if f != "created_by"]
 
 
-class TestHogTargetConfigSerializer(serializers.Serializer):
+class TestScriptTargetConfigSerializer(serializers.Serializer):
     window_seconds = serializers.IntegerField(
         required=False,
         default=TRACE_EVAL_DEFAULT_WINDOW_SECONDS,
@@ -740,7 +740,7 @@ class TestHogTargetConfigSerializer(serializers.Serializer):
     )
 
 
-class TestHogRequestSerializer(serializers.Serializer):
+class TestScriptRequestSerializer(serializers.Serializer):
     source = serializers.CharField(
         required=True,
         min_length=1,
@@ -772,7 +772,7 @@ class TestHogRequestSerializer(serializers.Serializer):
             "quiet. Each target runs against the same globals it would run against online."
         ),
     )
-    target_config = TestHogTargetConfigSerializer(
+    target_config = TestScriptTargetConfigSerializer(
         required=False,
         default=dict,
         help_text=(
@@ -782,7 +782,7 @@ class TestHogRequestSerializer(serializers.Serializer):
     )
 
 
-class TestHogResultItemSerializer(serializers.Serializer):
+class TestScriptResultItemSerializer(serializers.Serializer):
     sample_id = serializers.CharField(help_text="Stable identifier for the sampled generation, trace, or session.")
     sample_type = serializers.ChoiceField(
         choices=EvaluationTarget.choices,
@@ -800,8 +800,8 @@ class TestHogResultItemSerializer(serializers.Serializer):
     error = serializers.CharField(allow_null=True, help_text="Error message if the Script code raised an exception.")
 
 
-class TestHogResponseSerializer(serializers.Serializer):
-    results = TestHogResultItemSerializer(many=True)
+class TestScriptResponseSerializer(serializers.Serializer):
+    results = TestScriptResultItemSerializer(many=True)
     message = serializers.CharField(
         required=False, help_text="Optional message, e.g. when no recent events were found."
     )
@@ -819,7 +819,7 @@ def _humanize_seconds(seconds: int) -> str:
     return f"{seconds} second" if seconds == 1 else f"{seconds} seconds"
 
 
-def _test_hog_over_sessions(
+def _test_script_over_sessions(
     *,
     request: Request,
     team: Team,
@@ -830,11 +830,11 @@ def _test_hog_over_sessions(
     conditions: list[dict[str, Any]],
     quiet_period_seconds: int,
 ) -> Response:
-    """Session-target variant of `test_hog`: sample sessions that have gone quiet and run the code
+    """Session-target variant of `test_script`: sample sessions that have gone quiet and run the code
     against session-level globals, so the editor preview matches how a session eval runs online."""
     tag_queries(product=Product.LLM_ANALYTICS, feature=Feature.QUERY)
     try:
-        session_results = run_hog_eval_over_recent_sessions(
+        session_results = run_script_eval_over_recent_sessions(
             team=team,
             bytecode=bytecode,
             condition_filter=condition_filter,
@@ -888,7 +888,7 @@ def _test_hog_over_sessions(
     return Response({"results": results})
 
 
-def _test_hog_over_traces(
+def _test_script_over_traces(
     *,
     request: Request,
     team: Team,
@@ -899,11 +899,11 @@ def _test_hog_over_traces(
     conditions: list[dict[str, Any]],
     window_seconds: int,
 ) -> Response:
-    """Trace-target variant of the `test_hog` action: sample recent whole traces and run the code
+    """Trace-target variant of the `test_script` action: sample recent whole traces and run the code
     against trace-level globals, so the editor preview matches how a trace eval runs online."""
     tag_queries(product=Product.LLM_ANALYTICS, feature=Feature.QUERY)
     try:
-        trace_results = run_hog_eval_over_recent_traces(
+        trace_results = run_script_eval_over_recent_traces(
             team=team,
             bytecode=bytecode,
             condition_filter=condition_filter,
@@ -1147,11 +1147,11 @@ class EvaluationViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbi
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
-    @extend_schema(request=TestHogRequestSerializer, responses=TestHogResponseSerializer)
-    @action(detail=False, methods=["post"], url_path="test_hog", required_scopes=["evaluation:read"])
-    def test_hog(self, request: Request, **kwargs) -> Response:
+    @extend_schema(request=TestScriptRequestSerializer, responses=TestScriptResponseSerializer)
+    @action(detail=False, methods=["post"], url_path="test_script", required_scopes=["evaluation:read"])
+    def test_script(self, request: Request, **kwargs) -> Response:
         """Test Script evaluation code against sample events without saving."""
-        serializer = TestHogRequestSerializer(data=request.data)
+        serializer = TestScriptRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({"error": serializer.errors}, status=400)
 
@@ -1163,7 +1163,7 @@ class EvaluationViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbi
         target_config = serializer.validated_data["target_config"]
 
         try:
-            bytecode = compile_ai_observability_hog(source, "destination")
+            bytecode = compile_ai_observability_script(source, "destination")
         except serializers.ValidationError as e:
             return Response({"error": f"Compilation error: {e.detail}"}, status=400)
         except Exception:
@@ -1186,7 +1186,7 @@ class EvaluationViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbi
             condition_filter = ast.Or(exprs=condition_exprs)
 
         if target == EvaluationTarget.SESSION.value:
-            return _test_hog_over_sessions(
+            return _test_script_over_sessions(
                 request=request,
                 team=team,
                 bytecode=bytecode,
@@ -1200,7 +1200,7 @@ class EvaluationViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbi
             )
 
         if target == EvaluationTarget.TRACE.value:
-            return _test_hog_over_traces(
+            return _test_script_over_traces(
                 request=request,
                 team=team,
                 bytecode=bytecode,
@@ -1254,7 +1254,7 @@ class EvaluationViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbi
                 query=query,
                 placeholders={"where_clause": ast.And(exprs=where_exprs)},
                 team=team,
-                query_type="EvaluationTestHog",
+                query_type="EvaluationTestScript",
                 fall_back_to_events=False,
                 limit_context=None,
             )
@@ -1306,7 +1306,7 @@ class EvaluationViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbi
                 "timestamp": timestamp,
             }
 
-            result = run_hog_eval(bytecode, event_data, allows_na=allows_na)
+            result = run_script_eval(bytecode, event_data, allows_na=allows_na)
 
             input_raw, output_raw = extract_event_io(event_type, properties)
             input_preview = extract_text_from_messages(input_raw)[:200]

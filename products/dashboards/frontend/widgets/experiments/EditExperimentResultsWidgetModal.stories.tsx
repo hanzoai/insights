@@ -16,11 +16,11 @@ const DEFAULT_CONFIG = EXPERIMENT_RESULTS_CATALOG.defaultConfig as Record<string
 const pickerExperiments = experimentsSampleListRows.map(({ id, name, created_by }) => ({ id, name, created_by }))
 const experimentsApiDecorator = mswDecorator({
     get: {
-        '/api/projects/:team_id/experiments/': () => [
+        '/v1/projects/:team_id/experiments/': () => [
             200,
             { results: pickerExperiments, count: pickerExperiments.length },
         ],
-        '/api/projects/:team_id/experiments/:id/': ({ params }) => {
+        '/v1/projects/:team_id/experiments/:id/': ({ params }) => {
             const id = Number(params.id)
             return [200, pickerExperiments.find((experiment) => experiment.id === id) ?? pickerExperiments[0]]
         },

@@ -31,7 +31,7 @@ export type InsightsFunctionTestInvocationForm = {
     mock_async_functions: boolean
 }
 
-export type HogTransformationEvent = {
+export type ScriptTransformationEvent = {
     event: any
     uuid: string
     distinct_id: string
@@ -39,7 +39,7 @@ export type HogTransformationEvent = {
     properties: any
 }
 
-const convertToTransformationEvent = (result: any): HogTransformationEvent => {
+const convertToTransformationEvent = (result: any): ScriptTransformationEvent => {
     const properties = result.properties ?? {}
     // We don't want to use these values given they will change in the test invocation
     delete properties.$transformations_failed
@@ -54,7 +54,7 @@ const convertToTransformationEvent = (result: any): HogTransformationEvent => {
     }
 }
 
-const convertFromTransformationEvent = (result: HogTransformationEvent): Record<string, any> => {
+const convertFromTransformationEvent = (result: ScriptTransformationEvent): Record<string, any> => {
     delete result.properties.$transformations_failed
     delete result.properties.$transformations_succeeded
     delete result.properties.$transformations_skipped
@@ -79,7 +79,7 @@ export interface insightsFunctionTestLogicValues {
     configuration: InsightsFunctionConfigurationType // insightsFunctionConfigurationLogic
     configurationHasErrors: boolean // insightsFunctionConfigurationLogic
     contextId: InsightsFunctionConfigurationContextId // insightsFunctionConfigurationLogic
-    currentHogCode: string // insightsFunctionConfigurationLogic
+    currentScriptCode: string // insightsFunctionConfigurationLogic
     exampleInvocationGlobals: CyclotronJobInvocationGlobals // insightsFunctionConfigurationLogic
     sampleGlobals: CyclotronJobInvocationGlobals | null // insightsFunctionConfigurationLogic
     sampleGlobalsError: string | null // insightsFunctionConfigurationLogic
@@ -245,7 +245,7 @@ export const insightsFunctionTestLogic = kea<insightsFunctionTestLogicType>([
         return id ?? templateId ?? 'new'
     }),
 
-    path((id) => ['scenes', 'pipeline', 'hogfunctions', 'insightsFunctionTestLogic', id]),
+    path((id) => ['scenes', 'pipeline', 'insightsfunctions', 'insightsFunctionTestLogic', id]),
     connect((props: InsightsFunctionConfigurationLogicProps) => ({
         values: [
             insightsFunctionConfigurationLogic(props),
@@ -259,7 +259,7 @@ export const insightsFunctionTestLogic = kea<insightsFunctionTestLogicType>([
                 'exampleInvocationGlobals',
                 'sampleGlobalsError',
                 'type',
-                'currentHogCode',
+                'currentScriptCode',
             ],
             groupsModel,
             ['groupTypes'],
@@ -495,7 +495,7 @@ export const insightsFunctionTestLogic = kea<insightsFunctionTestLogicType>([
                             : 'Please fix the configuration errors before testing.'
 
                     toast.error(message, {
-                        toastId: 'hogfunction-validation-error',
+                        toastId: 'insightsfunction-validation-error',
                     })
 
                     // Show the errors in the UI
@@ -506,7 +506,7 @@ export const insightsFunctionTestLogic = kea<insightsFunctionTestLogicType>([
                 const parsedData = tryJsonParse(data.globals)
                 const configuration = sanitizeConfiguration(values.configuration) as Record<string, any>
                 configuration.template_id = values.templateId
-                configuration.script = values.currentHogCode
+                configuration.script = values.currentScriptCode
 
                 // Transformations have a simpler UI just showing the event/record so we map it back
                 const globals =

@@ -8,7 +8,7 @@ import { createApplyEventRestrictionsStep, createParseHeadersStep } from '~/inge
 import { IngestionOverflowMode } from '~/ingestion/config'
 import { BatchingContext, BatchingPipeline } from '~/ingestion/framework/batching-pipeline'
 import { newBatchingPipeline } from '~/ingestion/framework/builders'
-import { TopHogRegistry, createTopHogWrapper, sum, timer } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry, createTopFnWrapper, sum, timer } from '~/ingestion/framework/extensions/topfn'
 import { aggregateKafkaDebugContexts, createBatch } from '~/ingestion/framework/helpers'
 import { PipelineConfig } from '~/ingestion/framework/result-handling-pipeline'
 import { isOkResult, ok } from '~/ingestion/framework/results'
@@ -74,8 +74,8 @@ export interface SessionReplayPipelineConfig {
     keyStore: KeyStore
     /** Caps how many sessions resolve their encryption key concurrently, bounding KMS/DynamoDB fan-out. */
     sessionKeyResolutionMaxConcurrency: number
-    /** TopHog registry for tracking metrics. */
-    topHog: TopHogRegistry
+    /** TopFn registry for tracking metrics. */
+    topFn: TopFnRegistry
     /** Debug logging matcher for partition-based debugging. */
     isDebugLoggingEnabled: ValueMatcher<number>
 }
@@ -103,7 +103,7 @@ export function createSessionReplayPipeline(config: SessionReplayPipelineConfig)
         sessionFilter,
         keyStore,
         sessionKeyResolutionMaxConcurrency,
-        topHog,
+        topFn,
         isDebugLoggingEnabled,
     } = config
 
@@ -112,7 +112,7 @@ export function createSessionReplayPipeline(config: SessionReplayPipelineConfig)
         promiseScheduler,
     }
 
-    const topHogWrapper = createTopHogWrapper(topHog)
+    const topFnWrapper = createTopFnWrapper(topFn)
 
     return newBatchingPipeline<
         SessionReplayPipelineInput,
@@ -195,7 +195,7 @@ export function createSessionReplayPipeline(config: SessionReplayPipelineConfig)
                                                 b
                                                     // Parse message content
                                                     .pipe(
-                                                        topHogWrapper(createParseMessageStep(), [
+                                                        topFnWrapper(createParseMessageStep(), [
                                                             timer('parse_time_ms_by_session_id', (input) => ({
                                                                 org: input.headers.org ?? 'unknown',
                                                                 session_id: input.headers.session_id ?? 'unknown',
@@ -205,7 +205,7 @@ export function createSessionReplayPipeline(config: SessionReplayPipelineConfig)
                                                     // Monitor library version and emit warnings for old versions
                                                     .pipe(createLibVersionMonitorStep())
                                                     .pipe(
-                                                        topHogWrapper(
+                                                        topFnWrapper(
                                                             createRecordSessionEventStep({
                                                                 isDebugLoggingEnabled,
                                                             }),

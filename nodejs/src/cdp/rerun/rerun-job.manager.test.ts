@@ -112,10 +112,10 @@ describe('RerunJobManager', () => {
             max_count: 500,
         }
 
-        const jobId = await manager.enqueue(3, 'hog_flow', uuidv7(), { filter })
+        const jobId = await manager.enqueue(3, 'flow', uuidv7(), { filter })
 
         const state = fetchState(await queryJob(jobId))
-        expect(state.function_kind).toBe('hog_flow')
+        expect(state.function_kind).toBe('flow')
         expect(state.request.filter).toMatchObject(filter)
         expect(state.request.filter.invocation_ids).toBeUndefined()
         expect(state.progress.cursor).toBeUndefined()

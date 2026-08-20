@@ -1,6 +1,6 @@
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.hog_invocation_results.sql import (
+from insights.models.invocations.sql import (
     DISTRIBUTED_FN_INVOCATION_RESULTS_TABLE_SQL,
     DROP_FN_INVOCATION_RESULTS_MV_SQL,
     DROP_KAFKA_FN_INVOCATION_RESULTS_TABLE_SQL,
@@ -9,7 +9,7 @@ from insights.models.hog_invocation_results.sql import (
     KAFKA_FN_INVOCATION_RESULTS_TABLE_SQL,
 )
 
-# Repoint the hog_invocation_results Kafka engine table from the warpstream-shared
+# Repoint the invocations Kafka engine table from the warpstream-shared
 # named collection to warpstream-cyclotron — the CDP producer writes lifecycle
 # rows to the cyclotron Warpstream cluster, so Datastore must consume from the
 # same cluster.

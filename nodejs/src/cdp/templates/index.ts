@@ -30,7 +30,7 @@ import { template as insightsTagAccountTemplate } from './_destinations/insights
 import { template as insightsUpdateAccountPropertyTemplate } from './_destinations/insights_customer_analytics/insights-update-account-property.template'
 import { template as insightsUpdateAccountRelationshipsTemplate } from './_destinations/insights_customer_analytics/insights-update-account-relationships.template'
 import { template as insightsUpdateAccountTemplate } from './_destinations/insights_customer_analytics/insights-update-account.template'
-import { template as insightsSetHogflowVariableTemplate } from './_destinations/insights_workflows/insights-set-variable.template'
+import { template as insightsSetScriptflowVariableTemplate } from './_destinations/insights_workflows/insights-set-variable.template'
 import { template as pushTemplate } from './_destinations/push/push.template'
 import { template as redditAdsTemplate } from './_destinations/reddit_ads/reddit.template'
 import { template as snapchatAdsTemplate } from './_destinations/snapchat_ads/snapchat.template'
@@ -83,7 +83,7 @@ export const INSIGHTS_FUNCTION_TEMPLATES_DESTINATIONS: InsightsFunctionTemplate[
     insightsCaptureTemplate,
     insightsGroupIdentifyTemplate,
     insightsUpdatePersonPropertiesTemplate,
-    insightsSetHogflowVariableTemplate,
+    insightsSetScriptflowVariableTemplate,
     insightsGetTicketTemplate,
     insightsUpdateTicketTemplate,
     insightsCreateAccountTemplate,

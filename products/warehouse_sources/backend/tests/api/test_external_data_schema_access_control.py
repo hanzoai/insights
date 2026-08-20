@@ -66,19 +66,19 @@ class TestExternalDataSchemaAccessControl(APIBaseTest):
 
     def _reported_level(self, user):
         self.client.force_login(user)
-        listed = self.client.get(f"/api/environments/{self.team.pk}/external_data_schemas/")
+        listed = self.client.get(f"/v1/environments/{self.team.pk}/external_data_schemas/")
         self.assertEqual(listed.status_code, status.HTTP_200_OK)
         row = next(r for r in listed.json()["results"] if r["id"] == str(self.schema.id))
         return row["user_access_level"]
 
     def _reload(self, user):
         self.client.force_login(user)
-        return self.client.post(f"/api/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/reload/")
+        return self.client.post(f"/v1/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/reload/")
 
     def _patch(self, user):
         self.client.force_login(user)
         return self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/", {"sync_frequency": "6hour"}
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/", {"sync_frequency": "6hour"}
         )
 
     @parameterized.expand(
@@ -156,7 +156,7 @@ class TestExternalDataSchemaAccessControl(APIBaseTest):
         self._grant(self.editor_user, "external_data_source", str(self.source.id), "viewer")
 
         self.client.force_login(self.editor_user)
-        base = f"/api/environments/{self.team.pk}/external_data_schemas"
+        base = f"/v1/environments/{self.team.pk}/external_data_schemas"
         self.assertEqual(self.client.get(f"{base}/{self.schema.id}/").status_code, status.HTTP_200_OK)
         self.assertEqual(self.client.get(f"{base}/{other_schema.id}/").status_code, status.HTTP_403_FORBIDDEN)
 
@@ -177,7 +177,7 @@ class TestExternalDataSchemaAccessControl(APIBaseTest):
         self.schema.save()
 
         self.client.force_login(self.editor_user)
-        source_base = f"/api/environments/{self.team.pk}/external_data_sources/{self.source.id}"
+        source_base = f"/v1/environments/{self.team.pk}/external_data_sources/{self.source.id}"
         bulk = self.client.patch(
             f"{source_base}/bulk_update_schemas/",
             {"schemas": [{"id": str(self.schema.id), "should_sync": True}]},
@@ -196,5 +196,5 @@ class TestExternalDataSchemaAccessControl(APIBaseTest):
         self.schema.save()
 
         self.client.force_login(self.editor_user)
-        resp = self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{self.source.id}/reload/")
+        resp = self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{self.source.id}/reload/")
         self.assertNotEqual(resp.status_code, status.HTTP_403_FORBIDDEN)

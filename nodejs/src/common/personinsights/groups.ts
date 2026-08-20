@@ -2,7 +2,7 @@ import { create } from '@bufbuild/protobuf'
 import { Client } from '@connectrpc/connect'
 import { DateTime } from 'luxon'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import { GroupKeySchema } from '~/common/generated/personinsights/personinsights/types/v1/common_pb'
 import {
     GetGroupRequestSchema,
@@ -39,8 +39,8 @@ function protoGroupToDomain(proto: ProtoGroup): DomainGroup {
     }
 }
 
-export class PersonHogGroupOperations {
-    constructor(private client: Client<typeof PersonHogService>) {}
+export class PersonFnGroupOperations {
+    constructor(private client: Client<typeof PersonFnService>) {}
 
     async fetchGroup(
         teamId: number,

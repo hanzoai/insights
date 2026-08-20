@@ -10,7 +10,7 @@ from insights.personinsights_client.interceptor import RetryInterceptor, _Mutabl
 
 
 def _make_call_details(
-    method: str = "/personinsights.service.v1.PersonHogService/GetPerson",
+    method: str = "/personinsights.service.v1.PersonService/GetPerson",
 ) -> grpc.ClientCallDetails:
     return _MutableClientCallDetails(
         method=method,

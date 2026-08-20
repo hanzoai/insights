@@ -48,13 +48,13 @@ class TestExperimentsCreateFromPrompt(APIBaseTest):
         }
         payload.update(overrides)
         return self.client.post(
-            f"/api/projects/{self.team.id}/experiments/create_from_prompt/",
+            f"/v1/projects/{self.team.id}/experiments/create_from_prompt/",
             payload,
             format="json",
         )
 
     def test_url_under_prompt_templates(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/prompt_templates/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/prompt_templates/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         body = response.json()
         keys = [t["key"] for t in body]
@@ -221,7 +221,7 @@ class TestExperimentsCreateFromPrompt(APIBaseTest):
         created2 = self._post(versions=[2, 3], templates=["latency"]).json()
         # And an unrelated experiment (no prompt_metadata)
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Unrelated experiment",
                 "feature_flag_key": "unrelated-flag",
@@ -230,7 +230,7 @@ class TestExperimentsCreateFromPrompt(APIBaseTest):
             format="json",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/?prompt_name={self.prompt_name}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/?prompt_name={self.prompt_name}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         body = response.json()
         returned_ids = {r["id"] for r in body["results"]}
@@ -240,6 +240,6 @@ class TestExperimentsCreateFromPrompt(APIBaseTest):
 
     def test_list_filter_with_unknown_prompt_name_returns_empty(self) -> None:
         self._post(versions=[1, 2], templates=["cost"])
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/?prompt_name=does-not-exist")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/?prompt_name=does-not-exist")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 0)

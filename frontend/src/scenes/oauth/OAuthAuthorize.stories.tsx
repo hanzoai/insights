@@ -53,7 +53,7 @@ const meta: Meta = {
         mswDecorator({
             get: {
                 // The logic loads projects per organization for users that have organizations
-                '/api/organizations/:organization_id/projects/': {
+                '/v1/organizations/:organization_id/projects/': {
                     results: [
                         {
                             id: 1,
@@ -62,7 +62,7 @@ const meta: Meta = {
                         },
                     ],
                 },
-                '/api/projects/': {
+                '/v1/projects/': {
                     results: [
                         {
                             id: 1,

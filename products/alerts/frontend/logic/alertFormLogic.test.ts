@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 
@@ -33,8 +33,12 @@ import {
 } from './alertFormLogic'
 import { alertNotificationLogic } from './alertNotificationLogic'
 import { deriveFunnelAlertPreview } from './funnelAlertPreview'
-import { deriveInsightsQLAlertPreview, INSIGHTSQL_ANY_ROW_MAX_ROWS, INSIGHTSQL_LAST_ROW_MAX_ROWS } from './insightsqlAlertPreview'
 import { insightAlertsLogic } from './insightAlertsLogic'
+import {
+    deriveInsightsQLAlertPreview,
+    INSIGHTSQL_ANY_ROW_MAX_ROWS,
+    INSIGHTSQL_LAST_ROW_MAX_ROWS,
+} from './insightsqlAlertPreview'
 
 const Insight42 = '42' as InsightShortId
 
@@ -418,7 +422,7 @@ describe('alertFormLogic', () => {
     })
 
     describe('insightsql column prefill', () => {
-        function mountHogqlForm(configOverrides: Record<string, any>): ReturnType<typeof alertFormLogic.build> {
+        function mountInsightsqlForm(configOverrides: Record<string, any>): ReturnType<typeof alertFormLogic.build> {
             const logic = alertFormLogic({
                 alert: null,
                 insightId: 42,
@@ -507,7 +511,7 @@ describe('alertFormLogic', () => {
                 expectedLabelColumn: 'a',
             },
         ])('$name', async ({ config, insightData, expectedColumn, expectedLabelColumn }) => {
-            const logic = mountHogqlForm(config)
+            const logic = mountInsightsqlForm(config)
             insightDataLogic(insightLogicProps).actions.setInsightData(insightData)
             await expectLogic(logic).toFinishAllListeners()
             const formConfig = logic.values.alertForm.config as InsightsQLAlertConfig

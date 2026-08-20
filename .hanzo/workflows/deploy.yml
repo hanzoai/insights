@@ -228,6 +228,73 @@ jobs:
                   docker push "$IMAGE"
                   echo "built $IMAGE (revision ${GITHUB_SHA})"
 
+            # The static tree has to reach the origin BEFORE the pin below points
+            # production at this image, and the order is not a preference.
+            # insights.hanzo.ai/static/* is served from s3://cdn/insights by the
+            # ingress, and that middleware is terminal — a key it cannot find is a
+            # 404, not a fall-through to the pod. Pin first and there is a window
+            # where pods run a build whose chunks nobody has published yet, which
+            # is a harder failure than the one this whole arrangement removes.
+            # So: build, publish, then pin. If this step fails the release stops
+            # here, with the image pushed and production still on the last one.
+            #
+            # Cheap after the first run despite the size. bin/publish-static
+            # writes a content-hashed key ONCE — same name means same bytes — so a
+            # build only uploads what it actually changed; the 2.7 GB first
+            # publish is the floor, not the per-build cost.
+            #
+            # The script runs inside the image that was just built, because that
+            # image already carries python, boto3 and the tree itself at
+            # /code/staticfiles, so what gets published is exactly what the pods
+            # will serve. It arrives on stdin rather than a bind mount: this
+            # runner talks to a dind sidecar, so a -v path would resolve against
+            # the daemon's filesystem and silently mount an empty directory.
+            - name: Publish static to the origin
+              env:
+                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
+                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+              run: |
+                  set -euo pipefail
+                  VERSION="${{ steps.ver.outputs.version }}"
+                  IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
+
+                  KMS_CURL=(curl -fsS --retry 5 --retry-delay 2 --retry-connrefused --max-time 30)
+
+                  KMS_TOKEN=$("${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/auth/login" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+                    | jq -r '.accessToken // empty')
+                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+
+                  kms() {
+                    "${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/secrets/storage/$1?env=${KMS_SECRET_ENV}" \
+                      -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty'
+                  }
+                  export AWS_ACCESS_KEY_ID=$(kms S3_ROOT_USER)
+                  export AWS_SECRET_ACCESS_KEY=$(kms S3_ROOT_PASSWORD)
+                  [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ] || {
+                    echo "::error::S3 credentials missing in KMS at storage/ (env ${KMS_SECRET_ENV})"; exit 1; }
+                  # Both halves. Masking only the secret leaves the key id in the
+                  # log, and a credential is the pair.
+                  echo "::add-mask::${AWS_ACCESS_KEY_ID}"
+                  echo "::add-mask::${AWS_SECRET_ACCESS_KEY}"
+
+                  # `-e NAME` with no value passes the variable through from this
+                  # shell. `-e NAME=value` would put the credential on the docker
+                  # client's command line, where it is readable from any other
+                  # process on the runner and from `docker inspect` on the dind
+                  # sidecar for as long as the container lives.
+                  docker run --rm -i \
+                    -e S3_ENDPOINT=https://s3.hanzo.ai \
+                    -e S3_BUCKET=cdn \
+                    -e S3_PREFIX=insights \
+                    -e VERSION="$VERSION" \
+                    -e AWS_ACCESS_KEY_ID \
+                    -e AWS_SECRET_ACCESS_KEY \
+                    "$IMAGE" python - /code/staticfiles < bin/publish-static
+
             # THE DEPLOY. Everything above this PUBLISHES an image; this is the step
             # that makes production run it.
             #
@@ -349,41 +416,20 @@ jobs:
             - name: Wait for this commit to be the one serving
               id: rollout
               env:
-                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
-                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
-                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
-                  KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
-                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
                   LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
               run: |
                   set -euo pipefail
 
-                  KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
-                    -H 'Content-Type: application/json' \
-                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
-                    | jq -r '.accessToken // empty')
-                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
-
-                  # The e2e account's password lives in KMS and nowhere else. It is a real
-                  # account with a hashed password, not a shared human login.
-                  PW=$(curl -fsS \
-                    "${KMS_ENDPOINT}/v1/kms/secrets/insights/E2E_PASSWORD?env=${KMS_SECRET_ENV}" \
-                    -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty' || true)
-                  [ -n "$PW" ] || { echo "::error::E2E_PASSWORD missing in KMS at ${KMS_ORG}/insights (env ${KMS_SECRET_ENV})"; exit 1; }
-                  echo "::add-mask::${PW}"
-                  echo "pw=${PW}" >> "$GITHUB_OUTPUT"
-
-                  # /_preflight/ reports insights_version as null, so the only honest
-                  # signal for "which code is live" is the git sha on instance_status,
-                  # which needs a session. Short sha: that is the form it reports.
+                  # Which commit is serving is not private, so this asks the unauthenticated
+                  # preflight rather than signing in. It used to POST /api/login and read
+                  # instance_status with the session; local password auth is gone -- /login
+                  # is the OIDC handshake and no endpoint trades credentials for a session --
+                  # so that POST could only fail, GOT was always empty, and this step spent
+                  # twenty minutes before blaming CD for a rollout that had already arrived.
+                  # get_git_commit_short() returns ten characters, which is what WANT is.
                   WANT=$(printf '%s' "${GITHUB_SHA}" | cut -c1-10)
-                  JAR=$(mktemp)
                   for attempt in $(seq 1 60); do
-                    curl -fsS -c "$JAR" -o /dev/null -X POST "${LIVE_URL}/api/login" \
-                      -H 'Content-Type: application/json' \
-                      -d "$(jq -n --arg p "$PW" '{email:"e2e@hanzo.ai",password:$p}')" || true
-                    GOT=$(curl -fsS -b "$JAR" "${LIVE_URL}/api/instance_status" 2>/dev/null \
-                      | jq -r '.results.overview[]? | select(.key=="insights_git_sha") | .value' || true)
+                    GOT=$(curl -fsS "${LIVE_URL}/_preflight/" 2>/dev/null | jq -r '.git_sha // empty' || true)
                     if [ "$GOT" = "$WANT" ]; then
                       echo "serving ${GOT} after ~$((attempt * 20))s"; exit 0
                     fi
@@ -398,11 +444,33 @@ jobs:
 
             - name: Drive the product
               env:
+                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
+                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
                   LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
                   LOGIN_USERNAME: e2e@hanzo.ai
-                  LOGIN_PASSWORD: ${{ steps.rollout.outputs.pw }}
               run: |
                   set -euo pipefail
+
+                  # The suite signs in through the IdP now (playwright/live/auth.setup.ts drives
+                  # /login -> /login/oidc/ -> hanzo.id -> /complete/oidc/), so this password is
+                  # the IAM account's, typed into hanzo.id's form. It is no longer an insights
+                  # local credential -- there is no such thing any more. The step reads it
+                  # itself rather than taking it from a wait that no longer needs a session.
+                  KMS_CURL=(curl -fsS --retry 5 --retry-delay 2 --retry-connrefused --max-time 30)
+                  KMS_TOKEN=$("${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/auth/login" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+                    | jq -r '.accessToken // empty')
+                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+                  PW=$("${KMS_CURL[@]}" \
+                    "${KMS_ENDPOINT}/v1/kms/secrets/insights/E2E_PASSWORD?env=${KMS_SECRET_ENV}" \
+                    -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty' || true)
+                  [ -n "$PW" ] || { echo "::error::E2E_PASSWORD missing in KMS (insights, env ${KMS_SECRET_ENV})"; exit 1; }
+                  echo "::add-mask::${PW}"
+                  export LOGIN_PASSWORD="$PW"
+
                   corepack enable
                   # --no-frozen-lockfile, same as the image build one job up, and for a
                   # reason that predates this workflow: patchedDependencies is declared
@@ -414,3 +482,22 @@ jobs:
                   cd playwright
                   ./node_modules/.bin/playwright install --with-deps chromium
                   ./node_modules/.bin/playwright test -c live/live.config.ts
+
+            # The config already asks for a trace and a screenshot on failure
+            # (`trace: retain-on-failure`, `screenshot: only-on-failure`) and
+            # writes a junit file. Nothing collected them, so they were created
+            # and then destroyed with the container, and a failure here could
+            # only ever be read as the line that timed out.
+            #
+            # v3 deliberately: v4 and above error on this runner even when the
+            # job is green.
+            - name: Keep what the failure wrote
+              if: failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: playwright-live
+                  path: |
+                      playwright/test-results/
+                      playwright/live-results.xml
+                  retention-days: 14
+                  if-no-files-found: warn

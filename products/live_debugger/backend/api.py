@@ -209,7 +209,7 @@ class LiveDebuggerBreakpointViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
             "This endpoint allows external client applications (like Python scripts, Node.js apps, etc.) "
             "to fetch the list of active breakpoints so they can instrument their code accordingly. "
             "\n\nAuthentication: Requires a Project API Key in the Authorization header: "
-            "`Authorization: Bearer phs_<your-project-api-key>`. "
+            "`Authorization: Bearer sk-<your-project-api-key>`. "
             "You can find your Project API Key in Insights at: Settings → Project → Project API Key"
         ),
         parameters=[
@@ -260,7 +260,7 @@ class LiveDebuggerBreakpointViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         to fetch the list of active breakpoints so they can instrument their code accordingly.
 
         Authentication: Requires a Project API Key in the Authorization header:
-        Authorization: Bearer phs_<your-project-api-key>
+        Authorization: Bearer sk-<your-project-api-key>
 
         You can find your Project API Key in Insights at: Settings → Project → Project API Key
 

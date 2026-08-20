@@ -25,11 +25,11 @@ import { WizardModeShell } from './WizardModeShell'
  */
 export function WizardCloudRunBlock({
     onQueued,
-    hideHog = false,
+    hideScript = false,
     onRetryLocally,
 }: {
     onQueued?: () => void
-    hideHog?: boolean
+    hideScript?: boolean
     /** Forwarded to the install progress view so a failed run can offer "Run it yourself". */
     onRetryLocally?: () => void
 }): JSX.Element {
@@ -106,7 +106,7 @@ export function WizardCloudRunBlock({
     }
 
     return (
-        <WizardModeShell hideHog={hideHog} data-attr="wizard-cloud-run-block">
+        <WizardModeShell hideScript={hideScript} data-attr="wizard-cloud-run-block">
             <p className="text-sm text-muted mb-0">
                 We'll run the wizard against your repo and open a pull request with the SDK installed and events
                 flowing. Review it and merge whenever you're ready.
@@ -119,7 +119,7 @@ export function WizardCloudRunBlock({
                     to={connectGitHubUrl}
                     disableClientSideRouting
                     data-attr="wizard-cloud-run-connect-github"
-                    className={hideHog ? 'self-center' : 'self-start'}
+                    className={hideScript ? 'self-center' : 'self-start'}
                 >
                     Connect GitHub
                 </Button>

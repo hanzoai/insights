@@ -37,7 +37,7 @@ def get_support_slack_settings() -> dict:
     )
 
 
-def supporthog_missing_file_scopes(team: "Team") -> list[str]:
+def support_missing_file_scopes(team: "Team") -> list[str]:
     """File scopes this install hasn't granted, for logging why attachments failed.
 
     Installs authorized before we recorded scopes report both as missing, which is what
@@ -54,7 +54,7 @@ def get_support_slack_bot_token(team: "Team") -> str:
 
 
 def team_exists_for_slack_workspace(slack_team_id: str) -> bool:
-    """Whether any team has SupportHog connected to this Slack workspace.
+    """Whether any team has Support connected to this Slack workspace.
 
     Used by the webhook endpoints for region routing — the Celery task re-resolves
     the full config, so only existence matters here.
@@ -99,7 +99,7 @@ def validate_support_request(request: HttpRequest | Request) -> None:
         raise SlackIntegrationError("Invalid")
 
 
-def save_supporthog_slack_token(
+def save_support_slack_token(
     *,
     team: "Team",
     user: "User",
@@ -156,7 +156,7 @@ def save_supporthog_slack_token(
     )
 
 
-def clear_supporthog_slack_token(
+def clear_support_slack_token(
     *,
     team: "Team",
     user: "User",

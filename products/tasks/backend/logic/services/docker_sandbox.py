@@ -291,7 +291,7 @@ class DockerSandbox(SandboxBase):
             return NOTEBOOK_IMAGE_NAME
 
         # Slim ships its own standalone image (git + node + uv, no agent server, no skills)
-        # for review/exec sandboxes like stamphog — it never builds on the base image and
+        # for review/exec sandboxes like stamp — it never builds on the base image and
         # never needs the skills dist, unlike the default/notebook/PI builds below.
         if template == SandboxTemplate.SLIM_BASE:
             dockerfile_path = os.path.join(

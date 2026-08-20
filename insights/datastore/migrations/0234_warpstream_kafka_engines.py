@@ -2,9 +2,9 @@ from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
 from insights.datastore.log_entries import KAFKA_LOG_ENTRIES_WS_TABLE_SQL, LOG_ENTRIES_WS_MV_SQL
 from insights.models.app_metrics2.sql import APP_METRICS2_WS_MV_TABLE_SQL, KAFKA_APP_METRICS2_WS_TABLE_SQL
-from insights.models.tophog.sql import KAFKA_TOPFN_WS_TABLE_SQL, TOPFN_WS_MV_SQL
+from insights.models.topfn.sql import KAFKA_TOPFN_WS_TABLE_SQL, TOPFN_WS_MV_SQL
 
-# Migration to create WarpStream Kafka engine tables for log_entries, app_metrics2, and tophog.
+# Migration to create WarpStream Kafka engine tables for log_entries, app_metrics2, and topfn.
 #
 # These tables coexist alongside the existing MSK Kafka engine tables, reading from
 # the same topics but via the warpstream_ingestion named collection. Each has its own
@@ -13,7 +13,7 @@ from insights.models.tophog.sql import KAFKA_TOPFN_WS_TABLE_SQL, TOPFN_WS_MV_SQL
 # New tables:
 # - kafka_log_entries_ws + log_entries_ws_mv (INGESTION_SMALL)
 # - kafka_app_metrics2_ws + app_metrics2_ws_mv (INGESTION_MEDIUM)
-# - kafka_tophog_ws + tophog_ws_mv (INGESTION_MEDIUM)
+# - kafka_topfn_ws + topfn_ws_mv (INGESTION_MEDIUM)
 
 operations = [
     # log_entries (INGESTION_SMALL, matching existing MSK table)
@@ -34,7 +34,7 @@ operations = [
         APP_METRICS2_WS_MV_TABLE_SQL(),
         node_roles=[NodeRole.INGESTION_MEDIUM],
     ),
-    # tophog (INGESTION_MEDIUM, matching existing MSK table)
+    # topfn (INGESTION_MEDIUM, matching existing MSK table)
     run_sql_with_exceptions(
         KAFKA_TOPFN_WS_TABLE_SQL(),
         node_roles=[NodeRole.INGESTION_MEDIUM],

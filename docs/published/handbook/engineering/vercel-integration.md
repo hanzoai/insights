@@ -73,7 +73,7 @@ sequenceDiagram
     participant Stripe
 
     User->>VM: Click "Add Integration"
-    VM->>PH: PUT /api/vercel/v1/installations/{id}
+    VM->>PH: PUT /v1/vercel/v1/installations/{id}
     Note right of PH: installation credentials, user info
 
     PH->>PH: Create Organization (if new)
@@ -92,7 +92,7 @@ sequenceDiagram
     VM-->>User: Redirect to Insights
 ```
 
-**Key endpoint:** `PUT /api/vercel/v1/installations/{installation_id}` in `ee/api/vercel/vercel_installation.py`
+**Key endpoint:** `PUT /v1/vercel/v1/installations/{installation_id}` in `ee/api/vercel/vercel_installation.py`
 
 ### B. Connectable account (link existing Insights org)
 
@@ -110,7 +110,7 @@ sequenceDiagram
     PH->>PH: Store session in cache (10 min TTL)
 
     PH-->>User: Show org selection page
-    User->>PH: Select org, POST /api/vercel/connect/complete
+    User->>PH: Select org, POST /v1/vercel/connect/complete
     PH->>PH: Validate session + cookie
     PH->>PH: Create OrganizationIntegration (type="connectable")
     PH-->>User: Redirect to next_url
@@ -119,8 +119,8 @@ sequenceDiagram
 **Key endpoints:**
 
 - `GET /connect/vercel/callback` - OAuth callback (`ee/api/vercel/vercel_connect.py`)
-- `GET /api/vercel/connect/session` - Available orgs for linking
-- `POST /api/vercel/connect/complete` - Finalize the link
+- `GET /v1/vercel/connect/session` - Available orgs for linking
+- `POST /v1/vercel/connect/complete` - Finalize the link
 
 **Note:** Connectable installs do NOT call the billing service. The customer keeps their existing Insights billing. On uninstall, the `OrganizationIntegration` record is simply deleted with no billing side effects.
 
@@ -534,7 +534,7 @@ For integration or billing issues that need Vercel's involvement, post in the sh
 
 | File                                         | Purpose                                                                |
 | -------------------------------------------- | ---------------------------------------------------------------------- |
-| `ee/api/vercel/vercel_installation.py`       | Installation CRUD (`PUT /api/vercel/v1/installations/{id}`)            |
+| `ee/api/vercel/vercel_installation.py`       | Installation CRUD (`PUT /v1/vercel/v1/installations/{id}`)            |
 | `ee/api/vercel/vercel_connect.py`            | Connectable account OAuth flow                                         |
 | `ee/api/vercel/vercel_sso.py`                | SSO endpoints (`/login/vercel`)                                        |
 | `ee/api/vercel/vercel_webhooks.py`           | Webhook handler (`/webhooks/vercel`)                                   |
@@ -551,7 +551,7 @@ For integration or billing issues that need Vercel's involvement, post in the sh
 | File                                            | Purpose                                                               |
 | ----------------------------------------------- | --------------------------------------------------------------------- |
 | `api/activate.py`                               | `BillingAuthorizeViewSet` - authorize + deprecated uninstall redirect |
-| `api/billing.py`                                | Canonical uninstall endpoint (`/api/billing/uninstall`)               |
+| `api/billing.py`                                | Canonical uninstall endpoint (`/v1/billing/uninstall`)               |
 | `api/billing_provider_webhook.py`               | Receives "invoice paid" webhook from Vercel                           |
 | `billing_providers/clients/vercel.py`           | `VercelClient` - submits usage & invoices to Vercel                   |
 | `billing_providers/clients/vercel_api.py`       | Low-level API calls via Insights proxy                                 |

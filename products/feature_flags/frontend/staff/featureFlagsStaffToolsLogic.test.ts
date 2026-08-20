@@ -15,7 +15,7 @@ jest.mock('lib/elements/Toast/Toast', () => ({
 const TEAM: StaffTeamResult = {
     id: 5,
     name: 'Acme',
-    api_token: 'phc_acme',
+    api_token: 'pk-acme',
     organization_id: 'org-uuid',
     organization_name: 'Acme Org',
     project_id: 5,
@@ -28,9 +28,9 @@ describe('featureFlagsStaffToolsLogic', () => {
         jest.clearAllMocks()
         useMocks({
             get: {
-                '/api/feature_flags_staff_teams': { results: [TEAM] },
-                '/api/feature_flags_staff_cache': { results: [] },
-                '/api/feature_flags_staff_cache/warm_run': { run: null },
+                '/v1/feature_flags_staff_teams': { results: [TEAM] },
+                '/v1/feature_flags_staff_cache': { results: [] },
+                '/v1/feature_flags_staff_cache/warm_run': { run: null },
             },
         })
         initKeaTests()
@@ -55,8 +55,8 @@ describe('featureFlagsStaffToolsLogic', () => {
         it('loads cache status for the deep-linked team without a manual refresh', async () => {
             useMocks({
                 get: {
-                    '/api/feature_flags_staff_teams': { results: [TEAM] },
-                    '/api/feature_flags_staff_cache': {
+                    '/v1/feature_flags_staff_teams': { results: [TEAM] },
+                    '/v1/feature_flags_staff_cache': {
                         results: [
                             {
                                 team_id: 5,
@@ -98,14 +98,14 @@ describe('featureFlagsStaffToolsLogic', () => {
             {
                 label: 'rebuildCache',
                 run: () => logic.actions.rebuildCache({ caches: ['evaluation'] }),
-                url: '/api/feature_flags_staff_cache/rebuild',
+                url: '/v1/feature_flags_staff_cache/rebuild',
                 successAction: 'rebuildCacheSuccess',
                 failureAction: 'rebuildCacheFailure',
             },
             {
                 label: 'clearCache',
                 run: () => logic.actions.clearCache({ caches: ['evaluation'] }),
-                url: '/api/feature_flags_staff_cache/clear',
+                url: '/v1/feature_flags_staff_cache/clear',
                 successAction: 'clearCacheSuccess',
                 failureAction: 'clearCacheFailure',
             },
@@ -152,7 +152,7 @@ describe('featureFlagsStaffToolsLogic', () => {
         it('fetches the entry for the requested team and cache, keyed by team_id and cache', async () => {
             useMocks({
                 get: {
-                    '/api/feature_flags_staff_cache/entry': ({ request }) => {
+                    '/v1/feature_flags_staff_cache/entry': ({ request }) => {
                         const params = new URL(request.url).searchParams
                         return [
                             200,
@@ -177,7 +177,7 @@ describe('featureFlagsStaffToolsLogic', () => {
         })
 
         it('clears the viewed entry on close', async () => {
-            useMocks({ get: { '/api/feature_flags_staff_cache/entry': { team_id: 5, cache: 'evaluation' } } })
+            useMocks({ get: { '/v1/feature_flags_staff_cache/entry': { team_id: 5, cache: 'evaluation' } } })
 
             logic.actions.viewCacheEntry({ teamId: 5, cache: 'evaluation' })
             await expectLogic(logic).toDispatchActions(['viewCacheEntrySuccess'])
@@ -187,7 +187,7 @@ describe('featureFlagsStaffToolsLogic', () => {
         })
 
         it('shows an error toast and closes the modal on failure', async () => {
-            useMocks({ get: { '/api/feature_flags_staff_cache/entry': () => [404, {}] } })
+            useMocks({ get: { '/v1/feature_flags_staff_cache/entry': () => [404, {}] } })
 
             logic.actions.viewCacheEntry({ teamId: 5, cache: 'evaluation' })
             await expectLogic(logic).toDispatchActions(['viewCacheEntryFailure'])
@@ -216,7 +216,7 @@ describe('featureFlagsStaffToolsLogic', () => {
             // Let the mount-time load (mocked as { run: null }) settle first so the
             // assertion below unambiguously matches the reload with the new mock.
             await expectLogic(logic).toDispatchActions(['loadWarmRunSuccess'])
-            useMocks({ get: { '/api/feature_flags_staff_cache/warm_run': { run: WARM_RUN } } })
+            useMocks({ get: { '/v1/feature_flags_staff_cache/warm_run': { run: WARM_RUN } } })
 
             await expectLogic(logic, () => {
                 logic.actions.loadWarmRun()
@@ -233,7 +233,7 @@ describe('featureFlagsStaffToolsLogic', () => {
         it('refetches status after a cancel request so the UI reflects it promptly', async () => {
             useMocks({
                 post: {
-                    '/api/feature_flags_staff_cache/warm_run/cancel': { run_id: 'run-1', cancel_requested: true },
+                    '/v1/feature_flags_staff_cache/warm_run/cancel': { run_id: 'run-1', cancel_requested: true },
                 },
             })
 
@@ -243,7 +243,7 @@ describe('featureFlagsStaffToolsLogic', () => {
         })
 
         it('shows an error toast when the cancel request fails', async () => {
-            useMocks({ post: { '/api/feature_flags_staff_cache/warm_run/cancel': () => [400, {}] } })
+            useMocks({ post: { '/v1/feature_flags_staff_cache/warm_run/cancel': () => [400, {}] } })
 
             logic.actions.cancelWarmRun()
             await expectLogic(logic).toDispatchActions(['cancelWarmRunFailure'])
@@ -254,13 +254,13 @@ describe('featureFlagsStaffToolsLogic', () => {
             // Let the mount-time load (mocked as { run: null }, idle cadence) settle first.
             await expectLogic(logic).toDispatchActions(['loadWarmRunSuccess'])
 
-            useMocks({ get: { '/api/feature_flags_staff_cache/warm_run': { run: WARM_RUN } } })
+            useMocks({ get: { '/v1/feature_flags_staff_cache/warm_run': { run: WARM_RUN } } })
             logic.actions.loadWarmRun()
             await expectLogic(logic).toDispatchActions(['loadWarmRunSuccess'])
             expect(logic.cache.warmRunPollMs).toEqual(5000)
 
             // A stale "running" run is treated as idle, same as a completed/cancelled one.
-            useMocks({ get: { '/api/feature_flags_staff_cache/warm_run': { run: { ...WARM_RUN, is_stale: true } } } })
+            useMocks({ get: { '/v1/feature_flags_staff_cache/warm_run': { run: { ...WARM_RUN, is_stale: true } } } })
             logic.actions.loadWarmRun()
             await expectLogic(logic).toDispatchActions(['loadWarmRunSuccess'])
             expect(logic.cache.warmRunPollMs).toEqual(30000)
@@ -273,12 +273,12 @@ describe('featureFlagsStaffToolsLogic', () => {
 
             // Put the poller into the active cadence first, so a no-op failure handler would be
             // observable (staying at 5000) instead of masked by the idle default from mount.
-            useMocks({ get: { '/api/feature_flags_staff_cache/warm_run': { run: WARM_RUN } } })
+            useMocks({ get: { '/v1/feature_flags_staff_cache/warm_run': { run: WARM_RUN } } })
             logic.actions.loadWarmRun()
             await expectLogic(logic).toDispatchActions(['loadWarmRunSuccess'])
             expect(logic.cache.warmRunPollMs).toEqual(5000)
 
-            useMocks({ get: { '/api/feature_flags_staff_cache/warm_run': () => [500, {}] } })
+            useMocks({ get: { '/v1/feature_flags_staff_cache/warm_run': () => [500, {}] } })
             logic.actions.loadWarmRun()
             await expectLogic(logic).toDispatchActions(['loadWarmRunFailure'])
             expect(logic.cache.warmRunPollMs).toEqual(30000)
@@ -300,8 +300,8 @@ describe('featureFlagsStaffToolsLogic', () => {
     })
 
     describe('team config', () => {
-        const TEAM_CONFIG_URL = '/api/feature_flags_staff_team_config'
-        const SET_URL = '/api/feature_flags_staff_team_config/set'
+        const TEAM_CONFIG_URL = '/v1/feature_flags_staff_team_config'
+        const SET_URL = '/v1/feature_flags_staff_team_config/set'
 
         it('loads team config alongside cache status when the team selection changes', async () => {
             useMocks({

@@ -1,11 +1,11 @@
 ---
 name: setting-up-support-slack-locally
 description: >
-  Connect a real Slack workspace to local Insights Conversations (the SupportHog Slack app) so Slack
+  Connect a real Slack workspace to local Insights Conversations (the Support Slack app) so Slack
   messages become support tickets and replies post back. Use when the user wants to test the conversations
   Slack integration locally, hits "Support Slack OAuth client ID is not configured", gets a white screen or
   "Network error" on the OAuth callback, or asks how to set SUPPORT_SLACK_APP_CLIENT_ID / a tunnel for
-  supporthog Slack events. Covers the Slack app + scopes, the SUPPORT_SLACK_* dynamic settings, and the
+  support Slack events. Covers the Slack app + scopes, the SUPPORT_SLACK_* dynamic settings, and the
   key split: localhost for OAuth and the UI, a public tunnel only for inbound events.
 ---
 
@@ -24,7 +24,7 @@ Keep the whole app and the OAuth flow on `localhost`, and point only Event Subsc
 at the tunnel. This also sidesteps free-tier tunnel rate limits, since the tunnel then carries only Slack's
 low-volume event POSTs rather than the entire SPA.
 
-This is the conversations/SupportHog variant of the general
+This is the conversations/Support variant of the general
 [Slack local setup guide](../../../../docs/internal/slack-local-setup-guide.md); that guide covers the
 Insights Desktop / notifications Slack app (`SLACK_APP_*`, `/integrations/slack/callback`). Conversations uses
 its own `SUPPORT_SLACK_*` credentials and `/api/conversations/v1/slack/*` routes, but the tunnel and
@@ -32,7 +32,7 @@ its own `SUPPORT_SLACK_*` credentials and `/api/conversations/v1/slack/*` routes
 
 ## The endpoints
 
-All under `products/conversations/backend/api/urls.py`, prefixed `/api/conversations/`:
+All under `products/conversations/backend/api/urls.py`, prefixed `/v1/conversations/`:
 
 | Route                    | Purpose                                                       | Reachability             |
 | ------------------------ | ------------------------------------------------------------- | ------------------------ |

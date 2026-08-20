@@ -55,7 +55,7 @@ pub fn validate_token(token: &str) -> Result<(), InvalidTokenReason> {
         return Err(InvalidTokenReason::NotAscii);
     }
 
-    if token.starts_with("phx_") {
+    if token.starts_with("sk-") {
         return Err(InvalidTokenReason::PersonalApiKey);
     }
 
@@ -98,7 +98,7 @@ mod tests {
 
     #[test]
     fn blocks_personal_api_key() {
-        let valid = validate_token("phx_hellothere");
+        let valid = validate_token("sk-hellothere");
 
         assert!(valid.is_err());
         assert_eq!(valid.unwrap_err(), InvalidTokenReason::PersonalApiKey);

@@ -51,12 +51,12 @@ from .run_evaluation import (
     WorkflowResult,
     disable_evaluation_activity,
     emit_evaluation_event_activity,
-    execute_hog_eval_activity,
+    execute_script_eval_activity,
     execute_llm_judge_activity,
     execute_sentiment_eval_activity,
     extract_event_tools,
     fetch_evaluation_activity,
-    run_hog_eval,
+    run_script_eval,
     send_evaluation_disabled_email_activity,
 )
 
@@ -67,13 +67,13 @@ def _mock_config_with_active_key(provider: str = "openai") -> MagicMock:
     return MagicMock(active_provider_key=key)
 
 
-def test_status_reason_detail_for_terminal_user_error_only_keeps_truncated_hog_errors():
-    hog_spec = require_user_error_spec("hog_error")
+def test_status_reason_detail_for_terminal_user_error_only_keeps_truncated_script_errors():
+    script_spec = require_user_error_spec("script_error")
     permission_spec = require_user_error_spec("permission_error")
     long_message = "x" * (MAX_STATUS_REASON_DETAIL_LENGTH + 10)
 
     assert status_reason_detail_for_terminal_user_error(permission_spec, "provider denied") is None
-    assert status_reason_detail_for_terminal_user_error(hog_spec, long_message) == (
+    assert status_reason_detail_for_terminal_user_error(script_spec, long_message) == (
         f"{long_message[: MAX_STATUS_REASON_DETAIL_LENGTH - 3]}..."
     )
 
@@ -621,20 +621,20 @@ class TestRunEvaluationWorkflow:
                 "team_id": 1,
             }
 
-        @activity.defn(name="execute_hog_eval_activity")
-        async def mock_execute_hog_eval(
+        @activity.defn(name="execute_script_eval_activity")
+        async def mock_execute_script_eval(
             evaluation: dict[str, Any], event_data: dict[str, Any]
         ) -> EvaluationActivityResult:
-            calls.append("execute_hog")
+            calls.append("execute_script")
             return {
                 "result_type": "boolean",
                 "verdict": False,
                 "reasoning": "Must return boolean, got int: 42",
                 "allows_na": False,
                 "skipped": True,
-                "skip_reason": "hog_error",
+                "skip_reason": "script_error",
                 "terminal_user_error": True,
-                "status_reason": "hog_error",
+                "status_reason": "script_error",
             }
 
         @activity.defn(name="disable_evaluation_activity")
@@ -662,7 +662,7 @@ class TestRunEvaluationWorkflow:
                 workflows=[RunEvaluationWorkflow],
                 activities=[
                     mock_fetch_evaluation,
-                    mock_execute_hog_eval,
+                    mock_execute_script_eval,
                     mock_disable_evaluation,
                     mock_send_evaluation_disabled_email,
                     mock_emit_evaluation_event,
@@ -681,17 +681,17 @@ class TestRunEvaluationWorkflow:
 
         assert calls == [
             "fetch",
-            "execute_hog",
-            f"disable:{evaluation_id}:1:hog_error:Must return boolean, got int: 42",
+            "execute_script",
+            f"disable:{evaluation_id}:1:script_error:Must return boolean, got int: 42",
             (
-                f"email:{evaluation_id}:hog_error:"
+                f"email:{evaluation_id}:script_error:"
                 "The Script evaluation code failed. Fix the code before re-enabling this evaluation."
             ),
         ]
         assert result["evaluation_id"] == evaluation_id
         assert result["evaluation_type"] == "script"
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
         assert result["message"] == "Must return boolean, got int: 42"
 
     @pytest.mark.asyncio
@@ -711,20 +711,20 @@ class TestRunEvaluationWorkflow:
                 "team_id": 1,
             }
 
-        @activity.defn(name="execute_hog_eval_activity")
-        async def mock_execute_hog_eval(
+        @activity.defn(name="execute_script_eval_activity")
+        async def mock_execute_script_eval(
             evaluation: dict[str, Any], event_data: dict[str, Any]
         ) -> EvaluationActivityResult:
-            calls.append("execute_hog")
+            calls.append("execute_script")
             return {
                 "result_type": "boolean",
                 "verdict": False,
                 "reasoning": "Must return boolean, got int: 42",
                 "allows_na": False,
                 "skipped": True,
-                "skip_reason": "hog_error",
+                "skip_reason": "script_error",
                 "terminal_user_error": True,
-                "status_reason": "hog_error",
+                "status_reason": "script_error",
             }
 
         @activity.defn(name="disable_evaluation_activity")
@@ -748,7 +748,7 @@ class TestRunEvaluationWorkflow:
                 workflows=[RunEvaluationWorkflow],
                 activities=[
                     mock_fetch_evaluation,
-                    mock_execute_hog_eval,
+                    mock_execute_script_eval,
                     mock_disable_evaluation,
                     mock_send_evaluation_disabled_email,
                 ],
@@ -766,12 +766,12 @@ class TestRunEvaluationWorkflow:
 
         assert calls == [
             "fetch",
-            "execute_hog",
-            f"disable:{evaluation_id}:1:hog_error:Must return boolean, got int: 42",
+            "execute_script",
+            f"disable:{evaluation_id}:1:script_error:Must return boolean, got int: 42",
         ]
         assert result["evaluation_id"] == evaluation_id
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
 
     @pytest.mark.django_db(transaction=True)
     def test_execute_llm_judge_activity_allows_na_applicable(self, setup_data, active_key_config):
@@ -1108,14 +1108,14 @@ class TestRunEvaluationWorkflow:
         assert evaluation.enabled
 
         disabled = await disable_evaluation_activity(
-            str(evaluation.id), team.id, "hog_error", "Must return boolean, got int: 42"
+            str(evaluation.id), team.id, "script_error", "Must return boolean, got int: 42"
         )
 
         await sync_to_async(evaluation.refresh_from_db)()
         assert disabled is True
         assert not evaluation.enabled
         assert evaluation.status == "error"
-        assert evaluation.status_reason == "hog_error"
+        assert evaluation.status_reason == "script_error"
         assert evaluation.status_reason_detail == "Must return boolean, got int: 42"
 
         logs = await sync_to_async(
@@ -1127,12 +1127,12 @@ class TestRunEvaluationWorkflow:
         fields = {c["field"]: c for c in detail["changes"]}
         assert fields["status"]["before"] == "active"
         assert fields["status"]["after"] == "error"
-        assert fields["status_reason"]["after"] == "hog_error"
+        assert fields["status_reason"]["after"] == "script_error"
         assert fields["status_reason_detail"]["after"] == "Must return boolean, got int: 42"
         assert logs[0].is_system is True
 
         disabled_again = await disable_evaluation_activity(
-            str(evaluation.id), team.id, "hog_error", "Must return boolean, got int: 42"
+            str(evaluation.id), team.id, "script_error", "Must return boolean, got int: 42"
         )
 
         logs_after_retry = await sync_to_async(
@@ -1398,16 +1398,16 @@ class TestRunEvaluationWorkflow:
             assert result["provider_key_state"] == provider_key_state
 
 
-class TestExecuteHogEvalActivity:
+class TestExecuteScriptEvalActivity:
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_returns_true(self, setup_data):
+    async def test_script_eval_returns_true(self, setup_data):
         team = setup_data["team"]
 
         # Compile source to bytecode for the test
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return true", "destination")
+        bytecode = compile_script("return true", "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -1421,19 +1421,19 @@ class TestExecuteHogEvalActivity:
 
         event_data = create_mock_event_data(team.id)
 
-        result = await execute_hog_eval_activity(evaluation, event_data)
+        result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["verdict"] is True
         assert result["reasoning"] == ""
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_returns_false(self, setup_data):
+    async def test_script_eval_returns_false(self, setup_data):
         team = setup_data["team"]
 
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return false", "destination")
+        bytecode = compile_script("return false", "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -1447,18 +1447,18 @@ class TestExecuteHogEvalActivity:
 
         event_data = create_mock_event_data(team.id)
 
-        result = await execute_hog_eval_activity(evaluation, event_data)
+        result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["verdict"] is False
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_non_bool_returns_skipped(self, setup_data):
+    async def test_script_eval_non_bool_returns_skipped(self, setup_data):
         team = setup_data["team"]
 
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return 42", "destination")
+        bytecode = compile_script("return 42", "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -1473,23 +1473,23 @@ class TestExecuteHogEvalActivity:
         event_data = create_mock_event_data(team.id)
 
         # A non-boolean result is a user-authored Script error: recorded as skipped, not raised.
-        result = await execute_hog_eval_activity(evaluation, event_data)
+        result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
         assert result["terminal_user_error"] is True
-        assert result["status_reason"] == "hog_error"
+        assert result["status_reason"] == "script_error"
         assert "Must return boolean" in result["reasoning"]
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_captures_print_as_reasoning(self, setup_data):
+    async def test_script_eval_captures_print_as_reasoning(self, setup_data):
         team = setup_data["team"]
 
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
         source = "print('checking output'); return true"
-        bytecode = compile_hog(source, "destination")
+        bytecode = compile_script(source, "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -1503,14 +1503,14 @@ class TestExecuteHogEvalActivity:
 
         event_data = create_mock_event_data(team.id)
 
-        result = await execute_hog_eval_activity(evaluation, event_data)
+        result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["verdict"] is True
         assert "checking output" in result["reasoning"]
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_missing_bytecode_raises_error(self, setup_data):
+    async def test_script_eval_missing_bytecode_raises_error(self, setup_data):
         team = setup_data["team"]
 
         evaluation = {
@@ -1526,11 +1526,11 @@ class TestExecuteHogEvalActivity:
         event_data = create_mock_event_data(team.id)
 
         with pytest.raises(ApplicationError, match="Missing bytecode"):
-            await execute_hog_eval_activity(evaluation, event_data)
+            await execute_script_eval_activity(evaluation, event_data)
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_wrong_type_raises_error(self, setup_data):
+    async def test_script_eval_wrong_type_raises_error(self, setup_data):
         team = setup_data["team"]
 
         evaluation = {
@@ -1546,14 +1546,14 @@ class TestExecuteHogEvalActivity:
         event_data = create_mock_event_data(team.id)
 
         with pytest.raises(ApplicationError, match="Unsupported evaluation type"):
-            await execute_hog_eval_activity(evaluation, event_data)
+            await execute_script_eval_activity(evaluation, event_data)
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_accesses_globals(self, setup_data):
+    async def test_script_eval_accesses_globals(self, setup_data):
         team = setup_data["team"]
 
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
         source = """
             return output == 'test output'
@@ -1561,7 +1561,7 @@ class TestExecuteHogEvalActivity:
                 and evaluation_events.1.output == output
                 and target.type == 'generation'
         """
-        bytecode = compile_hog(source, "destination")
+        bytecode = compile_script(source, "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -1575,18 +1575,18 @@ class TestExecuteHogEvalActivity:
 
         event_data = create_mock_event_data(team.id)
 
-        result = await execute_hog_eval_activity(evaluation, event_data)
+        result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["verdict"] is True
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_runtime_error_returns_skipped(self, setup_data):
+    async def test_script_eval_runtime_error_returns_skipped(self, setup_data):
         team = setup_data["team"]
 
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return true", "destination")
+        bytecode = compile_script("return true", "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -1604,22 +1604,22 @@ class TestExecuteHogEvalActivity:
         # is recorded as skipped, not raised — so it never reaches error tracking.
         user_error = {"verdict": None, "reasoning": "", "error": "Runtime error: Global variable not found: continue"}
         with patch(
-            "insights.temporal.ai_observability.evaluation_hog.run_hog_eval",
+            "insights.temporal.ai_observability.evaluation_script.run_script_eval",
             return_value=user_error,
         ):
-            result = await execute_hog_eval_activity(evaluation, event_data)
+            result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
         assert result["terminal_user_error"] is True
-        assert result["status_reason"] == "hog_error"
+        assert result["status_reason"] == "script_error"
         assert "Global variable not found" in result["reasoning"]
 
     @pytest.mark.asyncio
-    async def test_hog_eval_length_null_returns_skipped(self):
-        from insights.cdp.validation import compile_hog
+    async def test_script_eval_length_null_returns_skipped(self):
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return length(null) > 0", "destination")
+        bytecode = compile_script("return length(null) > 0", "destination")
         evaluation = {
             "id": "eval-id",
             "name": "Script Eval",
@@ -1630,22 +1630,22 @@ class TestExecuteHogEvalActivity:
             "team_id": 1,
         }
 
-        result = await execute_hog_eval_activity(evaluation, create_mock_event_data(1))
+        result = await execute_script_eval_activity(evaluation, create_mock_event_data(1))
 
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
         assert result["terminal_user_error"] is True
-        assert result["status_reason"] == "hog_error"
+        assert result["status_reason"] == "script_error"
         assert result["verdict"] is False
         assert "Runtime error: Can not call length on null" in result["reasoning"]
         assert "TypeError" not in result["reasoning"]
         assert "NoneType" not in result["reasoning"]
 
     @pytest.mark.asyncio
-    async def test_hog_eval_comparison_type_error_returns_skipped(self):
-        from insights.cdp.validation import compile_hog
+    async def test_script_eval_comparison_type_error_returns_skipped(self):
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return properties.missing <= 1.0", "destination")
+        bytecode = compile_script("return properties.missing <= 1.0", "destination")
         evaluation = {
             "id": "eval-id",
             "name": "Script Eval",
@@ -1656,12 +1656,12 @@ class TestExecuteHogEvalActivity:
             "team_id": 1,
         }
 
-        result = await execute_hog_eval_activity(evaluation, create_mock_event_data(1))
+        result = await execute_script_eval_activity(evaluation, create_mock_event_data(1))
 
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
         assert result["terminal_user_error"] is True
-        assert result["status_reason"] == "hog_error"
+        assert result["status_reason"] == "script_error"
         assert result["verdict"] is False
         assert "Runtime error: '<=' not supported between instances of 'NoneType' and 'float'" in result["reasoning"]
         assert "Unexpected error during evaluation" not in result["reasoning"]
@@ -1688,10 +1688,10 @@ class TestExecuteHogEvalActivity:
         ],
         ids=["invalid-regex", "list-regex-input", "array-assignment-index"],
     )
-    async def test_hog_eval_vm_user_errors_return_skipped(self, source, properties, expected_reasoning):
-        from insights.cdp.validation import compile_hog
+    async def test_script_eval_vm_user_errors_return_skipped(self, source, properties, expected_reasoning):
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog(source, "destination")
+        bytecode = compile_script(source, "destination")
         evaluation = {
             "id": "eval-id",
             "name": "Script Eval",
@@ -1703,21 +1703,21 @@ class TestExecuteHogEvalActivity:
         }
         event_properties = {"$ai_input": "test input", "$ai_output": "test output", **properties}
 
-        result = await execute_hog_eval_activity(evaluation, create_mock_event_data(1, properties=event_properties))
+        result = await execute_script_eval_activity(evaluation, create_mock_event_data(1, properties=event_properties))
 
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
         assert result["terminal_user_error"] is True
-        assert result["status_reason"] == "hog_error"
+        assert result["status_reason"] == "script_error"
         assert result["verdict"] is False
         assert expected_reasoning in result["reasoning"]
         assert "Unexpected error during evaluation" not in result["reasoning"]
 
     @pytest.mark.asyncio
-    async def test_hog_eval_unexpected_error_raises(self):
-        from insights.cdp.validation import compile_hog
+    async def test_script_eval_unexpected_error_raises(self):
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return true", "destination")
+        bytecode = compile_script("return true", "destination")
 
         evaluation = {
             "id": "eval-id",
@@ -1739,11 +1739,11 @@ class TestExecuteHogEvalActivity:
             "unexpected": True,
         }
         with patch(
-            "insights.temporal.ai_observability.evaluation_hog.run_hog_eval",
+            "insights.temporal.ai_observability.evaluation_script.run_script_eval",
             return_value=unexpected_error,
         ):
             with pytest.raises(ApplicationError, match="Unexpected error during evaluation"):
-                await execute_hog_eval_activity(evaluation, event_data)
+                await execute_script_eval_activity(evaluation, event_data)
 
 
 class TestExecuteSentimentEvalActivity:
@@ -1911,25 +1911,25 @@ class TestEvalResultModels:
             BooleanWithNAEvalResult(reasoning="Not applicable", applicable=False, verdict=True)
 
 
-class TestRunHogEvalAllowsNA:
+class TestRunScriptEvalAllowsNA:
     @pytest.fixture(autouse=True)
     def _compile(self):
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        self.compile_hog = compile_hog
+        self.compile_script = compile_script
 
     def _event_data(self) -> dict[str, Any]:
         return create_mock_event_data(team_id=1)
 
-    @patch("insights.temporal.ai_observability.evaluation_hog.execute_hog_eval_bytecode")
+    @patch("insights.temporal.ai_observability.evaluation_script.execute_script_eval_bytecode")
     def test_saved_generation_source_only_builds_compatibility_globals(self, mock_execute):
         mock_execute.return_value = {"verdict": True, "reasoning": "", "error": None}
-        bytecode = self.compile_hog(
+        bytecode = self.compile_script(
             "return output == 'evaluation_events' or output == 'target'",
             "destination",
         )
 
-        run_hog_eval(bytecode, self._event_data())
+        run_script_eval(bytecode, self._event_data())
 
         globals_dict = mock_execute.call_args.args[1]
         assert set(globals_dict) == {"input", "output", "properties", "event"}
@@ -1941,24 +1941,24 @@ class TestRunHogEvalAllowsNA:
         ]
     )
     def test_bool_result_with_allows_na(self, _name, source, expected_verdict, expected_applicable):
-        bytecode = self.compile_hog(source, "destination")
-        result = run_hog_eval(bytecode, self._event_data(), allows_na=True)
+        bytecode = self.compile_script(source, "destination")
+        result = run_script_eval(bytecode, self._event_data(), allows_na=True)
 
         assert result["verdict"] is expected_verdict
         assert result["applicable"] is expected_applicable
         assert result["error"] is None
 
     def test_null_return_with_allows_na_true(self):
-        bytecode = self.compile_hog("return null", "destination")
-        result = run_hog_eval(bytecode, self._event_data(), allows_na=True)
+        bytecode = self.compile_script("return null", "destination")
+        result = run_script_eval(bytecode, self._event_data(), allows_na=True)
 
         assert result["verdict"] is None
         assert result["applicable"] is False
         assert result["error"] is None
 
     def test_null_return_with_allows_na_false(self):
-        bytecode = self.compile_hog("return null", "destination")
-        result = run_hog_eval(bytecode, self._event_data(), allows_na=False)
+        bytecode = self.compile_script("return null", "destination")
+        result = run_script_eval(bytecode, self._event_data(), allows_na=False)
 
         assert result["verdict"] is None
         assert result["error"] is not None
@@ -1966,22 +1966,22 @@ class TestRunHogEvalAllowsNA:
         assert "applicable" not in result
 
     def test_bool_result_without_allows_na_has_no_applicable(self):
-        bytecode = self.compile_hog("return true", "destination")
-        result = run_hog_eval(bytecode, self._event_data(), allows_na=False)
+        bytecode = self.compile_script("return true", "destination")
+        result = run_script_eval(bytecode, self._event_data(), allows_na=False)
 
         assert result["verdict"] is True
         assert "applicable" not in result
 
 
-class TestExecuteHogEvalActivityAllowsNA:
+class TestExecuteScriptEvalActivityAllowsNA:
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_null_return_with_allows_na(self, setup_data):
+    async def test_script_eval_null_return_with_allows_na(self, setup_data):
         team = setup_data["team"]
 
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return null", "destination")
+        bytecode = compile_script("return null", "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -1995,7 +1995,7 @@ class TestExecuteHogEvalActivityAllowsNA:
 
         event_data = create_mock_event_data(team.id)
 
-        result = await execute_hog_eval_activity(evaluation, event_data)
+        result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["verdict"] is None
         assert result["applicable"] is False
@@ -2003,12 +2003,12 @@ class TestExecuteHogEvalActivityAllowsNA:
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_bool_return_with_allows_na(self, setup_data):
+    async def test_script_eval_bool_return_with_allows_na(self, setup_data):
         team = setup_data["team"]
 
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return true", "destination")
+        bytecode = compile_script("return true", "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -2022,7 +2022,7 @@ class TestExecuteHogEvalActivityAllowsNA:
 
         event_data = create_mock_event_data(team.id)
 
-        result = await execute_hog_eval_activity(evaluation, event_data)
+        result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["verdict"] is True
         assert result["applicable"] is True
@@ -2030,12 +2030,12 @@ class TestExecuteHogEvalActivityAllowsNA:
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_hog_eval_null_return_without_allows_na_returns_skipped(self, setup_data):
+    async def test_script_eval_null_return_without_allows_na_returns_skipped(self, setup_data):
         team = setup_data["team"]
 
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return null", "destination")
+        bytecode = compile_script("return null", "destination")
 
         evaluation = {
             "id": str(setup_data["evaluation"].id),
@@ -2049,12 +2049,12 @@ class TestExecuteHogEvalActivityAllowsNA:
 
         event_data = create_mock_event_data(team.id)
 
-        result = await execute_hog_eval_activity(evaluation, event_data)
+        result = await execute_script_eval_activity(evaluation, event_data)
 
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
         assert result["terminal_user_error"] is True
-        assert result["status_reason"] == "hog_error"
+        assert result["status_reason"] == "script_error"
         assert result["verdict"] is False
         assert "Must return boolean" in result["reasoning"]
 

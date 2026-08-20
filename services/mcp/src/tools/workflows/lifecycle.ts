@@ -19,7 +19,7 @@ const patchStatus = async (
     const projectId = await context.stateManager.getProjectId()
     const result = await context.api.request<Schemas.InsightsFlow>({
         method: 'PATCH',
-        path: `/api/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(params.id))}/`,
+        path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/`,
         body: { status },
     })
     return await withInsightsUrl(context, result, `/pipeline/destinations/script-${result.id}`)

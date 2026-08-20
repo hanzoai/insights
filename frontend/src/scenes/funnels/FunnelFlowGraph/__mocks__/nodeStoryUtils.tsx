@@ -50,8 +50,8 @@ export function makeStep(name: string, order: number, count: number, total: numb
         type: 'events',
         average_conversion_time: order > 0 ? 120 : null,
         median_conversion_time: order > 0 ? 90 : null,
-        converted_people_url: '/api/person/funnel/?',
-        dropped_people_url: order > 0 ? '/api/person/funnel/?' : null,
+        converted_people_url: '/v1/person/funnel/?',
+        dropped_people_url: order > 0 ? '/v1/person/funnel/?' : null,
         droppedOffFromPrevious: total - count,
         conversionRates: { fromPrevious, total: fromPrevious, fromBasisStep: fromPrevious },
     } as unknown as FunnelStepWithConversionMetrics

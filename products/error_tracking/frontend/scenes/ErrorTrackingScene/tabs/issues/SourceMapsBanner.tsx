@@ -10,7 +10,7 @@ import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
 import { isSourceMapsRecommendation, recommendationsTabLogic } from '../recommendations/recommendationsTabLogic'
 import { SourceMapsFixModal } from '../recommendations/SourceMapsFixModal'
 import { SOURCE_MAPS_DOCS_URL, sourceMapsFixWizardLogic } from '../recommendations/sourceMapsFixWizardLogic'
-import { WizardHog } from '../recommendations/sourceMapsWizardVisuals'
+import { WizardScript } from '../recommendations/sourceMapsWizardVisuals'
 
 // Dismissal is independent of the source maps recommendation's own dismissed_at —
 // dismissing here only hides this banner, via the standard localStorage-backed pattern.
@@ -58,7 +58,7 @@ function SourceMapsBannerContent({ percent, lookbackHours }: { percent: number; 
                         <div className="relative hidden sm:block shrink-0 self-stretch w-20">
                             <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none">
                                 <div className="absolute -inset-2 bg-[radial-gradient(circle,rgba(43,111,244,0.18),transparent_70%)]" />
-                                <WizardHog className="relative w-20 h-20 -rotate-3" />
+                                <WizardScript className="relative w-20 h-20 -rotate-3" />
                             </div>
                         </div>
                         <div className="flex-1 min-w-0">

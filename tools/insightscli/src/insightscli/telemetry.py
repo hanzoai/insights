@@ -319,7 +319,7 @@ def flush_async() -> None:
 
 
 def _debug(msg: str, payload: dict[str, Any] | None = None) -> None:
-    if os.environ.get("HOGLI_DEBUG") != "1":
+    if os.environ.get("INSIGHTSCLI_DEBUG") != "1":
         return
     sys.stderr.write(f"[telemetry] {msg}\n")
     if payload:

@@ -6,7 +6,7 @@ import { ComboChart } from './ComboChart'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-const meta: Meta = { title: 'Components/HogCharts/ComboChart', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/ComboChart', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj<{}>

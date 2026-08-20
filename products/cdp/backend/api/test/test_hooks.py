@@ -37,7 +37,7 @@ class TestHooksAPI(DatastoreTestMixin, APIBaseTest):
     def test_delete_hook(self):
         hook_id = "abc123"
         Hook.objects.create(id=hook_id, user=self.user, team=self.team, resource_id=20)
-        response = self.client.delete(f"/api/projects/{self.team.id}/hooks/{hook_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/hooks/{hook_id}")
         self.assertEqual(response.status_code, 204)
 
     def test_invalid_target(self):
@@ -45,7 +45,7 @@ class TestHooksAPI(DatastoreTestMixin, APIBaseTest):
             "target": "https://hooks.non-zapier.com/abcd/",
             "event": "action_performed",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/hooks/", data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/hooks/", data)
         self.assertEqual(response.status_code, 400)
 
     def test_create_insights_function_via_hook(self):
@@ -55,7 +55,7 @@ class TestHooksAPI(DatastoreTestMixin, APIBaseTest):
             "resource_id": self.action.id,
         }
 
-        res = self.client.post(f"/api/projects/{self.team.id}/hooks/", data)
+        res = self.client.post(f"/v1/projects/{self.team.id}/hooks/", data)
 
         assert res.status_code == 201, res.json()
         json = res.json()
@@ -88,13 +88,13 @@ class TestHooksAPI(DatastoreTestMixin, APIBaseTest):
             "resource_id": self.action.id,
         }
 
-        res = self.client.post(f"/api/projects/{self.team.id}/hooks/", data)
+        res = self.client.post(f"/v1/projects/{self.team.id}/hooks/", data)
 
         hook_id = res.json()["id"]
 
         assert InsightsFunction.objects.filter(enabled=True, deleted=False).count() == 1
 
-        res = self.client.delete(f"/api/projects/{self.team.id}/hooks/{hook_id}")
+        res = self.client.delete(f"/v1/projects/{self.team.id}/hooks/{hook_id}")
         assert res.status_code == 204
 
         assert InsightsFunction.objects.filter(enabled=True, deleted=False).count() == 0
@@ -118,7 +118,7 @@ class TestHooksAPI(DatastoreTestMixin, APIBaseTest):
             hooks.append(hook)
             insights_functions.append(insights_function)
 
-        res = self.client.delete(f"/api/projects/{self.team.id}/hooks/{hooks[0].id}")
+        res = self.client.delete(f"/v1/projects/{self.team.id}/hooks/{hooks[0].id}")
         assert res.status_code == 204
 
         # Ensure the right hook and script function were deleted

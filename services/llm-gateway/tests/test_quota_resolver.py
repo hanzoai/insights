@@ -90,22 +90,22 @@ class TestResolveQuotaStatus:
     @pytest.mark.asyncio
     async def test_forwards_authorization_header(self) -> None:
         resolver = self._make_resolver()
-        request = _make_request({"Authorization": "Bearer phx_test"}, resolver)
+        request = _make_request({"Authorization": "Bearer sk-test"}, resolver)
 
         status = await resolve_quota_status(request, team_id=42, resource_key="ai_credits")
 
         assert status == QuotaResourceStatus(limited=True)
-        assert resolver.get_resource_status.await_args.kwargs["auth_header"] == "Bearer phx_test"
+        assert resolver.get_resource_status.await_args.kwargs["auth_header"] == "Bearer sk-test"
 
     @pytest.mark.asyncio
     async def test_forwards_x_api_key_as_bearer(self) -> None:
         resolver = self._make_resolver()
-        request = _make_request({"x-api-key": " phx_test "}, resolver)
+        request = _make_request({"x-api-key": " sk-test "}, resolver)
 
         status = await resolve_quota_status(request, team_id=42, resource_key="ai_credits")
 
         assert status == QuotaResourceStatus(limited=True)
-        assert resolver.get_resource_status.await_args.kwargs["auth_header"] == "Bearer phx_test"
+        assert resolver.get_resource_status.await_args.kwargs["auth_header"] == "Bearer sk-test"
 
     @pytest.mark.asyncio
     async def test_x_api_key_takes_precedence_over_authorization(self) -> None:
@@ -113,13 +113,13 @@ class TestResolveQuotaStatus:
         # the one whose quota gets checked.
         resolver = self._make_resolver()
         request = _make_request(
-            {"x-api-key": "phx_from_api_key", "Authorization": "Bearer phx_from_auth"},
+            {"x-api-key": "sk-from_api_key", "Authorization": "Bearer sk-from_auth"},
             resolver,
         )
 
         await resolve_quota_status(request, team_id=42, resource_key="ai_credits")
 
-        assert resolver.get_resource_status.await_args.kwargs["auth_header"] == "Bearer phx_from_api_key"
+        assert resolver.get_resource_status.await_args.kwargs["auth_header"] == "Bearer sk-from_api_key"
 
     @pytest.mark.asyncio
     async def test_no_credentials_fails_open_without_resolver_call(self) -> None:
@@ -134,7 +134,7 @@ class TestResolveQuotaStatus:
     @pytest.mark.asyncio
     async def test_no_team_id_fails_open(self) -> None:
         resolver = self._make_resolver()
-        request = _make_request({"Authorization": "Bearer phx_test"}, resolver)
+        request = _make_request({"Authorization": "Bearer sk-test"}, resolver)
 
         status = await resolve_quota_status(request, team_id=None, resource_key="ai_credits")
 
@@ -150,11 +150,11 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=None, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=True)
         http_client.get.assert_awaited_once()
-        assert http_client.get.await_args.kwargs["headers"]["Authorization"] == "Bearer phx_test"
+        assert http_client.get.await_args.kwargs["headers"]["Authorization"] == "Bearer sk-test"
 
     @pytest.mark.asyncio
     async def test_parses_and_caches_code_usage_billing_flag(self) -> None:
@@ -169,14 +169,14 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=redis, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
         assert status.code_usage_billing_active is True
 
         # Round-trips through the cache - a one-sided cache would flip a paying
         # user's cap between hit and miss.
         cached_payload = redis.set.call_args.args[1]
         redis.get = AsyncMock(return_value=cached_payload.encode())
-        cached = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        cached = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
         assert cached.code_usage_billing_active is True
 
     @pytest.mark.asyncio
@@ -187,7 +187,7 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=None, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
         assert status.code_usage_billing_active is False
 
     @pytest.mark.asyncio
@@ -210,13 +210,13 @@ class TestQuotaResolver:
         redis = _FakeRedis()
         resolver = QuotaResolver(redis=redis, http_client=http_client)  # type: ignore[arg-type]
 
-        first = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        first = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
         assert first.code_usage_billing_active is True
         assert redis.ttls[_billing_key(42)] == _LAST_KNOWN_BILLING_TTL_SECONDS
 
         # The per-team quota entry expires; the refetch fails.
         del redis.store[_redis_key("ai_credits", 42)]
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=False, code_usage_billing_active=True)
         if failure_mode == "retries_exhausted":
@@ -243,7 +243,7 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=None, http_client=http_client)
 
-        status = await resolver.get_resource_status("insights_code_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("insights_code_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status.used_usd == 12.34
         assert status.limit_usd == 20.0
@@ -260,7 +260,7 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=None, http_client=http_client)
 
-        status = await resolver.get_resource_status("insights_code_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("insights_code_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status.used_usd is None
         assert status.limit_usd is None
@@ -276,8 +276,8 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=redis, http_client=http_client)  # type: ignore[arg-type]
 
-        first = await resolver.get_resource_status("insights_code_credits", team_id=42, auth_header="Bearer phx_test")
-        cached = await resolver.get_resource_status("insights_code_credits", team_id=42, auth_header="Bearer phx_test")
+        first = await resolver.get_resource_status("insights_code_credits", team_id=42, auth_header="Bearer sk-test")
+        cached = await resolver.get_resource_status("insights_code_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert (first.used_usd, first.limit_usd) == (12.34, 50.0)
         assert (cached.used_usd, cached.limit_usd) == (12.34, 50.0)
@@ -290,7 +290,7 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=None, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=False)
 
@@ -301,7 +301,7 @@ class TestQuotaResolver:
         http_client = _make_http_client(_make_response(401, {"detail": "no auth"}))
         resolver = QuotaResolver(redis=None, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=False)
         http_client.get.assert_awaited_once()
@@ -317,7 +317,7 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=None, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=True)
         assert http_client.get.await_count == 2
@@ -332,7 +332,7 @@ class TestQuotaResolver:
         )
         resolver = QuotaResolver(redis=None, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=False)
         assert http_client.get.await_count == 2
@@ -347,7 +347,7 @@ class TestQuotaResolver:
         redis.set = AsyncMock()
         resolver = QuotaResolver(redis=redis, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=False)
         assert http_client.get.await_count == len(_RETRY_DELAYS_SECONDS)
@@ -361,7 +361,7 @@ class TestQuotaResolver:
         http_client = _make_http_client(_make_response(200))
         resolver = QuotaResolver(redis=redis, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=True)
         redis.get.assert_awaited_once_with(_redis_key("ai_credits", 42))
@@ -375,7 +375,7 @@ class TestQuotaResolver:
         http_client = _make_http_client(_make_response(200, {"limited": {"ai_credits": {"limited": True}}}))
         resolver = QuotaResolver(redis=redis, http_client=http_client)
 
-        await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         # One write per key: the team+resource quota entry and the per-team
         # last-known billing bit.
@@ -402,7 +402,7 @@ class TestQuotaResolver:
         http_client = _make_http_client(_make_response(401, {"detail": "no auth"}))
         resolver = QuotaResolver(redis=redis, http_client=http_client)
 
-        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer phx_test")
+        status = await resolver.get_resource_status("ai_credits", team_id=42, auth_header="Bearer sk-test")
 
         assert status == QuotaResourceStatus(limited=False)
         redis.set.assert_not_awaited()

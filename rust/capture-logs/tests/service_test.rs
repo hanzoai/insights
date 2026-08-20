@@ -661,7 +661,7 @@ async fn middleware_decompresses_gzip_js_query_param() {
 
     let req = Request::builder()
         .method("POST")
-        .uri("/i/v1/logs?token=phc_test&compression=gzip-js")
+        .uri("/i/v1/logs?token=pk-test&compression=gzip-js")
         .header("content-type", "text/plain")
         .body(Body::from(gzipped))
         .unwrap();

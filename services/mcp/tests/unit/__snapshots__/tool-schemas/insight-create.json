@@ -177,7 +177,7 @@
                                                     "description": "Display settings for a plotted Y series.",
                                                     "properties": {
                                                         "color": {
-                                                            "description": "Custom color for this series as a hex string (e.g. `#1d4aff`).",
+                                                            "description": "Custom color for this series as a hex string (e.g. `#3d3d3d`).",
                                                             "type": "string"
                                                         },
                                                         "displayType": {
@@ -250,7 +250,7 @@
                                                         "description": "Display settings for a plotted Y series.",
                                                         "properties": {
                                                             "color": {
-                                                                "description": "Custom color for this series as a hex string (e.g. `#1d4aff`).",
+                                                                "description": "Custom color for this series as a hex string (e.g. `#3d3d3d`).",
                                                                 "type": "string"
                                                             },
                                                             "displayType": {
@@ -354,7 +354,7 @@
                                                         "description": "Display settings for a plotted Y series.",
                                                         "properties": {
                                                             "color": {
-                                                                "description": "Custom color for this series as a hex string (e.g. `#1d4aff`).",
+                                                                "description": "Custom color for this series as a hex string (e.g. `#3d3d3d`).",
                                                                 "type": "string"
                                                             },
                                                             "displayType": {

@@ -60,7 +60,7 @@ PERSONAS: dict[str, dict[str, str]] = {
         "blurb": "One page stole the show, pulling {value} of all your visitors.",
         "color": "#db5a9a",
     },
-    "search_hog": {
+    "search_script": {
         "name": "Search Sensation",
         "emoji": "🔍",
         "blurb": "Search engines sent the crowd this week, and {value} led the way.",
@@ -84,7 +84,7 @@ PERSONAS: dict[str, dict[str, str]] = {
         "blurb": "Across the board, this week beat last week. You're on the way up.",
         "color": "#6a5af0",
     },
-    "steady_hog": {
+    "steady_script": {
         "name": "Old Faithful",
         "emoji": "🦔",
         "blurb": "A calm, consistent week. Steady traffic is its own kind of win.",
@@ -151,7 +151,7 @@ def compute_persona(digest: dict) -> dict:
             min(round((top_sources[0].get("visitors") or 0) / visitors_current * 100), 100) if visitors_current else 0
         )
         if _domain_matches(top_source_name, _SEARCH_DOMAINS):
-            return persona("search_hog", top_source_display)
+            return persona("search_script", top_source_display)
         if _domain_matches(top_source_name, _SOCIAL_DOMAINS) or top_source_share >= 30:
             return persona("word_of_mouth", top_source_display)
 
@@ -161,7 +161,7 @@ def compute_persona(digest: dict) -> dict:
     if visitors_change > 0 and (pageviews_change > 0 or sessions_change > 0):
         return persona("rising_star")
 
-    return persona("steady_hog")
+    return persona("steady_script")
 
 
 def _build_highlights(digest: dict, compare: bool = True) -> list[dict]:

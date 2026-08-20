@@ -1,28 +1,27 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Banner, Input, Switch } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS, OrganizationMembershipLevel } from 'lib/constants'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
 import { Dialog } from 'lib/elements/Dialog'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Table, TableColumns } from 'lib/elements/Table'
 import { Tag } from 'lib/elements/Tag/Tag'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import {
     getReasonForAccessLevelChangeProhibition,
     membershipLevelToName,
     organizationMembershipLevelIntegers,
 } from 'lib/utils/permissioning'
 import { capitalizeFirstLetter, fullName } from 'lib/utils/strings'
-import { twoFactorLogic } from 'scenes/authentication/two-factor-setup/twoFactorLogic'
 import { membersExportLogic } from 'scenes/organization/membersExportLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -193,7 +192,6 @@ export function Members(): JSX.Element | null {
     const { setSearch, ensureAllMembersLoaded } = useActions(membersLogic)
     const { downloadMembersList } = useActions(membersExportLogic)
     const { updateOrganization } = useActions(organizationLogic)
-    const { openTwoFactorSetupModal } = useActions(twoFactorLogic)
 
     const adminRestrictionReason = useRestrictedArea({ minimumAccessLevel: OrganizationMembershipLevel.Admin })
     const hasHiddenMembers =
@@ -257,37 +255,6 @@ export function Members(): JSX.Element | null {
                 )
             },
             sorter: (a, b) => a.level - b.level,
-        },
-        {
-            title: '2FA',
-            dataIndex: 'is_2fa_enabled',
-            key: 'is_2fa_enabled',
-            render: function LevelRender(_, member) {
-                return (
-                    <>
-                        <Tooltip
-                            title={
-                                member.user.uuid == user.uuid && !member.is_2fa_enabled
-                                    ? 'Click to setup 2FA for your account'
-                                    : ''
-                            }
-                        >
-                            <Tag
-                                onClick={
-                                    member.user.uuid == user.uuid && !member.is_2fa_enabled
-                                        ? () => openTwoFactorSetupModal()
-                                        : undefined
-                                }
-                                data-attr="2fa-enabled"
-                                type={member.is_2fa_enabled ? 'success' : 'warning'}
-                            >
-                                {member.is_2fa_enabled ? '2FA enabled' : '2FA not enabled'}
-                            </Tag>
-                        </Tooltip>
-                    </>
-                )
-            },
-            sorter: (a, b) => (a.is_2fa_enabled != b.is_2fa_enabled ? 1 : 0),
         },
         {
             title: 'Joined',
@@ -377,18 +344,6 @@ export function Members(): JSX.Element | null {
                     )
                 }
             />
-            <h3 className="mt-4">Two-factor authentication</h3>
-            <PayGateMini feature={AvailableFeature.TWOFA_ENFORCEMENT}>
-                <p>Require all organization members to use two-factor authentication.</p>
-                <Switch
-                    label="Enforce 2FA"
-                    bordered
-                    checked={!!currentOrganization?.enforce_2fa}
-                    onChange={(enforce_2fa) => updateOrganization({ enforce_2fa })}
-                    disabledReason={adminRestrictionReason}
-                />
-            </PayGateMini>
-
             <h3 className="mt-4">Invite settings</h3>
             <PayGateMini feature={AvailableFeature.ORGANIZATION_INVITE_SETTINGS}>
                 <p>Control who can send organization invites.</p>

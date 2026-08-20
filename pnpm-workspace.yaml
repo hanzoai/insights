@@ -1,7 +1,6 @@
 packages:
     - '.'
     - common/esbuilder
-    - common/sdk-peer
     - common/scriptvm/typescript
     - common/plugin_transpiler
     - common/storybook
@@ -67,8 +66,28 @@ trustPolicy: no-downgrade
 # first rule whose NAME matches and hands back only that rule's version list, so
 # a second `semver@...` line below is dead -- listing them separately excludes
 # 5.7.2 and lets 6.3.1 fail, which is exactly how this first went wrong.
+# The @typescript-eslint family is the same shape, checked package by package:
+# 5.62.0 is the last stable 5.x of each (2023-07-10), NOT ONE 5.x release of any
+# of them is attested, and the first attested version of each is 8.42.0, from
+# 2025-09-02. So the comparison is a 2025 release against a 2023 one across the
+# whole package, and there is no attested version on the line to move to.
+#
+# @stripe/ui-extension-tools pins them, so the alternative is a major bump inside
+# somebody else's dependency. Until that lands, no dependency anywhere in this
+# workspace can be added: the resolver reaches services/stripe-app on every
+# install that is not served entirely from the lockfile.
+#
+# One entry per package NAME, per the matcher note above.
 trustPolicyExclude:
     - semver@5.7.2 || 6.3.1
+    - '@typescript-eslint/eslint-plugin@5.62.0'
+    - '@typescript-eslint/parser@5.62.0'
+    - '@typescript-eslint/scope-manager@5.62.0'
+    - '@typescript-eslint/type-utils@5.62.0'
+    - '@typescript-eslint/types@5.62.0'
+    - '@typescript-eslint/typescript-estree@5.62.0'
+    - '@typescript-eslint/utils@5.62.0'
+    - '@typescript-eslint/visitor-keys@5.62.0'
 
 catalog:
     # Kea ecosystem - state management
@@ -94,8 +113,7 @@ catalog:
     #
     # Version lines are not shared with upstream -- upstream's ^0.38.0 is their
     # package's line; the fork's is 0.36.x -- so this does not track theirs.
-    '@hanzo/icons': npm:@hanzo/insights-icons@0.36.7
-    '@hanzo/brand': 0.9.1
+    '@hanzo/icons': npm:@hanzo/insights-icons@0.36.8
     '@hanzo/react': ^1.9.0
     insights-js: ^1.410.1
     # Build tools
@@ -137,10 +155,6 @@ catalog:
 # dependency automation should not delay these package updates.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
-    # Scoped to the exact version we pin, not the whole scope: upstream trusts
-    # its own '@posthog/*' publishes, but we only consume them, so the gate has
-    # to keep protecting every version we did not deliberately choose.
-    - '@posthog/brand@0.9.1'
     - insights-js
     - insights-js-lite
     - insights-node
@@ -254,22 +268,17 @@ overrides:
     '@tiptap/extension-text-align': '3.20.6'
     '@tiptap/extension-text-style': '3.20.6'
     '@tiptap/extension-underline': '3.20.6'
-    '@hanzo/icons': 'npm:@hanzo/insights-icons@0.36.7'
+    '@hanzo/icons': 'npm:@hanzo/insights-icons@0.36.8'
     '@hanzo/insightsql-parser': 'npm:@posthog/hogql-parser@1.3.75'
     insights-js: 'npm:@hanzo/insights@1.358.1'
-    # Every posthog-js request (including @posthog/react's peer) resolves to the Hanzo fork; upstream is never fetched.
-    posthog-js: 'npm:@hanzo/insights@1.358.1'
     insights-js-lite: 'npm:@hanzo/insights-lite@4.2.2'
-    '@hanzo/brand': 'npm:@posthog/brand@0.9.1'
-    '@hanzo/react': 'npm:@posthog/react@1.9.0'
+    # The React bindings are our own fork, and its peer is @hanzo/insights by name,
+    # so nothing has to be aliased into place to satisfy it.
+    '@hanzo/react': 'npm:@hanzo/insights-react@1.9.2'
     '@datastore/client': 'npm:@clickhouse/client@^1.12.0'
-    '@hanzo/cli': 'npm:@posthog/cli@^0.8.2'
     '@hanzo/mcp-analytics': 'npm:@posthog/mcp@0.5.0'
-    '@hanzo/rollup-plugin': 'npm:@posthog/rollup-plugin@^1.4.4'
     '@hanzo/siphash': 'npm:@posthog/siphash@1.1.1'
     insights-node: 'npm:posthog-node@5.25.0'
-    insights-react-native: 'npm:posthog-react-native@^4.18.0'
-    insights-react-native-session-replay: 'npm:posthog-react-native-session-replay@^1.6.0'
 
 patchedDependencies:
     heatmap.js@2.0.5: patches/heatmap.js@2.0.5.patch

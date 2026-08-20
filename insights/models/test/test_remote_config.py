@@ -35,7 +35,7 @@ class _RemoteConfigBase(BaseTest):
             name="Test project",
         )
         self.team = team
-        self.team.api_token = "phc_12345"  # Easier to test against
+        self.team.api_token = "pk-12345"  # Easier to test against
         self.team.recording_domains = ["https://*.example.com"]
         self.team.session_recording_opt_in = True
         self.team.surveys_opt_in = True
@@ -150,7 +150,7 @@ class TestRemoteConfig(_RemoteConfigBase):
         self.sync_remote_config()
         assert self.remote_config.config["conversations"]["enabled"] is True
         assert self.remote_config.config["conversations"]["greetingText"] == "Hey, how can I help you today?"
-        assert self.remote_config.config["conversations"]["color"] == "#1d4aff"
+        assert self.remote_config.config["conversations"]["color"] == "#000000"
         assert self.remote_config.config["conversations"]["token"] == "test_public_token_123"
         assert self.remote_config.config["conversations"]["domains"] == []
         assert self.remote_config.config["conversations"]["widgetPosition"] == "bottom_right"
@@ -247,7 +247,7 @@ class TestRemoteConfig(_RemoteConfigBase):
     def test_site_functions_query_failure_degrades_to_empty_list(self):
         with patch(
             "products.cdp.backend.models.insights_functions.insights_function.InsightsFunction.objects.select_related",
-            side_effect=Exception("column insights_hogfunction.version does not exist"),
+            side_effect=Exception("column insights_function.version does not exist"),
         ):
             result = self.remote_config._build_site_apps_js()
 
@@ -585,10 +585,10 @@ class TestRemoteConfigCaching(_RemoteConfigBase):
                 headers={"Authorization": "Bearer MY_TOKEN"},
                 json={
                     "files": [
-                        {"url": "https://cdn.hanzo.ai/array/phc_12345/config"},
-                        {"url": "https://cdn.hanzo.ai/array/phc_12345/config.js"},
-                        {"url": "https://cdn2.hanzo.ai/array/phc_12345/config"},
-                        {"url": "https://cdn2.hanzo.ai/array/phc_12345/config.js"},
+                        {"url": "https://cdn.hanzo.ai/array/pk-12345/config"},
+                        {"url": "https://cdn.hanzo.ai/array/pk-12345/config.js"},
+                        {"url": "https://cdn2.hanzo.ai/array/pk-12345/config"},
+                        {"url": "https://cdn2.hanzo.ai/array/pk-12345/config.js"},
                     ]
                 },
                 timeout=10,

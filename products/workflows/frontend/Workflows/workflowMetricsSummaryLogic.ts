@@ -11,7 +11,7 @@ import {
     type AppMetricsTotalsResponse,
 } from 'lib/components/AppMetrics/appMetricsLogic'
 import { dayjs } from 'lib/dayjs'
-import { buildHogInvocationsSearchParams } from 'scenes/insights-functions/invocations/hogInvocationsLogic'
+import { buildScriptInvocationsSearchParams } from 'scenes/insights-functions/invocations/scriptInvocationsLogic'
 import { urls } from 'scenes/urls'
 
 import { defaultDataTableColumns } from '~/queries/nodes/DataTable/utils'
@@ -289,7 +289,7 @@ export function buildEmailMetricInvocationSearchParams(
     if (!filter) {
         return null
     }
-    return buildHogInvocationsSearchParams({
+    return buildScriptInvocationsSearchParams({
         date_from: dateFrom,
         date_to: dateTo,
         // Drives the unified Invocations search box: the message term goes in `search`, and
@@ -712,7 +712,7 @@ export const workflowMetricsSummaryLogic = kea<workflowMetricsSummaryLogicType>(
                 loadOnMount: true,
                 loadOnChanges: true,
                 forceParams: {
-                    appSource: 'hog_flow',
+                    appSource: 'script_flow',
                     appSourceId: props.appSourceId ?? props.id,
                     instanceId: RUN_LEVEL_INSTANCE_ID,
                     metricName: 'succeeded',

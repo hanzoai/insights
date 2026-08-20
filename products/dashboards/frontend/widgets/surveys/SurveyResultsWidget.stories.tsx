@@ -31,8 +31,8 @@ const pickerSurveys = [
 ]
 const surveysApiDecorator = mswDecorator({
     get: {
-        '/api/projects/:team_id/surveys/': () => [200, { results: pickerSurveys, count: pickerSurveys.length }],
-        '/api/projects/:team_id/surveys/:id/': ({ params }) => [
+        '/v1/projects/:team_id/surveys/': () => [200, { results: pickerSurveys, count: pickerSurveys.length }],
+        '/v1/projects/:team_id/surveys/:id/': ({ params }) => [
             200,
             pickerSurveys.find((survey) => survey.id === params.id) ?? pickerSurveys[0],
         ],

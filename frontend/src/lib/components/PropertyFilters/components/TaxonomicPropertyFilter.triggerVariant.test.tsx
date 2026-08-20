@@ -32,12 +32,12 @@ describe('TaxonomicPropertyFilter triggerVariant (rebuild menu)', () => {
         localStorage.clear()
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/projects/:team/actions': { results: [] },
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/projects/:team/actions': { results: [] },
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
         unmountFeatureFlagLogic = featureFlagLogic.mount()

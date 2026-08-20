@@ -47,7 +47,7 @@ func StartCallbackServer(ctx context.Context) (int, <-chan CallbackResult, error
 <head><title>Insights Live</title></head>
 <body style="font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #1d1f27; color: #fff;">
 <div style="text-align: center;">
-<h1 style="color: #F54E00;">Authorization complete!</h1>
+<h1 style="color: #CCCCCC;">Authorization complete!</h1>
 <p>You can close this tab and return to your terminal.</p>
 </div>
 </body>

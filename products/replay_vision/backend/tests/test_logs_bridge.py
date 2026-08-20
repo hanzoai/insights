@@ -32,7 +32,7 @@ class TestVisionLogMirror(SimpleTestCase):
 
     @override_settings(
         OTLP_LOGS_INGEST_ENDPOINT="http://capture-logs.insights.svc.cluster.local:4318/i/v1/logs",
-        OTLP_LOGS_INGEST_TOKEN="phc_x",
+        OTLP_LOGS_INGEST_TOKEN="pk-x",
         TEMPORAL_LOG_LEVEL="DEBUG",
     )
     def test_pipeline_logs_serialize_and_export_through_the_real_worker_chain(self) -> None:

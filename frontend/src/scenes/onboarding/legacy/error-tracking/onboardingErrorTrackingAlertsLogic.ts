@@ -7,7 +7,7 @@ import { toast } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { errorTrackingIssueLinkHogTemplate } from 'scenes/insights-functions/sub-templates/sub-templates'
+import { errorTrackingIssueLinkScriptTemplate } from 'scenes/insights-functions/sub-templates/sub-templates'
 
 import { InsightsFunctionConfigurationType } from '~/types'
 
@@ -50,7 +50,7 @@ const DEFAULT_SLACK_INPUTS: Record<string, any> = {
                 type: 'actions',
                 elements: [
                     {
-                        url: errorTrackingIssueLinkHogTemplate('slack'),
+                        url: errorTrackingIssueLinkScriptTemplate('slack'),
                         text: { text: 'View Issue', type: 'plain_text' },
                         type: 'button',
                     },
@@ -244,7 +244,7 @@ export const onboardingErrorTrackingAlertsLogic = kea<onboardingErrorTrackingAle
                     configuration.inputs = {
                         webhookUrl: { value: formValues.microsoftTeamsWebhookUrl },
                         text: {
-                            value: `**🔴 {event.properties.name} created:** {event.properties.description} (View in [Insights](${errorTrackingIssueLinkHogTemplate(
+                            value: `**🔴 {event.properties.name} created:** {event.properties.description} (View in [Insights](${errorTrackingIssueLinkScriptTemplate(
                                 'microsoft_teams'
                             )}))`,
                         },
@@ -253,7 +253,7 @@ export const onboardingErrorTrackingAlertsLogic = kea<onboardingErrorTrackingAle
                     configuration.inputs = {
                         webhookUrl: { value: formValues.discordWebhookUrl },
                         content: {
-                            value: `**🔴 {event.properties.name} created:** {event.properties.description}\n\n[View in Insights](${errorTrackingIssueLinkHogTemplate(
+                            value: `**🔴 {event.properties.name} created:** {event.properties.description}\n\n[View in Insights](${errorTrackingIssueLinkScriptTemplate(
                                 'discord'
                             )})`,
                         },

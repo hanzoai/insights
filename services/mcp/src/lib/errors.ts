@@ -65,7 +65,7 @@ function formatMissingProjectContextMessage(organizationId: string | undefined):
  * the current session — neither pinned via header, cached from a prior init,
  * nor derivable from the API key's scopes or the active project. Throwing
  * (rather than returning `undefined`) prevents callers from interpolating
- * literal `"undefined"` into URLs like `/api/organizations/undefined/...`.
+ * literal `"undefined"` into URLs like `/v1/organizations/undefined/...`.
  */
 export class MissingOrganizationContextError extends Error {
     constructor() {

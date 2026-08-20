@@ -15,7 +15,7 @@ logger = structlog.get_logger(__name__)
 
 class TaggerType(models.TextChoices):
     LLM = "llm", "LLM"
-    HOG = "script", "Script"
+    SCRIPT = "script", "Script"
 
 
 class TagDefinition(BaseModel):
@@ -65,7 +65,7 @@ class LLMTaggerConfig(BaseModel):
         return self
 
 
-class HogTaggerConfig(BaseModel):
+class ScriptTaggerConfig(BaseModel):
     """Configuration for Script code taggers."""
 
     source: str = Field(..., min_length=1, description="Script source code")
@@ -90,7 +90,7 @@ class HogTaggerConfig(BaseModel):
 
 TAGGER_CONFIG_MODELS: dict[str, type[BaseModel]] = {
     TaggerType.LLM.value: LLMTaggerConfig,
-    TaggerType.HOG.value: HogTaggerConfig,
+    TaggerType.SCRIPT.value: ScriptTaggerConfig,
 }
 
 
@@ -149,7 +149,7 @@ class Tagger(UUIDTModel):
     def save(self, *args, **kwargs):
         from insights.cdp.filters import compile_filters_bytecode
 
-        from ..script import compile_ai_observability_hog  # noqa: PLC0415 - keeps Script compiler off model import path
+        from ..script import compile_ai_observability_script  # noqa: PLC0415 - keeps Script compiler off model import path
 
         # Validate tagger config based on type
         if self.tagger_config:
@@ -159,11 +159,11 @@ class Tagger(UUIDTModel):
                 raise ValidationError({"tagger_config": str(e)})
 
         # Compile Script source to bytecode
-        if self.tagger_type == TaggerType.HOG and self.tagger_config.get("source"):
+        if self.tagger_type == TaggerType.SCRIPT and self.tagger_config.get("source"):
             try:
                 # Use "tagger" kind so we don't expose PRODUCT_ASYNC_FUNCTIONS (fetch, insightsCapture, …) —
                 # taggers should only classify, never perform side effects.
-                bytecode = compile_ai_observability_hog(self.tagger_config["source"], "tagger")
+                bytecode = compile_ai_observability_script(self.tagger_config["source"], "tagger")
                 self.tagger_config["bytecode"] = bytecode
             except Exception as e:
                 raise ValidationError({"tagger_config": f"Failed to compile Script code: {e}"})

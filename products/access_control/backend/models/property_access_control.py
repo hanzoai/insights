@@ -42,6 +42,10 @@ class PropertyAccessControl(UUIDModel):
     role = models.ForeignKey(
         "insights.Role",
         on_delete=models.CASCADE,
+        # insights.Role is managed=False on the legacy ee_role table, which Django
+        # never creates — an FK constraint against it cannot be built on a fresh
+        # database.
+        db_constraint=False,
         related_name="property_access_controls",
         related_query_name="property_access_controls",
         null=True,

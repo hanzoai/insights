@@ -5,7 +5,7 @@ import { CommonConfig } from '~/common/config'
 import { GroupTypeManager } from '~/common/groups/group-type-manager'
 import { DatastoreGroupRepository } from '~/common/groups/repositories/datastore-group-repository'
 import { GroupRepository } from '~/common/groups/repositories/group-repository.interface'
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { KafkaConsumerInterface, createKafkaConsumer } from '~/common/kafka/consumer'
 import {
     AppMetricsOutput,
@@ -13,7 +13,7 @@ import {
     GroupsOutput,
     IngestionWarningsOutput,
     OverflowOutput,
-    TophogOutput,
+    TopFnOutput,
 } from '~/common/outputs'
 import {
     AiEventOutput,
@@ -42,7 +42,7 @@ import { BatchWritingPersonsStore } from '~/ingestion/common/persons/batch-writi
 import { effectivePersonMergeEventsEnabled } from '~/ingestion/common/persons/person-merge-event'
 import { PersonsStore } from '~/ingestion/common/persons/persons-store'
 import { createKafkaDebugContext, createOkContext } from '~/ingestion/framework/helpers'
-import { TopHog } from '~/ingestion/framework/tophog'
+import { TopFn } from '~/ingestion/framework/topfn'
 import {
     JoinedIngestionPipelineConfig,
     JoinedIngestionPipelineContext,
@@ -88,7 +88,7 @@ export interface IngestionConsumerDeps {
         | PersonDistinctIdsOutput
         | PersonMergeEventsOutput
         | AppMetricsOutput
-        | TophogOutput
+        | TopFnOutput
     >
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
@@ -96,7 +96,7 @@ export interface IngestionConsumerDeps {
     datastoreGroupRepository: DatastoreGroupRepository
     personRepository: PersonRepository
     cookielessManager: CookielessManager
-    hogTransformer: HogTransformer
+    scriptTransformer: ScriptTransformer
     aiSubpipelineFactory: AiEventSubpipelineFactory
 }
 
@@ -120,7 +120,7 @@ export class IngestionConsumer {
     protected topic: string
     protected kafkaConsumer: KafkaConsumerInterface
     isStopping = false
-    public hogTransformer: HogTransformer
+    public scriptTransformer: ScriptTransformer
     private overflowRedirectService?: OverflowRedirectService
     private overflowLaneTTLRefreshService?: OverflowRedirectService
     private featureFlagCalledDedupService?: FeatureFlagCalledDedupService
@@ -137,7 +137,7 @@ export class IngestionConsumer {
     private stopEventIngestionRestrictionManager?: () => Promise<void>
     private eventSchemaEnforcementManager: EventSchemaEnforcementManager
     public readonly promiseScheduler = new PromiseScheduler()
-    private topHog!: TopHog
+    private topFn!: TopFn
 
     private joinedPipeline!: ReturnType<
         typeof createJoinedIngestionPipeline<JoinedIngestionPipelineInput, JoinedIngestionPipelineContext>
@@ -218,7 +218,7 @@ export class IngestionConsumer {
             this.config
         )
 
-        this.hogTransformer = deps.hogTransformer
+        this.scriptTransformer = deps.scriptTransformer
 
         this.personsStore = new BatchWritingPersonsStore(this.deps.personRepository, this.deps.outputs, {
             dbWriteMode: this.config.PERSON_BATCH_WRITING_DB_WRITE_MODE,
@@ -242,7 +242,7 @@ export class IngestionConsumer {
             topic: this.topic,
         })
 
-        this.topHog = new TopHog({
+        this.topFn = new TopFn({
             outputs: this.deps.outputs,
             pipeline: this.config.INGESTION_PIPELINE ?? 'unknown',
             lane: this.config.INGESTION_LANE ?? 'unknown',
@@ -264,9 +264,9 @@ export class IngestionConsumer {
         const startedFilters = await this.eventFilterManagerComponent.start()
         this.eventFilterManager = startedFilters.value
         this.stopEventFilterManager = startedFilters.stop
-        await this.hogTransformer.start()
+        await this.scriptTransformer.start()
 
-        this.topHog.start()
+        this.topFn.start()
 
         const outputs = this.deps.outputs
 
@@ -307,7 +307,7 @@ export class IngestionConsumer {
         const joinedPipelineDeps: JoinedIngestionPipelineDeps = {
             personsStore: this.personsStore,
             groupStore: this.groupStore,
-            hogTransformer: this.hogTransformer,
+            scriptTransformer: this.scriptTransformer,
             aiSubpipelineFactory: this.deps.aiSubpipelineFactory,
             eventFilterManager: this.eventFilterManager,
             eventIngestionRestrictionManager: this.eventIngestionRestrictionManager,
@@ -319,7 +319,7 @@ export class IngestionConsumer {
             teamManager: this.deps.teamManager,
             cookielessManager: this.deps.cookielessManager,
             groupTypeManager: this.deps.groupTypeManager,
-            topHog: this.topHog!,
+            topFn: this.topFn!,
         }
         this.joinedPipeline = createJoinedIngestionPipeline(joinedPipelineConfig, joinedPipelineDeps)
 
@@ -344,10 +344,10 @@ export class IngestionConsumer {
         // Mark as stopping so that we don't actually process any more incoming messages, but still keep the process alive
         logger.info('🔁', `${this.name} - stopping batch consumer`)
         await this.kafkaConsumer?.disconnect()
-        logger.info('🔁', `${this.name} - stopping tophog`)
-        await this.topHog.stop()
+        logger.info('🔁', `${this.name} - stopping topfn`)
+        await this.topFn.stop()
         logger.info('🔁', `${this.name} - stopping script transformer`)
-        await this.hogTransformer.stop()
+        await this.scriptTransformer.stop()
         await this.stopEventFilterManager?.()
         await this.stopEventIngestionRestrictionManager?.()
         // Stores must be clean by now — flushBatchStoresStep runs after every

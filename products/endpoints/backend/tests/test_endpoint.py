@@ -64,7 +64,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "query": self.sample_insightsql_query,
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
         response_data = response.json()
@@ -105,7 +105,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "query": {"kind": "InsightsQLQuery", "query": "selet 100"},  # intentionally wrong spelling
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.json())
         response_data = response.json()
@@ -120,7 +120,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.json())
         self.assertIn("event_name", response.json()["detail"])
@@ -145,7 +145,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
 
@@ -169,7 +169,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             },
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.json())
         self.assertIn("os", response.json()["detail"])
@@ -180,7 +180,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "name": "test_query",
             "query": {"kind": "InsightsQLQuery", "query": "SELECT count() FROM events"},
         }
-        self.client.post(f"/api/environments/{self.team.id}/endpoints/", create_data, format="json")
+        self.client.post(f"/v1/environments/{self.team.id}/endpoints/", create_data, format="json")
 
         update_data = {
             "query": {
@@ -189,7 +189,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             },
         }
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/test_query/", update_data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/test_query/", update_data, format="json"
         )
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.json())
@@ -225,7 +225,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
                 },
             },
         }
-        create_response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", create_data, format="json")
+        create_response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", create_data, format="json")
         self.assertEqual(status.HTTP_201_CREATED, create_response.status_code, create_response.json())
 
         update_data = {
@@ -247,7 +247,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             }
         }
         update_response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/test_query/", update_data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/test_query/", update_data, format="json"
         )
 
         self.assertEqual(status.HTTP_200_OK, update_response.status_code, update_response.json())
@@ -272,7 +272,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
                 },
             },
         }
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", create_data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", create_data, format="json")
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.json())
         self.assertIn("not valid UUIDs", response.json()["detail"])
 
@@ -292,7 +292,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
                 },
             },
         }
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", create_data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", create_data, format="json")
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.json())
         self.assertIn("Variable ID(s) not found", response.json()["detail"])
 
@@ -303,7 +303,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "query": self.sample_insight_query,
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
 
@@ -324,7 +324,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         }
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/", updated_data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/", updated_data, format="json"
         )
 
         response_data = response.json()
@@ -383,7 +383,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/endpoints/delete_test/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/endpoints/delete_test/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Endpoint still exists in database but is soft-deleted
@@ -392,13 +392,13 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         self.assertIsNotNone(endpoint.deleted_at)
 
         # Not visible in list
-        list_response = self.client.get(f"/api/environments/{self.team.id}/endpoints/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/")
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)
         names = [e["name"] for e in list_response.json()["results"]]
         self.assertNotIn("delete_test", names)
 
         # Not accessible via retrieve
-        retrieve_response = self.client.get(f"/api/environments/{self.team.id}/endpoints/delete_test/")
+        retrieve_response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/delete_test/")
         self.assertEqual(retrieve_response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Activity log still created
@@ -427,7 +427,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             created_by=self.user,
         )
 
-        delete_response = self.client.delete(f"/api/environments/{self.team.id}/endpoints/reusable_name/")
+        delete_response = self.client.delete(f"/v1/environments/{self.team.id}/endpoints/reusable_name/")
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
 
         endpoint.refresh_from_db()
@@ -435,7 +435,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
 
         # Create a new endpoint with the same name
         data = {"name": "reusable_name", "query": self.sample_insightsql_query}
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
         self.assertEqual(response.json()["name"], "reusable_name")
 
@@ -443,13 +443,13 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         payload = {"name": "rollback-endpoint", "query": {"kind": "InsightsQLQuery", "query": "SELECT 1"}}
 
         with mock.patch.object(EndpointVersion.objects, "create", side_effect=RuntimeError("boom")):
-            response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", payload, format="json")
+            response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Endpoint.objects.filter(team=self.team, name="rollback-endpoint", deleted=False).count(), 0)
 
         # The name must be reusable after the failed create
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", payload, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
 
     def test_soft_deleted_endpoint_not_runnable(self):
@@ -459,9 +459,9 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             query=self.sample_insightsql_query,
             created_by=self.user,
         )
-        self.client.delete(f"/api/environments/{self.team.id}/endpoints/run_deleted/")
+        self.client.delete(f"/v1/environments/{self.team.id}/endpoints/run_deleted/")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/run_deleted/run/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/run_deleted/run/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_invalid_query_name_validation(self):
@@ -471,7 +471,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "query": self.sample_insightsql_query,
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
@@ -479,13 +479,13 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         """Test validation when required fields are missing."""
         data: dict[str, Any] = {"query": self.sample_insightsql_query}
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         data = {"name": "test_query"}
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -503,7 +503,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "query": {"kind": "InsightsQLQuery", "query": "SELECT 2"},
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -519,7 +519,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             created_by=other_user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/other_team_query/run/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/other_team_query/run/")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -540,14 +540,14 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             is_active=False,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/?is_active=true")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/?is_active=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 1)
         self.assertEqual(response_data["results"][0]["name"], "active_query")
         self.assertTrue(response_data["results"][0]["is_active"])
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/?is_active=false")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/?is_active=false")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 1)
@@ -572,14 +572,14 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         )
 
         # Test filtering by first user
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/?created_by={self.user.id}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/?created_by={self.user.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 1)
         self.assertEqual(response_data["results"][0]["name"], "query_by_user1")
 
         # Test filtering by second user
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/?created_by={other_user.id}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/?created_by={other_user.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 1)
@@ -612,7 +612,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/?is_active=true&created_by={self.user.id}"
+            f"/v1/environments/{self.team.id}/endpoints/?is_active=true&created_by={self.user.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -638,7 +638,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         )
 
         # Test without any filters - should return all queries
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 2)
@@ -713,7 +713,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "query": comprehensive_trends_query,
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
         response_data = response.json()
@@ -776,7 +776,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         data = EndpointLastExecutionTimesRequest(names=[]).model_dump()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -808,20 +808,20 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
 
         # Execute the endpoints using API key to update Postgres execution timestamps.
         response1 = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/test_query_1/run/",
+            f"/v1/environments/{self.team.id}/endpoints/test_query_1/run/",
             headers={"authorization": f"Bearer {self.api_key}"},
         )
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
 
         response2 = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/test_query_2/run/",
+            f"/v1/environments/{self.team.id}/endpoints/test_query_2/run/",
             headers={"authorization": f"Bearer {self.api_key}"},
         )
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
 
         data = {"names": ["test_query_1", "test_query_2", "nonexistent_query"]}
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -874,7 +874,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
 
         data = {"names": ["test_query_versions"]}
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -898,7 +898,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         version.last_executed_at = datetime.fromisoformat("2026-05-09T12:00:00+00:00")
         version.save(update_fields=["last_executed_at"])
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/v_test/versions/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/v_test/versions/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         rows = response.json()["results"]
         self.assertEqual(len(rows), 1)
@@ -910,7 +910,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         data = {"names": ["nonexistent_query"]}
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -934,7 +934,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         data = {"names": ["test_query_1"]}
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/last_execution_times/", data, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -961,7 +961,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
 
         data = {"names": ["test_query_1"]}
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/last_execution_times/",
+            f"/v1/environments/{self.team.id}/endpoints/last_execution_times/",
             data,
             format="json",
             headers={"authorization": f"Bearer {self.api_key}"},
@@ -987,7 +987,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "query": self.sample_insightsql_query,
             "data_freshness_seconds": data_freshness_seconds,
         }
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
         self.assertEqual(response.status_code, expected_status)
 
         if expected_status == status.HTTP_201_CREATED:
@@ -1033,7 +1033,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         )
 
         # First execution - should calculate fresh
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {"debug": True})
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {"debug": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
@@ -1042,7 +1042,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         cache_key = response_data["cache_key"]
 
         # Second execution immediately - should use cache
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {"debug": True})
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {"debug": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["cache_key"], cache_key)
@@ -1052,7 +1052,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         hours_within = time_within_freshness_min // 60
         mins_within = time_within_freshness_min % 60
         with freeze_time(f"2025-01-01 {12 + hours_within:02d}:{mins_within:02d}:00"):
-            response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             response_data = response.json()
             self.assertTrue(
@@ -1064,7 +1064,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         hours_past = time_past_freshness_min // 60
         mins_past = time_past_freshness_min % 60
         with freeze_time(f"2025-01-01 {12 + hours_past:02d}:{mins_past:02d}:00"):
-            response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             response_data = response.json()
             self.assertFalse(
@@ -1083,14 +1083,14 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         )
 
         # First execution
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         cache_key = response_data.get("cache_key")
 
         # Move time forward 5 minutes - should still use cache (default is 24 hours)
         with freeze_time("2025-01-01 12:05:00"):
-            response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             response_data = response.json()
             self.assertTrue(response_data.get("is_cached", False), "Should use cache with default timing")
@@ -1108,7 +1108,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
         # Update to different data freshness
         updated_data: dict[str, int | None] = {"data_freshness_seconds": 21600}
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/", updated_data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/", updated_data, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["data_freshness_seconds"], 21600)
@@ -1127,7 +1127,7 @@ class TestEndpoint(DatastoreTestMixin, APIBaseTest):
             "derived_from_insight": "abc123xyz",
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
         response_data = response.json()
@@ -1153,7 +1153,7 @@ class TestEndpointTags(DatastoreTestMixin, APIBaseTest):
     def _create(self, name: str, **extra: Any) -> dict:
         payload: dict[str, Any] = {"name": name, "query": self.sample_insightsql_query}
         payload.update(extra)
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", payload, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", payload, format="json")
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
         return response.json()
 
@@ -1173,7 +1173,7 @@ class TestEndpointTags(DatastoreTestMixin, APIBaseTest):
         self._create("ep_patch", tags=["alpha", "beta"])
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_patch/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_patch/",
             {"tags": ["gamma"]},
             format="json",
         )
@@ -1188,7 +1188,7 @@ class TestEndpointTags(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(Tag.objects.filter(team_id=self.team.id, name="alpha").count(), 1)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_clear/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_clear/",
             {"tags": []},
             format="json",
         )
@@ -1202,7 +1202,7 @@ class TestEndpointTags(DatastoreTestMixin, APIBaseTest):
         self._create("ep_keep", tags=["alpha"])
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_keep/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_keep/",
             {"description": "updated"},
             format="json",
         )
@@ -1213,7 +1213,7 @@ class TestEndpointTags(DatastoreTestMixin, APIBaseTest):
     def test_retrieve_returns_tags(self):
         self._create("ep_get", tags=["alpha"])
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/ep_get/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/ep_get/")
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(response.json()["tags"], ["alpha"])
 
@@ -1221,7 +1221,7 @@ class TestEndpointTags(DatastoreTestMixin, APIBaseTest):
         self._create("ep_list_1", tags=["alpha"])
         self._create("ep_list_2", tags=["beta", "gamma"])
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/")
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         results = {r["name"]: sorted(r["tags"]) for r in response.json()["results"]}
         self.assertEqual(results["ep_list_1"], ["alpha"])
@@ -1230,7 +1230,7 @@ class TestEndpointTags(DatastoreTestMixin, APIBaseTest):
     def test_tags_not_a_list_returns_400(self):
         # Pydantic validates the shape via EndpointRequest.tags: list[str] | None
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/",
+            f"/v1/environments/{self.team.id}/endpoints/",
             {"name": "ep_bad", "query": self.sample_insightsql_query, "tags": "not-a-list"},
             format="json",
         )
@@ -1274,7 +1274,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/",
+            f"/v1/environments/{self.team.id}/endpoints/",
             {"name": name, "query": self.variable_query},
             format="json",
         )
@@ -1285,7 +1285,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
         self._create_endpoint_with_variables()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/range-endpoint/materialization_preview/",
+            f"/v1/environments/{self.team.id}/endpoints/range-endpoint/materialization_preview/",
             {},
             format="json",
         )
@@ -1310,7 +1310,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
         self._create_endpoint_with_variables()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/range-endpoint/materialization_preview/",
+            f"/v1/environments/{self.team.id}/endpoints/range-endpoint/materialization_preview/",
             {"bucket_overrides": {"timestamp": "hour"}},
             format="json",
         )
@@ -1331,7 +1331,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/simple-endpoint/materialization_preview/",
+            f"/v1/environments/{self.team.id}/endpoints/simple-endpoint/materialization_preview/",
             {},
             format="json",
         )
@@ -1360,14 +1360,14 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
         )
 
         self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/",
+            f"/v1/environments/{self.team.id}/endpoints/",
             {"name": "bucket-test", "query": self.variable_query},
             format="json",
         )
 
         # Enable materialization with bucket overrides
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/bucket-test/",
+            f"/v1/environments/{self.team.id}/endpoints/bucket-test/",
             {"is_materialized": True, "bucket_overrides": {"timestamp": "hour"}},
             format="json",
         )
@@ -1385,7 +1385,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
         self._create_endpoint_with_variables("invalid-bucket")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/invalid-bucket/materialization_preview/",
+            f"/v1/environments/{self.team.id}/endpoints/invalid-bucket/materialization_preview/",
             {"bucket_overrides": {"timestamp": "invalid_fn"}},
             format="json",
         )
@@ -1398,7 +1398,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization with bucket overrides
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/clear-bucket/",
+            f"/v1/environments/{self.team.id}/endpoints/clear-bucket/",
             {"is_materialized": True, "bucket_overrides": {"timestamp": "hour"}},
             format="json",
         )
@@ -1410,7 +1410,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
         # mock the facade call so the test doesn't require a running Temporal dev server.
         with mock.patch("products.data_warehouse.backend.facade.api.delete_saved_query_schedule"):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/clear-bucket/",
+                f"/v1/environments/{self.team.id}/endpoints/clear-bucket/",
                 {"is_materialized": False},
                 format="json",
             )
@@ -1418,7 +1418,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
 
         # Re-enable without bucket_overrides
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/clear-bucket/",
+            f"/v1/environments/{self.team.id}/endpoints/clear-bucket/",
             {"is_materialized": True},
             format="json",
         )
@@ -1433,7 +1433,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization with bucket overrides
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/migrate-bucket/",
+            f"/v1/environments/{self.team.id}/endpoints/migrate-bucket/",
             {"is_materialized": True, "bucket_overrides": {"timestamp": "hour"}},
             format="json",
         )
@@ -1447,7 +1447,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
             "query": "SELECT event, count() FROM events WHERE timestamp >= {variables.start_ts} AND timestamp < {variables.end_ts} GROUP BY event",
         }
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/migrate-bucket/",
+            f"/v1/environments/{self.team.id}/endpoints/migrate-bucket/",
             {"query": new_query},
             format="json",
         )
@@ -1470,7 +1470,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization with initial bucket overrides
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/trigger-bucket/",
+            f"/v1/environments/{self.team.id}/endpoints/trigger-bucket/",
             {"is_materialized": True, "bucket_overrides": {"timestamp": "week"}},
             format="json",
         )
@@ -1480,7 +1480,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
         # Change bucket_overrides — should trigger an immediate refresh
         with mock.patch("products.endpoints.backend.logic.crud.trigger_saved_query_schedule") as mock_trigger:
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/trigger-bucket/",
+                f"/v1/environments/{self.team.id}/endpoints/trigger-bucket/",
                 {"bucket_overrides": {"timestamp": "hour"}},
                 format="json",
             )
@@ -1496,7 +1496,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization with bucket overrides
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/no-trigger-bucket/",
+            f"/v1/environments/{self.team.id}/endpoints/no-trigger-bucket/",
             {"is_materialized": True, "bucket_overrides": {"timestamp": "hour"}},
             format="json",
         )
@@ -1506,7 +1506,7 @@ class TestMaterializationPreview(DatastoreTestMixin, APIBaseTest):
             "products.data_warehouse.backend.logic.data_load.saved_query_service.trigger_saved_query_schedule"
         ) as mock_trigger:
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/no-trigger-bucket/",
+                f"/v1/environments/{self.team.id}/endpoints/no-trigger-bucket/",
                 {"bucket_overrides": {"timestamp": "hour"}},
                 format="json",
             )
@@ -1636,7 +1636,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
 
     def _create(self, name: str, query: dict, **extra: Any) -> dict:
         payload: dict[str, Any] = {"name": name, "query": query, **extra}
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", payload, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", payload, format="json")
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
         return response.json()
 
@@ -1675,7 +1675,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
         self._create("ep_patch", self.trends_with_breakdown)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_patch/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_patch/",
             {"optional_breakdown_properties": ["$os"]},
             format="json",
         )
@@ -1698,7 +1698,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
         }
         self._create("ep_target_version", browser_query)
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_target_version/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_target_version/",
             {"query": os_query},
             format="json",
         )
@@ -1706,7 +1706,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
 
         # $browser is valid for targeted v1 even though the current (v2) query dropped it.
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_target_version/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/ep_target_version/?version=1",
             {"optional_breakdown_properties": ["$browser"]},
             format="json",
         )
@@ -1716,7 +1716,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
 
         # $os is valid for the current version but not for targeted v1.
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_target_version/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/ep_target_version/?version=1",
             {"optional_breakdown_properties": ["$os"]},
             format="json",
         )
@@ -1730,7 +1730,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_clear/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_clear/",
             {"optional_breakdown_properties": []},
             format="json",
         )
@@ -1745,7 +1745,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_keep/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_keep/",
             {"description": "updated"},
             format="json",
         )
@@ -1754,7 +1754,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
 
     def test_rejects_unknown_property_name(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/",
+            f"/v1/environments/{self.team.id}/endpoints/",
             {
                 "name": "ep_bad_prop",
                 "query": self.trends_with_breakdown,
@@ -1767,7 +1767,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
 
     def test_rejects_for_insightsql_query(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/",
+            f"/v1/environments/{self.team.id}/endpoints/",
             {
                 "name": "ep_insightsql",
                 "query": {"kind": "InsightsQLQuery", "query": "SELECT 1"},
@@ -1781,7 +1781,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
     def test_rejects_for_query_kind_without_breakdown_support(self):
         # LifecycleQuery has no breakdown support
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/",
+            f"/v1/environments/{self.team.id}/endpoints/",
             {
                 "name": "ep_lifecycle",
                 "query": {"kind": "LifecycleQuery", "series": [{"kind": "EventsNode"}]},
@@ -1806,7 +1806,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
             "breakdownFilter": {"breakdowns": [{"property": "$browser", "type": "event"}]},
         }
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_inherit/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_inherit/",
             {"query": new_query},
             format="json",
         )
@@ -1828,7 +1828,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
         # New query has no breakdownFilter at all
         new_query = {"kind": "TrendsQuery", "series": [{"kind": "EventsNode"}]}
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_inherit_drop/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_inherit_drop/",
             {"query": new_query},
             format="json",
         )
@@ -1847,7 +1847,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/ep_version_detail/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/ep_version_detail/?version=1",
         )
         self.assertEqual(status.HTTP_200_OK, response.status_code, response.json())
         body = response.json()
@@ -1878,7 +1878,7 @@ class TestOptionalBreakdownProperties(DatastoreTestMixin, APIBaseTest):
             },
         }
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/ep_explicit_override/",
+            f"/v1/environments/{self.team.id}/endpoints/ep_explicit_override/",
             {"query": new_query, "optional_breakdown_properties": ["$os"]},
             format="json",
         )
@@ -1911,7 +1911,7 @@ class TestEndpointListResilienceAndQueryCount(DatastoreTestMixin, APIBaseTest):
     def _list_query_count(self, endpoint_count: int) -> int:
         Endpoint.objects.all().delete()
         self._create_endpoints(endpoint_count)
-        url = f"/api/environments/{self.team.id}/endpoints/"
+        url = f"/v1/environments/{self.team.id}/endpoints/"
         self.client.get(url)
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(url)
@@ -1934,12 +1934,12 @@ class TestEndpointListResilienceAndQueryCount(DatastoreTestMixin, APIBaseTest):
         )
         for i in range(2, 4):
             self.client.put(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"query": {"kind": "InsightsQLQuery", "query": f"SELECT {i}"}},
                 format="json",
             )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code, response.content)
         result = response.json()["results"][0]
@@ -1951,7 +1951,7 @@ class TestEndpointListResilienceAndQueryCount(DatastoreTestMixin, APIBaseTest):
         self._create_endpoints(2)
 
         with mock.patch.object(EndpointVersion, "can_materialize", side_effect=RuntimeError("boom")):
-            response = self.client.get(f"/api/environments/{self.team.id}/endpoints/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code, response.content)
         results = response.json()["results"]

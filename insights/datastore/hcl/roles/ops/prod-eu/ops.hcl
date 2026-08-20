@@ -1,4 +1,4 @@
-# OPS prod-eu env layer — sharded_tophog (tophog zoo_path)
+# OPS prod-eu env layer — sharded_topfn (topfn zoo_path)
 #
 # query_log_archive_old (legacy/transitional) is intentionally unmanaged — not
 # authored here and trimmed from the golden, so it is left untouched on the cluster.
@@ -90,12 +90,12 @@ database "insights" {
       sharding_key    = "sipHash64(distinct_id)"
     }
   }
-  # Shape inherited from sharded_tophog_base (prod layer); prod-eu writes to the
-  # tophog keeper path.
-  table "sharded_tophog" {
-    extend = "sharded_tophog_base"
+  # Shape inherited from sharded_topfn_base (prod layer); prod-eu writes to the
+  # topfn keeper path.
+  table "sharded_topfn" {
+    extend = "sharded_topfn_base"
     engine "replicated_merge_tree" {
-      zoo_path     = "/datastore/tables/ops/{shard}/insights.tophog"
+      zoo_path     = "/datastore/tables/ops/{shard}/insights.topfn"
       replica_name = "{replica}"
     }
   }

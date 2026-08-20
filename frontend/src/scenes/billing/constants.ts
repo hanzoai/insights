@@ -1,4 +1,4 @@
-// sync with ee/hogai/tools/read_billing_tool/tool.py
+// sync with ee/scriptai/tools/read_billing_tool/tool.py
 // Values are sent to the `billing` repo as `usage_types`; keep in sync with accepted types in `billing/types/usage.py`.
 export const USAGE_TYPES = [
     { label: 'Events', value: 'event_count_in_period' },

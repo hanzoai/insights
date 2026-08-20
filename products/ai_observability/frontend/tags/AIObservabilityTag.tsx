@@ -41,8 +41,8 @@ import {
     providerKeyStateIssueDescription,
     providerLabel,
 } from '../settings/providerKeyStateUtils'
-import { FN_TAGGER_EXAMPLES } from './hogTaggerExamples'
-import { HogTestResult, TagRun, llmTaggerLogic } from './llmTaggerLogic'
+import { FN_TAGGER_EXAMPLES } from './scriptTaggerExamples'
+import { ScriptTestResult, TagRun, llmTaggerLogic } from './llmTaggerLogic'
 import { Tagger, TaggerConditionSet } from './types'
 
 const DEFAULT_FN_SOURCE = `// Return a list of tag names that apply to this generation
@@ -300,44 +300,44 @@ function TaggerTriggers({ id }: { id: string }): JSX.Element {
     )
 }
 
-function HogTaggerTestSection({ id }: { id: string }): JSX.Element {
-    const { hogTestResults, hogTestLoading } = useValues(llmTaggerLogic({ id }))
-    const { testHogTagger, clearHogTestResults } = useActions(llmTaggerLogic({ id }))
+function ScriptTaggerTestSection({ id }: { id: string }): JSX.Element {
+    const { scriptTestResults, scriptTestLoading } = useValues(llmTaggerLogic({ id }))
+    const { testScriptTagger, clearScriptTestResults } = useActions(llmTaggerLogic({ id }))
 
     return (
         <div className="mt-4 space-y-3">
             <div className="flex gap-2">
-                <Button type="secondary" size="small" onClick={testHogTagger} loading={hogTestLoading}>
+                <Button type="secondary" size="small" onClick={testScriptTagger} loading={scriptTestLoading}>
                     Test on recent generations
                 </Button>
-                {hogTestResults && (
-                    <Button type="tertiary" size="small" onClick={clearHogTestResults}>
+                {scriptTestResults && (
+                    <Button type="tertiary" size="small" onClick={clearScriptTestResults}>
                         Clear
                     </Button>
                 )}
             </div>
 
-            {hogTestResults && (
+            {scriptTestResults && (
                 <Table
                     columns={[
                         {
                             title: 'Input',
                             key: 'input',
-                            render: (_, row: HogTestResult) => (
+                            render: (_, row: ScriptTestResult) => (
                                 <div className="max-w-xs text-sm truncate">{row.input_preview}</div>
                             ),
                         },
                         {
                             title: 'Output',
                             key: 'output',
-                            render: (_, row: HogTestResult) => (
+                            render: (_, row: ScriptTestResult) => (
                                 <div className="max-w-xs text-sm truncate">{row.output_preview}</div>
                             ),
                         },
                         {
                             title: 'Tags',
                             key: 'tags',
-                            render: (_, row: HogTestResult) =>
+                            render: (_, row: ScriptTestResult) =>
                                 row.error ? (
                                     <Tag type="danger">{row.error}</Tag>
                                 ) : (
@@ -357,7 +357,7 @@ function HogTaggerTestSection({ id }: { id: string }): JSX.Element {
                         {
                             title: 'Reasoning',
                             key: 'reasoning',
-                            render: (_, row: HogTestResult) =>
+                            render: (_, row: ScriptTestResult) =>
                                 row.reasoning ? (
                                     <Tooltip title={row.reasoning} placement="top">
                                         <div className="max-w-xs text-sm truncate cursor-default">{row.reasoning}</div>
@@ -367,7 +367,7 @@ function HogTaggerTestSection({ id }: { id: string }): JSX.Element {
                                 ),
                         },
                     ]}
-                    dataSource={hogTestResults}
+                    dataSource={scriptTestResults}
                     rowKey="event_uuid"
                     size="small"
                     emptyState={<span className="text-muted text-sm">No recent generations found</span>}
@@ -493,7 +493,7 @@ function AIObservabilityTaggerForm({ id }: { id: string }): JSX.Element {
                                     }
                                     height={200}
                                 />
-                                <HogTaggerTestSection id={id} />
+                                <ScriptTaggerTestSection id={id} />
                             </div>
                         ) : (
                             <div>

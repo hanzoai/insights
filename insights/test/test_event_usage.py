@@ -260,8 +260,8 @@ class TestGetEventSource(BaseTest):
             ("cli_exact", "insights-cli", EventSource.CLI),
             ("wizard", "insights/wizard 1.0", EventSource.WIZARD),
             ("insights_code", "insights/code 1.2.3", EventSource.INSIGHTS_CODE),
-            ("hog_dev_subdomain", "insights/desktop.script.dev 0.1.0", EventSource.INSIGHTS_CODE),
-            ("hog_dev_complex", "insights/my-app.script.dev", EventSource.INSIGHTS_CODE),
+            ("script_dev_subdomain", "insights/desktop.script.dev 0.1.0", EventSource.INSIGHTS_CODE),
+            ("script_dev_complex", "insights/my-app.script.dev", EventSource.INSIGHTS_CODE),
             ("mcp_server", "insights/mcp-server 1.0", EventSource.MCP),
             ("unknown_ua_falls_through_to_api", "some-random-agent/1.0", EventSource.API),
         ]

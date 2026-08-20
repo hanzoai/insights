@@ -95,7 +95,7 @@ APIScopeObject = Literal[
     "query",  # Covers query and events endpoints
     "query_performance",
     "replay_scanner",
-    "review_hog",
+    "review",
     "revenue_analytics",
     "session_recording",
     "session_recording_playlist",
@@ -103,7 +103,7 @@ APIScopeObject = Literal[
     "signal_scout",
     "signal_scout_internal",
     "signal_scout_report",
-    "stamphog",
+    "stamp",
     "streamlit_app",
     "subscription",
     "survey",

@@ -83,7 +83,7 @@ export function ThreadReportEntry({ report }: { report: SignalReportApi }): JSX.
                         the name instead of competing with it. Height comes from a class because the size
                         tokens start at 20px, and it lands just under a message avatar's 18px: small
                         enough to sit on the same rhythm, big enough to still read as the Insights mark. */}
-                    <Logomark variant="mono" color="primary" className="h-4 w-auto shrink-0" />
+                    <Logomark className="h-4 w-auto shrink-0" />
                     <span className="text-sm font-medium">Self-driving</span>
                     <Tooltip title="A Insights agent that investigates tickets against your codebase. Not a teammate.">
                         <span className="text-xs text-muted-alt">Insights agent</span>

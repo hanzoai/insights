@@ -973,7 +973,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
         *,
         team_id: int,
     ) -> None:
-        """Personhog path for inserting a single batch of cohort members.
+        """Person path for inserting a single batch of cohort members.
 
         Resolves UUIDs → person IDs via personinsights (field-masked — membership only needs
         id/uuid, not properties or distinct IDs), then writes the resolved batch.

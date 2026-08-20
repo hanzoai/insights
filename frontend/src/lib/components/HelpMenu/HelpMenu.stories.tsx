@@ -44,9 +44,9 @@ export default meta
 type Story = StoryObj<typeof HelpMenu>
 
 export const Open: Story = {
-    decorators: [mswDecorator({ get: { '/api/environments/:team_id/health_issues/summary/': HEALTHY_SUMMARY } })],
+    decorators: [mswDecorator({ get: { '/v1/environments/:team_id/health_issues/summary/': HEALTHY_SUMMARY } })],
 }
 
 export const OpenWithHealthIssues: Story = {
-    decorators: [mswDecorator({ get: { '/api/environments/:team_id/health_issues/summary/': UNHEALTHY_SUMMARY } })],
+    decorators: [mswDecorator({ get: { '/v1/environments/:team_id/health_issues/summary/': UNHEALTHY_SUMMARY } })],
 }

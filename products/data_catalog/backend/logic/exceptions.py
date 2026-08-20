@@ -32,7 +32,7 @@ class MetricHasNoDefinition(APIException):
 class CatalogConflict(APIException):
     """A 409 for catalog conflicts (duplicate certification, ambiguous table name, existing proposal).
 
-    ``detail`` must stay a plain string: the exceptions_hog handler cannot render dict details
+    ``detail`` must stay a plain string: the exceptions_script handler cannot render dict details
     (it 500s). Machine-readable payloads (candidate ids, the existing proposal id) go in
     ``extra``, which the handler attaches to the response verbatim.
     """

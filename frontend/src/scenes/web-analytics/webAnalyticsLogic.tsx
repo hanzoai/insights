@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     BreakPointFunction,
@@ -14,18 +15,17 @@ import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import { windowValues } from 'kea-window-values'
-import insights from 'insights-js'
 
-import { IconGear } from '@hanzo/icons'
 import { MenuItem } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 import { errorTrackingQuery } from '@hanzo/products-error-tracking/frontend/queries'
 
 import api from 'lib/api'
 import { AuthorizedUrlListType, authorizedUrlListLogic } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { FEATURE_FLAGS, RETENTION_FIRST_OCCURRENCE_MATCHING_FILTERS } from 'lib/constants'
-import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { trackedActionToUrl } from 'lib/logic/scenes/trackedActionToUrl'
@@ -810,7 +810,7 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
         shouldShowGeoIPQueries: {
             _default: null as boolean | null,
             loadShouldShowGeoIPQueries: async (): Promise<boolean> => {
-                // Always display on dev mode, we don't always have events and/or hogQL functions
+                // Always display on dev mode, we don't always have events and/or insightsQL functions
                 // but we want the map to be there for debugging purposes
                 if (values.isDev) {
                     return true
@@ -838,12 +838,14 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                     return false
                 }
 
-                const enabledGeoIPInsightsFunction = insightsFunctionsResponse.value.results.find((insightsFunction) => {
-                    const isFromTemplate = GEOIP_TEMPLATE_IDS.includes(insightsFunction.template?.id ?? '')
-                    const matchesName = insightsFunction.name === 'GeoIP' // Failsafe in case someone implements their custom GeoIP function
+                const enabledGeoIPInsightsFunction = insightsFunctionsResponse.value.results.find(
+                    (insightsFunction) => {
+                        const isFromTemplate = GEOIP_TEMPLATE_IDS.includes(insightsFunction.template?.id ?? '')
+                        const matchesName = insightsFunction.name === 'GeoIP' // Failsafe in case someone implements their custom GeoIP function
 
-                    return (isFromTemplate || matchesName) && insightsFunction.enabled
-                })
+                        return (isFromTemplate || matchesName) && insightsFunction.enabled
+                    }
+                )
 
                 return Boolean(enabledGeoIPInsightsFunction)
             },

@@ -18,7 +18,7 @@ HELPER = "products.customer_analytics.backend.logic.announcements.list_support_b
 class TestAnnouncementAPI(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.base_url = f"/api/projects/{self.team.pk}/announcements/"
+        self.base_url = f"/v1/projects/{self.team.pk}/announcements/"
 
     def _member_channels(self):
         return [

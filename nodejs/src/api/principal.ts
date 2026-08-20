@@ -1,9 +1,9 @@
 import { KeyObject, createPublicKey, verify as verifySignature } from 'crypto'
 import { NextFunction, Request, Response } from 'ultimate-express'
 
-import { parseJSON } from '~/utils/json-parse'
-import { logger } from '~/utils/logger'
-import { internalFetch } from '~/utils/request'
+import { parseJSON } from '~/common/utils/json-parse'
+import { logger } from '~/common/utils/logger'
+import { internalFetch } from '~/common/utils/request'
 
 /**
  * The ONE place a request becomes an identity on this server.

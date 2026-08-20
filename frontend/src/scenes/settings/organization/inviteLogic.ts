@@ -2,7 +2,6 @@ import { MakeLogicType, actions, connect, kea, listeners, path, reducers, select
 import { lazyLoaders, loaders } from 'kea-loaders'
 
 import api, { PaginatedResponse } from 'lib/api'
-import { timeSensitiveAuthenticationLogic } from 'lib/components/TimeSensitiveAuthentication/timeSensitiveAuthenticationLogic'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { toast } from 'lib/elements/Toast/Toast'
 import { bindModalToUrl } from 'lib/logic/bindModalToUrl'
@@ -221,11 +220,8 @@ export const inviteLogic = kea<inviteLogicType>([
                     if (values.message) {
                         payload.forEach((payload) => (payload.message = values.message))
                     }
-                    // Inviting members is a sensitive action; if re-authentication is required,
-                    // await its completion so the invite resumes once the user re-authenticates.
-                    await timeSensitiveAuthenticationLogic.findMounted()?.asyncActions.checkReauthentication()
                     return await api.create<OrganizationInviteType[]>(
-                        `api/organizations/${organizationLogic.values.currentOrganizationId}/invites/bulk/`,
+                        `v1/organizations/${organizationLogic.values.currentOrganizationId}/invites/bulk/`,
                         payload
                     )
                 },
@@ -236,7 +232,7 @@ export const inviteLogic = kea<inviteLogicType>([
             {
                 loadProjectAccessControl: async (projectId: number) => {
                     try {
-                        const accessControls = await api.get(`api/projects/${projectId}/access_controls`)
+                        const accessControls = await api.get(`v1/projects/${projectId}/access_controls`)
                         // Look for project-level access control (resource: "project", organization_member: null, role: null)
                         const projectAccessControl = accessControls.access_controls?.find(
                             (control: any) =>
@@ -263,14 +259,14 @@ export const inviteLogic = kea<inviteLogicType>([
                     return organizationLogic.values.currentOrganization
                         ? (
                               await api.get<PaginatedResponse<OrganizationInviteType>>(
-                                  `api/organizations/${organizationLogic.values.currentOrganizationId}/invites/`
+                                  `v1/organizations/${organizationLogic.values.currentOrganizationId}/invites/`
                               )
                           ).results
                         : []
                 },
                 deleteInvite: async (invite: OrganizationInviteType) => {
                     await api.delete(
-                        `api/organizations/${organizationLogic.values.currentOrganizationId}/invites/${invite.id}/`
+                        `v1/organizations/${organizationLogic.values.currentOrganizationId}/invites/${invite.id}/`
                     )
                     preflightLogic.actions.loadPreflight() // Make sure licensed_users_available is updated
                     toast.success(`Invite for ${invite.target_email} has been canceled`)

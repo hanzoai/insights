@@ -25,7 +25,7 @@ test.describe('SQL Editor direct Postgres queries', () => {
             await page.goto('/login')
             await page.evaluate(
                 async ({ email, password }) => {
-                    await fetch('/api/login/', {
+                    await fetch('/v1/login/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ test.describe('SQL Editor direct Postgres queries', () => {
                         }
 
                         for (let attempt = 1; attempt <= 3; attempt++) {
-                            const response = await fetch('/api/projects/@current/external_data_sources/', {
+                            const response = await fetch('/v1/projects/@current/external_data_sources/', {
                                 method: 'POST',
                                 credentials: 'include',
                                 headers: {
@@ -178,7 +178,7 @@ test.describe('SQL Editor direct Postgres queries', () => {
                                 throw new Error('CSRF cookie missing in browser context')
                             }
 
-                            await fetch(`/api/projects/@current/external_data_sources/${id}/`, {
+                            await fetch(`/v1/projects/@current/external_data_sources/${id}/`, {
                                 method: 'DELETE',
                                 credentials: 'include',
                                 headers: {

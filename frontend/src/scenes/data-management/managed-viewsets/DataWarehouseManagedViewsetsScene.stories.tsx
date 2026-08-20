@@ -18,7 +18,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/managed_viewsets/': () => {
+                '/v1/projects/:team_id/managed_viewsets/': () => {
                     return [
                         200,
                         {

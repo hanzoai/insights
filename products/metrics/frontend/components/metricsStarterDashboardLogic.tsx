@@ -208,7 +208,7 @@ export const metricsStarterDashboardLogic = kea<metricsStarterDashboardLogicType
                 // (only its sharing sub-resources are in the codegen surface), so this
                 // stays a manual call until the Dashboard viewset is tagged.
                 // nosemgrep: prefer-codegen-api
-                dashboard = await api.create<DashboardType>(`api/projects/${values.currentTeamId}/dashboards/`, {
+                dashboard = await api.create<DashboardType>(`v1/projects/${values.currentTeamId}/dashboards/`, {
                     name,
                 })
                 for (const { name: metricName, metric_type: rawType } of pickedMetrics) {

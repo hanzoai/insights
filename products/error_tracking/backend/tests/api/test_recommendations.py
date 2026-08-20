@@ -25,7 +25,6 @@ from products.error_tracking.backend.models import (
     sync_issues_to_datastore,
 )
 
-
 MOCK_ALERTS_META = {
     "alerts": [
         {"key": "error-tracking-issue-created", "enabled": False},
@@ -48,16 +47,16 @@ def _days_ago(n: int) -> str:
 
 class TestRecommendationsAPI(DatastoreTestMixin, APIBaseTest):
     def _list(self):
-        return self.client.get(f"/api/environments/{self.team.id}/error_tracking/recommendations/")
+        return self.client.get(f"/v1/environments/{self.team.id}/error_tracking/recommendations/")
 
     def _poll(self):
-        return self.client.get(f"/api/environments/{self.team.id}/error_tracking/recommendations/?poll=true")
+        return self.client.get(f"/v1/environments/{self.team.id}/error_tracking/recommendations/?poll=true")
 
     def _dismiss(self, rec_id):
-        return self.client.post(f"/api/environments/{self.team.id}/error_tracking/recommendations/{rec_id}/dismiss/")
+        return self.client.post(f"/v1/environments/{self.team.id}/error_tracking/recommendations/{rec_id}/dismiss/")
 
     def _refresh(self, rec_id):
-        return self.client.post(f"/api/environments/{self.team.id}/error_tracking/recommendations/{rec_id}/refresh/")
+        return self.client.post(f"/v1/environments/{self.team.id}/error_tracking/recommendations/{rec_id}/refresh/")
 
     @patch(
         "products.error_tracking.backend.logic.recommendations.long_running_issues.LongRunningIssuesRecommendation.compute",
@@ -346,7 +345,7 @@ class TestRecommendationsAPI(DatastoreTestMixin, APIBaseTest):
         mock_long_running.reset_mock()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/recommendations/{rec_id}/refresh/?force=false"
+            f"/v1/environments/{self.team.id}/error_tracking/recommendations/{rec_id}/refresh/?force=false"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

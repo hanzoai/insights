@@ -74,7 +74,7 @@ export async function cleanupResources(
         try {
             await client.request({
                 method: 'PATCH',
-                path: `/api/projects/${projectId}/feature_flags/${flagId}/`,
+                path: `/v1/projects/${projectId}/feature_flags/${flagId}/`,
                 body: { deleted: true },
             })
         } catch (error) {
@@ -96,7 +96,7 @@ export async function cleanupResources(
         try {
             await client.request({
                 method: 'PATCH',
-                path: `/api/projects/${projectId}/dashboards/${dashboardId}/`,
+                path: `/v1/projects/${projectId}/dashboards/${dashboardId}/`,
                 body: { deleted: true },
             })
         } catch (error) {
@@ -109,7 +109,7 @@ export async function cleanupResources(
         try {
             await client.request({
                 method: 'DELETE',
-                path: `/api/projects/${projectId}/surveys/${surveyId}/`,
+                path: `/v1/projects/${projectId}/surveys/${surveyId}/`,
             })
         } catch (error) {
             console.warn(`Failed to cleanup survey ${surveyId}:`, error)
@@ -121,7 +121,7 @@ export async function cleanupResources(
         try {
             await client.request({
                 method: 'PATCH',
-                path: `/api/projects/${projectId}/actions/${actionId}/`,
+                path: `/v1/projects/${projectId}/actions/${actionId}/`,
                 body: { deleted: true },
             })
         } catch (error) {
@@ -134,7 +134,7 @@ export async function cleanupResources(
         try {
             await client.request({
                 method: 'PATCH',
-                path: `/api/projects/${projectId}/cohorts/${cohortId}/`,
+                path: `/v1/projects/${projectId}/cohorts/${cohortId}/`,
                 body: { deleted: true },
             })
         } catch (error) {

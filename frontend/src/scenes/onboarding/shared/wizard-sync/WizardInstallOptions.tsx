@@ -17,7 +17,7 @@ export interface WizardInstallOptionsProps {
     /** The local "run it yourself" arm. Variants supply their own command block. */
     localBlock: React.ReactNode
     /** Keeps the compact onboarding card free of the wizard mascot. */
-    hideHog?: boolean
+    hideScript?: boolean
     /** Called when a cloud run is queued (e.g. advance or unblock the step). */
     onQueued?: () => void
     /** Instrumentation hook, fired when the user switches between cloud and local. */
@@ -38,7 +38,7 @@ export interface WizardInstallOptionsProps {
  */
 export function WizardInstallOptions({
     localBlock,
-    hideHog = false,
+    hideScript = false,
     onQueued,
     onModeSelected,
     offerCloudRun = true,
@@ -78,7 +78,7 @@ export function WizardInstallOptions({
             <div className="flex flex-col gap-4">
                 {badges}
                 {activeCloudRun ? (
-                    <WizardCloudRunBlock hideHog={hideHog} onRetryLocally={runItYourself} onQueued={onQueued} />
+                    <WizardCloudRunBlock hideScript={hideScript} onRetryLocally={runItYourself} onQueued={onQueued} />
                 ) : (
                     localBlock
                 )}
@@ -117,7 +117,7 @@ export function WizardInstallOptions({
                 ]}
             />
             {effectiveMode === 'cloud' ? (
-                <WizardCloudRunBlock hideHog={hideHog} onRetryLocally={runItYourself} onQueued={onQueued} />
+                <WizardCloudRunBlock hideScript={hideScript} onRetryLocally={runItYourself} onQueued={onQueued} />
             ) : (
                 localBlock
             )}

@@ -1034,7 +1034,7 @@ class TestMprocsGeneratorPreservesCapability:
         assert data["procs"]["storybook"]["capability"] == "tools"
 
 
-class TestPersonhogEnvInjection:
+class TestPersonscriptEnvInjection:
     """Test that personinsights env vars are injected into backend when capability is active."""
 
     def _make_fixtures(self, *, with_personinsights: bool):
@@ -1051,8 +1051,8 @@ class TestPersonhogEnvInjection:
         }
 
         if with_personinsights:
-            capabilities["personinsights"] = Capability(name="personinsights", description="PersonHog", requires=["core_infra"])
-            intents["personinsights"] = Intent(name="personinsights", description="PersonHog", capabilities=["personinsights"])
+            capabilities["personinsights"] = Capability(name="personinsights", description="PersonScript", requires=["core_infra"])
+            intents["personinsights"] = Intent(name="personinsights", description="PersonScript", capabilities=["personinsights"])
             capability_units["personinsights"] = ["personinsights-replica", "personinsights-router"]
 
         intent_map = IntentMap(

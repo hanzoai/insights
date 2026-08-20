@@ -360,7 +360,7 @@ async fn test_ai_endpoint_wrong_content_type_returns_400() {
         .header("Content-Type", "application/json")
         .header(
             "Authorization",
-            "Bearer phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
+            "Bearer pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
         )
         .json(&event_data)
         .send()
@@ -379,7 +379,7 @@ async fn test_ai_endpoint_empty_body_returns_400() {
         .header("Content-Type", "multipart/form-data; boundary=test")
         .header(
             "Authorization",
-            "Bearer phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
+            "Bearer pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
         )
         .send()
         .await;
@@ -447,7 +447,7 @@ async fn test_multipart_parsing_with_multiple_blobs() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -519,7 +519,7 @@ async fn test_multipart_parsing_with_mixed_content_types() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -585,7 +585,7 @@ async fn test_multipart_parsing_with_large_blob() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -638,7 +638,7 @@ async fn test_multipart_parsing_with_empty_blob() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
 
@@ -685,7 +685,7 @@ async fn test_multipart_missing_boundary_returns_400() {
         .header("Content-Type", "multipart/form-data")
         .header(
             "Authorization",
-            "Bearer phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
+            "Bearer pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
         )
         .body(body)
         .send()
@@ -721,7 +721,7 @@ async fn test_multipart_corrupted_boundary_returns_400() {
         )
         .header(
             "Authorization",
-            "Bearer phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
+            "Bearer pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
         )
         .body(body)
         .send()
@@ -770,7 +770,7 @@ async fn test_multipart_event_not_first_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -804,7 +804,7 @@ async fn test_invalid_event_name_not_ai_prefix_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -834,7 +834,7 @@ async fn test_invalid_event_name_regular_event_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -864,7 +864,7 @@ async fn test_invalid_event_name_custom_event_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -894,7 +894,7 @@ async fn test_all_allowed_ai_event_types_accepted() {
         let response = send_multipart_request(
             &test_client,
             form,
-            Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+            Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
         )
         .await;
         assert_eq!(
@@ -922,7 +922,7 @@ async fn test_invalid_ai_event_type_returns_400() {
         let response = send_multipart_request(
             &test_client,
             form,
-            Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+            Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
         )
         .await;
         assert_eq!(
@@ -957,7 +957,7 @@ async fn test_missing_required_ai_properties_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -987,7 +987,7 @@ async fn test_empty_event_name_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -1016,7 +1016,7 @@ async fn test_missing_distinct_id_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -1046,7 +1046,7 @@ async fn test_missing_uuid_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -1091,7 +1091,7 @@ async fn test_invalid_uuid_format_returns_400() {
         let response = send_multipart_request(
             &test_client,
             form,
-            Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+            Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
         )
         .await;
         assert_eq!(
@@ -1138,7 +1138,7 @@ async fn test_malicious_uuid_with_path_traversal_returns_400() {
         let response = send_multipart_request(
             &test_client,
             form,
-            Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+            Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
         )
         .await;
         assert_eq!(
@@ -1163,7 +1163,7 @@ async fn test_ai_endpoint_returns_200_for_valid_request() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -1211,7 +1211,7 @@ async fn test_properties_in_event_part_only() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -1258,7 +1258,7 @@ async fn test_properties_in_separate_part_only() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -1308,7 +1308,7 @@ async fn test_properties_both_embedded_and_separate_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -1344,7 +1344,7 @@ async fn test_event_exceeds_32kb_returns_413() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
@@ -1385,7 +1385,7 @@ async fn test_combined_event_properties_exceeds_960kb_returns_413() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
@@ -1432,7 +1432,7 @@ async fn test_sum_of_all_parts_exceeds_25mb_returns_413() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
@@ -1480,7 +1480,7 @@ async fn test_request_body_exceeds_110_percent_limit_returns_413() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
 
@@ -1513,7 +1513,7 @@ async fn test_blob_with_application_octet_stream_content_type() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -1540,7 +1540,7 @@ async fn test_blob_with_application_json_content_type() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -1567,7 +1567,7 @@ async fn test_blob_with_text_plain_content_type() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -1592,7 +1592,7 @@ async fn test_blob_with_invalid_content_type_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -1616,7 +1616,7 @@ async fn test_blob_without_content_type_returns_400() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -1660,7 +1660,7 @@ async fn test_gzip_compressed_request() {
         .header("Content-Encoding", "gzip")
         .header(
             "Authorization",
-            "Bearer phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
+            "Bearer pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3",
         )
         .body(compressed_body)
         .send()
@@ -1774,7 +1774,7 @@ async fn test_ai_event_published_to_kafka() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -1848,7 +1848,7 @@ async fn test_ai_event_with_blobs_published_with_s3_placeholders() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -1999,7 +1999,7 @@ async fn test_ai_event_with_multiple_blobs_sequential_ranges() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2086,7 +2086,7 @@ async fn test_ai_event_metadata_preserved_in_kafka() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2153,7 +2153,7 @@ async fn test_ai_event_with_ignore_sent_at_true() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2214,7 +2214,7 @@ async fn test_ai_event_with_ignore_sent_at_false() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2280,7 +2280,7 @@ async fn test_ai_event_without_ignore_sent_at_defaults_to_false() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2340,7 +2340,7 @@ async fn test_ai_event_ip_defaults_to_localhost_in_tests() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2390,7 +2390,7 @@ async fn test_ai_event_ip_redacted_for_internal_events() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2452,7 +2452,7 @@ async fn test_ai_event_with_invalid_sent_at_skips_clock_skew_correction() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2512,7 +2512,7 @@ async fn test_ai_event_without_sent_at_uses_event_timestamp() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2572,7 +2572,7 @@ async fn test_ai_event_with_valid_sent_at_applies_clock_skew_correction() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
@@ -2665,7 +2665,7 @@ fn setup_ai_test_router_with_token_dropper(token_dropper: TokenDropper) -> (Rout
 #[tokio::test]
 async fn test_ai_endpoint_token_dropper_drops_matching_token() {
     // Configure token dropper to drop all events for a specific token
-    let token_dropper = TokenDropper::new("phc_dropped_token");
+    let token_dropper = TokenDropper::new("pk-dropped_token");
     let (router, sink) = setup_ai_test_router_with_token_dropper(token_dropper);
     let test_client = TestClient::new(router);
 
@@ -2676,7 +2676,7 @@ async fn test_ai_endpoint_token_dropper_drops_matching_token() {
     let form = create_ai_event_form("$ai_generation", "test_user", properties);
 
     // Use the dropped token
-    let response = send_multipart_request(&test_client, form, Some("phc_dropped_token")).await;
+    let response = send_multipart_request(&test_client, form, Some("pk-dropped_token")).await;
 
     // Should return 200 OK (silently drops to avoid alerting clients)
     assert_eq!(response.status(), StatusCode::OK);
@@ -2693,7 +2693,7 @@ async fn test_ai_endpoint_token_dropper_drops_matching_token() {
 #[tokio::test]
 async fn test_ai_endpoint_token_dropper_allows_non_matching_token() {
     // Configure token dropper to drop a different token
-    let token_dropper = TokenDropper::new("phc_other_token");
+    let token_dropper = TokenDropper::new("pk-other_token");
     let (router, sink) = setup_ai_test_router_with_token_dropper(token_dropper);
     let test_client = TestClient::new(router);
 
@@ -2707,7 +2707,7 @@ async fn test_ai_endpoint_token_dropper_allows_non_matching_token() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
 
@@ -2725,7 +2725,7 @@ async fn test_ai_endpoint_token_dropper_allows_non_matching_token() {
 #[tokio::test]
 async fn test_ai_endpoint_token_dropper_drops_matching_token_and_distinct_id() {
     // Configure token dropper to drop events for specific token:distinct_id combination
-    let token_dropper = TokenDropper::new("phc_specific_token:blocked_user");
+    let token_dropper = TokenDropper::new("pk-specific_token:blocked_user");
     let (router, sink) = setup_ai_test_router_with_token_dropper(token_dropper);
     let test_client = TestClient::new(router);
 
@@ -2736,7 +2736,7 @@ async fn test_ai_endpoint_token_dropper_drops_matching_token_and_distinct_id() {
     // Create event with matching distinct_id
     let form = create_ai_event_form("$ai_generation", "blocked_user", properties);
 
-    let response = send_multipart_request(&test_client, form, Some("phc_specific_token")).await;
+    let response = send_multipart_request(&test_client, form, Some("pk-specific_token")).await;
 
     // Should return 200 OK (silently drops to avoid alerting clients)
     assert_eq!(response.status(), StatusCode::OK);
@@ -2753,7 +2753,7 @@ async fn test_ai_endpoint_token_dropper_drops_matching_token_and_distinct_id() {
 #[tokio::test]
 async fn test_ai_endpoint_token_dropper_allows_different_distinct_id() {
     // Configure token dropper to drop events for specific token:distinct_id combination
-    let token_dropper = TokenDropper::new("phc_specific_token:blocked_user");
+    let token_dropper = TokenDropper::new("pk-specific_token:blocked_user");
     let (router, sink) = setup_ai_test_router_with_token_dropper(token_dropper);
     let test_client = TestClient::new(router);
 
@@ -2764,7 +2764,7 @@ async fn test_ai_endpoint_token_dropper_allows_different_distinct_id() {
     // Create event with DIFFERENT distinct_id
     let form = create_ai_event_form("$ai_generation", "allowed_user", properties);
 
-    let response = send_multipart_request(&test_client, form, Some("phc_specific_token")).await;
+    let response = send_multipart_request(&test_client, form, Some("pk-specific_token")).await;
 
     assert_eq!(response.status(), StatusCode::OK);
 
@@ -2780,7 +2780,7 @@ async fn test_ai_endpoint_token_dropper_allows_different_distinct_id() {
 #[tokio::test]
 async fn test_ai_endpoint_token_dropper_returns_success_with_empty_accepted_parts() {
     // Configure token dropper to drop all events for a specific token
-    let token_dropper = TokenDropper::new("phc_dropped_token");
+    let token_dropper = TokenDropper::new("pk-dropped_token");
     let (router, _sink) = setup_ai_test_router_with_token_dropper(token_dropper);
     let test_client = TestClient::new(router);
 
@@ -2790,7 +2790,7 @@ async fn test_ai_endpoint_token_dropper_returns_success_with_empty_accepted_part
 
     let form = create_ai_event_form("$ai_generation", "test_user", properties);
 
-    let response = send_multipart_request(&test_client, form, Some("phc_dropped_token")).await;
+    let response = send_multipart_request(&test_client, form, Some("pk-dropped_token")).await;
 
     // Token dropper silently drops - returns 200 OK to avoid alerting clients
     assert_eq!(response.status(), StatusCode::OK);
@@ -2879,7 +2879,7 @@ fn setup_ai_test_router_with_llm_quota_limited(token: &str) -> (Router, Capturin
 
 #[tokio::test]
 async fn test_ai_endpoint_quota_limiter_drops_when_over_quota() {
-    let limited_token = "phc_limited_token_for_quota";
+    let limited_token = "pk-limited_token_for_quota";
     let (router, sink) = setup_ai_test_router_with_llm_quota_limited(limited_token);
     let test_client = TestClient::new(router);
 
@@ -2907,7 +2907,7 @@ async fn test_ai_endpoint_quota_limiter_drops_when_over_quota() {
 #[tokio::test]
 async fn test_ai_endpoint_quota_limiter_allows_when_not_over_quota() {
     // Set up quota limiter with a different token limited
-    let limited_token = "phc_other_limited_token";
+    let limited_token = "pk-other_limited_token";
     let (router, sink) = setup_ai_test_router_with_llm_quota_limited(limited_token);
     let test_client = TestClient::new(router);
 
@@ -2921,7 +2921,7 @@ async fn test_ai_endpoint_quota_limiter_allows_when_not_over_quota() {
     let response = send_multipart_request(
         &test_client,
         form,
-        Some("phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
+        Some("pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3"),
     )
     .await;
 
@@ -2938,7 +2938,7 @@ async fn test_ai_endpoint_quota_limiter_allows_when_not_over_quota() {
 
 #[tokio::test]
 async fn test_ai_endpoint_quota_limiter_returns_billing_limit_error_message() {
-    let limited_token = "phc_quota_limited_token";
+    let limited_token = "pk-quota_limited_token";
     let (router, _sink) = setup_ai_test_router_with_llm_quota_limited(limited_token);
     let test_client = TestClient::new(router);
 
@@ -2972,7 +2972,7 @@ async fn test_ai_endpoint_quota_limiter_returns_billing_limit_error_message() {
 // regression guard for `capture-ai-prod-us` (which runs with
 // `OVERFLOW_ENABLED=true` + `OVERFLOW_PRESERVE_PARTITION_LOCALITY=true`).
 
-const AI_OVERFLOW_TEST_TOKEN: &str = "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
+const AI_OVERFLOW_TEST_TOKEN: &str = "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
 
 /// Variant of `setup_ai_test_router_with_capturing_sink` that wires a real
 /// `OverflowLimiter` into the router. Existing helpers still pass `None`; this
@@ -3234,7 +3234,7 @@ async fn send_signed_ai_request(
 
 #[tokio::test]
 async fn test_ai_endpoint_verified_gateway_event_bypasses_quota_and_is_stamped() {
-    let token = "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
+    let token = "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
     let (router, sink) = setup_ai_router_quota_limited_with_secret(token);
     let client = TestClient::new(router);
 
@@ -3274,7 +3274,7 @@ async fn test_ai_endpoint_verified_gateway_event_bypasses_quota_and_is_stamped()
 
 #[tokio::test]
 async fn test_ai_endpoint_forged_marker_is_stripped() {
-    let token = "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
+    let token = "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
     let (router, sink) = setup_ai_router_with_secret();
     let client = TestClient::new(router);
 
@@ -3322,7 +3322,7 @@ fn setup_ai_router_global_quota_limited_with_secret(token: &str) -> (Router, Cap
 
 #[tokio::test]
 async fn test_ai_endpoint_verified_gateway_event_still_subject_to_global_quota() {
-    let token = "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
+    let token = "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
     let (router, sink) = setup_ai_router_global_quota_limited_with_secret(token);
     let client = TestClient::new(router);
 

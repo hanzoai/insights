@@ -2,7 +2,7 @@
 Provision the deterministic local ai-gateway dev credential, end to end:
 
   1. admit the team to the gateway (delegates to `llm_gateway_team`)
-  2. upsert the `phs_` project-secret key (scope ``llm_gateway:read``)
+  2. upsert the `sk-` project-secret key (scope ``llm_gateway:read``)
   3. publish its credential blob to the gateway's Redis, synchronously
 
 so `bin/start gateway` (resolver mode) authenticates with no manual setup.
@@ -11,7 +11,7 @@ the key and re-publish the blob. Driven by ``bin/setup-gateway-e2e``; lives here
 (rather than an inline ``manage.py shell`` heredoc) so it's unit-testable.
 
     AI_GATEWAY_REDIS_URL=redis://localhost:6381 \
-        python manage.py setup_local_gateway_credential --phs phs_... [--team 42]
+        python manage.py setup_local_gateway_credential --phs sk-... [--team 42]
 
 ``AI_GATEWAY_REDIS_URL`` must point at the gateway's Redis so the blob lands
 where the gateway reads it; without it the publish is a no-op (settings gate).
@@ -38,10 +38,10 @@ TEAM_ID_MARKER = "__GATEWAY_E2E_TEAM_ID__"
 
 
 class Command(BaseCommand):
-    help = "Provision the local ai-gateway dev credential (enable team + phs_ + blob). Dev/CI only."
+    help = "Provision the local ai-gateway dev credential (enable team + sk- + blob). Dev/CI only."
 
     def add_arguments(self, parser: Any) -> None:
-        parser.add_argument("--phs", required=True, help="deterministic dev phs_ bearer to provision")
+        parser.add_argument("--phs", required=True, help="deterministic dev sk- bearer to provision")
         parser.add_argument("--team", help="team id or api_token (default: the lowest-pk team)")
 
     def handle(self, *args: Any, **opts: Any) -> None:

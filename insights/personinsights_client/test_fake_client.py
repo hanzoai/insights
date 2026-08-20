@@ -2,13 +2,13 @@ import json
 
 import pytest
 
-from insights.personinsights_client.fake_client import FakePersonHogClient, fake_personinsights_client
+from insights.personinsights_client.fake_client import FakePersonClient, fake_personinsights_client
 from insights.personinsights_client.proto.generated.personinsights.types.v1 import cohort_pb2, common_pb2, group_pb2, person_pb2
 
 
-class TestFakePersonHogClientPersons:
+class TestFakePersonClientPersons:
     def setup_method(self):
-        self.client = FakePersonHogClient()
+        self.client = FakePersonClient()
         self.client.add_person(team_id=1, person_id=10, uuid="abc-123", distinct_ids=["user@example.com", "anon-1"])
         self.client.add_person(team_id=1, person_id=20, uuid="def-456", distinct_ids=["user2@example.com"])
 
@@ -92,9 +92,9 @@ class TestFakePersonHogClientPersons:
         ]
 
 
-class TestFakePersonHogClientGroups:
+class TestFakePersonClientGroups:
     def setup_method(self):
-        self.client = FakePersonHogClient()
+        self.client = FakePersonClient()
         self.client.add_group(team_id=1, group_type_index=0, group_key="org:1", group_properties={"name": "Acme"})
         self.client.add_group(team_id=1, group_type_index=0, group_key="org:2")
 
@@ -131,9 +131,9 @@ class TestFakePersonHogClientGroups:
         assert len(resp.results) == 2
 
 
-class TestFakePersonHogClientGroupTypeMappings:
+class TestFakePersonClientGroupTypeMappings:
     def setup_method(self):
-        self.client = FakePersonHogClient()
+        self.client = FakePersonClient()
         self.client.add_group_type_mapping(
             project_id=100,
             team_id=1,
@@ -177,9 +177,9 @@ class TestFakePersonHogClientGroupTypeMappings:
         assert len(resp.results[1].mappings) == 0
 
 
-class TestFakePersonHogClientCohorts:
+class TestFakePersonClientCohorts:
     def setup_method(self):
-        self.client = FakePersonHogClient()
+        self.client = FakePersonClient()
         self.client.add_cohort_membership(person_id=10, cohort_id=1, is_member=True)
         self.client.add_cohort_membership(person_id=10, cohort_id=2, is_member=False)
 
@@ -206,30 +206,30 @@ class TestFakePersonHogClientCohorts:
 
 class TestCallTracking:
     def test_assert_called(self):
-        client = FakePersonHogClient()
+        client = FakePersonClient()
         client.get_group_type_mappings_by_project_id(group_pb2.GetGroupTypeMappingsByProjectIdRequest(project_id=1))
         calls = client.assert_called("get_group_type_mappings_by_project_id", times=1)
         assert calls[0].request.project_id == 1
 
     def test_assert_called_fails(self):
-        client = FakePersonHogClient()
+        client = FakePersonClient()
         with pytest.raises(AssertionError, match="never called"):
             client.assert_called("get_person")
 
     def test_assert_not_called(self):
-        client = FakePersonHogClient()
+        client = FakePersonClient()
         client.assert_not_called("get_person")
 
     def test_assert_not_called_fails(self):
-        client = FakePersonHogClient()
+        client = FakePersonClient()
         client.get_person(person_pb2.GetPersonRequest(team_id=1, person_id=1))
         with pytest.raises(AssertionError, match="called 1 time"):
             client.assert_not_called("get_person")
 
 
-class TestFakePersonHogClientGroupWrites:
+class TestFakePersonClientGroupWrites:
     def setup_method(self):
-        self.client = FakePersonHogClient()
+        self.client = FakePersonClient()
         self.client.add_group(team_id=1, group_type_index=0, group_key="org:1", group_properties={"name": "Acme"})
 
     def test_create_group(self):
@@ -341,9 +341,9 @@ class TestFakePersonHogClientGroupWrites:
         assert fetched.group.group_key == "org:1"
 
 
-class TestFakePersonHogClientGroupTypeMappingWrites:
+class TestFakePersonClientGroupTypeMappingWrites:
     def setup_method(self):
-        self.client = FakePersonHogClient()
+        self.client = FakePersonClient()
         self.client.add_group_type_mapping(
             project_id=100,
             team_id=1,
@@ -460,7 +460,7 @@ class TestFakePersonHogClientGroupTypeMappingWrites:
         assert resp.deleted_count == 0
 
 
-class TestFakePersonhogClientContextManager:
+class TestFakePersonClientContextManager:
     def test_patches_get_personinsights_client(self):
         with fake_personinsights_client() as fake:
             fake.add_group_type_mapping(project_id=1, group_type="org", group_type_index=0)

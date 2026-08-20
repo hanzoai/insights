@@ -131,16 +131,16 @@ class TestInsightsFlowActionEmailAPI(APIBaseTest):
                 {"from": "email_1", "to": "action_1", "type": "continue"},
             ],
         }
-        create = self.client.post(f"/api/projects/{self.team.id}/hog_flows", flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/script_flows", flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
         if status != "draft":
-            activate = self.client.patch(f"/api/projects/{self.team.id}/hog_flows/{flow_id}", {"status": status})
+            activate = self.client.patch(f"/v1/projects/{self.team.id}/script_flows/{flow_id}", {"status": status})
             assert activate.status_code == 200, activate.json()
         return flow_id
 
     def _patch_email(self, flow_id: str, body: dict, action_id: str = "email_1", mcp: bool = True):
-        url = f"/api/projects/{self.team.id}/hog_flows/{flow_id}/actions/{action_id}/email"
+        url = f"/v1/projects/{self.team.id}/script_flows/{flow_id}/actions/{action_id}/email"
         if mcp:
             return self.client.patch(url, body, HTTP_X_INSIGHTS_CLIENT="mcp")
         return self.client.patch(url, body)
@@ -300,7 +300,7 @@ class TestInsightsFlowActionEmailAPI(APIBaseTest):
         # A graph patch stages a draft first; the email patch must apply on that draft, not reset it.
         flow_id = self._create_flow(status="active")
         graph = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/script_flows/{flow_id}/graph",
             {"operations": [{"op": "update_action", "id": "email_1", "patch": {"name": "Renamed step"}}]},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -355,7 +355,7 @@ class TestInsightsFlowActionEmailAPI(APIBaseTest):
         assert _stored_email_value(flow)["subject"] == "Live subject"
         # A live content change must land in the revision history so it can be rolled back to.
         latest = (
-            InsightsFlowRevision.objects.for_team(self.team.id).filter(hog_flow_id=flow_id).order_by("-version").first()
+            InsightsFlowRevision.objects.for_team(self.team.id).filter(script_flow_id=flow_id).order_by("-version").first()
         )
         assert latest is not None
         latest_email = next(a for a in latest.content["actions"] if a["id"] == "email_1")
@@ -388,7 +388,7 @@ class TestInsightsFlowEmailTemplateReference(APIBaseTest):
             ],
             "edges": [{"from": "trigger_node", "to": "email_1", "type": "continue"}],
         }
-        url = f"/api/projects/{self.team.id}/hog_flows"
+        url = f"/v1/projects/{self.team.id}/script_flows"
         if mcp:
             return self.client.post(url, flow, HTTP_X_INSIGHTS_CLIENT="mcp")
         return self.client.post(url, flow)
@@ -418,7 +418,7 @@ class TestInsightsFlowEmailTemplateReference(APIBaseTest):
         assert config["template_uuid"] == str(template.id)
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_flows/{flow.pk}/actions/email_1/email",
+            f"/v1/projects/{self.team.id}/script_flows/{flow.pk}/actions/email_1/email",
             {"email_patch": {"subject": "Patched subject"}},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -561,10 +561,10 @@ class TestInsightsFlowEmailTemplateReference(APIBaseTest):
         }
 
         with patch(
-            "products.workflows.backend.api.hog_flow.MATERIALIZED_TEMPLATE_CONTENT_MAX_BYTES",
+            "products.workflows.backend.api.script_flow.MATERIALIZED_TEMPLATE_CONTENT_MAX_BYTES",
             8000,
         ):
-            response = self.client.post(f"/api/projects/{self.team.id}/hog_flows", flow, HTTP_X_INSIGHTS_CLIENT="mcp")
+            response = self.client.post(f"/v1/projects/{self.team.id}/script_flows", flow, HTTP_X_INSIGHTS_CLIENT="mcp")
 
         assert response.status_code == 400, response.json()
         assert "author the email bodies inline" in response.json()["detail"], response.json()

@@ -262,7 +262,7 @@ class PullRequest:
 
 @dataclass(frozen=True)
 class MergedPullRequest:
-    """A merged pull request reduced to its branch-tip head SHA — the discovery seam for ReviewHog
+    """A merged pull request reduced to its branch-tip head SHA — the discovery seam for Review
     telemetry ("which PRs merged recently, and the commit at each branch tip"). ``head_sha`` is the
     run / branch-tip SHA (``head.sha``), never the ephemeral ``refs/pull/N/merge`` commit (SPEC §7).
     ``merged_at`` and ``head_sha`` are non-null and non-empty by construction: the read keeps only

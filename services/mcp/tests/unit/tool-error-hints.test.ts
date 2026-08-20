@@ -7,7 +7,7 @@ vi.mock('@/lib/insights', () => ({
     getInsightsClient: () => ({ captureException: vi.fn() }),
 }))
 
-const LOGS_QUERY_URL = 'https://us.hanzo.ai/api/projects/2/logs/query/'
+const LOGS_QUERY_URL = 'https://us.hanzo.ai/v1/projects/2/logs/query/'
 
 describe('getToolRecoveryHint', () => {
     it('returns the narrow-and-retry hint for a 5xx on a logs query endpoint', () => {
@@ -21,10 +21,10 @@ describe('getToolRecoveryHint', () => {
     })
 
     it.each([
-        'https://us.hanzo.ai/api/projects/2/logs/count/',
-        'https://us.hanzo.ai/api/projects/2/logs/count-ranges/',
-        'https://us.hanzo.ai/api/projects/2/logs/services/',
-        'https://us.hanzo.ai/api/projects/2/logs/sparkline/',
+        'https://us.hanzo.ai/v1/projects/2/logs/count/',
+        'https://us.hanzo.ai/v1/projects/2/logs/count-ranges/',
+        'https://us.hanzo.ai/v1/projects/2/logs/services/',
+        'https://us.hanzo.ai/v1/projects/2/logs/sparkline/',
     ])('also fires for the sibling logs query endpoint %s', (url: string) => {
         expect(getToolRecoveryHint({ url, status: 503 })).not.toBeUndefined()
     })
@@ -35,7 +35,7 @@ describe('getToolRecoveryHint', () => {
 
     it('does not fire for unrelated endpoints', () => {
         expect(
-            getToolRecoveryHint({ url: 'https://us.hanzo.ai/api/projects/2/insights/', status: 500 })
+            getToolRecoveryHint({ url: 'https://us.hanzo.ai/v1/projects/2/insights/', status: 500 })
         ).toBeUndefined()
     })
 
@@ -99,7 +99,7 @@ describe('handleToolError recovery hints', () => {
             status: 500,
             statusText: 'Internal Server Error',
             body: 'boom',
-            url: 'https://us.hanzo.ai/api/projects/2/insights/',
+            url: 'https://us.hanzo.ai/v1/projects/2/insights/',
             method: 'GET',
         })
 

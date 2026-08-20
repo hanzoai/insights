@@ -1,4 +1,4 @@
-"""Command-line entry point for Hogli."""
+"""Command-line entry point for Scriptli."""
 
 from __future__ import annotations
 

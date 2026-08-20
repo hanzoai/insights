@@ -124,8 +124,8 @@ func (v *GeoView) aggregated() []countryCount {
 }
 
 var countryColors = []lipgloss.Color{
-	"#F54E00", // Insights orange
-	"#1D4AFF", // Insights blue
+	"#5C6BC0", // indigo
+	"#8D6E63", // brown
 	"#77B96C", // green
 	"#E040FB", // purple
 	"#00BCD4", // cyan

@@ -1,19 +1,9 @@
 import { useActions, useValues } from 'kea'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
+import { Button, Dialog, Switch, Table, TableColumn, TableColumns, Tag, SpinnerOverlay } from '@hanzo/elements'
 import { IconBell, IconEllipsis, IconPlus } from '@hanzo/icons'
-import {
-    Button,
-    Dialog,
-    Switch,
-    Table,
-    TableColumn,
-    TableColumns,
-    Tag,
-    SpinnerOverlay,
-} from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -54,7 +44,7 @@ const DESTINATION_TAGS = [
     { type: NotificationDestinationTypeEnumApi.Teams, label: 'Teams', icon: IconMicrosoftTeams },
 ] as const
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngMascot()
 
 function formatThreshold(alert: LogsAlertConfigurationApi): string {
     const operator = alert.threshold_operator === LogsAlertThresholdOperatorEnumApi.Below ? '<' : '>'
@@ -298,7 +288,7 @@ export function LogsAlertList(): JSX.Element {
                 thingName="logs alert"
                 description="Logs alerts notify you when matching logs cross a threshold."
                 isEmpty
-                customHog={MascotMagnifyingGlass}
+                customScript={MascotMagnifyingGlass}
                 actionElementOverride={
                     <Button
                         type="primary"

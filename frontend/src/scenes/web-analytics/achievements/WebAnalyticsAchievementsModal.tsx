@@ -2,14 +2,11 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { type ComponentType, type ReactNode } from 'react'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
-import * as coffeeRunPng from '@hanzo/brand/hoggies/png/coffee-run'
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconCheck, IconChevronDown, IconCrown, IconInfo, IconLock, IconPeople, IconPerson } from '@hanzo/icons'
 import { Modal, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconChevronDown, IconCrown, IconInfo, IconLock, IconPeople, IconPerson } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
-import { ExplorerHog, HeartHog, StarHog, WavingHog } from 'lib/components/mascots'
+import { pngMascot } from 'lib/brand/mascot'
+import { ExplorerScript, HeartScript, StarScript, WavingScript } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { Link } from 'lib/elements/Link'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -27,9 +24,9 @@ import { isWebAnalyticsAchievementsEnabled } from './gating'
 import { webAnalyticsAchievementsLogic } from './webAnalyticsAchievementsLogic'
 import { webAnalyticsAchievementsPreferencesLogic } from './webAnalyticsAchievementsPreferencesLogic'
 
-const MascotChart = pngHoggie(chartPng)
-const MascotCoffeeRun = pngHoggie(coffeeRunPng)
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotChart = pngMascot()
+const MascotCoffeeRun = pngMascot()
+const MascotMagnifyingGlass = pngMascot()
 
 const RING_TRACK_COLOR = 'var(--border)'
 const TIER_COLORS = [
@@ -56,14 +53,14 @@ const TRACK_META: Record<string, TrackMeta> = {
             `${humanFriendlyLargeNumber(n)} ${pluralize(n, 'day', 'days', false)} until "${next}"`,
     },
     loyalty: {
-        script: HeartHog,
+        script: HeartScript,
         objective: 'Open Web analytics on many separate days over time.',
         unit: 'days',
         effortPhrase: (n, next) =>
             `Visit ${humanFriendlyLargeNumber(n)} more ${pluralize(n, 'day', 'days', false)} to reach "${next}"`,
     },
     explorer: {
-        script: ExplorerHog,
+        script: ExplorerScript,
         objective: 'Slice your data by adding a filter or opening a breakdown on the Web analytics dashboard.',
         unit: 'explorations',
         effortPhrase: (n, next) =>
@@ -77,7 +74,7 @@ const TRACK_META: Record<string, TrackMeta> = {
             `Watch ${humanFriendlyLargeNumber(n)} more ${pluralize(n, 'recording', 'recordings', false)} to reach "${next}"`,
     },
     conversions: {
-        script: StarHog,
+        script: StarScript,
         objective: 'Set up conversion goals in Web analytics.',
         unit: 'conversions',
         effortPhrase: (n, next) => `${humanFriendlyLargeNumber(n)} more to reach "${next}"`,
@@ -229,7 +226,7 @@ function AchievementTrackCard({
     pulsing: boolean
 }): JSX.Element {
     const trackMeta = TRACK_META[track.key]
-    const TrackHog = trackMeta?.script ?? WavingHog
+    const TrackScript = trackMeta?.script ?? WavingScript
     const { total, currentStage, value, maxed, currentName, nextStage, percent, remaining } = deriveTrackProgress(
         track,
         progress
@@ -267,7 +264,7 @@ function AchievementTrackCard({
                 <Tooltip title={progressTooltip}>
                     <span className="inline-flex">
                         <TrackMedallion
-                            script={TrackHog}
+                            script={TrackScript}
                             ringColor={tierColor}
                             colorFraction={colorFraction}
                             maxed={maxed}

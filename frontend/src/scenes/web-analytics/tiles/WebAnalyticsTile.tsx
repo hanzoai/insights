@@ -6,7 +6,7 @@ import { IconChevronDown, IconExternal, IconTrending, IconUndo, IconWarning } fr
 import { SegmentedButton, Select, Link, Tooltip } from '@hanzo/elements'
 
 import { getColorVar } from 'lib/colors'
-import { StarHog } from 'lib/components/mascots'
+import { StarScript } from 'lib/components/mascots'
 import { IntervalFilterStandalone } from 'lib/components/IntervalFilter'
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -1247,7 +1247,7 @@ export const WebGoalsTile = ({
                 titleOverride="Track your conversions"
                 description="Goals show how many visitors complete the actions that matter to you. Sign-ups, purchases, demo requests. Create an action for a key conversion to see its visitors and conversion rate here."
                 docsURL="https://hanzo.ai/docs/web-analytics/conversion-goals"
-                hogLayout="responsive"
+                scriptLayout="responsive"
                 actionElementOverride={
                     <NewActionButton onSelectOption={() => updateHasSeenProductIntroFor(ProductKey.ACTIONS)} />
                 }
@@ -1717,7 +1717,7 @@ const FrustrationMetricsEmptyState = (
             <div className="flex items-center gap-8 w-full justify-center">
                 <div>
                     <div className="w-40 lg:w-50 mx-auto mb-4 hidden md:block">
-                        <StarHog />
+                        <StarScript />
                     </div>
                     <p>No frustrating pages found! Keep up the great work!</p>
                 </div>

@@ -226,7 +226,7 @@ export const BreakdownTypeApi = {
     EventMetadata: 'event_metadata',
     Group: 'group',
     Session: 'session',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
     DataWarehouse: 'data_warehouse',
     DataWarehousePersonProperty: 'data_warehouse_person_property',
     RevenueAnalytics: 'revenue_analytics',
@@ -240,7 +240,7 @@ export const MultipleBreakdownTypeApi = {
     EventMetadata: 'event_metadata',
     Group: 'group',
     Session: 'session',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
     Cohort: 'cohort',
     RevenueAnalytics: 'revenue_analytics',
     DataWarehouse: 'data_warehouse',
@@ -1008,7 +1008,7 @@ export const ExperimentMetricMathTypeApi = {
     Avg: 'avg',
     Dau: 'dau',
     UniqueGroup: 'unique_group',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 export type CalendarHeatmapMathTypeApi = (typeof CalendarHeatmapMathTypeApi)[keyof typeof CalendarHeatmapMathTypeApi]
@@ -2562,7 +2562,7 @@ export const PathTypeApi = {
     Pageview: '$pageview',
     Screen: '$screen',
     CustomEvent: 'custom_event',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 export interface PathCleaningFilterApi {
@@ -4244,7 +4244,7 @@ export const TaxonomicFilterGroupTypeApi = {
     Dashboards: 'dashboards',
     NameGroups: 'name_groups',
     SessionProperties: 'session_properties',
-    HogqlExpression: 'insightsql_expression',
+    InsightsqlExpression: 'insightsql_expression',
     Notebooks: 'notebooks',
     LogEntries: 'log_entries',
     ErrorTrackingIssues: 'error_tracking_issues',
@@ -7282,25 +7282,25 @@ export interface DataVisualizationNodeApi {
     version?: number | null
 }
 
-export type HogQueryApiKind = (typeof HogQueryApiKind)[keyof typeof HogQueryApiKind]
+export type ScriptQueryApiKind = (typeof ScriptQueryApiKind)[keyof typeof ScriptQueryApiKind]
 
-export const HogQueryApiKind = {
-    HogQuery: 'HogQuery',
+export const ScriptQueryApiKind = {
+    ScriptQuery: 'ScriptQuery',
 } as const
 
-export interface HogQueryResponseApi {
+export interface ScriptQueryResponseApi {
     bytecode?: unknown[] | null
     coloredBytecode?: unknown[] | null
     results: unknown
     stdout?: string | null
 }
 
-export interface HogQueryApi {
+export interface ScriptQueryApi {
     code?: string | null
-    kind: HogQueryApiKind
+    kind: ScriptQueryApiKind
     /** Modifiers used when performing the query */
     modifiers?: InsightsQLQueryModifiersApi | null
-    response?: HogQueryResponseApi | null
+    response?: ScriptQueryResponseApi | null
     tags?: QueryLogTagsApi | null
     /** version of the node, used for schema migrations */
     version?: number | null
@@ -7311,9 +7311,9 @@ export interface HogQueryApi {
  * - `InsightVizNode` — product analytics (trends, funnels, retention, paths, stickiness, lifecycle)
  * - `DataVisualizationNode` — SQL insights using InsightsQL
  * - `DataTableNode` — raw data tables
- * - `HogQuery` — Script language queries
+ * - `ScriptQuery` — Script language queries
  */
-export type _InsightQuerySchemaApi = InsightVizNodeApi | DataTableNodeApi | DataVisualizationNodeApi | HogQueryApi
+export type _InsightQuerySchemaApi = InsightVizNodeApi | DataTableNodeApi | DataVisualizationNodeApi | ScriptQueryApi
 
 export interface DashboardTileBasicApi {
     readonly id: number

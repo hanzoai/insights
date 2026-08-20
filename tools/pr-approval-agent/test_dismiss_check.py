@@ -1,4 +1,4 @@
-"""Tests for the Stamphog dismiss-decision logic."""
+"""Tests for the Stamp dismiss-decision logic."""
 
 import os
 import subprocess
@@ -449,9 +449,9 @@ def test_select_last_bot_approval_ignores_bot_non_approval_states() -> None:
 
 
 def test_select_last_bot_approval_recognizes_app_identity() -> None:
-    # The Stamphog app posts the body-carrying approval as stamphog[bot]; it
+    # The Stamp app posts the body-carrying approval as stamp[bot]; it
     # must count as a prior bot approval so dismiss-on-push can find its SHA.
-    reviews = [_review("stamphog[bot]", "APPROVED", "sha-app", "2026-01-01T00:00:00Z")]
+    reviews = [_review("stamp[bot]", "APPROVED", "sha-app", "2026-01-01T00:00:00Z")]
     assert select_last_bot_approval(reviews) == "sha-app"
 
 

@@ -40,7 +40,7 @@ describe('slackIntegrationLogic — loadAllSlackChannels search & pagination', (
         ]
         useMocks({
             get: {
-                '/api/environments/:team_id/integrations/:id/channels': ({ request }) => {
+                '/v1/environments/:team_id/integrations/:id/channels': ({ request }) => {
                     lastChannelsQuery = Object.fromEntries(new URL(request.url).searchParams.entries())
                     return [
                         200,
@@ -183,7 +183,7 @@ describe('slackIntegrationLogic — getChannelRefreshButtonDisabledReason', () =
         lastRefreshedAt = ''
         useMocks({
             get: {
-                '/api/environments/:team_id/integrations/:id/channels': () => [200, { channels: [], lastRefreshedAt }],
+                '/v1/environments/:team_id/integrations/:id/channels': () => [200, { channels: [], lastRefreshedAt }],
             },
         })
         initKeaTests()
@@ -284,7 +284,7 @@ describe('slackIntegrationLogic — inactive Slack integration', () => {
         respondInactive = false
         useMocks({
             get: {
-                '/api/environments/:team_id/integrations/:id/channels': () =>
+                '/v1/environments/:team_id/integrations/:id/channels': () =>
                     respondInactive
                         ? [
                               400,
@@ -363,7 +363,7 @@ describe('slackIntegrationLogic — slackChannelsForPicker', () => {
         window.localStorage.clear()
         useMocks({
             get: {
-                '/api/environments/:team_id/integrations/:id/channels': {
+                '/v1/environments/:team_id/integrations/:id/channels': {
                     channels: allChannels,
                     lastRefreshedAt: '2026-01-01T00:00:00Z',
                 },

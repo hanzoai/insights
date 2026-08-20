@@ -86,7 +86,7 @@ def test_eval_live_server_routes_event_ingest_through_asgi() -> None:
         server = EvalLiveServer(port=0)
         try:
             response = requests.post(
-                f"{server.url}/api/projects/25/tasks/task-id/runs/run-id/event_stream/",
+                f"{server.url}/v1/projects/25/tasks/task-id/runs/run-id/event_stream/",
                 timeout=5,
             )
         finally:

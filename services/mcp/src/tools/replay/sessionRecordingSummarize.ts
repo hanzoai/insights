@@ -67,7 +67,7 @@ const sessionRecordingSummarize = (): ToolBase<typeof schema, SseResult> =>
 
             await context.api.requestSSE<SseEvent>({
                 method: 'POST',
-                path: `/api/environments/${encodeURIComponent(String(projectId))}/session_summaries/stream_batch/`,
+                path: `/v1/environments/${encodeURIComponent(String(projectId))}/session_summaries/stream_batch/`,
                 body,
                 onEvent: (event, data) => {
                     if (event === 'summary') {

@@ -1,4 +1,4 @@
-import { convertHogToJS } from '@hanzo/scriptvm'
+import { convertScriptToJS } from '@hanzo/scriptvm'
 
 import { CyclotronInputType } from '~/cdp/schema/cyclotron'
 import { ACCESS_TOKEN_PLACEHOLDER } from '~/common/config/constants'
@@ -6,7 +6,7 @@ import { logger } from '~/common/utils/logger'
 
 import { InsightsFunctionInvocationGlobals, InsightsFunctionInvocationGlobalsWithInputs, InsightsFunctionType } from '../types'
 import { EncryptedFields } from '../utils/encryption-utils'
-import { execHog } from '../utils/script-exec'
+import { execScript } from '../utils/script-exec'
 import { LiquidRenderer } from '../utils/liquid'
 import { getDevicePushSubscriptionToken } from '../utils/push-subscription-utils'
 import { IntegrationManagerService } from './managers/integration-manager.service'
@@ -14,7 +14,7 @@ import { RecipientTokensService } from './messaging/recipient-tokens.service'
 
 export const EXTEND_OBJECT_KEY = '$$_extend_object'
 
-export class HogInputsService {
+export class ScriptInputsService {
     constructor(
         private integrationManager: IntegrationManagerService,
         private recipientTokensService: RecipientTokensService | undefined,
@@ -48,7 +48,7 @@ export class HogInputsService {
                 return formatLiquidInput(input.value, newGlobals, key)
             }
             if (templating === 'script' && input?.bytecode) {
-                return await formatHogInput(input.bytecode, newGlobals, key)
+                return await formatScriptInput(input.bytecode, newGlobals, key)
             }
 
             return input.value
@@ -62,7 +62,7 @@ export class HogInputsService {
 
         if (emailInputSchema && emailInput) {
             if (!this.recipientTokensService) {
-                throw new Error('HogInputsService was constructed without messaging preference URL support')
+                throw new Error('ScriptInputsService was constructed without messaging preference URL support')
             }
             // If we have an email value then we template it out to get the email address
             const emailValue = await _formatInput(emailInput, emailInputSchema.key)
@@ -135,7 +135,7 @@ export class HogInputsService {
             }
 
             if (!appIdentifier) {
-                logger.warn('🦔', '[HogInputsService] No push integration found for push subscription input', {
+                logger.warn('🦔', '[ScriptInputsService] No push integration found for push subscription input', {
                     insightsFunctionId: insightsFunction.id,
                     insightsFunctionName: insightsFunction.name,
                     teamId: insightsFunction.team_id,
@@ -232,7 +232,7 @@ export class HogInputsService {
     }
 }
 
-export const formatHogInput = async (
+export const formatScriptInput = async (
     bytecode: any,
     globals: InsightsFunctionInvocationGlobalsWithInputs,
     key?: string
@@ -246,7 +246,7 @@ export const formatHogInput = async (
     }
 
     if (Array.isArray(bytecode) && (bytecode[0] === '_h' || bytecode[0] === '_H')) {
-        const { execResult: result, error } = await execHog(bytecode, { globals })
+        const { execResult: result, error } = await execScript(bytecode, { globals })
         if (!result || error) {
             throw error ?? result?.error
         }
@@ -254,16 +254,16 @@ export const formatHogInput = async (
             // NOT ALLOWED
             throw new Error(`Could not execute bytecode for input field: ${key}`)
         }
-        return convertHogToJS(result.result)
+        return convertScriptToJS(result.result)
     }
 
     if (Array.isArray(bytecode)) {
-        return await Promise.all(bytecode.map((item) => formatHogInput(item, globals, key)))
+        return await Promise.all(bytecode.map((item) => formatScriptInput(item, globals, key)))
     } else if (typeof bytecode === 'object' && bytecode !== null) {
         let ret: Record<string, any> = {}
 
         if (bytecode[EXTEND_OBJECT_KEY]) {
-            const res = await formatHogInput(bytecode[EXTEND_OBJECT_KEY], globals, key)
+            const res = await formatScriptInput(bytecode[EXTEND_OBJECT_KEY], globals, key)
             if (res && typeof res === 'object') {
                 ret = {
                     ...res,
@@ -276,7 +276,7 @@ export const formatHogInput = async (
                 if (subkey === EXTEND_OBJECT_KEY) {
                     return
                 }
-                ret[subkey] = await formatHogInput(value, globals, key ? `${key}.${subkey}` : subkey)
+                ret[subkey] = await formatScriptInput(value, globals, key ? `${key}.${subkey}` : subkey)
             })
         )
 

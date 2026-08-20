@@ -8,7 +8,7 @@ import { ChartSettings } from '~/queries/schema/schema-general'
 import {
     type DataVizFixture,
     buildDataVisualizationQuery,
-    getHogChart,
+    getScriptChart,
     HOVER,
     MONTHS,
     renderDataVisualization,
@@ -77,7 +77,7 @@ describe('SqlBarGraph', () => {
             renderBar(display, { yAxis: [{ column: 'a' }, { column: 'b' }], ...extra }, twoSeries())
 
             await screen.findByLabelText(/chart with 2 data series/i)
-            await waitFor(() => expect(getHogChart().yTicks().length).toBeGreaterThan(0))
+            await waitFor(() => expect(getScriptChart().yTicks().length).toBeGreaterThan(0))
         })
 
         it('renders percentage y-axis ticks for the 100%-stacked layout', async () => {
@@ -88,8 +88,8 @@ describe('SqlBarGraph', () => {
             )
 
             await screen.findByLabelText(/chart with 2 data series/i)
-            await waitFor(() => expect(getHogChart().yTicks().length).toBeGreaterThan(0))
-            for (const tick of getHogChart().yTicks()) {
+            await waitFor(() => expect(getScriptChart().yTicks().length).toBeGreaterThan(0))
+            for (const tick of getScriptChart().yTicks()) {
                 expect(tick).toMatch(/%$/)
             }
         })
@@ -115,8 +115,8 @@ describe('SqlBarGraph', () => {
             )
 
             await screen.findByLabelText(/chart with 2 data series/i)
-            await waitFor(() => expect(getHogChart().hasRightAxis).toBe(true))
-            const chart = getHogChart()
+            await waitFor(() => expect(getScriptChart().hasRightAxis).toBe(true))
+            const chart = getScriptChart()
             expect(chart.yTicks().length).toBeGreaterThan(0)
             expect(chart.yTicks().every((tick) => tick.startsWith('$'))).toBe(true)
             const rightTicks = chart.yRightTicks()
@@ -132,8 +132,8 @@ describe('SqlBarGraph', () => {
             )
 
             await screen.findByLabelText(/chart with/i)
-            await waitFor(() => expect(getHogChart().yRightTicks().length).toBeGreaterThan(0))
-            expect(getHogChart().yTicks()).toHaveLength(0)
+            await waitFor(() => expect(getScriptChart().yRightTicks().length).toBeGreaterThan(0))
+            expect(getScriptChart().yTicks()).toHaveLength(0)
         })
     })
 
@@ -186,7 +186,7 @@ describe('SqlBarGraph', () => {
             )!
             fireEvent.click(bButton)
 
-            await waitFor(() => expect(getHogChart().seriesCount).toBe(1))
+            await waitFor(() => expect(getScriptChart().seriesCount).toBe(1))
         })
     })
 
@@ -199,7 +199,7 @@ describe('SqlBarGraph', () => {
             )
 
             await screen.findByLabelText(/chart with/i)
-            const lines = getHogChart().referenceLines()
+            const lines = getScriptChart().referenceLines()
             expect(lines.map((l) => l.label)).toEqual(['Target'])
             expect(lines[0].orientation).toBe('horizontal')
         })

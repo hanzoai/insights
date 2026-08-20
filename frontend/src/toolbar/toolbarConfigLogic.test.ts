@@ -83,8 +83,8 @@ describe('toolbar toolbarConfigLogic', () => {
     it('is authenticated with accessToken', () => {
         const logic = toolbarConfigLogic.build({
             apiURL: 'http://localhost',
-            accessToken: 'pha_oauth_token',
-            refreshToken: 'phr_refresh',
+            accessToken: 'at-oauth_token',
+            refreshToken: 'rt-refresh',
             clientId: 'client-id',
         })
         logic.mount()
@@ -96,10 +96,10 @@ describe('toolbar toolbarConfigLogic', () => {
         logic.mount()
 
         expectLogic(logic, () => {
-            logic.actions.setOAuthTokens('pha_new', 'phr_new', 'client-123')
+            logic.actions.setOAuthTokens('at-new', 'rt-new', 'client-123')
         }).toMatchValues({
-            accessToken: 'pha_new',
-            refreshToken: 'phr_new',
+            accessToken: 'at-new',
+            refreshToken: 'rt-new',
             clientId: 'client-123',
             isAuthenticated: true,
         })
@@ -338,8 +338,8 @@ describe('toolbar toolbarConfigLogic', () => {
         it('skips the HEAD check when already authenticated and no pending code exchange', () => {
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://selfhosted.example.com',
-                accessToken: 'pha_existing',
-                refreshToken: 'phr_existing',
+                accessToken: 'at-existing',
+                refreshToken: 'rt-existing',
                 clientId: 'client',
             } as any)
             logic.mount()
@@ -364,8 +364,8 @@ describe('toolbar toolbarConfigLogic', () => {
             window.history.pushState({}, '', '/#__insights_toolbar=code:abc,client_id:xyz')
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://selfhosted.example.com',
-                accessToken: 'pha_existing',
-                refreshToken: 'phr_existing',
+                accessToken: 'at-existing',
+                refreshToken: 'rt-existing',
                 clientId: 'client',
             } as any)
             logic.mount()
@@ -623,7 +623,7 @@ describe('toolbar toolbarConfigLogic', () => {
             )
             const logic = toolbarConfigLogic.build({
                 apiURL: 'http://localhost',
-                token: 'phc_test',
+                token: 'pk-test',
                 // No accessToken — simulates insights-js overwrite
             })
             logic.mount()
@@ -899,7 +899,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 })
             })
 
-            const response = await toolbarFetch('/api/projects/@current/actions/')
+            const response = await toolbarFetch('/v1/projects/@current/actions/')
 
             expect(response.status).toBe(200)
             expect(logic.values.accessToken).toBe('new-access')
@@ -921,7 +921,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 return Promise.resolve({ ok: false, status: 401, json: () => Promise.resolve({}) })
             })
 
-            await toolbarFetch('/api/projects/@current/actions/')
+            await toolbarFetch('/v1/projects/@current/actions/')
 
             expect(logic.values.accessToken).toBeNull()
             expect(logic.values.isAuthenticated).toBe(false)
@@ -943,7 +943,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 return Promise.resolve({ ok: false, status: 401, json: () => Promise.resolve({}) })
             })
 
-            await toolbarFetch('/api/projects/@current/actions/')
+            await toolbarFetch('/v1/projects/@current/actions/')
 
             expect(refreshAttempted).toBe(false)
             expect(logic.values.accessToken).toBeNull()
@@ -967,7 +967,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 })
             )
 
-            const response = await toolbarFetch('/api/projects/@current/actions/')
+            const response = await toolbarFetch('/v1/projects/@current/actions/')
 
             expect(response.status).toBe(200)
             // Only one fetch call (no refresh)
@@ -987,7 +987,7 @@ describe('toolbar toolbarConfigLogic', () => {
             // used to crash the OAuth chain with "Cannot read properties of undefined (reading 'status')".
             ;(global.fetch as jest.Mock).mockImplementation(() => Promise.resolve(undefined))
 
-            const response = await toolbarFetch('/api/projects/@current/actions/')
+            const response = await toolbarFetch('/v1/projects/@current/actions/')
 
             // Normalized into a synthetic failed response so callers can degrade gracefully.
             expect(response).toBeInstanceOf(Response)
@@ -1484,8 +1484,8 @@ describe('toolbar toolbarConfigLogic', () => {
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://us.hanzo.ai',
                 apiURL: 'https://evil.example.com',
-                accessToken: 'pha_secret',
-                refreshToken: 'phr_secret',
+                accessToken: 'at-secret',
+                refreshToken: 'rt-secret',
                 clientId: 'client',
             } as any)
             logic.mount()
@@ -1509,7 +1509,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 (c) => typeof c[0] === 'string' && c[0].includes('/uploaded_media/')
             )
             expect(uploadCalls).toHaveLength(1)
-            expect(uploadCalls[0][0]).toBe('https://us.hanzo.ai/api/projects/@current/uploaded_media/')
+            expect(uploadCalls[0][0]).toBe('https://us.hanzo.ai/v1/projects/@current/uploaded_media/')
 
             // Strong regression guard: no fetch (auth or otherwise) may target attacker host.
             const callsToAttacker = (global.fetch as jest.Mock).mock.calls.filter(
@@ -1555,10 +1555,10 @@ describe('toolbar toolbarConfigLogic', () => {
         it('accepts string accessToken', () => {
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://us.hanzo.ai',
-                accessToken: 'pha_real',
+                accessToken: 'at-real',
             } as any)
             logic.mount()
-            expectLogic(logic).toMatchValues({ accessToken: 'pha_real', isAuthenticated: true })
+            expectLogic(logic).toMatchValues({ accessToken: 'at-real', isAuthenticated: true })
         })
 
         it.each([
@@ -1594,8 +1594,8 @@ describe('toolbar toolbarConfigLogic', () => {
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://us.hanzo.ai',
                 apiURL: 'https://us.hanzo.ai',
-                accessToken: 'pha_token',
-                refreshToken: 'phr_token',
+                accessToken: 'at-token',
+                refreshToken: 'rt-token',
                 clientId: 'client',
             } as any)
             logic.mount()
@@ -1609,14 +1609,14 @@ describe('toolbar toolbarConfigLogic', () => {
                 json: () => Promise.resolve({ results: [{ id: 1 }] }),
             } as any)
             const res = await toolbarFetch(
-                'https://us.hanzo.ai/api/element/stats/?page=2',
+                'https://us.hanzo.ai/v1/element/stats/?page=2',
                 'GET',
                 undefined,
                 'use-as-provided'
             )
             expect(res.status).toBe(200)
             const sentUrl = (global.fetch as jest.Mock).mock.calls[0][0]
-            expect(sentUrl).toBe('https://us.hanzo.ai/api/element/stats/?page=2')
+            expect(sentUrl).toBe('https://us.hanzo.ai/v1/element/stats/?page=2')
         })
 
         it('rejects cross-origin URLs with status 400 and results: []', async () => {

@@ -853,7 +853,7 @@ describe('Tool Filtering - Feature Flags', () => {
                 'endpoints-ai-materialization-fix',
                 'engineering-analytics',
                 'web-analytics-path-cleaning-suggestions',
-                'stamphog',
+                'stamp',
                 'product-data-catalog',
                 'loops',
                 'review-script',

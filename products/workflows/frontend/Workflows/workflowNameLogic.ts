@@ -61,7 +61,7 @@ export const workflowNameLogic = kea<workflowNameLogicType>([
             {
                 loadWorkflow: async () => {
                     try {
-                        return await api.hogFlows.getInsightsFlow(props.id)
+                        return await api.flows.getInsightsFlow(props.id)
                     } catch {
                         // Deleted, or not visible to this user. Callers fall back to a generic label.
                         return null

@@ -445,7 +445,7 @@ def _import_ticket_batch_sync(input: ImportBatchInput) -> ImportBatchOutput:
     # IMPORTANT: persist historical rows with bulk_create/bulk_update ONLY. These bypass the
     # post_save/pre_save receivers in products/conversations/backend/signals.py, which is what
     # keeps a backfill silent: those receivers emit the $conversation_* analytics events that
-    # power hogflow triggers (New ticket created, Ticket message sent/received, ...) AND enqueue
+    # power flow triggers (New ticket created, Ticket message sent/received, ...) AND enqueue
     # outbound Slack/email/Teams/GitHub replies. Switching any write here to create_with_number(),
     # Comment.objects.create(), or .save() would fire those signals for every imported row —
     # triggering workflows and re-sending replies to real customers for years-old tickets. Don't.

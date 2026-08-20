@@ -8,8 +8,8 @@ from rest_framework import status
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
-from insights.datastore.query_tagging import get_query_tags
 from insights.cloud_utils import is_cloud
+from insights.datastore.query_tagging import get_query_tags
 from insights.exceptions_capture import capture_exception
 
 logger = structlog.get_logger(__name__)
@@ -112,7 +112,7 @@ class ExceptionContext(TypedDict):
 def exception_reporting(exception: Exception, context: ExceptionContext) -> Optional[str]:
     """
     Determines which exceptions to report and sends them to error tracking.
-    Used through drf-exceptions-script
+    Used through insights.errors
     """
     if not isinstance(exception, APIException):
         tags = get_query_tags().model_dump(exclude_none=True)
@@ -133,9 +133,9 @@ def generate_exception_response(
     Generates a friendly JSON error response in line with drf-exceptions-script for endpoints not under DRF.
     """
 
-    # Importing here because this module is loaded before Django settings are configured,
-    # and statshog relies on those being ready
-    from statshog.defaults.django import statsd
+    # Importing here because this module is loaded before Django settings are
+    # configured, and the client reads its address from them at import time.
+    from insights.statsd import statsd
 
     statsd.incr(
         f"insights_cloud_raw_endpoint_exception",
@@ -146,19 +146,17 @@ def generate_exception_response(
 
 def exception_handler(exc: Exception, context: ExceptionContext) -> Optional[Response]:
     """
-    Wraps drf-exceptions-script and, on 401, advertises the OAuth protected resource
+    Renders the error envelope and, on 401, advertises the OAuth protected resource
     metadata document via WWW-Authenticate per RFC 9728, so that MCP-style agents
     can bootstrap from a stock 401.
     """
-    # Imported lazily: exceptions_hog calls a non-lazy gettext at module import time,
-    # which raises AppRegistryNotReady when insights.exceptions is imported during
-    # manage.py bootstrap (before Django apps are loaded).
-    from exceptions_hog import exception_handler as _exceptions_hog_handler
-
-    # Imported lazily to avoid pulling settings into module import.
+    # Both imported lazily: insights.envelope imports back into this module for the
+    # reporting hook, and this module is imported during bootstrap — so neither may
+    # be resolved at import time.
+    from insights.envelope import exception_handler as _envelope
     from insights.utils import absolute_uri
 
-    response = _exceptions_hog_handler(exc, context)
+    response = _envelope(exc, context)
     if response is not None and response.status_code == status.HTTP_401_UNAUTHORIZED:
         # A view may pin its own challenge (e.g. the skills marketplace git endpoints, which
         # git clients can only satisfy with Basic — they cannot complete a Bearer/OAuth flow).

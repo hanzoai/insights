@@ -206,11 +206,11 @@ const meta: Meta<StoryArgs> = {
                     slack_service: { available: true, client_id: 'test-client-id' },
                     site_url: window.location.origin,
                 },
-                '/api/organizations/@current/': {
+                '/v1/organizations/@current/': {
                     ...MOCK_DEFAULT_ORGANIZATION,
                     is_ai_data_processing_approved: true,
                 },
-                '/api/environments/:id/subscriptions': ({ request }) => {
+                '/v1/environments/:id/subscriptions': ({ request }) => {
                     const searchParams = new URL(request.url).searchParams
                     let results = contextualSubscriptions
 
@@ -222,15 +222,15 @@ const meta: Meta<StoryArgs> = {
 
                     return { count: results.length, results }
                 },
-                '/api/environments/:id/subscriptions/:subId': createMockSubscription(),
+                '/v1/environments/:id/subscriptions/:subId': createMockSubscription(),
                 ...(freeTierSubscriptionCount !== undefined
-                    ? { '/api/projects/:id/subscriptions/': { count: freeTierSubscriptionCount, results: [] } }
+                    ? { '/v1/projects/:id/subscriptions/': { count: freeTierSubscriptionCount, results: [] } }
                     : {}),
-                '/api/projects/:id/subscriptions/summary_quota': aiSummaryAtLimit
+                '/v1/projects/:id/subscriptions/summary_quota': aiSummaryAtLimit
                     ? { active_count: 10, limit: 10, at_limit: true }
                     : { active_count: 0, limit: 10, at_limit: false },
-                '/api/projects/:id/integrations': { results: [mockIntegration] },
-                '/api/projects/:id/integrations/:intId/channels': { channels: mockSlackChannels },
+                '/v1/projects/:id/integrations': { results: [mockIntegration] },
+                '/v1/projects/:id/integrations/:intId/channels': { channels: mockSlackChannels },
             },
         })
 

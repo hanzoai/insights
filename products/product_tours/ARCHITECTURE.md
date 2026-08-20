@@ -26,7 +26,7 @@ Product tours allow Insights users to implement automated onboarding and product
 │                        insights-js SDK (Display)                              │
 │              packages/browser/src/extensions/product-tours/                  │
 │                                                                              │
-│  - Fetches active tours from /api/product_tours                             │
+│  - Fetches active tours from /v1/product_tours                             │
 │  - Evaluates eligibility (URL, selector, device, flags)                     │
 │  - Renders tooltip UI with spotlight                                        │
 │  - Captures analytics events                                                │
@@ -86,7 +86,7 @@ Product tours allow Insights users to implement automated onboarding and product
   "appearance": {
     "backgroundColor": "#ffffff",
     "textColor": "#1d1d1f",
-    "buttonColor": "#1d4aff",
+    "buttonColor": "#1d1f27",
     "buttonTextColor": "#ffffff",
     "borderRadius": 8,
     "borderColor": "#e5e5e5",
@@ -105,12 +105,12 @@ Product tours allow Insights users to implement automated onboarding and product
 
 | Method | Path                                     | Description                          |
 | ------ | ---------------------------------------- | ------------------------------------ |
-| GET    | `/api/projects/{id}/product_tours/`      | List tours (authenticated)           |
-| POST   | `/api/projects/{id}/product_tours/`      | Create tour                          |
-| GET    | `/api/projects/{id}/product_tours/{id}/` | Get tour                             |
-| PATCH  | `/api/projects/{id}/product_tours/{id}/` | Update tour                          |
-| DELETE | `/api/projects/{id}/product_tours/{id}/` | Archive tour (soft delete)           |
-| GET    | `/api/product_tours`                     | Public endpoint for SDK (token auth) |
+| GET    | `/v1/projects/{id}/product_tours/`      | List tours (authenticated)           |
+| POST   | `/v1/projects/{id}/product_tours/`      | Create tour                          |
+| GET    | `/v1/projects/{id}/product_tours/{id}/` | Get tour                             |
+| PATCH  | `/v1/projects/{id}/product_tours/{id}/` | Update tour                          |
+| DELETE | `/v1/projects/{id}/product_tours/{id}/` | Archive tour (soft delete)           |
+| GET    | `/v1/product_tours`                     | Public endpoint for SDK (token auth) |
 
 ### Internal Feature Flag
 
@@ -148,7 +148,7 @@ The toolbar is injected into the customer's website to allow visual tour creatio
 4. Clicks element → StepEditor appears with auto-generated selector
 5. Writes step content (title, description) using rich text editor
 6. Adds more steps or saves tour
-7. Tour saved via `POST /api/projects/@current/product_tours/`
+7. Tour saved via `POST /v1/projects/@current/product_tours/`
 
 ### Element Selector Generation
 
@@ -289,7 +289,7 @@ Will provide a dedicated UI for viewing, managing, and analyzing product tours w
 | --------------------- | ----------------------------------------------------- |
 | Toolbar → Backend API | OAuth Bearer token (`OAuthAccessTokenAuthentication`) |
 | SDK → Public endpoint | Project token in request                              |
-| App UI → Backend API  | Session auth (standard Insights auth)                  |
+| App UI → Backend API  | Session auth (standard Insights auth)                 |
 
 ### Error Handling
 
@@ -352,7 +352,7 @@ The toolbar requires a specific setup because it runs inside an iframe on the cu
 ### Testing SDK display
 
 1. Create a tour via toolbar with `start_date` set
-2. Verify tour appears in `/api/product_tours` response
+2. Verify tour appears in `/v1/product_tours` response
 3. Open a fresh browser/incognito (to clear localStorage)
 4. Navigate to page matching tour conditions
 5. Tour should appear within 1 second (SDK polling interval)

@@ -1,8 +1,8 @@
 @mixin secondary-variables {
     --button-border-color: var(--secondary-3000-button-border);
+    --lemon-button-bg-color: var(--secondary-3000-button-bg);
     --lemon-button-bg-color-active: var(--color-bg-surface-primary);
     --lemon-button-border-color-hover: var(--secondary-3000-button-border-hover);
-    --lemon-button-frame-bg-color: var(--secondary-3000-frame-bg);
 }
 
 @mixin size-variables {
@@ -46,7 +46,6 @@
 }
 
 @mixin shared-variables {
-    --lemon-button-chrome-depth: 0.1875rem;
     --lemon-button-padding-vertical: 0.25rem;
     --lemon-button-padding-horizontal: 0.75rem;
     --lemon-button-side-action-width: 2rem;
@@ -55,15 +54,12 @@
 
 .Button,
 .Link.Button {
-    --lemon-button-hover-depth: -0.03125rem;
-    --lemon-button-press-depth: 0.03125rem;
     --lemon-button-padding-adjacent-icon: 0.375rem;
     --lemon-button-transition: opacity 200ms ease, transform 200ms ease;
     --lemon-button-border-width: 0;
     --lemon-button-bg-color: transparent;
     --button-border-color: none;
     --lemon-button-border-color-hover: none;
-    --lemon-button-frame-bg-color: none;
     --lemon-button-font-size: 0.875rem;
     --lemon-button-icon-size: 1.5rem;
     --lemon-button-height: 2.3125rem;
@@ -104,7 +100,7 @@
         min-height: var(--lemon-button-height);
         padding: var(--lemon-button-padding-vertical) var(--lemon-button-padding-horizontal);
         font-size: var(--lemon-button-font-size);
-        font-weight: 500;
+        font-weight: 400;
         line-height: 1.5rem;
         color: var(--lemon-button-color);
         text-align: left;
@@ -201,7 +197,6 @@
         --lemon-button-bg-color-active: var(--primary-3000-button-bg);
         --button-border-color: var(--primary-3000-button-border);
         --lemon-button-border-color-hover: var(--primary-3000-button-border-hover);
-        --lemon-button-frame-bg-color: var(--primary-3000-frame-bg);
         --lemon-button-color: var(--text-3000-light);
 
         &.Button--status-alt {
@@ -225,21 +220,15 @@
     &.Button--status-danger,
     &.Button--primary.Button--status-danger,
     &.Button--secondary.Button--status-danger {
-        --lemon-button-color: var(--danger-3000-button-border-hover) !important;
+        --lemon-button-color: var(--danger-3000-color);
         --button-border-color: var(--danger-3000-button-border);
         --lemon-button-border-color-hover: var(--danger-3000-button-border-hover);
-        --lemon-button-frame-bg-color: var(--danger-3000-frame-bg);
         --lemon-button-icon-opacity: 1;
     }
 
     &.Button--primary.Button--status-danger {
-        --lemon-button-bg-color: var(--red-100);
-        --lemon-button-color: var(--text-3000);
-
-        [theme='dark'] & {
-            --lemon-button-bg-color: #312101;
-            --lemon-button-color: var(--red-200);
-        }
+        --lemon-button-bg-color: var(--danger-3000-button-bg);
+        --lemon-button-bg-color-active: var(--danger-3000-button-bg);
     }
 
     &.Button--secondary.Button--status-alt {
@@ -270,9 +259,9 @@
         }
 
         .Button__chrome {
-            padding: calc(var(--lemon-button-padding-vertical) - var(--lemon-button-chrome-depth) * 0.5)
+            padding: var(--lemon-button-padding-vertical)
                 var(--lemon-button-padding-right, var(--lemon-button-padding-horizontal))
-                calc(var(--lemon-button-padding-vertical) + var(--lemon-button-chrome-depth) * 0.5)
+                var(--lemon-button-padding-vertical)
                 var(--lemon-button-padding-left, var(--lemon-button-padding-horizontal));
             background: transparent;
 
@@ -280,28 +269,14 @@
                 z-index: 1; // Places button content above the ::after element
             }
 
-            &::before {
-                position: absolute;
-                inset: -1px;
-                z-index: 0;
-                content: '';
-                border: 1px solid var(--button-border-color);
-                border-radius: var(--lemon-button-radius);
-
-                .Button--reduce & {
-                    border: 1px solid var(--color-border-primary) !important;
-                }
-            }
-
             &::after {
                 position: absolute;
-                inset: -1px -1px calc(var(--lemon-button-chrome-depth) - 1px);
+                inset: -1px;
                 z-index: 0;
                 content: '';
                 background: var(--lemon-button-bg-color);
                 border: 1px solid var(--button-border-color);
                 border-radius: var(--lemon-button-radius);
-                box-shadow: 0 var(--lemon-button-chrome-depth) 0 -1px var(--lemon-button-frame-bg-color);
                 transition: opacity 200ms ease;
             }
         }
@@ -311,30 +286,6 @@
             .Button__chrome {
                 &::after {
                     border: 1px solid var(--lemon-button-border-color-hover);
-                }
-            }
-        }
-
-        &:hover:not([aria-disabled='true']) {
-            --lemon-button-depth: var(--lemon-button-hover-depth);
-        }
-
-        &:not([aria-disabled='true']):active {
-            --lemon-button-depth: var(--lemon-button-press-depth);
-        }
-
-        &:hover:not([aria-disabled='true']),
-        &:not([aria-disabled='true']):active {
-            .Button__chrome {
-                transform: translateY(var(--lemon-button-depth));
-
-                &::after {
-                    box-shadow: 0 calc(var(--lemon-button-chrome-depth) - var(--lemon-button-depth)) 0 -1px
-                        var(--lemon-button-frame-bg-color);
-                }
-
-                &::before {
-                    bottom: calc(var(--lemon-button-depth) - 1px);
                 }
             }
         }
@@ -392,10 +343,6 @@
         width: 100%;
     }
 
-    &--tertiary .ButtonWithSideAction__side-button {
-        --lemon-button-chrome-depth: 0px; // Tertiary buttons are flat, no depth
-    }
-
     &:hover > .Button--secondary.Button--status-alt {
         @include secondary-variables;
     }
@@ -421,7 +368,7 @@
         position: absolute;
         top: 1px;
         right: 1px;
-        bottom: calc(var(--lemon-button-chrome-depth) + 1px);
+        bottom: 1px;
         z-index: 1; // Places button content above the main button
         background: none;
         border-top-right-radius: calc(var(--radius) - 1px);
@@ -429,8 +376,6 @@
         transform: none;
 
         .Button {
-            --lemon-button-depth: 0px;
-
             width: var(--lemon-button-side-action-width);
             height: 100%;
             border-top-left-radius: 0;
@@ -442,15 +387,8 @@
             padding: 0 !important;
             border: none !important;
 
-            &::before,
             &::after {
                 content: none !important;
-            }
-        }
-
-        &:not([aria-disabled='true']):active {
-            .Button__chrome {
-                transform: none !important;
             }
         }
 

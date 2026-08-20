@@ -48,7 +48,7 @@ function billingFor(state: InboxState): BillingType {
 function StateMocks({ state }: { state: InboxState }): JSX.Element {
     useStorybookMocks({
         get: {
-            '/api/billing/': billingFor(state),
+            '/v1/billing/': billingFor(state),
         },
     })
     // Mimic the agents rail's narrow column so the widget lays out as it does in the scene.

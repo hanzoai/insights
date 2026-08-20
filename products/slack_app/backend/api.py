@@ -271,8 +271,7 @@ def post_quota_exhausted_denial(
 
     Called by the workflow's quota gate after it determines the team is over
     quota. Lives in this module so the Slack-posting helpers and the message
-    text stay co-located; the quota check itself lives in the temporal layer
-    (which is the only side allowed to import ``ee.billing``).
+    text stay co-located; the quota check itself lives in the temporal layer.
     """
     logger.info(
         "slack_app_slack_blocked_by_quota",

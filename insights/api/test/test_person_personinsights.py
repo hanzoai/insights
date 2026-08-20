@@ -11,14 +11,14 @@ from rest_framework import status
 
 from insights.models import Organization, Team
 from insights.models.person.util import get_person_by_uuid
-from insights.personinsights_client.test_helpers import PersonhogTestMixin
+from insights.personinsights_client.test_helpers import PersonTestMixin
 
 from products.cohorts.backend.models.cohort import Cohort
 
 UUID_NONEXISTENT = "550e8400-e29b-41d4-a716-446655440000"
 
 
-class TestRetrievePerson(PersonhogTestMixin, APIBaseTest):
+class TestRetrievePerson(PersonTestMixin, APIBaseTest):
     def test_retrieve_by_uuid(self):
         person = self._seed_person(
             team=self.team,
@@ -26,7 +26,7 @@ class TestRetrievePerson(PersonhogTestMixin, APIBaseTest):
             properties={"email": "test@example.com"},
         )
 
-        resp = self.client.get(f"/api/person/{person.uuid}/")
+        resp = self.client.get(f"/v1/person/{person.uuid}/")
 
         assert resp.status_code == status.HTTP_200_OK
         data = resp.json()
@@ -42,7 +42,7 @@ class TestRetrievePerson(PersonhogTestMixin, APIBaseTest):
             properties={"name": "Test User"},
         )
 
-        resp = self.client.get(f"/api/person/{person.pk}/")
+        resp = self.client.get(f"/v1/person/{person.pk}/")
 
         assert resp.status_code == status.HTTP_200_OK
         data = resp.json()
@@ -52,12 +52,12 @@ class TestRetrievePerson(PersonhogTestMixin, APIBaseTest):
         self._assert_personinsights_called("get_person")
 
     def test_retrieve_nonexistent_returns_404(self):
-        resp = self.client.get(f"/api/person/{UUID_NONEXISTENT}/")
+        resp = self.client.get(f"/v1/person/{UUID_NONEXISTENT}/")
 
         assert resp.status_code == status.HTTP_404_NOT_FOUND
 
     def test_retrieve_invalid_id_returns_validation_error(self):
-        resp = self.client.get("/api/person/not-a-valid-id/")
+        resp = self.client.get("/v1/person/not-a-valid-id/")
 
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert "does not look like a personID" in resp.json().get("detail", "")
@@ -67,12 +67,12 @@ class TestRetrievePerson(PersonhogTestMixin, APIBaseTest):
         other_team = Team.objects.create(organization=other_org, name="Other Team")
         other_person = self._seed_person(team=other_team, distinct_ids=["other-did"])
 
-        resp = self.client.get(f"/api/person/{other_person.uuid}/")
+        resp = self.client.get(f"/v1/person/{other_person.uuid}/")
 
         assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-class TestUpdatePerson(PersonhogTestMixin, APIBaseTest):
+class TestUpdatePerson(PersonTestMixin, APIBaseTest):
     @mock.patch("insights.api.person.capture_internal")
     def test_update_properties_by_uuid(self, mock_capture):
         mock_capture.return_value = mock.MagicMock(status_code=200)
@@ -83,7 +83,7 @@ class TestUpdatePerson(PersonhogTestMixin, APIBaseTest):
         )
 
         resp = self.client.patch(
-            f"/api/person/{person.uuid}/",
+            f"/v1/person/{person.uuid}/",
             {"properties": {"new_key": "new_value"}},
             format="json",
         )
@@ -105,7 +105,7 @@ class TestUpdatePerson(PersonhogTestMixin, APIBaseTest):
         )
 
         resp = self.client.patch(
-            f"/api/person/{person.pk}/",
+            f"/v1/person/{person.pk}/",
             {"properties": {"key": "val"}},
             format="json",
         )
@@ -115,7 +115,7 @@ class TestUpdatePerson(PersonhogTestMixin, APIBaseTest):
         self._assert_personinsights_called("get_person")
 
 
-class TestSplitPerson(PersonhogTestMixin, APIBaseTest):
+class TestSplitPerson(PersonTestMixin, APIBaseTest):
     @mock.patch("insights.api.person.split_person")
     def test_split_by_uuid(self, mock_split):
         mock_split.delay = mock.MagicMock()
@@ -124,7 +124,7 @@ class TestSplitPerson(PersonhogTestMixin, APIBaseTest):
             distinct_ids=["did-1", "did-2", "did-3"],
         )
 
-        resp = self.client.post(f"/api/person/{person.uuid}/split/")
+        resp = self.client.post(f"/v1/person/{person.uuid}/split/")
 
         assert resp.status_code == status.HTTP_201_CREATED
         assert resp.json() == {"success": True}
@@ -139,13 +139,13 @@ class TestSplitPerson(PersonhogTestMixin, APIBaseTest):
 
     @mock.patch("insights.api.person.split_person")
     def test_split_nonexistent_returns_404(self, mock_split):
-        resp = self.client.post(f"/api/person/{UUID_NONEXISTENT}/split/")
+        resp = self.client.post(f"/v1/person/{UUID_NONEXISTENT}/split/")
 
         assert resp.status_code == status.HTTP_404_NOT_FOUND
         mock_split.delay.assert_not_called()
 
 
-class TestCohortsByPerson(PersonhogTestMixin, APIBaseTest):
+class TestCohortsByPerson(PersonTestMixin, APIBaseTest):
     def test_cohorts_by_uuid(self):
         person = self._seed_person(
             team=self.team,
@@ -157,7 +157,7 @@ class TestCohortsByPerson(PersonhogTestMixin, APIBaseTest):
             "insights.api.person.get_all_cohort_ids_by_person_uuid",
             return_value=[cohort.pk],
         ):
-            resp = self.client.get(f"/api/person/cohorts/?person_id={person.uuid}")
+            resp = self.client.get(f"/v1/person/cohorts/?person_id={person.uuid}")
 
         assert resp.status_code == status.HTTP_200_OK
         results = resp.json()["results"]
@@ -170,12 +170,12 @@ class TestCohortsByPerson(PersonhogTestMixin, APIBaseTest):
             "insights.api.person.get_all_cohort_ids_by_person_uuid",
             return_value=[],
         ):
-            resp = self.client.get(f"/api/person/cohorts/?person_id={UUID_NONEXISTENT}")
+            resp = self.client.get(f"/v1/person/cohorts/?person_id={UUID_NONEXISTENT}")
 
         assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-class TestDeleteProperty(PersonhogTestMixin, APIBaseTest):
+class TestDeleteProperty(PersonTestMixin, APIBaseTest):
     @mock.patch("insights.api.person.capture_internal")
     def test_uuid_lookup(self, mock_capture):
         mock_capture.return_value = mock.MagicMock(status_code=200)
@@ -186,7 +186,7 @@ class TestDeleteProperty(PersonhogTestMixin, APIBaseTest):
         )
 
         resp = self.client.post(
-            f"/api/person/{person.uuid}/delete_property",
+            f"/v1/person/{person.uuid}/delete_property",
             {"$unset": "foo"},
         )
 
@@ -213,7 +213,7 @@ class TestDeleteProperty(PersonhogTestMixin, APIBaseTest):
         )
 
         resp = self.client.post(
-            f"/api/person/{person.pk}/delete_property",
+            f"/v1/person/{person.pk}/delete_property",
             {"$unset": "foo"},
         )
 
@@ -223,20 +223,20 @@ class TestDeleteProperty(PersonhogTestMixin, APIBaseTest):
 
     def test_uuid_not_found_returns_error(self):
         resp = self.client.post(
-            f"/api/person/{UUID_NONEXISTENT}/delete_property",
+            f"/v1/person/{UUID_NONEXISTENT}/delete_property",
             {"$unset": "foo"},
         )
 
         assert resp.status_code != 201
 
 
-class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
+class TestBatchByDistinctIds(PersonTestMixin, APIBaseTest):
     def test_happy_path(self):
         self._seed_person(team=self.team, distinct_ids=["user_1"], properties={"email": "user1@example.com"})
         self._seed_person(team=self.team, distinct_ids=["user_2"], properties={"email": "user2@example.com"})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["user_1", "user_2"]},
             format="json",
         )
@@ -253,7 +253,7 @@ class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
         self._seed_person(team=self.team, distinct_ids=["existing_user"], properties={"email": "exists@example.com"})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["existing_user", "nonexistent_1", "nonexistent_2"]},
             format="json",
         )
@@ -268,7 +268,7 @@ class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
         self._seed_person(team=self.team, distinct_ids=["id_a", "id_b"], properties={"email": "multi@example.com"})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["id_a", "id_b"]},
             format="json",
         )
@@ -281,7 +281,7 @@ class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
 
     def test_empty_list(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": []},
             format="json",
         )
@@ -292,7 +292,7 @@ class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
 
     def test_invalid_input(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": "not_a_list"},
             format="json",
         )
@@ -309,7 +309,7 @@ class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
         self._seed_person(team=self.team, distinct_ids=["my_team_user"], properties={"email": "mine@example.com"})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["my_team_user", "other_team_user"]},
             format="json",
         )
@@ -324,7 +324,7 @@ class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
         self._seed_person(team=self.team, distinct_ids=[distinct_ids[200]], properties={"email": "last@example.com"})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": distinct_ids},
             format="json",
         )
@@ -334,11 +334,11 @@ class TestBatchByDistinctIds(PersonhogTestMixin, APIBaseTest):
         assert distinct_ids[200] not in results
 
 
-class TestDestroyPerson(PersonhogTestMixin, APIBaseTest):
+class TestDestroyPerson(PersonTestMixin, APIBaseTest):
     def test_destroy_returns_202(self):
         person = self._seed_person(team=self.team, distinct_ids=["did-1"])
 
-        resp = self.client.delete(f"/api/person/{person.uuid}/")
+        resp = self.client.delete(f"/v1/person/{person.uuid}/")
 
         assert resp.status_code == status.HTTP_202_ACCEPTED
         assert resp.content == b""
@@ -350,7 +350,7 @@ class TestDestroyPerson(PersonhogTestMixin, APIBaseTest):
     def test_destroy_removes_person_from_postgres(self):
         person = self._seed_person(team=self.team, distinct_ids=["did-1", "did-2"])
 
-        self.client.delete(f"/api/person/{person.uuid}/")
+        self.client.delete(f"/v1/person/{person.uuid}/")
 
         calls = self._assert_personinsights_called("delete_persons")
         if calls:
@@ -358,7 +358,7 @@ class TestDestroyPerson(PersonhogTestMixin, APIBaseTest):
             assert list(calls[0].request.person_uuids) == [str(person.uuid)]
 
     def test_destroy_nonexistent_returns_404(self):
-        resp = self.client.delete(f"/api/person/{UUID_NONEXISTENT}/")
+        resp = self.client.delete(f"/v1/person/{UUID_NONEXISTENT}/")
 
         assert resp.status_code == status.HTTP_404_NOT_FOUND
         self._assert_personinsights_not_called("delete_persons")
@@ -366,20 +366,20 @@ class TestDestroyPerson(PersonhogTestMixin, APIBaseTest):
     def test_destroy_with_keep_person_skips_delete(self):
         person = self._seed_person(team=self.team, distinct_ids=["did-1"])
 
-        resp = self.client.delete(f"/api/person/{person.uuid}/?keep_person=true&delete_events=true")
+        resp = self.client.delete(f"/v1/person/{person.uuid}/?keep_person=true&delete_events=true")
 
         assert resp.status_code == status.HTTP_202_ACCEPTED
         assert get_person_by_uuid(self.team.pk, str(person.uuid)) is not None
         self._assert_personinsights_not_called("delete_persons")
 
 
-class TestBulkDeletePersons(PersonhogTestMixin, APIBaseTest):
+class TestBulkDeletePersons(PersonTestMixin, APIBaseTest):
     def test_bulk_delete_by_ids(self):
         p1 = self._seed_person(team=self.team, distinct_ids=["did-1"])
         p2 = self._seed_person(team=self.team, distinct_ids=["did-2"])
 
         resp = self.client.post(
-            "/api/person/bulk_delete/",
+            "/v1/person/bulk_delete/",
             {"ids": [str(p1.uuid), str(p2.uuid)]},
         )
 
@@ -401,7 +401,7 @@ class TestBulkDeletePersons(PersonhogTestMixin, APIBaseTest):
         p2 = self._seed_person(team=self.team, distinct_ids=["did-2"])
 
         resp = self.client.post(
-            "/api/person/bulk_delete/",
+            "/v1/person/bulk_delete/",
             {"distinct_ids": ["did-1", "did-2"]},
         )
 
@@ -420,7 +420,7 @@ class TestBulkDeletePersons(PersonhogTestMixin, APIBaseTest):
         p1 = self._seed_person(team=self.team, distinct_ids=["did-1"])
 
         resp = self.client.post(
-            "/api/person/bulk_delete/",
+            "/v1/person/bulk_delete/",
             {"ids": [str(p1.uuid)], "keep_person": True, "delete_events": True},
         )
 
@@ -441,7 +441,7 @@ class TestBulkDeletePersons(PersonhogTestMixin, APIBaseTest):
         p1 = self._seed_person(team=self.team, distinct_ids=["did-1"])
 
         resp = self.client.post(
-            "/api/person/bulk_delete/",
+            "/v1/person/bulk_delete/",
             {"ids": [str(p1.uuid)]},
         )
 
@@ -466,7 +466,7 @@ class TestBulkDeletePersons(PersonhogTestMixin, APIBaseTest):
         mock_delete_person.side_effect = [Exception("CH write failed"), None]
 
         resp = self.client.post(
-            "/api/person/bulk_delete/",
+            "/v1/person/bulk_delete/",
             {"ids": [str(p1.uuid), str(p2.uuid)]},
         )
 

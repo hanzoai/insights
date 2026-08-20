@@ -529,7 +529,7 @@ procs:
         env:
             LLM_GATEWAY_DEBUG: 'true'
             LLM_GATEWAY_TEAM_RATE_LIMIT_MULTIPLIERS: '{"1": 10}'
-            LLM_GATEWAY_INSIGHTS_PROJECT_TOKEN: 'phc_localinsightsprojecttoken'
+            LLM_GATEWAY_INSIGHTS_PROJECT_TOKEN: 'pk-localinsightsprojecttoken'
             LLM_GATEWAY_INSIGHTS_HOST: 'http://localhost:8010'
 
     agent-proxy:

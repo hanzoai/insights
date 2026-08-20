@@ -20,7 +20,7 @@ import {
  *   precalculated-filters consumer's outputs (`datastore_prefiltered_events`,
  *   `datastore_precalculated_person_properties`).
  * - `WARPSTREAM_CYCLOTRON_PRODUCER` — Cyclotron Warpstream cluster used for
- *   batch hogflow request enqueue. Distinct env-var prefix from the legacy
+ *   batch flow request enqueue. Distinct env-var prefix from the legacy
  *   `KAFKA_CDP_PRODUCER_*` so output routing is decoupled from the cyclotron
  *   job queue's own producer.
  * - `WAREHOUSE_PRODUCER` — dedicated cluster for warehouse source webhooks.

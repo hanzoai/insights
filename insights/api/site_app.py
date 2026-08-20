@@ -4,12 +4,12 @@ from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import status
-from statshog.defaults.django import statsd
 
 from insights.exceptions import generate_exception_response
 from insights.exceptions_capture import capture_exception
 from insights.logging.timing import timed
 from insights.plugins.site import get_site_config_from_schema, get_transpiled_site_source
+from insights.statsd import statsd
 
 
 @csrf_exempt

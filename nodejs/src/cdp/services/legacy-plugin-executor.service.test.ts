@@ -8,7 +8,7 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { createExampleInvocation, createHogExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
+import { createExampleInvocation, createScriptExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID, TRANSFORMATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { LegacyDestinationPlugin, LegacyTransformationPlugin } from '../legacy-plugins/types'
 import {
@@ -118,7 +118,7 @@ describe('LegacyPluginExecutorService', () => {
         )
 
         globals = {
-            ...createHogExecutionGlobals({
+            ...createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,

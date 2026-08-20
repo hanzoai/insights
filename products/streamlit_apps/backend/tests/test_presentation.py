@@ -71,7 +71,7 @@ class _StreamlitAppsFlagMixin:
 class TestStreamlitAppAPI(_StreamlitAppsFlagMixin, APIBaseTest):
     # The viewset is registered under /projects/ via the product's routes.py.
     def _url(self, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/streamlit_apps"
+        base = f"/v1/projects/{self.team.id}/streamlit_apps"
         if suffix:
             return f"{base}/{suffix}"
         return f"{base}/"
@@ -218,7 +218,7 @@ class TestStreamlitAppAPI(_StreamlitAppsFlagMixin, APIBaseTest):
 
 class TestStreamlitAppVersionAPI(_StreamlitAppsFlagMixin, APIBaseTest):
     def _url(self, short_id: str, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/streamlit_apps/{short_id}"
+        base = f"/v1/projects/{self.team.id}/streamlit_apps/{short_id}"
         if suffix:
             return f"{base}/{suffix}"
         return f"{base}/"
@@ -463,7 +463,7 @@ class TestStreamlitAppVersionAPI(_StreamlitAppsFlagMixin, APIBaseTest):
 
 class TestStreamlitAppSandboxControlAPI(_StreamlitAppsFlagMixin, APIBaseTest):
     def _url(self, short_id: str, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/streamlit_apps/{short_id}"
+        base = f"/v1/projects/{self.team.id}/streamlit_apps/{short_id}"
         if suffix:
             return f"{base}/{suffix}"
         return f"{base}/"
@@ -684,7 +684,7 @@ class TestStreamlitAppSandboxControlAPI(_StreamlitAppsFlagMixin, APIBaseTest):
 
 class TestCreateVersionFromSource(_StreamlitAppsFlagMixin, APIBaseTest):
     def _url(self, short_id: str, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/streamlit_apps/{short_id}"
+        base = f"/v1/projects/{self.team.id}/streamlit_apps/{short_id}"
         return f"{base}/{suffix}" if suffix else f"{base}/"
 
     def _create_app(self, **kwargs) -> StreamlitApp:
@@ -742,7 +742,7 @@ class TestStreamlitAppPersonalAPIKeyAccess(_StreamlitAppsFlagMixin, APIBaseTest)
         self.client.logout()
 
     def _url(self, short_id: str = "", suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/streamlit_apps"
+        base = f"/v1/projects/{self.team.id}/streamlit_apps"
         if short_id:
             base = f"{base}/{short_id}"
         return f"{base}/{suffix}" if suffix else f"{base}/"

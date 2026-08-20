@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useId } from 'react'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, Dropdown, Link } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { OperatorValueSelect } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 import { PropertyFilterInternalProps } from 'lib/components/PropertyFilters/types'
@@ -89,7 +89,7 @@ export function TaxonomicPropertyFilter({
     editable = true,
     operatorAllowlist,
     endpointFilters,
-    hogQLGlobals,
+    insightsQLGlobals,
     triggerVariant = 'button',
 }: PropertyFilterInternalProps): JSX.Element {
     const generatedKey = useId()
@@ -187,7 +187,7 @@ export function TaxonomicPropertyFilter({
             hideBehavioralCohorts={hideBehavioralCohorts}
             selectFirstItem={!cohortOrOtherValue}
             endpointFilters={endpointFilters}
-            hogQLGlobals={hogQLGlobals}
+            insightsQLGlobals={insightsQLGlobals}
             excludedOperators={excludedOperators}
             selectingKeyOnly={selectingKeyOnly}
             enableKeywordShortcuts
@@ -210,7 +210,7 @@ export function TaxonomicPropertyFilter({
                 filter?.type === PropertyFilterType.DataWarehouse &&
                 dataWarehouseTableName &&
                 currentTeamId
-                    ? `api/environments/${currentTeamId}/data_warehouse/property_values?${toParams({
+                    ? `v1/environments/${currentTeamId}/data_warehouse/property_values?${toParams({
                           table_name: dataWarehouseTableName,
                           key: filter.key,
                       })}`
@@ -330,7 +330,7 @@ export function TaxonomicPropertyFilter({
             optionsFromProp={taxonomicFilterOptionsFromProp}
             hideBehavioralCohorts={hideBehavioralCohorts}
             endpointFilters={endpointFilters}
-            hogQLGlobals={hogQLGlobals}
+            insightsQLGlobals={insightsQLGlobals}
             enableKeywordShortcuts
             triggerVariant={triggerVariant}
             triggerButtonProps={{

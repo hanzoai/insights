@@ -124,7 +124,7 @@ export class MessageAssetsService {
     constructor(private outputs: IngestionOutputs<MessageAssetsOutput>) {}
 
     // Returns null when there's no content (neither html nor text) or no action id —
-    // the Assets API filters by `function_kind='hog_flow'` and keys off the action
+    // the Assets API filters by `function_kind='flow'` and keys off the action
     // node id, so a row without one is unreachable.
     buildRowForEmail(
         invocation: CyclotronJobInvocationInsightsFunction,
@@ -145,7 +145,7 @@ export class MessageAssetsService {
         }
         return {
             team_id: invocation.teamId,
-            function_kind: 'hog_flow',
+            function_kind: 'flow',
             function_id: invocation.functionId,
             parent_run_id: invocation.parentRunId ?? '',
             invocation_id: invocation.id,
@@ -188,7 +188,7 @@ export class MessageAssetsService {
         const recipient = params.distinctId
         return {
             team_id: invocation.teamId,
-            function_kind: 'hog_flow',
+            function_kind: 'flow',
             function_id: invocation.functionId,
             parent_run_id: invocation.parentRunId ?? '',
             invocation_id: invocation.id,

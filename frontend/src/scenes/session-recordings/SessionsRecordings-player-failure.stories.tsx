@@ -25,7 +25,7 @@ const meta: Meta = {
         mswDecorator({
             get: {
                 '/stats': () => [200, { users_on_product: 42, active_recordings: 7 }],
-                '/api/environments/:team_id/session_recordings': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings': ({ request }) => {
                     const version = new URL(request.url).searchParams.get('version')
                     return [
                         200,
@@ -36,8 +36,8 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists': recordingPlaylists,
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id': ({ params }) => {
+                '/v1/projects/:team_id/session_recording_playlists': recordingPlaylists,
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id': ({ params }) => {
                     const playlistId = params.playlist_id
 
                     return [
@@ -85,12 +85,12 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id/recordings': ({ params }) => {
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id/recordings': ({ params }) => {
                     const playlistId = params.playlist_id
                     const response = playlistId === '1234567' ? recordings : []
                     return [200, { has_next: false, results: response, version: 1 }]
                 },
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     // with no sources, returns sources...
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
@@ -110,10 +110,10 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/session_recordings/:id': () => {
+                '/v1/environments/:team_id/session_recordings/:id': () => {
                     return [404, {}]
                 },
-                'api/projects/:team/notebooks': {
+                'v1/projects/:team/notebooks': {
                     count: 0,
                     next: null,
                     previous: null,
@@ -121,8 +121,8 @@ const meta: Meta = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': recordingEventsJson,
-                '/api/environments/:team_id/session_recordings/:id/capture_diagnostics': { properties: null },
+                '/v1/environments/:team_id/query/:kind': recordingEventsJson,
+                '/v1/environments/:team_id/session_recordings/:id/capture_diagnostics': { properties: null },
             },
         }),
     ],

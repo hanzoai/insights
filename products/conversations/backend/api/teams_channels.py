@@ -122,7 +122,7 @@ class TeamsChannelsView(APIView):
 
 
 class TeamsInstallAppView(APIView):
-    """Install the SupportHog Teams app into a selected MS Teams group.
+    """Install the Support Teams app into a selected MS Teams group.
 
     Requires the manifest to already exist in the tenant's app catalog — via
     the public Teams Store (keyed by ``SUPPORT_TEAMS_CATALOG_APP_ID``) or,

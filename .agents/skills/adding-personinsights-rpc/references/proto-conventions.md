@@ -40,9 +40,9 @@ For NonPersonData, the replica handles consistency internally — the router alw
 | `proto/personinsights/types/v1/cohort.proto`       | CohortMembership messages and cohort-related request/response types           |
 | `proto/personinsights/types/v1/feature_flag.proto` | HashKeyOverride messages and feature flag request/response types              |
 | `proto/personinsights/types/v1/common.proto`       | ReadOptions, ConsistencyLevel, TeamDistinctId — shared across domains         |
-| `proto/personinsights/service/v1/service.proto`    | PersonHogService — public API (what clients call)                             |
-| `proto/personinsights/replica/v1/replica.proto`    | PersonHogReplica — internal API (what the router calls)                       |
-| `proto/personinsights/leader/v1/leader.proto`      | PersonHogLeader — internal write API for person data                          |
+| `proto/personinsights/service/v1/service.proto`    | PersonService — public API (what clients call)                             |
+| `proto/personinsights/replica/v1/replica.proto`    | PersonReplica — internal API (what the router calls)                       |
+| `proto/personinsights/leader/v1/leader.proto`      | PersonLeader — internal write API for person data                          |
 
 ## Worked example: adding GetPersonCount
 
@@ -62,7 +62,7 @@ message GetPersonCountResponse {
 ### 2. Add RPC to `service/v1/service.proto`
 
 ```protobuf
-service PersonHogService {
+service PersonService {
   // ... existing RPCs ...
   rpc GetPersonCount(personinsights.types.v1.GetPersonCountRequest) returns (personinsights.types.v1.GetPersonCountResponse);
 }
@@ -71,7 +71,7 @@ service PersonHogService {
 ### 3. Add RPC to `replica/v1/replica.proto`
 
 ```protobuf
-service PersonHogReplica {
+service PersonReplica {
   // ... existing RPCs ...
   rpc GetPersonCount(personinsights.types.v1.GetPersonCountRequest) returns (personinsights.types.v1.GetPersonCountResponse);
 }

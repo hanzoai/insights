@@ -126,9 +126,9 @@ describe('editor sync', () => {
 
         useMocks({
             get: {
-                '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                '/api/projects/:team/surveys/test-survey/': () => [200, createPersistedSurvey()],
-                '/api/projects/:team/surveys/test-survey/archived-response-uuids/': () => [200, []],
+                '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                '/v1/projects/:team/surveys/test-survey/': () => [200, createPersistedSurvey()],
+                '/v1/projects/:team/surveys/test-survey/archived-response-uuids/': () => [200, []],
             },
         })
     })
@@ -1612,8 +1612,8 @@ describe('URL parameter synchronization', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                [`/api/projects/:team/surveys/${MULTIPLE_CHOICE_SURVEY.id}/`]: () => [200, MULTIPLE_CHOICE_SURVEY],
-                [`/api/projects/:team/surveys/${MULTIPLE_CHOICE_SURVEY.id}/archived-response-uuids/`]: () => [200, []],
+                [`/v1/projects/:team/surveys/${MULTIPLE_CHOICE_SURVEY.id}/`]: () => [200, MULTIPLE_CHOICE_SURVEY],
+                [`/v1/projects/:team/surveys/${MULTIPLE_CHOICE_SURVEY.id}/archived-response-uuids/`]: () => [200, []],
             },
         })
         initKeaTests()
@@ -1858,11 +1858,11 @@ describe('survey stats calculation', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                [`/api/projects/:team/surveys/${MOCK_SURVEY_ID}/`]: () => [
+                [`/v1/projects/:team/surveys/${MOCK_SURVEY_ID}/`]: () => [
                     200,
                     { ...MULTIPLE_CHOICE_SURVEY, id: MOCK_SURVEY_ID },
                 ],
-                [`/api/projects/:team/surveys/${MOCK_SURVEY_ID}/archived-response-uuids/`]: () => [200, []],
+                [`/v1/projects/:team/surveys/${MOCK_SURVEY_ID}/archived-response-uuids/`]: () => [200, []],
             },
         })
         initKeaTests()
@@ -2086,9 +2086,9 @@ describe('surveyLogic archived response refresh', () => {
 
         useMocks({
             get: {
-                '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                '/api/projects/:team/surveys/test-survey/': () => [200, createPersistedSurvey()],
-                '/api/projects/:team/surveys/test-survey/archived-response-uuids/': () => [200, []],
+                '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                '/v1/projects/:team/surveys/test-survey/': () => [200, createPersistedSurvey()],
+                '/v1/projects/:team/surveys/test-survey/archived-response-uuids/': () => [200, []],
             },
         })
 

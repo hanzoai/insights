@@ -25,7 +25,6 @@ describe('SavedInsightsFilters Created by dropdown', () => {
                 level: 8,
                 joined_at: '2020-09-24T15:05:26.758796Z',
                 updated_at: '2020-09-24T15:05:26.758837Z',
-                is_2fa_enabled: false,
                 has_social_auth: false,
                 last_login: '2020-09-24T15:05:26.758796Z',
             },
@@ -35,14 +34,13 @@ describe('SavedInsightsFilters Created by dropdown', () => {
                 level: 1,
                 joined_at: '2021-03-11T19:11:11Z',
                 updated_at: '2021-03-11T19:11:11Z',
-                is_2fa_enabled: false,
                 has_social_auth: false,
                 last_login: '2021-03-11T19:11:11Z',
             },
         ]
         useMocks({
             get: {
-                '/api/organizations/:organization_id/members/': ({ request }) => {
+                '/v1/organizations/:organization_id/members/': ({ request }) => {
                     // membersLogic now does server-side search; mock honors `?search=`
                     // by filtering on first_name, last_name, and email substring.
                     const search = new URL(request.url).searchParams.get('search')?.toLowerCase()

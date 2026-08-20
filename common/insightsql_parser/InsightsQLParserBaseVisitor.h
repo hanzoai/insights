@@ -679,23 +679,23 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitHogqlxChildElement(InsightsQLParser::HogqlxChildElementContext *ctx) override {
+  virtual std::any visitInsightsqlxChildElement(InsightsQLParser::InsightsqlxChildElementContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitHogqlxText(InsightsQLParser::HogqlxTextContext *ctx) override {
+  virtual std::any visitInsightsqlxText(InsightsQLParser::InsightsqlxTextContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitHogqlxTagElementClosed(InsightsQLParser::HogqlxTagElementClosedContext *ctx) override {
+  virtual std::any visitInsightsqlxTagElementClosed(InsightsQLParser::InsightsqlxTagElementClosedContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitHogqlxTagElementNested(InsightsQLParser::HogqlxTagElementNestedContext *ctx) override {
+  virtual std::any visitInsightsqlxTagElementNested(InsightsQLParser::InsightsqlxTagElementNestedContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitHogqlxTagAttribute(InsightsQLParser::HogqlxTagAttributeContext *ctx) override {
+  virtual std::any visitInsightsqlxTagAttribute(InsightsQLParser::InsightsqlxTagAttributeContext *ctx) override {
     return visitChildren(ctx);
   }
 

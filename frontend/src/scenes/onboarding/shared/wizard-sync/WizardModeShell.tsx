@@ -3,7 +3,7 @@ import './WizardModeShell.scss'
 import type { ComponentType, ReactNode } from 'react'
 
 import { cn } from 'lib/utils/css-classes'
-import { WizardHog } from 'scenes/onboarding/shared/wizardHog'
+import { WizardScript } from 'scenes/onboarding/shared/wizardScript'
 
 import androidImage from '../logos/android.svg'
 import angularImage from '../logos/angular.svg'
@@ -68,37 +68,37 @@ export function WizardFrameworkBadges(): JSX.Element {
  * Shared chrome for both install modes, so the cloud and local tabs read as one
  * wizard rather than two unrelated panels: the mascot on the left, the
  * mode-specific content on the right. The framework badges are rendered once
- * above the mode selector (shared by both), not here. `hogCastKey` replays the
+ * above the mode selector (shared by both), not here. `scriptCastKey` replays the
  * script's "casting" wobble when bumped — the command tab bumps it on copy; the
  * cloud tab leaves it at 0 (a static script).
  */
 export function WizardModeShell({
     children,
-    hogCastKey = 0,
-    hideHog = false,
+    scriptCastKey = 0,
+    hideScript = false,
     'data-attr': dataAttr,
 }: {
     children: ReactNode
-    hogCastKey?: number
+    scriptCastKey?: number
     /** Drop the mascot (e.g. the compact context-first onboarding card has no room for it). */
-    hideHog?: boolean
+    hideScript?: boolean
     'data-attr'?: string
 }): JSX.Element {
     return (
         <div className="flex gap-6" data-attr={dataAttr}>
-            {!hideHog && (
-                <WizardHog
-                    key={`script-${hogCastKey}`}
+            {!hideScript && (
+                <WizardScript
+                    key={`script-${scriptCastKey}`}
                     className={cn(
                         'w-28 h-28 hidden sm:block shrink-0 self-center',
-                        hogCastKey > 0 && 'WizardModeShell__hogCast'
+                        scriptCastKey > 0 && 'WizardModeShell__scriptCast'
                     )}
                 />
             )}
             {/* With the script hidden (compact context-first card), center the content at its natural
                 width instead of stretching it full-bleed — so the command block and the GitHub-connect
                 block sit centered without expanding. With the script shown, keep the left-aligned column. */}
-            <div className={cn('flex-1 flex flex-col justify-center gap-3', hideHog && 'items-center text-center')}>
+            <div className={cn('flex-1 flex flex-col justify-center gap-3', hideScript && 'items-center text-center')}>
                 {children}
             </div>
         </div>

@@ -9,9 +9,8 @@ from rest_framework import status
 
 from insights.constants import AvailableFeature
 from insights.models import Team, User
-from insights.models.organization import OrganizationMembership
-
 from insights.models.ee_models import AccessControl
+from insights.models.organization import OrganizationMembership
 
 from ...api.skill_serializers import DEFAULT_BODY_PAGE_LENGTH
 from ...api.skill_services import (
@@ -27,7 +26,7 @@ from ...models.skills import LLMSkill, LLMSkillFile
 
 class TestLLMSkillAPI(APIBaseTest):
     def _url(self, path: str = "") -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/{path}"
+        return f"/v1/environments/{self.team.id}/llm_skills/{path}"
 
     def create_skill(
         self,
@@ -108,7 +107,7 @@ class TestLLMSkillAPI(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("review_hog_prefix", "review-script-perspective-custom-x", "review_hog"),
+            ("review_prefix", "review-script-perspective-custom-x", "review"),
             ("scout_prefix", "signals-scout-custom-x", "scout"),
             ("plain_name", "my-plain-skill", ""),
         ]
@@ -151,7 +150,7 @@ class TestLLMSkillAPI(APIBaseTest):
             ("consecutive_hyphens", "my--skill"),
             ("reserved_new", "new"),
             ("reserved_scouts", "scouts"),
-            ("reserved_review_hog", "review-script"),
+            ("reserved_review", "review-script"),
         ]
     )
     def test_create_skill_validates_name_format(self, _label, skill_name):
@@ -1236,7 +1235,7 @@ class TestSkillAccessControlRBAC(APIBaseTest):
         self.client.force_login(self.member)
 
     def _url(self, path: str = "") -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/{path}"
+        return f"/v1/environments/{self.team.id}/llm_skills/{path}"
 
     def _grant_llm_skill_access(self, access_level: str) -> None:
         membership = OrganizationMembership.objects.get(user=self.member, organization=self.organization)
@@ -1330,7 +1329,7 @@ class TestLLMSkillOwners(APIBaseTest):
     """
 
     def _url(self, path: str = "") -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/{path}"
+        return f"/v1/environments/{self.team.id}/llm_skills/{path}"
 
     def _member(self, email: str) -> User:
         return User.objects.create_and_join(self.organization, email, None)

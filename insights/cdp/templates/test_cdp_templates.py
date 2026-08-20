@@ -4,7 +4,7 @@ from insights.test.base import BaseTest
 
 from insights.cdp.templates import INSIGHTS_FUNCTION_TEMPLATES
 from insights.cdp.templates.insights_function_template import sync_template_to_db
-from insights.cdp.validation import InputsSchemaItemSerializer, compile_hog
+from insights.cdp.validation import InputsSchemaItemSerializer, compile_script
 
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 from products.cdp.backend.models.insights_functions.insights_function import TYPES_WITH_TRANSPILED_FILTERS
@@ -21,7 +21,7 @@ class TestTemplatesGeneral(BaseTest):
                 assert serializer.is_valid()
 
             if template.type not in TYPES_WITH_TRANSPILED_FILTERS:
-                bytecode = compile_hog(template.code, template.type)
+                bytecode = compile_script(template.code, template.type)
                 assert bytecode[0] == "_H"
 
     def test_sync_template_to_db(self):

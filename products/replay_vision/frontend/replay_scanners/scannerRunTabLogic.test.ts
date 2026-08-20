@@ -13,14 +13,14 @@ describe('scannerRunTabLogic', () => {
         requestedUrls = []
         useMocks({
             get: {
-                '/api/projects/:team/vision/scanners/:id/': () => [404, {}],
+                '/v1/projects/:team/vision/scanners/:id/': () => [404, {}],
                 // The connected replayScannerLogic loads stats on mount; give it a valid shape so its
                 // status-counts selector doesn't throw when this test awaits the full listener cascade.
-                '/api/projects/:team/vision/scanners/:id/observations/stats/': () => [
+                '/v1/projects/:team/vision/scanners/:id/observations/stats/': () => [
                     200,
                     { status_counts: { in_flight: 0, succeeded: 0, failed: 0, ineligible: 0 }, total: 0 },
                 ],
-                '/api/projects/:team/vision/scanners/:id/observations/': ({ request }: { request: Request }) => {
+                '/v1/projects/:team/vision/scanners/:id/observations/': ({ request }: { request: Request }) => {
                     requestedUrls.push(request.url)
                     return [
                         200,
@@ -88,7 +88,7 @@ describe('scannerRunTabLogic', () => {
         let postedBody: any
         useMocks({
             post: {
-                '/api/projects/:team/vision/scanners/:id/bulk_observe/': async ({ request }: { request: Request }) => {
+                '/v1/projects/:team/vision/scanners/:id/bulk_observe/': async ({ request }: { request: Request }) => {
                     postedBody = await request.json()
                     return [
                         202,

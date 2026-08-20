@@ -192,13 +192,13 @@ mod tests {
     #[test]
     fn envelope_is_a_client_ingestion_warning_event_keyed_by_token() {
         let event = Warning::new(WarningType::MissingEventName)
-            .into_event_envelope("phc_test_token", CAPTURE_V1_ANALYTICS)
+            .into_event_envelope("pk-test_token", CAPTURE_V1_ANALYTICS)
             .unwrap();
 
         assert_eq!(event.event, "$$client_ingestion_warning");
-        assert_eq!(event.token, "phc_test_token");
+        assert_eq!(event.token, "pk-test_token");
         // distinct_id must be the (safe, bounded) token, never a caller value.
-        assert_eq!(event.distinct_id, "phc_test_token");
+        assert_eq!(event.distinct_id, "pk-test_token");
     }
 
     #[test]
@@ -207,7 +207,7 @@ mod tests {
             .with_detail("distinctId", "user-1")
             .with_detail("lib", "insights-js")
             .with_count(3)
-            .into_event_envelope("phc_test_token", CAPTURE_V1_ANALYTICS)
+            .into_event_envelope("pk-test_token", CAPTURE_V1_ANALYTICS)
             .unwrap();
 
         let (raw, details) = parse_envelope(&event);
@@ -233,10 +233,10 @@ mod tests {
         let huge = "x".repeat(10_000);
         let event = Warning::new(WarningType::DistinctIdTooLarge)
             .with_detail("distinctId", huge)
-            .into_event_envelope("phc_real", CAPTURE_V1_ANALYTICS)
+            .into_event_envelope("pk-real", CAPTURE_V1_ANALYTICS)
             .unwrap();
 
-        assert_eq!(event.distinct_id, "phc_real");
+        assert_eq!(event.distinct_id, "pk-real");
         let (_, details) = parse_envelope(&event);
         assert_eq!(details["distinctId"].as_str().unwrap().len(), 10_000);
     }
@@ -252,7 +252,7 @@ mod tests {
             pipeline_step: "batch_import_validation",
         };
         let event = Warning::new(WarningType::EmptyBatch)
-            .into_event_envelope("phc_test_token", other)
+            .into_event_envelope("pk-test_token", other)
             .unwrap();
         let (raw, details) = parse_envelope(&event);
         assert_eq!(raw["properties"][PROP_SOURCE], "batch_import");

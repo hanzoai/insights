@@ -1893,7 +1893,7 @@ database "insights" {
     }
   }
 
-  table "hog_invocation_results" {
+  table "invocations" {
     column "team_id" {
       type = "Int64"
     }
@@ -1969,7 +1969,7 @@ database "insights" {
     engine "distributed" {
       cluster_name    = "aux"
       remote_database = "insights"
-      remote_table    = "hog_invocation_results_data"
+      remote_table    = "invocations_data"
     }
   }
 
@@ -7759,7 +7759,7 @@ database "insights" {
     }
   }
 
-  table "sharded_tophog" {
+  table "sharded_topfn" {
     order_by     = ["pipeline", "lane", "metric", "timestamp", "key"]
     partition_by = "toYYYYMMDD(timestamp)"
     ttl          = "toDate(timestamp) + toIntervalDay(30)"
@@ -7797,12 +7797,12 @@ database "insights" {
       type = "Map(LowCardinality(String), String)"
     }
     engine "replicated_merge_tree" {
-      zoo_path     = "/datastore/tables/{shard}/insights.tophog"
+      zoo_path     = "/datastore/tables/{shard}/insights.topfn"
       replica_name = "{replica}"
     }
   }
 
-  table "tophog" {
+  table "topfn" {
     column "timestamp" {
       type = "DateTime64(6, 'UTC')"
     }
@@ -7835,7 +7835,7 @@ database "insights" {
     engine "distributed" {
       cluster_name    = "insights"
       remote_database = "insights"
-      remote_table    = "sharded_tophog"
+      remote_table    = "sharded_topfn"
       sharding_key    = "cityHash64(toString(key))"
     }
   }

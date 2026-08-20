@@ -24,7 +24,7 @@ export interface RecordSessionEventStepConfig {
  * Creates a step that records parsed session event messages to the session batch.
  * This is a side-effect step that writes to the session batch recorder.
  *
- * Metrics (tracked via TopHog wrapper in the pipeline):
+ * Metrics (tracked via TopFn wrapper in the pipeline):
  * - message_size_by_session_id: Sum of raw message sizes per session
  * - consume_time_ms_by_session_id: Time spent recording each message
  */

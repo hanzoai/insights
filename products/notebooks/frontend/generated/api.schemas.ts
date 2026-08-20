@@ -382,7 +382,7 @@ export interface NotebookKernelStatusResponseApi {
 export type NotebookSQLV2RefKindEnumApi = (typeof NotebookSQLV2RefKindEnumApi)[keyof typeof NotebookSQLV2RefKindEnumApi]
 
 export const NotebookSQLV2RefKindEnumApi = {
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
     Local: 'local',
 } as const
 
@@ -409,7 +409,7 @@ export type NotebookSQLV2NodeTypeEnumApi =
     (typeof NotebookSQLV2NodeTypeEnumApi)[keyof typeof NotebookSQLV2NodeTypeEnumApi]
 
 export const NotebookSQLV2NodeTypeEnumApi = {
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
     Python: 'python',
 } as const
 

@@ -24,7 +24,7 @@ const PUBLIC_PATH_PREFIXES = ['/public/', '/_health', '/_ready', '/_metrics', '/
 // their callers never need INTERNAL_API_SECRET (the goal of retiring it). Each entry must be a
 // route whose handler enforces its own auth — never add a suffix here without one.
 const SCOPED_AUTH_PATH_SUFFIXES = [
-    // Verified in CdpApi.postInsightsFlowRescheduleParked against WORKFLOWS_RESCHEDULE_JWT_SECRET.
+    // Verified in CdpApi.postFlowRescheduleParked against WORKFLOWS_RESCHEDULE_JWT_SECRET.
     '/reschedule_parked',
 ]
 

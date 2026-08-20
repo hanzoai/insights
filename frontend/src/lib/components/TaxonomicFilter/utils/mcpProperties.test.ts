@@ -65,7 +65,7 @@ describe('mcpProperties', () => {
             maxContextOptions: [],
             hideBehavioralCohorts: false,
             endpointFilters: undefined,
-            hogQLExpressionComponentProps: { showBreakdownLabelHint: false },
+            insightsQLExpressionComponentProps: { showBreakdownLabelHint: false },
             featureFlags: {},
         }
 

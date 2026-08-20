@@ -6,6 +6,7 @@ import django.contrib.postgres.fields
 from django.db import migrations, models
 
 import insights.models.utils
+from insights.migration_helpers import AddColumnIfNotExists, CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -469,5 +470,23 @@ class Migration(migrations.Migration):
                 ),
             ],
             database_operations=[],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="buttontile"),
+                CreateTableIfNotExists(model_name="dashboard"),
+                CreateTableIfNotExists(model_name="text"),
+                CreateTableIfNotExists(model_name="dashboardtile"),
+                CreateTableIfNotExists(model_name="dashboardtemplate"),
+                # The table came from `insights.0001_initial`, whose shape predates these
+                # fields: the move declares them but nothing ever adds the columns, so a
+                # fresh install is left without them. No-ops where the table was built above.
+                AddColumnIfNotExists(model_name="dashboard", name="quick_filter_ids"),
+                AddColumnIfNotExists(model_name="dashboardtemplate", name="is_featured"),
+                AddColumnIfNotExists(model_name="dashboardtile", name="button_tile"),
+                AddColumnIfNotExists(model_name="dashboardtile", name="show_description"),
+                AddColumnIfNotExists(model_name="dashboardtile", name="transparent_background"),
+            ],
         ),
     ]

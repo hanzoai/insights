@@ -167,7 +167,7 @@ describe('InstructionsFormatter prompt snapshots', () => {
             {
                 name: 'P'.repeat(200),
                 id: 9_999_999,
-                api_token: `phc_${'x'.repeat(43)}`,
+                api_token: `pk-${'x'.repeat(43)}`,
                 timezone: 'America/Argentina/ComodRivadavia',
                 person_on_events_querying_enabled: true,
             } as CachedProject,
@@ -191,7 +191,7 @@ describe('InstructionsFormatter prompt snapshots', () => {
             groupTypes: worstCaseGroupTypes,
         } as unknown as ResolvedState
         const entry = new InstructionsBuilder('').buildExecToolEntry(state)
-        const insights = new InsightsMCP('phc_test', { disabled: true })
+        const insights = new InsightsMCP('pk-test', { disabled: true })
         const finalEntry = insights.prepareToolList([entry])[0]!
         // `prepareToolList` injects the `context` property into `inputSchema`, so the
         // measured schema must include it — measure the final, post-injection schema.

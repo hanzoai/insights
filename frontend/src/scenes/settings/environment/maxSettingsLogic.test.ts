@@ -23,7 +23,7 @@ describe('maxSettingsLogic', () => {
     it('loads core memory from the first result', async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/core_memory/': () => [
+                '/v1/environments/:team_id/core_memory/': () => [
                     200,
                     { results: [{ id: 'mem-1', text: 'remember this' }] },
                 ],
@@ -42,7 +42,7 @@ describe('maxSettingsLogic', () => {
         async (status) => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/core_memory/': () => [status, { detail: 'nope' }],
+                    '/v1/environments/:team_id/core_memory/': () => [status, { detail: 'nope' }],
                 },
             })
             logic = maxSettingsLogic()

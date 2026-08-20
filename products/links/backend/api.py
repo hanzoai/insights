@@ -40,8 +40,8 @@ class LinkSerializer(serializers.ModelSerializer):
     def create(self, validated_data: dict[str, Any]) -> Link:
         team = Team.objects.get(id=self.context["team_id"])
 
-        if validated_data.get("short_link_domain") != "phog.gg":
-            raise serializers.ValidationError({"short_link_domain": "Only phog.gg is allowed as a short link domain"})
+        if validated_data.get("short_link_domain") != "pscript.gg":
+            raise serializers.ValidationError({"short_link_domain": "Only pscript.gg is allowed as a short link domain"})
 
         link = Link.objects.create(
             team=team,

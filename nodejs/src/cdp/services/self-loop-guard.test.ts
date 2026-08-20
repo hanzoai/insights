@@ -12,9 +12,9 @@ import {
 
 // Synthetic, non-production values. OWN_TOKEN is the project the destination runs in;
 // OTHER_TOKEN is a different project (legitimate cross-project replication).
-const OWN_TOKEN = 'phc_synthetic_own_0000000000000000'
-const OWN_SECRET_TOKEN = 'phsx_synthetic_own_secret_00000000'
-const OTHER_TOKEN = 'phc_synthetic_other_111111111111111'
+const OWN_TOKEN = 'pk-synthetic_own_0000000000000000'
+const OWN_SECRET_TOKEN = 'sk-syntheticownsecret00000000'
+const OTHER_TOKEN = 'pk-synthetic_other_111111111111111'
 
 const TEAM: Pick<Team, 'api_token' | 'secret_api_token'> = {
     api_token: OWN_TOKEN,
@@ -24,7 +24,7 @@ const TEAM: Pick<Team, 'api_token' | 'secret_api_token'> = {
 const INGEST_URL = 'https://us.i.hanzo.ai/capture/'
 const BATCH_URL = 'https://eu.i.hanzo.ai/batch/'
 const LOGS_URL = 'https://us.i.hanzo.ai/i/v1/logs'
-const API_URL = 'https://us.hanzo.ai/api/projects/100/insights/'
+const API_URL = 'https://us.hanzo.ai/v1/projects/100/insights/'
 const EXTERNAL_URL = 'https://external.example.com/webhook'
 
 const captureBody = (event: string, properties: Record<string, unknown> = {}, apiKey = OWN_TOKEN): string =>
@@ -58,7 +58,7 @@ describe('self-loop-guard', () => {
             ['https://hanzo.ai/capture', true],
             // observability + REST endpoints are NOT ingestion - cannot form a loop
             ['https://us.i.hanzo.ai/i/v1/logs', false],
-            ['https://us.hanzo.ai/api/projects/100/insights/', false],
+            ['https://us.hanzo.ai/v1/projects/100/insights/', false],
             ['https://us.i.hanzo.ai/decide', false],
             // non-insights hosts
             ['https://external.example.com/capture', false],

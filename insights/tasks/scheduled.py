@@ -107,7 +107,7 @@ from products.signals.backend.tasks import (
     sync_pending_signals_refund_credits,
 )
 from products.skills.backend.tasks import sync_community_skills
-from products.stamphog.backend.facade.tasks import DAILY_DIGEST_CRONTAB, send_daily_digests
+from products.stamp.backend.facade.tasks import DAILY_DIGEST_CRONTAB, send_daily_digests
 from products.streamlit_apps.backend.facade.api import (
     auto_restart_crashed_streamlit_sandboxes,
     cleanup_deleted_streamlit_app_zips,
@@ -914,9 +914,9 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         name="prune old streamlit app versions",
     )
 
-    # Stamphog daily merged-PR digest fan-out.
+    # Stamp daily merged-PR digest fan-out.
     sender.add_periodic_task(
         DAILY_DIGEST_CRONTAB,
         send_daily_digests.s(),
-        name="stamphog daily merged-pr digests",
+        name="stamp daily merged-pr digests",
     )

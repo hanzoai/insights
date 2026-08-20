@@ -10,7 +10,8 @@ anywhere), `names/retire-version-suffix`, `schema/event-fact`, and upstream
 master `fa1a9a60` (2026-08-06) re-derived through `bin/debrand`. The tag for
 this state is v1.53.0.
 
-ONE ingest door: `POST https://api.hanzo.ai/v1/event` (cloud binary). Every
+ONE ingest door: `POST https://api.hanzo.ai/v1/event` (cloud binary), and ONE
+authority that mints the key it accepts: cloud, at `POST /v1/projects`. Every
 SDK wire path (`/e`, `/batch`, `/capture`, `/i/v0/e`, `/v1/e`) on
 insights/analytics/sentry hosts rewrites to it at the ingress. Cloud also
 serves the Sentry wires (`/v1/event/:project/envelope|store`), the tag script
@@ -23,10 +24,11 @@ no separate ingest route exists or is needed.
 Branding: zero upstream art. Workflow template cards, choosers, auth
 wallpaper, previews and fixtures carry no posthog cloudinary; the CSP does
 not allow that host; the mascot easter egg is deleted with its sprite
-package; `insights-js` resolves to `@hanzo/insights` for every consumer —
-the react wrapper's peer included, via `common/sdk-peer` (a workspace package
-carrying the peer's name). The wrapper package's own export names
-(`PostHog*`) are aliased at import sites listed in `bin/debrand`'s allowlist.
+package; `insights-js` resolves to `@hanzo/insights` for every consumer.
+The react wrapper is our own `@hanzo/insights-react`, whose peer is
+`@hanzo/insights` by name, so it needs no shim standing in for an upstream
+peer and its exports are `Insights*` — the aliased `PostHog*` import names,
+and the allowlist entries that excused them, are gone.
 
 Known debt, deliberate: ~85 type-level errors under `tsgo --noEmit`
 (size-prop enums, generated deep-relative imports in a few products,
@@ -37,17 +39,18 @@ imports; they are inert (not in INSTALLED_APPS).
 
 ## Django → Go observability map (both planes live)
 
-| Django surface | Go replacement | Status |
-|---|---|---|
-| LLM analytics (`products/llm_analytics`, `api/llm_proxy`) | `/v1/evals/*` + `/v1/analytics/llm/*` | **evals LIVE**; analytics/llm backend = GAP (below) |
-| Evals / datasets / scores | `/v1/evals/{datasets,dataset-items,evaluators,score-configs,scores,traces,runs}` | **LIVE** (`cloud/clients/eval`) |
-| Trace/observation query | `/v1/evals/traces` (+ `hanzo.traces`/`hanzo.observations`) | **LIVE** |
-| Product / web / revenue / marketing / customer analytics, insights, dashboards, funnels, retention, trends | `/v1/analytics/{overview,timeseries,realtime,top/*}` | **GAP** — backend not shipped (below) |
-| Org / user / project / `personal_api_keys` / `login` | **Hanzo IAM** (`hanzo.id`, OIDC `owner`) + `/v1/projects` | covered by IAM (auth/tenancy, not observability) |
-| Data warehouse / data_modeling / batch_exports | Datastore warehouse (`hanzoai/datastore`) direct | substrate retained |
-| Feature flags, early access, surveys, experiments, product tours, session replay, error tracking, CDP, notebooks, groups, user interviews | — | **SUNSET** — not ported; distinct products, not "observability". Were already dead in prod (Django `502`). Do NOT silently assume replaced. |
+| Django surface                                                                                                                            | Go replacement                                                                   | Status                                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| LLM analytics (`products/llm_analytics`, `api/llm_proxy`)                                                                                 | `/v1/evals/*` + `/v1/analytics/llm/*`                                            | **evals LIVE**; analytics/llm backend = GAP (below)                                                                                         |
+| Evals / datasets / scores                                                                                                                 | `/v1/evals/{datasets,dataset-items,evaluators,score-configs,scores,traces,runs}` | **LIVE** (`cloud/clients/eval`)                                                                                                             |
+| Trace/observation query                                                                                                                   | `/v1/evals/traces` (+ `hanzo.traces`/`hanzo.observations`)                       | **LIVE**                                                                                                                                    |
+| Product / web / revenue / marketing / customer analytics, insights, dashboards, funnels, retention, trends                                | `/v1/analytics/{overview,timeseries,realtime,top/*}`                             | **GAP** — backend not shipped (below)                                                                                                       |
+| Org / user / project / `personal_api_keys` / `login`                                                                                      | **Hanzo IAM** (`hanzo.id`, OIDC `owner`) + `/v1/projects`                        | covered by IAM (auth/tenancy, not observability)                                                                                            |
+| Data warehouse / data_modeling / batch_exports                                                                                            | Datastore warehouse (`hanzoai/datastore`) direct                                 | substrate retained                                                                                                                          |
+| Feature flags, early access, surveys, experiments, product tours, session replay, error tracking, CDP, notebooks, groups, user interviews | —                                                                                | **SUNSET** — not ported; distinct products, not "observability". Were already dead in prod (Django `502`). Do NOT silently assume replaced. |
 
 ### Honest GAPs (must port before claiming full parity)
+
 1. **`cloud/clients/analytics` is NOT shipped.** `console2` allow-lists and calls
    `/v1/analytics/{overview,timeseries,realtime,llm/overview}` but the cloud
    subsystem does not exist → `GET /v1/analytics/health` → `404`. The LLM-lens
@@ -62,25 +65,41 @@ imports; they are inert (not in INSTALLED_APPS).
 
 Events are ingested by the **cloud Go binary**, not by the Rust capture service:
 
-```
-insights.hanzo.ai/{e,/e/,v1/e,/v1/e/,batch,capture}   (ingress prio 150)
-  → middleware insights-cloud-ingest-rewrite (fixed replacePath)
+```text
+{insights,analytics,sentry}.hanzo.ai/{e,/v1/e,/batch,/capture,/i/v0/e,/v1/event}
+  → middleware insights-cloud-ingest-rewrite (replacePath /v1/event)
   → service api-hanzo-ai → cloud.hanzo.svc:8000
-  → POST /v1/insights/e → cloud/clients/analytics insightsIngest → hanzo.events
+  → POST /v1/event → cloud apps/analytics → JetStream → event.fact
 ```
 
-Tenant is resolved SERVER-SIDE by `captureTenant`, in this order: validated
-principal → presented project key (`cloud.OrgForKey`) → brand host. It fails
-**CLOSED** on a presented-but-unresolvable key, and deliberately does NOT fall
-back to the brand host in that case, so a bogus key cannot borrow the host's
-org. Consequence when testing: verify anonymously (no `api_key`) to exercise the
-brand-host path, or a valid-looking key will make a working route look broken.
+CLOUD IS THE ONE AUTHORITY THAT MINTS AN INGEST KEY, and this deployment mints
+none. A team's `api_token` HOLDS the key cloud minted at `POST /v1/projects`;
+`insights/ingest.py` is the only place it is obtained and `Team.objects.create`
+the only place it is stored. `generate_random_token_project` raises — a locally
+minted key names no cloud project, so the door refuses it and the events are
+gone. The three teams map to cloud projects `hanzo/insights`, `lux/insights`,
+`zoo/insights`.
 
-`/v1/e` was NOT on this router until 2026-07-26 — it fell to the Django
-catch-all, which answers **403 HTML**, so every event sent to the path our own
-SDK posts to was discarded silently. When debugging a 403 here, read the BODY:
-Django answers HTML, cloud answers
-`{"status":403,"error":"valid bearer or a recognized brand host required"}`.
+Tenant is resolved SERVER-SIDE by `eventTenant` (cloud `apps/analytics/event.go`),
+in this order: validated IAM bearer → a `pk-` on `Authorization` /
+`x-hanzo-ingest-key` / `?ingest_key=` → `?api_key=` / `x-api-key` / the PostHog
+body field `api_key` → a Hanzo Team workspace token. **There is no brand-host
+fallback any more** — a request Host names no tenant on any door. Earlier notes
+here described `captureTenant` and a brand-host path; both are gone, and testing
+anonymously now proves nothing except that the door refuses anonymous writes.
+
+Read the refusal BODY, it names the cause exactly (measured 2026-08-09):
+
+```text
+no credential          401 ingest_key_required   "create a project (POST /v1/projects)…"
+key naming no project  403 ingest_key_unknown    "this ingest key names no project…"
+accepted               200 {"accepted":N,"dropped":M}
+```
+
+A 200 means published to JetStream, not yet in the table — a separate consumer
+inserts into `event.fact`. Prove a landing by querying it, never by the status
+code: `SELECT org, product, name, time FROM event.fact WHERE distinct_id = …`.
+`product` holds the cloud project slug, stamped server-side by `attributeProject`.
 
 `POST /v1/ai` is likewise unrouted and falls through to Django.
 
@@ -104,7 +123,7 @@ false, so re-measure before repeating any of it:
   `insights-plugin`, `insights-livestream`, against services `kafka`, `kv`,
   `datastore`, `s3`.
 
-What is still absent is a *dedicated* write door. `rust/capture` has
+What is still absent is a _dedicated_ write door. `rust/capture` has
 `CaptureMode::Recordings` in source but NO workflow builds it — `.hanzo/workflows`
 builds exactly three images (`insights`, `insights-plugin`, `insights-livestream`).
 `/v1/s` no longer 502s at a retired capture service; it falls through to the
@@ -130,12 +149,12 @@ Anonymous `/` used to bounce straight to SSO, so the product had no public face.
 `insights/urls.py:root` now branches: `home` (the SPA, unchanged) for an
 authenticated user, `templates/landing.html` for everyone else.
 
-Its CTAs point OUT to `hanzo.ai/pricing` on purpose — **`GET /api/billing` is
+Its CTAs point OUT to `hanzo.ai/pricing` on purpose — **`GET /v1/billing` is
 404 in this deployment**, so an in-app upgrade funnel would dead-end. There is
 also no Insights SKU in `@hanzo/plans` (its 11 tiers are compute), so no plan
 copy is written in the template; minting that SKU is a pricing decision, not a
 template edit. Tests in `insights/test/test_landing.py` fail the build if
-`/api/billing` or any third-party asset host reappears on the page (prod refuses
+`/v1/billing` or any third-party asset host reappears on the page (prod refuses
 third-party CDNs and fails SILENTLY).
 
 ## `preflight.cloud` is FALSE here — and that drove a real bug
@@ -161,10 +180,16 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
 
 ## Live deploy (do-sfo3-hanzo-k8s / ns hanzo)
 
-- `ghcr.io/hanzoai/insights:<FULL-40-CHAR-SHA>` — built by the NATIVE pipeline
-  in `.hanzo/workflows/deploy.yml` (git.hanzo.ai push → in-cluster act_runner →
-  docker build → GHCR), tagged by **commit sha only**, never semver: a re-pushed
-  tag means two digests behind one name. `container-images-cd.yml` is
+- `ghcr.io/hanzoai/insights:<semver>` — built by the NATIVE pipeline in
+  `.hanzo/workflows/deploy.yml` (git.hanzo.ai push → in-cluster act_runner →
+  docker build → GHCR), tagged **semver, never sha**. This file said the
+  opposite for a while; the pipeline's own header explains the reversal. The
+  hazard behind the old sha-only rule was real — a RE-PUSHED tag leaves two
+  digests behind one name — but that is caused by mutating a tag, not by
+  readable names, and the workflow now refuses to push a tag that already
+  exists. The next patch is derived from the REGISTRY, not from `git tag`,
+  because those two disagree here. The commit rides the image as
+  `org.opencontainers.image.revision`. `container-images-cd.yml` is
   neutralized; GitHub Actions is a mirror and builds nothing.
 - `insights-web` (Django) + `insights-worker` (Celery) — **LIVE** on
   `insights.hanzo.ai`. Operator App CRs in `hanzoai/universe`
@@ -183,16 +208,112 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
   selected by its image. Reading a pod mid-rollout returns the OLD build and
   makes a shipped fix look absent (or an absent one look shipped).
 
+## `/static/*` is served from an object origin, not from the pods
+
+A content-hashed filename is a claim about bytes: `index-W7FGYMJN.js` names one
+byte sequence and only ever that one. Those files used to live only inside the
+pod that built them — WhiteNoise reading each pod's own `STATIC_ROOT` out of the
+image — so an asset died when its pod did. This repo ships every few minutes and
+rolls with `maxSurge: 1`, so two builds serve simultaneously for most of the day
+(measured: 11 ReplicaSets in two hours, three of them live). A browser therefore
+took `index.html` from one build and had roughly half its chunk requests answered
+by another that had never heard of that hash — **one url, 15 requests, 200×7 and
+404×8**. That was the "Insights failed to load. Reload the page to try again."
+
+So the tree is mirrored to `s3://cdn/insights/static/` and `insights.hanzo.ai`
+serves `/static/*` from there, via the ingress `staticFiles` middleware
+(`hanzoai/universe`, `infra/k8s/ingress/routes.yaml`, the `insights-static-*`
+middlewares). Rollout tweaks cannot substitute: `maxSurge`/session affinity only
+narrow the window, and a client still holding the old shell breaks _after_ the
+rollout finishes.
+
+- **The origin is flat and shared by every build**, which is only correct because
+  the names are content-addressed. Two builds emitting the same chunk write
+  identical bytes; two that differ emit different names. Collisions are
+  impossible by construction, which is also what makes retaining old builds
+  nearly free. `bin/publish-static` writes a hashed key ONCE and never rewrites
+  it, so a build uploads only what it changed — the 2.7 GB first publish is the
+  floor, not the per-build cost.
+- **1795 of the 12887 published names carry no hash**, and 129 of those are
+  `.js`. They are not incidental: `array.js`, `toolbar.js`, the recorders,
+  `surveys.js` are the SDK bundles customers load from their own pages by that
+  exact url, plus `staticfiles.json` and the hashless `index.js`/`index.css`
+  aliases `common/esbuilder/utils.mjs` re-emits every build. They keep
+  overwriting and must never be marked immutable — a year-long `immutable` on
+  `array.js` pins every customer's SDK with no way to recall it.
+- **Two routers, one origin.** `cacheControl` is keyed by EXTENSION, so "hashed
+  names are immutable" cannot be said in one map. The router discriminates
+  instead, on a `PathRegexp` of the two hash shapes the build emits — Django's
+  `name.<12 hex>.ext` and esbuild's `name-<8 base32>.ext`. A name the regex does
+  not recognise falls to the short-lived router, so the failure direction is
+  under-caching, never a permanently-stuck asset.
+- **The CORS header had to be restated.** `/static/*` answers
+  `Access-Control-Allow-Origin: *` from Django's corsheaders; serving from the
+  object store goes around Django and the header went with it. Set it with
+  `customResponseHeaders`, NOT `accessControlAllowOriginList` — the CORS branch
+  applies headers from a response modifier in the proxy's return path, which a
+  terminal middleware never reaches. `curl` reported 200 throughout; only loading
+  a font in a real browser surfaced it, as a bare `NetworkError`.
+- **`staticFiles` is terminal** — a key it cannot find is a 404, not a
+  fall-through to the pod. So the publish runs BETWEEN the build and the pin in
+  `deploy.yml`. Pin first and there is a window where pods serve a build whose
+  chunks nobody has published.
+- **A pin can still move without a publish, by hand, and that is now a
+  foot-gun.** `charts/app/pin.sh` checks semver, registry pullability, the
+  repository, and monotonicity — it does NOT check that the build's manifest
+  exists. `PIN_ROLLBACK=1` and a direct edit to
+  `charts/app/values/hanzo/insights-web.yaml` both bypass the workflow. That
+  used to be harmless because the image carried its own `STATIC_ROOT`; it is not
+  any more, because the ingress never reads the pod. **Rolling back to a build
+  older than the 30-day horizon will find its unique chunks pruned.** Check
+  `s3://cdn/insights-builds/` for that version before pinning backwards.
+- **Retention is 30 days**, held by `bin/prune-static` (weekly, in
+  `.hanzo/workflows/prune-static.yml`) and read from the per-build manifests in
+  `s3://cdn/insights-builds/`, never from object age: a chunk unchanged across
+  two hundred builds has the OLDEST `LastModified` in the bucket precisely
+  because it is the most stable thing in it, so an S3 lifecycle rule would delete
+  the load-bearing assets first and leave the churn.
+- **The prune deletes unattended, so it carries four guards** — all covered by
+  `bin/test/test_static_origin.py`, which runs in `ci-python`. A publish writes
+  its objects first and its manifest last, so a build finishing between the
+  manifest listing and the object listing looked present and unclaimed, and the
+  prune would delete the very build the pin was about to move to. Manifests are
+  re-read AFTER the object listing; nothing younger than a day is ever deleted
+  (age PROTECTS, never condemns); a floor of ten builds survives a wrong runner
+  clock; and an orphan set over a quarter of the tree refuses rather than
+  deletes. Do not remove one because the others look sufficient — the first two
+  cover different halves of the same race.
+- **The manifests are a SIBLING prefix, not `insights/.builds/`.** A
+  percent-encoded `../` reaches out of `static/` inside the middleware
+  (`/static/%2e%2e%2f.builds/<v>.txt` returned one, 200). It cannot climb past
+  the middleware's root, so only public filenames were ever reachable — but a
+  record of the tree does not belong inside the tree, and a sibling prefix puts
+  it out of reach by construction rather than by a path-cleaning rule.
+- **A version string does not name a tree.** Both forge mirrors run the deploy
+  workflow, the concurrency group is per-repo, and two builds routinely compute
+  the same next patch and push that tag with different digests — measured on
+  1.52.116 (`2453b673` ran while the registry resolved the tag to `81c09eaf`);
+  universe records the same for the plugin image. Manifests are therefore keyed
+  `<version>-<sha12 of the list>`, so two trees write two manifests instead of
+  one erasing the other's record and stranding its files for the prune.
+- **`analytics.hanzo.ai` and `sentry.hanzo.ai` are NOT part of this.** They share
+  the cloud _ingest_ routers with insights, but their `/static/` goes to entirely
+  different backends (`analytics.hanzo.svc` and `cloud-api-hanzo-ai`). Carving
+  `/static` on those hosts would hijack paths they serve themselves.
+- WhiteNoise is still in `MIDDLEWARE` and still serves the tree inside the pod.
+  It is the fallback, and leaving it is the safer order — remove it only as its
+  own change.
+
 ## Warehouse table names: no version suffixes, and a gate that can see them
 
 A `_v2` is a confession — two tables are the same thing and nobody deleted one.
 The fork brought nine into the `insights` database:
 
-| name | disposition |
-|---|---|
-| `query_log_archive_v2` | **retired** by `0230` — renamed to `retired.query_log_archive` |
-| `kafka_log_entries_v3`, `log_entries_v3_mv` | **retired** by `0230` — the clean pair takes over |
-| the six `raw_sessions_v3*` | **held** — the sessions rewrite is mid-flight |
+| name                                        | disposition                                                    |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| `query_log_archive_v2`                      | **retired** by `0230` — renamed to `retired.query_log_archive` |
+| `kafka_log_entries_v3`, `log_entries_v3_mv` | **retired** by `0230` — the clean pair takes over              |
+| the six `raw_sessions_v3*`                  | **held** — the sessions rewrite is mid-flight                  |
 
 `bin/tables` is the gate. `--check` reads source and is stdlib-only (no Django,
 no warehouse, no services, runs in `env -i`); `--live` reads `system.tables`.
@@ -220,9 +341,9 @@ make writing the cleanup down the thing that fails the build.
 **`0230` never drops a row.** `query_log_archive_v2` holds 575 rows, so it is
 MOVED — a cross-database `RENAME` between Atomic databases is metadata-only.
 The version distinction becomes a NAMESPACE distinction, which is the rule
-itself: `retired.query_log_archive` needs no number. The two log_entries objects
+itself: `retired.query_log_archive` needs no number. The two log*entries objects
 dropped are a Kafka table and a view, neither of which stores anything. Note
-`max_table_size_to_drop = 0` (used in `0201`) *disables* the size guard — it is
+`max_table_size_to_drop = 0` (used in `0201`) \_disables* the size guard — it is
 not a safety rail.
 
 **The duplicate consumer, found on the way.** `kafka_log_entries` and
@@ -272,10 +393,10 @@ reads. What a reader is SHOWN is ours — "0 users", "Users & groups".
 **Three views, one source.** `event_mv`, `user_mv` and `user_alias_mv` all
 project `event.event` through the same identity expressions:
 
-| view | writes | fact |
-|---|---|---|
-| `event_mv` | `writable_events` | this event happened |
-| `user_mv` | `writable_person` | this user exists |
+| view            | writes                                  | fact                      |
+| --------------- | --------------------------------------- | ------------------------- |
+| `event_mv`      | `writable_events`                       | this event happened       |
+| `user_mv`       | `writable_person`                       | this user exists          |
 | `user_alias_mv` | `writable_person_distinct_id_overrides` | this visitor IS that user |
 
 The alias is what makes signing up non-destructive: a visitor's pageviews are
@@ -333,8 +454,10 @@ whole class of bug survivable in the first place: the source read `toInt64(0)`
 while the warehouse ran `toInt64(1)`, and nothing reconciles the two but running
 `manage.py migrate_datastore`. Check the warehouse, not the file:
 
-    SELECT extract(create_table_query, 'toInt64\([0-9]+\)') FROM system.tables
-    WHERE database = 'insights' AND name = 'event_mv'
+```sql
+SELECT extract(create_table_query, 'toInt64\([0-9]+\)') FROM system.tables
+WHERE database = 'insights' AND name = 'event_mv'
+```
 
 ### Routing is derived, and `route_orgs` is its only writer
 
@@ -394,6 +517,7 @@ are imported by app code — they are NOT migrations; never delete them in a squ
 the squash.
 
 ### Guard + adoption
+
 - **Fresh install / CI guard**: `manage.py migrate` from zero on a scratch
   Postgres must reach head clean (validated: 246/246 tables, 0 missing columns,
   index parity).
@@ -477,19 +601,19 @@ The step below is right, but it depended on three things nobody had checked, and
 missing any one of them makes a build publish an image and pin nothing — while
 every dashboard stays green, because the BUILD succeeded:
 
- 1. `KMS_CLIENT_ID` / `KMS_CLIENT_SECRET` as ORG-level forge action secrets.
-    They were absent. `hanzo` had `GHCR_TOKEN`, `GHCR_USER`, `GH_PAT`, `OCI_*`
-    and nothing else — which is exactly why builds worked and deploys did not.
-    Repo-level secrets on `hanzo/insights` are empty; everything is inherited.
-    Check with: `GET /v1/orgs/hanzo/actions/secrets` (names only, never values).
- 2. A VALID `UNIVERSE_PIN_TOKEN` in KMS. The one provisioned there matched no
-    live token in the forge and answered 401 on every username, so even a
-    successful KMS login could not have pushed.
- 3. The token must be able to push to `hanzo/universe`. Verify without pushing:
-    `curl -o /dev/null -w '%{http_code}' -u "z:$TOKEN" \
-      https://git.hanzo.ai/hanzo/universe/info/refs?service=git-receive-pack`
-    200 means yes; 401 means the token is dead; 403 means the repo is a PULL
-    MIRROR and cannot be pushed to at all (several `hanzoai/*` repos are).
+1. `KMS_CLIENT_ID` / `KMS_CLIENT_SECRET` as ORG-level forge action secrets.
+   They were absent. `hanzo` had `GHCR_TOKEN`, `GHCR_USER`, `GH_PAT`, `OCI_*`
+   and nothing else — which is exactly why builds worked and deploys did not.
+   Repo-level secrets on `hanzo/insights` are empty; everything is inherited.
+   Check with: `GET /v1/orgs/hanzo/actions/secrets` (names only, never values).
+2. A VALID `UNIVERSE_PIN_TOKEN` in KMS. The one provisioned there matched no
+   live token in the forge and answered 401 on every username, so even a
+   successful KMS login could not have pushed.
+3. The token must be able to push to `hanzo/universe`. Verify without pushing:
+   `curl -o /dev/null -w '%{http_code}' -u "z:$TOKEN" \
+https://git.hanzo.ai/hanzo/universe/info/refs?service=git-receive-pack`
+   200 means yes; 401 means the token is dead; 403 means the repo is a PULL
+   MIRROR and cannot be pushed to at all (several `hanzoai/*` repos are).
 
 The lesson worth keeping: `1.52.37`, `.38` and `.39` all built and published
 while production sat on `.36`. A green build is not a deploy, and the only
@@ -527,7 +651,9 @@ Listing `frontend` alone does not include packages nested inside it.
 
 Before changing either, run the exact line the Dockerfile runs:
 
-    CI=1 pnpm --filter=@hanzo/frontend... install --no-frozen-lockfile
+```bash
+CI=1 pnpm --filter=@hanzo/frontend... install --no-frozen-lockfile
+```
 
 ## Verify a deploy by the POD image, never the Deployment spec
 
@@ -564,7 +690,9 @@ before believing it; nothing in CI reads letterforms.
 **What is NOT fixed, and it is the widest surface of the lot.** The browser SDK
 still ships the upstream mark, and we serve it:
 
-    https://insights.hanzo.ai/static/array.full.js   200, contains the hedgehog
+```text
+https://insights.hanzo.ai/static/array.full.js   200, contains the upstream mark
+```
 
 It comes from `@hanzo/insights` (1.358.1), copied into `frontend/dist` by
 `frontend/bin/copy-insights-js`, and it renders `Tour by <mark>` and
@@ -645,11 +773,15 @@ boot check does not see them:
 
 ## An `ee` import is a build failure
 
-`bin/check-imports-are-committed` counts `ee` as first-party, which — since the
-enterprise tree is not in this fork and never will be — means an `ee` import can
-only ever fail to resolve. That is the point. Left out of that tuple it read as
-somebody else's package and passed silently, which is how `from ee.hogai…` sat
-in a module the temporal graph loads eagerly and took down every web pod.
+`bin/check-imports-are-committed` refuses the name `ee` outright. It does not
+ask whether the import resolves: `FIRST_PARTY` answers "is this committed", and
+`ee` is not missing, it is refused. Counting it as first-party instead made the
+verdict depend on resolution, so a committed `ee/` would have satisfied the
+check and re-opened the hole — measured, with `ee/anything.py` staged and a file
+importing it, the resolution form exits 0 on the very tree the refusal form
+exits 1 on. Left out of both it read as somebody else's package and passed
+silently, which is how `from ee.hogai…` sat in a module the temporal graph loads
+eagerly and took down every web pod.
 
 The gate reports the two mistakes separately because they want different fixes:
 a named-but-uncommitted module wants committing, an `ee` import wants the
@@ -657,9 +789,21 @@ missing thing ported natively or the dead path deleted. Never shim it, and never
 `try/except ImportError` around it — a fork that pretends to have the enterprise
 tree is worse than one that admits it does not.
 
+Two things the gate cannot see, so do not rely on it alone. Dotted paths in
+strings — `mock.patch("ee.billing…")`, backend names in `LOGIN_METHODS`,
+`CELERY_IMPORTS` entries, `to="ee.role"` in a migration — are not `ast.Import`
+nodes, so they fail at run time or never. And migration dependencies: `("ee",
+"0041_…")` is a graph node, not an import. Grep for `"ee\.` and `("ee",` as well.
+
+A dropped `("ee", …)` dependency is not free. It also carried ordering: those
+migrations came after the ee migration that created the roles, so removing it
+without a replacement made a fresh database fail on `relation "ee_role" does not
+exist`. They now depend on `insights.0002_managed_tables`, which is what creates
+those tables here.
+
 ## Why login 500s: the migration graph, and how to ask it what is wrong
 
-`POST /api/login` returns 500 on `column django_session.user_id does not exist`.
+`POST /v1/login` returns 500 on `column django_session.user_id does not exist`.
 That column comes from `insights_session`'s 0002/0003, and they have never
 applied — because `migrate` builds the WHOLE graph before running anything, so
 one unsatisfiable dependency anywhere blocks every migration in the tree.
@@ -700,3 +844,68 @@ STILL BROKEN, and it is a different defect from all of the above:
 creates, so the `tasks` FKs pointing at them cannot resolve. They want a
 CreateModel, not a rename. Until that lands, `migrate` still cannot run and
 login stays down.
+
+## Schema, migrations, and the checks that lie (2026-08-09)
+
+**`migrate --check` answers the wrong question.** It compares the migration ledger to the
+migration tree, so it passes whenever every migration is *recorded* applied — including ones
+whose rows were faked past a failure. Production ran with **eleven absent model tables** while
+`migrate` reported nothing to do, `migrate --check` exited 0, and `showmigrations` listed them
+all applied. All three read `django_migrations`; none read the schema.
+
+Use `python manage.py schema_drift` — it compares every managed model's table and columns
+against `information_schema` and exits non-zero with the list. Measured on the same database in
+the same minute: `migrate --check` exit 0, `schema_drift` exit 1 naming all eleven.
+
+**Repair with the adopting operations, never `--fake`.** `insights/migration_helpers/absent.py`
+provides `CreateTableIfNotExists` / `AddColumnIfNotExists`. They take no field definition — the
+shape comes from migration state, so a repair cannot drift from what a fresh install gets — and
+they skip what is already present, which makes them correct in BOTH directions. `--fake` is
+wrong in one (it also skips a database that genuinely lacks the column); a plain
+`CreateModel`/`AddField` is wrong in the other (it fails where the table already exists).
+
+**A fresh database is a first-class test.** It was unbuildable for a long time, which is why the
+test-database builder failed and no backend test could run (`insights/conftest.py` builds the
+test DB by running migrations). Two defect classes did it: raw SQL in `insights/0002_managed_tables`
+re-creating tables that a product app's own migration owns, and ~45 state-only product moves
+(`*_migrate_*_models.py`) that adopt tables pre-squash history used to create — true on
+production, false on empty. Rebuild from empty after touching migrations:
+
+    U=$(python -c 'import os,re;u=os.environ["DATABASE_URL"];print(re.sub(r"/[^/?]+(\?|$)", r"/freshtest\1", u))')
+    DATABASE_URL="$U" python manage.py migrate --noinput
+
+**Do not run a bare `migrate` against production without classifying first.** The squash carries
+no `replaces`, so the ledger holds pre-squash names the tree does not contain. Classify the plan
+with `sqlmigrate` into ADDITIVE (CREATE TABLE / ADD COLUMN — cannot lose data) vs DESTRUCTIVE, and
+note that `RunPython` data migrations emit no SQL at all, so a grep over `sqlmigrate` is blind to
+them. `makemigrations` is the wrong tool here: it offers dozens of `DeleteModel`/`RemoveField`
+that would drop live tables.
+
+## Three remotes, and CD reads the forge
+
+`main` lives at `https://git.hanzo.ai/hanzo/insights` (CD reads this), `https://git.hanzo.ai/hanzoai/insights`
+(a second forge repo other lanes sync), and `ssh://github.com/hanzoai/insights`. The local `origin`
+has ONE fetch URL and TWO push URLs, so a push can succeed on one and be rejected on the other and
+split them silently. Verify every push with `git ls-remote <url> refs/heads/main` on all three and
+compare shas. Reconcile divergence with a MERGE — both sides then fast-forward and nothing is
+discarded. Never force-push. The sha in a pod's `/code/commit.txt` is often a sync merge commit that
+is an ancestor of both mains but the tip of neither; that is normal here.
+
+## Worktree limits (do not burn hours on these)
+
+The frontend build and `tsgo` DO NOT work in a `git worktree`: `copy-scripts` fails on a missing
+`node_modules/insights-js/dist/`, and tsgo reports ~111k phantom "cannot find module" errors because
+the borrowed `node_modules` does not resolve. Jest is absent too. `python` is not on PATH — prepend
+`.venv/bin`. NEVER run `bin/insightscli lint:python:fix` with no arguments: it goes repo-wide (it
+rewrote 422 files once). `bin/insightscli` borrows the venv from the main clone, so a module edited
+in a worktree may not be the one that executes — verify which file actually runs before trusting a
+result.
+
+## Static assets outlive the pod
+
+`/static/*` is served from a shared immutable origin through `hanzoai/ingress`, not from the pods.
+Before that, each pod served its own build's content-hashed filenames, so during a rollout the same
+URL answered 200 or 404 depending which pod took it (measured 200x7 / 404x8), and a page loaded
+before a deploy broke afterwards. A missing asset now answers an honest 404 rather than falling
+through to the SPA catch-all, which is `login_required` and 302'd to the IdP — that is what made
+the browser report "Expected a JavaScript module but the server responded with MIME type text/html".

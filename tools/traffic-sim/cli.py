@@ -55,7 +55,7 @@ INSIGHTS_DETECT_JS = r"""
         const text = (s.textContent || '').toLowerCase();
         return src.includes('insights') || src.includes('array.js') ||
                id.includes('insights') || text.includes('insights') ||
-               text.includes('phc_') || text.includes('ph_init');
+               text.includes('pk-') || text.includes('ph_init');
     });
     const hasInsightsInitId = !!document.getElementById('insights-init');
     const snippetPattern = /!function\s*\([a-z],[a-z]\)\s*\{[^}]*__SV/;

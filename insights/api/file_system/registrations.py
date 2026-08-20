@@ -348,7 +348,7 @@ def register_core_file_system_types() -> None:
         "action",
         "actions",
         "Action",
-        undo_message="Send PATCH /api/projects/@current/actions/{id} with deleted=false.",
+        undo_message="Send PATCH /v1/projects/@current/actions/{id} with deleted=false.",
     )
     register_post_delete_hook("action", _action_post_delete)
     register_post_restore_hook("action", _action_post_restore)
@@ -357,7 +357,7 @@ def register_core_file_system_types() -> None:
         "dashboard",
         "dashboards",
         "Dashboard",
-        undo_message="Send PATCH /api/projects/@current/dashboards/{id} with deleted=false.",
+        undo_message="Send PATCH /v1/projects/@current/dashboards/{id} with deleted=false.",
     )
     register_post_delete_hook("dashboard", _dashboard_post_delete)
     register_post_restore_hook("dashboard", _dashboard_post_restore)
@@ -366,7 +366,7 @@ def register_core_file_system_types() -> None:
         "feature_flag",
         "feature_flags",
         "FeatureFlag",
-        undo_message="Send PATCH /api/projects/@current/feature_flags/{id} with deleted=false.",
+        undo_message="Send PATCH /v1/projects/@current/feature_flags/{id} with deleted=false.",
     )
     register_pre_delete_hook("feature_flag", _feature_flag_pre_delete)
     register_pre_restore_hook("feature_flag", _feature_flag_pre_restore)
@@ -377,7 +377,7 @@ def register_core_file_system_types() -> None:
         "experiment",
         "experiments",
         "Experiment",
-        undo_message="Send PATCH /api/projects/@current/experiments/{id} with deleted=false.",
+        undo_message="Send PATCH /v1/projects/@current/experiments/{id} with deleted=false.",
     )
     register_post_delete_hook("experiment", _experiment_post_delete)
     register_post_restore_hook("experiment", _experiment_post_restore)
@@ -387,7 +387,7 @@ def register_core_file_system_types() -> None:
         "product_analytics",
         "Insight",
         lookup_field="short_id",
-        undo_message="Send PATCH /api/projects/@current/insights/{id} with deleted=false.",
+        undo_message="Send PATCH /v1/projects/@current/insights/{id} with deleted=false.",
     )
     register_post_delete_hook("insight", _insight_post_delete)
     register_post_restore_hook("insight", _insight_post_restore)
@@ -406,7 +406,7 @@ def register_core_file_system_types() -> None:
         "insights",
         "SessionRecordingPlaylist",
         lookup_field="short_id",
-        undo_message="Send PATCH /api/projects/@current/session_recordings/playlists/{id} with deleted=false.",
+        undo_message="Send PATCH /v1/projects/@current/session_recordings/playlists/{id} with deleted=false.",
     )
     register_post_delete_hook("session_recording_playlist", _playlist_post_delete)
     register_post_restore_hook("session_recording_playlist", _playlist_post_restore)
@@ -415,18 +415,18 @@ def register_core_file_system_types() -> None:
         "cohort",
         "cohorts",
         "Cohort",
-        undo_message="Send PATCH /api/projects/@current/cohorts/{id} with deleted=false.",
+        undo_message="Send PATCH /v1/projects/@current/cohorts/{id} with deleted=false.",
     )
     register_post_delete_hook("cohort", _cohort_post_delete)
     register_post_restore_hook("cohort", _cohort_post_restore)
 
-    for hog_type in INSIGHTS_FUNCTION_TYPES:
-        type_string = f"insights_function/{hog_type}"
+    for script_type in INSIGHTS_FUNCTION_TYPES:
+        type_string = f"insights_function/{script_type}"
         register_file_system_type(
             type_string,
             "cdp",
             "InsightsFunction",
-            undo_message="Send PATCH /api/projects/@current/insights_functions/{id} with deleted=false.",
+            undo_message="Send PATCH /v1/projects/@current/insights_functions/{id} with deleted=false.",
         )
         register_pre_delete_hook(type_string, _insights_function_pre_delete)
         register_pre_restore_hook(type_string, _insights_function_pre_restore)

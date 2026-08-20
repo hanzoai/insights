@@ -13,27 +13,27 @@ import { closeHub, createHub } from '~/common/utils/db/hub'
 import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { Datastore } from '~/tests/helpers/datastore'
 import { waitForExpect } from '~/tests/helpers/expectations'
-import { waitForHogInvocationResultsMvReady } from '~/tests/helpers/script-invocation-results'
 import { TEST_KAFKA_TOPICS, ensureKafkaTopics } from '~/tests/helpers/kafka'
+import { waitForScriptInvocationResultsMvReady } from '~/tests/helpers/script-invocation-results'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
+import { FixtureFlowBuilder } from '../_tests/builders/flow.builder'
 import { INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
-    createHogExecutionGlobals,
+    createScriptExecutionGlobals,
     insertInsightsFunctionTemplate,
 } from '../_tests/fixtures'
-import { insertInsightsFlow } from '../_tests/fixtures-insightsflows'
+import { insertFlow } from '../_tests/fixtures-flows'
 import { CdpConsumerBaseDeps } from '../consumers/cdp-base.consumer'
-import { CdpCyclotronWorkerInsightsFlow } from '../consumers/cdp-cyclotron-worker-hogflow.consumer'
+import { CdpCyclotronWorkerFlow } from '../consumers/cdp-cyclotron-worker-flow.consumer'
 import { CdpCyclotronWorker } from '../consumers/cdp-cyclotron-worker.consumer'
 import { CdpEventsConsumer } from '../consumers/cdp-events.consumer'
 import { CdpRerunWorkerConsumer } from '../consumers/cdp-rerun-worker.consumer'
 import { CyclotronJobQueueKafka } from '../services/job-queue/job-queue-kafka'
 import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-postgres-v2'
-import { compileHog } from '../templates/compiler'
+import { compileScript } from '../templates/compiler'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import { RerunJobManager } from './rerun-job.manager'
 import { RERUN_QUEUE_NAME } from './rerun-job.types'
@@ -62,10 +62,10 @@ interface PersistedRow {
  *
  * Flow under test:
  *   1. Script function runs -> producer writes a 'succeeded' lifecycle row to
- *      Kafka -> MV lands it in `hog_invocation_results`.
+ *      Kafka -> MV lands it in `invocations`.
  *   2. Simulated Django POST: `rerunManager.enqueue({ invocation_ids })`.
  *   3. Real `CdpRerunWorkerConsumer` dequeues the wrapper job, queries the
- *      real `hog_invocation_results`, rehydrates globals (rebuilding inputs),
+ *      real `invocations`, rehydrates globals (rebuilding inputs),
  *      and re-enqueues onto the regular cyclotron queue.
  *   4. The real cyclotron worker picks up the rerun invocation and writes a
  *      second lifecycle row, this time with `is_retry=1` and `attempts > 1`.
@@ -81,7 +81,7 @@ describe('CDP script invocation rerun e2e', () => {
     let mockProducerObserver: KafkaProducerObserver
     let eventsConsumer: CdpEventsConsumer
     let cyclotronWorker: CdpCyclotronWorker
-    let hogflowWorker: CdpCyclotronWorkerInsightsFlow
+    let flowWorker: CdpCyclotronWorkerFlow
     let rerunManager: RerunJobManager
     let rerunWorker: CdpRerunWorkerConsumer
     let kafkaQueue: CyclotronJobQueueKafka
@@ -108,10 +108,10 @@ describe('CDP script invocation rerun e2e', () => {
         // Kafka engine consumers keep their connections. Includes KAFKA_FN_INVOCATION_RESULTS,
         // which this test's MV needs but the shared set does not cover.
         await ensureKafkaTopics([...TEST_KAFKA_TOPICS, KAFKA_FN_INVOCATION_RESULTS])
-        await datastore.truncate('hog_invocation_results_data')
-        await waitForHogInvocationResultsMvReady(datastore)
+        await datastore.truncate('invocations_data')
+        await waitForScriptInvocationResultsMvReady(datastore)
         await resetTestDatabase()
-        await datastore.truncate('hog_invocation_results_data')
+        await datastore.truncate('invocations_data')
 
         hub = await createHub()
         kafkaProducer = await ActualKafkaProducerWrapper.create(hub.KAFKA_CLIENT_RACK)
@@ -169,7 +169,7 @@ describe('CDP script invocation rerun e2e', () => {
         fnFetch = await _insertInsightsFunction(hub.postgres, team.id, {
             type: 'destination',
             script,
-            bytecode: await compileHog(script),
+            bytecode: await compileScript(script),
             inputs_schema: INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? [],
             inputs: INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs,
             ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
@@ -181,8 +181,8 @@ describe('CDP script invocation rerun e2e', () => {
         cdpDeps = { ...createCdpConsumerDeps(hub, kafkaProducer), personRepository: mockPersonRepo }
 
         eventsConsumer = new CdpEventsConsumer(hub, cdpDeps, {
-            hogQueue: kafkaQueue,
-            hogflowQueue: postgresV2Queue,
+            scriptQueue: kafkaQueue,
+            flowQueue: postgresV2Queue,
         })
         // We call processBatch directly — no need to actually join the kafka group.
         // Stubbing keeps the test off Redpanda's stale-group-protocol coordinator,
@@ -200,7 +200,7 @@ describe('CDP script invocation rerun e2e', () => {
         rerunManager = new RerunJobManager({ dbUrl: NODE_DB_URL, maxCount: 10000 })
         await rerunManager.connect()
 
-        globals = createHogExecutionGlobals({
+        globals = createScriptExecutionGlobals({
             project: { id: team.id } as any,
             event: {
                 uuid: '0d0ff14e-1b15-4afe-99e3-1ea83f0e3aab',
@@ -215,7 +215,7 @@ describe('CDP script invocation rerun e2e', () => {
         await Promise.all([
             eventsConsumer?.stop().catch(() => undefined),
             cyclotronWorker?.stop().catch(() => undefined),
-            hogflowWorker?.stop().catch(() => undefined),
+            flowWorker?.stop().catch(() => undefined),
             rerunWorker?.stop().catch(() => undefined),
             rerunManager?.disconnect().catch(() => undefined),
         ])
@@ -242,7 +242,7 @@ describe('CDP script invocation rerun e2e', () => {
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, attempts, error_kind, function_kind
-                 FROM hog_invocation_results
+                 FROM invocations
                  WHERE team_id = ${team.id} AND function_id = '${fnFetch.id}' AND status = 'succeeded'`
             )
             expect(rows.length).toBeGreaterThanOrEqual(1)
@@ -250,7 +250,7 @@ describe('CDP script invocation rerun e2e', () => {
 
         const originalRows = await datastore.query<PersistedRow>(
             `SELECT invocation_id, status, is_retry, attempts, error_kind, function_kind, invocation_globals
-             FROM hog_invocation_results
+             FROM invocations
              WHERE team_id = ${team.id} AND function_id = '${fnFetch.id}' AND status = 'succeeded'`
         )
         const originalInvocationId = originalRows[0].invocation_id
@@ -297,7 +297,7 @@ describe('CDP script invocation rerun e2e', () => {
         rerunWorker = new CdpRerunWorkerConsumer(
             { ...hub, CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: 'postgres' },
             cdpDeps,
-            { insights_function: kafkaQueue, hog_flow: postgresV2Queue }
+            { insights_function: kafkaQueue, flow: postgresV2Queue }
         )
         await rerunWorker.start()
 
@@ -317,7 +317,7 @@ describe('CDP script invocation rerun e2e', () => {
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, attempts, error_kind, function_kind
-                 FROM hog_invocation_results
+                 FROM invocations
                  WHERE team_id = ${team.id}
                    AND function_id = '${fnFetch.id}'
                    AND invocation_id = '${originalInvocationId}'
@@ -354,14 +354,14 @@ describe('CDP script invocation rerun e2e', () => {
         // Custom function whose input specifically dereferences
         // `person.properties.foo` — the shape that crashed pre-fix.
         const FALLBACK_WEBHOOK_URL = 'https://example.com/person-props-fallback'
-        const gclidLikeHog = `
+        const gclidLikeScript = `
         let res := fetch(inputs.url, { 'method': 'POST', 'body': f'foo={inputs.foo}' });
         print('Fetch response:', res);
         `
         const personPropsFn = await _insertInsightsFunction(hub.postgres, team.id, {
             type: 'destination',
-            script: gclidLikeHog,
-            bytecode: await compileHog(gclidLikeHog),
+            script: gclidLikeScript,
+            bytecode: await compileScript(gclidLikeScript),
             inputs_schema: [
                 { key: 'url', type: 'string', label: 'URL', secret: false, required: true },
                 { key: 'foo', type: 'string', label: 'foo', secret: false, required: false },
@@ -375,7 +375,7 @@ describe('CDP script invocation rerun e2e', () => {
                 // event.properties as the tail fallback.
                 foo: {
                     value: '{person.properties.foo ?? event.properties.foo}',
-                    bytecode: await compileHog('return person.properties.foo ?? event.properties.foo'),
+                    bytecode: await compileScript('return person.properties.foo ?? event.properties.foo'),
                 },
             },
             ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
@@ -402,7 +402,7 @@ describe('CDP script invocation rerun e2e', () => {
         // coalesce falls through to event.properties.foo — proving the
         // fallback wiring is real (and letting the rerun's stubbed-empty
         // person hit the same branch).
-        const cookielessGlobals = createHogExecutionGlobals({
+        const cookielessGlobals = createScriptExecutionGlobals({
             project: { id: team.id } as any,
             event: {
                 uuid: 'aaaa1111-bbbb-2222-cccc-333333333333',
@@ -427,14 +427,14 @@ describe('CDP script invocation rerun e2e', () => {
 
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
-                `SELECT invocation_id, status FROM hog_invocation_results
+                `SELECT invocation_id, status FROM invocations
                  WHERE team_id = ${team.id} AND function_id = '${personPropsFn.id}' AND status = 'succeeded'`
             )
             expect(rows.length).toBeGreaterThanOrEqual(1)
         }, 30_000)
 
         const originalRows = await datastore.query<PersistedRow>(
-            `SELECT invocation_id, status FROM hog_invocation_results
+            `SELECT invocation_id, status FROM invocations
              WHERE team_id = ${team.id} AND function_id = '${personPropsFn.id}' AND status = 'succeeded'`
         )
         const originalInvocationId = originalRows[0].invocation_id
@@ -454,7 +454,7 @@ describe('CDP script invocation rerun e2e', () => {
         rerunWorker = new CdpRerunWorkerConsumer(
             { ...hub, CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: 'postgres' },
             cdpDeps,
-            { insights_function: kafkaQueue, hog_flow: postgresV2Queue }
+            { insights_function: kafkaQueue, flow: postgresV2Queue }
         )
         await rerunWorker.start()
 
@@ -515,7 +515,7 @@ describe('CDP script invocation rerun e2e', () => {
             ],
         })
 
-        const flow = new FixtureInsightsFlowBuilder()
+        const flow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withWorkflow({
@@ -539,12 +539,12 @@ describe('CDP script invocation rerun e2e', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, flow)
+        await insertFlow(hub.postgres, flow)
 
         // The script-flow worker polls the same postgres-v2 backend the events consumer
-        // routes flows to (hogflowQueue in beforeEach).
-        hogflowWorker = new CdpCyclotronWorkerInsightsFlow(hub, cdpDeps, postgresV2Queue)
-        await hogflowWorker.start()
+        // routes flows to (flowQueue in beforeEach).
+        flowWorker = new CdpCyclotronWorkerFlow(hub, cdpDeps, postgresV2Queue)
+        await flowWorker.start()
 
         // ── 1. Original flow runs to completion — fetch fires exactly once ──────────
         const { backgroundTask } = await eventsConsumer.processBatch([globals])
@@ -554,11 +554,11 @@ describe('CDP script invocation rerun e2e', () => {
             expect(mockFetch.mock.calls.filter(([url]) => String(url) === FLOW_WEBHOOK_URL).length).toBe(1)
         }, 15_000)
 
-        // Terminal 'succeeded' hog_flow row lands in Datastore via Kafka -> MV.
+        // Terminal 'succeeded' flow row lands in Datastore via Kafka -> MV.
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, function_kind
-                 FROM hog_invocation_results
+                 FROM invocations
                  WHERE team_id = ${team.id} AND function_id = '${flow.id}' AND status = 'succeeded'`
             )
             expect(rows.length).toBeGreaterThanOrEqual(1)
@@ -566,17 +566,17 @@ describe('CDP script invocation rerun e2e', () => {
 
         const originalRows = await datastore.query<PersistedRow>(
             `SELECT invocation_id, status, is_retry, function_kind
-             FROM hog_invocation_results
+             FROM invocations
              WHERE team_id = ${team.id} AND function_id = '${flow.id}' AND status = 'succeeded'`
         )
-        expect(originalRows[0].function_kind).toBe('hog_flow')
+        expect(originalRows[0].function_kind).toBe('flow')
         expect(originalRows[0].is_retry).toBe(0)
         const originalInvocationId = originalRows[0].invocation_id
 
         // ── 2. Mimic Django POST /rerun for the flow, scoped to this invocation ─────
         const windowStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
         const windowEnd = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-        const rerunJobId = await rerunManager.enqueue(team.id, 'hog_flow', flow.id, {
+        const rerunJobId = await rerunManager.enqueue(team.id, 'flow', flow.id, {
             filter: {
                 window_start: windowStart,
                 window_end: windowEnd,
@@ -585,11 +585,11 @@ describe('CDP script invocation rerun e2e', () => {
             },
         })
 
-        // ── 3. Rerun worker drains the wrapper job (hog_flow -> postgres-v2) ────────
+        // ── 3. Rerun worker drains the wrapper job (flow -> postgres-v2) ────────
         rerunWorker = new CdpRerunWorkerConsumer(
             { ...hub, CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: 'postgres' },
             cdpDeps,
-            { insights_function: kafkaQueue, hog_flow: postgresV2Queue }
+            { insights_function: kafkaQueue, flow: postgresV2Queue }
         )
         await rerunWorker.start()
 
@@ -604,7 +604,7 @@ describe('CDP script invocation rerun e2e', () => {
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, function_kind
-                 FROM hog_invocation_results
+                 FROM invocations
                  WHERE team_id = ${team.id}
                    AND function_id = '${flow.id}'
                    AND invocation_id = '${originalInvocationId}'

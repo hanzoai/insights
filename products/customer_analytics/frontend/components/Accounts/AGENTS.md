@@ -81,7 +81,7 @@ Operator sets honor the property's display type (numeric/boolean/date/string) be
 That module compiles each `AccountCustomPropertyFilter` into a InsightsQL predicate over `accounts.custom_properties.values."<definition-id>"` (numeric ops via `toFloatOrNull`, date ops via `parseDateTimeBestEffort`, select equality against the stored option **label**, boolean equality against both string renderings of the stored bool — `'true'/'false'` and `'1'/'0'`, the same hedge the cell renderer uses), which `applyAccountFilters` ANDs into `filterExpression` — so the list rows and the overview tiles stay consistent.
 Negative operators (is not / doesn't contain / doesn't match regex) are wrapped in `ifNull(..., true)` so accounts where the property is unset (the join yields NULL) stay in the result, matching canonical property-filter semantics; multi-value contains/regex filters match "any of the values" (negated: "none of them").
 Filters for deleted definitions or with incomplete values compile to nothing rather than breaking the query, and only validated UUID keys are ever interpolated (quoted via the shared `escapePropertyAsInsightsQLIdentifier`).
-Value suggestions load from`GET /api/projects/:team_id/custom_property_definitions/values/?key=<definition-id>&value=<search>`(the group's`valuesEndpoint`): select → option labels, boolean → true/false, text/numeric → distinct active values; date pickers need no suggestions.
+Value suggestions load from`GET /v1/projects/:team_id/custom_property_definitions/values/?key=<definition-id>&value=<search>`(the group's`valuesEndpoint`): select → option labels, boolean → true/false, text/numeric → distinct active values; date pickers need no suggestions.
 
 **Overview tile math** (`accountsOverviewTilesLogic` / `AccountsOverviewTilesEditor`). A tile's metric is a discriminated union: `count` (`count()`), the column aggregations `sum`/`avg`/`min`/`max`/`median` (the metric-type name _is_ the InsightsQL aggregate fn, so `tileMetricExpression`'s one `default` branch emits `${type}(col)`), and `count_threshold` (`countIf(col op val)`, the only row-level-clickable tile). The column aggregations carry an optional `scale` multiplier (`applyScale`) rendered as `agg(col) * n`, e.g. `sum(mrr) * 12` to annualize; a `scale` of 1/undefined/non-finite is a no-op. `scaleSuffix` mirrors that guard for the `× n` label/caption suffix. Add a new aggregation by extending `COLUMN_AGGREGATE_TYPES` (must be a valid InsightsQL aggregate fn) plus the editor's `METRIC_TYPE_LABELS` / `COLUMN_AGGREGATE_LABEL_PREFIX`. No backend change: `accounts_query_runner` `parse_expr`s each metric string with no fn whitelist.
 
@@ -160,7 +160,7 @@ Two things conspire to bounce a deep link back to the unfiltered list, so keep b
 **Build the URL via the canonical helpers, never hand-build the path:**
 
 - Frontend: `urls.customerAnalyticsAccount(accountId, tab?)` (in the product manifest). Used by the notebook→Accounts breadcrumb.
-- Backend: `build_account_deeplink(account_id, tab=None)` in `backend/account_urls.py` — the single source of truth for the Python side, returning `/customer_analytics/accounts/<id>[/<tab>]`. Used by the usage-spike notification (`backend/services/usage_spike_notifications.py`, `tab='usage'`) and by the agent's entity-search results (`ee/hogai/context/entity_search/context.py`), so when Max/MCP references an account it found, the link opens that account rather than the list.
+- Backend: `build_account_deeplink(account_id, tab=None)` in `backend/account_urls.py` — the single source of truth for the Python side, returning `/customer_analytics/accounts/<id>[/<tab>]`. Used by the usage-spike notification (`backend/services/usage_spike_notifications.py`, `tab='usage'`) and by the agent's entity-search results (`ee/scriptai/context/entity_search/context.py`), so when Max/MCP references an account it found, the link opens that account rather than the list.
 
 Anywhere we know the account, prefer a deep-link over the bare list. The notification path is routed through `buildNotificationSourcePath` in `sidePanelNotificationsLogic.tsx`, which has **no** `customer_analytics` entry in `SOURCE_TYPE_TO_PATH` precisely so the precise `source_url` deep-link wins instead of a static accounts-list path. The notification `source_url` is project-relative — the notifications side panel adds the project prefix on navigation.
 
@@ -214,7 +214,7 @@ The tool is registered for the page regardless of agent mode. The Customer analy
 - `products/customer_analytics/backend/models` — the `Account` model (`external_id` = group key).
 - `products/customer_analytics/backend/` — `accounts_query_runner` (builds the list rows + cell tuples).
 - `products/customer_analytics/backend/max_tools/` — `OpenAccountTool` and other account Max tools.
-- `ee/hogai/core/agent_modes/presets/customer_analytics.py` — the Customer analytics agent mode (gated by the `customer-analytics-csp` flag).
+- `ee/scriptai/core/agent_modes/presets/customer_analytics.py` — the Customer analytics agent mode (gated by the `customer-analytics-csp` flag).
 
 ## Conventions
 

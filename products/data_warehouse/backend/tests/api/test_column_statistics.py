@@ -18,7 +18,7 @@ class TestWarehouseColumnStatistics(APIBaseTest):
         )
 
     def _url(self, suffix: str = "") -> str:
-        return f"/api/projects/{self.team.pk}/warehouse_column_statistics/{suffix}"
+        return f"/v1/projects/{self.team.pk}/warehouse_column_statistics/{suffix}"
 
     def _make_stat(self, table: DataWarehouseTable, column_name: str, **kwargs) -> WarehouseColumnStatistics:
         return WarehouseColumnStatistics.objects.for_team(self.team.pk).create(

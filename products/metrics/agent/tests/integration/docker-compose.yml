@@ -17,7 +17,7 @@ services:
     agent:
         image: insights-metrics-agent:test
         environment:
-            INSIGHTS_API_KEY: phc_test
+            INSIGHTS_API_KEY: pk-test
             INSIGHTS_HOST: http://sink:4318
             # The sink's stock otlp receiver only serves /v1/metrics; prod
             # capture-logs is behind /i/v1/metrics (the template default).

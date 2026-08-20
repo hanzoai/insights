@@ -35,7 +35,7 @@ export function buildMarketplaceCommand(token: string | null): string {
     const origin = window.location.origin
     const scheme = origin.startsWith('https') ? 'https' : 'http'
     const host = origin.replace(/^https?:\/\//, '')
-    return `/plugin marketplace add ${scheme}://x-access-token:${token ?? 'YOUR_PHS_TOKEN'}@${host}/api/projects/${teamId}/llm_skills/marketplace.git`
+    return `/plugin marketplace add ${scheme}://x-access-token:${token ?? 'YOUR_PHS_TOKEN'}@${host}/v1/projects/${teamId}/llm_skills/marketplace.git`
 }
 
 function errorDetail(error: unknown): string | undefined {
@@ -103,10 +103,10 @@ export const SKILL_CATEGORY_TABS: SkillCategoryTab[] = [
     },
     {
         key: 'review-script',
-        category: 'review_hog',
+        category: 'review',
         label: 'Code review',
         description:
-            "ReviewHog's code-review skills: the specialist perspectives applied in parallel when reviewing a pull request (logic & correctness, contracts & security, performance & reliability) and the validation criteria that decide which findings are worth surfacing. Edit a skill to retune it for your team.",
+            "Review's code-review skills: the specialist perspectives applied in parallel when reviewing a pull request (logic & correctness, contracts & security, performance & reliability) and the validation criteria that decide which findings are worth surfacing. Edit a skill to retune it for your team.",
     },
 ]
 
@@ -438,7 +438,7 @@ export const llmSkillsLogic = kea<llmSkillsLogicType>([
                 setConnectModalOpen: (_, { open }) => open,
             },
         ],
-        // The full server response (status, command, command_template, token, mask). The live phs_
+        // The full server response (status, command, command_template, token, mask). The live sk-
         // token only ever lives here and only on create/rotate; clear it when the modal closes.
         marketplaceState: [
             null as LLMSkillMarketplaceCommandApi | null,

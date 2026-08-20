@@ -151,7 +151,7 @@ class TestSessionRecordingsCommentFiltering(APIBaseTest, DatastoreTestMixin, Que
 
     def _list_recordings_by_comment(self, search_text: str | list[str], operator: str) -> dict:
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings",
+            f"/v1/projects/{self.team.id}/session_recordings",
             {
                 "kind": "RecordingsQuery",
                 "order": "start_time",

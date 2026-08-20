@@ -1,6 +1,6 @@
 import { InsightsFunctionTemplate } from '~/cdp/types'
 
-import { hogApiErrorMessageFn } from './api-error'
+import { scriptApiErrorMessageFn } from './api-error'
 
 export const template: InsightsFunctionTemplate = {
     free: true,
@@ -13,7 +13,7 @@ export const template: InsightsFunctionTemplate = {
     category: ['Custom'],
     code_language: 'script',
     code: `
-${hogApiErrorMessageFn}
+${scriptApiErrorMessageFn}
 
 if (empty(inputs.external_id)) {
   throw Error('Account external ID is required')

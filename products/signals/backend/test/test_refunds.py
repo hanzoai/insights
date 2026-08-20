@@ -1,6 +1,5 @@
 import json
 from datetime import UTC, datetime, timedelta
-from decimal import Decimal
 
 from freezegun import freeze_time
 from insights.test.base import APIBaseTest, BaseTest
@@ -21,12 +20,7 @@ from insights.models import Organization, Team
 from products.signals.backend.billing import SIGNALS_CREDITS_PER_REPORT_WITH_PR
 from products.signals.backend.models import SignalReport, SignalReportArtefact, SignalReportRefund
 from products.signals.backend.quota import SELF_DRIVING_QUOTA_ENFORCEMENT_FLAG
-from products.signals.backend.tasks import (
-    _OUT_OF_PERIOD_SYNC_ERROR,
-    _REFUND_SYNC_MAX_RETRIES,
-    sync_pending_signals_refund_credits,
-    sync_signals_refund_credit,
-)
+from products.signals.backend.tasks import _OUT_OF_PERIOD_SYNC_ERROR, sync_pending_signals_refund_credits
 from products.signals.backend.test.test_billing import _make_pr_run, _make_report
 
 _PERIOD = ["2026-06-01T00:00:00Z", "2026-07-01T00:00:00Z"]
@@ -38,11 +32,6 @@ def _make_refund(
     *,
     billing_path: str = SignalReportRefund.BillingPath.CREDITED,
     pr_run_created_at: datetime | None = None,
-    # None models a row created before the frozen period bounds existed.
-    period: tuple[datetime, datetime] | None = (
-        datetime(2026, 6, 1, tzinfo=UTC),
-        datetime(2026, 7, 1, tzinfo=UTC),
-    ),
 ) -> SignalReportRefund:
     return SignalReportRefund.objects.create(
         team=report.team,
@@ -52,8 +41,8 @@ def _make_refund(
         credits=SIGNALS_CREDITS_PER_REPORT_WITH_PR,
         pr_url="https://github.com/x/y/pull/1",
         pr_run_created_at=pr_run_created_at or datetime(2026, 6, 10, tzinfo=UTC),
-        period_start=period[0] if period else None,
-        period_end=period[1] if period else None,
+        period_start=datetime(2026, 6, 1, tzinfo=UTC),
+        period_end=datetime(2026, 7, 1, tzinfo=UTC),
     )
 
 
@@ -65,10 +54,10 @@ class TestSignalReportRefundAPI(APIBaseTest):
         self.organization.save()
 
     def _refund_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/refund/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/refund/"
 
     def _state_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/state/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/state/"
 
     def _report_with_pr(
         self, *, pr_created_at: datetime, report_status: str = SignalReport.Status.READY
@@ -181,7 +170,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
                 billing_exempt_reason=SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
 
         assert response.status_code == 200
         assert response.json()["refund_ineligibility_reason"] == expected
@@ -432,7 +421,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
         archived.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/signals/reports/bulk-state/",
+            f"/v1/projects/{self.team.id}/signals/reports/bulk-state/",
             {"ids": [str(refunded.id), str(archived.id)], "state": "potential"},
             format="json",
         )
@@ -448,7 +437,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
     def test_report_response_includes_refund_and_exemption_fields(self, _flag):
         report = self._report_with_pr(pr_created_at=datetime(2026, 6, 10, tzinfo=UTC))
         self._refund(report)
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
         assert response.status_code == status.HTTP_200_OK
         body = response.json()
         assert body["refund"]["billing_path"] == "credited"
@@ -477,7 +466,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
         _make_pr_run(other_team, foreign, created_at=datetime(2026, 6, 14, tzinfo=UTC))
         _make_refund(foreign, pr_run_created_at=datetime(2026, 6, 14, tzinfo=UTC))
 
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/refund-summary/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/refund-summary/")
         assert response.status_code == status.HTTP_200_OK
         # period_billable_credits: only report_a has a billable PR run in this org (credited
         # refunds stay counted — usage is truthful); the foreign org's billable PR must not leak in.
@@ -493,7 +482,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
         # A PR created today hasn't shipped to billing yet but must count in the live number,
         # and a same-day (excluded-path) refund must visibly un-count it.
         report = self._report_with_pr(pr_created_at=datetime(2026, 6, 15, 8, 0, tzinfo=UTC))
-        url = f"/api/projects/{self.team.id}/signals/reports/refund-summary/"
+        url = f"/v1/projects/{self.team.id}/signals/reports/refund-summary/"
 
         assert self.client.get(url).json()["period_billable_credits"] == 1500
         assert self._refund(report).json()["billing_path"] == "excluded"
@@ -505,7 +494,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
         # same gate the pipeline enforces, not the widget's own usage math.
         from products.signals.backend.quota import SelfDrivingQuotaGate
 
-        url = f"/api/projects/{self.team.id}/signals/reports/refund-summary/"
+        url = f"/v1/projects/{self.team.id}/signals/reports/refund-summary/"
         with patch(
             "products.signals.backend.views.self_driving_quota_gate",
             return_value=SelfDrivingQuotaGate(limited=True, enforced=True),
@@ -519,13 +508,13 @@ class TestSignalReportRefundFlagGate(APIBaseTest):
         # The two flags roll out independently; an enforcement-only org still needs quota_limited
         # from this endpoint, or the widget's paused banner can never render.
         flag_mock.side_effect = lambda key, *args, **kwargs: key == SELF_DRIVING_QUOTA_ENFORCEMENT_FLAG
-        summary = self.client.get(f"/api/projects/{self.team.id}/signals/reports/refund-summary/")
+        summary = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/refund-summary/")
         assert summary.status_code == status.HTTP_200_OK
         assert summary.json()["quota_limited"] is False
         # The refund action itself stays refunds-gated.
         report = _make_report(self.team)
         refund = self.client.post(
-            f"/api/projects/{self.team.id}/signals/reports/{report.id}/refund/", {"reason": "other"}, format="json"
+            f"/v1/projects/{self.team.id}/signals/reports/{report.id}/refund/", {"reason": "other"}, format="json"
         )
         assert refund.status_code == status.HTTP_404_NOT_FOUND
 
@@ -534,176 +523,19 @@ class TestSignalReportRefundFlagGate(APIBaseTest):
     def test_endpoints_unavailable_with_flag_off(self, action_path, _flag):
         report = _make_report(self.team)
         if action_path == "refund":
-            url = f"/api/projects/{self.team.id}/signals/reports/{report.id}/refund/"
+            url = f"/v1/projects/{self.team.id}/signals/reports/{report.id}/refund/"
             response = self.client.post(url, {"reason": "other"}, format="json")
         else:
-            url = f"/api/projects/{self.team.id}/signals/reports/refund-summary/"
+            url = f"/v1/projects/{self.team.id}/signals/reports/refund-summary/"
             response = self.client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert not SignalReportRefund.objects.filter(report=report).exists()
 
 
-class TestSyncSignalsRefundCredit(BaseTest):
+class TestSweepPendingSignalsRefundCredits(BaseTest):
     def _credited_refund(self) -> SignalReportRefund:
         report = _make_report(self.team)
         return _make_refund(report)
-
-    def test_success_records_credit_and_contract_payload(self):
-        # The org's billing period has rolled over since the refund was accepted: the payload
-        # must report the bounds frozen on the refund row, not the current period — recomputing
-        # at sync time is the drift that loses post-rollover credits.
-        self.organization.usage = {"period": ["2026-07-01T00:00:00Z", "2026-08-01T00:00:00Z"]}
-        self.organization.save()
-        refund = self._credited_refund()
-        with patch(
-            "ee.billing.billing_manager.BillingManager.dispute_signals_pr",
-            return_value={"credit_amount_usd": "15.00", "credit_id": "c1", "already_processed": False},
-        ) as mock_dispute:
-            sync_signals_refund_credit(str(refund.id))
-
-        refund.refresh_from_db()
-        assert refund.credit_amount_usd == Decimal("15.00")
-        assert refund.billing_synced_at is not None
-        assert refund.billing_sync_error is None
-
-        organization, payload = mock_dispute.call_args.args
-        assert organization.id == self.organization.id
-        # The frozen cross-repo contract shape — billing keys idempotency on refund_id and
-        # credits against the accepted period carried in metadata.period_start/period_end.
-        assert payload == {
-            "refund_id": str(refund.id),
-            "credits": 1500,
-            "metadata": {
-                "team_id": self.team.id,
-                "report_id": str(refund.report_id),
-                "pr_url": "https://github.com/x/y/pull/1",
-                "pr_run_created_at": "2026-06-10T00:00:00+00:00",
-                "period_start": "2026-06-01T00:00:00+00:00",
-                "period_end": "2026-07-01T00:00:00+00:00",
-            },
-        }
-
-    def test_payload_falls_back_to_current_period_for_rows_without_frozen_bounds(self):
-        # Rows created before the frozen bounds existed must still sync (with sync-time bounds)
-        # rather than crash on the null fields.
-        self.organization.usage = {"period": _PERIOD}
-        self.organization.save()
-        refund = _make_refund(_make_report(self.team), period=None)
-        with patch(
-            "ee.billing.billing_manager.BillingManager.dispute_signals_pr",
-            return_value={"credit_amount_usd": "15.00", "credit_id": "c1", "already_processed": False},
-        ) as mock_dispute:
-            sync_signals_refund_credit(str(refund.id))
-        metadata = mock_dispute.call_args.args[1]["metadata"]
-        assert metadata["period_start"] == "2026-06-01T00:00:00+00:00"
-        assert metadata["period_end"] == "2026-07-01T00:00:00+00:00"
-
-    def test_zero_credit_outcome_still_marks_synced(self):
-        # "0.00" is a legitimate business outcome (free tier / free plan) — the row must complete.
-        refund = self._credited_refund()
-        with patch(
-            "ee.billing.billing_manager.BillingManager.dispute_signals_pr",
-            return_value={
-                "credit_amount_usd": "0.00",
-                "credit_id": None,
-                "already_processed": False,
-                "zero_reason": "no_marginal_cost",
-            },
-        ):
-            sync_signals_refund_credit(str(refund.id))
-        refund.refresh_from_db()
-        assert refund.credit_amount_usd == Decimal("0.00")
-        assert refund.billing_synced_at is not None
-
-    def test_out_of_period_zero_records_error_instead_of_synced(self):
-        # A $0 with zero_reason=out_of_period means billing could no longer credit the frozen
-        # refund period — the row must surface as a sync error for manual recovery, not close
-        # as a synced $0.
-        refund = self._credited_refund()
-        with patch(
-            "ee.billing.billing_manager.BillingManager.dispute_signals_pr",
-            return_value={
-                "credit_amount_usd": "0.00",
-                "credit_id": None,
-                "already_processed": False,
-                "zero_reason": "out_of_period",
-            },
-        ):
-            with patch("products.signals.backend.tasks.ph_scoped_capture") as mock_capture_cm:
-                mock_capture = mock_capture_cm.return_value.__enter__.return_value
-                sync_signals_refund_credit(str(refund.id))
-        refund.refresh_from_db()
-        assert refund.billing_synced_at is None
-        assert refund.credit_amount_usd is None
-        assert refund.billing_sync_error == _OUT_OF_PERIOD_SYNC_ERROR
-        assert mock_capture.call_args.kwargs["event"] == "signals_pr_refund_credit_failed"
-
-    def test_already_synced_refund_is_not_resent(self):
-        refund = self._credited_refund()
-        refund.billing_synced_at = timezone.now()
-        refund.save(update_fields=["billing_synced_at"])
-        with patch("ee.billing.billing_manager.BillingManager.dispute_signals_pr") as mock_dispute:
-            sync_signals_refund_credit(str(refund.id))
-        mock_dispute.assert_not_called()
-
-    def test_delivery_losing_the_sync_race_does_not_rerecord_or_emit(self):
-        # The on-commit enqueue and the hourly sweeper can both deliver the same refund; if a
-        # concurrent delivery commits the sync while this one's billing call is in flight, this
-        # one must not overwrite the row or emit a second issued event.
-        refund = self._credited_refund()
-        concurrent_synced_at = timezone.now()
-
-        def _concurrent_delivery_wins(*args, **kwargs):
-            SignalReportRefund.objects.filter(id=refund.id).update(
-                credit_amount_usd=Decimal("15.00"), billing_synced_at=concurrent_synced_at
-            )
-            return {"credit_amount_usd": "15.00", "credit_id": "c1", "already_processed": True}
-
-        with patch(
-            "ee.billing.billing_manager.BillingManager.dispute_signals_pr", side_effect=_concurrent_delivery_wins
-        ):
-            with patch("products.signals.backend.tasks.ph_scoped_capture") as mock_capture_cm:
-                sync_signals_refund_credit(str(refund.id))
-
-        refund.refresh_from_db()
-        assert refund.billing_synced_at == concurrent_synced_at
-        mock_capture_cm.assert_not_called()
-
-    def test_excluded_refund_never_calls_billing(self):
-        report = _make_report(self.team)
-        refund = _make_refund(report, billing_path=SignalReportRefund.BillingPath.EXCLUDED)
-        with patch("ee.billing.billing_manager.BillingManager.dispute_signals_pr") as mock_dispute:
-            sync_signals_refund_credit(str(refund.id))
-        mock_dispute.assert_not_called()
-
-    def test_failure_before_retry_exhaustion_does_not_record_terminal_error(self):
-        refund = self._credited_refund()
-        with patch(
-            "ee.billing.billing_manager.BillingManager.dispute_signals_pr", side_effect=ValueError("billing down")
-        ):
-            with self.assertRaises(Exception):
-                sync_signals_refund_credit(str(refund.id))
-        refund.refresh_from_db()
-        assert refund.billing_synced_at is None
-        assert refund.billing_sync_error is None
-
-    def test_exhausted_retries_record_terminal_error_and_event(self):
-        refund = self._credited_refund()
-        task = sync_signals_refund_credit
-        with patch(
-            "ee.billing.billing_manager.BillingManager.dispute_signals_pr", side_effect=ValueError("billing down")
-        ):
-            with patch("products.signals.backend.tasks.ph_scoped_capture") as mock_capture_cm:
-                mock_capture = mock_capture_cm.return_value.__enter__.return_value
-                task.push_request(retries=_REFUND_SYNC_MAX_RETRIES)
-                try:
-                    task.run(str(refund.id))
-                finally:
-                    task.pop_request()
-        refund.refresh_from_db()
-        assert refund.billing_synced_at is None
-        assert "billing down" in (refund.billing_sync_error or "")
-        assert mock_capture.call_args.kwargs["event"] == "signals_pr_refund_credit_failed"
 
     def test_sweeper_reenqueues_only_stale_unsynced_credited_rows(self):
         pending = self._credited_refund()

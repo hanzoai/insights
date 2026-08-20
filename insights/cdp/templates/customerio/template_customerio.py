@@ -1,7 +1,10 @@
 import dataclasses
 from copy import deepcopy
 
-from insights.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, InsightsFunctionTemplateMigrator
+from insights.cdp.templates.insights_function_template import (
+    InsightsFunctionTemplateDC,
+    InsightsFunctionTemplateMigrator,
+)
 
 # Based off of https://customer.io/docs/api/track/#operation/entity
 
@@ -62,7 +65,7 @@ for (let key, value in attributes) {
     }
 }
 
-let res := fetch(f'https://{inputs.host}/api/v2/entity', {
+let res := fetch(f'https://{inputs.host}/v1/v2/entity', {
     'method': 'POST',
     'headers': {
         'User-Agent': 'Insights Customer.io App',

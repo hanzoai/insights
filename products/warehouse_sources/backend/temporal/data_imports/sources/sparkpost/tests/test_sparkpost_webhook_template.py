@@ -16,7 +16,7 @@ SCHEMA_MAPPING = {"message_event": "schema_events"}
 class TestSparkPostWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         data: dict = {
             "request": {
                 "method": "POST",

@@ -61,14 +61,14 @@ describe('evaluationMetricsLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:teamId/llm_analytics/provider_keys/': { results: [] },
-                '/api/environments/:teamId/llm_analytics/evaluation_config/': {
+                '/v1/environments/:teamId/llm_analytics/provider_keys/': { results: [] },
+                '/v1/environments/:teamId/llm_analytics/evaluation_config/': {
                     active_provider_key: null,
                     created_at: '2024-01-01T00:00:00Z',
                     updated_at: '2024-01-01T00:00:00Z',
                 },
-                '/api/projects/:teamId/evaluations/': { results: [] },
-                '/api/projects/:teamId/evaluation_directories/': [],
+                '/v1/projects/:teamId/evaluations/': { results: [] },
+                '/v1/projects/:teamId/evaluation_directories/': [],
             },
         })
         initKeaTests()

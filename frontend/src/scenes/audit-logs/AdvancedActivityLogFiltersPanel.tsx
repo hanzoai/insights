@@ -7,7 +7,7 @@ import { ActivityLogSubscribeMenu } from 'lib/components/ActivityLog/ActivityLog
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
-import { advancedActivityFiltersToHogProperties } from './advancedActivityFilterTranslation'
+import { advancedActivityFiltersToScriptProperties } from './advancedActivityFilterTranslation'
 import { advancedActivityLogsLogic } from './advancedActivityLogsLogic'
 import { BasicFiltersTab } from './BasicFiltersTab'
 
@@ -16,7 +16,7 @@ export function AdvancedActivityLogFiltersPanel(): JSX.Element {
     const { clearAllFilters, exportLogs } = useActions(advancedActivityLogsLogic)
     const { featureFlags } = useValues(featureFlagLogic)
 
-    const { properties: subscribeProperties } = advancedActivityFiltersToHogProperties(filters)
+    const { properties: subscribeProperties } = advancedActivityFiltersToScriptProperties(filters)
 
     return (
         <div className="border rounded-md p-4 bg-bg-light">

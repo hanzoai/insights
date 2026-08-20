@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from insights.schema import SourceFieldInputConfig, SourceFieldInputConfigType
 
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_script
 
 from products.warehouse_sources.backend.temporal.data_imports.sources.common.base import (
     ExternalWebhookInfo,
@@ -156,12 +156,12 @@ class TestMailerLiteWebhooks:
         assert "request.headers['signature']" in template.code
         assert {i["key"] for i in template.inputs_schema} >= {"signing_secret", "schema_mapping", "source_id"}
 
-    def test_webhook_template_hog_compiles(self) -> None:
+    def test_webhook_template_script_compiles(self) -> None:
         # The template is only compiled when a delivery arrives, so a syntax error here ships a
         # webhook endpoint that fails on every push with nothing to catch it earlier.
         template = MailerLiteSource().webhook_template
         assert template is not None
-        assert compile_hog(template.code, template.type)[0] == "_H"
+        assert compile_script(template.code, template.type)[0] == "_H"
 
     @pytest.mark.parametrize(
         ("eligible", "expected"),

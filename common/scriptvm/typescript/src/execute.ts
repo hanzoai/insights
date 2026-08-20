@@ -5,7 +5,7 @@ import {
     DEFAULT_TIMEOUT_MS,
     MAX_FUNCTION_ARGS_LENGTH,
 } from './constants'
-import { isHogCallable, isHogClosure, isHogError, isHogUpValue, newHogCallable, newHogClosure } from './objects'
+import { isScriptCallable, isScriptClosure, isScriptError, isScriptUpValue, newScriptCallable, newScriptClosure } from './objects'
 import { Operation, operations } from './operation'
 import { BYTECODE_STL } from './stl/bytecode'
 import { ASYNC_STL, STL } from './stl/stl'
@@ -15,15 +15,15 @@ import {
     CallFrame,
     ExecOptions,
     ExecResult,
-    HogUpValue,
+    ScriptUpValue,
     Telemetry,
     ThrowFrame,
     VMState,
 } from './types'
 import {
     calculateCost,
-    convertHogToJS,
-    convertJSToHog,
+    convertScriptToJS,
+    convertJSToScript,
     getNestedValue,
     ScriptVMException,
     like,
@@ -105,17 +105,17 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
 
     const asyncSteps = vmState ? vmState.asyncSteps : 0
     const syncDuration = vmState ? vmState.syncDuration : 0
-    const sortedUpValues: HogUpValue[] = vmState
-        ? vmState.upvalues.map((v) => ({ ...v, value: convertJSToHog(v.value) }))
+    const sortedUpValues: ScriptUpValue[] = vmState
+        ? vmState.upvalues.map((v) => ({ ...v, value: convertJSToScript(v.value) }))
         : []
-    const upvaluesById: Record<number, HogUpValue> = {}
+    const upvaluesById: Record<number, ScriptUpValue> = {}
     for (const upvalue of sortedUpValues) {
         upvaluesById[upvalue.id] = upvalue
     }
-    const stack: any[] = vmState ? vmState.stack.map((v) => convertJSToHog(v)) : []
+    const stack: any[] = vmState ? vmState.stack.map((v) => convertJSToScript(v)) : []
     const memStack: number[] = stack.map((s) => calculateCost(s))
     const callStack: CallFrame[] = vmState
-        ? vmState.callStack.map((v) => ({ ...v, closure: convertJSToHog(v.closure) }))
+        ? vmState.callStack.map((v) => ({ ...v, closure: convertJSToScript(v.closure) }))
         : []
     const throwStack: ThrowFrame[] = vmState ? vmState.throwStack : []
     const declaredFunctions: Record<string, [number, number]> = vmState ? vmState.declaredFunctions : {}
@@ -136,8 +136,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
             chunk: 'root',
             stackStart: 0,
             argCount: 0,
-            closure: newHogClosure(
-                newHogCallable('local', {
+            closure: newScriptClosure(
+                newScriptCallable('local', {
                     name: '',
                     argCount: 0,
                     upvalueCount: 0,
@@ -243,11 +243,11 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
     function getVMState(): VMState {
         return {
             bytecodes: bytecodes,
-            stack: stack.map((v) => convertHogToJS(v)),
-            upvalues: sortedUpValues.map((v) => ({ ...v, value: convertHogToJS(v.value) })),
+            stack: stack.map((v) => convertScriptToJS(v)),
+            upvalues: sortedUpValues.map((v) => ({ ...v, value: convertScriptToJS(v.value) })),
             callStack: callStack.map((v) => ({
                 ...v,
-                closure: convertHogToJS(v.closure),
+                closure: convertScriptToJS(v.closure),
             })),
             throwStack,
             declaredFunctions,
@@ -259,7 +259,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
         }
     }
 
-    function captureUpValue(index: number): HogUpValue {
+    function captureUpValue(index: number): ScriptUpValue {
         for (let i = sortedUpValues.length - 1; i >= 0; i--) {
             if (sortedUpValues[i].location < index) {
                 break
@@ -269,12 +269,12 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
             }
         }
         const createdUpValue = {
-            __hogUpValue__: true,
+            __upValue__: true,
             id: sortedUpValues.length + 1, // used to deduplicate post deserialization
             location: index,
             closed: false,
             value: null,
-        } satisfies HogUpValue
+        } satisfies ScriptUpValue
         upvaluesById[createdUpValue.id] = createdUpValue
         sortedUpValues.push(createdUpValue)
         sortedUpValues.sort((a, b) => a.location - b.location)
@@ -475,7 +475,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         chain.push(popStack())
                     }
                     if (chunkGlobals && Object.hasOwn(chunkGlobals, chain[0])) {
-                        pushStack(convertJSToHog(getNestedValue(chunkGlobals, chain, true)))
+                        pushStack(convertJSToScript(getNestedValue(chunkGlobals, chain, true)))
                     } else if (
                         options?.asyncFunctions &&
                         chain.length == 1 &&
@@ -483,8 +483,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         options.asyncFunctions[chain[0]]
                     ) {
                         pushStack(
-                            newHogClosure(
-                                newHogCallable('async', {
+                            newScriptClosure(
+                                newScriptCallable('async', {
                                     name: chain[0],
                                     argCount: 0, // TODO
                                     upvalueCount: 0,
@@ -495,8 +495,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         )
                     } else if (chain.length == 1 && Object.hasOwn(ASYNC_STL, chain[0])) {
                         pushStack(
-                            newHogClosure(
-                                newHogCallable('async', {
+                            newScriptClosure(
+                                newScriptCallable('async', {
                                     name: chain[0],
                                     argCount: ASYNC_STL[chain[0]].maxArgs ?? 0,
                                     upvalueCount: 0,
@@ -507,8 +507,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         )
                     } else if (chain.length == 1 && Object.hasOwn(STL, chain[0])) {
                         pushStack(
-                            newHogClosure(
-                                newHogCallable('stl', {
+                            newScriptClosure(
+                                newScriptCallable('stl', {
                                     name: chain[0],
                                     argCount: STL[chain[0]].maxArgs ?? 0,
                                     upvalueCount: 0,
@@ -519,8 +519,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         )
                     } else if (chain.length == 1 && Object.hasOwn(BYTECODE_STL, chain[0])) {
                         pushStack(
-                            newHogClosure(
-                                newHogCallable('stl', {
+                            newScriptClosure(
+                                newScriptCallable('stl', {
                                     name: chain[0],
                                     argCount: BYTECODE_STL[chain[0]][0].length,
                                     upvalueCount: 0,
@@ -599,7 +599,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 case Operation.TUPLE:
                     temp = next()
                     tempArray = spliceStack2(stack.length - temp, temp)
-                    ;(tempArray as any).__isHogTuple = true
+                    ;(tempArray as any).__isTuple = true
                     pushStack(tempArray)
                     break
                 case Operation.JUMP:
@@ -632,7 +632,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     const argCount = next()
                     const upvalueCount = next()
                     const bodyLength = next()
-                    const callable = newHogCallable('local', {
+                    const callable = newScriptCallable('local', {
                         name,
                         argCount,
                         upvalueCount,
@@ -645,7 +645,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 }
                 case Operation.CLOSURE: {
                     const callable = popStack()
-                    if (!isHogCallable(callable)) {
+                    if (!isScriptCallable(callable)) {
                         throw new ScriptVMException(`Invalid callable: ${JSON.stringify(callable)}`)
                     }
                     const upvalueCount = next()
@@ -664,7 +664,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             closureUpValues.push(frame.closure.upvalues[index])
                         }
                     }
-                    pushStack(newHogClosure(callable, closureUpValues))
+                    pushStack(newScriptClosure(callable, closureUpValues))
                     break
                 }
                 case Operation.GET_UPVALUE: {
@@ -673,7 +673,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         throw new ScriptVMException(`Invalid upvalue index: ${index}`)
                     }
                     const upvalue = upvaluesById[frame.closure.upvalues[index]]
-                    if (!isHogUpValue(upvalue)) {
+                    if (!isScriptUpValue(upvalue)) {
                         throw new ScriptVMException(`Invalid upvalue: ${upvalue}`)
                     }
                     if (upvalue.closed) {
@@ -689,7 +689,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                         throw new ScriptVMException(`Invalid upvalue index: ${index}`)
                     }
                     const upvalue = upvaluesById[frame.closure.upvalues[index]]
-                    if (!isHogUpValue(upvalue)) {
+                    if (!isScriptUpValue(upvalue)) {
                         throw new ScriptVMException(`Invalid upvalue: ${upvalue}`)
                     }
                     if (upvalue.closed) {
@@ -717,8 +717,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             chunk: frame.chunk,
                             stackStart: stack.length - argLen,
                             argCount: argLen,
-                            closure: newHogClosure(
-                                newHogCallable('local', {
+                            closure: newScriptClosure(
+                                newScriptCallable('local', {
                                     name: name,
                                     argCount: argLen,
                                     upvalueCount: 0,
@@ -754,8 +754,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 chunk: args[0],
                                 stackStart: stack.length,
                                 argCount: 0,
-                                closure: newHogClosure(
-                                    newHogCallable('local', {
+                                closure: newScriptClosure(
+                                    newScriptCallable('local', {
                                         name: args[0],
                                         argCount: 0,
                                         upvalueCount: 0,
@@ -778,7 +778,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                           .fill(null)
                                           .map(() => popStack())
                                     : stackKeepFirstElements(stack.length - temp)
-                            pushStack(convertJSToHog(options.functions[name](...args.map((v) => convertHogToJS(v)))))
+                            pushStack(convertJSToScript(options.functions[name](...args.map((v) => convertScriptToJS(v)))))
                         } else if (
                             name !== 'toString' &&
                             ((options?.asyncFunctions &&
@@ -803,7 +803,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 result: undefined,
                                 finished: false,
                                 asyncFunctionName: name,
-                                asyncFunctionArgs: args.map((v) => convertHogToJS(v)),
+                                asyncFunctionArgs: args.map((v) => convertScriptToJS(v)),
                                 state: {
                                     ...getVMState(),
                                     asyncSteps: asyncSteps + 1,
@@ -830,8 +830,8 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 chunk: `stl/${name}`,
                                 stackStart: stack.length - temp,
                                 argCount: temp,
-                                closure: newHogClosure(
-                                    newHogCallable('stl', {
+                                closure: newScriptClosure(
+                                    newScriptCallable('stl', {
                                         name,
                                         argCount: temp,
                                         upvalueCount: 0,
@@ -855,10 +855,10 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 case Operation.CALL_LOCAL: {
                     checkTimeout()
                     const closure = popStack()
-                    if (!isHogClosure(closure)) {
+                    if (!isScriptClosure(closure)) {
                         throw new ScriptVMException(`Invalid closure: ${JSON.stringify(closure)}`)
                     }
-                    if (!isHogCallable(closure.callable)) {
+                    if (!isScriptCallable(closure.callable)) {
                         throw new ScriptVMException(`Invalid callable: ${JSON.stringify(closure.callable)}`)
                     }
                     temp = next() // args.length
@@ -868,7 +868,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     if (temp > MAX_FUNCTION_ARGS_LENGTH) {
                         throw new ScriptVMException('Too many arguments')
                     }
-                    if (closure.callable.__hogCallable__ === 'local') {
+                    if (closure.callable.__callable__ === 'local') {
                         if (closure.callable.argCount > temp) {
                             for (let i = temp; i < closure.callable.argCount; i++) {
                                 pushStack(null)
@@ -892,7 +892,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             throw new ScriptVMException(`Call stack exceeded maximum length of ${CALLSTACK_LENGTH}`)
                         }
                         continue // resume the loop without incrementing frame.ip
-                    } else if (closure.callable.__hogCallable__ === 'stl') {
+                    } else if (closure.callable.__callable__ === 'stl') {
                         if (!closure.callable.name || !Object.hasOwn(STL, closure.callable.name)) {
                             throw new ScriptVMException(`Unsupported function call: ${closure.callable.name}`)
                         }
@@ -919,7 +919,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             }
                         }
                         pushStack(stlFn.fn(args, closure.callable.name, options))
-                    } else if (closure.callable.__hogCallable__ === 'async') {
+                    } else if (closure.callable.__callable__ === 'async') {
                         if (asyncSteps >= maxAsyncSteps) {
                             throw new ScriptVMException(`Exceeded maximum number of async steps: ${maxAsyncSteps}`)
                         }
@@ -930,7 +930,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             result: undefined,
                             finished: false,
                             asyncFunctionName: closure.callable.name,
-                            asyncFunctionArgs: args.map((v) => convertHogToJS(v)),
+                            asyncFunctionArgs: args.map((v) => convertScriptToJS(v)),
                             state: { ...getVMState(), asyncSteps: asyncSteps + 1 },
                         } satisfies ExecResult
                     } else {
@@ -954,7 +954,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     break
                 case Operation.THROW: {
                     const exception = popStack()
-                    if (!isHogError(exception)) {
+                    if (!isScriptError(exception)) {
                         throw new ScriptVMException('Can not throw: value is not of type Error')
                     }
                     if (throwStack.length > 0) {

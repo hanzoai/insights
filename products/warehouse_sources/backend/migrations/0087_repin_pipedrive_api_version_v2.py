@@ -2,7 +2,7 @@ from django.db import migrations
 
 # Pipedrive deprecated the v1 API endpoints that have v2 replacements (sunset 2025-12-31). The
 # source now defaults new instances to v2; this repins existing source-level pins from v1 to v2
-# so they stop using the deprecated `/api/v1/activities` endpoint.
+# so they stop using the deprecated `/v1/v1/activities` endpoint.
 PIPEDRIVE_SOURCE_TYPE = "Pipedrive"
 OLD_VERSION = "v1"
 NEW_VERSION = "v2"

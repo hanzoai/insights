@@ -4,7 +4,7 @@ Live Debugger provides runtime inspection capabilities for Insights users by ena
 
 ## Related Projects
 
-- [https://github.com/Insights/hogtrace](hogtrace), a DTrace-inspired language for defining
+- [https://github.com/Insights/scripttrace](scripttrace), a DTrace-inspired language for defining
   instrumentation scripts. It includes a Rust-based VM that can evaluate expressions within
   the context of the client application safely.
 - [https://github.com/Insights/libdebugger](libdebugger), a library for runtime instrumentation
@@ -47,9 +47,9 @@ Applications poll the external API using a Project API key to fetch active break
 
 ## API Endpoints
 
-The product exposes two primary endpoints. The `/api/environments/:team_id/live_debugger_breakpoints/` endpoint handles breakpoint management operations through standard CRUD methods. The `/api/environments/:team_id/live_debugger_breakpoints/active/` endpoint allows external applications to fetch enabled breakpoints using Project API key authentication, returning breakpoint configurations that applications use to instrument their code at runtime.
+The product exposes two primary endpoints. The `/v1/environments/:team_id/live_debugger_breakpoints/` endpoint handles breakpoint management operations through standard CRUD methods. The `/v1/environments/:team_id/live_debugger_breakpoints/active/` endpoint allows external applications to fetch enabled breakpoints using Project API key authentication, returning breakpoint configurations that applications use to instrument their code at runtime.
 
-The `/api/environments/:team_id/live_debugger_breakpoints/breakpoint_hits/` endpoint queries Datastore for captured runtime state, retrieving events from the last hour with support for filtering by specific breakpoint and pagination. Each hit contains the captured variables, stack trace, timestamp, and execution context.
+The `/v1/environments/:team_id/live_debugger_breakpoints/breakpoint_hits/` endpoint queries Datastore for captured runtime state, retrieving events from the last hour with support for filtering by specific breakpoint and pagination. Each hit contains the captured variables, stack trace, timestamp, and execution context.
 
 ## Data Model
 

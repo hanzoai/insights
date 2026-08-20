@@ -14,10 +14,10 @@ describe('featureFlagTestingLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/feature_flags/1/test_evaluation': () => [200, {}],
+                '/v1/projects/:team/feature_flags/1/test_evaluation': () => [200, {}],
             },
             post: {
-                '/api/projects/:team/feature_flags/1/test_evaluation': () => [200, {}],
+                '/v1/projects/:team/feature_flags/1/test_evaluation': () => [200, {}],
             },
         })
         initKeaTests()
@@ -259,7 +259,7 @@ describe('featureFlagTestingLogic', () => {
         it('resolves distinct IDs for a partial person (recent tab) via the persons API', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team/persons/': () => [
+                    '/v1/environments/:team/persons/': () => [
                         200,
                         { results: [{ distinct_ids: ['user-123', 'user-456'] }], count: 1 },
                     ],
@@ -279,7 +279,7 @@ describe('featureFlagTestingLogic', () => {
         it('clears resolved distinct IDs when a new person is selected', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team/persons/': () => [
+                    '/v1/environments/:team/persons/': () => [
                         200,
                         { results: [{ distinct_ids: ['user-123', 'user-456'] }], count: 1 },
                     ],
@@ -429,7 +429,7 @@ describe('featureFlagTestingLogic', () => {
             let capturedBody: Record<string, any> = {}
             useMocks({
                 post: {
-                    '/api/projects/:team/feature_flags/1/test_evaluation': async ({ request }) => {
+                    '/v1/projects/:team/feature_flags/1/test_evaluation': async ({ request }) => {
                         capturedBody = (await request.json()) as Record<string, any>
                         return [200, {}]
                     },
@@ -493,7 +493,7 @@ describe('featureFlagTestingLogic', () => {
         it('evaluates every distinct ID as its own row and isolates a single failing ID', async () => {
             useMocks({
                 post: {
-                    '/api/projects/:team/feature_flags/1/test_evaluation': async ({ request }) => {
+                    '/v1/projects/:team/feature_flags/1/test_evaluation': async ({ request }) => {
                         const body = (await request.json()) as { distinct_id: string }
                         if (body.distinct_id === 'user-bad') {
                             return [404, { detail: 'Person not found for distinct_id: user-bad' }]

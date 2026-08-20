@@ -4,15 +4,15 @@ AI-assisted PR approval for Insights.
 Deterministic safety gates first, then Claude reviews for showstoppers.
 
 > [!NOTE]
-> This directory (together with `.stamphog/`) is vendored into other repos — e.g. [MLHog](https://github.com/Insights/MLHog/tree/master/tools/pr-approval-agent) — each documenting its intentional local changes in its own copy of this README. When you change the engine or policy format here, those copies stay stale until someone re-syncs them, so give the owning teams a heads-up (or re-sync yourself: diff, re-copy, re-apply their documented local changes).
+> This directory (together with `.stamp/`) is vendored into other repos — e.g. [MLScript](https://github.com/Insights/MLScript/tree/master/tools/pr-approval-agent) — each documenting its intentional local changes in its own copy of this README. When you change the engine or policy format here, those copies stay stale until someone re-syncs them, so give the owning teams a heads-up (or re-sync yourself: diff, re-copy, re-apply their documented local changes).
 > A policy that declares a `insightscli-resolver` ownership source additionally needs the sibling `tools/owners` package vendored.
 > The legacy `gh-codeowners` / `ph-product` ownership formats were removed together with the `CODEOWNERS-soft` migration, so a vendored copy whose policy still declares them must migrate to `insightscli-resolver` (adopting `owners.yaml` + `tools/owners`) as part of the re-sync — or skip the re-sync and keep its previous engine until it's ready. The policy loader rejects unknown formats loudly at startup, so a missed migration fails closed rather than silently skipping the ownership source.
 
 ## Usage
 
-Add the `stamphog` label to a non-draft PR.
+Add the `stamp` label to a non-draft PR.
 The GitHub Action runs the agent and posts an approval or comment.
-On approval the label stays so it's visible which PRs were stamphog'd.
+On approval the label stays so it's visible which PRs were stamp'd.
 Only a substantive non-approval (`REFUSE`/`ESCALATE`) removes the label, so it
 can be re-applied once the feedback is addressed; every other outcome —
 including a crashed run that produced no verdict — keeps the label and retries
@@ -24,8 +24,8 @@ next push, or re-apply the label once the backend recovers.
 `WAIT` also keeps the label: it means an allowlisted reviewer bot still had a
 review in flight (👀 reaction) after the polling budget — not a verdict on the
 PR, so the next push retries automatically. When the whole
-fleet of stamphog reviews suddenly returns `ERROR`, suspect the
-`STAMPFN_ANTHROPIC_API_KEY` org secret first (stamphog uses its own dedicated
+fleet of stamp reviews suddenly returns `ERROR`, suspect the
+`STAMPFN_ANTHROPIC_API_KEY` org secret first (stamp uses its own dedicated
 Anthropic key, separate from the shared `ANTHROPIC_API_KEY`).
 
 ### Local testing
@@ -50,7 +50,7 @@ Uses PEP 723 inline metadata so `uv run` handles dependencies automatically.
 ## How it works
 
 ```text
-"stamphog" label added to PR
+"stamp" label added to PR
   │
   ▼
 Prerequisites (hard gate)
@@ -90,7 +90,7 @@ Tier classification
   ▼
 Wait for in-flight bot reviews (skipped when gates already denied)
   - Reviewer bots (greptile, hex-security, codex) put 👀 on the PR while
-    reviewing and swap it for a verdict reaction minutes later; stamphog is
+    reviewing and swap it for a verdict reaction minutes later; stamp is
     triggered at the same moment, so an 👀 at fetch time is a race, not a
     lasting state
   - Polls until allowlisted-bot 👀 reactions clear (up to 5 min); if one
@@ -121,13 +121,13 @@ LLM Review
   - An 👀 reaction signals an in-flight review — the LLM refuses rather than
     approving over someone who is mid-review (bot 👀 races are waited out
     before the LLM runs; see above)
-  - Stamphog's own prior reviews (stamphog[bot] refusals, github-actions[bot]
+  - Stamp's own prior reviews (stamp[bot] refusals, github-actions[bot]
     approvals) and its own inline comments are excluded from the prompt — they
     describe an earlier snapshot of the PR and are never independent review
-    signal. Quoted stamphog verdicts in other reviewers' comments are treated
+    signal. Quoted stamp verdicts in other reviewers' comments are treated
     as history, not tampering
   - For changes entering risky territory (migrations, billing, auth, and
-    similar; the full list lives in `.stamphog/review-guidance.md`), expects
+    similar; the full list lives in `.stamp/review-guidance.md`), expects
     independent assurance over the risky part on the current head: a
     substantive reviewer pass, or an owning-team / STRONG-familiarity author;
     escalates otherwise. Outside risky territory no independent review is
@@ -141,8 +141,8 @@ Final verdict → GitHub review (approve) or sticky comment (everything else)
 
 The bot never posts request-changes.
 Approvals are posted as real PR reviews (they must count toward branch protection).
-An approval is posted once, as the Stamphog app (`stamphog[bot]`), carrying the review body.
-This identity was confirmed to satisfy branch protection, so the earlier bodyless `github-actions[bot]` fallback approval has been dropped and every stamphog action now runs under the app token.
+An approval is posted once, as the Stamp app (`stamp[bot]`), carrying the review body.
+This identity was confirmed to satisfy branch protection, so the earlier bodyless `github-actions[bot]` fallback approval has been dropped and every stamp action now runs under the app token.
 Every other verdict (REFUSED, ESCALATE, WAIT, ERROR) goes into a single sticky comment that is updated in place on each run, with a counter of how many verdicts the comment has carried (failure notes append without bumping it) — repeated refusals don't stack up as separate review comments on the PR.
 
 ## Tiers
@@ -202,17 +202,17 @@ are exempt from the **auth** and **billing** categories — connector code
 legitimately does OAuth and talks to the Stripe API without touching
 Insights's auth system or its billing.
 
-The **migrations** deny-list is bypassed when the `Migration risk` check on the head commit concludes `success` (all migrations classified Safe). The check is published by `analyze_migration_risk` in `ci-backend.yml` and is the same signal humans see in the PR's Checks tab. See `tools/pr-approval-agent/migration_risk.py` for how stamphog reads it.
+The **migrations** deny-list is bypassed when the `Migration risk` check on the head commit concludes `success` (all migrations classified Safe). The check is published by `analyze_migration_risk` in `ci-backend.yml` and is the same signal humans see in the PR's Checks tab. See `tools/pr-approval-agent/migration_risk.py` for how stamp reads it.
 
-If the check hasn't completed yet when stamphog runs, stamphog refuses with a message asking the user to wait for the `Migration risk` check and re-apply the `stamphog` label. The label-strip on non-approved verdicts breaks the auto-rerun loop, so the next labeling action is the one that triggers a fresh review against the now-classified head commit.
+If the check hasn't completed yet when stamp runs, stamp refuses with a message asking the user to wait for the `Migration risk` check and re-apply the `stamp` label. The label-strip on non-approved verdicts breaks the auto-rerun loop, so the next labeling action is the one that triggers a fresh review against the now-classified head commit.
 
 ### Ownership
 
 Ownership context for the LLM (not a hard gate). The sources are declared in
-`.stamphog/policy.yml` under `ownership:` and read from the master checkout: a
+`.stamp/policy.yml` under `ownership:` and read from the master checkout: a
 `insightscli-resolver` source that resolves ownership through the shared insightscli
 resolver over the distributed `owners.yaml` / `product.yaml` files. A file's
-owning teams are the union across all sources, so stamphog sees the same merged
+owning teams are the union across all sources, so stamp sees the same merged
 view the reviewer auto-assigner builds. Cross-team typo/test/comment fixes are
 fine, as are small well-tested behavioral fixes (T1a/T1b) with no outstanding
 reviewer concerns; API contract, data model, and larger behavioral changes get
@@ -221,7 +221,7 @@ escalated.
 ## Versioning
 
 `version.py` holds `STAMPFN_VERSION` (semver, pre-releases like `2.0.0b1`).
-It is stamped onto the `stamphog_review_completed` event (alongside the
+It is stamped onto the `stamp_review_completed` event (alongside the
 checkout commit sha), the LLM trace properties, the evidence bundle, and the
 verdict comment's mechanics table — so verdict quality and reviewer behavior
 can be segmented by version in LLM analytics. Bump it in the same PR as any
@@ -233,7 +233,7 @@ sha shown next to the version.
 
 Every run produces a JSON evidence bundle (`--output-json` locally, uploaded as artifact in CI) containing:
 
-- Stamphog version and PR metadata (number, author, title)
+- Stamp version and PR metadata (number, author, title)
 - Classification (tier, sub-tier, breadth, commit type, deny categories, ownership)
 - Gate results (each gate's pass/fail status and message)
 - Reviewer output (verdict, reasoning, risk, issues)

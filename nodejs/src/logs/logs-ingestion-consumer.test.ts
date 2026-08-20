@@ -10,7 +10,7 @@ import {
 import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 
-import { compileHog } from '~/cdp/templates/compiler'
+import { compileScript } from '~/cdp/templates/compiler'
 import { InsightsFunctionType } from '~/cdp/types'
 import { KAFKA_APP_METRICS_2, KAFKA_LOGS_DATASTORE, KAFKA_LOGS_INGESTION_DLQ } from '~/common/config/kafka-topics'
 import { APP_METRICS_OUTPUT, AppMetricsOutput } from '~/common/outputs'
@@ -2173,7 +2173,7 @@ describe('LogsIngestionConsumer', () => {
                 name: 'Test log transformation',
                 type: 'transformation_log',
                 enabled: true,
-                bytecode: await compileHog(script),
+                bytecode: await compileScript(script),
                 inputs: {},
                 encrypted_inputs: null,
                 execution_order: 1,
@@ -2186,7 +2186,7 @@ describe('LogsIngestionConsumer', () => {
             const monitoring = { queueAppMetric: jest.fn(), queueLogs: jest.fn(), flush: jest.fn() }
             return new LogsTransformerService(manager as any, monitoring as any, {
                 siteUrl: 'http://localhost:8010',
-                hogTimeoutMs: 10,
+                scriptTimeoutMs: 10,
                 messageBudgetMs: 100,
                 batchBudgetMs: 2000,
                 maxErrorLogsPerFunctionPerMessage: 3,

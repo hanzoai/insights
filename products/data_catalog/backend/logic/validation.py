@@ -85,7 +85,7 @@ class _TableReferenceCollector(TraversingVisitor):
 
 
 def _fail(error: str, hint: str) -> NoReturn:
-    # Keyed by the offending field with a single string message: the exceptions_hog handler
+    # Keyed by the offending field with a single string message: the exceptions_script handler
     # renders that as attr="definition" + the full text; any richer dict shape strips the
     # message (or 500s) on its way through the HTTP envelope.
     raise ValidationError({"definition": f"{error} {hint}"})

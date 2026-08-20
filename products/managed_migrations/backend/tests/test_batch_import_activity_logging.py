@@ -109,7 +109,7 @@ class TestBatchImportActivityLogging(ActivityLogTestHelper):
 
             # `status` is read-only on the serializer; mutate via the pause action instead.
             response = self.client.post(
-                f"/api/projects/{self.team.id}/managed_migrations/{batch_import['id']}/pause", format="json"
+                f"/v1/projects/{self.team.id}/managed_migrations/{batch_import['id']}/pause", format="json"
             )
             self.assertEqual(response.status_code, 200)
 

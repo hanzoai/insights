@@ -134,7 +134,7 @@ def _determine_login_method(request, was_impersonated):
     if was_impersonated:
         return "Impersonation"
 
-    backend = request.session.get("_auth_user_backend", "django.contrib.auth.backends.ModelBackend")
+    backend = request.session.get("_auth_user_backend", "")
     login_method = AUTH_BACKEND_DISPLAY_NAMES.get(backend, "Unknown")
 
     return login_method

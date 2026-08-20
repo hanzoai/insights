@@ -17,7 +17,7 @@ describe('verifiedDomainsLogic', () => {
         useAvailableFeatures([AvailableFeature.SSO_ENFORCEMENT, AvailableFeature.SAML])
         useMocks({
             get: {
-                '/api/organizations/:organization/domains': {
+                '/v1/organizations/:organization/domains': {
                     count: 1,
                     next: null,
                     previous: null,
@@ -26,7 +26,7 @@ describe('verifiedDomainsLogic', () => {
                             id: '8db3b0c2-a0ab-490a-9037-14f3358a81bc',
                             domain: 'my.hanzo.ai',
                             jit_provisioning_enabled: true,
-                            sso_enforcement: 'google-oauth2',
+                            sso_enforcement: 'oidc',
                             is_verified: true,
                             verified_at: '2022-01-01T23:59:59',
                         },
@@ -42,7 +42,7 @@ describe('verifiedDomainsLogic', () => {
                 },
             },
             post: {
-                '/api/organizations/:organization/domains/': {
+                '/v1/organizations/:organization/domains/': {
                     id: '14f3358a-a0ab-490a-9037-81a0abc',
                     domain: 'new.hanzo.ai',
                     jit_provisioning_enabled: false,
@@ -52,7 +52,7 @@ describe('verifiedDomainsLogic', () => {
                 },
             },
             delete: {
-                '/api/organizations/:organization/domains/:id/': {},
+                '/v1/organizations/:organization/domains/:id/': {},
             },
         })
         initKeaTests()

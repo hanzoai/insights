@@ -20,7 +20,7 @@ from products.feature_flags.backend.api import remote_config_shadow as shadow
 REDACTED = '"********* (encrypted)"'
 
 
-def _request(authenticator=TeamSecretTokenAuthentication, authorization="Bearer phs_x", query=None):
+def _request(authenticator=TeamSecretTokenAuthentication, authorization="Bearer sk-x", query=None):
     req = MagicMock()
     req.successful_authenticator = MagicMock(spec=authenticator) if authenticator else None
     req.headers = {"Authorization": authorization} if authorization else {}
@@ -101,10 +101,10 @@ def test_non_header_credential_is_skipped(authenticator):
 def test_builds_canonical_rust_url():
     with patch.object(shadow, "_SHADOW_SESSION") as session, patch.object(shadow, "REMOTE_CONFIG_SHADOW_COMPARISONS"):
         session.get.return_value = _rust_response(200, b'"v"', "v")
-        shadow.shadow_compare_remote_config(_request(query={"token": "phc_x"}), Response("v"), project_id=7, key="flag")
+        shadow.shadow_compare_remote_config(_request(query={"token": "pk-x"}), Response("v"), project_id=7, key="flag")
         assert session.get.call_args.args[0] == "http://rust:3001/api/projects/7/feature_flags/flag/remote_config"
-        assert session.get.call_args.kwargs["params"] == {"token": "phc_x"}
-        assert session.get.call_args.kwargs["headers"] == {"Authorization": "Bearer phs_x"}
+        assert session.get.call_args.kwargs["params"] == {"token": "pk-x"}
+        assert session.get.call_args.kwargs["headers"] == {"Authorization": "Bearer sk-x"}
 
 
 @pytest.mark.parametrize(

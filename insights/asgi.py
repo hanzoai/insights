@@ -37,7 +37,7 @@ async def _event_loop_lag_heartbeat() -> None:
     """Measure event-loop starvation: sleep 1s, record how late we woke up.
 
     A busy-but-healthy loop wakes within milliseconds; sustained lag means
-    something is hogging the loop between awaits (CPU-bound work in a stream,
+    something is scriptging the loop between awaits (CPU-bound work in a stream,
     a sync iterator, ...) and health probes on this worker are at risk of
     timing out. Exported as a gauge so operators can alert on it.
     """

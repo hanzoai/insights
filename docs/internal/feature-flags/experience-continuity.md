@@ -89,7 +89,7 @@ CREATE TABLE insights_featureflaghashkeyoverride (
 ```python
 # You must manually include $anon_distinct_id
 requests.post('https://app.hanzo.ai/flags/', json={
-    'token': 'phc_abc123',
+    'token': 'pk-abc123',
     'distinct_id': 'user_456',
     '$anon_distinct_id': 'anon_abc123',  # Top-level, NOT in person_properties
     'person_properties': {}
@@ -307,7 +307,7 @@ The SDK must include `$device_id` as a top-level field in `/flags` requests:
 
 ```json
 {
-  "token": "phc_abc123",
+  "token": "pk-abc123",
   "distinct_id": "user_456",
   "$device_id": "device_xyz789",
   "person_properties": {}

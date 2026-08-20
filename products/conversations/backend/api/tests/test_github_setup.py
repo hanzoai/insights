@@ -40,7 +40,7 @@ class TestGithubSetupEndpoints(BaseTest):
             self.team.conversations_settings = settings_override
             self.team.save()
 
-        resp = self.client.get("/api/conversations/v1/github/status")
+        resp = self.client.get("/v1/conversations/v1/github/status")
         assert resp.status_code == 200
         data = resp.json()
         assert data["connected"] is expected_connected
@@ -51,7 +51,7 @@ class TestGithubSetupEndpoints(BaseTest):
         self.team.save()
 
         resp = self.client.post(
-            "/api/conversations/v1/github/connect",
+            "/v1/conversations/v1/github/connect",
             {"integration_id": self.integration.id},
             content_type="application/json",
         )
@@ -70,14 +70,14 @@ class TestGithubSetupEndpoints(BaseTest):
     )
     def test_connect_rejects_bad_input(self, _name, payload, expected_status):
         resp = self.client.post(
-            "/api/conversations/v1/github/connect",
+            "/v1/conversations/v1/github/connect",
             payload,
             content_type="application/json",
         )
         assert resp.status_code == expected_status
 
     def test_disconnect_clears_settings(self):
-        resp = self.client.post("/api/conversations/v1/github/disconnect", content_type="application/json")
+        resp = self.client.post("/v1/conversations/v1/github/disconnect", content_type="application/json")
         assert resp.status_code == 200
 
         self.team.refresh_from_db()
@@ -95,7 +95,7 @@ class TestGithubSetupEndpoints(BaseTest):
     )
     def test_select_repos(self, _name, repos, expected_status, expected_repos):
         resp = self.client.post(
-            "/api/conversations/v1/github/select-repos",
+            "/v1/conversations/v1/github/select-repos",
             {"repos": repos},
             content_type="application/json",
         )
@@ -109,7 +109,7 @@ class TestGithubSetupEndpoints(BaseTest):
         self.team.save()
 
         resp = self.client.post(
-            "/api/conversations/v1/github/select-repos",
+            "/v1/conversations/v1/github/select-repos",
             {"repos": ["org/repo"]},
             content_type="application/json",
         )
@@ -119,7 +119,7 @@ class TestGithubSetupEndpoints(BaseTest):
     def test_create_issue_dispatches_task(self, mock_task):
         mock_task.delay = MagicMock()
         resp = self.client.post(
-            "/api/conversations/v1/github/create-issue",
+            "/v1/conversations/v1/github/create-issue",
             {"repo": "org/repo", "title": "New bug", "body": "Details"},
             content_type="application/json",
         )
@@ -147,7 +147,7 @@ class TestGithubSetupEndpoints(BaseTest):
             self.team.save()
 
         resp = self.client.post(
-            "/api/conversations/v1/github/create-issue",
+            "/v1/conversations/v1/github/create-issue",
             payload,
             content_type="application/json",
         )

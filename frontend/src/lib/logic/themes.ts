@@ -41,7 +41,7 @@ export const themes: Theme[] = [
         },
     },
     {
-        id: 'livelaughhog',
+        id: 'livelaughscript',
         name: 'Live, Laugh, Script',
         dark: false,
         sidebarStyle: {

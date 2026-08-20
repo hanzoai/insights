@@ -98,20 +98,20 @@ const meta: Meta = {
                 '/_preflight': { ...preflightJson, cloud: true, realm: 'cloud' },
                 '/stats': {},
                 '/events': {},
-                '/api/billing/': { ...billingJson },
-                '/api/environments/:team_id/integrations': { results: [githubIntegration] },
-                '/api/environments/:team_id/integrations/:id/github_repos': githubReposResponse,
-                '/api/projects/:project_id/tasks/:task_id/runs/:run_id/stream': () =>
+                '/v1/billing/': { ...billingJson },
+                '/v1/environments/:team_id/integrations': { results: [githubIntegration] },
+                '/v1/environments/:team_id/integrations/:id/github_repos': githubReposResponse,
+                '/v1/projects/:project_id/tasks/:task_id/runs/:run_id/stream': () =>
                     new Response(TASK_RUN_STREAM_BODY, {
                         status: 200,
                         headers: { 'Content-Type': 'text/event-stream' },
                     }),
                 // No wizard session enriching the run in these stories; a 404 closes the EventSource
                 // without retries (the pipeline above is the only progress source).
-                '/api/projects/:project_id/wizard/sessions/stream': () => [404],
+                '/v1/projects/:project_id/wizard/sessions/stream': () => [404],
             },
             patch: {
-                '/api/environments/:team_id/add_product_intent/': {},
+                '/v1/environments/:team_id/add_product_intent/': {},
             },
         }),
     ],

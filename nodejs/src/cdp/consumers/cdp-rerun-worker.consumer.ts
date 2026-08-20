@@ -1,4 +1,4 @@
-import { DatastoreClient, createClient as createDatastoreClient } from '@datastore/client'
+import { ClickHouseClient as DatastoreClient, createClient as createDatastoreClient } from '@datastore/client'
 import https from 'https'
 import { Counter } from 'prom-client'
 
@@ -22,7 +22,7 @@ const HEARTBEAT_INTERVAL_MS = 10_000
 const RERUN_PAGE_DELAY_MS = 500
 
 const counterRerunJobsAcked = new Counter({
-    name: 'cdp_hog_invocation_rerun_jobs_acked_total',
+    name: 'cdp_invocation_rerun_jobs_acked_total',
     help: 'Rerun wrapper jobs terminated by the worker, by outcome.',
     labelNames: ['outcome'],
 })
@@ -62,7 +62,7 @@ export class CdpRerunWorkerConsumer extends CdpConsumerBase<PluginsServerConfig>
         }
 
         await this.jobQueues.insights_function.startAsProducer()
-        await this.jobQueues.hog_flow.startAsProducer()
+        await this.jobQueues.flow.startAsProducer()
 
         // Dedicated Datastore client for the paginator. Internal Datastore
         // uses self-signed certs with a hostname mismatch, same as the
@@ -86,7 +86,7 @@ export class CdpRerunWorkerConsumer extends CdpConsumerBase<PluginsServerConfig>
         this.paginator = new RerunPaginatorService(
             this.datastoreClient,
             this.insightsFunctionManager,
-            this.hogFlowManager,
+            this.flowManager,
             this.invocationResultsService.invocationResultsRowsService,
             this.jobQueues,
             this.invocationResultsService.monitoringService,
@@ -113,7 +113,7 @@ export class CdpRerunWorkerConsumer extends CdpConsumerBase<PluginsServerConfig>
         this.isStopping = true
         await this.worker?.disconnect()
         await this.jobQueues.insights_function.stopProducer()
-        await this.jobQueues.hog_flow.stopProducer()
+        await this.jobQueues.flow.stopProducer()
         await this.datastoreClient?.close()
         await this.invocationResultsService.flush()
     }

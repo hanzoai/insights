@@ -1,16 +1,15 @@
 import { useActions } from 'kea'
 
-import * as directorPng from '@hanzo/brand/hoggies/png/director'
 import { Button } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 
 import { OnboardingStepKey } from '~/types'
 
 import { OnboardingStepComponentType, onboardingLogic } from './onboardingLogic'
 import { OnboardingStep } from './OnboardingStep'
 
-const MascotDirector = pngHoggie(directorPng)
+const MascotDirector = pngMascot()
 
 export const OnboardingSessionReplayConfiguration: OnboardingStepComponentType = () => {
     const { goToNextStep, updateCurrentTeam } = useActions(onboardingLogic)

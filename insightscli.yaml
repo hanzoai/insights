@@ -29,7 +29,7 @@ config:
         # Write-only project token for Insights's internal insightscli project.
         # It cannot read data; safe to commit. Standalone insightscli users get a blank
         # default and telemetry stays disabled unless they set their own key.
-        api_key: phc_JYFXrbqdzueOYb0wFUTnCglFKZuC4xRXBW790ewdcvn
+        api_key: pk-JYFXrbqdzueOYb0wFUTnCglFKZuC4xRXBW790ewdcvn
         host: https://us.i.hanzo.ai
 
 metadata:
@@ -919,10 +919,11 @@ tools:
             - temporal
     tool:script:
         bin_script: script
-        description: Run InsightsQL interpreter (TypeScript/Python) or compiled bytecode
-    tool:hoge:
-        bin_script: hoge
-        description: Compile InsightsQL source to bytecode or JavaScript
+        description: Run a .script program or compiled .scriptc bytecode on the script
+            VM (nodejs by default, --python for the Python VM)
+    tool:scriptc:
+        bin_script: scriptc
+        description: Compile a .script program to .scriptc bytecode or JavaScript
     tool:ruff:
         bin_script: ruff.sh
         description: Python linter and formatter with virtualenv auto-activation
@@ -938,8 +939,8 @@ tools:
         cmd: python manage.py create_ch_migration
         description: Generate new Datastore migration scaffold
     tool:print-script-stl:
-        cmd: python manage.py print_hog_stl_table
-        description: Print HogSQL standard library definitions for reference
+        cmd: python manage.py print_script_stl_table
+        description: Print the script standard library definitions for reference
         hidden: true
     datastore:logs:init:
         bin_script: datastore-logs-init
@@ -971,7 +972,7 @@ tools:
         hidden: true
     sync:storage:
         bin_script: sync-storage
-        description: 'TODO: add description for sync-storage'
+        description: 'Sync object storage between MinIO and SeaweedFS, per service or all of them'
         hidden: true
     tool:check_ducklake_up:
         bin_script: check_ducklake_up
@@ -998,7 +999,7 @@ tools:
         needs_secrets: true
     generate_personinsights_proto:
         bin_script: generate_personinsights_proto.sh
-        description: 'TODO: add description for generate_personinsights_proto.sh'
+        description: 'Regenerate the personinsights protobuf clients from proto/ into the generated package'
         hidden: true
     phrocs:build:
         cmd: cd tools/phrocs && make build
@@ -1021,6 +1022,14 @@ tools:
     ci:preflight:
         click: insightscli_commands.ci_preflight:ci_preflight
         description: Catch deterministic CI failures reachable from your diff before you push (advisory; --fix, --strict)
+    publish:static:
+        bin_script: publish-static
+        description: 'Mirror a built STATIC_ROOT into the shared object origin, so chunks outlive the pod that built them'
+        hidden: true
+    prune:static:
+        bin_script: prune-static
+        description: 'Hold the static origin to its 30-day deploy horizon'
+        hidden: true
 desktop:
     desktop:dev:
         cmd: pnpm --dir products/desktop dev
@@ -1180,7 +1189,7 @@ environment:
         hidden: true
     setup:gateway:e2e:
         bin_script: setup-gateway-e2e
-        description: 'Provision the local ai-gateway e2e: enable the team, mint a phs_, publish the credential blob, fund the ledger'
+        description: 'Provision the local ai-gateway e2e: enable the team, mint a sk-, publish the credential blob, fund the ledger'
         hidden: true
     dev:open:when:ready:
         bin_script: dev-open-when-ready
@@ -1197,4 +1206,28 @@ environment:
     start:desktop:
         bin_script: start-desktop
         description: 'Install the nested products/desktop workspace and run its dev stack (Electron app plus package watchers via turbo); used by the desktop intent on insightscli start'
+        hidden: true
+    check:forge:credential:
+        bin_script: check-forge-credential
+        description: 'Answer in seconds whether this build can read the forge, before a long build spends the hour finding out'
+        hidden: true
+    check:imports:are:committed:
+        bin_script: check-imports-are-committed
+        description: 'Check that every first-party import resolves to a committed file, so a fresh clone of this commit starts'
+        hidden: true
+    debrand:
+        bin_script: debrand
+        description: 'Rewrite an upstream tree into the Hanzo Insights tree; --check asserts the rename holds'
+        hidden: true
+    debrand:selftest:
+        bin_script: debrand-selftest
+        description: 'Self-test bin/debrand, one check per rename defect that has happened before'
+        hidden: true
+    tables:
+        bin_script: tables
+        description: 'Report the warehouse table names this tree declares, and refuse a versioned one'
+        hidden: true
+    theme:
+        bin_script: theme
+        description: 'Assert the Hanzo design tokens survive a rebase onto upstream'
         hidden: true

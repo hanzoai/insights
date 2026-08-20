@@ -381,16 +381,16 @@ class TestCloudflareModelAdvertising:
 
 
 class TestBasetenModelAdvertising:
-    def test_deepseek_is_available_to_code_and_review_hog(self):
+    def test_deepseek_is_available_to_code_and_review(self):
         with patch(
             "llm_gateway.services.model_registry.get_settings",
             return_value=create_mock_settings(baseten=True),
         ):
-            assert is_model_available("deepseek-ai/deepseek-v4-flash-0731", "review_hog") is True
+            assert is_model_available("deepseek-ai/deepseek-v4-flash-0731", "review") is True
             assert is_model_available("deepseek-ai/deepseek-v4-flash-0731", "insights_code") is True
             assert is_model_available("deepseek-ai/deepseek-v4-flash-0731", "llm_gateway") is False
             assert is_model_available("deepseek-ai/deepseek-v4-flash-0731", "slack_app") is False
-            for product in ("review_hog", "insights_code"):
+            for product in ("review", "insights_code"):
                 model = next(
                     model
                     for model in ModelRegistryService.get_instance().get_available_models(product)

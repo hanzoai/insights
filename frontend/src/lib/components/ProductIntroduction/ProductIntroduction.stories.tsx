@@ -1,14 +1,12 @@
 import { Meta } from '@storybook/react'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
-
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 
 import { ProductKey } from '~/queries/schema/schema-general'
 
 import { ProductIntroduction, ProductIntroductionProps } from './ProductIntroduction'
 
-const MascotChart = pngHoggie(chartPng)
+const MascotChart = pngMascot()
 
 const meta: Meta<ProductIntroductionProps> = {
     title: 'Components/Product Empty State',
@@ -82,23 +80,23 @@ function DashboardEmptyResponsiveIntro({
             docsURL="https://hanzo.ai/docs/product-analytics/dashboards"
             action={() => alert('CTA clicked')}
             isEmpty={true}
-            customHog={MascotChart}
-            hogLayout="responsive"
+            customScript={MascotChart}
+            scriptLayout="responsive"
             useMainContentContainerQueries={useMainContentContainerQueries}
         />
     )
 }
 
-/** `hogLayout="responsive"`: script stays visible on small viewports (stacked); switches to row from `md` up. */
-export function hogLayoutResponsive(): JSX.Element {
+/** `scriptLayout="responsive"`: script stays visible on small viewports (stacked); switches to row from `md` up. */
+export function scriptLayoutResponsive(): JSX.Element {
     return <DashboardEmptyResponsiveIntro />
 }
 
 /**
- * Same as `hogLayoutResponsive`, but breakpoints come from the `main-content` container (as in navigation),
+ * Same as `scriptLayoutResponsive`, but breakpoints come from the `main-content` container (as in navigation),
  * not the viewport — so a narrow main column stays stacked even when the Storybook canvas is wide.
  */
-export function hogLayoutResponsiveWithMainContentContainerQueries(): JSX.Element {
+export function scriptLayoutResponsiveWithMainContentContainerQueries(): JSX.Element {
     return (
         <div className="flex flex-col gap-6">
             <p className="text-secondary text-sm m-0">
@@ -128,7 +126,7 @@ export function hogLayoutResponsiveWithMainContentContainerQueries(): JSX.Elemen
     )
 }
 
-hogLayoutResponsiveWithMainContentContainerQueries.parameters = {
+scriptLayoutResponsiveWithMainContentContainerQueries.parameters = {
     docs: {
         description: {
             story: 'Uses `@container/main-content` like `#main-content` in `Navigation.tsx`, so layout tracks the main column when the side panel narrows it.',

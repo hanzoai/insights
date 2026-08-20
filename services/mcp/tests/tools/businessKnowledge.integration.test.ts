@@ -54,7 +54,7 @@ describe('Business knowledge sources', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'DELETE',
-                    path: `/api/projects/${TEST_PROJECT_ID}/business_knowledge/sources/${id}/`,
+                    path: `/v1/projects/${TEST_PROJECT_ID}/business_knowledge/sources/${id}/`,
                 })
             } catch (error) {
                 console.warn(`Failed to cleanup knowledge source ${id}:`, error)

@@ -114,7 +114,9 @@ def build_e2e_docker_compose_shell() -> str:
     """bin/mprocs-e2e.yaml's docker-compose shell: never sandboxed, plus an explicit
     `up` for personinsights-replica/router under the ingestion profile."""
     up_cmd = build_docker_compose_command([], "up --pull always -d")
-    personinsights_cmd = build_docker_compose_command(["ingestion"], "up -d personinsights-replica personinsights-router")
+    personinsights_cmd = build_docker_compose_command(
+        ["ingestion"], "up -d personinsights-replica personinsights-router"
+    )
     logs_cmd = build_docker_compose_command([], "logs --tail=100 -f")
     return f'{up_cmd} && {personinsights_cmd} && echo "{_READY_MARKER}" && {logs_cmd}'
 
@@ -335,9 +337,10 @@ class MprocsGenerator(ConfigGenerator):
         process_count = len(resolved.units)
         products = sorted(resolved.intents) if resolved.intents else ["(none)"]
 
-        # ANSI color codes matching Insights brand
-        orange = r"\033[38;2;245;78;0m"  # #F54E00
-        blue = r"\033[38;2;29;74;255m"  # #1D4AFF
+        # The banner runs on whatever terminal theme the developer picked, and a
+        # fixed grey that reads on one ground is invisible on the other. So
+        # emphasis is weight, not color: bold for the things you act on, the
+        # terminal's own foreground for body text, one mid grey for asides.
         gray = r"\033[38;5;245m"
         green = r"\033[32m"
         bold = r"\033[1m"
@@ -361,32 +364,32 @@ class MprocsGenerator(ConfigGenerator):
 
         shell = f"""\
 echo ''
-printf '{orange}{bold}  Insights Dev Environment{reset}\\n'
+printf '{bold}  Insights Dev Environment{reset}\\n'
 printf '{gray}  ─────────────────────────────────────{reset}\\n'
 echo ''
 _news=$(curl -sf --max-time 2 '{news_url}' 2>/dev/null || cat {news_local} 2>/dev/null || true)
 if [ -n "$_news" ]; then
-    printf '  {orange}{bold}News:{reset}\\n'
+    printf '  {bold}News:{reset}\\n'
     printf '%s\\n' "$_news" | sed 's/^/  /'
     echo ''
 fi
 printf '  {bold}Commands:{reset}\\n'
-printf '    {blue}insightscli dev:setup{reset}    Configure which services run\\n'
-printf '    {blue}insightscli dev:explain{reset}  Show why each service is running\\n'
+printf '    {bold}insightscli dev:setup{reset}    Configure which services run\\n'
+printf '    {bold}insightscli dev:explain{reset}  Show why each service is running\\n'
 echo ''
 printf '{gray}  ─────────────────────────────────────{reset}\\n'
 printf '  {bold}Path:{reset}      {gray}%s{reset}\\n' "${{REPOSITORY_ROOT:-$PWD}}"
-printf '  {bold}Products:{reset}  {blue}{", ".join(products)}{reset}\\n'
+printf '  {bold}Products:{reset}  {", ".join(products)}\\n'
 printf '  {bold}Processes:{reset} {process_count} active\\n'
 if [ -n "${{_INSIGHTS_OP_RESOLVED:-}}" ]; then
-    printf '  {bold}Secrets:{reset}   {blue}1Password{reset} {gray}(op run){reset}\\n'
+    printf '  {bold}Secrets:{reset}   1Password {gray}(op run){reset}\\n'
 else
     printf '  {bold}Secrets:{reset}   {gray}local .env files{reset}\\n'
 fi
 printf '  {bold}Sandbox:{reset}   {sandbox_status}\\n'
 echo ''
-printf '  {bold}Log in with:{reset} test@hanzo.ai - {blue}12345678{reset}\\n'
-printf '  {gray}Run {reset}{blue}insightscli dev:setup{reset}{gray} to tailor this to your workflow.{reset}\\n'
+printf '  {bold}Log in with:{reset} test@hanzo.ai - {bold}12345678{reset}\\n'
+printf '  {gray}Run {reset}{bold}insightscli dev:setup{reset}{gray} to tailor this to your workflow.{reset}\\n'
 """
         proc_config["shell"] = shell
         return proc_config
@@ -426,7 +429,9 @@ printf '  {gray}Run {reset}{blue}insightscli dev:setup{reset}{gray} to tailor th
 
         # Build the profile flags (may be empty for minimal stack)
         if profiles:
-            message = f"echo '▶ docker-compose: profiles: {', '.join(profiles)} (configure via: insightscli dev:setup)' && "
+            message = (
+                f"echo '▶ docker-compose: profiles: {', '.join(profiles)} (configure via: insightscli dev:setup)' && "
+            )
         else:
             message = "echo '▶ docker-compose: core services only (configure via: insightscli dev:setup)' && "
 
@@ -672,7 +677,7 @@ def get_generated_mprocs_path() -> Path:
 
     Checks local path first, then main repo if in a worktree.
     """
-    override_path = os.getenv("HOGLI_MPROCS_PATH")
+    override_path = os.getenv("INSIGHTSCLI_MPROCS_PATH")
     if override_path:
         return Path(override_path)
 

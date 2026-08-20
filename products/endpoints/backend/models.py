@@ -357,7 +357,7 @@ class Endpoint(CreatedMetaFields, UpdatedMetaFields, DeletedMetaFields, UUIDTMod
     """Model for storing endpoints that can be accessed via API endpoints.
 
     Endpoints allow creating reusable query endpoints like:
-    /api/projects/{team_id}/endpoints/{endpoint_name}/run
+    /v1/projects/{team_id}/endpoints/{endpoint_name}/run
 
     Query, description, data_freshness_seconds, and materialization settings are stored
     in EndpointVersion, allowing per-version configuration.
@@ -407,7 +407,7 @@ class Endpoint(CreatedMetaFields, UpdatedMetaFields, DeletedMetaFields, UUIDTMod
     @property
     def endpoint_path(self) -> str:
         """Return the API endpoint path for this endpoint."""
-        return f"/api/projects/{self.team_id}/endpoints/{self.name}/run"
+        return f"/v1/projects/{self.team_id}/endpoints/{self.name}/run"
 
     def has_query_changed(self, new_query: dict[str, Any]) -> bool:
         """Deep comparison to check if query has actually changed.

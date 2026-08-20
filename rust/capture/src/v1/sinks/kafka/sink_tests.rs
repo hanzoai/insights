@@ -62,7 +62,7 @@ impl FakeEvent {
             parsed_uuid: Uuid::new_v4(),
             publish: true,
             destination: Destination::AnalyticsMain,
-            partition_key: Some(format!("phc_test:{uuid}")),
+            partition_key: Some(format!("pk-test:{uuid}")),
             payload: Ok(r#"{"event":"test"}"#.to_string()),
             event_headers: empty_captured_headers(),
             ordering: OrderingGuarantee::PerDistinctId,
@@ -296,7 +296,7 @@ async fn single_event_success() {
     h.producer.with_records(|records| {
         assert_eq!(records[0].topic, "events_main");
         assert_eq!(records[0].payload, r#"{"event":"test"}"#);
-        assert_eq!(records[0].key.as_deref(), Some("phc_test:evt-1"));
+        assert_eq!(records[0].key.as_deref(), Some("pk-test:evt-1"));
     });
 }
 
@@ -757,12 +757,12 @@ async fn health_refreshed_on_partial_success() {
 /// out of the headers is the bug this indirection removes.
 #[rstest]
 #[case::none_drops_key(OrderingGuarantee::None, true, None)]
-#[case::per_distinct_id_keeps_key(OrderingGuarantee::PerDistinctId, false, Some("phc_test:user-1"))]
-#[case::per_session_keeps_key(OrderingGuarantee::PerSession, false, Some("phc_test:user-1"))]
+#[case::per_distinct_id_keeps_key(OrderingGuarantee::PerDistinctId, false, Some("pk-test:user-1"))]
+#[case::per_session_keeps_key(OrderingGuarantee::PerSession, false, Some("pk-test:user-1"))]
 #[case::header_alone_does_not_drop_key(
     OrderingGuarantee::PerDistinctId,
     true,
-    Some("phc_test:user-1")
+    Some("pk-test:user-1")
 )]
 #[tokio::test]
 async fn ordering_decides_partition_key(
@@ -776,7 +776,7 @@ async fn ordering_decides_partition_key(
         headers.force_disable_person_processing = Some(true);
     }
     let event = FakeEvent::ok("evt-1")
-        .with_partition_key(Some("phc_test:user-1"))
+        .with_partition_key(Some("pk-test:user-1"))
         .with_ordering(ordering)
         .with_headers(headers);
     let events = prepared(&[&event], &h.ctx);
@@ -793,7 +793,7 @@ async fn ordering_decides_partition_key(
 #[tokio::test]
 async fn some_partition_key_propagates_as_some() {
     let h = TestHarness::new();
-    let event = FakeEvent::ok("evt-1").with_partition_key(Some("phc_test:user-1"));
+    let event = FakeEvent::ok("evt-1").with_partition_key(Some("pk-test:user-1"));
     let events = prepared(&[&event], &h.ctx);
 
     let results = h.sink.publish_batch(&h.ctx, &events).await;
@@ -801,7 +801,7 @@ async fn some_partition_key_propagates_as_some() {
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].outcome(), Outcome::Success);
     h.producer.with_records(|records| {
-        assert_eq!(records[0].key.as_deref(), Some("phc_test:user-1"));
+        assert_eq!(records[0].key.as_deref(), Some("pk-test:user-1"));
     });
 }
 

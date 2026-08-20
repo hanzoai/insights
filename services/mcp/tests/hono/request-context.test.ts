@@ -57,7 +57,7 @@ const env = {} as any
 function makeProps(overrides: Partial<RequestProperties> = {}): RequestProperties {
     return {
         userHash: 'test-user',
-        apiToken: 'phx_test',
+        apiToken: 'sk-test',
         sessionId: 'sess-1',
         mcpClientName: 'test-client',
         mcpClientVersion: '1.0',

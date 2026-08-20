@@ -1,7 +1,7 @@
 -- AUTO-GENERATED from the declarative HCL by ops/gen-sql.sh — do not edit.
 -- Full CREATE schema for the local-multi/aux node. Apply to a fresh Datastore to build it.
 
-CREATE TABLE insights.hog_invocation_results_data (
+CREATE TABLE insights.invocations_data (
   team_id Int64,
   function_kind LowCardinality(String),
   function_id String,
@@ -30,7 +30,7 @@ CREATE TABLE insights.hog_invocation_results_data (
   INDEX function_idx function_id TYPE bloom_filter(0.01) GRANULARITY 1,
   INDEX event_uuid_idx event_uuid TYPE bloom_filter(0.01) GRANULARITY 1,
   INDEX is_retry_idx is_retry TYPE set(2) GRANULARITY 1
-) ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/insights.hog_invocation_results_data', '{replica}-{shard}', version) ORDER BY (team_id, function_kind, function_id, invocation_id) PARTITION BY toYYYYMMDD(scheduled_at) TTL toDate(scheduled_at) + toIntervalDay(30) SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1;
+) ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/insights.invocations_data', '{replica}-{shard}', version) ORDER BY (team_id, function_kind, function_id, invocation_id) PARTITION BY toYYYYMMDD(scheduled_at) TTL toDate(scheduled_at) + toIntervalDay(30) SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1;
 CREATE TABLE insights.ingestion_warnings_v2 (
   team_id Int64,
   source LowCardinality(String),
@@ -78,7 +78,7 @@ CREATE TABLE insights.kafka_error_tracking_fingerprint_issue_state (
   is_deleted Int8,
   version Int64
 ) ENGINE = Kafka() SETTINGS kafka_broker_list = 'msk_cluster', kafka_format = 'kafka_format = \'JSONEachRow\'', kafka_group_name = 'kafka_group_name = \'datastore-error-tracking-fingerprint-issue-state\'', kafka_topic_list = 'kafka_topic_list = \'datastore_error_tracking_fingerprint_issue_state\'';
-CREATE TABLE insights.kafka_hog_invocation_results (
+CREATE TABLE insights.kafka_invocations (
   team_id Int64,
   function_kind LowCardinality(String),
   function_id String,
@@ -100,7 +100,7 @@ CREATE TABLE insights.kafka_hog_invocation_results (
   invocation_globals String,
   version UInt64,
   is_deleted UInt8
-) ENGINE = Kafka() SETTINGS kafka_broker_list = 'warpstream_cyclotron', kafka_format = 'kafka_format = \'JSONEachRow\'', kafka_group_name = 'kafka_group_name = \'datastore_hog_invocation_results\'', kafka_skip_broken_messages = 100, kafka_topic_list = 'kafka_topic_list = \'datastore_hog_invocation_results\'';
+) ENGINE = Kafka() SETTINGS kafka_broker_list = 'warpstream_cyclotron', kafka_format = 'kafka_format = \'JSONEachRow\'', kafka_group_name = 'kafka_group_name = \'datastore_invocations\'', kafka_skip_broken_messages = 100, kafka_topic_list = 'kafka_topic_list = \'datastore_invocations\'';
 CREATE TABLE insights.kafka_ingestion_warnings_v2 (
   team_id Int64,
   source LowCardinality(String),
@@ -797,7 +797,7 @@ CREATE MATERIALIZED VIEW insights.error_tracking_fingerprint_issue_state_mv TO i
   _offset,
   _partition
 FROM insights.kafka_error_tracking_fingerprint_issue_state;
-CREATE MATERIALIZED VIEW insights.hog_invocation_results_mv TO insights.hog_invocation_results_data (team_id Int64, function_kind LowCardinality(String), function_id String, invocation_id String, parent_run_id String, status LowCardinality(String), attempts UInt8, is_retry UInt8, scheduled_at DateTime64(6, 'UTC'), first_scheduled_at DateTime64(6, 'UTC'), started_at Nullable(DateTime64(6, 'UTC')), finished_at Nullable(DateTime64(6, 'UTC')), duration_ms Nullable(UInt32), error_kind LowCardinality(String), error_message String, event_uuid String, distinct_id String, person_id String, invocation_globals String, version UInt64, is_deleted UInt8, _timestamp Nullable(DateTime), _offset UInt64, _partition UInt64) AS SELECT
+CREATE MATERIALIZED VIEW insights.invocations_mv TO insights.invocations_data (team_id Int64, function_kind LowCardinality(String), function_id String, invocation_id String, parent_run_id String, status LowCardinality(String), attempts UInt8, is_retry UInt8, scheduled_at DateTime64(6, 'UTC'), first_scheduled_at DateTime64(6, 'UTC'), started_at Nullable(DateTime64(6, 'UTC')), finished_at Nullable(DateTime64(6, 'UTC')), duration_ms Nullable(UInt32), error_kind LowCardinality(String), error_message String, event_uuid String, distinct_id String, person_id String, invocation_globals String, version UInt64, is_deleted UInt8, _timestamp Nullable(DateTime), _offset UInt64, _partition UInt64) AS SELECT
   team_id,
   function_kind,
   function_id,
@@ -826,7 +826,7 @@ CREATE MATERIALIZED VIEW insights.hog_invocation_results_mv TO insights.hog_invo
   _timestamp,
   _offset,
   _partition
-FROM insights.kafka_hog_invocation_results;
+FROM insights.kafka_invocations;
 CREATE MATERIALIZED VIEW insights.ingestion_warnings_v2_mv TO insights.ingestion_warnings_v2 (team_id Int64, source LowCardinality(String), type String, details String, timestamp DateTime64(6, 'UTC'), _timestamp Nullable(DateTime), _offset UInt64, _partition UInt64) AS SELECT
   team_id,
   source,
@@ -1002,7 +1002,7 @@ CREATE VIEW insights.custom_metrics_test AS SELECT
   1 AS value,
   'Test to check that the metric endpoint is working' AS help,
   'gauge' AS type;
-CREATE OR REPLACE DICTIONARY insights.web_bot_definition_dict (`regexp` String, `name` String, `category` String, `traffic_type` String, `operator` String) PRIMARY KEY regexp SOURCE(DATASTORE(USER 'default' DB 'insights' TABLE 'web_bot_definition')) LAYOUT(REGEXP_TREE()) LIFETIME(MIN 3000 MAX 3600);
+CREATE OR REPLACE DICTIONARY insights.web_bot_definition_dict (`regexp` String, `name` String, `category` String, `traffic_type` String, `operator` String) PRIMARY KEY regexp SOURCE(CLICKHOUSE(USER 'default' DB 'insights' TABLE 'web_bot_definition')) LAYOUT(REGEXP_TREE()) LIFETIME(MIN 3000 MAX 3600);
 CREATE TABLE insights.conversion_goal_attributed_preaggregated (
   team_id Int64,
   job_id UUID,
@@ -1051,7 +1051,7 @@ CREATE TABLE insights.experiment_metric_events_preaggregated (
   computed_at DateTime64(6, 'UTC') DEFAULT now(),
   expires_at Date DEFAULT today() + toIntervalDay(7)
 ) ENGINE = Distributed('aux', 'insights', 'sharded_experiment_metric_events_preaggregated', cityHash64(entity_id));
-CREATE TABLE insights.hog_invocation_results (
+CREATE TABLE insights.invocations (
   team_id Int64,
   function_kind LowCardinality(String),
   function_id String,
@@ -1076,7 +1076,7 @@ CREATE TABLE insights.hog_invocation_results (
   _timestamp DateTime,
   _offset UInt64,
   _partition UInt64
-) ENGINE = Distributed('aux', 'insights', 'hog_invocation_results_data');
+) ENGINE = Distributed('aux', 'insights', 'invocations_data');
 CREATE TABLE insights.marketing_conversions_preaggregated (
   team_id Int64,
   job_id UUID,

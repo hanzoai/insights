@@ -28,8 +28,8 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id': { id: 2 },
-                '/api/projects/:team_id/event_definitions': {
+                '/v1/projects/:team_id': { id: 2 },
+                '/v1/projects/:team_id/event_definitions': {
                     count: eventDefinitions.length,
                     next: null,
                     previous: null,

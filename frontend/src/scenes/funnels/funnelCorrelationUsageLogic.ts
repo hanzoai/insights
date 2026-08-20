@@ -15,7 +15,7 @@ import type {
     InsightsQLAutocompleteResponse,
     InsightsQLMetadataResponse,
     InsightsQLQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     LifecycleQuery,
     LogAttributesQueryResponse,
     LogValuesQueryResponse,
@@ -88,7 +88,7 @@ export interface funnelCorrelationUsageLogicActions {
     setPropertyNames: (propertyNames: string[]) => {
         propertyNames: string[];
     }; // funnelPropertyCorrelationLogic
-    loadDataSuccess: (response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null | undefined, payload?: {
+    loadDataSuccess: (response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null | undefined, payload?: {
         overrideQuery: DataNode<Record<string, any>> | undefined;
         pollOnly: boolean;
         queryId: string;
@@ -100,7 +100,7 @@ export interface funnelCorrelationUsageLogicActions {
             queryId: string;
             refresh: RefreshType | undefined;
         };
-        response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null | undefined;
+        response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null | undefined;
     }; // insightVizDataLogic
 }
 

@@ -3,7 +3,7 @@
 These evals run the real coding agent inside a real sandbox against a seeded Hedgebox project, then score what it did.
 Each eval case gets its own isolated org/team/user, so cases never see each other's state.
 
-Unlike `ee/hogai/eval/ci/`, this tree does **not** run under pytest.
+Unlike `ee/scriptai/eval/ci/`, this tree does **not** run under pytest.
 It runs on a standalone harness that boots the shared infrastructure once (test database, Django live server, LLM gateway, MCP server, Temporal) and then runs every selected suite concurrently.
 See [`harness/README.md`](harness/README.md) for how that works internally.
 
