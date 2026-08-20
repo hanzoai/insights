@@ -1,4 +1,4 @@
-# insights — the ONE build, on Hanzo's own forge.
+# insights — the ONE build, on Hanzo's own Hanzo Git.
 #
 #   git.hanzo.ai push → act_runner (in-cluster git-runner, privileged dind)
 #   → docker build → ghcr.io/hanzoai/insights:<semver> → operator App CR
@@ -33,7 +33,7 @@ on:
         branches: [main]
     # A mirror sync DOES fire push events (verified: run 1289 here has
     # event=push and was created by a sync, not a push), so `on: push` works even
-    # though the forge holds this repo as a pull mirror of GitHub. This is here
+    # though Hanzo Git holds this repo as a pull mirror of GitHub. This is here
     # for deliberate rebuilds, not because push is broken.
     #
     # The flip side, worth knowing before enabling Actions on any mirror: a sync

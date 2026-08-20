@@ -29,7 +29,7 @@
 # it needs no install.
 test:
     - name: one plane
-      # This forge collects workflows from the FIRST entry of WORKFLOW_DIRS that
+      # Hanzo Git collects workflows from the FIRST entry of WORKFLOW_DIRS that
       # exists. .hanzo/workflows/ exists, so a file under .github/workflows/ is
       # not a second lane — it is a file that runs nowhere, and it fails by being
       # silent: the checks that would go red are the ones no longer running. That

@@ -2,11 +2,11 @@ name: security
 
 # Semgrep over .semgrep/rules/security — the 46 rules this fork wrote for itself.
 #
-# It had stopped running. The forge collects workflows from the FIRST entry of
+# It had stopped running. Hanzo Git collects workflows from the FIRST entry of
 # WORKFLOW_DIRS that exists, so the day .hanzo/workflows/ appeared, every file
 # still under .github/workflows/ went dark — ci-security.yaml among them. Nothing
 # went red, because the check that would go red was the one no longer running.
-# The forge's own API is the proof: it listed 7 workflows for this repo while 121
+# Hanzo Git's own API is the proof: it listed 7 workflows for this repo while 121
 # files sat in .github/workflows.
 #
 # The rules are the reason this is worth reviving rather than retiring. They are
@@ -23,7 +23,7 @@ name: security
 #     measures 146s, so the filter cost more complexity than it saved.
 #   - The `semgrep_checks` rollup, whose job was to collapse nine jobs into one
 #     required check. One job needs no rollup.
-#   - The Docker Hub login. Those credentials are not among this forge's org
+#   - The Docker Hub login. Those credentials are not among Hanzo Git's org
 #     secrets, and the step was already conditional on them being non-empty.
 #   - The registry packs (p/owasp-top-ten, p/security-audit, p/trailofbits).
 #     Measured on this tree: 170 rules over 25445 files, 322s, one ERROR finding
