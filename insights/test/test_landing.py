@@ -31,6 +31,14 @@ class TestLandingPage(APIBaseTest):
         assert 'href="/login"' in body
         assert "/v1/billing" not in body
 
+    def test_landing_renders_every_template_construct(self):
+        body = Client().get("/").content.decode()
+        for token in ("{#", "{%", "{{"):
+            assert token not in body, (
+                f"{token} reached the browser as text. Django's {{# #}} comment is single-line only, "
+                "so a comment wrapped across lines is emitted verbatim — use {% comment %} for those."
+            )
+
     def test_landing_ships_no_third_party_assets(self):
         """Third-party CDNs are refused in prod and fail SILENTLY — a font that
         never loads leaves the page in system-ui with nothing in the logs."""

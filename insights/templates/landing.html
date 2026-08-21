@@ -141,9 +141,6 @@ footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--i
 <header>
   <div class="wrap bar">
     <a class="mark" href="/"><svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hanzo"><path d="M22.21 67V44.6369H0V67H22.21Z"/><path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"/><path d="M22.21 0H0V22.3184H22.21V0Z"/><path d="M66.7198 0H44.5098V22.3184H66.7198V0Z"/><path d="M66.7198 67V44.6369H44.5098V67H66.7198Z"/></svg>Hanzo Insights</a>
-    {# The bar carried the mark and Sign in alone, so every other way out of this
-       page sat at the bottom of a long scroll. Same destinations the footer
-       already names, from the same context, at the top where a reader is. #}
     <nav class="nav">
       <a href="{{ docs_url }}">Docs</a>
       <a href="{{ plans_url }}">Plans</a>
@@ -238,9 +235,7 @@ footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--i
 </footer>
 
 {% if not opt_out_capture and js_insights_api_key %}
-{# The page is otherwise script-free, so this is the whole of its JavaScript: the
-   product measuring its own front door, with the library it already serves from
-   this origin. No third-party tag — those are refused here, like every other asset. #}
+{# Served from this origin: prod refuses third-party asset hosts. #}
 <script nonce="{{ request.csp_nonce }}" src="{% static 'array.js' %}"></script>
 <script nonce="{{ request.csp_nonce }}">
   insights.init("{{ js_insights_api_key|escapejs }}", {
