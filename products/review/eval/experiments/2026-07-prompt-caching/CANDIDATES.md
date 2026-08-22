@@ -1,7 +1,7 @@
 # Review-stage cost experiment candidates (prompt-caching program) — 2026-07-06
 
 > Ideation round over the 2026-07-03 investigation (`INVESTIGATION.md`, same folder).
-> Method: 4 lens-diverse generators produced 18 raw candidates, merged to 13, each adversarially audited by 2 independent
+> Method: 4 lens-diverse generators produced 18 raw candidates, merged to 13, each adversarially reviewed by 2 independent
 > critics (caching mechanics + economics; quality + precedent). The audit killed 3; a user decision the same day
 > (see the locked constraints below) killed 3 more. 7 survive; kills are recorded in the graveyard so they are not re-proposed.
 > Candidate numbering (#1-#10) is stable across kills — `PLAN.md` and DECISIONS.md reference it.
