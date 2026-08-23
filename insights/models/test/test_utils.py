@@ -137,7 +137,7 @@ class TestKeyMarks:
 class TestIngestKeyIsNotMintedHere:
     """Cloud is the one authority that mints an ingest key.
 
-    A `pk-` invented here resolves to no project, and the ingest door answers
+    A `pk-` invented here resolves to no project, and the ingest endpoint answers
     `ingest_key_unknown` -- a team that looks configured and drops every event. So
     the mint refuses outright, and `Team.api_token`'s default stands in something
     that is not a key at all rather than a weaker one.

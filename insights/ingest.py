@@ -1,7 +1,7 @@
 """A project's ingest key, which Hanzo cloud mints.
 
 WHY CLOUD AND NOT HERE. The ingress diverts every SDK wire path on this
-deployment's hosts to cloud's `POST /v1/event`, and that door resolves the key it
+deployment's hosts to cloud's `POST /v1/event`, and that endpoint resolves the key it
 is handed to an (org, project) before it accepts anything -- cloud stamps the
 project onto every row it writes. So the key is not a random string this
 deployment gets to choose; it is the name cloud gave a project it created. A

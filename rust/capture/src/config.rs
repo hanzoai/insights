@@ -182,7 +182,7 @@ pub struct Config {
     /// refused rather than stored. On by default: the gate is the tenancy seam.
     ///
     /// Turn it OFF to bring the service up while the KV `team_token:` cache is
-    /// still cold — every key would otherwise resolve to nothing and the door
+    /// still cold — every key would otherwise resolve to nothing and the endpoint
     /// would refuse all traffic at once. Off leaves shape validation, so a
     /// keyless caller is still refused; only the "is this key real" check is
     /// skipped.

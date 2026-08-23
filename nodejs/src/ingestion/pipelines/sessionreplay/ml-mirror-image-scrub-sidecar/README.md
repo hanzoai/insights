@@ -38,7 +38,7 @@ The one difference is that a parked image outlives its source copy, 30 days agai
 Why it was parked travels in headers, so the topic can be triaged without reading image content.
 
 **What makes an image poison rather than unlucky is the only question that matters here.**
-Under saturation every image waits a long time, so anything keyed on waiting or failure count alone would park the entire stream during a backlog, which is the mass loss the wait exists to prevent arriving through a different door.
+Under saturation every image waits a long time, so anything keyed on waiting or failure count alone would park the entire stream during a backlog, which is the mass loss the wait exists to prevent arriving another way.
 An image is blamed only when it keeps failing **while other images succeed**: a sidecar that is full or wedged fails everything equally, so no image ever meets that condition and the lane keeps waiting, which is correct.
 Only a considered answer counts towards blame, which is the `rejected` reason: the sidecar took the image, looked at it, and could not produce bytes.
 A 503 is it declining to look at all, and a refused or reset socket is true of every image at once.

@@ -39,7 +39,7 @@ describe('createValidateSessionReplayHeadersStep', () => {
         }
     })
 
-    // The door that produces this topic guarantees all three headers, so a missing one is an upstream bug → DLQ.
+    // The endpoint that produces this topic guarantees all three headers, so a missing one is an upstream bug → DLQ.
     it.each([
         { missing: 'org', headers: { session_id: 'sess-1', distinct_id: 'user-1' }, reason: 'no_org_in_header' },
         // A token header alone must not route the message — org is the only routing identity.

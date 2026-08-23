@@ -3,8 +3,8 @@
 This deployment holds no flag definitions and runs no evaluator. Evaluation is
 `POST /v1/flags` on api.hanzo.ai -- the native Go engine in `hanzoai/cloud`
 (`apps/flags`), which reads its tenant off the IAM `owner` claim and refuses a
-request that carries no validated principal. This view is the door a signed-in
-browser knocks on, and nothing more.
+request that carries no validated principal. This view is the endpoint a signed-in
+browser calls, and nothing more.
 
 WHY THE BROWSER DOES NOT CALL CLOUD DIRECTLY. `/v1/flags` is org-scoped off a
 signed claim, so the only credential that opens it is an org credential -- and a

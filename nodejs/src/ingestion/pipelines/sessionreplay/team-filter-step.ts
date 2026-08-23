@@ -20,7 +20,7 @@ export interface TeamFilterStepOutput {
  * message with it. This step is additive - it preserves all input properties and adds
  * team context.
  *
- * THE ORG IS A ROUTING FACT, NOT A CREDENTIAL. The door that produces this topic has
+ * THE ORG IS A ROUTING FACT, NOT A CREDENTIAL. The endpoint that produces this topic has
  * already authenticated the caller against IAM and resolved the org server-side; this
  * step decides only WHERE the recording is filed, and nothing here re-authenticates
  * anything.

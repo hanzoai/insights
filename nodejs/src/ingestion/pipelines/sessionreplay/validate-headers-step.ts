@@ -10,11 +10,11 @@ export interface ValidateSessionReplayHeadersStepInput {
 }
 
 /**
- * Validates that a session replay message carries the headers the door that produces this topic
+ * Validates that a session replay message carries the headers the endpoint that produces this topic
  * guarantees, and replaces the wide header object with the narrowed {@link SessionReplayHeaders} so
  * downstream steps can trust them.
  *
- * The one door that produces this topic (cloud's /v1/replay) rejects a snapshot before it reaches
+ * The one endpoint that produces this topic (cloud's /v1/replay) rejects a snapshot before it reaches
  * Kafka unless it has an org, a valid `session_id`, and a `distinct_id`, so their absence here
  * indicates a bug upstream rather than bad user input — such messages are sent to the DLQ.
  */

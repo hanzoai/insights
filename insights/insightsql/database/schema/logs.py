@@ -18,7 +18,7 @@ INSIGHTSQL_MAX_BYTES_TO_READ_FOR_LOGS_USER_QUERIES = 50_000_000_000
 # ── the log plane ────────────────────────────────────────────────────────────
 #
 # WHERE THE LOGS ARE. `event.log` is the live log plane — the same envelope
-# `event.fact` carries, written through the same door, kept in its own table
+# `event.fact` carries, written through the same endpoint, kept in its own table
 # rather than discriminated by a `signal` column. It is where every log line
 # actually lands.
 #
@@ -148,7 +148,7 @@ LOG_ATTRIBUTE_GROUP = [*LOG_ATTRIBUTE_COLUMN, "attribute_key", "attribute_value"
 # The live-tail watermark: how far the product can trust the tail to be complete.
 #
 # The fork read it off its Kafka consumer's per-partition lag. This plane has no
-# staged ingest tier — a row is readable the moment the door writes it — so the
+# staged ingest tier — a row is readable the moment the endpoint writes it — so the
 # watermark is simply now, and the one row here says exactly that. The shape
 # (topic, partition, timestamp) is kept because the product groups by it.
 LOG_CHECKPOINT_SELECT_SQL = "SELECT '' AS _topic, 0 AS _partition, now64(6) AS max_observed_timestamp"

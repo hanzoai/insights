@@ -117,7 +117,7 @@ class ReportDecision:
     # a JSON set, `[]` to clear, or `None` to leave the column alone. `None` for the no-repo branch,
     # which does no research.
     charts: list[dict[str, Any]] | None = None
-    # Which of the two doors into PENDING_INPUT produced this decision, so telemetry can tell a
+    # Which of the two paths into PENDING_INPUT produced this decision, so telemetry can tell a
     # broken repo-selection integration apart from the agent legitimately asking for human input.
     # Irrelevant (left `None`) unless `choice == ActionabilityChoice.REQUIRES_HUMAN_INPUT`.
     pending_reason: str | None = None
