@@ -192,7 +192,7 @@ export function createParseAndAnonymizeMessageStep<T extends ParseMessageStepInp
 
         const sessionId = normalizeSessionId(meta.sessionId)
 
-        // session_id and distinct_id are carried both in the headers (set by the door that produces
+        // session_id and distinct_id are carried both in the headers (set by the endpoint that produces
         // this topic) and in the message body; they must agree — a mismatch means the message is
         // corrupt or mis-routed.
         if (headers.session_id !== sessionId) {

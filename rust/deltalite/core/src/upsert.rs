@@ -590,7 +590,7 @@ async fn upsert_inner(
     }
     let source_rows: usize = cast.iter().map(RecordBatch::num_rows).sum();
 
-    // --- Source-size guard: fail at the front door, not as an OOM mid-rewrite. -------
+    // --- Source-size guard: fail up front, not as an OOM mid-rewrite. ----------------
     let footprint = source_footprint(&cast, &table_schema, &opts.primary_keys)?;
     check_source_size(&footprint, resolve_max_source_bytes(opts.max_source_bytes))?;
 

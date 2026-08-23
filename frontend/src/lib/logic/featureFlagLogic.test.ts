@@ -152,7 +152,7 @@ describe('featureFlagLogic', () => {
         expect(logic.values.featureFlags['new-editor' as never]).toBeUndefined()
     })
 
-    it('says so when the door answers without an evaluator behind it', async () => {
+    it('says so when the endpoint answers without an evaluator behind it', async () => {
         // 200, well-formed, and nothing evaluated it. It grants the same nothing as
         // a 502, so the only thing separating it from a verdict is this signal.
         await mountFlags({ featureFlags: {}, featureFlagPayloads: {}, evaluated: false })

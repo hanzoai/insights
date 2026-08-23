@@ -532,7 +532,7 @@ class VisionActionSerializer(serializers.ModelSerializer):
         if self.instance is not None:
             demote = demote.exclude(pk=self.instance.pk)
         # This bulk update is a write to the current digest. A direct PATCH to it would run
-        # _validate_scanner_access; authorize the same way here so promoting can't be a back door to
+        # _validate_scanner_access; authorize the same way here so promoting can't be a way of
         # modifying a digest whose selection reads from a scanner the requesting user can't access.
         self._authorize_demotions(demote)
         demote.update(is_scanner_digest=False)

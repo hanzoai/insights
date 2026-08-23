@@ -10,7 +10,7 @@ anywhere), `names/retire-version-suffix`, `schema/event-fact`, and upstream
 master `fa1a9a60` (2026-08-06) re-derived through `bin/debrand`. The tag for
 this state is v1.53.0.
 
-ONE ingest door: `POST https://api.hanzo.ai/v1/event` (cloud binary), and ONE
+ONE ingest endpoint: `POST https://api.hanzo.ai/v1/event` (cloud binary), and ONE
 authority that mints the key it accepts: cloud, at `POST /v1/projects`. Every
 SDK wire path (`/e`, `/batch`, `/capture`, `/i/v0/e`, `/v1/e`) on
 insights/analytics/sentry hosts rewrites to it at the ingress. Cloud also
@@ -76,7 +76,7 @@ CLOUD IS THE ONE AUTHORITY THAT MINTS AN INGEST KEY, and this deployment mints
 none. A team's `api_token` HOLDS the key cloud minted at `POST /v1/projects`;
 `insights/ingest.py` is the only place it is obtained and `Team.objects.create`
 the only place it is stored. `generate_random_token_project` raises — a locally
-minted key names no cloud project, so the door refuses it and the events are
+minted key names no cloud project, so the endpoint refuses it and the events are
 gone. The three teams map to cloud projects `hanzo/insights`, `lux/insights`,
 `zoo/insights`.
 
@@ -84,9 +84,9 @@ Tenant is resolved SERVER-SIDE by `eventTenant` (cloud `apps/analytics/event.go`
 in this order: validated IAM bearer → a `pk-` on `Authorization` /
 `x-hanzo-ingest-key` / `?ingest_key=` → `?api_key=` / `x-api-key` / the PostHog
 body field `api_key` → a Hanzo Team workspace token. **There is no brand-host
-fallback any more** — a request Host names no tenant on any door. Earlier notes
+fallback any more** — a request Host names no tenant on any endpoint. Earlier notes
 here described `captureTenant` and a brand-host path; both are gone, and testing
-anonymously now proves nothing except that the door refuses anonymous writes.
+anonymously now proves nothing except that the endpoint refuses anonymous writes.
 
 Read the refusal BODY, it names the cause exactly (measured 2026-08-09):
 
@@ -123,7 +123,7 @@ false, so re-measure before repeating any of it:
   `insights-plugin`, `insights-livestream`, against services `kafka`, `kv`,
   `datastore`, `s3`.
 
-What is still absent is a _dedicated_ write door. `rust/capture` has
+What is still absent is a _dedicated_ write endpoint. `rust/capture` has
 `CaptureMode::Recordings` in source but NO workflow builds it — `.hanzo/workflows`
 builds exactly three images (`insights`, `insights-plugin`, `insights-livestream`).
 `/v1/s` no longer 502s at a retired capture service; it falls through to the

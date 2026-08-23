@@ -10,7 +10,7 @@ Deployment mechanics (create/start/share) are the `managing-streamlit-apps` skil
 
 ## Reading Insights data: `insights_apps.query()`
 
-The one and only data door is the in-sandbox bridge:
+The one and only data path is the in-sandbox bridge:
 
 ```python
 import insights_apps
