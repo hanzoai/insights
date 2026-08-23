@@ -110,8 +110,8 @@ so the whole ramp moves from one place:
 | ------------- | ------------------------------------------------- |
 | Base size     | 14px                                              |
 | Line height   | 1.5715                                            |
-| Font sans     | Geist, -apple-system, Inter, ...                  |
-| Font title    | Geist, -apple-system, Inter, ...                  |
+| Font sans     | Zen, -apple-system, Inter, ...                  |
+| Font title    | Zen, -apple-system, Inter, ...                  |
 | Font mono     | ui-monospace, SFMono-Regular, SF Mono, Menlo, ... |
 | Font medium   | 500                                               |
 | Font semibold | 600                                               |
