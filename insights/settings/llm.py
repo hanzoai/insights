@@ -6,8 +6,8 @@ missing import, so nothing caught it until a request reached the reader and rais
 `AttributeError` as a 500. They live here now, with the concern they belong to.
 
 Every credential defaults empty: a provider is off until something supplies its key, and the
-callers already fail closed on that. Only the endpoints carry a default, and the default is our
-own door rather than a vendor's.
+callers already fail closed on that. Only the endpoints carry a default, and the default is
+ours rather than a vendor's.
 """
 
 from insights.settings.utils import get_from_env
