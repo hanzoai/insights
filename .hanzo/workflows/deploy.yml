@@ -232,6 +232,7 @@ jobs:
             # a matching label. Same shape as platform's build, which is proven green.
             - name: Build + push
               env:
+                  VERSION: ${{ steps.ver.outputs.version }}
                   # The credential the build reads our own packages with. FORGE_TOKEN is
                   # the provisioned one; where nothing more specific is set, the runner's
                   # own job token is what that credential is. One credential, resolved in
@@ -240,7 +241,6 @@ jobs:
                   RUNNER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   set -euo pipefail
-                  VERSION="${{ steps.ver.outputs.version }}"
                   IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
 
                   export FORGE_TOKEN="${FORGE_TOKEN:-$RUNNER_TOKEN}"
@@ -281,13 +281,13 @@ jobs:
             # the daemon's filesystem and silently mount an empty directory.
             - name: Publish static to the origin
               env:
+                  VERSION: ${{ steps.ver.outputs.version }}
                   KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
                   KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
                   KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
                   KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
               run: |
                   set -euo pipefail
-                  VERSION="${{ steps.ver.outputs.version }}"
                   IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
 
                   KMS_CURL=(curl -fsS --retry 5 --retry-delay 2 --retry-connrefused --max-time 30)
@@ -345,6 +345,7 @@ jobs:
             # does not.
             - name: Ship it
               env:
+                  VERSION: ${{ steps.ver.outputs.version }}
                   KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
                   KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
                   KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
@@ -356,7 +357,6 @@ jobs:
                   GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
               run: |
                   set -euo pipefail
-                  VERSION="${{ steps.ver.outputs.version }}"
 
                   # Secrets come from KMS, never from a file or a repo variable.
                   #

@@ -31,11 +31,13 @@ import json
 import time
 import uuid
 import threading
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
+from typing import Any
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
-from django.http import StreamingHttpResponse
+from django.db.models import QuerySet
+from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import timezone
 
 import structlog
@@ -44,12 +46,14 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.throttling import UserRateThrottle
+from rest_framework.throttling import BaseThrottle, UserRateThrottle
 
 from insights import iam
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
+from insights.api.streaming import sse_streaming_response
 from insights.iam import IamUnavailable
+from insights.models.team import Team
 from insights.renderers import SafeJSONRenderer, ServerSentEventRenderer
 
 from products.insights_ai.backend import assistant
@@ -194,7 +198,7 @@ class ConversationDetailSerializer(ConversationSerializer):
         return [render_message(message) for message in messages]
 
 
-def replayable_turns(messages) -> list[dict]:
+def replayable_turns(messages: Iterable[ConversationMessage]) -> list[dict]:
     """The stored thread as turns the model may be shown, oldest-first.
 
     Only what the model actually said is replayed as the model's words. A
@@ -236,14 +240,14 @@ class ConversationViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
     serializer_class = ConversationDetailSerializer
     renderer_classes = [SafeJSONRenderer, ServerSentEventRenderer]
 
-    def get_throttles(self):
+    def get_throttles(self) -> list[BaseThrottle]:
         # Only the writes. Reads are cheap and the UI makes them on every mount,
         # so throttling them would break the product rather than protect it.
         if self.action in ("create", "append_message"):
             return [AssistantBurstThrottle(), AssistantDailyThrottle()]
         return []
 
-    def safely_get_queryset(self, queryset):
+    def safely_get_queryset(self, queryset: QuerySet[Conversation]) -> QuerySet[Conversation]:
         # The mixin filters by team; this adds the second half of the key. A
         # conversation belongs to one person, not to everyone on the project.
         return queryset.filter(user=self.request.user).prefetch_related("messages")
@@ -307,7 +311,7 @@ class ConversationViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
             self._settle(conversation)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def create(self, request: Request, *args, **kwargs):
+    def create(self, request: Request, *args, **kwargs) -> Response | StreamingHttpResponse | HttpResponse:
         """Say something, and stream the reply.
 
         POST rather than GET because it appends to the thread; the response is an
@@ -384,7 +388,7 @@ class ConversationViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
                 }
             )
 
-    def _get_or_open(self, raw_id) -> tuple[Conversation, bool]:
+    def _get_or_open(self, raw_id: Any) -> tuple[Conversation, bool]:
         """Resolve the client-minted id, or open a thread under it.
 
         Fails closed on the read side: a well-formed id belonging to another user
@@ -457,18 +461,32 @@ class ConversationViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
         conversation.refresh_from_db()
         return conversation
 
-    def _stream(self, chunks) -> StreamingHttpResponse:
-        response = StreamingHttpResponse(streaming_content=chunks, content_type=ServerSentEventRenderer.media_type)
-        response["Cache-Control"] = "no-cache"
-        # Tell any buffering proxy to pass bytes through, or the whole point of
-        # streaming is lost at the last hop.
-        response["X-Accel-Buffering"] = "no"
-        return response
+    def _stream(self, chunks: Iterable[bytes]) -> StreamingHttpResponse | HttpResponse:
+        """The reply as an event stream, or 503 once this process is at its cap.
+
+        The wrapper releases the request thread's database connections before the
+        first chunk. Insights runs CONN_MAX_AGE = 0, so a connection still open
+        when the stream opens stays pinned to a pgbouncer slot until the stream
+        ends — and an assistant reply runs for minutes, so at any real number of
+        concurrent chats that is the pool. It also sets the no-buffering headers
+        this used to set by hand, and counts the stream on the SSE metrics every
+        other stream here is already counted on.
+        """
+        return sse_streaming_response(chunks, endpoint="ai_conversation")
 
     def _cancelled(self, conversation: Conversation) -> bool:
         return Conversation.objects.filter(pk=conversation.pk, status=Conversation.Status.CANCELING).exists()
 
-    def _generate(self, conversation, team, content, trace_id, ui_context, is_new, permit) -> Iterator[bytes]:
+    def _generate(
+        self,
+        conversation: Conversation,
+        team: Team,
+        content: str,
+        trace_id: str | None,
+        ui_context: Any,
+        is_new: bool,
+        permit: _Permit,
+    ) -> Iterator[bytes]:
         """Persist the turn, then stream the reply.
 
         Ordering matters: the human turn and the thread's own metadata are stored
@@ -495,7 +513,9 @@ class ConversationViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
                     content=content,
                     trace_id=trace_id,
                 )
-                fields = {"status": Conversation.Status.IN_PROGRESS, "updated_at": timezone.now()}
+                # Heterogeneous by construction: a status, a timestamp, and
+                # sometimes a title, splatted into one update().
+                fields: dict[str, Any] = {"status": Conversation.Status.IN_PROGRESS, "updated_at": timezone.now()}
                 if not conversation.title:
                     fields["title"] = content.strip()[:200] or "New chat"
                 Conversation.objects.filter(pk=conversation.pk).update(**fields)

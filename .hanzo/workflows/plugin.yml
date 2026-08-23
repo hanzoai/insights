@@ -146,9 +146,10 @@ jobs:
             # from common/ and rust/ as well as nodejs/, which is why the GitHub
             # workflow it replaces also built from the root.
             - name: Build + push
+              env:
+                  VERSION: ${{ steps.ver.outputs.version }}
               run: |
                   set -euo pipefail
-                  VERSION="${{ steps.ver.outputs.version }}"
                   IMAGE="ghcr.io/hanzoai/insights-plugin:${VERSION}"
                   # The commit rides the image, so dropping it from the tag loses nothing:
                   # `docker inspect` still answers which source built this.
@@ -180,6 +181,7 @@ jobs:
             # later run ships itself with no special case.
             - name: Ship it
               env:
+                  VERSION: ${{ steps.ver.outputs.version }}
                   KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
                   KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
                   KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
@@ -191,7 +193,6 @@ jobs:
                   GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
               run: |
                   set -euo pipefail
-                  VERSION="${{ steps.ver.outputs.version }}"
 
                   # Secrets come from KMS, never from a file or a repo variable.
                   KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
