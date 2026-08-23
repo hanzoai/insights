@@ -1114,7 +1114,7 @@ def test_inbox_receiver_leg_refuses_a_pr_outside_the_linked_task_repo(team, repo
 def test_inbox_receiver_leg_noops_without_a_reviewable_config(team, repo_config, config_mutation):
     # Self-scoping (decision): toggle on without a synced+enabled config covering the PR's repository
     # is a silent no-op — no GitHub fetch, no run — so the toggle is inert for teams that never
-    # installed the Stamp App, and a disabled/unsynced repo can't be reviewed through the side door.
+    # installed the Stamp App, and a disabled/unsynced repo can't be reviewed some other way.
     _sync_repo_config(team.id, repo_config)
     with team_scope(team.id):
         config_mutation(StampRepoConfig.objects.filter(id=repo_config.id))

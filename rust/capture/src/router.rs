@@ -346,7 +346,7 @@ pub fn router<TZ: TimeSource + Send + Sync + 'static, R: Client + Send + Sync + 
                 .get(v0_endpoint::event)
                 .options(v0_endpoint::options),
         )
-        // The fork's ONE analytics door: the edge routes SDK traffic to /v1/e.
+        // The fork's ONE analytics endpoint: the edge routes SDK traffic to /v1/e.
         .route(
             "/v1/e",
             post(v0_endpoint::event)
@@ -391,7 +391,7 @@ pub fn router<TZ: TimeSource + Send + Sync + 'static, R: Client + Send + Sync + 
                 .get(v0_endpoint::recording)
                 .options(v0_endpoint::options),
         )
-        // The fork's ONE replay door: the edge routes snapshot traffic to /v1/s.
+        // The fork's ONE replay endpoint: the edge routes snapshot traffic to /v1/s.
         .route(
             "/v1/s",
             post(v0_endpoint::recording)
@@ -418,7 +418,7 @@ pub fn router<TZ: TimeSource + Send + Sync + 'static, R: Client + Send + Sync + 
             "/i/v0/ai/",
             post(ai_endpoint::ai_handler).options(ai_endpoint::options),
         )
-        // The fork's ONE AI door: the edge routes AI events to /v1/ai.
+        // The fork's ONE AI endpoint: the edge routes AI events to /v1/ai.
         .route(
             "/v1/ai",
             post(ai_endpoint::ai_handler).options(ai_endpoint::options),

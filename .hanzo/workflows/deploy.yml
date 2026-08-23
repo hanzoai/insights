@@ -86,7 +86,7 @@ jobs:
     # bug, because it was reimplementing scope analysis badly. The compiler already
     # does this correctly.
     #
-    # TS1117 is the same class through a different door, and it recurred because this
+    # TS1117 is the same class arriving a different way, and it recurred because this
     # gate did not name it. A duplicate key in an object literal: the later one wins
     # silently, so `tabs: [(s) => [s.tabs], ...]` declared twice leaves a selector
     # that depends on itself and dies with "Maximum call stack size exceeded".

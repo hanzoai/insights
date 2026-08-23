@@ -3,7 +3,7 @@
 //! A refusal nobody can observe just moves the blindness: the caller learns it
 //! failed, the operator does not learn anyone is failing. Every refusal counts
 //! events on [`crate::prometheus::report_dropped_events`]; this module adds the
-//! attributed half — which credential, how often, from which door — as a
+//! attributed half — which credential, how often, from which endpoint — as a
 //! throttled warning.
 //!
 //! Warnings stay on the OPERATOR plane (metrics + logs) and are deliberately not
@@ -35,7 +35,7 @@ const MAX_TRACKED_KEYS: usize = 100_000;
 /// Stands in for the credential in the throttle key when none was presented.
 const NO_CREDENTIAL: &str = "-";
 
-/// Why traffic was refused at the door. One variant per condition an operator
+/// Why traffic was refused at ingest. One variant per condition an operator
 /// would act on differently.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum WarningType {

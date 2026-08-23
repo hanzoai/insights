@@ -48,7 +48,7 @@ class TestLandingPage(APIBaseTest):
 
     @override_settings(SELF_CAPTURE=True, E2E_TESTING=False, OPT_OUT_CAPTURE=False)
     def test_landing_reports_its_own_traffic(self):
-        """The product's front door went unmeasured while it measured every other
+        """The product's landing page went unmeasured while it measured every other
         surface we run — and a page that records nothing looks exactly like a page
         that records, which is why this asserts the key and not just the script."""
         body = Client().get("/").content.decode()

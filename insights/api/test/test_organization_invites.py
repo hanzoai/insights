@@ -1723,7 +1723,7 @@ class TestOnboardingSkipAPI(APIBaseTest):
         # Regression guard: DRF's Meta.read_only_fields is silently ignored for explicitly
         # declared serializer fields. The dedicated /onboarding/skip/ endpoint rejects
         # reason="delegated" and runs atomic state cleanup; the user PATCH path must NOT
-        # be a back door that bypasses those guarantees.
+        # be a second path that bypasses those guarantees.
         for attempted_value in ("delegated", "later", "other"):
             response = self.client.patch("/v1/users/@me/", {"onboarding_skipped_reason": attempted_value})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)

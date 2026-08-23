@@ -167,13 +167,13 @@ class TestRouting:
 
 
 class TestFlagsEndpoint:
-    """The door itself: the real view, through DRF's real authentication stack."""
+    """The endpoint itself: the real view, through DRF's real authentication stack."""
 
     @pytest.fixture(autouse=True)
     def _rate_limit_setting(self):
         """Isolate the throttle's instance-setting read, not the throttle.
 
-        This door inherits the platform throttle, which asks the database whether
+        This endpoint inherits the platform throttle, which asks the database whether
         rate limiting is on before it decides. That lookup is the only thing here
         that needs a row, so it is stubbed -- the throttle itself still runs, and
         so does everything after it.

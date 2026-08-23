@@ -36,5 +36,5 @@ One line each — the doc has the full write-up and the fix recipe for every ent
 - **Vanished re-exports** — regenerating/shimming a module drops names other code imported from it incidentally (e.g. `schema.BaseModel`); grep for consumers of the old namespace, including relative-import spellings.
 - **Patch targets break on call-time imports** — `@patch("mod.helper")` stops intercepting once `mod` imports `helper` at call time; patch the defining module instead.
 - **Snapshot regen on a bad merge** — regenerate `.ambr` against the merged branch, then confirm it isn't masking a regression.
-- **Measuring the wrapper, not the work** — time inside the process; `importtime` + `tuna`, not pyinstrument; `grimp` for cycles and door enumeration.
+- **Measuring the wrapper, not the work** — time inside the process; `importtime` + `tuna`, not pyinstrument; `grimp` for cycles and importer enumeration.
 - **Phantom importtime costs from GC** — re-capture with `gc.disable()`; if the cost vanishes, the finding is GC, not the module. Keep the entrypoints' GC window closing in a `finally`.

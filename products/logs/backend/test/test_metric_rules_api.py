@@ -326,7 +326,7 @@ class TestLogsMetricRulesAPI(APIBaseTest):
     def test_write_requires_metrics_editor_access(self):
         # Metric rules publish log attribute values into the Metrics product, so rule
         # authors need authority over metrics too — a logs editor whose org restricted
-        # metrics must not be able to export logs data through this side door. RBAC is
+        # metrics must not be able to export logs data this way. RBAC is
         # patched at the core boundary (creating an AccessControl row needs `ee`, which
         # products.logs may not depend on).
         def deny_metrics_only(resource, required_level=None, *args, **kwargs):

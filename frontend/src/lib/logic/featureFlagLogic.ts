@@ -18,7 +18,7 @@ export type FeatureFlagPayloads = Record<string, any>
 interface FeatureFlagVerdict {
     featureFlags?: FeatureFlagsSet
     featureFlagPayloads?: FeatureFlagPayloads
-    /** Did an evaluator actually decide this? False when the door answered without one. */
+    /** Did an evaluator actually decide this? False when the endpoint answered without one. */
     evaluated?: boolean
 }
 
@@ -59,7 +59,7 @@ function spyOnFeatureFlags(featureFlags: FeatureFlagsSet): FeatureFlagsSet {
     // advertised "Move to Insights Cloud" to our own paying users. Whether a
     // verdict is trustworthy is decided by who delivers it, not by a flag about
     // somebody else's hosting model, and the deliverer here is this deployment's
-    // own session-authenticated door.
+    // own session-authenticated endpoint.
     const availableFlags = { ...getPersistedFeatureFlags(), ...featureFlags }
 
     const serialized = JSON.stringify(availableFlags)
@@ -102,7 +102,7 @@ function spyOnFeatureFlags(featureFlags: FeatureFlagsSet): FeatureFlagsSet {
     return flags
 }
 
-/** This user's verdict, from this deployment's own door.
+/** This user's verdict, from this deployment's own endpoint.
  *
  * `/v1/flags/` is answered by Django over the session the browser already has;
  * it relays what Hanzo cloud's native evaluator decided for the signed-in user.
@@ -228,11 +228,11 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         void fetchVerdict()
             .then((verdict) => {
                 actions.setFeatureFlags([], verdict.featureFlags ?? {}, verdict.featureFlagPayloads ?? {})
-                // A door that answers without an evaluator behind it grants nothing,
+                // An endpoint that answers without an evaluator behind it grants nothing,
                 // which is indistinguishable from a deployment that turned nothing
                 // on, so it has to record which of the two happened.
                 if (verdict.evaluated === false) {
-                    actions.setFlagsUnavailable('the door answered without an evaluated verdict')
+                    actions.setFlagsUnavailable('the endpoint answered without an evaluated verdict')
                 }
             })
             .catch((error) => {

@@ -311,8 +311,8 @@ class UserIntegrationViewSet(viewsets.GenericViewSet):
 
         # Single query and single pass — each row picks its own serializer
         # off `integration.kind`. Today the query is filtered to one kind so
-        # the loop only sees that one shape, but the per-row dispatch keeps
-        # the door open for dropping the kind default and returning github
+        # the loop only sees that one shape, but the per-row dispatch leaves
+        # room for dropping the kind default and returning github
         # + slack rows side-by-side in one response.
         integrations = UserIntegration.objects.filter(user=user, kind=kind).order_by("created_at")
         # Only compute the github-specific cross-team installation set when

@@ -32,7 +32,7 @@ pub enum Error {
     Conflict(String),
 
     /// The source batch (resident bytes + estimated PK-set size) exceeds the configured
-    /// ceiling. Raised at the front door instead of growing RSS until the pod OOMs:
+    /// ceiling. Raised on entry instead of growing RSS until the pod OOMs:
     /// deltalite's memory is bounded in the *target* by construction, but scales
     /// linearly with the *source*, and this is the guard on that term.
     #[error("{0}")]
