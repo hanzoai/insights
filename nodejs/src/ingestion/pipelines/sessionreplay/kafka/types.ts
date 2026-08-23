@@ -79,7 +79,7 @@ export const ParsedMessageDataSchema = z.object({
     distinct_id: z.string(),
     session_id: z.string(),
     // The ORG that produced this recording — a routing fact, resolved server-side
-    // from the caller's credential by the one door that produces this topic. It is
+    // from the caller's credential by the one endpoint that produces this topic. It is
     // not a credential and it is not authenticated here.
     org: z.string().nullable(),
     eventsByWindowId: z.record(z.string(), z.array(SnapshotEventSchema)),

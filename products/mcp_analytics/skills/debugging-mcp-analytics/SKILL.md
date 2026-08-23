@@ -134,7 +134,7 @@ before writing queries or changing what gets captured.
 **Prefer the dedicated analysis skills** over hand-written InsightsQL; they already encode the
 exec-mode and harness handling that Hard rules 1 and 4 describe:
 
-- `exploring-mcp-tool-usage` — front door / router: takes a broad "how is my MCP doing"
+- `exploring-mcp-tool-usage` — entry point / router: takes a broad "how is my MCP doing"
   question and dispatches to the right typed tool or focused skill. Start here.
 - `exploring-mcp-tool-quality` — error rates, latency, reach, failing and slow tools.
 - `exploring-mcp-sessions` — session list, per-session tool calls, intent.

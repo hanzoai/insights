@@ -32,7 +32,7 @@ export class TeamService {
      * Resolve the project a recording belongs to from the ORG that produced it.
      *
      * The org is a routing fact, not a credential. It arrives already authenticated:
-     * the only producer on this topic is cloud's /v1/replay door, which resolves it
+     * the only producer on this topic is cloud's /v1/replay endpoint, which resolves it
      * server-side from the IAM-issued publishable key before it ever reaches the
      * wire. Nothing here re-authenticates it, and nothing here should — a second
      * credential on this path is precisely what was removed.

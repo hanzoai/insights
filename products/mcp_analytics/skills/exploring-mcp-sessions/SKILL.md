@@ -182,8 +182,8 @@ HAVING/ORDER, so a `HAVING` search would mismatch the `GROUP BY` key.
 
 ## Related skills
 
-- [`exploring-mcp-tool-usage`](../exploring-mcp-tool-usage/SKILL.md) — the front
-  door: routes a broad "how is my MCP doing?" question to the right tool
+- [`exploring-mcp-tool-usage`](../exploring-mcp-tool-usage/SKILL.md) — the entry
+  point: routes a broad "how is my MCP doing?" question to the right tool
 - [`exploring-mcp-tool-quality`](../exploring-mcp-tool-quality/SKILL.md) — error
   rates and latency across all tools
 - [`exploring-mcp-intent-clusters`](../exploring-mcp-intent-clusters/SKILL.md) —

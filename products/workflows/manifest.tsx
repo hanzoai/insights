@@ -62,7 +62,7 @@ export const manifest: ProductManifest = {
     // merely redundant: its model reads `db_table = "insights_hogflow"`, a table
     // that does not exist in the database, so listing flows answers 500. Showing
     // an entry that can only fail is worse than showing none, and pointing it at
-    // Automations would be a second door onto the same idea.
+    // Automations would be a second entry for the same idea.
     //
     // The routes stay registered for now. Nothing reaches them without this
     // entry, and the removal migration has to wait: the migration chain is wedged

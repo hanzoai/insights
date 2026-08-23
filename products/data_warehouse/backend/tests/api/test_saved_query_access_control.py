@@ -342,7 +342,7 @@ class TestMaterializationRequiresUnderlyingAccess(WarehouseAccessControlTestMixi
 
     def test_running_the_dag_node_is_denied_when_the_query_reads_a_denied_table(self):
         # The run workflow sets is_materialized itself, so running a node publishes the same rows
-        # that `materialize` would - a separate door onto the same declassification.
+        # that `materialize` would - a separate route onto the same declassification.
         dag = DAG.objects.create(team=self.team, name="dag")
         node = Node.objects.create(
             team=self.team, dag=dag, name=self.view.name, saved_query=self.view, type=NodeType.VIEW
@@ -358,7 +358,7 @@ class TestMaterializationRequiresUnderlyingAccess(WarehouseAccessControlTestMixi
 
     def test_materializing_the_node_is_denied_when_the_query_reads_a_denied_table(self):
         # The single-node endpoint dispatches the same materialization workflow as `run`, so it is
-        # yet another door onto the same declassification.
+        # yet another route onto the same declassification.
         dag = DAG.objects.create(team=self.team, name="dag")
         node = Node.objects.create(
             team=self.team, dag=dag, name=self.view.name, saved_query=self.view, type=NodeType.VIEW

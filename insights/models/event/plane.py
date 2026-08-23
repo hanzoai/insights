@@ -46,8 +46,8 @@ from .sql import WRITABLE_EVENTS_DATA_TABLE
 EVENT_TABLE = "event.fact"
 EVENT_MV = "event_mv"
 
-# WHICH SIGNAL. The rename was also a MERGE: `event.fact` holds every signal the
-# door accepts — act, clip, error, log, span — discriminated by `signal`, so the
+# WHICH SIGNAL. The rename was also a MERGE: `event.fact` holds every signal
+# ingest accepts — act, clip, error, log, span — discriminated by `signal`, so the
 # source name no longer says what a row IS. Product events are `act`, and a view
 # that projects them has to say so: unpinned, an exception message arrives as an
 # event name and a browser that only ever threw becomes a user.

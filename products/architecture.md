@@ -97,7 +97,7 @@ These cross the boundary as classes — allowed only under all three rules:
    The implementation lives in the product's wiring location — `backend/insightsql_queries/`, `backend/max_tools.py`, `backend/temporal/`, `backend/tasks/` (a flat `backend/tasks.py` also qualifies) — and isolated products keep those locations in their `backend:contract-check` inputs, so any change to a wiring implementation still re-runs the full suite.
 3. **Validated registration.**
    Registration points check `issubclass(cls, Base)` and reject anything else.
-   Import linters (tach, import-linter) see only the import graph; _what an object is_ can only be checked at runtime, at the door.
+   Import linters (tach, import-linter) see only the import graph; _what an object is_ can only be checked at runtime, at the registration point.
    `ee/scriptai/registry.py` (MaxTool) is the reference implementation: subclass auto-registration with validation.
 
 Django models never cross, with or without an approved base.

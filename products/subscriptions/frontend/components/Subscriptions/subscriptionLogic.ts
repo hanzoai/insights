@@ -401,7 +401,7 @@ export const subscriptionLogic = kea<subscriptionLogicType>([
         subscription: {
             __default: undefined as unknown as SubscriptionType,
             loadSubscription: async () => {
-                // Same guard as the list loader next door, for the same reason: this one is reached
+                // Same guard as the list loader beside it, for the same reason: this one is reached
                 // by URL (`/subscriptions/:id`), so the entry-point check upstream cannot cover it,
                 // and a request to the absent endpoint raises a toast naming a feature the UI has
                 // already stopped offering.

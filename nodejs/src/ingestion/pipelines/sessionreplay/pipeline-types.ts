@@ -13,10 +13,10 @@ export interface MessageContext {
 
 /**
  * The message headers a session replay message is guaranteed to carry and that the pipeline consumes.
- * These are exactly the fields set by the one door that produces this topic (cloud's /v1/replay),
+ * These are exactly the fields set by the one endpoint that produces this topic (cloud's /v1/replay),
  * narrowed to their required, non-optional form — downstream steps take this instead of the wide,
  * all-optional `EventHeaders` so they can read them without re-checking. `org` is a routing fact, not
- * a credential: the door resolves it before the message reaches the wire, and the pipeline files the
+ * a credential: the endpoint resolves it before the message reaches the wire, and the pipeline files the
  * snapshot by it. `session_id` is normalized in the validate step so every downstream step (retention
  * keys, batch lookup, parse) keys on the same canonical form the record path uses.
  */

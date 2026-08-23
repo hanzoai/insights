@@ -469,7 +469,7 @@ def team_api_test_factory():
 
         def test_there_is_no_way_to_reset_the_ingest_key(self):
             # Cloud mints it and has no route that replaces one, so a reset here
-            # could only produce a key the ingest door refuses.
+            # could only produce a key the ingest endpoint refuses.
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
             self.organization_membership.save()
 

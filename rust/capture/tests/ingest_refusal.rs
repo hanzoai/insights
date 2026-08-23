@@ -1,5 +1,5 @@
-//! The door's refusal contract: a caller can tell success from oblivion, and an
-//! operator can see who is being turned away.
+//! The ingest endpoint's refusal contract: a caller can tell success from
+//! oblivion, and an operator can see who is being turned away.
 
 use std::sync::Arc;
 use std::time::Duration;
@@ -190,7 +190,7 @@ async fn refusals_are_visible_to_an_operator() {
 
     let scrape = METRICS.render();
 
-    // Both refusal kinds are counted, attributed to the door that refused.
+    // Both refusal kinds are counted, attributed to the endpoint that refused.
     assert!(
         scrape.contains(r#"capture_ingestion_warnings_total{"#)
             && scrape.contains(r#"type="ingest_key_required""#),
@@ -202,7 +202,7 @@ async fn refusals_are_visible_to_an_operator() {
     );
     assert!(
         scrape.contains(r#"source="analytics""#),
-        "the refusing door must be attributed:\n{scrape}"
+        "the refusing endpoint must be attributed:\n{scrape}"
     );
     assert!(
         scrape.contains(r#"outcome="emitted""#),
