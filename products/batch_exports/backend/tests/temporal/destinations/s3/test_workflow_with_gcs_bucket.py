@@ -34,8 +34,8 @@ async def s3_client(bucket_name, s3_key_prefix):
     """Manage an S3 client to interact with a GCS bucket.
 
     Yields the client after assuming the test bucket exists. Upon resuming, we delete
-    the contents of the bucket under the key prefix we are testing. This opens up the door
-    to bugs that could delete all other data in your bucket. I *strongly* recommend
+    the contents of the bucket under the key prefix we are testing. This risks bugs
+    that could delete all other data in your bucket. I *strongly* recommend
     using a disposable bucket to run these tests or sticking to other tests that use the
     local development object storage.
     """

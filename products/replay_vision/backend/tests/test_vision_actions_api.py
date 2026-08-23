@@ -253,7 +253,7 @@ class TestVisionActionViewSet(_VisionActionAPITestCase):
     def test_promotion_blocked_when_current_digest_reads_a_restricted_scanner(self) -> None:
         # Demoting the current digest is a write to it. If that digest's selection reads from a scanner
         # the promoting user can't access, a direct PATCH would be rejected — promoting must not be a
-        # back door around that check, and the restricted digest must stay put.
+        # second path around that check, and the restricted digest must stay put.
         hidden = self._create_scanner(name="restricted")
         current = VisionAction.all_teams.create(
             team=self.team,

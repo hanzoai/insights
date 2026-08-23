@@ -382,7 +382,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
 (
     team_id Int64,
     model_name LowCardinality(String),
-    embedding_version Int64, -- This is the given iteration of the embedding approach - it will /probably/ always be 0, but we want to be able to iterate on e.g. what we feed the model, so we'll leave that door open for now
+    embedding_version Int64, -- This is the given iteration of the embedding approach - it will /probably/ always be 0, but we want to be able to iterate on e.g. what we feed the model, so we'll keep that option open for now
     fingerprint VARCHAR,
     inserted_at DateTime64(3, 'UTC'),
     embeddings Array(Float64) -- We could experiment with quantization, but if we do we can use a new column, for now we'll eat the inefficiency

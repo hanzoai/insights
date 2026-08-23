@@ -6,7 +6,7 @@ not, and a view whose source stopped receiving rows does not fail — it simply
 stops firing. `event.event` still answers every query with the 9,605 rows it
 froze holding on 2026-08-02, which is the date the People list stopped growing.
 
-The rename was also a MERGE. One table now holds every signal the door accepts
+The rename was also a MERGE. One table now holds every signal the ingest endpoint accepts
 — act, clip, error, log, span — so `FROM event.fact` alone projects a browser
 that only ever threw an exception as a user. `plane.py` pins `signal = 'act'`,
 and both views are recreated here because the predicate is compiled into the

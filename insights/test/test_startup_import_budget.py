@@ -7,7 +7,8 @@ from pathlib import Path
 # Heavy subsystems that must NOT be imported by a bare ``django.setup()``. Each one was
 # deliberately pulled off the startup path (lazy API router, deferred AI-core imports,
 # deferred embedded-Datastore). Importing any of them at setup means a new module-level
-# import re-opened a door — defer it (function-local / TYPE_CHECKING / lazy facade) instead
+# import pulled one back onto the startup path — defer it (function-local / TYPE_CHECKING /
+# lazy facade) instead
 # of widening this budget. See logs/startup-profile and the PRs that introduced these cuts.
 FORBIDDEN_AT_SETUP = [
     "insights.api.rest_router",  # the 160-route DRF aggregator — builds lazily on first request
@@ -34,7 +35,7 @@ FORBIDDEN_AT_SETUP = [
     "pyarrow",  # arrow tables — reached via pandas.compat and batch-export internals, both deferred
     "numpy",  # alert detectors / weighted sampling / warehouse coercion — all call-time now
     "openai",  # OpenAI SDK — pulled by insights.llm.gateway_client, whose callers defer it to call time
-    "anthropic",  # Anthropic SDK — same door as openai (insights.llm.gateway_client)
+    "anthropic",  # Anthropic SDK — same importer as openai (insights.llm.gateway_client)
     "insights.schema",  # the generated pydantic data model (~2s) — enums live in insights.schema_enums
     "insights.insightsql.query",  # query execution entrypoint — drags the layers below in
     "insights.insightsql_queries",  # the query-runner layer (every insight runner)
@@ -386,7 +387,7 @@ def test_no_new_heavy_imports_at_setup() -> None:
         "DO NOT add the package to setup_import_baseline.txt to make this pass — defer the import instead: "
         "function-local with `# noqa: PLC0415`, TYPE_CHECKING for type-only uses, a PEP 562 lazy facade for "
         "package aggregators, or a light activity_logging/visibility module for AppConfig.ready() wiring. "
-        "Read docs/internal/django-startup-time.md for the patterns and the traps. To find the door, run: "
+        "Read docs/internal/django-startup-time.md for the patterns and the traps. To find the importer, run: "
         "python -X importtime -c 'import gc; gc.disable(); import django; django.setup()' and trace the first "
         "importer of the offending package. Only if the package is genuinely required by every process during "
         "django.setup() may it be baselined, with a comment justifying why."

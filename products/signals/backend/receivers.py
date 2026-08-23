@@ -471,7 +471,7 @@ def capture_status_change_analytics(
         return
 
     # Set by mark_report_pending_input_activity right before this save, so the pipeline's two
-    # doors into PENDING_INPUT (repo-selection failure vs. the agent requesting human input) are
+    # paths into PENDING_INPUT (repo-selection failure vs. the agent requesting human input) are
     # distinguishable in the training stream — mirrors failure_reason on signal_report_completed.
     pending_reason = (
         getattr(instance, "_pending_reason", None) if instance.status == SignalReport.Status.PENDING_INPUT else None

@@ -172,7 +172,7 @@ class KeyKind(StrEnum):
     looked up, so each keeps its own mark. A verification token proves control of a
     domain and is read only by the check that issued it. A widget token lets an
     embedded conversations widget speak for the team that embedded it, and reaches
-    that one door rather than the ingest door.
+    that one endpoint rather than the ingest endpoint.
     """
 
     PUBLISHABLE = "publishable"
@@ -244,7 +244,7 @@ def mint(kind: KeyKind) -> str:
     Except the ingest key. Hanzo cloud mints that one at `POST /v1/projects`,
     where it is born already resolving to an (org, project) that cloud stamps
     onto every row it accepts. A `pk-` invented here resolves to nothing, so the
-    ingest door refuses it -- and a team holding one looks healthy while dropping
+    ingest endpoint refuses it -- and a team holding one looks healthy while dropping
     every event. Refusing to make one is what keeps that state unreachable.
     """
     if kind is KeyKind.PUBLISHABLE:
@@ -255,7 +255,7 @@ def mint(kind: KeyKind) -> str:
 # A team that no cloud project has been created for yet holds this instead of a
 # key. It deliberately carries none of the marks above, so `key_kind` reads it as
 # nothing and no reader can mistake it for a credential; it is an absence the
-# column can store, not a weaker key. The door refuses it with
+# column can store, not a weaker key. The ingest endpoint refuses it with
 # `ingest_key_unknown`, which is the true answer -- it names no project.
 UNBOUND_MARK = "unbound-"
 
@@ -266,7 +266,7 @@ def generate_random_token_project() -> str:
     """`Team.api_token` before cloud has named a project for it.
 
     Not a key, and not a mint: cloud mints the ingest key at `POST /v1/projects`
-    and the three doors that create a team (the IAM login pipeline, and the team
+    and the three paths that create a team (the IAM login pipeline, and the team
     and project serializers) put it here at birth. What reaches this is a team
     born outside all three -- a fixture, or a local bootstrap -- and the honest
     value for one of those is that it has no key, spelled so that nothing reads it

@@ -2811,8 +2811,8 @@ def _start_mention_workflow(
     classifier activity at the top of its body and short-circuits if the
     mapping is gone by the time the followup activity runs.
 
-    ``insights_user`` is optional only to keep the door open for the legacy
-    in-workflow resolution path; in practice both event types resolve the
+    ``insights_user`` is optional only to keep the legacy in-workflow resolution
+    path available; in practice both event types resolve the
     user at routing time and pass it in.
     """
     if not untagged_followup:
