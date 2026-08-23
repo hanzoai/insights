@@ -93,7 +93,7 @@ describe('ScrubClient', () => {
     it('never dead-letters on saturation alone, however long the sidecar sheds', async () => {
         // The safety property of the whole dead-letter path. Under a backlog every image waits a
         // long time, so anything keyed on waiting or failure count alone would park the entire
-        // stream, which is the mass loss the wait exists to prevent arriving through another door.
+        // stream, which is the mass loss the wait exists to prevent arriving another way.
         // Nothing succeeds here, so nothing may be blamed on any one image.
         replies = Array.from({ length: 400 }, () => ({ status: 503, body: '' }))
 

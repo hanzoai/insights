@@ -1,8 +1,8 @@
 """Production hardening added on top of the spike: the source-size guard and the
 multipart upload path.
 
-The guard turns "RSS grows until the pod OOMs" into a clean typed error at the front
-door; multipart replaces single ~100 MB PUTs of output files. Both must leave upsert
+The guard turns "RSS grows until the pod OOMs" into a clean typed error on entry;
+multipart replaces single ~100 MB PUTs of output files. Both must leave upsert
 semantics byte-identical, so the multipart test is a full differential parity run with
 the threshold forced to minimum.
 """

@@ -2232,7 +2232,7 @@ def update_task_run(
             if key == "output" and isinstance(value, dict):
                 existing_output = run.output if isinstance(run.output, dict) else {}
                 # Same attested-key policy as set_task_run_output — this PATCH surface is
-                # caller-controlled too, so it can't be a back door to output.pr_merged.
+                # caller-controlled too, so it can't be a second path to output.pr_merged.
                 merged_output = merge_pr_output(existing_output, value)
                 setattr(run, key, _apply_caller_output(existing_output, value, merged_output))
                 update_fields.add(key)

@@ -7,8 +7,8 @@ use thiserror::Error;
 use crate::token::InvalidTokenReason;
 
 /// Machine-readable refusal body. Byte-identical in shape to the `/v1/event`
-/// door cloud already serves (`zip.HTTPError`), so a client branches on `code`
-/// once and both doors answer it the same way.
+/// endpoint cloud already serves (`zip.HTTPError`), so a client branches on `code`
+/// once and both endpoints answer it the same way.
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct ErrorBody {
     pub status: u16,
@@ -147,7 +147,7 @@ impl CaptureError {
     }
 
     /// The client-facing code. The credential arms use the vocabulary the
-    /// `/v1/event` door already answers with, so a caller branches once:
+    /// `/v1/event` endpoint already answers with, so a caller branches once:
     /// `ingest_key_required` (nothing presented), `ingest_key_unknown`
     /// (presented, names no project), `unroutable_events` (body names no one
     /// project to land in). The rest name the payload defect they describe.

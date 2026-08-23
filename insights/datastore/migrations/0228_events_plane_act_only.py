@@ -1,6 +1,6 @@
 """Pin `event_mv` to the `act` signal, so an error message stops becoming an event.
 
-`event.fact` holds every signal the door accepts — act, clip, error, log, span —
+`event.fact` holds every signal the ingest endpoint accepts — act, clip, error, log, span —
 discriminated by `signal`. The events plane is the PRODUCT-event plane, so its
 projection has to say which signal it wants. `plane.py` says exactly that, and
 names both failure modes:

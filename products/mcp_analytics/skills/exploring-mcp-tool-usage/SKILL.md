@@ -12,7 +12,7 @@ description: >
 # Exploring MCP tool usage
 
 Any MCP server instrumented with the `@hanzo/mcp` SDK emits a `$mcp_tool_call`
-event every time an agent invokes a tool. This skill is the **front door** for a
+event every time an agent invokes a tool. This skill is the **starting point** for a
 user who knows they want to look at their MCP tool usage but hasn't picked a
 specific question. Offer the menu below, then route to the tool — or the focused
 skill — that answers what they choose.

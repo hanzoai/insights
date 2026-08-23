@@ -189,7 +189,7 @@ class TestDashboardDuplicationAccessControl(APIBaseTest):
         assert self._duplicate() == expected_status
 
     def test_denied_source_dashboard_also_blocks_direct_retrieve(self) -> None:
-        # Baseline: the duplication block is a back door around this denied retrieve.
+        # Baseline: the duplication block is a second path around this denied retrieve.
         self._set_access("dashboard", self.dashboard_id, "none")
         self.client.force_login(self.member)
 

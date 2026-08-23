@@ -167,7 +167,7 @@ pub fn resolve_max_source_bytes(explicit: Option<usize>) -> Option<usize> {
 }
 
 /// Reject a source whose estimated footprint exceeds the ceiling. This is the clean
-/// front-door failure that replaces "RSS grows until the pod OOMs": the target side of
+/// failure on entry that replaces "RSS grows until the pod OOMs": the target side of
 /// an upsert is memory-bounded by construction, the source side is linear in the
 /// caller's batch, and nothing else refuses an oversized one.
 pub fn check_source_size(footprint: &SourceFootprint, ceiling: Option<usize>) -> Result<()> {

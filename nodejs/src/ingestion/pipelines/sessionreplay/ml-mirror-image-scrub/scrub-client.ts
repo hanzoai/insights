@@ -39,7 +39,7 @@ export class ScrubPoisoned extends Error {
  *
  * This is the whole safety question for the dead-letter path, because under saturation every image
  * waits a long time, so anything keyed on waiting alone would dead-letter the entire stream during a
- * backlog. That is the mass loss the wait exists to prevent, arriving through a different door.
+ * backlog. That is the mass loss the wait exists to prevent, arriving another way.
  *
  * A poison image is distinguished by failing WHILE OTHER IMAGES SUCCEED. A sidecar that is full or
  * wedged fails everything equally, so no image ever meets the second condition and the lane keeps

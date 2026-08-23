@@ -631,7 +631,7 @@ urlpatterns = [
         name="raycast-client-metadata",
     ),
     re_path(r"^v1.+", api_not_found),
-    # This deployment's own flag door: the signed-in user's verdict, evaluated by
+    # This deployment's own flag endpoint: the signed-in user's verdict, evaluated by
     # Hanzo cloud (`/v1/flags`, the native Go engine) and relayed over the session
     # the browser already has. Registered ahead of the SPA catch-all, which would
     # otherwise answer it with a login redirect.
@@ -639,7 +639,7 @@ urlpatterns = [
     # /flags/ is the SDK's evaluation endpoint, and it stays a 404 on purpose. The
     # SDK speaks a keyed, cross-origin protocol we deliberately do not serve -- its
     # token is a stub and it is opted out of capturing -- so answering it would mean
-    # standing that protocol up. The door above is the one this deployment serves,
+    # standing that protocol up. The endpoint above is the one this deployment serves,
     # and it is authenticated by the session rather than by a key in the bundle.
     #
     # Before this existed the path fell through to the SPA catch-all -- a session
