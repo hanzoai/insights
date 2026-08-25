@@ -27,7 +27,7 @@ import type {
 } from './api.schemas'
 
 export const getEventFilterMetricsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_filter/metrics/`
+    return `/v1/projects/${projectId}/event_filter/metrics/`
 }
 
 /**
@@ -48,7 +48,7 @@ export const eventFilterMetricsRetrieve = async (
 }
 
 export const getEventFilterMetricsTotalsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_filter/metrics/totals/`
+    return `/v1/projects/${projectId}/event_filter/metrics/totals/`
 }
 
 /**
@@ -83,8 +83,8 @@ export const getMetricsAttributeValuesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/metrics/attribute_values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/metrics/attribute_values/`
+        ? `/v1/projects/${projectId}/metrics/attribute_values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/metrics/attribute_values/`
 }
 
 /**
@@ -114,8 +114,8 @@ export const getMetricsAttributesRetrieveUrl = (projectId: string, params?: Metr
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/metrics/attributes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/metrics/attributes/`
+        ? `/v1/projects/${projectId}/metrics/attributes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/metrics/attributes/`
 }
 
 /**
@@ -135,7 +135,7 @@ export const metricsAttributesRetrieve = async (
 }
 
 export const getMetricsCharacterizeCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/metrics/characterize/`
+    return `/v1/projects/${projectId}/metrics/characterize/`
 }
 
 /**
@@ -156,7 +156,7 @@ export const metricsCharacterizeCreate = async (
 }
 
 export const getMetricsHasMetricsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/metrics/has_metrics/`
+    return `/v1/projects/${projectId}/metrics/has_metrics/`
 }
 
 export const metricsHasMetricsRetrieve = async (
@@ -170,7 +170,7 @@ export const metricsHasMetricsRetrieve = async (
 }
 
 export const getMetricsQueryCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/metrics/query/`
+    return `/v1/projects/${projectId}/metrics/query/`
 }
 
 export const metricsQueryCreate = async (
@@ -187,7 +187,7 @@ export const metricsQueryCreate = async (
 }
 
 export const getMetricsSamplesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/metrics/samples/`
+    return `/v1/projects/${projectId}/metrics/samples/`
 }
 
 /**
@@ -219,8 +219,8 @@ export const getMetricsValuesRetrieveUrl = (projectId: string, params?: MetricsV
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/metrics/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/metrics/values/`
+        ? `/v1/projects/${projectId}/metrics/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/metrics/values/`
 }
 
 /**

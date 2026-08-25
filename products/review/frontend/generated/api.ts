@@ -44,7 +44,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 export const getReviewBlindSpotsListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review/blind_spots/`
+    return `/v1/projects/${projectId}/review/blind_spots/`
 }
 
 /**
@@ -62,7 +62,7 @@ export const reviewBlindSpotsList = async (
 }
 
 export const getReviewBlindSpotsPartialUpdateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/review/blind_spots/${skillName}/`
+    return `/v1/projects/${projectId}/review/blind_spots/${skillName}/`
 }
 
 /**
@@ -84,7 +84,7 @@ export const reviewBlindSpotsPartialUpdate = async (
 }
 
 export const getReviewPerspectivesListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review/perspectives/`
+    return `/v1/projects/${projectId}/review/perspectives/`
 }
 
 /**
@@ -102,7 +102,7 @@ export const reviewPerspectivesList = async (
 }
 
 export const getReviewPerspectivesPartialUpdateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/review/perspectives/${skillName}/`
+    return `/v1/projects/${projectId}/review/perspectives/${skillName}/`
 }
 
 /**
@@ -135,8 +135,8 @@ export const getReviewReviewsListUrl = (projectId: string, params?: ReviewReview
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/review/reviews/?${stringifiedParams}`
-        : `/api/projects/${projectId}/review/reviews/`
+        ? `/v1/projects/${projectId}/review/reviews/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/review/reviews/`
 }
 
 /**
@@ -155,7 +155,7 @@ export const reviewReviewsList = async (
 }
 
 export const getReviewReviewsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/review/reviews/${id}/`
+    return `/v1/projects/${projectId}/review/reviews/${id}/`
 }
 
 /**
@@ -188,8 +188,8 @@ export const getReviewReviewsPerspectiveStatsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/review/reviews/perspective_stats/?${stringifiedParams}`
-        : `/api/projects/${projectId}/review/reviews/perspective_stats/`
+        ? `/v1/projects/${projectId}/review/reviews/perspective_stats/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/review/reviews/perspective_stats/`
 }
 
 /**
@@ -208,7 +208,7 @@ export const reviewReviewsPerspectiveStatsRetrieve = async (
 }
 
 export const getReviewReviewsTriggerCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review/reviews/trigger/`
+    return `/v1/projects/${projectId}/review/reviews/trigger/`
 }
 
 /**
@@ -229,7 +229,7 @@ export const reviewReviewsTriggerCreate = async (
 }
 
 export const getReviewSettingsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review/settings/`
+    return `/v1/projects/${projectId}/review/settings/`
 }
 
 /**
@@ -247,7 +247,7 @@ export const reviewSettingsRetrieve = async (
 }
 
 export const getReviewSettingsPartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review/settings/`
+    return `/v1/projects/${projectId}/review/settings/`
 }
 
 /**
@@ -268,7 +268,7 @@ export const reviewSettingsPartialUpdate = async (
 }
 
 export const getReviewValidatorsListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/review/validators/`
+    return `/v1/projects/${projectId}/review/validators/`
 }
 
 /**
@@ -286,7 +286,7 @@ export const reviewValidatorsList = async (
 }
 
 export const getReviewValidatorsPartialUpdateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/review/validators/${skillName}/`
+    return `/v1/projects/${projectId}/review/validators/${skillName}/`
 }
 
 /**

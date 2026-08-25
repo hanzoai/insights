@@ -26,8 +26,8 @@ export const getNotificationsListUrl = (projectId: string, params?: Notification
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/notifications/?${stringifiedParams}`
-        : `/api/projects/${projectId}/notifications/`
+        ? `/v1/projects/${projectId}/notifications/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/notifications/`
 }
 
 export const notificationsList = async (
@@ -42,7 +42,7 @@ export const notificationsList = async (
 }
 
 export const getNotificationsArchiveCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/notifications/${id}/archive/`
+    return `/v1/projects/${projectId}/notifications/${id}/archive/`
 }
 
 export const notificationsArchiveCreate = async (
@@ -57,7 +57,7 @@ export const notificationsArchiveCreate = async (
 }
 
 export const getNotificationsMarkReadCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/notifications/${id}/mark_read/`
+    return `/v1/projects/${projectId}/notifications/${id}/mark_read/`
 }
 
 export const notificationsMarkReadCreate = async (
@@ -72,7 +72,7 @@ export const notificationsMarkReadCreate = async (
 }
 
 export const getNotificationsMarkUnreadCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/notifications/${id}/mark_unread/`
+    return `/v1/projects/${projectId}/notifications/${id}/mark_unread/`
 }
 
 export const notificationsMarkUnreadCreate = async (
@@ -87,7 +87,7 @@ export const notificationsMarkUnreadCreate = async (
 }
 
 export const getNotificationsArchiveAllCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notifications/archive_all/`
+    return `/v1/projects/${projectId}/notifications/archive_all/`
 }
 
 export const notificationsArchiveAllCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -98,7 +98,7 @@ export const notificationsArchiveAllCreate = async (projectId: string, options?:
 }
 
 export const getNotificationsArchiveBulkCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notifications/archive_bulk/`
+    return `/v1/projects/${projectId}/notifications/archive_bulk/`
 }
 
 export const notificationsArchiveBulkCreate = async (
@@ -115,7 +115,7 @@ export const notificationsArchiveBulkCreate = async (
 }
 
 export const getNotificationsMarkAllReadCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notifications/mark_all_read/`
+    return `/v1/projects/${projectId}/notifications/mark_all_read/`
 }
 
 export const notificationsMarkAllReadCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -126,7 +126,7 @@ export const notificationsMarkAllReadCreate = async (projectId: string, options?
 }
 
 export const getNotificationsMarkReadBulkCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notifications/mark_read_bulk/`
+    return `/v1/projects/${projectId}/notifications/mark_read_bulk/`
 }
 
 export const notificationsMarkReadBulkCreate = async (
@@ -143,7 +143,7 @@ export const notificationsMarkReadBulkCreate = async (
 }
 
 export const getNotificationsMarkUnreadBulkCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notifications/mark_unread_bulk/`
+    return `/v1/projects/${projectId}/notifications/mark_unread_bulk/`
 }
 
 export const notificationsMarkUnreadBulkCreate = async (
@@ -160,7 +160,7 @@ export const notificationsMarkUnreadBulkCreate = async (
 }
 
 export const getNotificationsUnreadCountRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notifications/unread_count/`
+    return `/v1/projects/${projectId}/notifications/unread_count/`
 }
 
 export const notificationsUnreadCountRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {

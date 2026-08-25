@@ -149,8 +149,8 @@ export const getLlmAnalyticsPersonalSpendListUrl = (params: LlmAnalyticsPersonal
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/llm_analytics/@me/spend/?${stringifiedParams}`
-        : `/api/llm_analytics/@me/spend/`
+        ? `/v1/llm_analytics/@me/spend/?${stringifiedParams}`
+        : `/v1/llm_analytics/@me/spend/`
 }
 
 /**
@@ -178,8 +178,8 @@ export const getDatasetItemsListUrl = (projectId: string, params: DatasetItemsLi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dataset_items/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dataset_items/`
+        ? `/v1/projects/${projectId}/dataset_items/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dataset_items/`
 }
 
 /**
@@ -197,7 +197,7 @@ export const datasetItemsList = async (
 }
 
 export const getDatasetItemsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/dataset_items/`
+    return `/v1/projects/${projectId}/dataset_items/`
 }
 
 /**
@@ -232,8 +232,8 @@ export const getDatasetItemsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dataset_items/${datasetItemId}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dataset_items/${datasetItemId}/`
+        ? `/v1/projects/${projectId}/dataset_items/${datasetItemId}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dataset_items/${datasetItemId}/`
 }
 
 /**
@@ -252,7 +252,7 @@ export const datasetItemsRetrieve = async (
 }
 
 export const getDatasetItemsPartialUpdateUrl = (projectId: string, datasetItemId: string) => {
-    return `/api/projects/${projectId}/dataset_items/${datasetItemId}/`
+    return `/v1/projects/${projectId}/dataset_items/${datasetItemId}/`
 }
 
 /**
@@ -273,7 +273,7 @@ export const datasetItemsPartialUpdate = async (
 }
 
 export const getDatasetItemsArchiveUrl = (projectId: string, datasetItemId: string) => {
-    return `/api/projects/${projectId}/dataset_items/${datasetItemId}/archive/`
+    return `/v1/projects/${projectId}/dataset_items/${datasetItemId}/archive/`
 }
 
 /**
@@ -294,7 +294,7 @@ export const datasetItemsArchive = async (
 }
 
 export const getDatasetItemsRestoreUrl = (projectId: string, datasetItemId: string) => {
-    return `/api/projects/${projectId}/dataset_items/${datasetItemId}/restore/`
+    return `/v1/projects/${projectId}/dataset_items/${datasetItemId}/restore/`
 }
 
 /**
@@ -330,8 +330,8 @@ export const getDatasetItemsVersionsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dataset_items/${datasetItemId}/versions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dataset_items/${datasetItemId}/versions/`
+        ? `/v1/projects/${projectId}/dataset_items/${datasetItemId}/versions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dataset_items/${datasetItemId}/versions/`
 }
 
 /**
@@ -364,8 +364,8 @@ export const getDatasetsListUrl = (projectId: string, params?: DatasetsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/datasets/?${stringifiedParams}`
-        : `/api/projects/${projectId}/datasets/`
+        ? `/v1/projects/${projectId}/datasets/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/datasets/`
 }
 
 /**
@@ -383,7 +383,7 @@ export const datasetsList = async (
 }
 
 export const getDatasetsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/datasets/`
+    return `/v1/projects/${projectId}/datasets/`
 }
 
 /**
@@ -403,7 +403,7 @@ export const datasetsCreate = async (
 }
 
 export const getDatasetsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/`
+    return `/v1/projects/${projectId}/datasets/${id}/`
 }
 
 /**
@@ -421,7 +421,7 @@ export const datasetsRetrieve = async (
 }
 
 export const getDatasetsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/`
+    return `/v1/projects/${projectId}/datasets/${id}/`
 }
 
 /**
@@ -442,7 +442,7 @@ export const datasetsPartialUpdate = async (
 }
 
 export const getDatasetsArchiveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/archive/`
+    return `/v1/projects/${projectId}/datasets/${id}/archive/`
 }
 
 /**
@@ -460,7 +460,7 @@ export const datasetsArchive = async (
 }
 
 export const getDatasetsExportsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/exports/`
+    return `/v1/projects/${projectId}/datasets/${id}/exports/`
 }
 
 /**
@@ -481,7 +481,7 @@ export const datasetsExportsCreate = async (
 }
 
 export const getDatasetsExportsRetrieveUrl = (projectId: string, id: string, exportId: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/exports/${exportId}/`
+    return `/v1/projects/${projectId}/datasets/${id}/exports/${exportId}/`
 }
 
 /**
@@ -500,7 +500,7 @@ export const datasetsExportsRetrieve = async (
 }
 
 export const getDatasetsExportsContentRetrieveUrl = (projectId: string, id: string, exportId: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/exports/${exportId}/content/`
+    return `/v1/projects/${projectId}/datasets/${id}/exports/${exportId}/content/`
 }
 
 /**
@@ -519,7 +519,7 @@ export const datasetsExportsContentRetrieve = async (
 }
 
 export const getDatasetsRestoreUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/restore/`
+    return `/v1/projects/${projectId}/datasets/${id}/restore/`
 }
 
 /**
@@ -548,8 +548,8 @@ export const getDatasetsRevisionsListUrl = (projectId: string, id: string, param
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/datasets/${id}/revisions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/datasets/${id}/revisions/`
+        ? `/v1/projects/${projectId}/datasets/${id}/revisions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/datasets/${id}/revisions/`
 }
 
 /**
@@ -568,7 +568,7 @@ export const datasetsRevisionsList = async (
 }
 
 export const getEvaluationDirectoriesListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/evaluation_directories/`
+    return `/v1/projects/${projectId}/evaluation_directories/`
 }
 
 export const evaluationDirectoriesList = async (
@@ -582,7 +582,7 @@ export const evaluationDirectoriesList = async (
 }
 
 export const getEvaluationDirectoriesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/evaluation_directories/`
+    return `/v1/projects/${projectId}/evaluation_directories/`
 }
 
 export const evaluationDirectoriesCreate = async (
@@ -599,7 +599,7 @@ export const evaluationDirectoriesCreate = async (
 }
 
 export const getEvaluationDirectoriesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/evaluation_directories/${id}/`
+    return `/v1/projects/${projectId}/evaluation_directories/${id}/`
 }
 
 export const evaluationDirectoriesRetrieve = async (
@@ -614,7 +614,7 @@ export const evaluationDirectoriesRetrieve = async (
 }
 
 export const getEvaluationDirectoriesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/evaluation_directories/${id}/`
+    return `/v1/projects/${projectId}/evaluation_directories/${id}/`
 }
 
 export const evaluationDirectoriesPartialUpdate = async (
@@ -632,7 +632,7 @@ export const evaluationDirectoriesPartialUpdate = async (
 }
 
 export const getEvaluationDirectoriesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/evaluation_directories/${id}/`
+    return `/v1/projects/${projectId}/evaluation_directories/${id}/`
 }
 
 export const evaluationDirectoriesDestroy = async (
@@ -647,7 +647,7 @@ export const evaluationDirectoriesDestroy = async (
 }
 
 export const getEvaluationRunsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/evaluation_runs/`
+    return `/v1/projects/${projectId}/evaluation_runs/`
 }
 
 /**
@@ -681,8 +681,8 @@ export const getEvaluationsListUrl = (projectId: string, params?: EvaluationsLis
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/evaluations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/evaluations/`
+        ? `/v1/projects/${projectId}/evaluations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/evaluations/`
 }
 
 export const evaluationsList = async (
@@ -697,7 +697,7 @@ export const evaluationsList = async (
 }
 
 export const getEvaluationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/evaluations/`
+    return `/v1/projects/${projectId}/evaluations/`
 }
 
 export const evaluationsCreate = async (
@@ -714,7 +714,7 @@ export const evaluationsCreate = async (
 }
 
 export const getEvaluationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/evaluations/${id}/`
+    return `/v1/projects/${projectId}/evaluations/${id}/`
 }
 
 export const evaluationsRetrieve = async (
@@ -729,7 +729,7 @@ export const evaluationsRetrieve = async (
 }
 
 export const getEvaluationsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/evaluations/${id}/`
+    return `/v1/projects/${projectId}/evaluations/${id}/`
 }
 
 export const evaluationsUpdate = async (
@@ -747,7 +747,7 @@ export const evaluationsUpdate = async (
 }
 
 export const getEvaluationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/evaluations/${id}/`
+    return `/v1/projects/${projectId}/evaluations/${id}/`
 }
 
 export const evaluationsPartialUpdate = async (
@@ -765,7 +765,7 @@ export const evaluationsPartialUpdate = async (
 }
 
 export const getEvaluationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/evaluations/${id}/`
+    return `/v1/projects/${projectId}/evaluations/${id}/`
 }
 
 /**
@@ -779,7 +779,7 @@ export const evaluationsDestroy = async (projectId: string, id: string, options?
 }
 
 export const getEvaluationsTestScriptCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/evaluations/test_script/`
+    return `/v1/projects/${projectId}/evaluations/test_script/`
 }
 
 /**
@@ -799,7 +799,7 @@ export const evaluationsTestScriptCreate = async (
 }
 
 export const getLlmAnalyticsClusteringConfigListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/clustering_config/`
+    return `/v1/projects/${projectId}/llm_analytics/clustering_config/`
 }
 
 /**
@@ -816,7 +816,7 @@ export const llmAnalyticsClusteringConfigList = async (
 }
 
 export const getLlmAnalyticsClusteringConfigSetEventFiltersCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/clustering_config/set_event_filters/`
+    return `/v1/projects/${projectId}/llm_analytics/clustering_config/set_event_filters/`
 }
 
 /**
@@ -850,8 +850,8 @@ export const getLlmAnalyticsClusteringJobsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/clustering_jobs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/clustering_jobs/`
+        ? `/v1/projects/${projectId}/llm_analytics/clustering_jobs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/clustering_jobs/`
 }
 
 /**
@@ -869,7 +869,7 @@ export const llmAnalyticsClusteringJobsList = async (
 }
 
 export const getLlmAnalyticsClusteringJobsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/clustering_jobs/`
+    return `/v1/projects/${projectId}/llm_analytics/clustering_jobs/`
 }
 
 /**
@@ -889,7 +889,7 @@ export const llmAnalyticsClusteringJobsCreate = async (
 }
 
 export const getLlmAnalyticsClusteringJobsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/clustering_jobs/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/clustering_jobs/${id}/`
 }
 
 /**
@@ -907,7 +907,7 @@ export const llmAnalyticsClusteringJobsRetrieve = async (
 }
 
 export const getLlmAnalyticsClusteringJobsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/clustering_jobs/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/clustering_jobs/${id}/`
 }
 
 /**
@@ -928,7 +928,7 @@ export const llmAnalyticsClusteringJobsUpdate = async (
 }
 
 export const getLlmAnalyticsClusteringJobsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/clustering_jobs/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/clustering_jobs/${id}/`
 }
 
 /**
@@ -949,7 +949,7 @@ export const llmAnalyticsClusteringJobsPartialUpdate = async (
 }
 
 export const getLlmAnalyticsClusteringJobsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/clustering_jobs/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/clustering_jobs/${id}/`
 }
 
 /**
@@ -967,7 +967,7 @@ export const llmAnalyticsClusteringJobsDestroy = async (
 }
 
 export const getLlmAnalyticsClusteringRunsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/clustering_runs/`
+    return `/v1/projects/${projectId}/llm_analytics/clustering_runs/`
 }
 
 /**
@@ -990,7 +990,7 @@ export const llmAnalyticsClusteringRunsCreate = async (
 }
 
 export const getLlmAnalyticsEvaluationConfigRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_config/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_config/`
 }
 
 /**
@@ -1007,7 +1007,7 @@ export const llmAnalyticsEvaluationConfigRetrieve = async (
 }
 
 export const getLlmAnalyticsEvaluationConfigSetActiveKeyCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_config/set_active_key/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_config/set_active_key/`
 }
 
 /**
@@ -1041,8 +1041,8 @@ export const getLlmAnalyticsEvaluationReportsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/evaluation_reports/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/evaluation_reports/`
+        ? `/v1/projects/${projectId}/llm_analytics/evaluation_reports/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/evaluation_reports/`
 }
 
 /**
@@ -1060,7 +1060,7 @@ export const llmAnalyticsEvaluationReportsList = async (
 }
 
 export const getLlmAnalyticsEvaluationReportsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_reports/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_reports/`
 }
 
 /**
@@ -1080,7 +1080,7 @@ export const llmAnalyticsEvaluationReportsCreate = async (
 }
 
 export const getLlmAnalyticsEvaluationReportsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_reports/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_reports/${id}/`
 }
 
 /**
@@ -1098,7 +1098,7 @@ export const llmAnalyticsEvaluationReportsRetrieve = async (
 }
 
 export const getLlmAnalyticsEvaluationReportsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_reports/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_reports/${id}/`
 }
 
 /**
@@ -1119,7 +1119,7 @@ export const llmAnalyticsEvaluationReportsUpdate = async (
 }
 
 export const getLlmAnalyticsEvaluationReportsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_reports/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_reports/${id}/`
 }
 
 /**
@@ -1140,7 +1140,7 @@ export const llmAnalyticsEvaluationReportsPartialUpdate = async (
 }
 
 export const getLlmAnalyticsEvaluationReportsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_reports/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_reports/${id}/`
 }
 
 /**
@@ -1158,7 +1158,7 @@ export const llmAnalyticsEvaluationReportsDestroy = async (
 }
 
 export const getLlmAnalyticsEvaluationReportsGenerateCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_reports/${id}/generate/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_reports/${id}/generate/`
 }
 
 /**
@@ -1191,8 +1191,8 @@ export const getLlmAnalyticsEvaluationReportsRunsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/evaluation_reports/${id}/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/evaluation_reports/${id}/runs/`
+        ? `/v1/projects/${projectId}/llm_analytics/evaluation_reports/${id}/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/evaluation_reports/${id}/runs/`
 }
 
 /**
@@ -1214,7 +1214,7 @@ export const llmAnalyticsEvaluationReportsRunsList = async (
 }
 
 export const getLlmAnalyticsEvaluationSummaryCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/evaluation_summary/`
+    return `/v1/projects/${projectId}/llm_analytics/evaluation_summary/`
 }
 
 /**
@@ -1258,8 +1258,8 @@ export const getLlmAnalyticsModelsRetrieveUrl = (projectId: string, params: LlmA
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/models/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/models/`
+        ? `/v1/projects/${projectId}/llm_analytics/models/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/models/`
 }
 
 /**
@@ -1277,7 +1277,7 @@ export const llmAnalyticsModelsRetrieve = async (
 }
 
 export const getLlmAnalyticsOfflineEvaluationsExperimentItemsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/offline_evaluations/experiment_items/`
+    return `/v1/projects/${projectId}/llm_analytics/offline_evaluations/experiment_items/`
 }
 
 export const llmAnalyticsOfflineEvaluationsExperimentItemsCreate = async (
@@ -1311,8 +1311,8 @@ export const getLlmAnalyticsParserRecipesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/parser_recipes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/parser_recipes/`
+        ? `/v1/projects/${projectId}/llm_analytics/parser_recipes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/parser_recipes/`
 }
 
 export const llmAnalyticsParserRecipesList = async (
@@ -1327,7 +1327,7 @@ export const llmAnalyticsParserRecipesList = async (
 }
 
 export const getLlmAnalyticsParserRecipesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/parser_recipes/`
+    return `/v1/projects/${projectId}/llm_analytics/parser_recipes/`
 }
 
 export const llmAnalyticsParserRecipesCreate = async (
@@ -1344,7 +1344,7 @@ export const llmAnalyticsParserRecipesCreate = async (
 }
 
 export const getLlmAnalyticsParserRecipesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/parser_recipes/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/parser_recipes/${id}/`
 }
 
 export const llmAnalyticsParserRecipesRetrieve = async (
@@ -1359,7 +1359,7 @@ export const llmAnalyticsParserRecipesRetrieve = async (
 }
 
 export const getLlmAnalyticsParserRecipesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/parser_recipes/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/parser_recipes/${id}/`
 }
 
 export const llmAnalyticsParserRecipesPartialUpdate = async (
@@ -1377,7 +1377,7 @@ export const llmAnalyticsParserRecipesPartialUpdate = async (
 }
 
 export const getLlmAnalyticsParserRecipesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/parser_recipes/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/parser_recipes/${id}/`
 }
 
 export const llmAnalyticsParserRecipesDestroy = async (
@@ -1392,7 +1392,7 @@ export const llmAnalyticsParserRecipesDestroy = async (
 }
 
 export const getLlmAnalyticsProviderKeyValidationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/provider_key_validations/`
+    return `/v1/projects/${projectId}/llm_analytics/provider_key_validations/`
 }
 
 /**
@@ -1423,8 +1423,8 @@ export const getLlmAnalyticsProviderKeysListUrl = (projectId: string, params?: L
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/provider_keys/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/provider_keys/`
+        ? `/v1/projects/${projectId}/llm_analytics/provider_keys/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/provider_keys/`
 }
 
 export const llmAnalyticsProviderKeysList = async (
@@ -1439,7 +1439,7 @@ export const llmAnalyticsProviderKeysList = async (
 }
 
 export const getLlmAnalyticsProviderKeysCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/provider_keys/`
+    return `/v1/projects/${projectId}/llm_analytics/provider_keys/`
 }
 
 export const llmAnalyticsProviderKeysCreate = async (
@@ -1456,7 +1456,7 @@ export const llmAnalyticsProviderKeysCreate = async (
 }
 
 export const getLlmAnalyticsProviderKeysRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/provider_keys/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/provider_keys/${id}/`
 }
 
 export const llmAnalyticsProviderKeysRetrieve = async (
@@ -1471,7 +1471,7 @@ export const llmAnalyticsProviderKeysRetrieve = async (
 }
 
 export const getLlmAnalyticsProviderKeysUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/provider_keys/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/provider_keys/${id}/`
 }
 
 export const llmAnalyticsProviderKeysUpdate = async (
@@ -1489,7 +1489,7 @@ export const llmAnalyticsProviderKeysUpdate = async (
 }
 
 export const getLlmAnalyticsProviderKeysPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/provider_keys/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/provider_keys/${id}/`
 }
 
 export const llmAnalyticsProviderKeysPartialUpdate = async (
@@ -1507,7 +1507,7 @@ export const llmAnalyticsProviderKeysPartialUpdate = async (
 }
 
 export const getLlmAnalyticsProviderKeysDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/provider_keys/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/provider_keys/${id}/`
 }
 
 export const llmAnalyticsProviderKeysDestroy = async (
@@ -1522,7 +1522,7 @@ export const llmAnalyticsProviderKeysDestroy = async (
 }
 
 export const getLlmAnalyticsProviderKeysDependentConfigsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/provider_keys/${id}/dependent_configs/`
+    return `/v1/projects/${projectId}/llm_analytics/provider_keys/${id}/dependent_configs/`
 }
 
 /**
@@ -1540,7 +1540,7 @@ export const llmAnalyticsProviderKeysDependentConfigsRetrieve = async (
 }
 
 export const getLlmAnalyticsProviderKeysValidateCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/provider_keys/${id}/validate/`
+    return `/v1/projects/${projectId}/llm_analytics/provider_keys/${id}/validate/`
 }
 
 export const llmAnalyticsProviderKeysValidateCreate = async (
@@ -1572,8 +1572,8 @@ export const getLlmAnalyticsReviewQueueItemsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/review_queue_items/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/review_queue_items/`
+        ? `/v1/projects/${projectId}/llm_analytics/review_queue_items/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/review_queue_items/`
 }
 
 export const llmAnalyticsReviewQueueItemsList = async (
@@ -1588,7 +1588,7 @@ export const llmAnalyticsReviewQueueItemsList = async (
 }
 
 export const getLlmAnalyticsReviewQueueItemsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/review_queue_items/`
+    return `/v1/projects/${projectId}/llm_analytics/review_queue_items/`
 }
 
 export const llmAnalyticsReviewQueueItemsCreate = async (
@@ -1605,7 +1605,7 @@ export const llmAnalyticsReviewQueueItemsCreate = async (
 }
 
 export const getLlmAnalyticsReviewQueueItemsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/review_queue_items/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/review_queue_items/${id}/`
 }
 
 export const llmAnalyticsReviewQueueItemsRetrieve = async (
@@ -1620,7 +1620,7 @@ export const llmAnalyticsReviewQueueItemsRetrieve = async (
 }
 
 export const getLlmAnalyticsReviewQueueItemsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/review_queue_items/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/review_queue_items/${id}/`
 }
 
 export const llmAnalyticsReviewQueueItemsPartialUpdate = async (
@@ -1638,7 +1638,7 @@ export const llmAnalyticsReviewQueueItemsPartialUpdate = async (
 }
 
 export const getLlmAnalyticsReviewQueueItemsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/review_queue_items/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/review_queue_items/${id}/`
 }
 
 export const llmAnalyticsReviewQueueItemsDestroy = async (
@@ -1664,8 +1664,8 @@ export const getLlmAnalyticsReviewQueuesListUrl = (projectId: string, params?: L
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/review_queues/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/review_queues/`
+        ? `/v1/projects/${projectId}/llm_analytics/review_queues/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/review_queues/`
 }
 
 export const llmAnalyticsReviewQueuesList = async (
@@ -1680,7 +1680,7 @@ export const llmAnalyticsReviewQueuesList = async (
 }
 
 export const getLlmAnalyticsReviewQueuesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/review_queues/`
+    return `/v1/projects/${projectId}/llm_analytics/review_queues/`
 }
 
 export const llmAnalyticsReviewQueuesCreate = async (
@@ -1697,7 +1697,7 @@ export const llmAnalyticsReviewQueuesCreate = async (
 }
 
 export const getLlmAnalyticsReviewQueuesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/review_queues/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/review_queues/${id}/`
 }
 
 export const llmAnalyticsReviewQueuesRetrieve = async (
@@ -1712,7 +1712,7 @@ export const llmAnalyticsReviewQueuesRetrieve = async (
 }
 
 export const getLlmAnalyticsReviewQueuesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/review_queues/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/review_queues/${id}/`
 }
 
 export const llmAnalyticsReviewQueuesPartialUpdate = async (
@@ -1730,7 +1730,7 @@ export const llmAnalyticsReviewQueuesPartialUpdate = async (
 }
 
 export const getLlmAnalyticsReviewQueuesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/review_queues/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/review_queues/${id}/`
 }
 
 export const llmAnalyticsReviewQueuesDestroy = async (
@@ -1759,8 +1759,8 @@ export const getLlmAnalyticsScoreDefinitionsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/score_definitions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/score_definitions/`
+        ? `/v1/projects/${projectId}/llm_analytics/score_definitions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/score_definitions/`
 }
 
 export const llmAnalyticsScoreDefinitionsList = async (
@@ -1775,7 +1775,7 @@ export const llmAnalyticsScoreDefinitionsList = async (
 }
 
 export const getLlmAnalyticsScoreDefinitionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/score_definitions/`
+    return `/v1/projects/${projectId}/llm_analytics/score_definitions/`
 }
 
 export const llmAnalyticsScoreDefinitionsCreate = async (
@@ -1792,7 +1792,7 @@ export const llmAnalyticsScoreDefinitionsCreate = async (
 }
 
 export const getLlmAnalyticsScoreDefinitionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/score_definitions/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/score_definitions/${id}/`
 }
 
 export const llmAnalyticsScoreDefinitionsRetrieve = async (
@@ -1807,7 +1807,7 @@ export const llmAnalyticsScoreDefinitionsRetrieve = async (
 }
 
 export const getLlmAnalyticsScoreDefinitionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/score_definitions/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/score_definitions/${id}/`
 }
 
 export const llmAnalyticsScoreDefinitionsPartialUpdate = async (
@@ -1825,7 +1825,7 @@ export const llmAnalyticsScoreDefinitionsPartialUpdate = async (
 }
 
 export const getLlmAnalyticsScoreDefinitionsNewVersionCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/score_definitions/${id}/new_version/`
+    return `/v1/projects/${projectId}/llm_analytics/score_definitions/${id}/new_version/`
 }
 
 export const llmAnalyticsScoreDefinitionsNewVersionCreate = async (
@@ -1843,7 +1843,7 @@ export const llmAnalyticsScoreDefinitionsNewVersionCreate = async (
 }
 
 export const getLlmAnalyticsSummarizationCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/summarization/`
+    return `/v1/projects/${projectId}/llm_analytics/summarization/`
 }
 
 /**
@@ -1884,7 +1884,7 @@ export const llmAnalyticsSummarizationCreate = async (
 }
 
 export const getLlmAnalyticsSummarizationBatchCheckCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/summarization/batch_check/`
+    return `/v1/projects/${projectId}/llm_analytics/summarization/batch_check/`
 }
 
 /**
@@ -1915,7 +1915,7 @@ export const llmAnalyticsSummarizationBatchCheckCreate = async (
 }
 
 export const getLlmAnalyticsTextReprCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/text_repr/`
+    return `/v1/projects/${projectId}/llm_analytics/text_repr/`
 }
 
 /**
@@ -1979,8 +1979,8 @@ export const getLlmAnalyticsTraceReviewsListUrl = (projectId: string, params?: L
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_analytics/trace_reviews/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_analytics/trace_reviews/`
+        ? `/v1/projects/${projectId}/llm_analytics/trace_reviews/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_analytics/trace_reviews/`
 }
 
 export const llmAnalyticsTraceReviewsList = async (
@@ -1995,7 +1995,7 @@ export const llmAnalyticsTraceReviewsList = async (
 }
 
 export const getLlmAnalyticsTraceReviewsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/trace_reviews/`
+    return `/v1/projects/${projectId}/llm_analytics/trace_reviews/`
 }
 
 export const llmAnalyticsTraceReviewsCreate = async (
@@ -2012,7 +2012,7 @@ export const llmAnalyticsTraceReviewsCreate = async (
 }
 
 export const getLlmAnalyticsTraceReviewsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/trace_reviews/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/trace_reviews/${id}/`
 }
 
 export const llmAnalyticsTraceReviewsRetrieve = async (
@@ -2027,7 +2027,7 @@ export const llmAnalyticsTraceReviewsRetrieve = async (
 }
 
 export const getLlmAnalyticsTraceReviewsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/trace_reviews/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/trace_reviews/${id}/`
 }
 
 export const llmAnalyticsTraceReviewsPartialUpdate = async (
@@ -2045,7 +2045,7 @@ export const llmAnalyticsTraceReviewsPartialUpdate = async (
 }
 
 export const getLlmAnalyticsTraceReviewsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/llm_analytics/trace_reviews/${id}/`
+    return `/v1/projects/${projectId}/llm_analytics/trace_reviews/${id}/`
 }
 
 export const llmAnalyticsTraceReviewsDestroy = async (
@@ -2060,7 +2060,7 @@ export const llmAnalyticsTraceReviewsDestroy = async (
 }
 
 export const getLlmAnalyticsTranslateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_analytics/translate/`
+    return `/v1/projects/${projectId}/llm_analytics/translate/`
 }
 
 /**
@@ -2091,8 +2091,8 @@ export const getLlmPromptsListUrl = (projectId: string, params?: LlmPromptsListP
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_prompts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_prompts/`
+        ? `/v1/projects/${projectId}/llm_prompts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_prompts/`
 }
 
 export const llmPromptsList = async (
@@ -2107,7 +2107,7 @@ export const llmPromptsList = async (
 }
 
 export const getLlmPromptsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_prompts/`
+    return `/v1/projects/${projectId}/llm_prompts/`
 }
 
 export const llmPromptsCreate = async (
@@ -2139,8 +2139,8 @@ export const getLlmPromptsNameRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_prompts/name/${promptName}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_prompts/name/${promptName}/`
+        ? `/v1/projects/${projectId}/llm_prompts/name/${promptName}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_prompts/name/${promptName}/`
 }
 
 export const llmPromptsNameRetrieve = async (
@@ -2156,7 +2156,7 @@ export const llmPromptsNameRetrieve = async (
 }
 
 export const getLlmPromptsNamePartialUpdateUrl = (projectId: string, promptName: string) => {
-    return `/api/projects/${projectId}/llm_prompts/name/${promptName}/`
+    return `/v1/projects/${projectId}/llm_prompts/name/${promptName}/`
 }
 
 export const llmPromptsNamePartialUpdate = async (
@@ -2174,7 +2174,7 @@ export const llmPromptsNamePartialUpdate = async (
 }
 
 export const getLlmPromptsNameArchiveCreateUrl = (projectId: string, promptName: string) => {
-    return `/api/projects/${projectId}/llm_prompts/name/${promptName}/archive/`
+    return `/v1/projects/${projectId}/llm_prompts/name/${promptName}/archive/`
 }
 
 export const llmPromptsNameArchiveCreate = async (
@@ -2189,7 +2189,7 @@ export const llmPromptsNameArchiveCreate = async (
 }
 
 export const getLlmPromptsNameDuplicateCreateUrl = (projectId: string, promptName: string) => {
-    return `/api/projects/${projectId}/llm_prompts/name/${promptName}/duplicate/`
+    return `/v1/projects/${projectId}/llm_prompts/name/${promptName}/duplicate/`
 }
 
 export const llmPromptsNameDuplicateCreate = async (
@@ -2207,7 +2207,7 @@ export const llmPromptsNameDuplicateCreate = async (
 }
 
 export const getLlmPromptsNameLabelsUpdateUrl = (projectId: string, promptName: string, labelName: string) => {
-    return `/api/projects/${projectId}/llm_prompts/name/${promptName}/labels/${labelName}/`
+    return `/v1/projects/${projectId}/llm_prompts/name/${promptName}/labels/${labelName}/`
 }
 
 export const llmPromptsNameLabelsUpdate = async (
@@ -2226,7 +2226,7 @@ export const llmPromptsNameLabelsUpdate = async (
 }
 
 export const getLlmPromptsNameLabelsDestroyUrl = (projectId: string, promptName: string, labelName: string) => {
-    return `/api/projects/${projectId}/llm_prompts/name/${promptName}/labels/${labelName}/`
+    return `/v1/projects/${projectId}/llm_prompts/name/${promptName}/labels/${labelName}/`
 }
 
 export const llmPromptsNameLabelsDestroy = async (
@@ -2257,8 +2257,8 @@ export const getLlmPromptsResolveNameRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_prompts/resolve/name/${promptName}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_prompts/resolve/name/${promptName}/`
+        ? `/v1/projects/${projectId}/llm_prompts/resolve/name/${promptName}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_prompts/resolve/name/${promptName}/`
 }
 
 export const llmPromptsResolveNameRetrieve = async (
@@ -2285,8 +2285,8 @@ export const getTaggersListUrl = (projectId: string, params?: TaggersListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/taggers/?${stringifiedParams}`
-        : `/api/projects/${projectId}/taggers/`
+        ? `/v1/projects/${projectId}/taggers/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/taggers/`
 }
 
 export const taggersList = async (
@@ -2301,7 +2301,7 @@ export const taggersList = async (
 }
 
 export const getTaggersCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/taggers/`
+    return `/v1/projects/${projectId}/taggers/`
 }
 
 export const taggersCreate = async (
@@ -2318,7 +2318,7 @@ export const taggersCreate = async (
 }
 
 export const getTaggersRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/taggers/${id}/`
+    return `/v1/projects/${projectId}/taggers/${id}/`
 }
 
 export const taggersRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<TaggerApi> => {
@@ -2329,7 +2329,7 @@ export const taggersRetrieve = async (projectId: string, id: string, options?: R
 }
 
 export const getTaggersUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/taggers/${id}/`
+    return `/v1/projects/${projectId}/taggers/${id}/`
 }
 
 export const taggersUpdate = async (
@@ -2347,7 +2347,7 @@ export const taggersUpdate = async (
 }
 
 export const getTaggersPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/taggers/${id}/`
+    return `/v1/projects/${projectId}/taggers/${id}/`
 }
 
 export const taggersPartialUpdate = async (
@@ -2365,7 +2365,7 @@ export const taggersPartialUpdate = async (
 }
 
 export const getTaggersDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/taggers/${id}/`
+    return `/v1/projects/${projectId}/taggers/${id}/`
 }
 
 /**
@@ -2379,7 +2379,7 @@ export const taggersDestroy = async (projectId: string, id: string, options?: Re
 }
 
 export const getTaggersTestScriptCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/taggers/test_script/`
+    return `/v1/projects/${projectId}/taggers/test_script/`
 }
 
 /**

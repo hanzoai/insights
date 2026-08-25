@@ -53,7 +53,7 @@ export const getCohortsStaffListUrl = (params: CohortsStaffListParams) => {
 
     const stringifiedParams = normalizedParams.toString()
 
-    return stringifiedParams.length > 0 ? `/api/cohorts_staff/?${stringifiedParams}` : `/api/cohorts_staff/`
+    return stringifiedParams.length > 0 ? `/v1/cohorts_staff/?${stringifiedParams}` : `/v1/cohorts_staff/`
 }
 
 /**
@@ -79,7 +79,7 @@ export const cohortsStaffList = async (
 }
 
 export const getCohortsStaffRecalculateCreateUrl = () => {
-    return `/api/cohorts_staff/recalculate/`
+    return `/v1/cohorts_staff/recalculate/`
 }
 
 /**
@@ -107,7 +107,7 @@ export const cohortsStaffRecalculateCreate = async (
 }
 
 export const getCohortsStaffStuckRetrieveUrl = () => {
-    return `/api/cohorts_staff/stuck/`
+    return `/v1/cohorts_staff/stuck/`
 }
 
 /**
@@ -141,8 +141,8 @@ export const getCohortsListUrl = (projectId: string, params?: CohortsListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/cohorts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/cohorts/`
+        ? `/v1/projects/${projectId}/cohorts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/cohorts/`
 }
 
 export const cohortsList = async (
@@ -157,7 +157,7 @@ export const cohortsList = async (
 }
 
 export const getCohortsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/cohorts/`
+    return `/v1/projects/${projectId}/cohorts/`
 }
 
 export const cohortsCreate = async (
@@ -174,7 +174,7 @@ export const cohortsCreate = async (
 }
 
 export const getCohortsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/`
+    return `/v1/projects/${projectId}/cohorts/${id}/`
 }
 
 export const cohortsRetrieve = async (projectId: string, id: number, options?: RequestInit): Promise<CohortApi> => {
@@ -185,7 +185,7 @@ export const cohortsRetrieve = async (projectId: string, id: number, options?: R
 }
 
 export const getCohortsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/`
+    return `/v1/projects/${projectId}/cohorts/${id}/`
 }
 
 export const cohortsUpdate = async (
@@ -203,7 +203,7 @@ export const cohortsUpdate = async (
 }
 
 export const getCohortsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/`
+    return `/v1/projects/${projectId}/cohorts/${id}/`
 }
 
 export const cohortsPartialUpdate = async (
@@ -221,7 +221,7 @@ export const cohortsPartialUpdate = async (
 }
 
 export const getCohortsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/`
+    return `/v1/projects/${projectId}/cohorts/${id}/`
 }
 
 /**
@@ -235,7 +235,7 @@ export const cohortsDestroy = async (projectId: string, id: number, options?: Re
 }
 
 export const getCohortsActivityRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/activity/`
+    return `/v1/projects/${projectId}/cohorts/${id}/activity/`
 }
 
 export const cohortsActivityRetrieve = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {
@@ -246,7 +246,7 @@ export const cohortsActivityRetrieve = async (projectId: string, id: number, opt
 }
 
 export const getCohortsAddPersonsToStaticCohortPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/add_persons_to_static_cohort/`
+    return `/v1/projects/${projectId}/cohorts/${id}/add_persons_to_static_cohort/`
 }
 
 export const cohortsAddPersonsToStaticCohortPartialUpdate = async (
@@ -264,7 +264,7 @@ export const cohortsAddPersonsToStaticCohortPartialUpdate = async (
 }
 
 export const getCohortsCalculationHistoryRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/calculation_history/`
+    return `/v1/projects/${projectId}/cohorts/${id}/calculation_history/`
 }
 
 export const cohortsCalculationHistoryRetrieve = async (
@@ -290,8 +290,8 @@ export const getCohortsPersonsRetrieveUrl = (projectId: string, id: number, para
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/cohorts/${id}/persons/?${stringifiedParams}`
-        : `/api/projects/${projectId}/cohorts/${id}/persons/`
+        ? `/v1/projects/${projectId}/cohorts/${id}/persons/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/cohorts/${id}/persons/`
 }
 
 export const cohortsPersonsRetrieve = async (
@@ -307,7 +307,7 @@ export const cohortsPersonsRetrieve = async (
 }
 
 export const getCohortsRemovePersonFromStaticCohortPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/remove_person_from_static_cohort/`
+    return `/v1/projects/${projectId}/cohorts/${id}/remove_person_from_static_cohort/`
 }
 
 export const cohortsRemovePersonFromStaticCohortPartialUpdate = async (
@@ -325,7 +325,7 @@ export const cohortsRemovePersonFromStaticCohortPartialUpdate = async (
 }
 
 export const getCohortsUsedInRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/cohorts/${id}/used_in/`
+    return `/v1/projects/${projectId}/cohorts/${id}/used_in/`
 }
 
 export const cohortsUsedInRetrieve = async (
@@ -340,7 +340,7 @@ export const cohortsUsedInRetrieve = async (
 }
 
 export const getCohortsAllActivityRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/cohorts/activity/`
+    return `/v1/projects/${projectId}/cohorts/activity/`
 }
 
 export const cohortsAllActivityRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {

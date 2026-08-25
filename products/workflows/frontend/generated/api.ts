@@ -70,7 +70,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 export const getInternalInsightsFlowsProcessDueSchedulesCreateUrl = () => {
-    return `/api/internal/script_flows/process_due_schedules`
+    return `/v1/internal/script_flows/process_due_schedules`
 }
 
 /**
@@ -96,8 +96,8 @@ export const getInsightsFlowTemplatesListUrl = (projectId: string, params?: Insi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flow_templates/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flow_templates/`
+        ? `/v1/projects/${projectId}/script_flow_templates/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flow_templates/`
 }
 
 /**
@@ -115,7 +115,7 @@ export const flowTemplatesList = async (
 }
 
 export const getInsightsFlowTemplatesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/script_flow_templates/`
+    return `/v1/projects/${projectId}/script_flow_templates/`
 }
 
 export const flowTemplatesCreate = async (
@@ -132,7 +132,7 @@ export const flowTemplatesCreate = async (
 }
 
 export const getInsightsFlowTemplatesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flow_templates/${id}/`
+    return `/v1/projects/${projectId}/script_flow_templates/${id}/`
 }
 
 /**
@@ -151,7 +151,7 @@ export const flowTemplatesRetrieve = async (
 }
 
 export const getInsightsFlowTemplatesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flow_templates/${id}/`
+    return `/v1/projects/${projectId}/script_flow_templates/${id}/`
 }
 
 export const flowTemplatesUpdate = async (
@@ -169,7 +169,7 @@ export const flowTemplatesUpdate = async (
 }
 
 export const getInsightsFlowTemplatesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flow_templates/${id}/`
+    return `/v1/projects/${projectId}/script_flow_templates/${id}/`
 }
 
 export const flowTemplatesPartialUpdate = async (
@@ -187,7 +187,7 @@ export const flowTemplatesPartialUpdate = async (
 }
 
 export const getInsightsFlowTemplatesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flow_templates/${id}/`
+    return `/v1/projects/${projectId}/script_flow_templates/${id}/`
 }
 
 export const flowTemplatesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -213,8 +213,8 @@ export const getInsightsFlowTemplatesLogsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flow_templates/${id}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flow_templates/${id}/logs/`
+        ? `/v1/projects/${projectId}/script_flow_templates/${id}/logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flow_templates/${id}/logs/`
 }
 
 export const flowTemplatesLogsRetrieve = async (
@@ -241,8 +241,8 @@ export const getInsightsFlowsListUrl = (projectId: string, params?: InsightsFlow
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/`
+        ? `/v1/projects/${projectId}/script_flows/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/`
 }
 
 export const flowsList = async (
@@ -257,7 +257,7 @@ export const flowsList = async (
 }
 
 export const getInsightsFlowsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/script_flows/`
+    return `/v1/projects/${projectId}/script_flows/`
 }
 
 export const flowsCreate = async (
@@ -274,7 +274,7 @@ export const flowsCreate = async (
 }
 
 export const getInsightsFlowsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/`
+    return `/v1/projects/${projectId}/script_flows/${id}/`
 }
 
 export const flowsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<InsightsFlowApi> => {
@@ -285,7 +285,7 @@ export const flowsRetrieve = async (projectId: string, id: string, options?: Req
 }
 
 export const getInsightsFlowsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/`
+    return `/v1/projects/${projectId}/script_flows/${id}/`
 }
 
 export const flowsUpdate = async (
@@ -303,7 +303,7 @@ export const flowsUpdate = async (
 }
 
 export const getInsightsFlowsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/`
+    return `/v1/projects/${projectId}/script_flows/${id}/`
 }
 
 export const flowsPartialUpdate = async (
@@ -321,7 +321,7 @@ export const flowsPartialUpdate = async (
 }
 
 export const getInsightsFlowsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/`
+    return `/v1/projects/${projectId}/script_flows/${id}/`
 }
 
 export const flowsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -332,7 +332,7 @@ export const flowsDestroy = async (projectId: string, id: string, options?: Requ
 }
 
 export const getInsightsFlowsActionsEmailPartialUpdateUrl = (projectId: string, id: string, actionId: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/actions/${actionId}/email/`
+    return `/v1/projects/${projectId}/script_flows/${id}/actions/${actionId}/email/`
 }
 
 export const flowsActionsEmailPartialUpdate = async (
@@ -362,8 +362,8 @@ export const getInsightsFlowsAssetsRetrieveUrl = (projectId: string, id: string,
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/${id}/assets/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/${id}/assets/`
+        ? `/v1/projects/${projectId}/script_flows/${id}/assets/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/${id}/assets/`
 }
 
 export const flowsAssetsRetrieve = async (
@@ -394,8 +394,8 @@ export const getInsightsFlowsAssetContentRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/${id}/assets/content/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/${id}/assets/content/`
+        ? `/v1/projects/${projectId}/script_flows/${id}/assets/content/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/${id}/assets/content/`
 }
 
 export const flowsAssetContentRetrieve = async (
@@ -411,7 +411,7 @@ export const flowsAssetContentRetrieve = async (
 }
 
 export const getInsightsFlowsBatchJobsListUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/batch_jobs/`
+    return `/v1/projects/${projectId}/script_flows/${id}/batch_jobs/`
 }
 
 export const flowsBatchJobsList = async (
@@ -426,7 +426,7 @@ export const flowsBatchJobsList = async (
 }
 
 export const getInsightsFlowsBatchJobsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/batch_jobs/`
+    return `/v1/projects/${projectId}/script_flows/${id}/batch_jobs/`
 }
 
 export const flowsBatchJobsCreate = async (
@@ -444,7 +444,7 @@ export const flowsBatchJobsCreate = async (
 }
 
 export const getInsightsFlowsDiscardDraftCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/discard_draft/`
+    return `/v1/projects/${projectId}/script_flows/${id}/discard_draft/`
 }
 
 export const flowsDiscardDraftCreate = async (
@@ -459,7 +459,7 @@ export const flowsDiscardDraftCreate = async (
 }
 
 export const getInsightsFlowsGraphPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/graph/`
+    return `/v1/projects/${projectId}/script_flows/${id}/graph/`
 }
 
 export const flowsGraphPartialUpdate = async (
@@ -492,8 +492,8 @@ export const getInsightsFlowsInvocationResultsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/${id}/invocation_results/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/${id}/invocation_results/`
+        ? `/v1/projects/${projectId}/script_flows/${id}/invocation_results/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/${id}/invocation_results/`
 }
 
 export const flowsInvocationResultsRetrieve = async (
@@ -509,7 +509,7 @@ export const flowsInvocationResultsRetrieve = async (
 }
 
 export const getInsightsFlowsInvocationResultRetrieveUrl = (projectId: string, id: string, invocationId: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/invocation_results/${invocationId}/`
+    return `/v1/projects/${projectId}/script_flows/${id}/invocation_results/${invocationId}/`
 }
 
 export const flowsInvocationResultRetrieve = async (
@@ -528,7 +528,7 @@ export const flowsInvocationResultRetrieve = async (
 }
 
 export const getInsightsFlowsInvocationsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/invocations/`
+    return `/v1/projects/${projectId}/script_flows/${id}/invocations/`
 }
 
 export const flowsInvocationsCreate = async (
@@ -557,8 +557,8 @@ export const getInsightsFlowsLogsRetrieveUrl = (projectId: string, id: string, p
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/${id}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/${id}/logs/`
+        ? `/v1/projects/${projectId}/script_flows/${id}/logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/${id}/logs/`
 }
 
 export const flowsLogsRetrieve = async (
@@ -589,8 +589,8 @@ export const getInsightsFlowsMetricsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/${id}/metrics/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/${id}/metrics/`
+        ? `/v1/projects/${projectId}/script_flows/${id}/metrics/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/${id}/metrics/`
 }
 
 export const flowsMetricsRetrieve = async (
@@ -621,8 +621,8 @@ export const getInsightsFlowsMetricsTotalsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/${id}/metrics/totals/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/${id}/metrics/totals/`
+        ? `/v1/projects/${projectId}/script_flows/${id}/metrics/totals/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/${id}/metrics/totals/`
 }
 
 export const flowsMetricsTotalsRetrieve = async (
@@ -638,7 +638,7 @@ export const flowsMetricsTotalsRetrieve = async (
 }
 
 export const getInsightsFlowsPublishCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/publish/`
+    return `/v1/projects/${projectId}/script_flows/${id}/publish/`
 }
 
 export const flowsPublishCreate = async (
@@ -656,7 +656,7 @@ export const flowsPublishCreate = async (
 }
 
 export const getInsightsFlowsRerunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/rerun/`
+    return `/v1/projects/${projectId}/script_flows/${id}/rerun/`
 }
 
 /**
@@ -696,8 +696,8 @@ export const getInsightsFlowsRevisionsListUrl = (projectId: string, id: string, 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/${id}/revisions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/${id}/revisions/`
+        ? `/v1/projects/${projectId}/script_flows/${id}/revisions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/${id}/revisions/`
 }
 
 export const flowsRevisionsList = async (
@@ -713,7 +713,7 @@ export const flowsRevisionsList = async (
 }
 
 export const getInsightsFlowsRevisionsRetrieveUrl = (projectId: string, id: string, version: number) => {
-    return `/api/projects/${projectId}/script_flows/${id}/revisions/${version}/`
+    return `/v1/projects/${projectId}/script_flows/${id}/revisions/${version}/`
 }
 
 export const flowsRevisionsRetrieve = async (
@@ -729,7 +729,7 @@ export const flowsRevisionsRetrieve = async (
 }
 
 export const getInsightsFlowsRevisionsRestoreCreateUrl = (projectId: string, id: string, version: number) => {
-    return `/api/projects/${projectId}/script_flows/${id}/revisions/${version}/restore/`
+    return `/v1/projects/${projectId}/script_flows/${id}/revisions/${version}/restore/`
 }
 
 export const flowsRevisionsRestoreCreate = async (
@@ -748,7 +748,7 @@ export const flowsRevisionsRestoreCreate = async (
 }
 
 export const getInsightsFlowsSchedulesListUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/schedules/`
+    return `/v1/projects/${projectId}/script_flows/${id}/schedules/`
 }
 
 export const flowsSchedulesList = async (
@@ -763,7 +763,7 @@ export const flowsSchedulesList = async (
 }
 
 export const getInsightsFlowsSchedulesCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/schedules/`
+    return `/v1/projects/${projectId}/script_flows/${id}/schedules/`
 }
 
 export const flowsSchedulesCreate = async (
@@ -781,7 +781,7 @@ export const flowsSchedulesCreate = async (
 }
 
 export const getInsightsFlowsSchedulesPartialUpdateUrl = (projectId: string, id: string, scheduleId: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/schedules/${scheduleId}/`
+    return `/v1/projects/${projectId}/script_flows/${id}/schedules/${scheduleId}/`
 }
 
 export const flowsSchedulesPartialUpdate = async (
@@ -800,7 +800,7 @@ export const flowsSchedulesPartialUpdate = async (
 }
 
 export const getInsightsFlowsSchedulesDestroyUrl = (projectId: string, id: string, scheduleId: string) => {
-    return `/api/projects/${projectId}/script_flows/${id}/schedules/${scheduleId}/`
+    return `/v1/projects/${projectId}/script_flows/${id}/schedules/${scheduleId}/`
 }
 
 export const flowsSchedulesDestroy = async (
@@ -816,7 +816,7 @@ export const flowsSchedulesDestroy = async (
 }
 
 export const getInsightsFlowsBulkDeleteCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/script_flows/bulk_delete/`
+    return `/v1/projects/${projectId}/script_flows/bulk_delete/`
 }
 
 export const flowsBulkDeleteCreate = async (
@@ -833,7 +833,7 @@ export const flowsBulkDeleteCreate = async (
 }
 
 export const getInsightsFlowsEmailSendingSuspensionRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/script_flows/email_sending_suspension/`
+    return `/v1/projects/${projectId}/script_flows/email_sending_suspension/`
 }
 
 /**
@@ -866,8 +866,8 @@ export const getInsightsFlowsMetricsGlobalRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/metrics/global/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/metrics/global/`
+        ? `/v1/projects/${projectId}/script_flows/metrics/global/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/metrics/global/`
 }
 
 export const flowsMetricsGlobalRetrieve = async (
@@ -893,8 +893,8 @@ export const getInsightsFlowsReputationRetrieveUrl = (projectId: string, params?
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/script_flows/reputation/?${stringifiedParams}`
-        : `/api/projects/${projectId}/script_flows/reputation/`
+        ? `/v1/projects/${projectId}/script_flows/reputation/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/script_flows/reputation/`
 }
 
 /**
@@ -915,7 +915,7 @@ export const flowsReputationRetrieve = async (
 }
 
 export const getInsightsFlowsUserBlastRadiusCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/script_flows/user_blast_radius/`
+    return `/v1/projects/${projectId}/script_flows/user_blast_radius/`
 }
 
 export const flowsUserBlastRadiusCreate = async (
@@ -932,7 +932,7 @@ export const flowsUserBlastRadiusCreate = async (
 }
 
 export const getInternalInsightsFlowsAccountAudienceCreateUrl = (teamId: string) => {
-    return `/api/projects/${teamId}/internal/script_flows/account_audience`
+    return `/v1/projects/${teamId}/internal/script_flows/account_audience`
 }
 
 /**
@@ -947,7 +947,7 @@ export const internalInsightsFlowsAccountAudienceCreate = async (teamId: string,
 }
 
 export const getInternalInsightsFlowsBatchJobsStatusUpdateUrl = (teamId: string, batchJobId: string) => {
-    return `/api/projects/${teamId}/internal/script_flows/batch_jobs/${batchJobId}/status`
+    return `/v1/projects/${teamId}/internal/script_flows/batch_jobs/${batchJobId}/status`
 }
 
 /**
@@ -970,7 +970,7 @@ export const internalInsightsFlowsBatchJobsStatusUpdate = async (
 }
 
 export const getInternalInsightsFlowsUserBlastRadiusCreateUrl = (teamId: string) => {
-    return `/api/projects/${teamId}/internal/script_flows/user_blast_radius`
+    return `/v1/projects/${teamId}/internal/script_flows/user_blast_radius`
 }
 
 /**
@@ -985,7 +985,7 @@ export const internalInsightsFlowsUserBlastRadiusCreate = async (teamId: string,
 }
 
 export const getInternalInsightsFlowsUserBlastRadiusPersonsCreateUrl = (teamId: string) => {
-    return `/api/projects/${teamId}/internal/script_flows/user_blast_radius_persons`
+    return `/v1/projects/${teamId}/internal/script_flows/user_blast_radius_persons`
 }
 
 /**

@@ -53,7 +53,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 export const getTracingSpansAggregateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/aggregate/`
+    return `/v1/projects/${projectId}/tracing/spans/aggregate/`
 }
 
 export const tracingSpansAggregateCreate = async (
@@ -70,7 +70,7 @@ export const tracingSpansAggregateCreate = async (
 }
 
 export const getTracingSpansAttributeBreakdownCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/attribute-breakdown/`
+    return `/v1/projects/${projectId}/tracing/spans/attribute-breakdown/`
 }
 
 export const tracingSpansAttributeBreakdownCreate = async (
@@ -101,8 +101,8 @@ export const getTracingSpansAttributesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tracing/spans/attributes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tracing/spans/attributes/`
+        ? `/v1/projects/${projectId}/tracing/spans/attributes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tracing/spans/attributes/`
 }
 
 export const tracingSpansAttributesRetrieve = async (
@@ -117,7 +117,7 @@ export const tracingSpansAttributesRetrieve = async (
 }
 
 export const getTracingSpansCountCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/count/`
+    return `/v1/projects/${projectId}/tracing/spans/count/`
 }
 
 export const tracingSpansCountCreate = async (
@@ -134,7 +134,7 @@ export const tracingSpansCountCreate = async (
 }
 
 export const getTracingSpansDurationHistogramCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/duration-histogram/`
+    return `/v1/projects/${projectId}/tracing/spans/duration-histogram/`
 }
 
 export const tracingSpansDurationHistogramCreate = async (
@@ -151,7 +151,7 @@ export const tracingSpansDurationHistogramCreate = async (
 }
 
 export const getTracingSpansHasSpansRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/has_spans/`
+    return `/v1/projects/${projectId}/tracing/spans/has_spans/`
 }
 
 export const tracingSpansHasSpansRetrieve = async (
@@ -165,7 +165,7 @@ export const tracingSpansHasSpansRetrieve = async (
 }
 
 export const getTracingSpansLatencyHeatmapCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/latency-heatmap/`
+    return `/v1/projects/${projectId}/tracing/spans/latency-heatmap/`
 }
 
 export const tracingSpansLatencyHeatmapCreate = async (
@@ -182,7 +182,7 @@ export const tracingSpansLatencyHeatmapCreate = async (
 }
 
 export const getTracingSpansQueryCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/query/`
+    return `/v1/projects/${projectId}/tracing/spans/query/`
 }
 
 export const tracingSpansQueryCreate = async (
@@ -213,8 +213,8 @@ export const getTracingSpansServiceNamesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tracing/spans/service-names/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tracing/spans/service-names/`
+        ? `/v1/projects/${projectId}/tracing/spans/service-names/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tracing/spans/service-names/`
 }
 
 export const tracingSpansServiceNamesRetrieve = async (
@@ -229,7 +229,7 @@ export const tracingSpansServiceNamesRetrieve = async (
 }
 
 export const getTracingSpansSparklineCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/sparkline/`
+    return `/v1/projects/${projectId}/tracing/spans/sparkline/`
 }
 
 export const tracingSpansSparklineCreate = async (
@@ -246,7 +246,7 @@ export const tracingSpansSparklineCreate = async (
 }
 
 export const getTracingSpansSymbolStatsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/symbol-stats/`
+    return `/v1/projects/${projectId}/tracing/spans/symbol-stats/`
 }
 
 export const tracingSpansSymbolStatsCreate = async (
@@ -263,7 +263,7 @@ export const tracingSpansSymbolStatsCreate = async (
 }
 
 export const getTracingSpansTraceCreateUrl = (projectId: string, traceId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/trace/${traceId}/`
+    return `/v1/projects/${projectId}/tracing/spans/trace/${traceId}/`
 }
 
 export const tracingSpansTraceCreate = async (
@@ -281,7 +281,7 @@ export const tracingSpansTraceCreate = async (
 }
 
 export const getTracingSpansTreeCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/spans/tree/`
+    return `/v1/projects/${projectId}/tracing/spans/tree/`
 }
 
 export const tracingSpansTreeCreate = async (
@@ -309,8 +309,8 @@ export const getTracingSpansValuesRetrieveUrl = (projectId: string, params: Trac
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tracing/spans/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tracing/spans/values/`
+        ? `/v1/projects/${projectId}/tracing/spans/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tracing/spans/values/`
 }
 
 export const tracingSpansValuesRetrieve = async (
@@ -336,8 +336,8 @@ export const getTracingViewsListUrl = (projectId: string, params?: TracingViewsL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tracing/views/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tracing/views/`
+        ? `/v1/projects/${projectId}/tracing/views/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tracing/views/`
 }
 
 export const tracingViewsList = async (
@@ -352,7 +352,7 @@ export const tracingViewsList = async (
 }
 
 export const getTracingViewsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tracing/views/`
+    return `/v1/projects/${projectId}/tracing/views/`
 }
 
 export const tracingViewsCreate = async (
@@ -369,7 +369,7 @@ export const tracingViewsCreate = async (
 }
 
 export const getTracingViewsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/tracing/views/${shortId}/`
+    return `/v1/projects/${projectId}/tracing/views/${shortId}/`
 }
 
 export const tracingViewsRetrieve = async (
@@ -384,7 +384,7 @@ export const tracingViewsRetrieve = async (
 }
 
 export const getTracingViewsUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/tracing/views/${shortId}/`
+    return `/v1/projects/${projectId}/tracing/views/${shortId}/`
 }
 
 export const tracingViewsUpdate = async (
@@ -402,7 +402,7 @@ export const tracingViewsUpdate = async (
 }
 
 export const getTracingViewsPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/tracing/views/${shortId}/`
+    return `/v1/projects/${projectId}/tracing/views/${shortId}/`
 }
 
 export const tracingViewsPartialUpdate = async (
@@ -420,7 +420,7 @@ export const tracingViewsPartialUpdate = async (
 }
 
 export const getTracingViewsDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/tracing/views/${shortId}/`
+    return `/v1/projects/${projectId}/tracing/views/${shortId}/`
 }
 
 export const tracingViewsDestroy = async (projectId: string, shortId: string, options?: RequestInit): Promise<void> => {

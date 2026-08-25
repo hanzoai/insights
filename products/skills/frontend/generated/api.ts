@@ -58,8 +58,8 @@ export const getLlmSkillsListUrl = (projectId: string, params?: LlmSkillsListPar
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_skills/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_skills/`
+        ? `/v1/projects/${projectId}/llm_skills/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_skills/`
 }
 
 export const llmSkillsList = async (
@@ -74,7 +74,7 @@ export const llmSkillsList = async (
 }
 
 export const getLlmSkillsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_skills/`
+    return `/v1/projects/${projectId}/llm_skills/`
 }
 
 export const llmSkillsCreate = async (
@@ -91,7 +91,7 @@ export const llmSkillsCreate = async (
 }
 
 export const getLlmSkillsImportCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_skills/import/`
+    return `/v1/projects/${projectId}/llm_skills/import/`
 }
 
 export const llmSkillsImportCreate = async (
@@ -110,7 +110,7 @@ export const llmSkillsImportCreate = async (
 }
 
 export const getLlmSkillsMarketplaceInstallCommandRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_skills/marketplace/install-command/`
+    return `/v1/projects/${projectId}/llm_skills/marketplace/install-command/`
 }
 
 /**
@@ -130,7 +130,7 @@ export const llmSkillsMarketplaceInstallCommandRetrieve = async (
 }
 
 export const getLlmSkillsMarketplaceInstallCommandCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/llm_skills/marketplace/install-command/`
+    return `/v1/projects/${projectId}/llm_skills/marketplace/install-command/`
 }
 
 /**
@@ -167,8 +167,8 @@ export const getLlmSkillsNameRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_skills/name/${skillName}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_skills/name/${skillName}/`
+        ? `/v1/projects/${projectId}/llm_skills/name/${skillName}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_skills/name/${skillName}/`
 }
 
 export const llmSkillsNameRetrieve = async (
@@ -184,7 +184,7 @@ export const llmSkillsNameRetrieve = async (
 }
 
 export const getLlmSkillsNamePartialUpdateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/llm_skills/name/${skillName}/`
+    return `/v1/projects/${projectId}/llm_skills/name/${skillName}/`
 }
 
 export const llmSkillsNamePartialUpdate = async (
@@ -202,7 +202,7 @@ export const llmSkillsNamePartialUpdate = async (
 }
 
 export const getLlmSkillsNameArchiveCreateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/llm_skills/name/${skillName}/archive/`
+    return `/v1/projects/${projectId}/llm_skills/name/${skillName}/archive/`
 }
 
 export const llmSkillsNameArchiveCreate = async (
@@ -217,7 +217,7 @@ export const llmSkillsNameArchiveCreate = async (
 }
 
 export const getLlmSkillsNameDuplicateCreateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/llm_skills/name/${skillName}/duplicate/`
+    return `/v1/projects/${projectId}/llm_skills/name/${skillName}/duplicate/`
 }
 
 export const llmSkillsNameDuplicateCreate = async (
@@ -250,8 +250,8 @@ export const getLlmSkillsNameExportRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_skills/name/${skillName}/export/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_skills/name/${skillName}/export/`
+        ? `/v1/projects/${projectId}/llm_skills/name/${skillName}/export/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_skills/name/${skillName}/export/`
 }
 
 export const llmSkillsNameExportRetrieve = async (
@@ -267,7 +267,7 @@ export const llmSkillsNameExportRetrieve = async (
 }
 
 export const getLlmSkillsNameFilesCreateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/llm_skills/name/${skillName}/files/`
+    return `/v1/projects/${projectId}/llm_skills/name/${skillName}/files/`
 }
 
 export const llmSkillsNameFilesCreate = async (
@@ -285,7 +285,7 @@ export const llmSkillsNameFilesCreate = async (
 }
 
 export const getLlmSkillsNameFilesRenameCreateUrl = (projectId: string, skillName: string) => {
-    return `/api/projects/${projectId}/llm_skills/name/${skillName}/files-rename/`
+    return `/v1/projects/${projectId}/llm_skills/name/${skillName}/files-rename/`
 }
 
 export const llmSkillsNameFilesRenameCreate = async (
@@ -319,8 +319,8 @@ export const getLlmSkillsNameFilesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_skills/name/${skillName}/files/${filePath}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_skills/name/${skillName}/files/${filePath}/`
+        ? `/v1/projects/${projectId}/llm_skills/name/${skillName}/files/${filePath}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_skills/name/${skillName}/files/${filePath}/`
 }
 
 export const llmSkillsNameFilesRetrieve = async (
@@ -353,8 +353,8 @@ export const getLlmSkillsNameFilesDestroyUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_skills/name/${skillName}/files/${filePath}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_skills/name/${skillName}/files/${filePath}/`
+        ? `/v1/projects/${projectId}/llm_skills/name/${skillName}/files/${filePath}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_skills/name/${skillName}/files/${filePath}/`
 }
 
 export const llmSkillsNameFilesDestroy = async (
@@ -386,8 +386,8 @@ export const getLlmSkillsResolveNameRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/llm_skills/resolve/name/${skillName}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/llm_skills/resolve/name/${skillName}/`
+        ? `/v1/projects/${projectId}/llm_skills/resolve/name/${skillName}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/llm_skills/resolve/name/${skillName}/`
 }
 
 export const llmSkillsResolveNameRetrieve = async (

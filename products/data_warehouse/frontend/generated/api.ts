@@ -107,8 +107,8 @@ export const getDataModelingJobsListUrl = (projectId: string, params?: DataModel
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_modeling_jobs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_modeling_jobs/`
+        ? `/v1/projects/${projectId}/data_modeling_jobs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_modeling_jobs/`
 }
 
 /**
@@ -126,7 +126,7 @@ export const dataModelingJobsList = async (
 }
 
 export const getDataModelingJobsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_jobs/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_jobs/${id}/`
 }
 
 /**
@@ -144,7 +144,7 @@ export const dataModelingJobsRetrieve = async (
 }
 
 export const getDataModelingJobsRecentRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_modeling_jobs/recent/`
+    return `/v1/projects/${projectId}/data_modeling_jobs/recent/`
 }
 
 /**
@@ -161,7 +161,7 @@ export const dataModelingJobsRecentRetrieve = async (
 }
 
 export const getDataModelingJobsRunningRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_modeling_jobs/running/`
+    return `/v1/projects/${projectId}/data_modeling_jobs/running/`
 }
 
 /**
@@ -192,8 +192,8 @@ export const getDataWarehouseCheckDatabaseNameRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_warehouse/check-database-name/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_warehouse/check-database-name/`
+        ? `/v1/projects/${projectId}/data_warehouse/check-database-name/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_warehouse/check-database-name/`
 }
 
 /**
@@ -225,8 +225,8 @@ export const getDataWarehouseCheckSchemaNameRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_warehouse/check-schema-name/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_warehouse/check-schema-name/`
+        ? `/v1/projects/${projectId}/data_warehouse/check-schema-name/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_warehouse/check-schema-name/`
 }
 
 /**
@@ -244,7 +244,7 @@ export const dataWarehouseCheckSchemaNameRetrieve = async (
 }
 
 export const getDataWarehouseCompletedActivityRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/completed_activity/`
+    return `/v1/projects/${projectId}/data_warehouse/completed_activity/`
 }
 
 /**
@@ -262,7 +262,7 @@ export const dataWarehouseCompletedActivityRetrieve = async (
 }
 
 export const getDataWarehouseDataHealthIssuesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/data_health_issues/`
+    return `/v1/projects/${projectId}/data_warehouse/data_health_issues/`
 }
 
 /**
@@ -280,7 +280,7 @@ export const dataWarehouseDataHealthIssuesRetrieve = async (
 }
 
 export const getDataWarehouseDataOpsDashboardRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/data_ops_dashboard/`
+    return `/v1/projects/${projectId}/data_warehouse/data_ops_dashboard/`
 }
 
 /**
@@ -297,7 +297,7 @@ export const dataWarehouseDataOpsDashboardRetrieve = async (
 }
 
 export const getDataWarehouseDeleteOrgDestroyUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/delete-org/`
+    return `/v1/projects/${projectId}/data_warehouse/delete-org/`
 }
 
 /**
@@ -318,7 +318,7 @@ export const dataWarehouseDeleteOrgDestroy = async (
 }
 
 export const getDataWarehouseDeprovisionCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/deprovision/`
+    return `/v1/projects/${projectId}/data_warehouse/deprovision/`
 }
 
 /**
@@ -335,7 +335,7 @@ export const dataWarehouseDeprovisionCreate = async (
 }
 
 export const getDataWarehouseJobStatsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/job_stats/`
+    return `/v1/projects/${projectId}/data_warehouse/job_stats/`
 }
 
 /**
@@ -350,7 +350,7 @@ export const dataWarehouseJobStatsRetrieve = async (projectId: string, options?:
 }
 
 export const getDataWarehouseManagedWarehouseDataStatusRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/managed-warehouse-data-status/`
+    return `/v1/projects/${projectId}/data_warehouse/managed-warehouse-data-status/`
 }
 
 /**
@@ -384,8 +384,8 @@ export const getDataWarehouseManagedWarehouseSourceSchemasRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_warehouse/managed-warehouse-source-schemas/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_warehouse/managed-warehouse-source-schemas/`
+        ? `/v1/projects/${projectId}/data_warehouse/managed-warehouse-source-schemas/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_warehouse/managed-warehouse-source-schemas/`
 }
 
 /**
@@ -407,7 +407,7 @@ export const dataWarehouseManagedWarehouseSourceSchemasRetrieve = async (
 }
 
 export const getDataWarehouseOnboardTeamCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/onboard-team/`
+    return `/v1/projects/${projectId}/data_warehouse/onboard-team/`
 }
 
 /**
@@ -430,7 +430,7 @@ export const dataWarehouseOnboardTeamCreate = async (
 }
 
 export const getDataWarehousePropertyValuesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/property_values/`
+    return `/v1/projects/${projectId}/data_warehouse/property_values/`
 }
 
 /**
@@ -444,7 +444,7 @@ export const dataWarehousePropertyValuesRetrieve = async (projectId: string, opt
 }
 
 export const getDataWarehouseProvisionCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/provision/`
+    return `/v1/projects/${projectId}/data_warehouse/provision/`
 }
 
 /**
@@ -464,7 +464,7 @@ export const dataWarehouseProvisionCreate = async (
 }
 
 export const getDataWarehouseResetPasswordCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/reset-password/`
+    return `/v1/projects/${projectId}/data_warehouse/reset-password/`
 }
 
 /**
@@ -481,7 +481,7 @@ export const dataWarehouseResetPasswordCreate = async (
 }
 
 export const getDataWarehouseRunningActivityRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/running_activity/`
+    return `/v1/projects/${projectId}/data_warehouse/running_activity/`
 }
 
 /**
@@ -496,7 +496,7 @@ export const dataWarehouseRunningActivityRetrieve = async (projectId: string, op
 }
 
 export const getDataWarehouseTotalRowsStatsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/total_rows_stats/`
+    return `/v1/projects/${projectId}/data_warehouse/total_rows_stats/`
 }
 
 /**
@@ -511,7 +511,7 @@ export const dataWarehouseTotalRowsStatsRetrieve = async (projectId: string, opt
 }
 
 export const getDataWarehouseWarehouseStatusRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_warehouse/warehouse_status/`
+    return `/v1/projects/${projectId}/data_warehouse/warehouse_status/`
 }
 
 /**
@@ -539,8 +539,8 @@ export const getFixInsightsqlListUrl = (projectId: string, params?: FixInsightsq
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/fix_insightsql/?${stringifiedParams}`
-        : `/api/projects/${projectId}/fix_insightsql/`
+        ? `/v1/projects/${projectId}/fix_insightsql/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/fix_insightsql/`
 }
 
 export const fixInsightsqlList = async (
@@ -555,7 +555,7 @@ export const fixInsightsqlList = async (
 }
 
 export const getFixInsightsqlCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/fix_insightsql/`
+    return `/v1/projects/${projectId}/fix_insightsql/`
 }
 
 export const fixInsightsqlCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -566,7 +566,7 @@ export const fixInsightsqlCreate = async (projectId: string, options?: RequestIn
 }
 
 export const getFixInsightsqlRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/fix_insightsql/${id}/`
+    return `/v1/projects/${projectId}/fix_insightsql/${id}/`
 }
 
 export const fixInsightsqlRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -577,7 +577,7 @@ export const fixInsightsqlRetrieve = async (projectId: string, id: string, optio
 }
 
 export const getFixInsightsqlUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/fix_insightsql/${id}/`
+    return `/v1/projects/${projectId}/fix_insightsql/${id}/`
 }
 
 export const fixInsightsqlUpdate = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -588,7 +588,7 @@ export const fixInsightsqlUpdate = async (projectId: string, id: string, options
 }
 
 export const getFixInsightsqlPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/fix_insightsql/${id}/`
+    return `/v1/projects/${projectId}/fix_insightsql/${id}/`
 }
 
 export const fixInsightsqlPartialUpdate = async (
@@ -603,7 +603,7 @@ export const fixInsightsqlPartialUpdate = async (
 }
 
 export const getFixInsightsqlDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/fix_insightsql/${id}/`
+    return `/v1/projects/${projectId}/fix_insightsql/${id}/`
 }
 
 export const fixInsightsqlDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -625,8 +625,8 @@ export const getInsightVariablesListUrl = (projectId: string, params?: InsightVa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insight_variables/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insight_variables/`
+        ? `/v1/projects/${projectId}/insight_variables/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insight_variables/`
 }
 
 export const insightVariablesList = async (
@@ -641,7 +641,7 @@ export const insightVariablesList = async (
 }
 
 export const getInsightVariablesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/insight_variables/`
+    return `/v1/projects/${projectId}/insight_variables/`
 }
 
 export const insightVariablesCreate = async (
@@ -658,7 +658,7 @@ export const insightVariablesCreate = async (
 }
 
 export const getInsightVariablesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insight_variables/${id}/`
+    return `/v1/projects/${projectId}/insight_variables/${id}/`
 }
 
 export const insightVariablesRetrieve = async (
@@ -673,7 +673,7 @@ export const insightVariablesRetrieve = async (
 }
 
 export const getInsightVariablesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insight_variables/${id}/`
+    return `/v1/projects/${projectId}/insight_variables/${id}/`
 }
 
 export const insightVariablesUpdate = async (
@@ -691,7 +691,7 @@ export const insightVariablesUpdate = async (
 }
 
 export const getInsightVariablesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insight_variables/${id}/`
+    return `/v1/projects/${projectId}/insight_variables/${id}/`
 }
 
 export const insightVariablesPartialUpdate = async (
@@ -709,7 +709,7 @@ export const insightVariablesPartialUpdate = async (
 }
 
 export const getInsightVariablesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insight_variables/${id}/`
+    return `/v1/projects/${projectId}/insight_variables/${id}/`
 }
 
 export const insightVariablesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -723,12 +723,12 @@ export const getManagedViewsetsRetrieveUrl = (
     projectId: string,
     kind: 'revenue_analytics' | 'engineering_analytics'
 ) => {
-    return `/api/projects/${projectId}/managed_viewsets/${kind}/`
+    return `/v1/projects/${projectId}/managed_viewsets/${kind}/`
 }
 
 /**
  * Get all views associated with a specific managed viewset.
- * GET /api/environments/{team_id}/managed_viewsets/{kind}/
+ * GET /v1/environments/{team_id}/managed_viewsets/{kind}/
  */
 export const managedViewsetsRetrieve = async (
     projectId: string,
@@ -742,12 +742,12 @@ export const managedViewsetsRetrieve = async (
 }
 
 export const getManagedViewsetsUpdateUrl = (projectId: string, kind: 'revenue_analytics' | 'engineering_analytics') => {
-    return `/api/projects/${projectId}/managed_viewsets/${kind}/`
+    return `/v1/projects/${projectId}/managed_viewsets/${kind}/`
 }
 
 /**
  * Enable or disable a managed viewset by kind.
- * PUT /api/environments/{team_id}/managed_viewsets/{kind}/ with body {"enabled": true/false}
+ * PUT /v1/environments/{team_id}/managed_viewsets/{kind}/ with body {"enabled": true/false}
  */
 export const managedViewsetsUpdate = async (
     projectId: string,
@@ -772,8 +772,8 @@ export const getQueryTabStateListUrl = (projectId: string, params?: QueryTabStat
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/query_tab_state/?${stringifiedParams}`
-        : `/api/projects/${projectId}/query_tab_state/`
+        ? `/v1/projects/${projectId}/query_tab_state/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/query_tab_state/`
 }
 
 /**
@@ -791,7 +791,7 @@ export const queryTabStateList = async (
 }
 
 export const getQueryTabStateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/query_tab_state/`
+    return `/v1/projects/${projectId}/query_tab_state/`
 }
 
 /**
@@ -811,7 +811,7 @@ export const queryTabStateCreate = async (
 }
 
 export const getQueryTabStateRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/query_tab_state/${id}/`
+    return `/v1/projects/${projectId}/query_tab_state/${id}/`
 }
 
 /**
@@ -829,7 +829,7 @@ export const queryTabStateRetrieve = async (
 }
 
 export const getQueryTabStateUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/query_tab_state/${id}/`
+    return `/v1/projects/${projectId}/query_tab_state/${id}/`
 }
 
 /**
@@ -850,7 +850,7 @@ export const queryTabStateUpdate = async (
 }
 
 export const getQueryTabStatePartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/query_tab_state/${id}/`
+    return `/v1/projects/${projectId}/query_tab_state/${id}/`
 }
 
 /**
@@ -871,7 +871,7 @@ export const queryTabStatePartialUpdate = async (
 }
 
 export const getQueryTabStateDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/query_tab_state/${id}/`
+    return `/v1/projects/${projectId}/query_tab_state/${id}/`
 }
 
 /**
@@ -885,7 +885,7 @@ export const queryTabStateDestroy = async (projectId: string, id: string, option
 }
 
 export const getQueryTabStateUserRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/query_tab_state/user/`
+    return `/v1/projects/${projectId}/query_tab_state/user/`
 }
 
 /**
@@ -916,8 +916,8 @@ export const getSavedQueryColumnAnnotationsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/saved_query_column_annotations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/saved_query_column_annotations/`
+        ? `/v1/projects/${projectId}/saved_query_column_annotations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/saved_query_column_annotations/`
 }
 
 /**
@@ -942,7 +942,7 @@ export const savedQueryColumnAnnotationsList = async (
 }
 
 export const getSavedQueryColumnAnnotationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/saved_query_column_annotations/`
+    return `/v1/projects/${projectId}/saved_query_column_annotations/`
 }
 
 /**
@@ -966,7 +966,7 @@ export const savedQueryColumnAnnotationsCreate = async (
 }
 
 export const getSavedQueryColumnAnnotationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/saved_query_column_annotations/${id}/`
+    return `/v1/projects/${projectId}/saved_query_column_annotations/${id}/`
 }
 
 /**
@@ -991,7 +991,7 @@ export const savedQueryColumnAnnotationsRetrieve = async (
 }
 
 export const getSavedQueryColumnAnnotationsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/saved_query_column_annotations/${id}/`
+    return `/v1/projects/${projectId}/saved_query_column_annotations/${id}/`
 }
 
 /**
@@ -1019,7 +1019,7 @@ export const savedQueryColumnAnnotationsUpdate = async (
 }
 
 export const getSavedQueryColumnAnnotationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/saved_query_column_annotations/${id}/`
+    return `/v1/projects/${projectId}/saved_query_column_annotations/${id}/`
 }
 
 /**
@@ -1047,7 +1047,7 @@ export const savedQueryColumnAnnotationsPartialUpdate = async (
 }
 
 export const getSavedQueryColumnAnnotationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/saved_query_column_annotations/${id}/`
+    return `/v1/projects/${projectId}/saved_query_column_annotations/${id}/`
 }
 
 /**
@@ -1083,8 +1083,8 @@ export const getWarehouseColumnAnnotationsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/warehouse_column_annotations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/warehouse_column_annotations/`
+        ? `/v1/projects/${projectId}/warehouse_column_annotations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/warehouse_column_annotations/`
 }
 
 /**
@@ -1109,7 +1109,7 @@ export const warehouseColumnAnnotationsList = async (
 }
 
 export const getWarehouseColumnAnnotationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_column_annotations/`
+    return `/v1/projects/${projectId}/warehouse_column_annotations/`
 }
 
 /**
@@ -1133,7 +1133,7 @@ export const warehouseColumnAnnotationsCreate = async (
 }
 
 export const getWarehouseColumnAnnotationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_column_annotations/${id}/`
+    return `/v1/projects/${projectId}/warehouse_column_annotations/${id}/`
 }
 
 /**
@@ -1155,7 +1155,7 @@ export const warehouseColumnAnnotationsRetrieve = async (
 }
 
 export const getWarehouseColumnAnnotationsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_column_annotations/${id}/`
+    return `/v1/projects/${projectId}/warehouse_column_annotations/${id}/`
 }
 
 /**
@@ -1180,7 +1180,7 @@ export const warehouseColumnAnnotationsUpdate = async (
 }
 
 export const getWarehouseColumnAnnotationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_column_annotations/${id}/`
+    return `/v1/projects/${projectId}/warehouse_column_annotations/${id}/`
 }
 
 /**
@@ -1205,7 +1205,7 @@ export const warehouseColumnAnnotationsPartialUpdate = async (
 }
 
 export const getWarehouseColumnAnnotationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_column_annotations/${id}/`
+    return `/v1/projects/${projectId}/warehouse_column_annotations/${id}/`
 }
 
 /**
@@ -1241,8 +1241,8 @@ export const getWarehouseColumnStatisticsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/warehouse_column_statistics/?${stringifiedParams}`
-        : `/api/projects/${projectId}/warehouse_column_statistics/`
+        ? `/v1/projects/${projectId}/warehouse_column_statistics/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/warehouse_column_statistics/`
 }
 
 /**
@@ -1267,7 +1267,7 @@ export const warehouseColumnStatisticsList = async (
 }
 
 export const getWarehouseColumnStatisticsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_column_statistics/${id}/`
+    return `/v1/projects/${projectId}/warehouse_column_statistics/${id}/`
 }
 
 /**
@@ -1289,7 +1289,7 @@ export const warehouseColumnStatisticsRetrieve = async (
 }
 
 export const getWarehouseDagListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_dag/`
+    return `/v1/projects/${projectId}/warehouse_dag/`
 }
 
 /**
@@ -1314,8 +1314,8 @@ export const getWarehouseModelPathsListUrl = (projectId: string, params?: Wareho
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/warehouse_model_paths/?${stringifiedParams}`
-        : `/api/projects/${projectId}/warehouse_model_paths/`
+        ? `/v1/projects/${projectId}/warehouse_model_paths/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/warehouse_model_paths/`
 }
 
 export const warehouseModelPathsList = async (
@@ -1330,7 +1330,7 @@ export const warehouseModelPathsList = async (
 }
 
 export const getWarehouseModelPathsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_model_paths/${id}/`
+    return `/v1/projects/${projectId}/warehouse_model_paths/${id}/`
 }
 
 export const warehouseModelPathsRetrieve = async (
@@ -1356,8 +1356,8 @@ export const getWarehouseSavedQueriesListUrl = (projectId: string, params?: Ware
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/warehouse_saved_queries/?${stringifiedParams}`
-        : `/api/projects/${projectId}/warehouse_saved_queries/`
+        ? `/v1/projects/${projectId}/warehouse_saved_queries/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/warehouse_saved_queries/`
 }
 
 /**
@@ -1378,7 +1378,7 @@ export const warehouseSavedQueriesList = async (
 }
 
 export const getWarehouseSavedQueriesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/`
 }
 
 /**
@@ -1398,7 +1398,7 @@ export const warehouseSavedQueriesCreate = async (
 }
 
 export const getWarehouseSavedQueriesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/`
 }
 
 /**
@@ -1416,7 +1416,7 @@ export const warehouseSavedQueriesRetrieve = async (
 }
 
 export const getWarehouseSavedQueriesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/`
 }
 
 /**
@@ -1437,7 +1437,7 @@ export const warehouseSavedQueriesUpdate = async (
 }
 
 export const getWarehouseSavedQueriesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/`
 }
 
 /**
@@ -1458,7 +1458,7 @@ export const warehouseSavedQueriesPartialUpdate = async (
 }
 
 export const getWarehouseSavedQueriesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/`
 }
 
 /**
@@ -1476,7 +1476,7 @@ export const warehouseSavedQueriesDestroy = async (
 }
 
 export const getWarehouseSavedQueriesActivityRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/activity/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/activity/`
 }
 
 /**
@@ -1494,7 +1494,7 @@ export const warehouseSavedQueriesActivityRetrieve = async (
 }
 
 export const getWarehouseSavedQueriesAncestorsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/ancestors/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/ancestors/`
 }
 
 /**
@@ -1519,7 +1519,7 @@ export const warehouseSavedQueriesAncestorsCreate = async (
 }
 
 export const getWarehouseSavedQueriesCancelCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/cancel/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/cancel/`
 }
 
 /**
@@ -1540,7 +1540,7 @@ export const warehouseSavedQueriesCancelCreate = async (
 }
 
 export const getWarehouseSavedQueriesDependenciesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/dependencies/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/dependencies/`
 }
 
 /**
@@ -1558,7 +1558,7 @@ export const warehouseSavedQueriesDependenciesRetrieve = async (
 }
 
 export const getWarehouseSavedQueriesDescendantsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/descendants/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/descendants/`
 }
 
 /**
@@ -1583,7 +1583,7 @@ export const warehouseSavedQueriesDescendantsCreate = async (
 }
 
 export const getWarehouseSavedQueriesMaterializeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/materialize/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/materialize/`
 }
 
 /**
@@ -1604,7 +1604,7 @@ export const warehouseSavedQueriesMaterializeCreate = async (
 }
 
 export const getWarehouseSavedQueriesResumeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/resume/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/resume/`
 }
 
 /**
@@ -1625,7 +1625,7 @@ export const warehouseSavedQueriesResumeCreate = async (
 }
 
 export const getWarehouseSavedQueriesRevertMaterializationCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/revert_materialization/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/revert_materialization/`
 }
 
 /**
@@ -1650,7 +1650,7 @@ export const warehouseSavedQueriesRevertMaterializationCreate = async (
 }
 
 export const getWarehouseSavedQueriesRunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/run/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/run/`
 }
 
 /**
@@ -1671,7 +1671,7 @@ export const warehouseSavedQueriesRunCreate = async (
 }
 
 export const getWarehouseSavedQueriesRunHistoryRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/${id}/run_history/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/${id}/run_history/`
 }
 
 /**
@@ -1689,7 +1689,7 @@ export const warehouseSavedQueriesRunHistoryRetrieve = async (
 }
 
 export const getWarehouseSavedQueriesResumeSchedulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_queries/resume_schedules/`
+    return `/v1/projects/${projectId}/warehouse_saved_queries/resume_schedules/`
 }
 
 /**
@@ -1726,8 +1726,8 @@ export const getWarehouseSavedQueryDraftsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/warehouse_saved_query_drafts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/warehouse_saved_query_drafts/`
+        ? `/v1/projects/${projectId}/warehouse_saved_query_drafts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/warehouse_saved_query_drafts/`
 }
 
 export const warehouseSavedQueryDraftsList = async (
@@ -1745,7 +1745,7 @@ export const warehouseSavedQueryDraftsList = async (
 }
 
 export const getWarehouseSavedQueryDraftsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_drafts/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_drafts/`
 }
 
 export const warehouseSavedQueryDraftsCreate = async (
@@ -1762,7 +1762,7 @@ export const warehouseSavedQueryDraftsCreate = async (
 }
 
 export const getWarehouseSavedQueryDraftsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_drafts/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_drafts/${id}/`
 }
 
 export const warehouseSavedQueryDraftsRetrieve = async (
@@ -1777,7 +1777,7 @@ export const warehouseSavedQueryDraftsRetrieve = async (
 }
 
 export const getWarehouseSavedQueryDraftsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_drafts/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_drafts/${id}/`
 }
 
 export const warehouseSavedQueryDraftsUpdate = async (
@@ -1795,7 +1795,7 @@ export const warehouseSavedQueryDraftsUpdate = async (
 }
 
 export const getWarehouseSavedQueryDraftsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_drafts/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_drafts/${id}/`
 }
 
 export const warehouseSavedQueryDraftsPartialUpdate = async (
@@ -1813,7 +1813,7 @@ export const warehouseSavedQueryDraftsPartialUpdate = async (
 }
 
 export const getWarehouseSavedQueryDraftsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_drafts/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_drafts/${id}/`
 }
 
 export const warehouseSavedQueryDraftsDestroy = async (
@@ -1828,7 +1828,7 @@ export const warehouseSavedQueryDraftsDestroy = async (
 }
 
 export const getWarehouseSavedQueryFoldersListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_folders/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_folders/`
 }
 
 export const warehouseSavedQueryFoldersList = async (
@@ -1842,7 +1842,7 @@ export const warehouseSavedQueryFoldersList = async (
 }
 
 export const getWarehouseSavedQueryFoldersCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_folders/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_folders/`
 }
 
 export const warehouseSavedQueryFoldersCreate = async (
@@ -1859,7 +1859,7 @@ export const warehouseSavedQueryFoldersCreate = async (
 }
 
 export const getWarehouseSavedQueryFoldersRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_folders/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_folders/${id}/`
 }
 
 export const warehouseSavedQueryFoldersRetrieve = async (
@@ -1874,7 +1874,7 @@ export const warehouseSavedQueryFoldersRetrieve = async (
 }
 
 export const getWarehouseSavedQueryFoldersPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_folders/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_folders/${id}/`
 }
 
 export const warehouseSavedQueryFoldersPartialUpdate = async (
@@ -1892,7 +1892,7 @@ export const warehouseSavedQueryFoldersPartialUpdate = async (
 }
 
 export const getWarehouseSavedQueryFoldersDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_saved_query_folders/${id}/`
+    return `/v1/projects/${projectId}/warehouse_saved_query_folders/${id}/`
 }
 
 export const warehouseSavedQueryFoldersDestroy = async (
@@ -1918,8 +1918,8 @@ export const getWarehouseTablesListUrl = (projectId: string, params?: WarehouseT
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/warehouse_tables/?${stringifiedParams}`
-        : `/api/projects/${projectId}/warehouse_tables/`
+        ? `/v1/projects/${projectId}/warehouse_tables/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/warehouse_tables/`
 }
 
 /**
@@ -1937,7 +1937,7 @@ export const warehouseTablesList = async (
 }
 
 export const getWarehouseTablesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/`
+    return `/v1/projects/${projectId}/warehouse_tables/`
 }
 
 /**
@@ -1957,7 +1957,7 @@ export const warehouseTablesCreate = async (
 }
 
 export const getWarehouseTablesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/${id}/`
+    return `/v1/projects/${projectId}/warehouse_tables/${id}/`
 }
 
 /**
@@ -1975,7 +1975,7 @@ export const warehouseTablesRetrieve = async (
 }
 
 export const getWarehouseTablesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/${id}/`
+    return `/v1/projects/${projectId}/warehouse_tables/${id}/`
 }
 
 /**
@@ -1996,7 +1996,7 @@ export const warehouseTablesUpdate = async (
 }
 
 export const getWarehouseTablesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/${id}/`
+    return `/v1/projects/${projectId}/warehouse_tables/${id}/`
 }
 
 /**
@@ -2017,7 +2017,7 @@ export const warehouseTablesPartialUpdate = async (
 }
 
 export const getWarehouseTablesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/${id}/`
+    return `/v1/projects/${projectId}/warehouse_tables/${id}/`
 }
 
 /**
@@ -2031,7 +2031,7 @@ export const warehouseTablesDestroy = async (projectId: string, id: string, opti
 }
 
 export const getWarehouseTablesRefreshSchemaCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/${id}/refresh_schema/`
+    return `/v1/projects/${projectId}/warehouse_tables/${id}/refresh_schema/`
 }
 
 /**
@@ -2050,7 +2050,7 @@ export const warehouseTablesRefreshSchemaCreate = async (
 }
 
 export const getWarehouseTablesUpdateSchemaCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/${id}/update_schema/`
+    return `/v1/projects/${projectId}/warehouse_tables/${id}/update_schema/`
 }
 
 /**
@@ -2071,7 +2071,7 @@ export const warehouseTablesUpdateSchemaCreate = async (
 }
 
 export const getWarehouseTablesCreateFromUploadCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/create_from_upload/`
+    return `/v1/projects/${projectId}/warehouse_tables/create_from_upload/`
 }
 
 /**
@@ -2098,7 +2098,7 @@ export const warehouseTablesCreateFromUploadCreate = async (
 }
 
 export const getWarehouseTablesFileCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/file/`
+    return `/v1/projects/${projectId}/warehouse_tables/file/`
 }
 
 /**
@@ -2129,7 +2129,7 @@ export const warehouseTablesFileCreate = async (
 }
 
 export const getWarehouseTablesUploadFileCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_tables/upload_file/`
+    return `/v1/projects/${projectId}/warehouse_tables/upload_file/`
 }
 
 /**
@@ -2172,8 +2172,8 @@ export const getWarehouseViewLinkListUrl = (projectId: string, params?: Warehous
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/warehouse_view_link/?${stringifiedParams}`
-        : `/api/projects/${projectId}/warehouse_view_link/`
+        ? `/v1/projects/${projectId}/warehouse_view_link/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/warehouse_view_link/`
 }
 
 /**
@@ -2191,7 +2191,7 @@ export const warehouseViewLinkList = async (
 }
 
 export const getWarehouseViewLinkCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_view_link/`
+    return `/v1/projects/${projectId}/warehouse_view_link/`
 }
 
 /**
@@ -2211,7 +2211,7 @@ export const warehouseViewLinkCreate = async (
 }
 
 export const getWarehouseViewLinkRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_view_link/${id}/`
+    return `/v1/projects/${projectId}/warehouse_view_link/${id}/`
 }
 
 /**
@@ -2229,7 +2229,7 @@ export const warehouseViewLinkRetrieve = async (
 }
 
 export const getWarehouseViewLinkUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_view_link/${id}/`
+    return `/v1/projects/${projectId}/warehouse_view_link/${id}/`
 }
 
 /**
@@ -2250,7 +2250,7 @@ export const warehouseViewLinkUpdate = async (
 }
 
 export const getWarehouseViewLinkPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_view_link/${id}/`
+    return `/v1/projects/${projectId}/warehouse_view_link/${id}/`
 }
 
 /**
@@ -2271,7 +2271,7 @@ export const warehouseViewLinkPartialUpdate = async (
 }
 
 export const getWarehouseViewLinkDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_view_link/${id}/`
+    return `/v1/projects/${projectId}/warehouse_view_link/${id}/`
 }
 
 /**
@@ -2285,7 +2285,7 @@ export const warehouseViewLinkDestroy = async (projectId: string, id: string, op
 }
 
 export const getWarehouseViewLinkValidateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_view_link/validate/`
+    return `/v1/projects/${projectId}/warehouse_view_link/validate/`
 }
 
 /**
@@ -2316,8 +2316,8 @@ export const getWarehouseViewLinksListUrl = (projectId: string, params?: Warehou
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/warehouse_view_links/?${stringifiedParams}`
-        : `/api/projects/${projectId}/warehouse_view_links/`
+        ? `/v1/projects/${projectId}/warehouse_view_links/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/warehouse_view_links/`
 }
 
 /**
@@ -2335,7 +2335,7 @@ export const warehouseViewLinksList = async (
 }
 
 export const getWarehouseViewLinksCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_view_links/`
+    return `/v1/projects/${projectId}/warehouse_view_links/`
 }
 
 /**
@@ -2355,7 +2355,7 @@ export const warehouseViewLinksCreate = async (
 }
 
 export const getWarehouseViewLinksRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_view_links/${id}/`
+    return `/v1/projects/${projectId}/warehouse_view_links/${id}/`
 }
 
 /**
@@ -2373,7 +2373,7 @@ export const warehouseViewLinksRetrieve = async (
 }
 
 export const getWarehouseViewLinksUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_view_links/${id}/`
+    return `/v1/projects/${projectId}/warehouse_view_links/${id}/`
 }
 
 /**
@@ -2394,7 +2394,7 @@ export const warehouseViewLinksUpdate = async (
 }
 
 export const getWarehouseViewLinksPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_view_links/${id}/`
+    return `/v1/projects/${projectId}/warehouse_view_links/${id}/`
 }
 
 /**
@@ -2415,7 +2415,7 @@ export const warehouseViewLinksPartialUpdate = async (
 }
 
 export const getWarehouseViewLinksDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/warehouse_view_links/${id}/`
+    return `/v1/projects/${projectId}/warehouse_view_links/${id}/`
 }
 
 /**
@@ -2433,7 +2433,7 @@ export const warehouseViewLinksDestroy = async (
 }
 
 export const getWarehouseViewLinksValidateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/warehouse_view_links/validate/`
+    return `/v1/projects/${projectId}/warehouse_view_links/validate/`
 }
 
 /**

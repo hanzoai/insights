@@ -51,8 +51,8 @@ export const getManagedMigrationsSupportListUrl = (params?: ManagedMigrationsSup
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/managed_migrations_support/?${stringifiedParams}`
-        : `/api/managed_migrations_support/`
+        ? `/v1/managed_migrations_support/?${stringifiedParams}`
+        : `/v1/managed_migrations_support/`
 }
 
 /**
@@ -69,7 +69,7 @@ export const managedMigrationsSupportList = async (
 }
 
 export const getManagedMigrationsSupportRetrieveUrl = (id: string) => {
-    return `/api/managed_migrations_support/${id}/`
+    return `/v1/managed_migrations_support/${id}/`
 }
 
 /**
@@ -97,8 +97,8 @@ export const getManagedMigrationsListUrl = (projectId: string, params?: ManagedM
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/managed_migrations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/managed_migrations/`
+        ? `/v1/projects/${projectId}/managed_migrations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/managed_migrations/`
 }
 
 /**
@@ -116,7 +116,7 @@ export const managedMigrationsList = async (
 }
 
 export const getManagedMigrationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/managed_migrations/`
+    return `/v1/projects/${projectId}/managed_migrations/`
 }
 
 /**
@@ -136,7 +136,7 @@ export const managedMigrationsCreate = async (
 }
 
 export const getManagedMigrationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/`
 }
 
 /**
@@ -154,7 +154,7 @@ export const managedMigrationsRetrieve = async (
 }
 
 export const getManagedMigrationsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/`
 }
 
 /**
@@ -175,7 +175,7 @@ export const managedMigrationsUpdate = async (
 }
 
 export const getManagedMigrationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/`
 }
 
 /**
@@ -196,7 +196,7 @@ export const managedMigrationsPartialUpdate = async (
 }
 
 export const getManagedMigrationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/`
 }
 
 /**
@@ -210,7 +210,7 @@ export const managedMigrationsDestroy = async (projectId: string, id: string, op
 }
 
 export const getManagedMigrationsPauseCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/pause/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/pause/`
 }
 
 /**
@@ -231,7 +231,7 @@ export const managedMigrationsPauseCreate = async (
 }
 
 export const getManagedMigrationsPromoteCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/promote/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/promote/`
 }
 
 /**
@@ -249,7 +249,7 @@ export const managedMigrationsPromoteCreate = async (
 }
 
 export const getManagedMigrationsResumeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/resume/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/resume/`
 }
 
 /**
@@ -285,8 +285,8 @@ export const getManagedMigrationsTrialRecordsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/managed_migrations/${id}/trial_records/?${stringifiedParams}`
-        : `/api/projects/${projectId}/managed_migrations/${id}/trial_records/`
+        ? `/v1/projects/${projectId}/managed_migrations/${id}/trial_records/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/managed_migrations/${id}/trial_records/`
 }
 
 /**
@@ -305,7 +305,7 @@ export const managedMigrationsTrialRecordsRetrieve = async (
 }
 
 export const getManagedMigrationsAwsIamSetupRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/managed_migrations/aws_iam_setup/`
+    return `/v1/projects/${projectId}/managed_migrations/aws_iam_setup/`
 }
 
 /**

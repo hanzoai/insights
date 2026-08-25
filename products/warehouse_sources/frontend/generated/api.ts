@@ -73,8 +73,8 @@ export const getExternalDataSchemasListUrl = (projectId: string, params?: Extern
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/external_data_schemas/?${stringifiedParams}`
-        : `/api/projects/${projectId}/external_data_schemas/`
+        ? `/v1/projects/${projectId}/external_data_schemas/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/external_data_schemas/`
 }
 
 export const externalDataSchemasList = async (
@@ -89,7 +89,7 @@ export const externalDataSchemasList = async (
 }
 
 export const getExternalDataSchemasRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/`
 }
 
 export const externalDataSchemasRetrieve = async (
@@ -104,7 +104,7 @@ export const externalDataSchemasRetrieve = async (
 }
 
 export const getExternalDataSchemasUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/`
 }
 
 export const externalDataSchemasUpdate = async (
@@ -122,7 +122,7 @@ export const externalDataSchemasUpdate = async (
 }
 
 export const getExternalDataSchemasPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/`
 }
 
 export const externalDataSchemasPartialUpdate = async (
@@ -140,7 +140,7 @@ export const externalDataSchemasPartialUpdate = async (
 }
 
 export const getExternalDataSchemasDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/`
 }
 
 export const externalDataSchemasDestroy = async (
@@ -155,7 +155,7 @@ export const externalDataSchemasDestroy = async (
 }
 
 export const getExternalDataSchemasCancelCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/cancel/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/cancel/`
 }
 
 export const externalDataSchemasCancelCreate = async (
@@ -170,7 +170,7 @@ export const externalDataSchemasCancelCreate = async (
 }
 
 export const getExternalDataSchemasDeleteDataDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/delete_data/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/delete_data/`
 }
 
 export const externalDataSchemasDeleteDataDestroy = async (
@@ -185,7 +185,7 @@ export const externalDataSchemasDeleteDataDestroy = async (
 }
 
 export const getExternalDataSchemasIncrementalFieldsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/incremental_fields/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/incremental_fields/`
 }
 
 export const externalDataSchemasIncrementalFieldsCreate = async (
@@ -218,8 +218,8 @@ export const getExternalDataSchemasLogsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/external_data_schemas/${id}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/external_data_schemas/${id}/logs/`
+        ? `/v1/projects/${projectId}/external_data_schemas/${id}/logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/external_data_schemas/${id}/logs/`
 }
 
 export const externalDataSchemasLogsRetrieve = async (
@@ -235,7 +235,7 @@ export const externalDataSchemasLogsRetrieve = async (
 }
 
 export const getExternalDataSchemasReloadCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/reload/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/reload/`
 }
 
 export const externalDataSchemasReloadCreate = async (
@@ -253,7 +253,7 @@ export const externalDataSchemasReloadCreate = async (
 }
 
 export const getExternalDataSchemasResyncCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_schemas/${id}/resync/`
+    return `/v1/projects/${projectId}/external_data_schemas/${id}/resync/`
 }
 
 export const externalDataSchemasResyncCreate = async (
@@ -282,8 +282,8 @@ export const getExternalDataSourcesListUrl = (projectId: string, params?: Extern
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/external_data_sources/?${stringifiedParams}`
-        : `/api/projects/${projectId}/external_data_sources/`
+        ? `/v1/projects/${projectId}/external_data_sources/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/external_data_sources/`
 }
 
 /**
@@ -301,7 +301,7 @@ export const externalDataSourcesList = async (
 }
 
 export const getExternalDataSourcesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/`
+    return `/v1/projects/${projectId}/external_data_sources/`
 }
 
 /**
@@ -321,7 +321,7 @@ export const externalDataSourcesCreate = async (
 }
 
 export const getExternalDataSourcesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/`
 }
 
 /**
@@ -339,7 +339,7 @@ export const externalDataSourcesRetrieve = async (
 }
 
 export const getExternalDataSourcesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/`
 }
 
 /**
@@ -360,7 +360,7 @@ export const externalDataSourcesUpdate = async (
 }
 
 export const getExternalDataSourcesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/`
 }
 
 /**
@@ -381,7 +381,7 @@ export const externalDataSourcesPartialUpdate = async (
 }
 
 export const getExternalDataSourcesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/`
 }
 
 /**
@@ -414,8 +414,8 @@ export const getExternalDataSourcesBulkUpdateSchemasPartialUpdateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/external_data_sources/${id}/bulk_update_schemas/?${stringifiedParams}`
-        : `/api/projects/${projectId}/external_data_sources/${id}/bulk_update_schemas/`
+        ? `/v1/projects/${projectId}/external_data_sources/${id}/bulk_update_schemas/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/external_data_sources/${id}/bulk_update_schemas/`
 }
 
 /**
@@ -440,7 +440,7 @@ export const externalDataSourcesBulkUpdateSchemasPartialUpdate = async (
 }
 
 export const getExternalDataSourcesCdcStatusRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/cdc_status/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/cdc_status/`
 }
 
 /**
@@ -463,7 +463,7 @@ export const externalDataSourcesCdcStatusRetrieve = async (
 }
 
 export const getExternalDataSourcesCheckCdcPrerequisitesForSourceCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/check_cdc_prerequisites_for_source/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/check_cdc_prerequisites_for_source/`
 }
 
 /**
@@ -493,7 +493,7 @@ export const externalDataSourcesCheckCdcPrerequisitesForSourceCreate = async (
 }
 
 export const getExternalDataSourcesCreateWebhookCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/create_webhook/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/create_webhook/`
 }
 
 /**
@@ -514,7 +514,7 @@ export const externalDataSourcesCreateWebhookCreate = async (
 }
 
 export const getExternalDataSourcesDeleteWebhookCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/delete_webhook/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/delete_webhook/`
 }
 
 /**
@@ -535,7 +535,7 @@ export const externalDataSourcesDeleteWebhookCreate = async (
 }
 
 export const getExternalDataSourcesDisableCdcCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/disable_cdc/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/disable_cdc/`
 }
 
 /**
@@ -563,7 +563,7 @@ export const externalDataSourcesDisableCdcCreate = async (
 }
 
 export const getExternalDataSourcesEnableCdcCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/enable_cdc/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/enable_cdc/`
 }
 
 /**
@@ -595,7 +595,7 @@ export const externalDataSourcesEnableCdcCreate = async (
 }
 
 export const getExternalDataSourcesJobsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/jobs/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/jobs/`
 }
 
 /**
@@ -613,7 +613,7 @@ export const externalDataSourcesJobsRetrieve = async (
 }
 
 export const getExternalDataSourcesRefreshSchemasCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/refresh_schemas/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/refresh_schemas/`
 }
 
 /**
@@ -634,7 +634,7 @@ export const externalDataSourcesRefreshSchemasCreate = async (
 }
 
 export const getExternalDataSourcesReloadCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/reload/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/reload/`
 }
 
 /**
@@ -655,7 +655,7 @@ export const externalDataSourcesReloadCreate = async (
 }
 
 export const getExternalDataSourcesRepairCdcCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/repair_cdc/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/repair_cdc/`
 }
 
 /**
@@ -682,7 +682,7 @@ export const externalDataSourcesRepairCdcCreate = async (
 }
 
 export const getExternalDataSourcesResumeCdcCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/resume_cdc/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/resume_cdc/`
 }
 
 /**
@@ -708,7 +708,7 @@ export const externalDataSourcesResumeCdcCreate = async (
 }
 
 export const getExternalDataSourcesRevenueAnalyticsConfigPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/revenue_analytics_config/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/revenue_analytics_config/`
 }
 
 /**
@@ -729,7 +729,7 @@ export const externalDataSourcesRevenueAnalyticsConfigPartialUpdate = async (
 }
 
 export const getExternalDataSourcesUpdateCdcSettingsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/update_cdc_settings/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/update_cdc_settings/`
 }
 
 /**
@@ -755,7 +755,7 @@ export const externalDataSourcesUpdateCdcSettingsCreate = async (
 }
 
 export const getExternalDataSourcesUpdateWebhookInputsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/update_webhook_inputs/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/update_webhook_inputs/`
 }
 
 /**
@@ -776,7 +776,7 @@ export const externalDataSourcesUpdateWebhookInputsCreate = async (
 }
 
 export const getExternalDataSourcesWebhookInfoRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/external_data_sources/${id}/webhook_info/`
+    return `/v1/projects/${projectId}/external_data_sources/${id}/webhook_info/`
 }
 
 /**
@@ -794,7 +794,7 @@ export const externalDataSourcesWebhookInfoRetrieve = async (
 }
 
 export const getExternalDataSourcesCheckCdcPrerequisitesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/check_cdc_prerequisites/`
+    return `/v1/projects/${projectId}/external_data_sources/check_cdc_prerequisites/`
 }
 
 /**
@@ -831,8 +831,8 @@ export const getExternalDataSourcesConnectLinkRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/external_data_sources/connect_link/?${stringifiedParams}`
-        : `/api/projects/${projectId}/external_data_sources/connect_link/`
+        ? `/v1/projects/${projectId}/external_data_sources/connect_link/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/external_data_sources/connect_link/`
 }
 
 /**
@@ -855,7 +855,7 @@ export const externalDataSourcesConnectLinkRetrieve = async (
 }
 
 export const getExternalDataSourcesConnectionsListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/connections/`
+    return `/v1/projects/${projectId}/external_data_sources/connections/`
 }
 
 /**
@@ -872,7 +872,7 @@ export const externalDataSourcesConnectionsList = async (
 }
 
 export const getExternalDataSourcesDatabaseSchemaCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/database_schema/`
+    return `/v1/projects/${projectId}/external_data_sources/database_schema/`
 }
 
 /**
@@ -892,7 +892,7 @@ export const externalDataSourcesDatabaseSchemaCreate = async (
 }
 
 export const getExternalDataSourcesDirectConnectionOptionsListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/direct_connection_options/`
+    return `/v1/projects/${projectId}/external_data_sources/direct_connection_options/`
 }
 
 /**
@@ -913,7 +913,7 @@ export const externalDataSourcesDirectConnectionOptionsList = async (
 }
 
 export const getExternalDataSourcesDraftCustomManifestCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/draft_custom_manifest/`
+    return `/v1/projects/${projectId}/external_data_sources/draft_custom_manifest/`
 }
 
 /**
@@ -954,8 +954,8 @@ export const getExternalDataSourcesOauthAccountsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/external_data_sources/oauth_accounts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/external_data_sources/oauth_accounts/`
+        ? `/v1/projects/${projectId}/external_data_sources/oauth_accounts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/external_data_sources/oauth_accounts/`
 }
 
 /**
@@ -978,7 +978,7 @@ export const externalDataSourcesOauthAccountsRetrieve = async (
 }
 
 export const getExternalDataSourcesPreviewResourceCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/preview_resource/`
+    return `/v1/projects/${projectId}/external_data_sources/preview_resource/`
 }
 
 /**
@@ -1004,7 +1004,7 @@ export const externalDataSourcesPreviewResourceCreate = async (
 }
 
 export const getExternalDataSourcesSetupCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/setup/`
+    return `/v1/projects/${projectId}/external_data_sources/setup/`
 }
 
 /**
@@ -1032,7 +1032,7 @@ export const externalDataSourcesSetupCreate = async (
 }
 
 export const getExternalDataSourcesSourcePrefixCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/source_prefix/`
+    return `/v1/projects/${projectId}/external_data_sources/source_prefix/`
 }
 
 /**
@@ -1052,7 +1052,7 @@ export const externalDataSourcesSourcePrefixCreate = async (
 }
 
 export const getExternalDataSourcesStoreCredentialsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/external_data_sources/store_credentials/`
+    return `/v1/projects/${projectId}/external_data_sources/store_credentials/`
 }
 
 /**
@@ -1092,8 +1092,8 @@ export const getExternalDataSourcesStoredCredentialsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/external_data_sources/stored_credentials/?${stringifiedParams}`
-        : `/api/projects/${projectId}/external_data_sources/stored_credentials/`
+        ? `/v1/projects/${projectId}/external_data_sources/stored_credentials/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/external_data_sources/stored_credentials/`
 }
 
 /**
@@ -1131,8 +1131,8 @@ export const getExternalDataSourcesWizardRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/external_data_sources/wizard/?${stringifiedParams}`
-        : `/api/projects/${projectId}/external_data_sources/wizard/`
+        ? `/v1/projects/${projectId}/external_data_sources/wizard/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/external_data_sources/wizard/`
 }
 
 /**

@@ -51,8 +51,8 @@ export const getAlertsListUrl = (projectId: string, params?: AlertsListParams) =
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/alerts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/alerts/`
+        ? `/v1/projects/${projectId}/alerts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/alerts/`
 }
 
 export const alertsList = async (
@@ -67,7 +67,7 @@ export const alertsList = async (
 }
 
 export const getAlertsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/alerts/`
+    return `/v1/projects/${projectId}/alerts/`
 }
 
 export const alertsCreate = async (
@@ -95,8 +95,8 @@ export const getAlertsRetrieveUrl = (projectId: string, id: string, params?: Ale
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/alerts/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/alerts/${id}/`
+        ? `/v1/projects/${projectId}/alerts/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/alerts/${id}/`
 }
 
 export const alertsRetrieve = async (
@@ -112,7 +112,7 @@ export const alertsRetrieve = async (
 }
 
 export const getAlertsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/alerts/${id}/`
+    return `/v1/projects/${projectId}/alerts/${id}/`
 }
 
 export const alertsUpdate = async (
@@ -130,7 +130,7 @@ export const alertsUpdate = async (
 }
 
 export const getAlertsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/alerts/${id}/`
+    return `/v1/projects/${projectId}/alerts/${id}/`
 }
 
 export const alertsPartialUpdate = async (
@@ -148,7 +148,7 @@ export const alertsPartialUpdate = async (
 }
 
 export const getAlertsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/alerts/${id}/`
+    return `/v1/projects/${projectId}/alerts/${id}/`
 }
 
 export const alertsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -159,7 +159,7 @@ export const alertsDestroy = async (projectId: string, id: string, options?: Req
 }
 
 export const getAlertsTestDeliveryCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/alerts/${id}/test-delivery/`
+    return `/v1/projects/${projectId}/alerts/${id}/test-delivery/`
 }
 
 /**
@@ -177,7 +177,7 @@ export const alertsTestDeliveryCreate = async (
 }
 
 export const getAlertsSimulateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/alerts/simulate/`
+    return `/v1/projects/${projectId}/alerts/simulate/`
 }
 
 /**
@@ -212,8 +212,8 @@ export const getInsightsThresholdsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${insightId}/thresholds/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${insightId}/thresholds/`
+        ? `/v1/projects/${projectId}/insights/${insightId}/thresholds/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${insightId}/thresholds/`
 }
 
 export const insightsThresholdsList = async (
@@ -229,7 +229,7 @@ export const insightsThresholdsList = async (
 }
 
 export const getInsightsThresholdsRetrieveUrl = (projectId: string, insightId: number, id: string) => {
-    return `/api/projects/${projectId}/insights/${insightId}/thresholds/${id}/`
+    return `/v1/projects/${projectId}/insights/${insightId}/thresholds/${id}/`
 }
 
 export const insightsThresholdsRetrieve = async (

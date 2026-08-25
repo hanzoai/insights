@@ -54,8 +54,8 @@ export const getActionsListUrl = (projectId: string, params?: ActionsListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/actions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/actions/`
+        ? `/v1/projects/${projectId}/actions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/actions/`
 }
 
 export const actionsList = async (
@@ -81,8 +81,8 @@ export const getActionsCreateUrl = (projectId: string, params?: ActionsCreatePar
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/actions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/actions/`
+        ? `/v1/projects/${projectId}/actions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/actions/`
 }
 
 export const actionsCreate = async (
@@ -111,8 +111,8 @@ export const getActionsRetrieveUrl = (projectId: string, id: number, params?: Ac
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/actions/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/actions/${id}/`
+        ? `/v1/projects/${projectId}/actions/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/actions/${id}/`
 }
 
 export const actionsRetrieve = async (
@@ -139,8 +139,8 @@ export const getActionsUpdateUrl = (projectId: string, id: number, params?: Acti
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/actions/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/actions/${id}/`
+        ? `/v1/projects/${projectId}/actions/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/actions/${id}/`
 }
 
 export const actionsUpdate = async (
@@ -170,8 +170,8 @@ export const getActionsPartialUpdateUrl = (projectId: string, id: number, params
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/actions/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/actions/${id}/`
+        ? `/v1/projects/${projectId}/actions/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/actions/${id}/`
 }
 
 export const actionsPartialUpdate = async (
@@ -201,8 +201,8 @@ export const getActionsDestroyUrl = (projectId: string, id: number, params?: Act
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/actions/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/actions/${id}/`
+        ? `/v1/projects/${projectId}/actions/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/actions/${id}/`
 }
 
 /**
@@ -232,8 +232,8 @@ export const getActionsReferencesListUrl = (projectId: string, id: number, param
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/actions/${id}/references/?${stringifiedParams}`
-        : `/api/projects/${projectId}/actions/${id}/references/`
+        ? `/v1/projects/${projectId}/actions/${id}/references/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/actions/${id}/references/`
 }
 
 export const actionsReferencesList = async (
@@ -260,8 +260,8 @@ export const getActionsBulkUpdateTagsCreateUrl = (projectId: string, params?: Ac
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/actions/bulk_update_tags/?${stringifiedParams}`
-        : `/api/projects/${projectId}/actions/bulk_update_tags/`
+        ? `/v1/projects/${projectId}/actions/bulk_update_tags/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/actions/bulk_update_tags/`
 }
 
 /**

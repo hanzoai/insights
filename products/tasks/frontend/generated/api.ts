@@ -128,7 +128,7 @@ import type {
 } from './api.schemas'
 
 export const getCodeInvitesCheckAccessRetrieveUrl = () => {
-    return `/api/code/invites/check-access/`
+    return `/v1/code/invites/check-access/`
 }
 
 /**
@@ -143,7 +143,7 @@ export const codeInvitesCheckAccessRetrieve = async (options?: RequestInit): Pro
 }
 
 export const getCodeInvitesRedeemCreateUrl = () => {
-    return `/api/code/invites/redeem/`
+    return `/v1/code/invites/redeem/`
 }
 
 /**
@@ -174,8 +174,8 @@ export const getLoopsListUrl = (projectId: string, params?: LoopsListParams) => 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/loops/?${stringifiedParams}`
-        : `/api/projects/${projectId}/loops/`
+        ? `/v1/projects/${projectId}/loops/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/loops/`
 }
 
 /**
@@ -194,7 +194,7 @@ export const loopsList = async (
 }
 
 export const getLoopsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/loops/`
+    return `/v1/projects/${projectId}/loops/`
 }
 
 /**
@@ -216,7 +216,7 @@ export const loopsCreate = async (
 }
 
 export const getLoopsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/loops/${id}/`
+    return `/v1/projects/${projectId}/loops/${id}/`
 }
 
 /**
@@ -232,7 +232,7 @@ export const loopsRetrieve = async (projectId: string, id: string, options?: Req
 }
 
 export const getLoopsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/loops/${id}/`
+    return `/v1/projects/${projectId}/loops/${id}/`
 }
 
 /**
@@ -254,7 +254,7 @@ export const loopsPartialUpdate = async (
 }
 
 export const getLoopsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/loops/${id}/`
+    return `/v1/projects/${projectId}/loops/${id}/`
 }
 
 /**
@@ -269,7 +269,7 @@ export const loopsDestroy = async (projectId: string, id: string, options?: Requ
 }
 
 export const getLoopsPreviewCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/loops/${id}/preview/`
+    return `/v1/projects/${projectId}/loops/${id}/preview/`
 }
 
 /**
@@ -291,7 +291,7 @@ export const loopsPreviewCreate = async (
 }
 
 export const getLoopsRunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/loops/${id}/run/`
+    return `/v1/projects/${projectId}/loops/${id}/run/`
 }
 
 /**
@@ -321,8 +321,8 @@ export const getLoopsRunsRetrieveUrl = (projectId: string, id: string, params?: 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/loops/${id}/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/loops/${id}/runs/`
+        ? `/v1/projects/${projectId}/loops/${id}/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/loops/${id}/runs/`
 }
 
 /**
@@ -342,7 +342,7 @@ export const loopsRunsRetrieve = async (
 }
 
 export const getLoopsSkillBundlesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/loops/${id}/skill_bundles/`
+    return `/v1/projects/${projectId}/loops/${id}/skill_bundles/`
 }
 
 /**
@@ -364,7 +364,7 @@ export const loopsSkillBundlesUpdate = async (
 }
 
 export const getLoopsTriggerCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/loops/${id}/trigger/`
+    return `/v1/projects/${projectId}/loops/${id}/trigger/`
 }
 
 /**
@@ -396,8 +396,8 @@ export const getSandboxCustomImagesListUrl = (projectId: string, params?: Sandbo
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/sandbox_custom_images/?${stringifiedParams}`
-        : `/api/projects/${projectId}/sandbox_custom_images/`
+        ? `/v1/projects/${projectId}/sandbox_custom_images/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/sandbox_custom_images/`
 }
 
 /**
@@ -418,7 +418,7 @@ export const sandboxCustomImagesList = async (
 }
 
 export const getSandboxCustomImagesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/sandbox_custom_images/`
+    return `/v1/projects/${projectId}/sandbox_custom_images/`
 }
 
 /**
@@ -438,7 +438,7 @@ export const sandboxCustomImagesCreate = async (
 }
 
 export const getSandboxCustomImagesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/sandbox_custom_images/${id}/`
+    return `/v1/projects/${projectId}/sandbox_custom_images/${id}/`
 }
 
 /**
@@ -459,7 +459,7 @@ export const sandboxCustomImagesRetrieve = async (
 }
 
 export const getSandboxCustomImagesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/sandbox_custom_images/${id}/`
+    return `/v1/projects/${projectId}/sandbox_custom_images/${id}/`
 }
 
 /**
@@ -480,7 +480,7 @@ export const sandboxCustomImagesPartialUpdate = async (
 }
 
 export const getSandboxCustomImagesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/sandbox_custom_images/${id}/`
+    return `/v1/projects/${projectId}/sandbox_custom_images/${id}/`
 }
 
 /**
@@ -501,7 +501,7 @@ export const sandboxCustomImagesDestroy = async (
 }
 
 export const getSandboxCustomImagesBuildCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/sandbox_custom_images/${id}/build/`
+    return `/v1/projects/${projectId}/sandbox_custom_images/${id}/build/`
 }
 
 /**
@@ -522,7 +522,7 @@ export const sandboxCustomImagesBuildCreate = async (
 }
 
 export const getSandboxCustomImagesBuilderTaskCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/sandbox_custom_images/${id}/builder_task/`
+    return `/v1/projects/${projectId}/sandbox_custom_images/${id}/builder_task/`
 }
 
 /**
@@ -551,8 +551,8 @@ export const getSandboxListUrl = (projectId: string, params?: SandboxListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/sandbox_environments/?${stringifiedParams}`
-        : `/api/projects/${projectId}/sandbox_environments/`
+        ? `/v1/projects/${projectId}/sandbox_environments/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/sandbox_environments/`
 }
 
 /**
@@ -570,7 +570,7 @@ export const sandboxList = async (
 }
 
 export const getSandboxCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/sandbox_environments/`
+    return `/v1/projects/${projectId}/sandbox_environments/`
 }
 
 /**
@@ -590,7 +590,7 @@ export const sandboxCreate = async (
 }
 
 export const getSandboxRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/sandbox_environments/${id}/`
+    return `/v1/projects/${projectId}/sandbox_environments/${id}/`
 }
 
 /**
@@ -608,7 +608,7 @@ export const sandboxRetrieve = async (
 }
 
 export const getSandboxPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/sandbox_environments/${id}/`
+    return `/v1/projects/${projectId}/sandbox_environments/${id}/`
 }
 
 /**
@@ -629,7 +629,7 @@ export const sandboxPartialUpdate = async (
 }
 
 export const getSandboxDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/sandbox_environments/${id}/`
+    return `/v1/projects/${projectId}/sandbox_environments/${id}/`
 }
 
 /**
@@ -654,8 +654,8 @@ export const getTaskActivityListUrl = (projectId: string, params?: TaskActivityL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/task_activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/task_activity/`
+        ? `/v1/projects/${projectId}/task_activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/task_activity/`
 }
 
 /**
@@ -674,7 +674,7 @@ export const taskActivityList = async (
 }
 
 export const getTaskActivityMarkReadCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/task_activity/mark_read/`
+    return `/v1/projects/${projectId}/task_activity/mark_read/`
 }
 
 /**
@@ -706,8 +706,8 @@ export const getTaskAutomationsListUrl = (projectId: string, params?: TaskAutoma
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/task_automations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/task_automations/`
+        ? `/v1/projects/${projectId}/task_automations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/task_automations/`
 }
 
 /**
@@ -725,7 +725,7 @@ export const taskAutomationsList = async (
 }
 
 export const getTaskAutomationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/task_automations/`
+    return `/v1/projects/${projectId}/task_automations/`
 }
 
 /**
@@ -745,7 +745,7 @@ export const taskAutomationsCreate = async (
 }
 
 export const getTaskAutomationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_automations/${id}/`
+    return `/v1/projects/${projectId}/task_automations/${id}/`
 }
 
 /**
@@ -763,7 +763,7 @@ export const taskAutomationsRetrieve = async (
 }
 
 export const getTaskAutomationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_automations/${id}/`
+    return `/v1/projects/${projectId}/task_automations/${id}/`
 }
 
 /**
@@ -784,7 +784,7 @@ export const taskAutomationsPartialUpdate = async (
 }
 
 export const getTaskAutomationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_automations/${id}/`
+    return `/v1/projects/${projectId}/task_automations/${id}/`
 }
 
 /**
@@ -798,7 +798,7 @@ export const taskAutomationsDestroy = async (projectId: string, id: string, opti
 }
 
 export const getTaskAutomationsRunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_automations/${id}/run/`
+    return `/v1/projects/${projectId}/task_automations/${id}/run/`
 }
 
 /**
@@ -827,8 +827,8 @@ export const getTaskChannelsListUrl = (projectId: string, params?: TaskChannelsL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/task_channels/?${stringifiedParams}`
-        : `/api/projects/${projectId}/task_channels/`
+        ? `/v1/projects/${projectId}/task_channels/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/task_channels/`
 }
 
 /**
@@ -847,7 +847,7 @@ export const taskChannelsList = async (
 }
 
 export const getTaskChannelsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/task_channels/`
+    return `/v1/projects/${projectId}/task_channels/`
 }
 
 /**
@@ -883,8 +883,8 @@ export const getTaskChannelsFeedListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/task_channels/${channelId}/feed/?${stringifiedParams}`
-        : `/api/projects/${projectId}/task_channels/${channelId}/feed/`
+        ? `/v1/projects/${projectId}/task_channels/${channelId}/feed/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/task_channels/${channelId}/feed/`
 }
 
 /**
@@ -904,7 +904,7 @@ export const taskChannelsFeedList = async (
 }
 
 export const getTaskChannelsFeedCreateUrl = (projectId: string, channelId: string) => {
-    return `/api/projects/${projectId}/task_channels/${channelId}/feed/`
+    return `/v1/projects/${projectId}/task_channels/${channelId}/feed/`
 }
 
 /**
@@ -928,7 +928,7 @@ export const taskChannelsFeedCreate = async (
 }
 
 export const getTaskChannelsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/`
+    return `/v1/projects/${projectId}/task_channels/${id}/`
 }
 
 /**
@@ -949,7 +949,7 @@ export const taskChannelsRetrieve = async (
 }
 
 export const getTaskChannelsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/`
+    return `/v1/projects/${projectId}/task_channels/${id}/`
 }
 
 /**
@@ -973,7 +973,7 @@ export const taskChannelsPartialUpdate = async (
 }
 
 export const getTaskChannelsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/`
+    return `/v1/projects/${projectId}/task_channels/${id}/`
 }
 
 /**
@@ -990,7 +990,7 @@ export const taskChannelsDestroy = async (projectId: string, id: string, options
 }
 
 export const getTaskChannelsContextGenerationRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/context_generation/`
+    return `/v1/projects/${projectId}/task_channels/${id}/context_generation/`
 }
 
 /**
@@ -1011,7 +1011,7 @@ export const taskChannelsContextGenerationRetrieve = async (
 }
 
 export const getTaskChannelsContextGenerationUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/context_generation/`
+    return `/v1/projects/${projectId}/task_channels/${id}/context_generation/`
 }
 
 /**
@@ -1035,7 +1035,7 @@ export const taskChannelsContextGenerationUpdate = async (
 }
 
 export const getTaskChannelsInstructionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/instructions/`
+    return `/v1/projects/${projectId}/task_channels/${id}/instructions/`
 }
 
 /**
@@ -1054,7 +1054,7 @@ export const taskChannelsInstructionsRetrieve = async (
 }
 
 export const getTaskChannelsInstructionsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/instructions/`
+    return `/v1/projects/${projectId}/task_channels/${id}/instructions/`
 }
 
 /**
@@ -1076,7 +1076,7 @@ export const taskChannelsInstructionsUpdate = async (
 }
 
 export const getTaskChannelsInstructionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/instructions/`
+    return `/v1/projects/${projectId}/task_channels/${id}/instructions/`
 }
 
 /**
@@ -1098,7 +1098,7 @@ export const taskChannelsInstructionsPartialUpdate = async (
 }
 
 export const getTaskChannelsInstructionsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/instructions/`
+    return `/v1/projects/${projectId}/task_channels/${id}/instructions/`
 }
 
 /**
@@ -1119,7 +1119,7 @@ export const taskChannelsInstructionsDestroy = async (
 }
 
 export const getTaskChannelsInstructionsVersionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/instructions/versions/`
+    return `/v1/projects/${projectId}/task_channels/${id}/instructions/versions/`
 }
 
 /**
@@ -1143,7 +1143,7 @@ export const taskChannelsInstructionsVersionsRetrieve = async (
 }
 
 export const getTaskChannelsStarCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/task_channels/${id}/star/`
+    return `/v1/projects/${projectId}/task_channels/${id}/star/`
 }
 
 /**
@@ -1178,8 +1178,8 @@ export const getTaskMentionsListUrl = (projectId: string, params?: TaskMentionsL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/task_mentions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/task_mentions/`
+        ? `/v1/projects/${projectId}/task_mentions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/task_mentions/`
 }
 
 /**
@@ -1209,8 +1209,8 @@ export const getTasksListUrl = (projectId: string, params?: TasksListParams) => 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/`
+        ? `/v1/projects/${projectId}/tasks/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/`
 }
 
 /**
@@ -1229,7 +1229,7 @@ export const tasksList = async (
 }
 
 export const getTasksCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tasks/`
+    return `/v1/projects/${projectId}/tasks/`
 }
 
 /**
@@ -1249,7 +1249,7 @@ export const tasksCreate = async (
 }
 
 export const getTasksRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/`
+    return `/v1/projects/${projectId}/tasks/${id}/`
 }
 
 /**
@@ -1268,7 +1268,7 @@ export const tasksRetrieve = async (
 }
 
 export const getTasksUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/`
+    return `/v1/projects/${projectId}/tasks/${id}/`
 }
 
 /**
@@ -1289,7 +1289,7 @@ export const tasksUpdate = async (
 }
 
 export const getTasksPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/`
+    return `/v1/projects/${projectId}/tasks/${id}/`
 }
 
 /**
@@ -1310,7 +1310,7 @@ export const tasksPartialUpdate = async (
 }
 
 export const getTasksDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/`
+    return `/v1/projects/${projectId}/tasks/${id}/`
 }
 
 /**
@@ -1324,7 +1324,7 @@ export const tasksDestroy = async (projectId: string, id: string, options?: Requ
 }
 
 export const getTasksPinCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/pin/`
+    return `/v1/projects/${projectId}/tasks/${id}/pin/`
 }
 
 /**
@@ -1345,7 +1345,7 @@ export const tasksPinCreate = async (
 }
 
 export const getTasksPresenceCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/presence/`
+    return `/v1/projects/${projectId}/tasks/${id}/presence/`
 }
 
 /**
@@ -1367,7 +1367,7 @@ export const tasksPresenceCreate = async (
 }
 
 export const getTasksPresenceDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/presence/`
+    return `/v1/projects/${projectId}/tasks/${id}/presence/`
 }
 
 /**
@@ -1382,7 +1382,7 @@ export const tasksPresenceDestroy = async (projectId: string, id: string, option
 }
 
 export const getTasksRunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/run/`
+    return `/v1/projects/${projectId}/tasks/${id}/run/`
 }
 
 /**
@@ -1404,7 +1404,7 @@ export const tasksRunCreate = async (
 }
 
 export const getTasksStagedArtifactsFinalizeUploadCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/staged_artifacts/finalize_upload/`
+    return `/v1/projects/${projectId}/tasks/${id}/staged_artifacts/finalize_upload/`
 }
 
 /**
@@ -1429,7 +1429,7 @@ export const tasksStagedArtifactsFinalizeUploadCreate = async (
 }
 
 export const getTasksStagedArtifactsPrepareUploadCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/staged_artifacts/prepare_upload/`
+    return `/v1/projects/${projectId}/tasks/${id}/staged_artifacts/prepare_upload/`
 }
 
 /**
@@ -1465,8 +1465,8 @@ export const getTasksRunsListUrl = (projectId: string, taskId: string, params?: 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/${taskId}/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/${taskId}/runs/`
+        ? `/v1/projects/${projectId}/tasks/${taskId}/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/${taskId}/runs/`
 }
 
 /**
@@ -1486,7 +1486,7 @@ export const tasksRunsList = async (
 }
 
 export const getTasksRunsCreateUrl = (projectId: string, taskId: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/`
 }
 
 /**
@@ -1508,7 +1508,7 @@ export const tasksRunsCreate = async (
 }
 
 export const getTasksRunsRetrieveUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/`
 }
 
 /**
@@ -1528,7 +1528,7 @@ export const tasksRunsRetrieve = async (
 }
 
 export const getTasksRunsPartialUpdateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/`
 }
 
 /**
@@ -1551,7 +1551,7 @@ export const tasksRunsPartialUpdate = async (
 }
 
 export const getTasksRunsAppendLogCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/append_log/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/append_log/`
 }
 
 /**
@@ -1574,7 +1574,7 @@ export const tasksRunsAppendLogCreate = async (
 }
 
 export const getTasksRunsArtifactsCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/`
 }
 
 /**
@@ -1597,7 +1597,7 @@ export const tasksRunsArtifactsCreate = async (
 }
 
 export const getTasksRunsArtifactsDownloadCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/download/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/download/`
 }
 
 /**
@@ -1620,7 +1620,7 @@ export const tasksRunsArtifactsDownloadCreate = async (
 }
 
 export const getTasksRunsArtifactsFinalizeUploadCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/finalize_upload/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/finalize_upload/`
 }
 
 /**
@@ -1646,7 +1646,7 @@ export const tasksRunsArtifactsFinalizeUploadCreate = async (
 }
 
 export const getTasksRunsArtifactsPrepareUploadCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/prepare_upload/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/prepare_upload/`
 }
 
 /**
@@ -1672,7 +1672,7 @@ export const tasksRunsArtifactsPrepareUploadCreate = async (
 }
 
 export const getTasksRunsArtifactsPresignCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/presign/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/presign/`
 }
 
 /**
@@ -1695,7 +1695,7 @@ export const tasksRunsArtifactsPresignCreate = async (
 }
 
 export const getTasksRunsCancelCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/cancel/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/cancel/`
 }
 
 /**
@@ -1718,7 +1718,7 @@ export const tasksRunsCancelCreate = async (
 }
 
 export const getTasksRunsCommandCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/command/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/command/`
 }
 
 /**
@@ -1741,7 +1741,7 @@ export const tasksRunsCommandCreate = async (
 }
 
 export const getTasksRunsConnectionTokenRetrieveUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/connection_token/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/connection_token/`
 }
 
 /**
@@ -1761,7 +1761,7 @@ export const tasksRunsConnectionTokenRetrieve = async (
 }
 
 export const getTasksRunsRelayMessageCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/relay_message/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/relay_message/`
 }
 
 /**
@@ -1784,7 +1784,7 @@ export const tasksRunsRelayMessageCreate = async (
 }
 
 export const getTasksRunsResumeInCloudCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/resume_in_cloud/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/resume_in_cloud/`
 }
 
 /**
@@ -1820,8 +1820,8 @@ export const getTasksRunsSessionLogsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/session_logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/session_logs/`
+        ? `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/session_logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/session_logs/`
 }
 
 /**
@@ -1842,7 +1842,7 @@ export const tasksRunsSessionLogsRetrieve = async (
 }
 
 export const getTasksRunsSetOutputPartialUpdateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/set_output/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/set_output/`
 }
 
 /**
@@ -1865,7 +1865,7 @@ export const tasksRunsSetOutputPartialUpdate = async (
 }
 
 export const getTasksRunsStartCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/start/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/start/`
 }
 
 /**
@@ -1904,8 +1904,8 @@ export const getTasksRunsStreamRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/stream/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/stream/`
+        ? `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/stream/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/stream/`
 }
 
 /**
@@ -1931,7 +1931,7 @@ export const tasksRunsStreamRetrieve = async (
 }
 
 export const getTasksRunsStreamTokenRetrieveUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/stream_token/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/stream_token/`
 }
 
 /**
@@ -1951,7 +1951,7 @@ export const tasksRunsStreamTokenRetrieve = async (
 }
 
 export const getTasksRunsTaskSessionRetrieveUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/task_session/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/task_session/`
 }
 
 /**
@@ -1971,7 +1971,7 @@ export const tasksRunsTaskSessionRetrieve = async (
 }
 
 export const getTasksRunsTaskSessionSyncCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/task_session_sync/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/task_session_sync/`
 }
 
 /**
@@ -1994,7 +1994,7 @@ export const tasksRunsTaskSessionSyncCreate = async (
 }
 
 export const getTasksRunsLivingArtifactsListUrl = (projectId: string, taskId: string, runId: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/`
 }
 
 /**
@@ -2017,7 +2017,7 @@ export const tasksRunsLivingArtifactsList = async (
 }
 
 export const getTasksRunsLivingArtifactsCreateUrl = (projectId: string, taskId: string, runId: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/`
 }
 
 /**
@@ -2043,7 +2043,7 @@ export const tasksRunsLivingArtifactsCreate = async (
 }
 
 export const getTasksRunsLivingArtifactsOpenUrl = (projectId: string, taskId: string, runId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/${id}/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/${id}/`
 }
 
 /**
@@ -2067,7 +2067,7 @@ export const tasksRunsLivingArtifactsOpen = async (
 }
 
 export const getTasksRunsLivingArtifactsEditUrl = (projectId: string, taskId: string, runId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/${id}/edit/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/${id}/edit/`
 }
 
 /**
@@ -2094,7 +2094,7 @@ export const tasksRunsLivingArtifactsEdit = async (
 }
 
 export const getTasksRunsLivingArtifactsChartUrl = (projectId: string, taskId: string, runId: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/chart/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${runId}/living_artifacts/chart/`
 }
 
 /**
@@ -2135,8 +2135,8 @@ export const getTasksThreadMessagesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/${taskId}/thread_messages/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/${taskId}/thread_messages/`
+        ? `/v1/projects/${projectId}/tasks/${taskId}/thread_messages/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/${taskId}/thread_messages/`
 }
 
 /**
@@ -2156,7 +2156,7 @@ export const tasksThreadMessagesList = async (
 }
 
 export const getTasksThreadMessagesCreateUrl = (projectId: string, taskId: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/thread_messages/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/thread_messages/`
 }
 
 /**
@@ -2179,7 +2179,7 @@ export const tasksThreadMessagesCreate = async (
 }
 
 export const getTasksThreadMessagesDestroyUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/thread_messages/${id}/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/thread_messages/${id}/`
 }
 
 /**
@@ -2200,7 +2200,7 @@ export const tasksThreadMessagesDestroy = async (
 }
 
 export const getTasksThreadMessagesSendToAgentCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/thread_messages/${id}/send_to_agent/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/thread_messages/${id}/send_to_agent/`
 }
 
 /**
@@ -2223,7 +2223,7 @@ export const tasksThreadMessagesSendToAgentCreate = async (
 }
 
 export const getTasksActiveWizardRunRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tasks/active_wizard_run/`
+    return `/v1/projects/${projectId}/tasks/active_wizard_run/`
 }
 
 /**
@@ -2241,7 +2241,7 @@ export const tasksActiveWizardRunRetrieve = async (
 }
 
 export const getTasksPinnedRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tasks/pinned/`
+    return `/v1/projects/${projectId}/tasks/pinned/`
 }
 
 /**
@@ -2259,7 +2259,7 @@ export const tasksPinnedRetrieve = async (
 }
 
 export const getTasksRepositoriesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tasks/repositories/`
+    return `/v1/projects/${projectId}/tasks/repositories/`
 }
 
 /**
@@ -2291,8 +2291,8 @@ export const getTasksRepositoryReadinessRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/repository_readiness/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/repository_readiness/`
+        ? `/v1/projects/${projectId}/tasks/repository_readiness/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/repository_readiness/`
 }
 
 /**
@@ -2325,8 +2325,8 @@ export const getTasksSlackThreadContextRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/slack_thread_context/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/slack_thread_context/`
+        ? `/v1/projects/${projectId}/tasks/slack_thread_context/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/slack_thread_context/`
 }
 
 /**
@@ -2356,8 +2356,8 @@ export const getTasksSummariesCreateUrl = (projectId: string, params?: TasksSumm
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/summaries/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/summaries/`
+        ? `/v1/projects/${projectId}/tasks/summaries/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/summaries/`
 }
 
 /**
@@ -2379,7 +2379,7 @@ export const tasksSummariesCreate = async (
 }
 
 export const getTasksWarmCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tasks/warm/`
+    return `/v1/projects/${projectId}/tasks/warm/`
 }
 
 /**

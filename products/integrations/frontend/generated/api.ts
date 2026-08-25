@@ -58,7 +58,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 export const getIntegrationsEnvironmentMappingPartialUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/integrations/${id}/environment-mapping/`
+    return `/v1/organizations/${organizationId}/integrations/${id}/environment-mapping/`
 }
 
 /**
@@ -100,8 +100,8 @@ export const getRoleExternalReferencesListUrl = (organizationId: string, params?
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/role_external_references/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/role_external_references/`
+        ? `/v1/organizations/${organizationId}/role_external_references/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/role_external_references/`
 }
 
 export const roleExternalReferencesList = async (
@@ -116,7 +116,7 @@ export const roleExternalReferencesList = async (
 }
 
 export const getRoleExternalReferencesCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/role_external_references/`
+    return `/v1/organizations/${organizationId}/role_external_references/`
 }
 
 export const roleExternalReferencesCreate = async (
@@ -133,7 +133,7 @@ export const roleExternalReferencesCreate = async (
 }
 
 export const getRoleExternalReferencesDestroyUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/role_external_references/${id}/`
+    return `/v1/organizations/${organizationId}/role_external_references/${id}/`
 }
 
 export const roleExternalReferencesDestroy = async (
@@ -162,8 +162,8 @@ export const getRoleExternalReferencesLookupRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/role_external_references/lookup/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/role_external_references/lookup/`
+        ? `/v1/organizations/${organizationId}/role_external_references/lookup/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/role_external_references/lookup/`
 }
 
 export const roleExternalReferencesLookupRetrieve = async (
@@ -189,8 +189,8 @@ export const getIntegrationsListUrl = (projectId: string, params?: IntegrationsL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/integrations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/integrations/`
+        ? `/v1/projects/${projectId}/integrations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/integrations/`
 }
 
 export const integrationsList = async (
@@ -205,7 +205,7 @@ export const integrationsList = async (
 }
 
 export const getIntegrationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/`
+    return `/v1/projects/${projectId}/integrations/`
 }
 
 export const integrationsCreate = async (
@@ -222,7 +222,7 @@ export const integrationsCreate = async (
 }
 
 export const getIntegrationsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/`
+    return `/v1/projects/${projectId}/integrations/${id}/`
 }
 
 export const integrationsRetrieve = async (
@@ -237,7 +237,7 @@ export const integrationsRetrieve = async (
 }
 
 export const getIntegrationsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/`
+    return `/v1/projects/${projectId}/integrations/${id}/`
 }
 
 export const integrationsDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {
@@ -248,7 +248,7 @@ export const integrationsDestroy = async (projectId: string, id: number, options
 }
 
 export const getIntegrationsAnthropicManagedAgentEnvsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/anthropic_managed_agent_environments/`
+    return `/v1/projects/${projectId}/integrations/${id}/anthropic_managed_agent_environments/`
 }
 
 export const integrationsAnthropicManagedAgentEnvsRetrieve = async (
@@ -263,7 +263,7 @@ export const integrationsAnthropicManagedAgentEnvsRetrieve = async (
 }
 
 export const getIntegrationsAnthropicManagedAgentVaultsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/anthropic_managed_agent_vaults/`
+    return `/v1/projects/${projectId}/integrations/${id}/anthropic_managed_agent_vaults/`
 }
 
 export const integrationsAnthropicManagedAgentVaultsRetrieve = async (
@@ -278,7 +278,7 @@ export const integrationsAnthropicManagedAgentVaultsRetrieve = async (
 }
 
 export const getIntegrationsAnthropicManagedAgentsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/anthropic_managed_agents/`
+    return `/v1/projects/${projectId}/integrations/${id}/anthropic_managed_agents/`
 }
 
 export const integrationsAnthropicManagedAgentsRetrieve = async (
@@ -308,8 +308,8 @@ export const getIntegrationsChannelsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/integrations/${id}/channels/?${stringifiedParams}`
-        : `/api/projects/${projectId}/integrations/${id}/channels/`
+        ? `/v1/projects/${projectId}/integrations/${id}/channels/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/integrations/${id}/channels/`
 }
 
 export const integrationsChannelsRetrieve = async (
@@ -325,7 +325,7 @@ export const integrationsChannelsRetrieve = async (
 }
 
 export const getIntegrationsClickupListsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/clickup_lists/`
+    return `/v1/projects/${projectId}/integrations/${id}/clickup_lists/`
 }
 
 export const integrationsClickupListsRetrieve = async (
@@ -340,7 +340,7 @@ export const integrationsClickupListsRetrieve = async (
 }
 
 export const getIntegrationsClickupSpacesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/clickup_spaces/`
+    return `/v1/projects/${projectId}/integrations/${id}/clickup_spaces/`
 }
 
 export const integrationsClickupSpacesRetrieve = async (
@@ -355,7 +355,7 @@ export const integrationsClickupSpacesRetrieve = async (
 }
 
 export const getIntegrationsClickupWorkspacesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/clickup_workspaces/`
+    return `/v1/projects/${projectId}/integrations/${id}/clickup_workspaces/`
 }
 
 export const integrationsClickupWorkspacesRetrieve = async (
@@ -370,7 +370,7 @@ export const integrationsClickupWorkspacesRetrieve = async (
 }
 
 export const getIntegrationsEmailPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/email/`
+    return `/v1/projects/${projectId}/integrations/${id}/email/`
 }
 
 export const integrationsEmailPartialUpdate = async (
@@ -388,7 +388,7 @@ export const integrationsEmailPartialUpdate = async (
 }
 
 export const getIntegrationsEmailVerifyCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/email/verify/`
+    return `/v1/projects/${projectId}/integrations/${id}/email/verify/`
 }
 
 export const integrationsEmailVerifyCreate = async (
@@ -421,8 +421,8 @@ export const getIntegrationsGithubBranchesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/integrations/${id}/github_branches/?${stringifiedParams}`
-        : `/api/projects/${projectId}/integrations/${id}/github_branches/`
+        ? `/v1/projects/${projectId}/integrations/${id}/github_branches/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/integrations/${id}/github_branches/`
 }
 
 export const integrationsGithubBranchesRetrieve = async (
@@ -453,8 +453,8 @@ export const getIntegrationsGithubReposRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/integrations/${id}/github_repos/?${stringifiedParams}`
-        : `/api/projects/${projectId}/integrations/${id}/github_repos/`
+        ? `/v1/projects/${projectId}/integrations/${id}/github_repos/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/integrations/${id}/github_repos/`
 }
 
 export const integrationsGithubReposRetrieve = async (
@@ -470,7 +470,7 @@ export const integrationsGithubReposRetrieve = async (
 }
 
 export const getIntegrationsGithubReposRefreshCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/github_repos/refresh/`
+    return `/v1/projects/${projectId}/integrations/${id}/github_repos/refresh/`
 }
 
 export const integrationsGithubReposRefreshCreate = async (
@@ -500,8 +500,8 @@ export const getIntegrationsGithubTeamsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/integrations/${id}/github_teams/?${stringifiedParams}`
-        : `/api/projects/${projectId}/integrations/${id}/github_teams/`
+        ? `/v1/projects/${projectId}/integrations/${id}/github_teams/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/integrations/${id}/github_teams/`
 }
 
 export const integrationsGithubTeamsRetrieve = async (
@@ -517,7 +517,7 @@ export const integrationsGithubTeamsRetrieve = async (
 }
 
 export const getIntegrationsGoogleAccessibleAccountsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/google_accessible_accounts/`
+    return `/v1/projects/${projectId}/integrations/${id}/google_accessible_accounts/`
 }
 
 export const integrationsGoogleAccessibleAccountsRetrieve = async (
@@ -532,7 +532,7 @@ export const integrationsGoogleAccessibleAccountsRetrieve = async (
 }
 
 export const getIntegrationsGoogleConversionActionsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/google_conversion_actions/`
+    return `/v1/projects/${projectId}/integrations/${id}/google_conversion_actions/`
 }
 
 export const integrationsGoogleConversionActionsRetrieve = async (
@@ -547,7 +547,7 @@ export const integrationsGoogleConversionActionsRetrieve = async (
 }
 
 export const getIntegrationsJiraProjectsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/jira_projects/`
+    return `/v1/projects/${projectId}/integrations/${id}/jira_projects/`
 }
 
 export const integrationsJiraProjectsRetrieve = async (
@@ -562,7 +562,7 @@ export const integrationsJiraProjectsRetrieve = async (
 }
 
 export const getIntegrationsLinearTeamsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/linear_teams/`
+    return `/v1/projects/${projectId}/integrations/${id}/linear_teams/`
 }
 
 export const integrationsLinearTeamsRetrieve = async (
@@ -577,7 +577,7 @@ export const integrationsLinearTeamsRetrieve = async (
 }
 
 export const getIntegrationsLinkedinAdsAccountsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/linkedin_ads_accounts/`
+    return `/v1/projects/${projectId}/integrations/${id}/linkedin_ads_accounts/`
 }
 
 export const integrationsLinkedinAdsAccountsRetrieve = async (
@@ -592,7 +592,7 @@ export const integrationsLinkedinAdsAccountsRetrieve = async (
 }
 
 export const getIntegrationsLinkedinAdsConversionRulesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/linkedin_ads_conversion_rules/`
+    return `/v1/projects/${projectId}/integrations/${id}/linkedin_ads_conversion_rules/`
 }
 
 export const integrationsLinkedinAdsConversionRulesRetrieve = async (
@@ -607,7 +607,7 @@ export const integrationsLinkedinAdsConversionRulesRetrieve = async (
 }
 
 export const getIntegrationsTwilioPhoneNumbersRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/twilio_phone_numbers/`
+    return `/v1/projects/${projectId}/integrations/${id}/twilio_phone_numbers/`
 }
 
 export const integrationsTwilioPhoneNumbersRetrieve = async (
@@ -622,7 +622,7 @@ export const integrationsTwilioPhoneNumbersRetrieve = async (
 }
 
 export const getIntegrationsAuthorizeRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/authorize/`
+    return `/v1/projects/${projectId}/integrations/authorize/`
 }
 
 export const integrationsAuthorizeRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -633,7 +633,7 @@ export const integrationsAuthorizeRetrieve = async (projectId: string, options?:
 }
 
 export const getIntegrationsDomainConnectApplyUrlCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/domain-connect/apply-url/`
+    return `/v1/projects/${projectId}/integrations/domain-connect/apply-url/`
 }
 
 /**
@@ -657,7 +657,7 @@ export const integrationsDomainConnectApplyUrlCreate = async (
 }
 
 export const getIntegrationsDomainConnectCheckRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/domain-connect/check/`
+    return `/v1/projects/${projectId}/integrations/domain-connect/check/`
 }
 
 export const integrationsDomainConnectCheckRetrieve = async (
@@ -671,7 +671,7 @@ export const integrationsDomainConnectCheckRetrieve = async (
 }
 
 export const getIntegrationsGithubAvailableInstallationsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/github/available_installations/`
+    return `/v1/projects/${projectId}/integrations/github/available_installations/`
 }
 
 /**
@@ -695,7 +695,7 @@ export const integrationsGithubAvailableInstallationsRetrieve = async (
 }
 
 export const getIntegrationsGithubLinkExistingCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/github/link_existing/`
+    return `/v1/projects/${projectId}/integrations/github/link_existing/`
 }
 
 /**
@@ -715,7 +715,7 @@ export const integrationsGithubLinkExistingCreate = async (
 }
 
 export const getIntegrationsGithubOauthAuthorizeCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/github/oauth_authorize/`
+    return `/v1/projects/${projectId}/integrations/github/oauth_authorize/`
 }
 
 /**
@@ -735,7 +735,7 @@ export const integrationsGithubOauthAuthorizeCreate = async (
 }
 
 export const getIntegrationsGithubPrepareCallbackCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/github/prepare_callback/`
+    return `/v1/projects/${projectId}/integrations/github/prepare_callback/`
 }
 
 /**
@@ -758,7 +758,7 @@ export const integrationsGithubPrepareCallbackCreate = async (
 }
 
 export const getIntegrationsRequestAccessCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/request_access/`
+    return `/v1/projects/${projectId}/integrations/request_access/`
 }
 
 /**

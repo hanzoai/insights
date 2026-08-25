@@ -87,8 +87,8 @@ export const getVisionActionsListUrl = (projectId: string, params?: VisionAction
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/actions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/actions/`
+        ? `/v1/projects/${projectId}/vision/actions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/actions/`
 }
 
 /**
@@ -106,7 +106,7 @@ export const visionActionsList = async (
 }
 
 export const getVisionActionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/vision/actions/`
+    return `/v1/projects/${projectId}/vision/actions/`
 }
 
 /**
@@ -126,7 +126,7 @@ export const visionActionsCreate = async (
 }
 
 export const getVisionActionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/actions/${id}/`
+    return `/v1/projects/${projectId}/vision/actions/${id}/`
 }
 
 /**
@@ -144,7 +144,7 @@ export const visionActionsRetrieve = async (
 }
 
 export const getVisionActionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/actions/${id}/`
+    return `/v1/projects/${projectId}/vision/actions/${id}/`
 }
 
 /**
@@ -165,7 +165,7 @@ export const visionActionsPartialUpdate = async (
 }
 
 export const getVisionActionsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/actions/${id}/`
+    return `/v1/projects/${projectId}/vision/actions/${id}/`
 }
 
 /**
@@ -179,7 +179,7 @@ export const visionActionsDestroy = async (projectId: string, id: string, option
 }
 
 export const getVisionActionsRunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/actions/${id}/run/`
+    return `/v1/projects/${projectId}/vision/actions/${id}/run/`
 }
 
 /**
@@ -214,8 +214,8 @@ export const getVisionActionsRunsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/actions/${visionActionId}/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/actions/${visionActionId}/runs/`
+        ? `/v1/projects/${projectId}/vision/actions/${visionActionId}/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/actions/${visionActionId}/runs/`
 }
 
 /**
@@ -237,7 +237,7 @@ export const visionActionsRunsList = async (
 }
 
 export const getVisionActionsRunsRetrieveUrl = (projectId: string, visionActionId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/actions/${visionActionId}/runs/${id}/`
+    return `/v1/projects/${projectId}/vision/actions/${visionActionId}/runs/${id}/`
 }
 
 /**
@@ -267,8 +267,8 @@ export const getVisionObservationsListUrl = (projectId: string, params: VisionOb
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/observations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/observations/`
+        ? `/v1/projects/${projectId}/vision/observations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/observations/`
 }
 
 /**
@@ -301,8 +301,8 @@ export const getVisionObservationsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/observations/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/observations/${id}/`
+        ? `/v1/projects/${projectId}/vision/observations/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/observations/${id}/`
 }
 
 /**
@@ -321,7 +321,7 @@ export const visionObservationsRetrieve = async (
 }
 
 export const getVisionObservationsCreateTaskCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/observations/${id}/create_task/`
+    return `/v1/projects/${projectId}/vision/observations/${id}/create_task/`
 }
 
 /**
@@ -339,7 +339,7 @@ export const visionObservationsCreateTaskCreate = async (
 }
 
 export const getVisionObservationsLabelCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/observations/${id}/label/`
+    return `/v1/projects/${projectId}/vision/observations/${id}/label/`
 }
 
 /**
@@ -360,7 +360,7 @@ export const visionObservationsLabelCreate = async (
 }
 
 export const getVisionObservationsLabelDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/observations/${id}/label/`
+    return `/v1/projects/${projectId}/vision/observations/${id}/label/`
 }
 
 /**
@@ -378,7 +378,7 @@ export const visionObservationsLabelDestroy = async (
 }
 
 export const getVisionObservationsRetryCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/observations/${id}/retry/`
+    return `/v1/projects/${projectId}/vision/observations/${id}/retry/`
 }
 
 /**
@@ -396,7 +396,7 @@ export const visionObservationsRetryCreate = async (
 }
 
 export const getEnvironmentVisionQuotaRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/vision/quota/`
+    return `/v1/projects/${projectId}/vision/quota/`
 }
 
 export const environmentVisionQuotaRetrieve = async (
@@ -421,8 +421,8 @@ export const getVisionScannersListUrl = (projectId: string, params?: VisionScann
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/scanners/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/scanners/`
+        ? `/v1/projects/${projectId}/vision/scanners/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/scanners/`
 }
 
 /**
@@ -440,7 +440,7 @@ export const visionScannersList = async (
 }
 
 export const getVisionScannersCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/vision/scanners/`
+    return `/v1/projects/${projectId}/vision/scanners/`
 }
 
 /**
@@ -460,7 +460,7 @@ export const visionScannersCreate = async (
 }
 
 export const getVisionScannersRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${id}/`
+    return `/v1/projects/${projectId}/vision/scanners/${id}/`
 }
 
 /**
@@ -478,7 +478,7 @@ export const visionScannersRetrieve = async (
 }
 
 export const getVisionScannersPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${id}/`
+    return `/v1/projects/${projectId}/vision/scanners/${id}/`
 }
 
 /**
@@ -499,7 +499,7 @@ export const visionScannersPartialUpdate = async (
 }
 
 export const getVisionScannersDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${id}/`
+    return `/v1/projects/${projectId}/vision/scanners/${id}/`
 }
 
 /**
@@ -513,7 +513,7 @@ export const visionScannersDestroy = async (projectId: string, id: string, optio
 }
 
 export const getVisionScannersAffectedCohortCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${id}/affected_cohort/`
+    return `/v1/projects/${projectId}/vision/scanners/${id}/affected_cohort/`
 }
 
 /**
@@ -534,7 +534,7 @@ export const visionScannersAffectedCohortCreate = async (
 }
 
 export const getVisionScannersBulkObserveCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${id}/bulk_observe/`
+    return `/v1/projects/${projectId}/vision/scanners/${id}/bulk_observe/`
 }
 
 /**
@@ -571,8 +571,8 @@ export const getVisionScannersImpactRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/scanners/${id}/impact/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/scanners/${id}/impact/`
+        ? `/v1/projects/${projectId}/vision/scanners/${id}/impact/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/scanners/${id}/impact/`
 }
 
 /**
@@ -591,7 +591,7 @@ export const visionScannersImpactRetrieve = async (
 }
 
 export const getVisionScannersObserveCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${id}/observe/`
+    return `/v1/projects/${projectId}/vision/scanners/${id}/observe/`
 }
 
 /**
@@ -627,8 +627,8 @@ export const getVisionScannersObservationsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/`
+        ? `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/`
 }
 
 /**
@@ -666,8 +666,8 @@ export const getVisionScannersObservationsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/`
+        ? `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/`
 }
 
 /**
@@ -690,7 +690,7 @@ export const visionScannersObservationsRetrieve = async (
 }
 
 export const getVisionScannersObservationsCreateTaskCreateUrl = (projectId: string, scannerId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/create_task/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/create_task/`
 }
 
 /**
@@ -712,7 +712,7 @@ export const visionScannersObservationsCreateTaskCreate = async (
 }
 
 export const getVisionScannersObservationsLabelCreateUrl = (projectId: string, scannerId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/label/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/label/`
 }
 
 /**
@@ -737,7 +737,7 @@ export const visionScannersObservationsLabelCreate = async (
 }
 
 export const getVisionScannersObservationsLabelDestroyUrl = (projectId: string, scannerId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/label/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/label/`
 }
 
 /**
@@ -756,7 +756,7 @@ export const visionScannersObservationsLabelDestroy = async (
 }
 
 export const getVisionScannersObservationsRetryCreateUrl = (projectId: string, scannerId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/retry/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/${id}/retry/`
 }
 
 /**
@@ -790,8 +790,8 @@ export const getVisionScannersObservationsStatsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/stats/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/scanners/${scannerId}/observations/stats/`
+        ? `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/stats/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/scanners/${scannerId}/observations/stats/`
 }
 
 /**
@@ -828,8 +828,8 @@ export const getVisionScannersPromptSuggestionsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/`
+        ? `/v1/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/`
 }
 
 /**
@@ -851,7 +851,7 @@ export const visionScannersPromptSuggestionsList = async (
 }
 
 export const getVisionScannersPromptSuggestionsApplyCreateUrl = (projectId: string, scannerId: string, id: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/${id}/apply/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/${id}/apply/`
 }
 
 /**
@@ -880,7 +880,7 @@ export const getVisionScannersPromptSuggestionsDismissCreateUrl = (
     scannerId: string,
     id: string
 ) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/${id}/dismiss/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/${id}/dismiss/`
 }
 
 /**
@@ -906,7 +906,7 @@ export const getVisionScannersPromptSuggestionsEvaluateCreateUrl = (
     scannerId: string,
     id: string
 ) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/${id}/evaluate/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/${id}/evaluate/`
 }
 
 /**
@@ -931,7 +931,7 @@ export const visionScannersPromptSuggestionsEvaluateCreate = async (
 }
 
 export const getVisionScannersPromptSuggestionsCurrentRetrieveUrl = (projectId: string, scannerId: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/current/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/current/`
 }
 
 /**
@@ -952,7 +952,7 @@ export const visionScannersPromptSuggestionsCurrentRetrieve = async (
 }
 
 export const getVisionScannersPromptSuggestionsGenerateCreateUrl = (projectId: string, scannerId: string) => {
-    return `/api/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/generate/`
+    return `/v1/projects/${projectId}/vision/scanners/${scannerId}/prompt_suggestions/generate/`
 }
 
 /**
@@ -973,7 +973,7 @@ export const visionScannersPromptSuggestionsGenerateCreate = async (
 }
 
 export const getVisionScannersCreatorsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/vision/scanners/creators/`
+    return `/v1/projects/${projectId}/vision/scanners/creators/`
 }
 
 /**
@@ -990,7 +990,7 @@ export const visionScannersCreatorsRetrieve = async (
 }
 
 export const getVisionScannersEstimateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/vision/scanners/estimate/`
+    return `/v1/projects/${projectId}/vision/scanners/estimate/`
 }
 
 /**
@@ -1010,7 +1010,7 @@ export const visionScannersEstimateCreate = async (
 }
 
 export const getVisionScannersInlineScanCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/vision/scanners/inline_scan/`
+    return `/v1/projects/${projectId}/vision/scanners/inline_scan/`
 }
 
 /**
@@ -1033,7 +1033,7 @@ export const visionScannersInlineScanCreate = async (
 }
 
 export const getVisionScannersStatsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/vision/scanners/stats/`
+    return `/v1/projects/${projectId}/vision/scanners/stats/`
 }
 
 /**
@@ -1050,7 +1050,7 @@ export const visionScannersStatsRetrieve = async (
 }
 
 export const getVisionScannersSuggestTagsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/vision/scanners/suggest_tags/`
+    return `/v1/projects/${projectId}/vision/scanners/suggest_tags/`
 }
 
 /**

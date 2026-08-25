@@ -48,8 +48,8 @@ export const getPulseBriefConfigsListUrl = (projectId: string, params?: PulseBri
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/pulse/brief_configs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/pulse/brief_configs/`
+        ? `/v1/projects/${projectId}/pulse/brief_configs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/pulse/brief_configs/`
 }
 
 export const pulseBriefConfigsList = async (
@@ -64,7 +64,7 @@ export const pulseBriefConfigsList = async (
 }
 
 export const getPulseBriefConfigsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/pulse/brief_configs/`
+    return `/v1/projects/${projectId}/pulse/brief_configs/`
 }
 
 export const pulseBriefConfigsCreate = async (
@@ -81,7 +81,7 @@ export const pulseBriefConfigsCreate = async (
 }
 
 export const getPulseBriefConfigsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/pulse/brief_configs/${id}/`
+    return `/v1/projects/${projectId}/pulse/brief_configs/${id}/`
 }
 
 export const pulseBriefConfigsRetrieve = async (
@@ -96,7 +96,7 @@ export const pulseBriefConfigsRetrieve = async (
 }
 
 export const getPulseBriefConfigsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/pulse/brief_configs/${id}/`
+    return `/v1/projects/${projectId}/pulse/brief_configs/${id}/`
 }
 
 export const pulseBriefConfigsUpdate = async (
@@ -114,7 +114,7 @@ export const pulseBriefConfigsUpdate = async (
 }
 
 export const getPulseBriefConfigsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/pulse/brief_configs/${id}/`
+    return `/v1/projects/${projectId}/pulse/brief_configs/${id}/`
 }
 
 export const pulseBriefConfigsPartialUpdate = async (
@@ -132,7 +132,7 @@ export const pulseBriefConfigsPartialUpdate = async (
 }
 
 export const getPulseBriefConfigsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/pulse/brief_configs/${id}/`
+    return `/v1/projects/${projectId}/pulse/brief_configs/${id}/`
 }
 
 export const pulseBriefConfigsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -154,8 +154,8 @@ export const getPulseBriefsListUrl = (projectId: string, params?: PulseBriefsLis
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/pulse/briefs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/pulse/briefs/`
+        ? `/v1/projects/${projectId}/pulse/briefs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/pulse/briefs/`
 }
 
 export const pulseBriefsList = async (
@@ -170,7 +170,7 @@ export const pulseBriefsList = async (
 }
 
 export const getPulseBriefsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/pulse/briefs/${id}/`
+    return `/v1/projects/${projectId}/pulse/briefs/${id}/`
 }
 
 export const pulseBriefsRetrieve = async (
@@ -185,7 +185,7 @@ export const pulseBriefsRetrieve = async (
 }
 
 export const getPulseBriefsGenerateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/pulse/briefs/generate/`
+    return `/v1/projects/${projectId}/pulse/briefs/generate/`
 }
 
 export const pulseBriefsGenerateCreate = async (

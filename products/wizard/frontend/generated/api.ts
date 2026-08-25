@@ -29,8 +29,8 @@ export const getWizardSessionsListUrl = (projectId: string, params?: WizardSessi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/wizard/sessions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/wizard/sessions/`
+        ? `/v1/projects/${projectId}/wizard/sessions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/wizard/sessions/`
 }
 
 /**
@@ -48,7 +48,7 @@ export const wizardSessionsList = async (
 }
 
 export const getWizardSessionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/wizard/sessions/`
+    return `/v1/projects/${projectId}/wizard/sessions/`
 }
 
 /**
@@ -68,7 +68,7 @@ export const wizardSessionsCreate = async (
 }
 
 export const getWizardSessionsRetrieveUrl = (projectId: string, sessionId: string) => {
-    return `/api/projects/${projectId}/wizard/sessions/${sessionId}/`
+    return `/v1/projects/${projectId}/wizard/sessions/${sessionId}/`
 }
 
 /**
@@ -97,8 +97,8 @@ export const getWizardSessionsLatestRetrieveUrl = (projectId: string, params: Wi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/wizard/sessions/latest/?${stringifiedParams}`
-        : `/api/projects/${projectId}/wizard/sessions/latest/`
+        ? `/v1/projects/${projectId}/wizard/sessions/latest/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/wizard/sessions/latest/`
 }
 
 /**
@@ -127,8 +127,8 @@ export const getWizardSessionsStreamRetrieveUrl = (projectId: string, params: Wi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/wizard/sessions/stream/?${stringifiedParams}`
-        : `/api/projects/${projectId}/wizard/sessions/stream/`
+        ? `/v1/projects/${projectId}/wizard/sessions/stream/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/wizard/sessions/stream/`
 }
 
 /**

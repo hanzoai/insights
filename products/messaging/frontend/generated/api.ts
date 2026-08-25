@@ -60,8 +60,8 @@ export const getMessagingCategoriesListUrl = (projectId: string, params?: Messag
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/messaging_categories/?${stringifiedParams}`
-        : `/api/projects/${projectId}/messaging_categories/`
+        ? `/v1/projects/${projectId}/messaging_categories/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/messaging_categories/`
 }
 
 export const messagingCategoriesList = async (
@@ -76,7 +76,7 @@ export const messagingCategoriesList = async (
 }
 
 export const getMessagingCategoriesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/`
+    return `/v1/projects/${projectId}/messaging_categories/`
 }
 
 export const messagingCategoriesCreate = async (
@@ -93,7 +93,7 @@ export const messagingCategoriesCreate = async (
 }
 
 export const getMessagingCategoriesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_categories/${id}/`
+    return `/v1/projects/${projectId}/messaging_categories/${id}/`
 }
 
 export const messagingCategoriesRetrieve = async (
@@ -108,7 +108,7 @@ export const messagingCategoriesRetrieve = async (
 }
 
 export const getMessagingCategoriesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_categories/${id}/`
+    return `/v1/projects/${projectId}/messaging_categories/${id}/`
 }
 
 export const messagingCategoriesUpdate = async (
@@ -126,7 +126,7 @@ export const messagingCategoriesUpdate = async (
 }
 
 export const getMessagingCategoriesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_categories/${id}/`
+    return `/v1/projects/${projectId}/messaging_categories/${id}/`
 }
 
 export const messagingCategoriesPartialUpdate = async (
@@ -144,7 +144,7 @@ export const messagingCategoriesPartialUpdate = async (
 }
 
 export const getMessagingCategoriesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_categories/${id}/`
+    return `/v1/projects/${projectId}/messaging_categories/${id}/`
 }
 
 /**
@@ -162,7 +162,7 @@ export const messagingCategoriesDestroy = async (
 }
 
 export const getMessagingCategoriesImportFromCustomerioCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/import_from_customerio/`
+    return `/v1/projects/${projectId}/messaging_categories/import_from_customerio/`
 }
 
 /**
@@ -184,7 +184,7 @@ export const messagingCategoriesImportFromCustomerioCreate = async (
 }
 
 export const getMessagingCategoriesImportPreferencesCsvCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/import_preferences_csv/`
+    return `/v1/projects/${projectId}/messaging_categories/import_preferences_csv/`
 }
 
 /**
@@ -220,7 +220,7 @@ export const messagingCategoriesImportPreferencesCsvCreate = async (
 }
 
 export const getMessagingCategoriesOptoutSyncConfigRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/optout_sync_config/`
+    return `/v1/projects/${projectId}/messaging_categories/optout_sync_config/`
 }
 
 /**
@@ -238,7 +238,7 @@ export const messagingCategoriesOptoutSyncConfigRetrieve = async (
 }
 
 export const getMessagingCategoriesRemoveCustomerioAppConfigDestroyUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/remove_customerio_app_config/`
+    return `/v1/projects/${projectId}/messaging_categories/remove_customerio_app_config/`
 }
 
 /**
@@ -255,7 +255,7 @@ export const messagingCategoriesRemoveCustomerioAppConfigDestroy = async (
 }
 
 export const getMessagingCategoriesRemoveTrackConfigDestroyUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/remove_track_config/`
+    return `/v1/projects/${projectId}/messaging_categories/remove_track_config/`
 }
 
 /**
@@ -272,7 +272,7 @@ export const messagingCategoriesRemoveTrackConfigDestroy = async (
 }
 
 export const getMessagingCategoriesRemoveWebhookConfigDestroyUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/remove_webhook_config/`
+    return `/v1/projects/${projectId}/messaging_categories/remove_webhook_config/`
 }
 
 /**
@@ -289,7 +289,7 @@ export const messagingCategoriesRemoveWebhookConfigDestroy = async (
 }
 
 export const getMessagingCategoriesSaveTrackConfigCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/save_track_config/`
+    return `/v1/projects/${projectId}/messaging_categories/save_track_config/`
 }
 
 /**
@@ -315,7 +315,7 @@ export const messagingCategoriesSaveTrackConfigCreate = async (
 }
 
 export const getMessagingCategoriesSaveWebhookConfigCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_categories/save_webhook_config/`
+    return `/v1/projects/${projectId}/messaging_categories/save_webhook_config/`
 }
 
 /**
@@ -339,7 +339,7 @@ export const messagingCategoriesSaveWebhookConfigCreate = async (
 }
 
 export const getMessagingPreferencesAddOptOutCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_preferences/add_opt_out/`
+    return `/v1/projects/${projectId}/messaging_preferences/add_opt_out/`
 }
 
 /**
@@ -360,7 +360,7 @@ export const messagingPreferencesAddOptOutCreate = async (
 }
 
 export const getMessagingPreferencesBulkAddOptOutsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_preferences/bulk_add_opt_outs/`
+    return `/v1/projects/${projectId}/messaging_preferences/bulk_add_opt_outs/`
 }
 
 /**
@@ -395,8 +395,8 @@ export const getMessagingPreferencesExportOptOutsCsvRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/messaging_preferences/export_opt_outs_csv/?${stringifiedParams}`
-        : `/api/projects/${projectId}/messaging_preferences/export_opt_outs_csv/`
+        ? `/v1/projects/${projectId}/messaging_preferences/export_opt_outs_csv/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/messaging_preferences/export_opt_outs_csv/`
 }
 
 /**
@@ -415,7 +415,7 @@ export const messagingPreferencesExportOptOutsCsvRetrieve = async (
 }
 
 export const getMessagingPreferencesGenerateLinkCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_preferences/generate_link/`
+    return `/v1/projects/${projectId}/messaging_preferences/generate_link/`
 }
 
 /**
@@ -446,8 +446,8 @@ export const getMessagingPreferencesOptOutsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/messaging_preferences/opt_outs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/messaging_preferences/opt_outs/`
+        ? `/v1/projects/${projectId}/messaging_preferences/opt_outs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/messaging_preferences/opt_outs/`
 }
 
 /**
@@ -466,7 +466,7 @@ export const messagingPreferencesOptOutsRetrieve = async (
 }
 
 export const getMessagingPreferencesWebhookUrlRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_preferences/webhook_url/`
+    return `/v1/projects/${projectId}/messaging_preferences/webhook_url/`
 }
 
 /**
@@ -483,7 +483,7 @@ export const messagingPreferencesWebhookUrlRetrieve = async (
 }
 
 export const getMessagingSuppressionsAddSuppressionCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_suppressions/add_suppression/`
+    return `/v1/projects/${projectId}/messaging_suppressions/add_suppression/`
 }
 
 /**
@@ -504,7 +504,7 @@ export const messagingSuppressionsAddSuppressionCreate = async (
 }
 
 export const getMessagingSuppressionsRemoveSuppressionCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_suppressions/remove_suppression/`
+    return `/v1/projects/${projectId}/messaging_suppressions/remove_suppression/`
 }
 
 /**
@@ -539,8 +539,8 @@ export const getMessagingSuppressionsSuppressionsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/messaging_suppressions/suppressions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/messaging_suppressions/suppressions/`
+        ? `/v1/projects/${projectId}/messaging_suppressions/suppressions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/messaging_suppressions/suppressions/`
 }
 
 /**
@@ -573,8 +573,8 @@ export const getMessagingTemplatesListUrl = (projectId: string, params?: Messagi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/messaging_templates/?${stringifiedParams}`
-        : `/api/projects/${projectId}/messaging_templates/`
+        ? `/v1/projects/${projectId}/messaging_templates/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/messaging_templates/`
 }
 
 export const messagingTemplatesList = async (
@@ -589,7 +589,7 @@ export const messagingTemplatesList = async (
 }
 
 export const getMessagingTemplatesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/messaging_templates/`
+    return `/v1/projects/${projectId}/messaging_templates/`
 }
 
 export const messagingTemplatesCreate = async (
@@ -606,7 +606,7 @@ export const messagingTemplatesCreate = async (
 }
 
 export const getMessagingTemplatesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_templates/${id}/`
+    return `/v1/projects/${projectId}/messaging_templates/${id}/`
 }
 
 export const messagingTemplatesRetrieve = async (
@@ -621,7 +621,7 @@ export const messagingTemplatesRetrieve = async (
 }
 
 export const getMessagingTemplatesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_templates/${id}/`
+    return `/v1/projects/${projectId}/messaging_templates/${id}/`
 }
 
 export const messagingTemplatesUpdate = async (
@@ -639,7 +639,7 @@ export const messagingTemplatesUpdate = async (
 }
 
 export const getMessagingTemplatesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_templates/${id}/`
+    return `/v1/projects/${projectId}/messaging_templates/${id}/`
 }
 
 export const messagingTemplatesPartialUpdate = async (
@@ -657,7 +657,7 @@ export const messagingTemplatesPartialUpdate = async (
 }
 
 export const getMessagingTemplatesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_templates/${id}/`
+    return `/v1/projects/${projectId}/messaging_templates/${id}/`
 }
 
 /**
@@ -675,7 +675,7 @@ export const messagingTemplatesDestroy = async (
 }
 
 export const getMessagingTemplatesDesignPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/messaging_templates/${id}/design/`
+    return `/v1/projects/${projectId}/messaging_templates/${id}/design/`
 }
 
 export const messagingTemplatesDesignPartialUpdate = async (

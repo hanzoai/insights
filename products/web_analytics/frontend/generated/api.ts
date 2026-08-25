@@ -75,8 +75,8 @@ export const getHeatmapScreenshotsContentRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/heatmap_screenshots/${id}/content/?${stringifiedParams}`
-        : `/api/projects/${projectId}/heatmap_screenshots/${id}/content/`
+        ? `/v1/projects/${projectId}/heatmap_screenshots/${id}/content/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/heatmap_screenshots/${id}/content/`
 }
 
 /**
@@ -109,8 +109,8 @@ export const getHeatmapsListUrl = (projectId: string, params?: HeatmapsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/heatmaps/?${stringifiedParams}`
-        : `/api/projects/${projectId}/heatmaps/`
+        ? `/v1/projects/${projectId}/heatmaps/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/heatmaps/`
 }
 
 /**
@@ -139,8 +139,8 @@ export const getHeatmapsEventsRetrieveUrl = (projectId: string, params: Heatmaps
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/heatmaps/events/?${stringifiedParams}`
-        : `/api/projects/${projectId}/heatmaps/events/`
+        ? `/v1/projects/${projectId}/heatmaps/events/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/heatmaps/events/`
 }
 
 /**
@@ -169,8 +169,8 @@ export const getSavedListUrl = (projectId: string, params?: SavedListParams) => 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/saved/?${stringifiedParams}`
-        : `/api/projects/${projectId}/saved/`
+        ? `/v1/projects/${projectId}/saved/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/saved/`
 }
 
 /**
@@ -188,7 +188,7 @@ export const savedList = async (
 }
 
 export const getSavedCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/saved/`
+    return `/v1/projects/${projectId}/saved/`
 }
 
 /**
@@ -208,7 +208,7 @@ export const savedCreate = async (
 }
 
 export const getSavedRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/saved/${shortId}/`
+    return `/v1/projects/${projectId}/saved/${shortId}/`
 }
 
 /**
@@ -226,7 +226,7 @@ export const savedRetrieve = async (
 }
 
 export const getSavedPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/saved/${shortId}/`
+    return `/v1/projects/${projectId}/saved/${shortId}/`
 }
 
 /**
@@ -247,7 +247,7 @@ export const savedPartialUpdate = async (
 }
 
 export const getSavedDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/saved/${shortId}/`
+    return `/v1/projects/${projectId}/saved/${shortId}/`
 }
 
 /**
@@ -261,7 +261,7 @@ export const savedDestroy = async (projectId: string, shortId: string, options?:
 }
 
 export const getSavedRegenerateCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/saved/${shortId}/regenerate/`
+    return `/v1/projects/${projectId}/saved/${shortId}/regenerate/`
 }
 
 /**
@@ -279,7 +279,7 @@ export const savedRegenerateCreate = async (
 }
 
 export const getSavedPreflightCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/saved/preflight/`
+    return `/v1/projects/${projectId}/saved/preflight/`
 }
 
 /**
@@ -300,7 +300,7 @@ export const savedPreflightCreate = async (
 }
 
 export const getSavedPrewarmCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/saved/prewarm/`
+    return `/v1/projects/${projectId}/saved/prewarm/`
 }
 
 /**
@@ -331,8 +331,8 @@ export const getWebAnalyticsRecapUrl = (projectId: string, params?: WebAnalytics
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/web_analytics/recap/?${stringifiedParams}`
-        : `/api/projects/${projectId}/web_analytics/recap/`
+        ? `/v1/projects/${projectId}/web_analytics/recap/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/web_analytics/recap/`
 }
 
 /**
@@ -362,8 +362,8 @@ export const getWebAnalyticsWeeklyDigestUrl = (projectId: string, params?: WebAn
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/web_analytics/weekly_digest/?${stringifiedParams}`
-        : `/api/projects/${projectId}/web_analytics/weekly_digest/`
+        ? `/v1/projects/${projectId}/web_analytics/weekly_digest/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/web_analytics/weekly_digest/`
 }
 
 /**
@@ -382,7 +382,7 @@ export const webAnalyticsWeeklyDigest = async (
 }
 
 export const getWebAnalyticsAchievementsAcknowledgeCelebrationUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/web_analytics_achievements/acknowledge_celebration/`
+    return `/v1/projects/${projectId}/web_analytics_achievements/acknowledge_celebration/`
 }
 
 /**
@@ -406,7 +406,7 @@ export const webAnalyticsAchievementsAcknowledgeCelebration = async (
 }
 
 export const getWebAnalyticsAchievementsOverviewUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/web_analytics_achievements/overview/`
+    return `/v1/projects/${projectId}/web_analytics_achievements/overview/`
 }
 
 /**
@@ -424,7 +424,7 @@ export const webAnalyticsAchievementsOverview = async (
 }
 
 export const getWebAnalyticsAchievementsPreferencesUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/web_analytics_achievements/preferences/`
+    return `/v1/projects/${projectId}/web_analytics_achievements/preferences/`
 }
 
 /**
@@ -442,7 +442,7 @@ export const webAnalyticsAchievementsPreferences = async (
 }
 
 export const getWebAnalyticsAchievementsUpdatePreferencesUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/web_analytics_achievements/preferences/`
+    return `/v1/projects/${projectId}/web_analytics_achievements/preferences/`
 }
 
 /**
@@ -463,7 +463,7 @@ export const webAnalyticsAchievementsUpdatePreferences = async (
 }
 
 export const getWebAnalyticsAchievementsRecordInteractionUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/web_analytics_achievements/record_interaction/`
+    return `/v1/projects/${projectId}/web_analytics_achievements/record_interaction/`
 }
 
 /**
@@ -484,7 +484,7 @@ export const webAnalyticsAchievementsRecordInteraction = async (
 }
 
 export const getWebAnalyticsAchievementsRecordVisitUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/web_analytics_achievements/record_visit/`
+    return `/v1/projects/${projectId}/web_analytics_achievements/record_visit/`
 }
 
 /**
@@ -516,8 +516,8 @@ export const getWebAnalyticsFilterPresetsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/web_analytics_filter_presets/?${stringifiedParams}`
-        : `/api/projects/${projectId}/web_analytics_filter_presets/`
+        ? `/v1/projects/${projectId}/web_analytics_filter_presets/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/web_analytics_filter_presets/`
 }
 
 export const webAnalyticsFilterPresetsList = async (
@@ -535,7 +535,7 @@ export const webAnalyticsFilterPresetsList = async (
 }
 
 export const getWebAnalyticsFilterPresetsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/web_analytics_filter_presets/`
+    return `/v1/projects/${projectId}/web_analytics_filter_presets/`
 }
 
 export const webAnalyticsFilterPresetsCreate = async (
@@ -552,7 +552,7 @@ export const webAnalyticsFilterPresetsCreate = async (
 }
 
 export const getWebAnalyticsFilterPresetsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/web_analytics_filter_presets/${shortId}/`
+    return `/v1/projects/${projectId}/web_analytics_filter_presets/${shortId}/`
 }
 
 export const webAnalyticsFilterPresetsRetrieve = async (
@@ -567,7 +567,7 @@ export const webAnalyticsFilterPresetsRetrieve = async (
 }
 
 export const getWebAnalyticsFilterPresetsUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/web_analytics_filter_presets/${shortId}/`
+    return `/v1/projects/${projectId}/web_analytics_filter_presets/${shortId}/`
 }
 
 export const webAnalyticsFilterPresetsUpdate = async (
@@ -585,7 +585,7 @@ export const webAnalyticsFilterPresetsUpdate = async (
 }
 
 export const getWebAnalyticsFilterPresetsPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/web_analytics_filter_presets/${shortId}/`
+    return `/v1/projects/${projectId}/web_analytics_filter_presets/${shortId}/`
 }
 
 export const webAnalyticsFilterPresetsPartialUpdate = async (
@@ -603,7 +603,7 @@ export const webAnalyticsFilterPresetsPartialUpdate = async (
 }
 
 export const getWebAnalyticsFilterPresetsDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/web_analytics_filter_presets/${shortId}/`
+    return `/v1/projects/${projectId}/web_analytics_filter_presets/${shortId}/`
 }
 
 /**
@@ -621,7 +621,7 @@ export const webAnalyticsFilterPresetsDestroy = async (
 }
 
 export const getWebAnalyticsPathCleaningSuggestionsApplyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/web_analytics_path_cleaning_suggestions/${id}/apply/`
+    return `/v1/projects/${projectId}/web_analytics_path_cleaning_suggestions/${id}/apply/`
 }
 
 /**
@@ -643,7 +643,7 @@ export const webAnalyticsPathCleaningSuggestionsApply = async (
 }
 
 export const getWebAnalyticsPathCleaningSuggestionsPreviewUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/web_analytics_path_cleaning_suggestions/${id}/preview/`
+    return `/v1/projects/${projectId}/web_analytics_path_cleaning_suggestions/${id}/preview/`
 }
 
 /**
@@ -665,7 +665,7 @@ export const webAnalyticsPathCleaningSuggestionsPreview = async (
 }
 
 export const getWebAnalyticsPathCleaningSuggestionsGenerateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/web_analytics_path_cleaning_suggestions/generate/`
+    return `/v1/projects/${projectId}/web_analytics_path_cleaning_suggestions/generate/`
 }
 
 /**

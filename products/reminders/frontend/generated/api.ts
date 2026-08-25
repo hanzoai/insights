@@ -38,7 +38,7 @@ export const getRemindersListUrl = (params?: RemindersListParams) => {
 
     const stringifiedParams = normalizedParams.toString()
 
-    return stringifiedParams.length > 0 ? `/api/reminders/?${stringifiedParams}` : `/api/reminders/`
+    return stringifiedParams.length > 0 ? `/v1/reminders/?${stringifiedParams}` : `/v1/reminders/`
 }
 
 export const remindersList = async (
@@ -52,7 +52,7 @@ export const remindersList = async (
 }
 
 export const getRemindersCreateUrl = () => {
-    return `/api/reminders/`
+    return `/v1/reminders/`
 }
 
 export const remindersCreate = async (
@@ -68,7 +68,7 @@ export const remindersCreate = async (
 }
 
 export const getRemindersRetrieveUrl = (id: string) => {
-    return `/api/reminders/${id}/`
+    return `/v1/reminders/${id}/`
 }
 
 export const remindersRetrieve = async (id: string, options?: RequestInit): Promise<ReminderApi> => {
@@ -79,7 +79,7 @@ export const remindersRetrieve = async (id: string, options?: RequestInit): Prom
 }
 
 export const getRemindersUpdateUrl = (id: string) => {
-    return `/api/reminders/${id}/`
+    return `/v1/reminders/${id}/`
 }
 
 export const remindersUpdate = async (
@@ -96,7 +96,7 @@ export const remindersUpdate = async (
 }
 
 export const getRemindersPartialUpdateUrl = (id: string) => {
-    return `/api/reminders/${id}/`
+    return `/v1/reminders/${id}/`
 }
 
 export const remindersPartialUpdate = async (
@@ -113,7 +113,7 @@ export const remindersPartialUpdate = async (
 }
 
 export const getRemindersDestroyUrl = (id: string) => {
-    return `/api/reminders/${id}/`
+    return `/v1/reminders/${id}/`
 }
 
 export const remindersDestroy = async (id: string, options?: RequestInit): Promise<void> => {
