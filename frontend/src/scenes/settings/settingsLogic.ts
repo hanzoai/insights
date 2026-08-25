@@ -525,24 +525,16 @@ export const settingsLogic = kea<settingsLogicType>([
             },
         ],
         selectedLevel: [
-            (s) => [s.selectedLevelRaw, s.selectedSectionIdRaw, s.currentTeam],
+            (s) => [s.selectedLevelRaw, s.currentTeam],
             (
                 selectedLevelRaw: 'environment' | 'organization' | 'project' | 'user',
-                selectedSectionIdRaw: SettingSectionId | null,
                 currentTeam: null | import('../../types').TeamPublicType | import('../../types').TeamType
             ): SettingLevelId => {
-                if (
-                    !selectedSectionIdRaw ||
-                    (!selectedSectionIdRaw.endsWith('-details') && !selectedSectionIdRaw.endsWith('-danger-zone'))
-                ) {
-                    // If there's no current team, default to organization settings
-                    if (!currentTeam) {
-                        return 'organization'
-                    }
-                    // Convert environment to project
-                    return selectedLevelRaw === 'environment' ? 'project' : selectedLevelRaw
+                // Without a team there are no project sections to show, so organization is the level
+                if (!currentTeam) {
+                    return 'organization'
                 }
-                return selectedLevelRaw
+                return selectedLevelRaw === 'environment' ? 'project' : selectedLevelRaw
             },
         ],
         selectedSectionId: [
@@ -551,11 +543,9 @@ export const settingsLogic = kea<settingsLogicType>([
                 if (!selectedSectionIdRaw) {
                     return null
                 }
-                // Convert environment sections to project sections
-                if (!selectedSectionIdRaw.endsWith('-details') && !selectedSectionIdRaw.endsWith('-danger-zone')) {
-                    return selectedSectionIdRaw.replace(/^environment/, 'project') as SettingSectionId
-                }
-                return selectedSectionIdRaw
+                // `sections` renames every environment section to its project name, so an id has to
+                // arrive here the same way or it resolves to nothing.
+                return selectedSectionIdRaw.replace(/^environment/, 'project') as SettingSectionId
             },
         ],
         defaultSectionId: [
