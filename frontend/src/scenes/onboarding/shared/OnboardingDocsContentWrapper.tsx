@@ -270,7 +270,7 @@ function OSButton(props: any): JSX.Element {
     return <Button {...props} />
 }
 
-function Markdown({ children }: { children: string | ReactNode }): JSX.Element {
+function Prose({ children }: { children: string | ReactNode }): JSX.Element {
     const content = typeof children === 'string' ? children : String(children)
 
     return <Markdown disableDocsRedirect={true}>{content}</Markdown>
@@ -375,7 +375,7 @@ export function OnboardingDocsContentWrapper({
             CalloutBox,
             ProductScreenshot,
             OSButton,
-            Markdown,
+            Markdown: Prose,
             Blockquote,
             dedent,
             Tab,
