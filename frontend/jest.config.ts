@@ -17,7 +17,6 @@ const esmModules = [
     // @toon-format/toon ships ESM-only; the insights_ai widget extractors decode TOON tool output.
     '@toon-format',
     'monaco-editor',
-    '@hanzo/mascot-mode',
     // @hanzo/appearance (and the @hanzo/design tokens it reads) are ESM-only. The
     // appearance settings pull them into every scene graph that reaches SettingsMap,
     // which is most of them -- settingsLogic is imported by the error tracking and
