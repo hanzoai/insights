@@ -48,7 +48,6 @@ const config: StorybookConfig = {
     staticDirs: [
         'public',
         { from: '../../../frontend/public', to: '/static' },
-        { from: '../../../frontend/node_modules/@hanzo/mascot-mode/assets', to: '/static/mascot-mode' },
     ],
 
     framework: {
