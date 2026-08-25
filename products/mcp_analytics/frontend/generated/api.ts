@@ -39,8 +39,8 @@ export const getMcpAnalyticsFeedbackListUrl = (projectId: string, params?: McpAn
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_analytics/feedback/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_analytics/feedback/`
+        ? `/v1/projects/${projectId}/mcp_analytics/feedback/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_analytics/feedback/`
 }
 
 /**
@@ -58,7 +58,7 @@ export const mcpAnalyticsFeedbackList = async (
 }
 
 export const getMcpAnalyticsFeedbackCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_analytics/feedback/`
+    return `/v1/projects/${projectId}/mcp_analytics/feedback/`
 }
 
 /**
@@ -92,8 +92,8 @@ export const getMcpAnalyticsIntentClustersRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_analytics/intent_clusters/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_analytics/intent_clusters/`
+        ? `/v1/projects/${projectId}/mcp_analytics/intent_clusters/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_analytics/intent_clusters/`
 }
 
 /**
@@ -111,7 +111,7 @@ export const mcpAnalyticsIntentClustersRetrieve = async (
 }
 
 export const getMcpAnalyticsIntentClustersRecomputeUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_analytics/intent_clusters/recompute/`
+    return `/v1/projects/${projectId}/mcp_analytics/intent_clusters/recompute/`
 }
 
 /**
@@ -142,8 +142,8 @@ export const getMcpAnalyticsMissingCapabilitiesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_analytics/missing_capabilities/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_analytics/missing_capabilities/`
+        ? `/v1/projects/${projectId}/mcp_analytics/missing_capabilities/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_analytics/missing_capabilities/`
 }
 
 /**
@@ -164,7 +164,7 @@ export const mcpAnalyticsMissingCapabilitiesList = async (
 }
 
 export const getMcpAnalyticsMissingCapabilitiesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_analytics/missing_capabilities/`
+    return `/v1/projects/${projectId}/mcp_analytics/missing_capabilities/`
 }
 
 /**
@@ -195,8 +195,8 @@ export const getMcpAnalyticsSessionsListUrl = (projectId: string, params?: McpAn
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_analytics/sessions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_analytics/sessions/`
+        ? `/v1/projects/${projectId}/mcp_analytics/sessions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_analytics/sessions/`
 }
 
 /**
@@ -229,8 +229,8 @@ export const getMcpAnalyticsSessionsGenerateIntentUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_analytics/sessions/${id}/generate_intent/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_analytics/sessions/${id}/generate_intent/`
+        ? `/v1/projects/${projectId}/mcp_analytics/sessions/${id}/generate_intent/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_analytics/sessions/${id}/generate_intent/`
 }
 
 /**
@@ -264,8 +264,8 @@ export const getMcpAnalyticsSessionsToolCallsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_analytics/sessions/${id}/tool_calls/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_analytics/sessions/${id}/tool_calls/`
+        ? `/v1/projects/${projectId}/mcp_analytics/sessions/${id}/tool_calls/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_analytics/sessions/${id}/tool_calls/`
 }
 
 /**
@@ -284,7 +284,7 @@ export const mcpAnalyticsSessionsToolCalls = async (
 }
 
 export const getMcpAnalyticsSessionsActivityOverviewUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_analytics/sessions/activity_overview/`
+    return `/v1/projects/${projectId}/mcp_analytics/sessions/activity_overview/`
 }
 
 /**
@@ -301,7 +301,7 @@ export const mcpAnalyticsSessionsActivityOverview = async (
 }
 
 export const getMcpAnalyticsSessionsIntentDigestUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_analytics/sessions/intent_digest/`
+    return `/v1/projects/${projectId}/mcp_analytics/sessions/intent_digest/`
 }
 
 /**

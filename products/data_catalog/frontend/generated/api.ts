@@ -58,8 +58,8 @@ export const getDataCatalogCertificationsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_catalog/certifications/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_catalog/certifications/`
+        ? `/v1/projects/${projectId}/data_catalog/certifications/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_catalog/certifications/`
 }
 
 /**
@@ -80,7 +80,7 @@ export const dataCatalogCertificationsList = async (
 }
 
 export const getDataCatalogCertificationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_catalog/certifications/`
+    return `/v1/projects/${projectId}/data_catalog/certifications/`
 }
 
 /**
@@ -100,7 +100,7 @@ export const dataCatalogCertificationsCreate = async (
 }
 
 export const getDataCatalogCertificationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_catalog/certifications/${id}/`
+    return `/v1/projects/${projectId}/data_catalog/certifications/${id}/`
 }
 
 /**
@@ -118,7 +118,7 @@ export const dataCatalogCertificationsRetrieve = async (
 }
 
 export const getDataCatalogCertificationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_catalog/certifications/${id}/`
+    return `/v1/projects/${projectId}/data_catalog/certifications/${id}/`
 }
 
 /**
@@ -136,7 +136,7 @@ export const dataCatalogCertificationsDestroy = async (
 }
 
 export const getDataCatalogCertificationsCertifyCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_catalog/certifications/${id}/certify/`
+    return `/v1/projects/${projectId}/data_catalog/certifications/${id}/certify/`
 }
 
 /**
@@ -154,7 +154,7 @@ export const dataCatalogCertificationsCertifyCreate = async (
 }
 
 export const getDataCatalogCertificationsDeprecateCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_catalog/certifications/${id}/deprecate/`
+    return `/v1/projects/${projectId}/data_catalog/certifications/${id}/deprecate/`
 }
 
 /**
@@ -183,8 +183,8 @@ export const getDataCatalogMetricsListUrl = (projectId: string, params?: DataCat
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_catalog/metrics/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_catalog/metrics/`
+        ? `/v1/projects/${projectId}/data_catalog/metrics/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_catalog/metrics/`
 }
 
 /**
@@ -202,7 +202,7 @@ export const dataCatalogMetricsList = async (
 }
 
 export const getDataCatalogMetricsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_catalog/metrics/`
+    return `/v1/projects/${projectId}/data_catalog/metrics/`
 }
 
 /**
@@ -222,7 +222,7 @@ export const dataCatalogMetricsCreate = async (
 }
 
 export const getDataCatalogMetricsRetrieveUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/data_catalog/metrics/${name}/`
+    return `/v1/projects/${projectId}/data_catalog/metrics/${name}/`
 }
 
 /**
@@ -240,7 +240,7 @@ export const dataCatalogMetricsRetrieve = async (
 }
 
 export const getDataCatalogMetricsUpdateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/data_catalog/metrics/${name}/`
+    return `/v1/projects/${projectId}/data_catalog/metrics/${name}/`
 }
 
 /**
@@ -261,7 +261,7 @@ export const dataCatalogMetricsUpdate = async (
 }
 
 export const getDataCatalogMetricsPartialUpdateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/data_catalog/metrics/${name}/`
+    return `/v1/projects/${projectId}/data_catalog/metrics/${name}/`
 }
 
 /**
@@ -282,7 +282,7 @@ export const dataCatalogMetricsPartialUpdate = async (
 }
 
 export const getDataCatalogMetricsDestroyUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/data_catalog/metrics/${name}/`
+    return `/v1/projects/${projectId}/data_catalog/metrics/${name}/`
 }
 
 /**
@@ -300,7 +300,7 @@ export const dataCatalogMetricsDestroy = async (
 }
 
 export const getDataCatalogMetricsApproveCreateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/data_catalog/metrics/${name}/approve/`
+    return `/v1/projects/${projectId}/data_catalog/metrics/${name}/approve/`
 }
 
 /**
@@ -318,7 +318,7 @@ export const dataCatalogMetricsApproveCreate = async (
 }
 
 export const getDataCatalogMetricsRefreshFromInsightCreateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/data_catalog/metrics/${name}/refresh_from_insight/`
+    return `/v1/projects/${projectId}/data_catalog/metrics/${name}/refresh_from_insight/`
 }
 
 /**
@@ -351,8 +351,8 @@ export const getDataCatalogMetricsRunCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_catalog/metrics/${name}/run/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_catalog/metrics/${name}/run/`
+        ? `/v1/projects/${projectId}/data_catalog/metrics/${name}/run/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_catalog/metrics/${name}/run/`
 }
 
 /**
@@ -388,8 +388,8 @@ export const getDataCatalogRelationshipProposalsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_catalog/relationship_proposals/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_catalog/relationship_proposals/`
+        ? `/v1/projects/${projectId}/data_catalog/relationship_proposals/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_catalog/relationship_proposals/`
 }
 
 /**
@@ -410,7 +410,7 @@ export const dataCatalogRelationshipProposalsList = async (
 }
 
 export const getDataCatalogRelationshipProposalsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_catalog/relationship_proposals/`
+    return `/v1/projects/${projectId}/data_catalog/relationship_proposals/`
 }
 
 /**
@@ -430,7 +430,7 @@ export const dataCatalogRelationshipProposalsCreate = async (
 }
 
 export const getDataCatalogRelationshipProposalsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_catalog/relationship_proposals/${id}/`
+    return `/v1/projects/${projectId}/data_catalog/relationship_proposals/${id}/`
 }
 
 /**
@@ -451,7 +451,7 @@ export const dataCatalogRelationshipProposalsRetrieve = async (
 }
 
 export const getDataCatalogRelationshipProposalsAcceptCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_catalog/relationship_proposals/${id}/accept/`
+    return `/v1/projects/${projectId}/data_catalog/relationship_proposals/${id}/accept/`
 }
 
 /**
@@ -472,7 +472,7 @@ export const dataCatalogRelationshipProposalsAcceptCreate = async (
 }
 
 export const getDataCatalogRelationshipProposalsRejectCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_catalog/relationship_proposals/${id}/reject/`
+    return `/v1/projects/${projectId}/data_catalog/relationship_proposals/${id}/reject/`
 }
 
 /**

@@ -2012,14 +2012,14 @@ export interface TaskPinResponseApi {
  * Request body for the presence beacon and beacon-leave endpoints.
  *
  * `device_id` is the UUID of the caller's `UserPushToken` row, which the
- * client received when it registered for push via `/api/users/@me/push_tokens/`.
+ * client received when it registered for push via `/v1/users/@me/push_tokens/`.
  * The client is expected to use the same identifier on the beacon and leave
  * calls; if the user has unregistered the underlying push token, the value
  * won't resolve and the call returns 404 — at which point pushes were
  * already not going there anyway.
  */
 export interface TaskPresenceBeaconRequestApi {
-    /** UUID of the caller's UserPushToken (returned by `/api/users/@me/push_tokens/` on register). */
+    /** UUID of the caller's UserPushToken (returned by `/v1/users/@me/push_tokens/` on register). */
     device_id: string
 }
 

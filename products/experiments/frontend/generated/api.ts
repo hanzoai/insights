@@ -74,8 +74,8 @@ export const getExperimentHoldoutsListUrl = (projectId: string, params?: Experim
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/experiment_holdouts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/experiment_holdouts/`
+        ? `/v1/projects/${projectId}/experiment_holdouts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/experiment_holdouts/`
 }
 
 export const experimentHoldoutsList = async (
@@ -90,7 +90,7 @@ export const experimentHoldoutsList = async (
 }
 
 export const getExperimentHoldoutsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiment_holdouts/`
+    return `/v1/projects/${projectId}/experiment_holdouts/`
 }
 
 export const experimentHoldoutsCreate = async (
@@ -107,7 +107,7 @@ export const experimentHoldoutsCreate = async (
 }
 
 export const getExperimentHoldoutsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_holdouts/${id}/`
+    return `/v1/projects/${projectId}/experiment_holdouts/${id}/`
 }
 
 export const experimentHoldoutsRetrieve = async (
@@ -122,7 +122,7 @@ export const experimentHoldoutsRetrieve = async (
 }
 
 export const getExperimentHoldoutsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_holdouts/${id}/`
+    return `/v1/projects/${projectId}/experiment_holdouts/${id}/`
 }
 
 export const experimentHoldoutsUpdate = async (
@@ -140,7 +140,7 @@ export const experimentHoldoutsUpdate = async (
 }
 
 export const getExperimentHoldoutsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_holdouts/${id}/`
+    return `/v1/projects/${projectId}/experiment_holdouts/${id}/`
 }
 
 export const experimentHoldoutsPartialUpdate = async (
@@ -158,7 +158,7 @@ export const experimentHoldoutsPartialUpdate = async (
 }
 
 export const getExperimentHoldoutsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_holdouts/${id}/`
+    return `/v1/projects/${projectId}/experiment_holdouts/${id}/`
 }
 
 export const experimentHoldoutsDestroy = async (
@@ -184,8 +184,8 @@ export const getExperimentSavedMetricsListUrl = (projectId: string, params?: Exp
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/experiment_saved_metrics/?${stringifiedParams}`
-        : `/api/projects/${projectId}/experiment_saved_metrics/`
+        ? `/v1/projects/${projectId}/experiment_saved_metrics/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/experiment_saved_metrics/`
 }
 
 export const experimentSavedMetricsList = async (
@@ -200,7 +200,7 @@ export const experimentSavedMetricsList = async (
 }
 
 export const getExperimentSavedMetricsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiment_saved_metrics/`
+    return `/v1/projects/${projectId}/experiment_saved_metrics/`
 }
 
 export const experimentSavedMetricsCreate = async (
@@ -217,7 +217,7 @@ export const experimentSavedMetricsCreate = async (
 }
 
 export const getExperimentSavedMetricsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_saved_metrics/${id}/`
+    return `/v1/projects/${projectId}/experiment_saved_metrics/${id}/`
 }
 
 export const experimentSavedMetricsRetrieve = async (
@@ -232,7 +232,7 @@ export const experimentSavedMetricsRetrieve = async (
 }
 
 export const getExperimentSavedMetricsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_saved_metrics/${id}/`
+    return `/v1/projects/${projectId}/experiment_saved_metrics/${id}/`
 }
 
 export const experimentSavedMetricsUpdate = async (
@@ -250,7 +250,7 @@ export const experimentSavedMetricsUpdate = async (
 }
 
 export const getExperimentSavedMetricsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_saved_metrics/${id}/`
+    return `/v1/projects/${projectId}/experiment_saved_metrics/${id}/`
 }
 
 export const experimentSavedMetricsPartialUpdate = async (
@@ -268,7 +268,7 @@ export const experimentSavedMetricsPartialUpdate = async (
 }
 
 export const getExperimentSavedMetricsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_saved_metrics/${id}/`
+    return `/v1/projects/${projectId}/experiment_saved_metrics/${id}/`
 }
 
 export const experimentSavedMetricsDestroy = async (
@@ -294,8 +294,8 @@ export const getExperimentsListUrl = (projectId: string, params?: ExperimentsLis
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/experiments/?${stringifiedParams}`
-        : `/api/projects/${projectId}/experiments/`
+        ? `/v1/projects/${projectId}/experiments/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/experiments/`
 }
 
 /**
@@ -313,7 +313,7 @@ export const experimentsList = async (
 }
 
 export const getExperimentsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/`
+    return `/v1/projects/${projectId}/experiments/`
 }
 
 /**
@@ -333,7 +333,7 @@ export const experimentsCreate = async (
 }
 
 export const getExperimentsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/`
+    return `/v1/projects/${projectId}/experiments/${id}/`
 }
 
 /**
@@ -351,7 +351,7 @@ export const experimentsRetrieve = async (
 }
 
 export const getExperimentsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/`
+    return `/v1/projects/${projectId}/experiments/${id}/`
 }
 
 /**
@@ -376,7 +376,7 @@ export const experimentsUpdate = async (
 }
 
 export const getExperimentsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/`
+    return `/v1/projects/${projectId}/experiments/${id}/`
 }
 
 /**
@@ -397,7 +397,7 @@ export const experimentsPartialUpdate = async (
 }
 
 export const getExperimentsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/`
+    return `/v1/projects/${projectId}/experiments/${id}/`
 }
 
 /**
@@ -426,8 +426,8 @@ export const getExperimentsActivityRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/experiments/${id}/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/experiments/${id}/activity/`
+        ? `/v1/projects/${projectId}/experiments/${id}/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/experiments/${id}/activity/`
 }
 
 /**
@@ -450,7 +450,7 @@ export const experimentsActivityRetrieve = async (
 }
 
 export const getExperimentsArchiveCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/archive/`
+    return `/v1/projects/${projectId}/experiments/${id}/archive/`
 }
 
 /**
@@ -477,7 +477,7 @@ export const experimentsArchiveCreate = async (
 }
 
 export const getExperimentsCopyToProjectCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/copy_to_project/`
+    return `/v1/projects/${projectId}/experiments/${id}/copy_to_project/`
 }
 
 /**
@@ -498,7 +498,7 @@ export const experimentsCopyToProjectCreate = async (
 }
 
 export const getExperimentsCreateExposureCohortForExperimentCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/create_exposure_cohort_for_experiment/`
+    return `/v1/projects/${projectId}/experiments/${id}/create_exposure_cohort_for_experiment/`
 }
 
 /**
@@ -523,7 +523,7 @@ export const experimentsCreateExposureCohortForExperimentCreate = async (
 }
 
 export const getExperimentsDuplicateCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/duplicate/`
+    return `/v1/projects/${projectId}/experiments/${id}/duplicate/`
 }
 
 /**
@@ -548,7 +548,7 @@ export const experimentsDuplicateCreate = async (
 }
 
 export const getExperimentsEndCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/end/`
+    return `/v1/projects/${projectId}/experiments/${id}/end/`
 }
 
 /**
@@ -590,7 +590,7 @@ export const experimentsEndCreate = async (
 }
 
 export const getExperimentsFlagCleanupTargetRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/flag_cleanup_target/`
+    return `/v1/projects/${projectId}/experiments/${id}/flag_cleanup_target/`
 }
 
 /**
@@ -613,7 +613,7 @@ export const experimentsFlagCleanupTargetRetrieve = async (
 }
 
 export const getExperimentsFlagCleanupTaskRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/flag_cleanup_task/`
+    return `/v1/projects/${projectId}/experiments/${id}/flag_cleanup_task/`
 }
 
 /**
@@ -636,7 +636,7 @@ export const experimentsFlagCleanupTaskRetrieve = async (
 }
 
 export const getExperimentsFreezeExposureCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/freeze_exposure/`
+    return `/v1/projects/${projectId}/experiments/${id}/freeze_exposure/`
 }
 
 /**
@@ -664,7 +664,7 @@ export const experimentsFreezeExposureCreate = async (
 }
 
 export const getExperimentsLaunchCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/launch/`
+    return `/v1/projects/${projectId}/experiments/${id}/launch/`
 }
 
 /**
@@ -687,7 +687,7 @@ export const experimentsLaunchCreate = async (
 }
 
 export const getExperimentsMetricsRecalculationCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/metrics_recalculation/`
+    return `/v1/projects/${projectId}/experiments/${id}/metrics_recalculation/`
 }
 
 /**
@@ -718,7 +718,7 @@ export const getExperimentsMetricsRecalculationRetrieveUrl = (
     id: number,
     recalculationId: string
 ) => {
-    return `/api/projects/${projectId}/experiments/${id}/metrics_recalculation/${recalculationId}/`
+    return `/v1/projects/${projectId}/experiments/${id}/metrics_recalculation/${recalculationId}/`
 }
 
 /**
@@ -744,7 +744,7 @@ export const experimentsMetricsRecalculationRetrieve = async (
 }
 
 export const getExperimentsMetricsRecalculationLatestRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/metrics_recalculation/latest/`
+    return `/v1/projects/${projectId}/experiments/${id}/metrics_recalculation/latest/`
 }
 
 /**
@@ -769,7 +769,7 @@ export const experimentsMetricsRecalculationLatestRetrieve = async (
 }
 
 export const getExperimentsPauseCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/pause/`
+    return `/v1/projects/${projectId}/experiments/${id}/pause/`
 }
 
 /**
@@ -793,7 +793,7 @@ export const experimentsPauseCreate = async (
 }
 
 export const getExperimentsRecalculateTimeseriesCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/recalculate_timeseries/`
+    return `/v1/projects/${projectId}/experiments/${id}/recalculate_timeseries/`
 }
 
 /**
@@ -818,7 +818,7 @@ export const experimentsRecalculateTimeseriesCreate = async (
 }
 
 export const getExperimentsResetCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/reset/`
+    return `/v1/projects/${projectId}/experiments/${id}/reset/`
 }
 
 /**
@@ -845,7 +845,7 @@ export const experimentsResetCreate = async (
 }
 
 export const getExperimentsResumeCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/resume/`
+    return `/v1/projects/${projectId}/experiments/${id}/resume/`
 }
 
 /**
@@ -868,7 +868,7 @@ export const experimentsResumeCreate = async (
 }
 
 export const getExperimentsSessionBucketsCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/session_buckets/`
+    return `/v1/projects/${projectId}/experiments/${id}/session_buckets/`
 }
 
 /**
@@ -899,7 +899,7 @@ export const experimentsSessionBucketsCreate = async (
 }
 
 export const getExperimentsShipVariantCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/ship_variant/`
+    return `/v1/projects/${projectId}/experiments/${id}/ship_variant/`
 }
 
 /**
@@ -954,8 +954,8 @@ export const getExperimentsTimeseriesResultsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/experiments/${id}/timeseries_results/?${stringifiedParams}`
-        : `/api/projects/${projectId}/experiments/${id}/timeseries_results/`
+        ? `/v1/projects/${projectId}/experiments/${id}/timeseries_results/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/experiments/${id}/timeseries_results/`
 }
 
 /**
@@ -978,7 +978,7 @@ export const experimentsTimeseriesResultsRetrieve = async (
 }
 
 export const getExperimentsUnarchiveCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/unarchive/`
+    return `/v1/projects/${projectId}/experiments/${id}/unarchive/`
 }
 
 /**
@@ -999,7 +999,7 @@ export const experimentsUnarchiveCreate = async (
 }
 
 export const getExperimentsUnfreezeExposureCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/unfreeze_exposure/`
+    return `/v1/projects/${projectId}/experiments/${id}/unfreeze_exposure/`
 }
 
 /**
@@ -1024,7 +1024,7 @@ export const experimentsUnfreezeExposureCreate = async (
 }
 
 export const getExperimentsCalculateRunningTimeCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/calculate_running_time/`
+    return `/v1/projects/${projectId}/experiments/calculate_running_time/`
 }
 
 /**
@@ -1048,7 +1048,7 @@ export const experimentsCalculateRunningTimeCreate = async (
 }
 
 export const getExperimentsCreateFromPromptCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/create_from_prompt/`
+    return `/v1/projects/${projectId}/experiments/create_from_prompt/`
 }
 
 /**
@@ -1074,7 +1074,7 @@ export const experimentsCreateFromPromptCreate = async (
 }
 
 export const getExperimentsPromptTemplatesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/prompt_templates/`
+    return `/v1/projects/${projectId}/experiments/prompt_templates/`
 }
 
 /**
@@ -1108,8 +1108,8 @@ export const getExperimentsSessionContextRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/experiments/session_context/?${stringifiedParams}`
-        : `/api/projects/${projectId}/experiments/session_context/`
+        ? `/v1/projects/${projectId}/experiments/session_context/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/experiments/session_context/`
 }
 
 /**
@@ -1127,7 +1127,7 @@ export const experimentsSessionContextRetrieve = async (
 }
 
 export const getExperimentsSessionContextsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/session_contexts/`
+    return `/v1/projects/${projectId}/experiments/session_contexts/`
 }
 
 /**
@@ -1157,7 +1157,7 @@ export const experimentsSessionContextsCreate = async (
 }
 
 export const getExperimentsStatsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/stats/`
+    return `/v1/projects/${projectId}/experiments/stats/`
 }
 
 /**

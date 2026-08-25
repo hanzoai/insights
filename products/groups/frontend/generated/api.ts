@@ -48,13 +48,13 @@ export const getGroupsListUrl = (projectId: string, params: GroupsListParams) =>
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/groups/?${stringifiedParams}`
-        : `/api/projects/${projectId}/groups/`
+        ? `/v1/projects/${projectId}/groups/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/groups/`
 }
 
 /**
  * List all groups of a specific group type. You must pass ?group_type_index= in the URL.
- * To get a list of valid group types, call /api/:project_id/groups_types/.
+ * To get a list of valid group types, call /v1/:project_id/groups_types/.
  *
  * Uses forward-only keyset pagination via the `cursor` parameter.
  * The `previous` field in the response envelope is always null.
@@ -71,7 +71,7 @@ export const groupsList = async (
 }
 
 export const getGroupsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/groups/`
+    return `/v1/projects/${projectId}/groups/`
 }
 
 export const groupsCreate = async (
@@ -99,8 +99,8 @@ export const getGroupsActivityRetrieveUrl = (projectId: string, params: GroupsAc
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/groups/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/groups/activity/`
+        ? `/v1/projects/${projectId}/groups/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/groups/activity/`
 }
 
 export const groupsActivityRetrieve = async (
@@ -126,8 +126,8 @@ export const getGroupsDeletePropertyCreateUrl = (projectId: string, params: Grou
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/groups/delete_property/?${stringifiedParams}`
-        : `/api/projects/${projectId}/groups/delete_property/`
+        ? `/v1/projects/${projectId}/groups/delete_property/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/groups/delete_property/`
 }
 
 export const groupsDeletePropertyCreate = async (
@@ -156,8 +156,8 @@ export const getGroupsFindRetrieveUrl = (projectId: string, params: GroupsFindRe
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/groups/find/?${stringifiedParams}`
-        : `/api/projects/${projectId}/groups/find/`
+        ? `/v1/projects/${projectId}/groups/find/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/groups/find/`
 }
 
 export const groupsFindRetrieve = async (
@@ -172,7 +172,7 @@ export const groupsFindRetrieve = async (
 }
 
 export const getGroupsPropertyValuesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/groups/property_values/`
+    return `/v1/projects/${projectId}/groups/property_values/`
 }
 
 export const groupsPropertyValuesRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -194,8 +194,8 @@ export const getGroupsRelatedRetrieveUrl = (projectId: string, params: GroupsRel
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/groups/related/?${stringifiedParams}`
-        : `/api/projects/${projectId}/groups/related/`
+        ? `/v1/projects/${projectId}/groups/related/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/groups/related/`
 }
 
 export const groupsRelatedRetrieve = async (
@@ -221,8 +221,8 @@ export const getGroupsUpdatePropertyCreateUrl = (projectId: string, params: Grou
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/groups/update_property/?${stringifiedParams}`
-        : `/api/projects/${projectId}/groups/update_property/`
+        ? `/v1/projects/${projectId}/groups/update_property/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/groups/update_property/`
 }
 
 export const groupsUpdatePropertyCreate = async (

@@ -48,8 +48,8 @@ export const getSubscriptionsListUrl = (projectId: string, params?: Subscription
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/subscriptions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/subscriptions/`
+        ? `/v1/projects/${projectId}/subscriptions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/subscriptions/`
 }
 
 export const subscriptionsList = async (
@@ -64,7 +64,7 @@ export const subscriptionsList = async (
 }
 
 export const getSubscriptionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/subscriptions/`
+    return `/v1/projects/${projectId}/subscriptions/`
 }
 
 export const subscriptionsCreate = async (
@@ -81,7 +81,7 @@ export const subscriptionsCreate = async (
 }
 
 export const getSubscriptionsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/`
 }
 
 export const subscriptionsRetrieve = async (
@@ -96,7 +96,7 @@ export const subscriptionsRetrieve = async (
 }
 
 export const getSubscriptionsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/`
 }
 
 export const subscriptionsUpdate = async (
@@ -114,7 +114,7 @@ export const subscriptionsUpdate = async (
 }
 
 export const getSubscriptionsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/`
 }
 
 export const subscriptionsPartialUpdate = async (
@@ -132,7 +132,7 @@ export const subscriptionsPartialUpdate = async (
 }
 
 export const getSubscriptionsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/`
 }
 
 /**
@@ -146,7 +146,7 @@ export const subscriptionsDestroy = async (projectId: string, id: number, option
 }
 
 export const getSubscriptionsTestDeliveryCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/test-delivery/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/test-delivery/`
 }
 
 export const subscriptionsTestDeliveryCreate = async (
@@ -176,8 +176,8 @@ export const getSubscriptionsDeliveriesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/subscriptions/${subscriptionId}/deliveries/?${stringifiedParams}`
-        : `/api/projects/${projectId}/subscriptions/${subscriptionId}/deliveries/`
+        ? `/v1/projects/${projectId}/subscriptions/${subscriptionId}/deliveries/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/subscriptions/${subscriptionId}/deliveries/`
 }
 
 /**
@@ -200,7 +200,7 @@ export const subscriptionsDeliveriesList = async (
 }
 
 export const getSubscriptionsDeliveriesRetrieveUrl = (projectId: string, subscriptionId: number, id: string) => {
-    return `/api/projects/${projectId}/subscriptions/${subscriptionId}/deliveries/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${subscriptionId}/deliveries/${id}/`
 }
 
 /**
@@ -220,7 +220,7 @@ export const subscriptionsDeliveriesRetrieve = async (
 }
 
 export const getSubscriptionsSummaryQuotaRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/subscriptions/summary_quota/`
+    return `/v1/projects/${projectId}/subscriptions/summary_quota/`
 }
 
 export const subscriptionsSummaryQuotaRetrieve = async (

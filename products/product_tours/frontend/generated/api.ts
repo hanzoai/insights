@@ -48,8 +48,8 @@ export const getProductToursListUrl = (projectId: string, params?: ProductToursL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/product_tours/?${stringifiedParams}`
-        : `/api/projects/${projectId}/product_tours/`
+        ? `/v1/projects/${projectId}/product_tours/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/product_tours/`
 }
 
 /**
@@ -67,7 +67,7 @@ export const productToursList = async (
 }
 
 export const getProductToursCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/product_tours/`
+    return `/v1/projects/${projectId}/product_tours/`
 }
 
 /**
@@ -87,7 +87,7 @@ export const productToursCreate = async (
 }
 
 export const getProductToursRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/`
+    return `/v1/projects/${projectId}/product_tours/${id}/`
 }
 
 /**
@@ -105,7 +105,7 @@ export const productToursRetrieve = async (
 }
 
 export const getProductToursUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/`
+    return `/v1/projects/${projectId}/product_tours/${id}/`
 }
 
 /**
@@ -126,7 +126,7 @@ export const productToursUpdate = async (
 }
 
 export const getProductToursPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/`
+    return `/v1/projects/${projectId}/product_tours/${id}/`
 }
 
 /**
@@ -147,7 +147,7 @@ export const productToursPartialUpdate = async (
 }
 
 export const getProductToursDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/`
+    return `/v1/projects/${projectId}/product_tours/${id}/`
 }
 
 /**
@@ -161,7 +161,7 @@ export const productToursDestroy = async (projectId: string, id: string, options
 }
 
 export const getProductToursDiscardDraftDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/discard_draft/`
+    return `/v1/projects/${projectId}/product_tours/${id}/discard_draft/`
 }
 
 /**
@@ -179,7 +179,7 @@ export const productToursDiscardDraftDestroy = async (
 }
 
 export const getProductToursDraftPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/draft/`
+    return `/v1/projects/${projectId}/product_tours/${id}/draft/`
 }
 
 /**
@@ -200,7 +200,7 @@ export const productToursDraftPartialUpdate = async (
 }
 
 export const getProductToursDraftStatusRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/draft_status/`
+    return `/v1/projects/${projectId}/product_tours/${id}/draft_status/`
 }
 
 /**
@@ -218,7 +218,7 @@ export const productToursDraftStatusRetrieve = async (
 }
 
 export const getProductToursGenerateCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/generate/`
+    return `/v1/projects/${projectId}/product_tours/${id}/generate/`
 }
 
 /**
@@ -239,7 +239,7 @@ export const productToursGenerateCreate = async (
 }
 
 export const getProductToursPublishDraftCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/product_tours/${id}/publish_draft/`
+    return `/v1/projects/${projectId}/product_tours/${id}/publish_draft/`
 }
 
 /**

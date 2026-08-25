@@ -128,7 +128,7 @@ export interface EndpointResponseApi {
     is_active: boolean
     /** How fresh the data is, in seconds. One of: 900, 1800, 3600, 21600, 43200, 86400, 604800. */
     data_freshness_seconds: number
-    /** Relative API path to execute this endpoint (e.g. /api/projects/{team_id}/endpoints/{name}/run). */
+    /** Relative API path to execute this endpoint (e.g. /v1/projects/{team_id}/endpoints/{name}/run). */
     endpoint_path: string
     /**
      * Absolute URL to execute this endpoint.
@@ -285,7 +285,7 @@ export interface EndpointVersionResponseApi {
     is_active: boolean
     /** How fresh the data is, in seconds. One of: 900, 1800, 3600, 21600, 43200, 86400, 604800. */
     data_freshness_seconds: number
-    /** Relative API path to execute this endpoint (e.g. /api/projects/{team_id}/endpoints/{name}/run). */
+    /** Relative API path to execute this endpoint (e.g. /v1/projects/{team_id}/endpoints/{name}/run). */
     endpoint_path: string
     /**
      * Absolute URL to execute this endpoint.

@@ -27,8 +27,8 @@ export const getLegalDocumentsListUrl = (organizationId: string, params?: LegalD
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/legal_documents/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/legal_documents/`
+        ? `/v1/organizations/${organizationId}/legal_documents/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/legal_documents/`
 }
 
 export const legalDocumentsList = async (
@@ -43,7 +43,7 @@ export const legalDocumentsList = async (
 }
 
 export const getLegalDocumentsCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/legal_documents/`
+    return `/v1/organizations/${organizationId}/legal_documents/`
 }
 
 export const legalDocumentsCreate = async (
@@ -60,7 +60,7 @@ export const legalDocumentsCreate = async (
 }
 
 export const getLegalDocumentsRetrieveUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/legal_documents/${id}/`
+    return `/v1/organizations/${organizationId}/legal_documents/${id}/`
 }
 
 export const legalDocumentsRetrieve = async (
@@ -75,7 +75,7 @@ export const legalDocumentsRetrieve = async (
 }
 
 export const getLegalDocumentsDestroyUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/legal_documents/${id}/`
+    return `/v1/organizations/${organizationId}/legal_documents/${id}/`
 }
 
 /**
@@ -101,7 +101,7 @@ export const legalDocumentsDestroy = async (
 }
 
 export const getLegalDocumentsDownloadRetrieveUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/legal_documents/${id}/download/`
+    return `/v1/organizations/${organizationId}/legal_documents/${id}/download/`
 }
 
 /**

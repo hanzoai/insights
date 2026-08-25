@@ -33,8 +33,8 @@ export const getProductPushCampaignActiveRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/product_push_campaign/active/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/product_push_campaign/active/`
+        ? `/v1/organizations/${organizationId}/product_push_campaign/active/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/product_push_campaign/active/`
 }
 
 /**
@@ -63,8 +63,8 @@ export const getIdentityMatchingLinksListUrl = (projectId: string, params?: Iden
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/identity_matching_links/?${stringifiedParams}`
-        : `/api/projects/${projectId}/identity_matching_links/`
+        ? `/v1/projects/${projectId}/identity_matching_links/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/identity_matching_links/`
 }
 
 /**
@@ -83,7 +83,7 @@ export const identityMatchingLinksList = async (
 }
 
 export const getIdentityMatchingLinksRunsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/identity_matching_links/runs/`
+    return `/v1/projects/${projectId}/identity_matching_links/runs/`
 }
 
 /**
@@ -112,8 +112,8 @@ export const getSdkHealthReportRetrieveUrl = (projectId: string, params?: SdkHea
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/sdk_health/report/?${stringifiedParams}`
-        : `/api/projects/${projectId}/sdk_health/report/`
+        ? `/v1/projects/${projectId}/sdk_health/report/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/sdk_health/report/`
 }
 
 /**

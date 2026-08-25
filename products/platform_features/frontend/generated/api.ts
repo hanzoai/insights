@@ -80,7 +80,7 @@ export const getListUrl = (params?: ListParams) => {
 
     const stringifiedParams = normalizedParams.toString()
 
-    return stringifiedParams.length > 0 ? `/api/organizations/?${stringifiedParams}` : `/api/organizations/`
+    return stringifiedParams.length > 0 ? `/v1/organizations/?${stringifiedParams}` : `/v1/organizations/`
 }
 
 export const list = async (params?: ListParams, options?: RequestInit): Promise<PaginatedOrganizationListApi> => {
@@ -91,7 +91,7 @@ export const list = async (params?: ListParams, options?: RequestInit): Promise<
 }
 
 export const getCreateUrl = () => {
-    return `/api/organizations/`
+    return `/v1/organizations/`
 }
 
 export const create = async (
@@ -107,7 +107,7 @@ export const create = async (
 }
 
 export const getRetrieveUrl = (id: string) => {
-    return `/api/organizations/${id}/`
+    return `/v1/organizations/${id}/`
 }
 
 export const retrieve = async (id: string, options?: RequestInit): Promise<OrganizationApi> => {
@@ -118,7 +118,7 @@ export const retrieve = async (id: string, options?: RequestInit): Promise<Organ
 }
 
 export const getUpdateUrl = (id: string) => {
-    return `/api/organizations/${id}/`
+    return `/v1/organizations/${id}/`
 }
 
 export const update = async (
@@ -135,7 +135,7 @@ export const update = async (
 }
 
 export const getPartialUpdateUrl = (id: string) => {
-    return `/api/organizations/${id}/`
+    return `/v1/organizations/${id}/`
 }
 
 export const partialUpdate = async (
@@ -152,7 +152,7 @@ export const partialUpdate = async (
 }
 
 export const getDestroyUrl = (id: string) => {
-    return `/api/organizations/${id}/`
+    return `/v1/organizations/${id}/`
 }
 
 export const destroy = async (id: string, options?: RequestInit): Promise<void> => {
@@ -163,7 +163,7 @@ export const destroy = async (id: string, options?: RequestInit): Promise<void> 
 }
 
 export const getRequestAiAccessCreateUrl = (id: string) => {
-    return `/api/organizations/${id}/request_ai_access/`
+    return `/v1/organizations/${id}/request_ai_access/`
 }
 
 /**
@@ -191,8 +191,8 @@ export const getMembersListUrl = (organizationId: string, params?: MembersListPa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/members/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/members/`
+        ? `/v1/organizations/${organizationId}/members/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/members/`
 }
 
 export const membersList = async (
@@ -207,7 +207,7 @@ export const membersList = async (
 }
 
 export const getMembersUpdateUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/`
 }
 
 export const membersUpdate = async (
@@ -225,7 +225,7 @@ export const membersUpdate = async (
 }
 
 export const getMembersPartialUpdateUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/`
 }
 
 export const membersPartialUpdate = async (
@@ -243,7 +243,7 @@ export const membersPartialUpdate = async (
 }
 
 export const getMembersDestroyUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/`
 }
 
 export const membersDestroy = async (
@@ -258,7 +258,7 @@ export const membersDestroy = async (
 }
 
 export const getMembersGithubLoginRetrieveUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/github_login/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/github_login/`
 }
 
 export const membersGithubLoginRetrieve = async (
@@ -273,7 +273,7 @@ export const membersGithubLoginRetrieve = async (
 }
 
 export const getMembersScopedApiKeysRetrieveUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/scoped_api_keys/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/scoped_api_keys/`
 }
 
 export const membersScopedApiKeysRetrieve = async (
@@ -299,8 +299,8 @@ export const getPersonalApiKeysListUrl = (organizationId: string, params?: Perso
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/personal_api_keys/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/personal_api_keys/`
+        ? `/v1/organizations/${organizationId}/personal_api_keys/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/personal_api_keys/`
 }
 
 export const personalApiKeysList = async (
@@ -326,8 +326,8 @@ export const getRolesListUrl = (organizationId: string, params?: RolesListParams
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/roles/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/roles/`
+        ? `/v1/organizations/${organizationId}/roles/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/roles/`
 }
 
 /**
@@ -346,7 +346,7 @@ export const rolesList = async (
 }
 
 export const getRolesCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/roles/`
+    return `/v1/organizations/${organizationId}/roles/`
 }
 
 /**
@@ -367,7 +367,7 @@ export const rolesCreate = async (
 }
 
 export const getRolesRetrieveUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${id}/`
 }
 
 /**
@@ -382,7 +382,7 @@ export const rolesRetrieve = async (organizationId: string, id: string, options?
 }
 
 export const getRolesUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${id}/`
 }
 
 /**
@@ -404,7 +404,7 @@ export const rolesUpdate = async (
 }
 
 export const getRolesPartialUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${id}/`
 }
 
 /**
@@ -426,7 +426,7 @@ export const rolesPartialUpdate = async (
 }
 
 export const getRolesDestroyUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${id}/`
 }
 
 /**
@@ -456,8 +456,8 @@ export const getRolesRoleMembershipsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/roles/${roleId}/role_memberships/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/roles/${roleId}/role_memberships/`
+        ? `/v1/organizations/${organizationId}/roles/${roleId}/role_memberships/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/roles/${roleId}/role_memberships/`
 }
 
 /**
@@ -477,7 +477,7 @@ export const rolesRoleMembershipsList = async (
 }
 
 export const getRolesRoleMembershipsCreateUrl = (organizationId: string, roleId: string) => {
-    return `/api/organizations/${organizationId}/roles/${roleId}/role_memberships/`
+    return `/v1/organizations/${organizationId}/roles/${roleId}/role_memberships/`
 }
 
 /**
@@ -499,7 +499,7 @@ export const rolesRoleMembershipsCreate = async (
 }
 
 export const getRolesRoleMembershipsRetrieveUrl = (organizationId: string, roleId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${roleId}/role_memberships/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${roleId}/role_memberships/${id}/`
 }
 
 /**
@@ -519,7 +519,7 @@ export const rolesRoleMembershipsRetrieve = async (
 }
 
 export const getRolesRoleMembershipsDestroyUrl = (organizationId: string, roleId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${roleId}/role_memberships/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${roleId}/role_memberships/${id}/`
 }
 
 /**
@@ -539,7 +539,7 @@ export const rolesRoleMembershipsDestroy = async (
 }
 
 export const getWelcomeCurrentRetrieveUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/welcome/current/`
+    return `/v1/organizations/${organizationId}/welcome/current/`
 }
 
 /**
@@ -567,8 +567,8 @@ export const getActivityLogListUrl = (projectId: string, params?: ActivityLogLis
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/activity_log/?${stringifiedParams}`
-        : `/api/projects/${projectId}/activity_log/`
+        ? `/v1/projects/${projectId}/activity_log/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/activity_log/`
 }
 
 export const activityLogList = async (
@@ -594,8 +594,8 @@ export const getAdvancedActivityLogsListUrl = (projectId: string, params?: Advan
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/advanced_activity_logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/advanced_activity_logs/`
+        ? `/v1/projects/${projectId}/advanced_activity_logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/advanced_activity_logs/`
 }
 
 export const advancedActivityLogsList = async (
@@ -610,7 +610,7 @@ export const advancedActivityLogsList = async (
 }
 
 export const getAdvancedActivityLogsAvailableFiltersRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/advanced_activity_logs/available_filters/`
+    return `/v1/projects/${projectId}/advanced_activity_logs/available_filters/`
 }
 
 export const advancedActivityLogsAvailableFiltersRetrieve = async (
@@ -624,7 +624,7 @@ export const advancedActivityLogsAvailableFiltersRetrieve = async (
 }
 
 export const getAdvancedActivityLogsExportCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/advanced_activity_logs/export/`
+    return `/v1/projects/${projectId}/advanced_activity_logs/export/`
 }
 
 export const advancedActivityLogsExportCreate = async (
@@ -652,8 +652,8 @@ export const getApprovalPoliciesListUrl = (projectId: string, params?: ApprovalP
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/approval_policies/?${stringifiedParams}`
-        : `/api/projects/${projectId}/approval_policies/`
+        ? `/v1/projects/${projectId}/approval_policies/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/approval_policies/`
 }
 
 export const approvalPoliciesList = async (
@@ -668,7 +668,7 @@ export const approvalPoliciesList = async (
 }
 
 export const getApprovalPoliciesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/approval_policies/`
+    return `/v1/projects/${projectId}/approval_policies/`
 }
 
 export const approvalPoliciesCreate = async (
@@ -685,7 +685,7 @@ export const approvalPoliciesCreate = async (
 }
 
 export const getApprovalPoliciesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/approval_policies/${id}/`
+    return `/v1/projects/${projectId}/approval_policies/${id}/`
 }
 
 export const approvalPoliciesRetrieve = async (
@@ -700,7 +700,7 @@ export const approvalPoliciesRetrieve = async (
 }
 
 export const getApprovalPoliciesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/approval_policies/${id}/`
+    return `/v1/projects/${projectId}/approval_policies/${id}/`
 }
 
 export const approvalPoliciesUpdate = async (
@@ -718,7 +718,7 @@ export const approvalPoliciesUpdate = async (
 }
 
 export const getApprovalPoliciesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/approval_policies/${id}/`
+    return `/v1/projects/${projectId}/approval_policies/${id}/`
 }
 
 export const approvalPoliciesPartialUpdate = async (
@@ -736,7 +736,7 @@ export const approvalPoliciesPartialUpdate = async (
 }
 
 export const getApprovalPoliciesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/approval_policies/${id}/`
+    return `/v1/projects/${projectId}/approval_policies/${id}/`
 }
 
 export const approvalPoliciesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -758,8 +758,8 @@ export const getChangeRequestsListUrl = (projectId: string, params?: ChangeReque
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/change_requests/?${stringifiedParams}`
-        : `/api/projects/${projectId}/change_requests/`
+        ? `/v1/projects/${projectId}/change_requests/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/change_requests/`
 }
 
 export const changeRequestsList = async (
@@ -774,7 +774,7 @@ export const changeRequestsList = async (
 }
 
 export const getChangeRequestsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/change_requests/${id}/`
+    return `/v1/projects/${projectId}/change_requests/${id}/`
 }
 
 export const changeRequestsRetrieve = async (
@@ -789,7 +789,7 @@ export const changeRequestsRetrieve = async (
 }
 
 export const getChangeRequestsApproveCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/change_requests/${id}/approve/`
+    return `/v1/projects/${projectId}/change_requests/${id}/approve/`
 }
 
 /**
@@ -811,7 +811,7 @@ export const changeRequestsApproveCreate = async (
 }
 
 export const getChangeRequestsCancelCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/change_requests/${id}/cancel/`
+    return `/v1/projects/${projectId}/change_requests/${id}/cancel/`
 }
 
 /**
@@ -833,7 +833,7 @@ export const changeRequestsCancelCreate = async (
 }
 
 export const getChangeRequestsRejectCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/change_requests/${id}/reject/`
+    return `/v1/projects/${projectId}/change_requests/${id}/reject/`
 }
 
 /**
@@ -865,8 +865,8 @@ export const getCommentsListUrl = (projectId: string, params?: CommentsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/comments/?${stringifiedParams}`
-        : `/api/projects/${projectId}/comments/`
+        ? `/v1/projects/${projectId}/comments/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/comments/`
 }
 
 export const commentsList = async (
@@ -881,7 +881,7 @@ export const commentsList = async (
 }
 
 export const getCommentsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/comments/`
+    return `/v1/projects/${projectId}/comments/`
 }
 
 export const commentsCreate = async (
@@ -898,7 +898,7 @@ export const commentsCreate = async (
 }
 
 export const getCommentsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/`
+    return `/v1/projects/${projectId}/comments/${id}/`
 }
 
 export const commentsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<CommentApi> => {
@@ -909,7 +909,7 @@ export const commentsRetrieve = async (projectId: string, id: string, options?: 
 }
 
 export const getCommentsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/`
+    return `/v1/projects/${projectId}/comments/${id}/`
 }
 
 export const commentsUpdate = async (
@@ -927,7 +927,7 @@ export const commentsUpdate = async (
 }
 
 export const getCommentsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/`
+    return `/v1/projects/${projectId}/comments/${id}/`
 }
 
 export const commentsPartialUpdate = async (
@@ -945,7 +945,7 @@ export const commentsPartialUpdate = async (
 }
 
 export const getCommentsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/`
+    return `/v1/projects/${projectId}/comments/${id}/`
 }
 
 /**
@@ -959,7 +959,7 @@ export const commentsDestroy = async (projectId: string, id: string, options?: R
 }
 
 export const getCommentsCompleteCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/complete/`
+    return `/v1/projects/${projectId}/comments/${id}/complete/`
 }
 
 /**
@@ -977,7 +977,7 @@ export const commentsCompleteCreate = async (
 }
 
 export const getCommentsReopenCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/reopen/`
+    return `/v1/projects/${projectId}/comments/${id}/reopen/`
 }
 
 /**
@@ -995,7 +995,7 @@ export const commentsReopenCreate = async (
 }
 
 export const getCommentsThreadRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/thread/`
+    return `/v1/projects/${projectId}/comments/${id}/thread/`
 }
 
 export const commentsThreadRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -1006,7 +1006,7 @@ export const commentsThreadRetrieve = async (projectId: string, id: string, opti
 }
 
 export const getCommentsCountRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/comments/count/`
+    return `/v1/projects/${projectId}/comments/count/`
 }
 
 export const commentsCountRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -1017,7 +1017,7 @@ export const commentsCountRetrieve = async (projectId: string, options?: Request
 }
 
 export const getUserHomeSettingsRetrieveUrl = (uuid: string) => {
-    return `/api/user_home_settings/${uuid}/`
+    return `/v1/user_home_settings/${uuid}/`
 }
 
 /**
@@ -1031,7 +1031,7 @@ export const userHomeSettingsRetrieve = async (uuid: string, options?: RequestIn
 }
 
 export const getUserHomeSettingsPartialUpdateUrl = (uuid: string) => {
-    return `/api/user_home_settings/${uuid}/`
+    return `/v1/user_home_settings/${uuid}/`
 }
 
 /**

@@ -44,8 +44,8 @@ export const getAnnotationsListUrl = (projectId: string, params?: AnnotationsLis
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/annotations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/annotations/`
+        ? `/v1/projects/${projectId}/annotations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/annotations/`
 }
 
 /**
@@ -63,7 +63,7 @@ export const annotationsList = async (
 }
 
 export const getAnnotationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/annotations/`
+    return `/v1/projects/${projectId}/annotations/`
 }
 
 /**
@@ -83,7 +83,7 @@ export const annotationsCreate = async (
 }
 
 export const getAnnotationsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/annotations/${id}/`
+    return `/v1/projects/${projectId}/annotations/${id}/`
 }
 
 /**
@@ -101,7 +101,7 @@ export const annotationsRetrieve = async (
 }
 
 export const getAnnotationsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/annotations/${id}/`
+    return `/v1/projects/${projectId}/annotations/${id}/`
 }
 
 /**
@@ -122,7 +122,7 @@ export const annotationsUpdate = async (
 }
 
 export const getAnnotationsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/annotations/${id}/`
+    return `/v1/projects/${projectId}/annotations/${id}/`
 }
 
 /**
@@ -143,7 +143,7 @@ export const annotationsPartialUpdate = async (
 }
 
 export const getAnnotationsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/annotations/${id}/`
+    return `/v1/projects/${projectId}/annotations/${id}/`
 }
 
 /**

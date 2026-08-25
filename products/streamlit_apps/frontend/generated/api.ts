@@ -37,8 +37,8 @@ export const getStreamlitAppsListUrl = (projectId: string, params?: StreamlitApp
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/streamlit_apps/?${stringifiedParams}`
-        : `/api/projects/${projectId}/streamlit_apps/`
+        ? `/v1/projects/${projectId}/streamlit_apps/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/streamlit_apps/`
 }
 
 /**
@@ -56,7 +56,7 @@ export const streamlitAppsList = async (
 }
 
 export const getStreamlitAppsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/`
+    return `/v1/projects/${projectId}/streamlit_apps/`
 }
 
 /**
@@ -76,7 +76,7 @@ export const streamlitAppsCreate = async (
 }
 
 export const getStreamlitAppsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/`
 }
 
 /**
@@ -94,7 +94,7 @@ export const streamlitAppsRetrieve = async (
 }
 
 export const getStreamlitAppsUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/`
 }
 
 /**
@@ -115,7 +115,7 @@ export const streamlitAppsUpdate = async (
 }
 
 export const getStreamlitAppsPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/`
 }
 
 /**
@@ -136,7 +136,7 @@ export const streamlitAppsPartialUpdate = async (
 }
 
 export const getStreamlitAppsDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/`
 }
 
 /**
@@ -154,7 +154,7 @@ export const streamlitAppsDestroy = async (
 }
 
 export const getStreamlitAppsActivateVersionCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/activate_version/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/activate_version/`
 }
 
 /**
@@ -175,7 +175,7 @@ export const streamlitAppsActivateVersionCreate = async (
 }
 
 export const getStreamlitAppsConnectInfoRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/connect_info/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/connect_info/`
 }
 
 /**
@@ -193,7 +193,7 @@ export const streamlitAppsConnectInfoRetrieve = async (
 }
 
 export const getStreamlitAppsCreateVersionFromSourceCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/create_version_from_source/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/create_version_from_source/`
 }
 
 /**
@@ -214,7 +214,7 @@ export const streamlitAppsCreateVersionFromSourceCreate = async (
 }
 
 export const getStreamlitAppsRestartCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/restart/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/restart/`
 }
 
 /**
@@ -232,7 +232,7 @@ export const streamlitAppsRestartCreate = async (
 }
 
 export const getStreamlitAppsStartCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/start/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/start/`
 }
 
 /**
@@ -250,7 +250,7 @@ export const streamlitAppsStartCreate = async (
 }
 
 export const getStreamlitAppsStatusRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/status/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/status/`
 }
 
 /**
@@ -268,7 +268,7 @@ export const streamlitAppsStatusRetrieve = async (
 }
 
 export const getStreamlitAppsStopCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/stop/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/stop/`
 }
 
 /**
@@ -286,7 +286,7 @@ export const streamlitAppsStopCreate = async (
 }
 
 export const getStreamlitAppsUploadVersionCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/upload_version/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/upload_version/`
 }
 
 /**
@@ -307,7 +307,7 @@ export const streamlitAppsUploadVersionCreate = async (
 }
 
 export const getStreamlitAppsVersionsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/streamlit_apps/${shortId}/versions/`
+    return `/v1/projects/${projectId}/streamlit_apps/${shortId}/versions/`
 }
 
 /**

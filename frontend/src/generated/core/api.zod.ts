@@ -397,8 +397,8 @@ export const OrganizationsProjectsGenerateConversationsPublicTokenCreateBody = /
 /**
  * Manage logs product configuration for this project's canonical environment.
  * Members can read; writing requires project admin, matching the admin-only
- * settings UI. Mirrors the env-router action so /api/projects/:id/logs_config/
- * resolves alongside the legacy /api/environments/:id/logs_config/ alias.
+ * settings UI. Mirrors the env-router action so /v1/projects/:id/logs_config/
+ * resolves alongside the legacy /v1/environments/:id/logs_config/ alias.
  */
 export const OrganizationsProjectsLogsConfigPartialUpdateBody = /* @__PURE__ */ zod
     .record(zod.string(), zod.unknown())
@@ -1145,7 +1145,7 @@ export const UsersIntegrationsGithubPrepareCallbackCreateBody = /* @__PURE__ */ 
  * Start GitHub linking: either full App install or OAuth-only (user-to-server).
  *
  * ``**_kwargs`` absorbs ``parent_lookup_uuid`` from the nested
- * ``/api/users/{uuid}/integrations/`` router (same pattern as ``local_evaluation``
+ * ``/v1/users/{uuid}/integrations/`` router (same pattern as ``local_evaluation``
  * under projects).
  *
  * Usually returns ``install_url`` pointing at ``/installations/new`` so the

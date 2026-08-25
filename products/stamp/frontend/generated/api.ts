@@ -60,8 +60,8 @@ export const getStampDigestChannelsListUrl = (projectId: string, params?: StampD
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamp/digest_channels/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamp/digest_channels/`
+        ? `/v1/projects/${projectId}/stamp/digest_channels/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/stamp/digest_channels/`
 }
 
 /**
@@ -79,7 +79,7 @@ export const stampDigestChannelsList = async (
 }
 
 export const getStampDigestChannelsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/stamp/digest_channels/`
+    return `/v1/projects/${projectId}/stamp/digest_channels/`
 }
 
 /**
@@ -99,7 +99,7 @@ export const stampDigestChannelsCreate = async (
 }
 
 export const getStampDigestChannelsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/digest_channels/${id}/`
+    return `/v1/projects/${projectId}/stamp/digest_channels/${id}/`
 }
 
 /**
@@ -117,7 +117,7 @@ export const stampDigestChannelsRetrieve = async (
 }
 
 export const getStampDigestChannelsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/digest_channels/${id}/`
+    return `/v1/projects/${projectId}/stamp/digest_channels/${id}/`
 }
 
 /**
@@ -138,7 +138,7 @@ export const stampDigestChannelsUpdate = async (
 }
 
 export const getStampDigestChannelsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/digest_channels/${id}/`
+    return `/v1/projects/${projectId}/stamp/digest_channels/${id}/`
 }
 
 /**
@@ -159,7 +159,7 @@ export const stampDigestChannelsPartialUpdate = async (
 }
 
 export const getStampDigestChannelsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/digest_channels/${id}/`
+    return `/v1/projects/${projectId}/stamp/digest_channels/${id}/`
 }
 
 /**
@@ -188,8 +188,8 @@ export const getStampDigestRunsListUrl = (projectId: string, params?: StampDiges
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamp/digest_runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamp/digest_runs/`
+        ? `/v1/projects/${projectId}/stamp/digest_runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/stamp/digest_runs/`
 }
 
 /**
@@ -207,7 +207,7 @@ export const stampDigestRunsList = async (
 }
 
 export const getStampDigestRunsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/digest_runs/${id}/`
+    return `/v1/projects/${projectId}/stamp/digest_runs/${id}/`
 }
 
 /**
@@ -236,8 +236,8 @@ export const getStampPullRequestsListUrl = (projectId: string, params?: StampPul
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamp/pull_requests/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamp/pull_requests/`
+        ? `/v1/projects/${projectId}/stamp/pull_requests/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/stamp/pull_requests/`
 }
 
 /**
@@ -255,7 +255,7 @@ export const stampPullRequestsList = async (
 }
 
 export const getStampPullRequestsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/pull_requests/${id}/`
+    return `/v1/projects/${projectId}/stamp/pull_requests/${id}/`
 }
 
 /**
@@ -284,8 +284,8 @@ export const getStampRepoConfigsListUrl = (projectId: string, params?: StampRepo
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamp/repo_configs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamp/repo_configs/`
+        ? `/v1/projects/${projectId}/stamp/repo_configs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/stamp/repo_configs/`
 }
 
 /**
@@ -303,7 +303,7 @@ export const stampRepoConfigsList = async (
 }
 
 export const getStampRepoConfigsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/stamp/repo_configs/`
+    return `/v1/projects/${projectId}/stamp/repo_configs/`
 }
 
 /**
@@ -323,7 +323,7 @@ export const stampRepoConfigsCreate = async (
 }
 
 export const getStampRepoConfigsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/repo_configs/${id}/`
+    return `/v1/projects/${projectId}/stamp/repo_configs/${id}/`
 }
 
 /**
@@ -341,7 +341,7 @@ export const stampRepoConfigsRetrieve = async (
 }
 
 export const getStampRepoConfigsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/repo_configs/${id}/`
+    return `/v1/projects/${projectId}/stamp/repo_configs/${id}/`
 }
 
 /**
@@ -362,7 +362,7 @@ export const stampRepoConfigsUpdate = async (
 }
 
 export const getStampRepoConfigsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/repo_configs/${id}/`
+    return `/v1/projects/${projectId}/stamp/repo_configs/${id}/`
 }
 
 /**
@@ -383,7 +383,7 @@ export const stampRepoConfigsPartialUpdate = async (
 }
 
 export const getStampRepoConfigsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/repo_configs/${id}/`
+    return `/v1/projects/${projectId}/stamp/repo_configs/${id}/`
 }
 
 /**
@@ -401,7 +401,7 @@ export const stampRepoConfigsDestroy = async (
 }
 
 export const getStampRepoConfigsInstallInfoRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/stamp/repo_configs/install_info/`
+    return `/v1/projects/${projectId}/stamp/repo_configs/install_info/`
 }
 
 /**
@@ -418,7 +418,7 @@ export const stampRepoConfigsInstallInfoRetrieve = async (
 }
 
 export const getStampRepoConfigsSyncInstallationCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/stamp/repo_configs/sync_installation/`
+    return `/v1/projects/${projectId}/stamp/repo_configs/sync_installation/`
 }
 
 /**
@@ -449,8 +449,8 @@ export const getStampReviewRunsListUrl = (projectId: string, params?: StampRevie
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamp/review_runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamp/review_runs/`
+        ? `/v1/projects/${projectId}/stamp/review_runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/stamp/review_runs/`
 }
 
 /**
@@ -468,7 +468,7 @@ export const stampReviewRunsList = async (
 }
 
 export const getStampReviewRunsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamp/review_runs/${id}/`
+    return `/v1/projects/${projectId}/stamp/review_runs/${id}/`
 }
 
 /**

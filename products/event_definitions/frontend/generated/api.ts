@@ -52,8 +52,8 @@ export const getEventDefinitionsListUrl = (projectId: string, params?: EventDefi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/event_definitions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/event_definitions/`
+        ? `/v1/projects/${projectId}/event_definitions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/event_definitions/`
 }
 
 export const eventDefinitionsList = async (
@@ -68,7 +68,7 @@ export const eventDefinitionsList = async (
 }
 
 export const getEventDefinitionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/`
+    return `/v1/projects/${projectId}/event_definitions/`
 }
 
 export const eventDefinitionsCreate = async (
@@ -85,7 +85,7 @@ export const eventDefinitionsCreate = async (
 }
 
 export const getEventDefinitionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/`
 }
 
 export const eventDefinitionsRetrieve = async (
@@ -100,7 +100,7 @@ export const eventDefinitionsRetrieve = async (
 }
 
 export const getEventDefinitionsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/`
 }
 
 export const eventDefinitionsUpdate = async (
@@ -118,7 +118,7 @@ export const eventDefinitionsUpdate = async (
 }
 
 export const getEventDefinitionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/`
 }
 
 export const eventDefinitionsPartialUpdate = async (
@@ -136,7 +136,7 @@ export const eventDefinitionsPartialUpdate = async (
 }
 
 export const getEventDefinitionsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/`
 }
 
 export const eventDefinitionsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -147,7 +147,7 @@ export const eventDefinitionsDestroy = async (projectId: string, id: string, opt
 }
 
 export const getEventDefinitionsMetricsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/metrics/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/metrics/`
 }
 
 export const eventDefinitionsMetricsRetrieve = async (
@@ -162,7 +162,7 @@ export const eventDefinitionsMetricsRetrieve = async (
 }
 
 export const getEventDefinitionsBulkUpdateTagsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/bulk_update_tags/`
+    return `/v1/projects/${projectId}/event_definitions/bulk_update_tags/`
 }
 
 /**
@@ -189,7 +189,7 @@ export const eventDefinitionsBulkUpdateTagsCreate = async (
 }
 
 export const getEventDefinitionsBulkUpdateVerifiedCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/bulk_update_verified/`
+    return `/v1/projects/${projectId}/event_definitions/bulk_update_verified/`
 }
 
 /**
@@ -239,8 +239,8 @@ export const getEventDefinitionsByNameRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/event_definitions/by_name/?${stringifiedParams}`
-        : `/api/projects/${projectId}/event_definitions/by_name/`
+        ? `/v1/projects/${projectId}/event_definitions/by_name/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/event_definitions/by_name/`
 }
 
 /**
@@ -258,7 +258,7 @@ export const eventDefinitionsByNameRetrieve = async (
 }
 
 export const getEventDefinitionsGolangRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/golang/`
+    return `/v1/projects/${projectId}/event_definitions/golang/`
 }
 
 export const eventDefinitionsGolangRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -283,8 +283,8 @@ export const getEventDefinitionsPrimaryPropertiesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/event_definitions/primary_properties/?${stringifiedParams}`
-        : `/api/projects/${projectId}/event_definitions/primary_properties/`
+        ? `/v1/projects/${projectId}/event_definitions/primary_properties/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/event_definitions/primary_properties/`
 }
 
 /**
@@ -309,7 +309,7 @@ export const eventDefinitionsPrimaryPropertiesRetrieve = async (
 }
 
 export const getEventDefinitionsPythonRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/python/`
+    return `/v1/projects/${projectId}/event_definitions/python/`
 }
 
 export const eventDefinitionsPythonRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -320,7 +320,7 @@ export const eventDefinitionsPythonRetrieve = async (projectId: string, options?
 }
 
 export const getEventDefinitionsTypescriptRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/typescript/`
+    return `/v1/projects/${projectId}/event_definitions/typescript/`
 }
 
 export const eventDefinitionsTypescriptRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {

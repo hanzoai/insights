@@ -99,8 +99,8 @@ export const getLogsAlertsListUrl = (projectId: string, params?: LogsAlertsListP
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/alerts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/alerts/`
+        ? `/v1/projects/${projectId}/logs/alerts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/alerts/`
 }
 
 export const logsAlertsList = async (
@@ -115,7 +115,7 @@ export const logsAlertsList = async (
 }
 
 export const getLogsAlertsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/alerts/`
+    return `/v1/projects/${projectId}/logs/alerts/`
 }
 
 export const logsAlertsCreate = async (
@@ -132,7 +132,7 @@ export const logsAlertsCreate = async (
 }
 
 export const getLogsAlertsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/alerts/${id}/`
+    return `/v1/projects/${projectId}/logs/alerts/${id}/`
 }
 
 export const logsAlertsRetrieve = async (
@@ -147,7 +147,7 @@ export const logsAlertsRetrieve = async (
 }
 
 export const getLogsAlertsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/alerts/${id}/`
+    return `/v1/projects/${projectId}/logs/alerts/${id}/`
 }
 
 export const logsAlertsUpdate = async (
@@ -165,7 +165,7 @@ export const logsAlertsUpdate = async (
 }
 
 export const getLogsAlertsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/alerts/${id}/`
+    return `/v1/projects/${projectId}/logs/alerts/${id}/`
 }
 
 export const logsAlertsPartialUpdate = async (
@@ -183,7 +183,7 @@ export const logsAlertsPartialUpdate = async (
 }
 
 export const getLogsAlertsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/alerts/${id}/`
+    return `/v1/projects/${projectId}/logs/alerts/${id}/`
 }
 
 export const logsAlertsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -194,7 +194,7 @@ export const logsAlertsDestroy = async (projectId: string, id: string, options?:
 }
 
 export const getLogsAlertsDestinationsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/alerts/${id}/destinations/`
+    return `/v1/projects/${projectId}/logs/alerts/${id}/destinations/`
 }
 
 /**
@@ -215,7 +215,7 @@ export const logsAlertsDestinationsCreate = async (
 }
 
 export const getLogsAlertsDestinationsDeleteCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/alerts/${id}/destinations/delete/`
+    return `/v1/projects/${projectId}/logs/alerts/${id}/destinations/delete/`
 }
 
 /**
@@ -247,8 +247,8 @@ export const getLogsAlertsEventsListUrl = (projectId: string, id: string, params
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/alerts/${id}/events/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/alerts/${id}/events/`
+        ? `/v1/projects/${projectId}/logs/alerts/${id}/events/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/alerts/${id}/events/`
 }
 
 /**
@@ -267,7 +267,7 @@ export const logsAlertsEventsList = async (
 }
 
 export const getLogsAlertsResetCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/alerts/${id}/reset/`
+    return `/v1/projects/${projectId}/logs/alerts/${id}/reset/`
 }
 
 /**
@@ -285,7 +285,7 @@ export const logsAlertsResetCreate = async (
 }
 
 export const getLogsAlertsSimulateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/alerts/simulate/`
+    return `/v1/projects/${projectId}/logs/alerts/simulate/`
 }
 
 /**
@@ -316,8 +316,8 @@ export const getLogsAttributesRetrieveUrl = (projectId: string, params?: LogsAtt
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/attributes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/attributes/`
+        ? `/v1/projects/${projectId}/logs/attributes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/attributes/`
 }
 
 export const logsAttributesRetrieve = async (
@@ -332,7 +332,7 @@ export const logsAttributesRetrieve = async (
 }
 
 export const getLogsCountCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/count/`
+    return `/v1/projects/${projectId}/logs/count/`
 }
 
 export const logsCountCreate = async (
@@ -349,7 +349,7 @@ export const logsCountCreate = async (
 }
 
 export const getLogsCountRangesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/count-ranges/`
+    return `/v1/projects/${projectId}/logs/count-ranges/`
 }
 
 export const logsCountRangesCreate = async (
@@ -366,13 +366,13 @@ export const logsCountRangesCreate = async (
 }
 
 export const getLogsExplainLogWithAICreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/explainLogWithAI/`
+    return `/v1/projects/${projectId}/logs/explainLogWithAI/`
 }
 
 /**
  * Explain a log entry using AI.
  *
- * POST /api/environments/:id/logs/explainLogWithAI/
+ * POST /v1/environments/:id/logs/explainLogWithAI/
  */
 export const logsExplainLogWithAICreate = async (
     projectId: string,
@@ -388,7 +388,7 @@ export const logsExplainLogWithAICreate = async (
 }
 
 export const getLogsExportCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/export/`
+    return `/v1/projects/${projectId}/logs/export/`
 }
 
 export const logsExportCreate = async (projectId: string, options?: RequestInit): Promise<LogsExportCreate201> => {
@@ -399,7 +399,7 @@ export const logsExportCreate = async (projectId: string, options?: RequestInit)
 }
 
 export const getLogsFacetValuesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/facet_values/`
+    return `/v1/projects/${projectId}/logs/facet_values/`
 }
 
 export const logsFacetValuesCreate = async (
@@ -416,7 +416,7 @@ export const logsFacetValuesCreate = async (
 }
 
 export const getLogsGroupByCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/group-by/`
+    return `/v1/projects/${projectId}/logs/group-by/`
 }
 
 export const logsGroupByCreate = async (
@@ -433,7 +433,7 @@ export const logsGroupByCreate = async (
 }
 
 export const getLogsHasLogsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/has_logs/`
+    return `/v1/projects/${projectId}/logs/has_logs/`
 }
 
 export const logsHasLogsRetrieve = async (
@@ -458,8 +458,8 @@ export const getLogsMetricRulesListUrl = (projectId: string, params?: LogsMetric
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/metric_rules/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/metric_rules/`
+        ? `/v1/projects/${projectId}/logs/metric_rules/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/metric_rules/`
 }
 
 export const logsMetricRulesList = async (
@@ -474,7 +474,7 @@ export const logsMetricRulesList = async (
 }
 
 export const getLogsMetricRulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/metric_rules/`
+    return `/v1/projects/${projectId}/logs/metric_rules/`
 }
 
 export const logsMetricRulesCreate = async (
@@ -491,7 +491,7 @@ export const logsMetricRulesCreate = async (
 }
 
 export const getLogsMetricRulesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/metric_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/metric_rules/${id}/`
 }
 
 export const logsMetricRulesRetrieve = async (
@@ -506,7 +506,7 @@ export const logsMetricRulesRetrieve = async (
 }
 
 export const getLogsMetricRulesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/metric_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/metric_rules/${id}/`
 }
 
 export const logsMetricRulesUpdate = async (
@@ -524,7 +524,7 @@ export const logsMetricRulesUpdate = async (
 }
 
 export const getLogsMetricRulesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/metric_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/metric_rules/${id}/`
 }
 
 export const logsMetricRulesPartialUpdate = async (
@@ -542,7 +542,7 @@ export const logsMetricRulesPartialUpdate = async (
 }
 
 export const getLogsMetricRulesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/metric_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/metric_rules/${id}/`
 }
 
 export const logsMetricRulesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -553,7 +553,7 @@ export const logsMetricRulesDestroy = async (projectId: string, id: string, opti
 }
 
 export const getLogsPatternsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/patterns/`
+    return `/v1/projects/${projectId}/logs/patterns/`
 }
 
 export const logsPatternsCreate = async (
@@ -570,7 +570,7 @@ export const logsPatternsCreate = async (
 }
 
 export const getLogsPatternsDiffCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/patterns_diff/`
+    return `/v1/projects/${projectId}/logs/patterns_diff/`
 }
 
 export const logsPatternsDiffCreate = async (
@@ -587,7 +587,7 @@ export const logsPatternsDiffCreate = async (
 }
 
 export const getLogsQueryCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/query/`
+    return `/v1/projects/${projectId}/logs/query/`
 }
 
 export const logsQueryCreate = async (
@@ -615,8 +615,8 @@ export const getLogsRetentionRulesListUrl = (projectId: string, params?: LogsRet
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/retention_rules/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/retention_rules/`
+        ? `/v1/projects/${projectId}/logs/retention_rules/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/retention_rules/`
 }
 
 export const logsRetentionRulesList = async (
@@ -631,7 +631,7 @@ export const logsRetentionRulesList = async (
 }
 
 export const getLogsRetentionRulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/retention_rules/`
+    return `/v1/projects/${projectId}/logs/retention_rules/`
 }
 
 export const logsRetentionRulesCreate = async (
@@ -648,7 +648,7 @@ export const logsRetentionRulesCreate = async (
 }
 
 export const getLogsRetentionRulesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/retention_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/retention_rules/${id}/`
 }
 
 export const logsRetentionRulesRetrieve = async (
@@ -663,7 +663,7 @@ export const logsRetentionRulesRetrieve = async (
 }
 
 export const getLogsRetentionRulesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/retention_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/retention_rules/${id}/`
 }
 
 export const logsRetentionRulesUpdate = async (
@@ -681,7 +681,7 @@ export const logsRetentionRulesUpdate = async (
 }
 
 export const getLogsRetentionRulesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/retention_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/retention_rules/${id}/`
 }
 
 export const logsRetentionRulesPartialUpdate = async (
@@ -699,7 +699,7 @@ export const logsRetentionRulesPartialUpdate = async (
 }
 
 export const getLogsRetentionRulesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/retention_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/retention_rules/${id}/`
 }
 
 export const logsRetentionRulesDestroy = async (
@@ -728,8 +728,8 @@ export const getLogsRetentionRulesReorderCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/retention_rules/reorder/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/retention_rules/reorder/`
+        ? `/v1/projects/${projectId}/logs/retention_rules/reorder/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/retention_rules/reorder/`
 }
 
 /**
@@ -750,7 +750,7 @@ export const logsRetentionRulesReorderCreate = async (
 }
 
 export const getLogsRetentionRulesSuggestNameCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/retention_rules/suggest_name/`
+    return `/v1/projects/${projectId}/logs/retention_rules/suggest_name/`
 }
 
 /**
@@ -781,8 +781,8 @@ export const getLogsSamplingRulesListUrl = (projectId: string, params?: LogsSamp
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/sampling_rules/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/sampling_rules/`
+        ? `/v1/projects/${projectId}/logs/sampling_rules/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/sampling_rules/`
 }
 
 export const logsSamplingRulesList = async (
@@ -797,7 +797,7 @@ export const logsSamplingRulesList = async (
 }
 
 export const getLogsSamplingRulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/sampling_rules/`
+    return `/v1/projects/${projectId}/logs/sampling_rules/`
 }
 
 export const logsSamplingRulesCreate = async (
@@ -814,7 +814,7 @@ export const logsSamplingRulesCreate = async (
 }
 
 export const getLogsSamplingRulesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/sampling_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/sampling_rules/${id}/`
 }
 
 export const logsSamplingRulesRetrieve = async (
@@ -829,7 +829,7 @@ export const logsSamplingRulesRetrieve = async (
 }
 
 export const getLogsSamplingRulesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/sampling_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/sampling_rules/${id}/`
 }
 
 export const logsSamplingRulesUpdate = async (
@@ -847,7 +847,7 @@ export const logsSamplingRulesUpdate = async (
 }
 
 export const getLogsSamplingRulesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/sampling_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/sampling_rules/${id}/`
 }
 
 export const logsSamplingRulesPartialUpdate = async (
@@ -865,7 +865,7 @@ export const logsSamplingRulesPartialUpdate = async (
 }
 
 export const getLogsSamplingRulesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/sampling_rules/${id}/`
+    return `/v1/projects/${projectId}/logs/sampling_rules/${id}/`
 }
 
 export const logsSamplingRulesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -876,7 +876,7 @@ export const logsSamplingRulesDestroy = async (projectId: string, id: string, op
 }
 
 export const getLogsSamplingRulesSimulateCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/logs/sampling_rules/${id}/simulate/`
+    return `/v1/projects/${projectId}/logs/sampling_rules/${id}/simulate/`
 }
 
 /**
@@ -908,8 +908,8 @@ export const getLogsSamplingRulesReorderCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/sampling_rules/reorder/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/sampling_rules/reorder/`
+        ? `/v1/projects/${projectId}/logs/sampling_rules/reorder/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/sampling_rules/reorder/`
 }
 
 /**
@@ -930,7 +930,7 @@ export const logsSamplingRulesReorderCreate = async (
 }
 
 export const getLogsServicesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/services/`
+    return `/v1/projects/${projectId}/logs/services/`
 }
 
 export const logsServicesCreate = async (
@@ -947,7 +947,7 @@ export const logsServicesCreate = async (
 }
 
 export const getLogsSparklineCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/sparkline/`
+    return `/v1/projects/${projectId}/logs/sparkline/`
 }
 
 export const logsSparklineCreate = async (
@@ -975,8 +975,8 @@ export const getLogsValuesRetrieveUrl = (projectId: string, params: LogsValuesRe
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/values/`
+        ? `/v1/projects/${projectId}/logs/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/values/`
 }
 
 export const logsValuesRetrieve = async (
@@ -1002,8 +1002,8 @@ export const getLogsViewsListUrl = (projectId: string, params?: LogsViewsListPar
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/logs/views/?${stringifiedParams}`
-        : `/api/projects/${projectId}/logs/views/`
+        ? `/v1/projects/${projectId}/logs/views/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/logs/views/`
 }
 
 export const logsViewsList = async (
@@ -1018,7 +1018,7 @@ export const logsViewsList = async (
 }
 
 export const getLogsViewsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/views/`
+    return `/v1/projects/${projectId}/logs/views/`
 }
 
 export const logsViewsCreate = async (
@@ -1035,7 +1035,7 @@ export const logsViewsCreate = async (
 }
 
 export const getLogsViewsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/logs/views/${shortId}/`
+    return `/v1/projects/${projectId}/logs/views/${shortId}/`
 }
 
 export const logsViewsRetrieve = async (
@@ -1050,7 +1050,7 @@ export const logsViewsRetrieve = async (
 }
 
 export const getLogsViewsUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/logs/views/${shortId}/`
+    return `/v1/projects/${projectId}/logs/views/${shortId}/`
 }
 
 export const logsViewsUpdate = async (
@@ -1068,7 +1068,7 @@ export const logsViewsUpdate = async (
 }
 
 export const getLogsViewsPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/logs/views/${shortId}/`
+    return `/v1/projects/${projectId}/logs/views/${shortId}/`
 }
 
 export const logsViewsPartialUpdate = async (
@@ -1086,7 +1086,7 @@ export const logsViewsPartialUpdate = async (
 }
 
 export const getLogsViewsDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/logs/views/${shortId}/`
+    return `/v1/projects/${projectId}/logs/views/${shortId}/`
 }
 
 export const logsViewsDestroy = async (projectId: string, shortId: string, options?: RequestInit): Promise<void> => {
@@ -1097,7 +1097,7 @@ export const logsViewsDestroy = async (projectId: string, shortId: string, optio
 }
 
 export const getTasksRunsLogsRetrieveUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/logs/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/logs/`
 }
 
 /**

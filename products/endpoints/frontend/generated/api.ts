@@ -42,8 +42,8 @@ export const getEndpointsListUrl = (projectId: string, params?: EndpointsListPar
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/endpoints/?${stringifiedParams}`
-        : `/api/projects/${projectId}/endpoints/`
+        ? `/v1/projects/${projectId}/endpoints/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/endpoints/`
 }
 
 /**
@@ -61,7 +61,7 @@ export const endpointsList = async (
 }
 
 export const getEndpointsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/endpoints/`
+    return `/v1/projects/${projectId}/endpoints/`
 }
 
 /**
@@ -81,7 +81,7 @@ export const endpointsCreate = async (
 }
 
 export const getEndpointsRetrieveUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/`
+    return `/v1/projects/${projectId}/endpoints/${name}/`
 }
 
 /**
@@ -99,7 +99,7 @@ export const endpointsRetrieve = async (
 }
 
 export const getEndpointsUpdateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/`
+    return `/v1/projects/${projectId}/endpoints/${name}/`
 }
 
 /**
@@ -120,7 +120,7 @@ export const endpointsUpdate = async (
 }
 
 export const getEndpointsPartialUpdateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/`
+    return `/v1/projects/${projectId}/endpoints/${name}/`
 }
 
 /**
@@ -141,7 +141,7 @@ export const endpointsPartialUpdate = async (
 }
 
 export const getEndpointsDestroyUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/`
+    return `/v1/projects/${projectId}/endpoints/${name}/`
 }
 
 /**
@@ -166,8 +166,8 @@ export const getEndpointsLogsRetrieveUrl = (projectId: string, name: string, par
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/endpoints/${name}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/endpoints/${name}/logs/`
+        ? `/v1/projects/${projectId}/endpoints/${name}/logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/endpoints/${name}/logs/`
 }
 
 export const endpointsLogsRetrieve = async (
@@ -183,7 +183,7 @@ export const endpointsLogsRetrieve = async (
 }
 
 export const getEndpointsMaterializationPreviewCreateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/materialization_preview/`
+    return `/v1/projects/${projectId}/endpoints/${name}/materialization_preview/`
 }
 
 /**
@@ -204,7 +204,7 @@ export const endpointsMaterializationPreviewCreate = async (
 }
 
 export const getEndpointsMaterializationStatusRetrieveUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/materialization_status/`
+    return `/v1/projects/${projectId}/endpoints/${name}/materialization_status/`
 }
 
 /**
@@ -222,7 +222,7 @@ export const endpointsMaterializationStatusRetrieve = async (
 }
 
 export const getEndpointsMaterializationSuggestionCreateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/materialization_suggestion/`
+    return `/v1/projects/${projectId}/endpoints/${name}/materialization_suggestion/`
 }
 
 /**
@@ -261,8 +261,8 @@ export const getEndpointsOpenapiSpecRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/endpoints/${name}/openapi.json/?${stringifiedParams}`
-        : `/api/projects/${projectId}/endpoints/${name}/openapi.json/`
+        ? `/v1/projects/${projectId}/endpoints/${name}/openapi.json/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/endpoints/${name}/openapi.json/`
 }
 
 /**
@@ -281,7 +281,7 @@ export const endpointsOpenapiSpecRetrieve = async (
 }
 
 export const getEndpointsRunRetrieveUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/run/`
+    return `/v1/projects/${projectId}/endpoints/${name}/run/`
 }
 
 /**
@@ -299,7 +299,7 @@ export const endpointsRunRetrieve = async (
 }
 
 export const getEndpointsRunCreateUrl = (projectId: string, name: string) => {
-    return `/api/projects/${projectId}/endpoints/${name}/run/`
+    return `/v1/projects/${projectId}/endpoints/${name}/run/`
 }
 
 /**
@@ -331,8 +331,8 @@ export const getEndpointsVersionsListUrl = (projectId: string, name: string, par
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/endpoints/${name}/versions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/endpoints/${name}/versions/`
+        ? `/v1/projects/${projectId}/endpoints/${name}/versions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/endpoints/${name}/versions/`
 }
 
 /**
@@ -351,7 +351,7 @@ export const endpointsVersionsList = async (
 }
 
 export const getEndpointsLastExecutionTimesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/endpoints/last_execution_times/`
+    return `/v1/projects/${projectId}/endpoints/last_execution_times/`
 }
 
 /**
@@ -371,7 +371,7 @@ export const endpointsLastExecutionTimesCreate = async (
 }
 
 export const getEndpointsMaterializationConditionsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/endpoints/materialization_conditions/`
+    return `/v1/projects/${projectId}/endpoints/materialization_conditions/`
 }
 
 /**
