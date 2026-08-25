@@ -39,23 +39,31 @@
         U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Geist is the house typeface across every Hanzo surface, so it is declared the
+/* Zen is the house typeface across every Hanzo surface, so it is declared the
  * same way here: our own copy under `public/fonts`, served from our own origin.
  * One variable file spans 100-900, which is why eight static faces collapse to
- * one; italics are synthesized, as Geist ships no italic axis. Licensed SIL OFL
- * 1.1 (see `public/fonts/LICENSE.txt`), so it travels with the source. */
+ * one; italics are synthesized, as this cut ships no italic axis.
+ *
+ * These files were named Geist until now, which was the UPSTREAM name for the
+ * same design: Zen is our OFL fork of it (hanzoai/font, Copyright 2023 Vercel
+ * in collaboration with basement.studio, Copyright 2026 Hanzo AI). OFL reserves
+ * the original name, so shipping a modified cut as `Geist` is both a licence
+ * problem and another vendor's brand on our own analytics product. Same design,
+ * our name. Binaries come from hanzoai/font `fonts/Zen/webfonts/Zen[wght].woff2`
+ * so there is one place a new cut lands. Licence travels beside them in
+ * `public/fonts/LICENSE.txt`. */
 @font-face {
-    font-family: Geist;
+    font-family: Zen;
     font-style: normal;
     font-weight: 100 900;
-    src: url('../../public/fonts/Geist-Variable.woff2') format('woff2-variations');
+    src: url('../../public/fonts/Zen-Variable.woff2') format('woff2-variations');
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Geist Mono';
+    font-family: 'Zen Mono';
     font-style: normal;
     font-weight: 100 900;
-    src: url('../../public/fonts/GeistMono-Variable.woff2') format('woff2-variations');
+    src: url('../../public/fonts/ZenMono-Variable.woff2') format('woff2-variations');
     font-display: swap;
 }
