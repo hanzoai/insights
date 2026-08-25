@@ -1526,7 +1526,7 @@ export interface SignalNodeApi {
 }
 
 /**
- * Response body for GET /api/projects/:id/signals/reports/:id/signals/.
+ * Response body for GET /v1/projects/:id/signals/reports/:id/signals/.
  */
 export interface ReportSignalsResponseApi {
     /** The report these signals were clustered into. */

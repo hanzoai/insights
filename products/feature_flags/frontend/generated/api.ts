@@ -94,8 +94,8 @@ export const getFeatureFlagsStaffCacheListUrl = (params: FeatureFlagsStaffCacheL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/feature_flags_staff_cache/?${stringifiedParams}`
-        : `/api/feature_flags_staff_cache/`
+        ? `/v1/feature_flags_staff_cache/?${stringifiedParams}`
+        : `/v1/feature_flags_staff_cache/`
 }
 
 /**
@@ -119,7 +119,7 @@ export const featureFlagsStaffCacheList = async (
 }
 
 export const getFeatureFlagsStaffCacheClearCreateUrl = () => {
-    return `/api/feature_flags_staff_cache/clear/`
+    return `/v1/feature_flags_staff_cache/clear/`
 }
 
 /**
@@ -156,8 +156,8 @@ export const getFeatureFlagsStaffCacheEntryRetrieveUrl = (params: FeatureFlagsSt
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/feature_flags_staff_cache/entry/?${stringifiedParams}`
-        : `/api/feature_flags_staff_cache/entry/`
+        ? `/v1/feature_flags_staff_cache/entry/?${stringifiedParams}`
+        : `/v1/feature_flags_staff_cache/entry/`
 }
 
 /**
@@ -181,7 +181,7 @@ export const featureFlagsStaffCacheEntryRetrieve = async (
 }
 
 export const getFeatureFlagsStaffCacheRebuildCreateUrl = () => {
-    return `/api/feature_flags_staff_cache/rebuild/`
+    return `/v1/feature_flags_staff_cache/rebuild/`
 }
 
 /**
@@ -207,7 +207,7 @@ export const featureFlagsStaffCacheRebuildCreate = async (
 }
 
 export const getFeatureFlagsStaffCacheWarmRunRetrieveUrl = () => {
-    return `/api/feature_flags_staff_cache/warm_run/`
+    return `/v1/feature_flags_staff_cache/warm_run/`
 }
 
 /**
@@ -223,7 +223,7 @@ export const featureFlagsStaffCacheWarmRunRetrieve = async (
 }
 
 export const getFeatureFlagsStaffCacheWarmRunCancelCreateUrl = () => {
-    return `/api/feature_flags_staff_cache/warm_run/cancel/`
+    return `/v1/feature_flags_staff_cache/warm_run/cancel/`
 }
 
 /**
@@ -254,8 +254,8 @@ export const getFeatureFlagsStaffTeamConfigListUrl = (params: FeatureFlagsStaffT
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/feature_flags_staff_team_config/?${stringifiedParams}`
-        : `/api/feature_flags_staff_team_config/`
+        ? `/v1/feature_flags_staff_team_config/?${stringifiedParams}`
+        : `/v1/feature_flags_staff_team_config/`
 }
 
 /**
@@ -280,7 +280,7 @@ export const featureFlagsStaffTeamConfigList = async (
 }
 
 export const getFeatureFlagsStaffTeamConfigSetCreateUrl = () => {
-    return `/api/feature_flags_staff_team_config/set/`
+    return `/v1/feature_flags_staff_team_config/set/`
 }
 
 /**
@@ -318,8 +318,8 @@ export const getFeatureFlagsStaffTeamsListUrl = (params: FeatureFlagsStaffTeamsL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/feature_flags_staff_teams/?${stringifiedParams}`
-        : `/api/feature_flags_staff_teams/`
+        ? `/v1/feature_flags_staff_teams/?${stringifiedParams}`
+        : `/v1/feature_flags_staff_teams/`
 }
 
 /**
@@ -341,7 +341,7 @@ export const featureFlagsStaffTeamsList = async (
 }
 
 export const getOrgFeatureFlagsRetrieveUrl = (organizationId: string, featureFlagKey: string) => {
-    return `/api/organizations/${organizationId}/feature_flags/${featureFlagKey}/`
+    return `/v1/organizations/${organizationId}/feature_flags/${featureFlagKey}/`
 }
 
 export const orgFeatureFlagsRetrieve = async (
@@ -356,7 +356,7 @@ export const orgFeatureFlagsRetrieve = async (
 }
 
 export const getFeatureFlagsCopyFlagsCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/feature_flags/copy_flags/`
+    return `/v1/organizations/${organizationId}/feature_flags/copy_flags/`
 }
 
 export const featureFlagsCopyFlagsCreate = async (
@@ -373,7 +373,7 @@ export const featureFlagsCopyFlagsCreate = async (
 }
 
 export const getFeatureFlagsCopyFlagsDependencyRequirementsCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/feature_flags/copy_flags/dependency_requirements/`
+    return `/v1/organizations/${organizationId}/feature_flags/copy_flags/dependency_requirements/`
 }
 
 export const featureFlagsCopyFlagsDependencyRequirementsCreate = async (
@@ -404,8 +404,8 @@ export const getOrgFeatureFlagsKeysUrl = (organizationId: string, params?: OrgFe
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/feature_flags/keys/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/feature_flags/keys/`
+        ? `/v1/organizations/${organizationId}/feature_flags/keys/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/feature_flags/keys/`
 }
 
 /**
@@ -426,7 +426,7 @@ export const orgFeatureFlagsKeys = async (
 }
 
 export const getOrganizationsProjectsEvaluationContextSuggestionsCreateUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/evaluation_context_suggestions/`
+    return `/v1/organizations/${organizationId}/projects/${id}/evaluation_context_suggestions/`
 }
 
 /**
@@ -468,8 +468,8 @@ export const getOrganizationsProjectsEvaluationContextSuggestionsDestroyUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/projects/${id}/evaluation_context_suggestions/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/projects/${id}/evaluation_context_suggestions/`
+        ? `/v1/organizations/${organizationId}/projects/${id}/evaluation_context_suggestions/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/projects/${id}/evaluation_context_suggestions/`
 }
 
 /**
@@ -494,7 +494,7 @@ export const organizationsProjectsEvaluationContextSuggestionsDestroy = async (
 }
 
 export const getEnvironmentsEvaluationContextSuggestionsCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/environments/${id}/evaluation_context_suggestions/`
+    return `/v1/projects/${projectId}/environments/${id}/evaluation_context_suggestions/`
 }
 
 /**
@@ -536,8 +536,8 @@ export const getEnvironmentsEvaluationContextSuggestionsDestroyUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/environments/${id}/evaluation_context_suggestions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/environments/${id}/evaluation_context_suggestions/`
+        ? `/v1/projects/${projectId}/environments/${id}/evaluation_context_suggestions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/environments/${id}/evaluation_context_suggestions/`
 }
 
 /**
@@ -573,8 +573,8 @@ export const getFeatureFlagsListUrl = (projectId: string, params?: FeatureFlagsL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/`
+        ? `/v1/projects/${projectId}/feature_flags/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/`
 }
 
 /**
@@ -594,7 +594,7 @@ export const featureFlagsList = async (
 }
 
 export const getFeatureFlagsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/`
+    return `/v1/projects/${projectId}/feature_flags/`
 }
 
 /**
@@ -616,7 +616,7 @@ export const featureFlagsCreate = async (
 }
 
 export const getFeatureFlagsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/`
 }
 
 /**
@@ -636,7 +636,7 @@ export const featureFlagsRetrieve = async (
 }
 
 export const getFeatureFlagsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/`
 }
 
 /**
@@ -659,7 +659,7 @@ export const featureFlagsUpdate = async (
 }
 
 export const getFeatureFlagsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/`
 }
 
 /**
@@ -682,7 +682,7 @@ export const featureFlagsPartialUpdate = async (
 }
 
 export const getFeatureFlagsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/`
 }
 
 /**
@@ -711,8 +711,8 @@ export const getFeatureFlagsActivityRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/${id}/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/${id}/activity/`
+        ? `/v1/projects/${projectId}/feature_flags/${id}/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/${id}/activity/`
 }
 
 /**
@@ -733,7 +733,7 @@ export const featureFlagsActivityRetrieve = async (
 }
 
 export const getFeatureFlagsCreateStaticCohortForFlagCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/create_static_cohort_for_flag/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/create_static_cohort_for_flag/`
 }
 
 /**
@@ -756,7 +756,7 @@ export const featureFlagsCreateStaticCohortForFlagCreate = async (
 }
 
 export const getFeatureFlagsDashboardCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/dashboard/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/dashboard/`
 }
 
 /**
@@ -779,7 +779,7 @@ export const featureFlagsDashboardCreate = async (
 }
 
 export const getFeatureFlagsDependentFlagsListUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/dependent_flags/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/dependent_flags/`
 }
 
 /**
@@ -797,7 +797,7 @@ export const featureFlagsDependentFlagsList = async (
 }
 
 export const getFeatureFlagsEnrichUsageDashboardCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/enrich_usage_dashboard/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/enrich_usage_dashboard/`
 }
 
 /**
@@ -820,7 +820,7 @@ export const featureFlagsEnrichUsageDashboardCreate = async (
 }
 
 export const getFeatureFlagsRemoteConfigRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/remote_config/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/remote_config/`
 }
 
 /**
@@ -840,7 +840,7 @@ export const featureFlagsRemoteConfigRetrieve = async (
 }
 
 export const getFeatureFlagsStatusRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/status/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/status/`
 }
 
 /**
@@ -860,7 +860,7 @@ export const featureFlagsStatusRetrieve = async (
 }
 
 export const getFeatureFlagsTestEvaluationCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/test_evaluation/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/test_evaluation/`
 }
 
 /**
@@ -885,7 +885,7 @@ export const featureFlagsTestEvaluationCreate = async (
 }
 
 export const getFeatureFlagsVersionsRetrieveUrl = (projectId: string, id: number, versionNumber: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/versions/${versionNumber}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/versions/${versionNumber}/`
 }
 
 /**
@@ -920,8 +920,8 @@ export const getFeatureFlagsAllActivityRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/activity/`
+        ? `/v1/projects/${projectId}/feature_flags/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/activity/`
 }
 
 /**
@@ -941,7 +941,7 @@ export const featureFlagsAllActivityRetrieve = async (
 }
 
 export const getFeatureFlagsBulkDeleteCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/bulk_delete/`
+    return `/v1/projects/${projectId}/feature_flags/bulk_delete/`
 }
 
 /**
@@ -970,7 +970,7 @@ export const featureFlagsBulkDeleteCreate = async (
 }
 
 export const getFeatureFlagsBulkKeysRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/bulk_keys/`
+    return `/v1/projects/${projectId}/feature_flags/bulk_keys/`
 }
 
 /**
@@ -991,7 +991,7 @@ export const featureFlagsBulkKeysRetrieve = async (
 }
 
 export const getFeatureFlagsBulkUpdateTagsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/bulk_update_tags/`
+    return `/v1/projects/${projectId}/feature_flags/bulk_update_tags/`
 }
 
 /**
@@ -1041,8 +1041,8 @@ export const getFeatureFlagsEvaluationReasonsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/evaluation_reasons/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/evaluation_reasons/`
+        ? `/v1/projects/${projectId}/feature_flags/evaluation_reasons/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/evaluation_reasons/`
 }
 
 /**
@@ -1062,7 +1062,7 @@ export const featureFlagsEvaluationReasonsRetrieve = async (
 }
 
 export const getFeatureFlagsMatchingIdsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/matching_ids/`
+    return `/v1/projects/${projectId}/feature_flags/matching_ids/`
 }
 
 /**
@@ -1089,8 +1089,8 @@ export const getFeatureFlagsMyFlagsRetrieveUrl = (projectId: string, params?: Fe
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/my_flags/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/my_flags/`
+        ? `/v1/projects/${projectId}/feature_flags/my_flags/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/my_flags/`
 }
 
 /**
@@ -1110,7 +1110,7 @@ export const featureFlagsMyFlagsRetrieve = async (
 }
 
 export const getFeatureFlagsUserBlastRadiusCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/user_blast_radius/`
+    return `/v1/projects/${projectId}/feature_flags/user_blast_radius/`
 }
 
 /**
@@ -1143,8 +1143,8 @@ export const getFlagValueValuesRetrieveUrl = (projectId: string, params?: FlagVa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/flag_value/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/flag_value/values/`
+        ? `/v1/projects/${projectId}/flag_value/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/flag_value/values/`
 }
 
 /**
@@ -1179,8 +1179,8 @@ export const getScheduledChangesListUrl = (projectId: string, params?: Scheduled
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/scheduled_changes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/scheduled_changes/`
+        ? `/v1/projects/${projectId}/scheduled_changes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/scheduled_changes/`
 }
 
 /**
@@ -1198,7 +1198,7 @@ export const scheduledChangesList = async (
 }
 
 export const getScheduledChangesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/scheduled_changes/`
+    return `/v1/projects/${projectId}/scheduled_changes/`
 }
 
 /**
@@ -1218,7 +1218,7 @@ export const scheduledChangesCreate = async (
 }
 
 export const getScheduledChangesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/scheduled_changes/${id}/`
+    return `/v1/projects/${projectId}/scheduled_changes/${id}/`
 }
 
 /**
@@ -1236,7 +1236,7 @@ export const scheduledChangesRetrieve = async (
 }
 
 export const getScheduledChangesUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/scheduled_changes/${id}/`
+    return `/v1/projects/${projectId}/scheduled_changes/${id}/`
 }
 
 /**
@@ -1257,7 +1257,7 @@ export const scheduledChangesUpdate = async (
 }
 
 export const getScheduledChangesPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/scheduled_changes/${id}/`
+    return `/v1/projects/${projectId}/scheduled_changes/${id}/`
 }
 
 /**
@@ -1278,7 +1278,7 @@ export const scheduledChangesPartialUpdate = async (
 }
 
 export const getScheduledChangesDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/scheduled_changes/${id}/`
+    return `/v1/projects/${projectId}/scheduled_changes/${id}/`
 }
 
 /**

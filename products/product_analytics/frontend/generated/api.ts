@@ -82,8 +82,8 @@ export const getColumnConfigurationsListUrl = (projectId: string, params?: Colum
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/column_configurations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/column_configurations/`
+        ? `/v1/projects/${projectId}/column_configurations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/column_configurations/`
 }
 
 export const columnConfigurationsList = async (
@@ -98,7 +98,7 @@ export const columnConfigurationsList = async (
 }
 
 export const getColumnConfigurationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/column_configurations/`
+    return `/v1/projects/${projectId}/column_configurations/`
 }
 
 export const columnConfigurationsCreate = async (
@@ -115,7 +115,7 @@ export const columnConfigurationsCreate = async (
 }
 
 export const getColumnConfigurationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/column_configurations/${id}/`
+    return `/v1/projects/${projectId}/column_configurations/${id}/`
 }
 
 export const columnConfigurationsRetrieve = async (
@@ -130,7 +130,7 @@ export const columnConfigurationsRetrieve = async (
 }
 
 export const getColumnConfigurationsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/column_configurations/${id}/`
+    return `/v1/projects/${projectId}/column_configurations/${id}/`
 }
 
 export const columnConfigurationsUpdate = async (
@@ -148,7 +148,7 @@ export const columnConfigurationsUpdate = async (
 }
 
 export const getColumnConfigurationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/column_configurations/${id}/`
+    return `/v1/projects/${projectId}/column_configurations/${id}/`
 }
 
 export const columnConfigurationsPartialUpdate = async (
@@ -166,7 +166,7 @@ export const columnConfigurationsPartialUpdate = async (
 }
 
 export const getColumnConfigurationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/column_configurations/${id}/`
+    return `/v1/projects/${projectId}/column_configurations/${id}/`
 }
 
 export const columnConfigurationsDestroy = async (
@@ -192,8 +192,8 @@ export const getElementsListUrl = (projectId: string, params?: ElementsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/elements/?${stringifiedParams}`
-        : `/api/projects/${projectId}/elements/`
+        ? `/v1/projects/${projectId}/elements/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/elements/`
 }
 
 export const elementsList = async (
@@ -208,7 +208,7 @@ export const elementsList = async (
 }
 
 export const getElementsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/elements/`
+    return `/v1/projects/${projectId}/elements/`
 }
 
 export const elementsCreate = async (
@@ -225,7 +225,7 @@ export const elementsCreate = async (
 }
 
 export const getElementsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/elements/${id}/`
+    return `/v1/projects/${projectId}/elements/${id}/`
 }
 
 export const elementsRetrieve = async (projectId: string, id: number, options?: RequestInit): Promise<ElementApi> => {
@@ -236,7 +236,7 @@ export const elementsRetrieve = async (projectId: string, id: number, options?: 
 }
 
 export const getElementsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/elements/${id}/`
+    return `/v1/projects/${projectId}/elements/${id}/`
 }
 
 export const elementsUpdate = async (
@@ -254,7 +254,7 @@ export const elementsUpdate = async (
 }
 
 export const getElementsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/elements/${id}/`
+    return `/v1/projects/${projectId}/elements/${id}/`
 }
 
 export const elementsPartialUpdate = async (
@@ -272,7 +272,7 @@ export const elementsPartialUpdate = async (
 }
 
 export const getElementsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/elements/${id}/`
+    return `/v1/projects/${projectId}/elements/${id}/`
 }
 
 export const elementsDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {
@@ -294,8 +294,8 @@ export const getElementsStatsRetrieveUrl = (projectId: string, params?: Elements
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/elements/stats/?${stringifiedParams}`
-        : `/api/projects/${projectId}/elements/stats/`
+        ? `/v1/projects/${projectId}/elements/stats/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/elements/stats/`
 }
 
 /**
@@ -326,8 +326,8 @@ export const getElementsValuesListUrl = (projectId: string, params: ElementsValu
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/elements/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/elements/values/`
+        ? `/v1/projects/${projectId}/elements/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/elements/values/`
 }
 
 export const elementsValuesList = async (
@@ -353,8 +353,8 @@ export const getInsightsListUrl = (projectId: string, params?: InsightsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/`
+        ? `/v1/projects/${projectId}/insights/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/`
 }
 
 /**
@@ -388,8 +388,8 @@ export const getInsightsCreateUrl = (projectId: string, params?: InsightsCreateP
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/`
+        ? `/v1/projects/${projectId}/insights/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/`
 }
 
 /**
@@ -426,8 +426,8 @@ export const getInsightsRetrieveUrl = (projectId: string, id: number | string, p
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${id}/`
+        ? `/v1/projects/${projectId}/insights/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${id}/`
 }
 
 /**
@@ -462,8 +462,8 @@ export const getInsightsUpdateUrl = (projectId: string, id: number | string, par
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${id}/`
+        ? `/v1/projects/${projectId}/insights/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${id}/`
 }
 
 /**
@@ -505,8 +505,8 @@ export const getInsightsPartialUpdateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${id}/`
+        ? `/v1/projects/${projectId}/insights/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${id}/`
 }
 
 /**
@@ -544,8 +544,8 @@ export const getInsightsDestroyUrl = (projectId: string, id: number | string, pa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${id}/`
+        ? `/v1/projects/${projectId}/insights/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${id}/`
 }
 
 /**
@@ -579,8 +579,8 @@ export const getInsightsActivityRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${id}/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${id}/activity/`
+        ? `/v1/projects/${projectId}/insights/${id}/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${id}/activity/`
 }
 
 /**
@@ -614,8 +614,8 @@ export const getInsightsAnalyzeRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${id}/analyze/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${id}/analyze/`
+        ? `/v1/projects/${projectId}/insights/${id}/analyze/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${id}/analyze/`
 }
 
 /**
@@ -654,8 +654,8 @@ export const getInsightsSuggestionsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${id}/suggestions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${id}/suggestions/`
+        ? `/v1/projects/${projectId}/insights/${id}/suggestions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${id}/suggestions/`
 }
 
 /**
@@ -694,8 +694,8 @@ export const getInsightsSuggestionsCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/${id}/suggestions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/${id}/suggestions/`
+        ? `/v1/projects/${projectId}/insights/${id}/suggestions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/${id}/suggestions/`
 }
 
 /**
@@ -733,8 +733,8 @@ export const getInsightsAllActivityRetrieveUrl = (projectId: string, params?: In
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/activity/`
+        ? `/v1/projects/${projectId}/insights/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/activity/`
 }
 
 /**
@@ -763,8 +763,8 @@ export const getInsightsBulkDeleteCreateUrl = (projectId: string, params?: Insig
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/bulk_delete/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/bulk_delete/`
+        ? `/v1/projects/${projectId}/insights/bulk_delete/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/bulk_delete/`
 }
 
 /**
@@ -796,8 +796,8 @@ export const getInsightsBulkRestoreCreateUrl = (projectId: string, params?: Insi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/bulk_restore/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/bulk_restore/`
+        ? `/v1/projects/${projectId}/insights/bulk_restore/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/bulk_restore/`
 }
 
 /**
@@ -829,8 +829,8 @@ export const getInsightsBulkUpdateTagsCreateUrl = (projectId: string, params?: I
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/bulk_update_tags/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/bulk_update_tags/`
+        ? `/v1/projects/${projectId}/insights/bulk_update_tags/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/bulk_update_tags/`
 }
 
 /**
@@ -878,8 +878,8 @@ export const getInsightsCancelCreateUrl = (projectId: string, params?: InsightsC
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/cancel/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/cancel/`
+        ? `/v1/projects/${projectId}/insights/cancel/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/cancel/`
 }
 
 /**
@@ -919,8 +919,8 @@ export const getInsightsGenerateMetadataCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/generate_metadata/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/generate_metadata/`
+        ? `/v1/projects/${projectId}/insights/generate_metadata/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/generate_metadata/`
 }
 
 /**
@@ -952,8 +952,8 @@ export const getInsightsMyLastViewedRetrieveUrl = (projectId: string, params?: I
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/my_last_viewed/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/my_last_viewed/`
+        ? `/v1/projects/${projectId}/insights/my_last_viewed/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/my_last_viewed/`
 }
 
 /**
@@ -982,8 +982,8 @@ export const getInsightsTrendingRetrieveUrl = (projectId: string, params?: Insig
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/trending/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/trending/`
+        ? `/v1/projects/${projectId}/insights/trending/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/trending/`
 }
 
 /**
@@ -1012,8 +1012,8 @@ export const getInsightsViewedCreateUrl = (projectId: string, params?: InsightsV
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights/viewed/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights/viewed/`
+        ? `/v1/projects/${projectId}/insights/viewed/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights/viewed/`
 }
 
 /**

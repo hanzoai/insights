@@ -85,8 +85,8 @@ export const getMcpGatewayAuditListUrl = (projectId: string, params?: McpGateway
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_gateway/audit/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_gateway/audit/`
+        ? `/v1/projects/${projectId}/mcp_gateway/audit/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_gateway/audit/`
 }
 
 /**
@@ -106,7 +106,7 @@ export const mcpGatewayAuditList = async (
 }
 
 export const getMcpGatewayAuditRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/audit/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/audit/${id}/`
 }
 
 /**
@@ -140,8 +140,8 @@ export const getMcpGatewayAuditCountsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_gateway/audit/counts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_gateway/audit/counts/`
+        ? `/v1/projects/${projectId}/mcp_gateway/audit/counts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_gateway/audit/counts/`
 }
 
 /**
@@ -159,7 +159,7 @@ export const mcpGatewayAuditCountsRetrieve = async (
 }
 
 export const getMcpGatewayConfigListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/config/`
+    return `/v1/projects/${projectId}/mcp_gateway/config/`
 }
 
 /**
@@ -176,7 +176,7 @@ export const mcpGatewayConfigList = async (
 }
 
 export const getMcpGatewayConfigApplyPresetCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/config/apply_preset/`
+    return `/v1/projects/${projectId}/mcp_gateway/config/apply_preset/`
 }
 
 /**
@@ -196,7 +196,7 @@ export const mcpGatewayConfigApplyPresetCreate = async (
 }
 
 export const getMcpGatewayConfigSetAllServersEnabledCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/config/set_all_servers_enabled/`
+    return `/v1/projects/${projectId}/mcp_gateway/config/set_all_servers_enabled/`
 }
 
 /**
@@ -218,7 +218,7 @@ export const mcpGatewayConfigSetAllServersEnabledCreate = async (
 }
 
 export const getMcpGatewayConfigUpdateSettingsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/config/update_settings/`
+    return `/v1/projects/${projectId}/mcp_gateway/config/update_settings/`
 }
 
 /**
@@ -249,8 +249,8 @@ export const getMcpGatewayMembersListUrl = (projectId: string, params?: McpGatew
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_gateway/members/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_gateway/members/`
+        ? `/v1/projects/${projectId}/mcp_gateway/members/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_gateway/members/`
 }
 
 /**
@@ -269,7 +269,7 @@ export const mcpGatewayMembersList = async (
 }
 
 export const getMcpGatewayMembersRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/members/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/members/${id}/`
 }
 
 /**
@@ -288,7 +288,7 @@ export const mcpGatewayMembersRetrieve = async (
 }
 
 export const getMcpGatewayMembersSetAccessCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/members/${id}/set_access/`
+    return `/v1/projects/${projectId}/mcp_gateway/members/${id}/set_access/`
 }
 
 /**
@@ -320,8 +320,8 @@ export const getMcpGatewayRulesListUrl = (projectId: string, params?: McpGateway
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_gateway/rules/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_gateway/rules/`
+        ? `/v1/projects/${projectId}/mcp_gateway/rules/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_gateway/rules/`
 }
 
 /**
@@ -339,7 +339,7 @@ export const mcpGatewayRulesList = async (
 }
 
 export const getMcpGatewayRulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/rules/`
+    return `/v1/projects/${projectId}/mcp_gateway/rules/`
 }
 
 /**
@@ -359,7 +359,7 @@ export const mcpGatewayRulesCreate = async (
 }
 
 export const getMcpGatewayRulesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/rules/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/rules/${id}/`
 }
 
 /**
@@ -377,7 +377,7 @@ export const mcpGatewayRulesRetrieve = async (
 }
 
 export const getMcpGatewayRulesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/rules/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/rules/${id}/`
 }
 
 /**
@@ -398,7 +398,7 @@ export const mcpGatewayRulesUpdate = async (
 }
 
 export const getMcpGatewayRulesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/rules/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/rules/${id}/`
 }
 
 /**
@@ -419,7 +419,7 @@ export const mcpGatewayRulesPartialUpdate = async (
 }
 
 export const getMcpGatewayRulesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/rules/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/rules/${id}/`
 }
 
 /**
@@ -444,8 +444,8 @@ export const getMcpGatewayServersListUrl = (projectId: string, params?: McpGatew
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_gateway/servers/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_gateway/servers/`
+        ? `/v1/projects/${projectId}/mcp_gateway/servers/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_gateway/servers/`
 }
 
 /**
@@ -466,7 +466,7 @@ export const mcpGatewayServersList = async (
 }
 
 export const getMcpGatewayServersRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/servers/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/servers/${id}/`
 }
 
 /**
@@ -487,7 +487,7 @@ export const mcpGatewayServersRetrieve = async (
 }
 
 export const getMcpGatewayServersUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/servers/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/servers/${id}/`
 }
 
 /**
@@ -511,7 +511,7 @@ export const mcpGatewayServersUpdate = async (
 }
 
 export const getMcpGatewayServersPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/servers/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/servers/${id}/`
 }
 
 /**
@@ -535,7 +535,7 @@ export const mcpGatewayServersPartialUpdate = async (
 }
 
 export const getMcpGatewayServersDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/servers/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/servers/${id}/`
 }
 
 /**
@@ -552,7 +552,7 @@ export const mcpGatewayServersDestroy = async (projectId: string, id: string, op
 }
 
 export const getMcpGatewayServersPoliciesCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/servers/${id}/policies/`
+    return `/v1/projects/${projectId}/mcp_gateway/servers/${id}/policies/`
 }
 
 /**
@@ -588,8 +588,8 @@ export const getMcpGatewayServersToolsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_gateway/servers/${id}/tools/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_gateway/servers/${id}/tools/`
+        ? `/v1/projects/${projectId}/mcp_gateway/servers/${id}/tools/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_gateway/servers/${id}/tools/`
 }
 
 /**
@@ -608,7 +608,7 @@ export const mcpGatewayServersToolsRetrieve = async (
 }
 
 export const getMcpGatewayServersSetTemplateEnabledCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/servers/set_template_enabled/`
+    return `/v1/projects/${projectId}/mcp_gateway/servers/set_template_enabled/`
 }
 
 /**
@@ -643,8 +643,8 @@ export const getMcpGatewayServiceAccountsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_gateway/service_accounts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_gateway/service_accounts/`
+        ? `/v1/projects/${projectId}/mcp_gateway/service_accounts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_gateway/service_accounts/`
 }
 
 /**
@@ -665,7 +665,7 @@ export const mcpGatewayServiceAccountsList = async (
 }
 
 export const getMcpGatewayServiceAccountsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/service_accounts/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/service_accounts/${id}/`
 }
 
 /**
@@ -686,7 +686,7 @@ export const mcpGatewayServiceAccountsRetrieve = async (
 }
 
 export const getMcpGatewayServiceAccountsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/service_accounts/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/service_accounts/${id}/`
 }
 
 /**
@@ -710,7 +710,7 @@ export const mcpGatewayServiceAccountsUpdate = async (
 }
 
 export const getMcpGatewayServiceAccountsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/service_accounts/${id}/`
+    return `/v1/projects/${projectId}/mcp_gateway/service_accounts/${id}/`
 }
 
 /**
@@ -734,7 +734,7 @@ export const mcpGatewayServiceAccountsPartialUpdate = async (
 }
 
 export const getMcpGatewayServiceAccountsAccessCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_gateway/service_accounts/${id}/access/`
+    return `/v1/projects/${projectId}/mcp_gateway/service_accounts/${id}/access/`
 }
 
 /**
@@ -766,8 +766,8 @@ export const getMcpServerInstallationsListUrl = (projectId: string, params?: Mcp
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_server_installations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_server_installations/`
+        ? `/v1/projects/${projectId}/mcp_server_installations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_server_installations/`
 }
 
 export const mcpServerInstallationsList = async (
@@ -782,7 +782,7 @@ export const mcpServerInstallationsList = async (
 }
 
 export const getMcpServerInstallationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/`
+    return `/v1/projects/${projectId}/mcp_server_installations/`
 }
 
 export const mcpServerInstallationsCreate = async (
@@ -799,7 +799,7 @@ export const mcpServerInstallationsCreate = async (
 }
 
 export const getMcpServerInstallationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/`
 }
 
 export const mcpServerInstallationsRetrieve = async (
@@ -814,7 +814,7 @@ export const mcpServerInstallationsRetrieve = async (
 }
 
 export const getMcpServerInstallationsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/`
 }
 
 export const mcpServerInstallationsUpdate = async (
@@ -832,7 +832,7 @@ export const mcpServerInstallationsUpdate = async (
 }
 
 export const getMcpServerInstallationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/`
 }
 
 export const mcpServerInstallationsPartialUpdate = async (
@@ -850,7 +850,7 @@ export const mcpServerInstallationsPartialUpdate = async (
 }
 
 export const getMcpServerInstallationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/`
 }
 
 export const mcpServerInstallationsDestroy = async (
@@ -865,7 +865,7 @@ export const mcpServerInstallationsDestroy = async (
 }
 
 export const getMcpServerInstallationsProxyCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/proxy/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/proxy/`
 }
 
 export const mcpServerInstallationsProxyCreate = async (
@@ -883,7 +883,7 @@ export const mcpServerInstallationsProxyCreate = async (
 }
 
 export const getMcpServerInstallationsShareCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/share/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/share/`
 }
 
 /**
@@ -905,7 +905,7 @@ export const mcpServerInstallationsShareCreate = async (
 }
 
 export const getMcpServerInstallationsToolsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/tools/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/tools/`
 }
 
 export const mcpServerInstallationsToolsRetrieve = async (
@@ -923,7 +923,7 @@ export const mcpServerInstallationsToolsRetrieve = async (
 }
 
 export const getMcpServerInstallationsToolsPartialUpdateUrl = (projectId: string, id: string, toolName: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/tools/${toolName}/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/tools/${toolName}/`
 }
 
 export const mcpServerInstallationsToolsPartialUpdate = async (
@@ -945,7 +945,7 @@ export const mcpServerInstallationsToolsPartialUpdate = async (
 }
 
 export const getMcpServerInstallationsToolsRefreshCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/tools/refresh/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/tools/refresh/`
 }
 
 export const mcpServerInstallationsToolsRefreshCreate = async (
@@ -966,7 +966,7 @@ export const mcpServerInstallationsToolsRefreshCreate = async (
 }
 
 export const getMcpServerInstallationsUnshareCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/${id}/unshare/`
+    return `/v1/projects/${projectId}/mcp_server_installations/${id}/unshare/`
 }
 
 /**
@@ -1003,8 +1003,8 @@ export const getMcpServerInstallationsAuthorizeRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_server_installations/authorize/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_server_installations/authorize/`
+        ? `/v1/projects/${projectId}/mcp_server_installations/authorize/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_server_installations/authorize/`
 }
 
 /**
@@ -1026,7 +1026,7 @@ export const mcpServerInstallationsAuthorizeRetrieve = async (
 }
 
 export const getMcpServerInstallationsInstallCustomCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/install_custom/`
+    return `/v1/projects/${projectId}/mcp_server_installations/install_custom/`
 }
 
 export const mcpServerInstallationsInstallCustomCreate = async (
@@ -1046,7 +1046,7 @@ export const mcpServerInstallationsInstallCustomCreate = async (
 }
 
 export const getMcpServerInstallationsInstallTemplateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/mcp_server_installations/install_template/`
+    return `/v1/projects/${projectId}/mcp_server_installations/install_template/`
 }
 
 export const mcpServerInstallationsInstallTemplateCreate = async (
@@ -1077,8 +1077,8 @@ export const getMcpServersListUrl = (projectId: string, params?: McpServersListP
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/mcp_servers/?${stringifiedParams}`
-        : `/api/projects/${projectId}/mcp_servers/`
+        ? `/v1/projects/${projectId}/mcp_servers/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/mcp_servers/`
 }
 
 /**

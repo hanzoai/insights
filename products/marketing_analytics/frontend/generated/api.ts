@@ -25,7 +25,7 @@ import type {
 } from './api.schemas'
 
 export const getMarketingAnalyticsConversionGoalsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/marketing_analytics/conversion_goals/`
+    return `/v1/projects/${projectId}/marketing_analytics/conversion_goals/`
 }
 
 /**
@@ -57,8 +57,8 @@ export const getMarketingAnalyticsDataSourcesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/marketing_analytics/data_sources/?${stringifiedParams}`
-        : `/api/projects/${projectId}/marketing_analytics/data_sources/`
+        ? `/v1/projects/${projectId}/marketing_analytics/data_sources/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/marketing_analytics/data_sources/`
 }
 
 /**
@@ -91,8 +91,8 @@ export const getMarketingAnalyticsDiagnoseRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/marketing_analytics/diagnose/?${stringifiedParams}`
-        : `/api/projects/${projectId}/marketing_analytics/diagnose/`
+        ? `/v1/projects/${projectId}/marketing_analytics/diagnose/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/marketing_analytics/diagnose/`
 }
 
 /**
@@ -125,8 +125,8 @@ export const getMarketingAnalyticsExplainConversionGoalRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/marketing_analytics/explain_conversion_goal/?${stringifiedParams}`
-        : `/api/projects/${projectId}/marketing_analytics/explain_conversion_goal/`
+        ? `/v1/projects/${projectId}/marketing_analytics/explain_conversion_goal/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/marketing_analytics/explain_conversion_goal/`
 }
 
 /**
@@ -159,8 +159,8 @@ export const getMarketingAnalyticsSuggestConversionGoalsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/marketing_analytics/suggest_conversion_goals/?${stringifiedParams}`
-        : `/api/projects/${projectId}/marketing_analytics/suggest_conversion_goals/`
+        ? `/v1/projects/${projectId}/marketing_analytics/suggest_conversion_goals/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/marketing_analytics/suggest_conversion_goals/`
 }
 
 /**
@@ -196,8 +196,8 @@ export const getMarketingAnalyticsSuggestUtmMappingsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/marketing_analytics/suggest_utm_mappings/?${stringifiedParams}`
-        : `/api/projects/${projectId}/marketing_analytics/suggest_utm_mappings/`
+        ? `/v1/projects/${projectId}/marketing_analytics/suggest_utm_mappings/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/marketing_analytics/suggest_utm_mappings/`
 }
 
 /**
@@ -219,7 +219,7 @@ export const marketingAnalyticsSuggestUtmMappingsRetrieve = async (
 }
 
 export const getMarketingAnalyticsTestMappingCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/marketing_analytics/test_mapping/`
+    return `/v1/projects/${projectId}/marketing_analytics/test_mapping/`
 }
 
 export const marketingAnalyticsTestMappingCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -244,8 +244,8 @@ export const getMarketingAnalyticsUtmAuditRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/marketing_analytics/utm_audit/?${stringifiedParams}`
-        : `/api/projects/${projectId}/marketing_analytics/utm_audit/`
+        ? `/v1/projects/${projectId}/marketing_analytics/utm_audit/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/marketing_analytics/utm_audit/`
 }
 
 /**

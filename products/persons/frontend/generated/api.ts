@@ -72,8 +72,8 @@ export const getPersonsListUrl = (projectId: string, params?: PersonsListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/`
+        ? `/v1/projects/${projectId}/persons/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/`
 }
 
 /**
@@ -102,8 +102,8 @@ export const getPersonsRetrieveUrl = (projectId: string, id: string, params?: Pe
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/`
+        ? `/v1/projects/${projectId}/persons/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/`
 }
 
 /**
@@ -133,8 +133,8 @@ export const getPersonsUpdateUrl = (projectId: string, id: string, params?: Pers
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/`
+        ? `/v1/projects/${projectId}/persons/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/`
 }
 
 /**
@@ -169,8 +169,8 @@ export const getPersonsPartialUpdateUrl = (projectId: string, id: string, params
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/`
+        ? `/v1/projects/${projectId}/persons/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/`
 }
 
 /**
@@ -207,8 +207,8 @@ export const getPersonsActivityRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/activity/`
+        ? `/v1/projects/${projectId}/persons/${id}/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/activity/`
 }
 
 /**
@@ -242,8 +242,8 @@ export const getPersonsDeletePropertyCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/delete_property/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/delete_property/`
+        ? `/v1/projects/${projectId}/persons/${id}/delete_property/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/delete_property/`
 }
 
 /**
@@ -276,8 +276,8 @@ export const getPersonsEmailsListUrl = (projectId: string, id: number, params?: 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/emails/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/emails/`
+        ? `/v1/projects/${projectId}/persons/${id}/emails/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/emails/`
 }
 
 /**
@@ -311,8 +311,8 @@ export const getPersonsPropertiesTimelineRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/properties_timeline/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/properties_timeline/`
+        ? `/v1/projects/${projectId}/persons/${id}/properties_timeline/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/properties_timeline/`
 }
 
 /**
@@ -346,8 +346,8 @@ export const getPersonsPushNotificationsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/push_notifications/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/push_notifications/`
+        ? `/v1/projects/${projectId}/persons/${id}/push_notifications/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/push_notifications/`
 }
 
 /**
@@ -377,8 +377,8 @@ export const getPersonsSplitCreateUrl = (projectId: string, id: string, params?:
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/split/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/split/`
+        ? `/v1/projects/${projectId}/persons/${id}/split/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/split/`
 }
 
 /**
@@ -422,8 +422,8 @@ export const getPersonsUpdatePropertyCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/update_property/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/update_property/`
+        ? `/v1/projects/${projectId}/persons/${id}/update_property/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/update_property/`
 }
 
 /**
@@ -456,8 +456,8 @@ export const getPersonsAllActivityRetrieveUrl = (projectId: string, params?: Per
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/activity/`
+        ? `/v1/projects/${projectId}/persons/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/activity/`
 }
 
 /**
@@ -489,8 +489,8 @@ export const getPersonsBatchByDistinctIdsCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/batch_by_distinct_ids/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/batch_by_distinct_ids/`
+        ? `/v1/projects/${projectId}/persons/batch_by_distinct_ids/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/batch_by_distinct_ids/`
 }
 
 /**
@@ -522,8 +522,8 @@ export const getPersonsBatchByUuidsCreateUrl = (projectId: string, params?: Pers
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/batch_by_uuids/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/batch_by_uuids/`
+        ? `/v1/projects/${projectId}/persons/batch_by_uuids/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/batch_by_uuids/`
 }
 
 /**
@@ -555,8 +555,8 @@ export const getPersonsBulkDeleteCreateUrl = (projectId: string, params?: Person
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/bulk_delete/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/bulk_delete/`
+        ? `/v1/projects/${projectId}/persons/bulk_delete/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/bulk_delete/`
 }
 
 /**
@@ -588,8 +588,8 @@ export const getPersonsCohortsRetrieveUrl = (projectId: string, params: PersonsC
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/cohorts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/cohorts/`
+        ? `/v1/projects/${projectId}/persons/cohorts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/cohorts/`
 }
 
 /**
@@ -618,8 +618,8 @@ export const getPersonsDeletionStatusListUrl = (projectId: string, params?: Pers
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/deletion_status/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/deletion_status/`
+        ? `/v1/projects/${projectId}/persons/deletion_status/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/deletion_status/`
 }
 
 /**
@@ -651,8 +651,8 @@ export const getPersonsPropertiesAtTimeRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/properties_at_time/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/properties_at_time/`
+        ? `/v1/projects/${projectId}/persons/properties_at_time/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/properties_at_time/`
 }
 
 /**
@@ -692,8 +692,8 @@ export const getPersonsResetPersonDistinctIdCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/reset_person_distinct_id/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/reset_person_distinct_id/`
+        ? `/v1/projects/${projectId}/persons/reset_person_distinct_id/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/reset_person_distinct_id/`
 }
 
 /**
@@ -725,8 +725,8 @@ export const getPersonsValuesRetrieveUrl = (projectId: string, params: PersonsVa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/values/`
+        ? `/v1/projects/${projectId}/persons/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/values/`
 }
 
 /**

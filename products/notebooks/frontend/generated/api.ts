@@ -55,8 +55,8 @@ export const getNotebooksListUrl = (projectId: string, params?: NotebooksListPar
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/notebooks/?${stringifiedParams}`
-        : `/api/projects/${projectId}/notebooks/`
+        ? `/v1/projects/${projectId}/notebooks/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/notebooks/`
 }
 
 /**
@@ -74,7 +74,7 @@ export const notebooksList = async (
 }
 
 export const getNotebooksCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notebooks/`
+    return `/v1/projects/${projectId}/notebooks/`
 }
 
 /**
@@ -94,7 +94,7 @@ export const notebooksCreate = async (
 }
 
 export const getNotebooksRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/`
 }
 
 /**
@@ -112,7 +112,7 @@ export const notebooksRetrieve = async (
 }
 
 export const getNotebooksUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/`
 }
 
 /**
@@ -133,7 +133,7 @@ export const notebooksUpdate = async (
 }
 
 export const getNotebooksPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/`
 }
 
 /**
@@ -154,7 +154,7 @@ export const notebooksPartialUpdate = async (
 }
 
 export const getNotebooksDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/`
 }
 
 /**
@@ -168,7 +168,7 @@ export const notebooksDestroy = async (projectId: string, shortId: string, optio
 }
 
 export const getNotebooksActivityRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/activity/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/activity/`
 }
 
 /**
@@ -186,7 +186,7 @@ export const notebooksActivityRetrieve = async (
 }
 
 export const getNotebooksCollabMarkdownSaveCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/collab/markdown_save/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/collab/markdown_save/`
 }
 
 /**
@@ -207,7 +207,7 @@ export const notebooksCollabMarkdownSaveCreate = async (
 }
 
 export const getNotebooksCollabPresenceCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/collab/presence/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/collab/presence/`
 }
 
 /**
@@ -228,7 +228,7 @@ export const notebooksCollabPresenceCreate = async (
 }
 
 export const getNotebooksCollabSaveCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/collab/save/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/collab/save/`
 }
 
 /**
@@ -249,7 +249,7 @@ export const notebooksCollabSaveCreate = async (
 }
 
 export const getNotebooksCollabStreamRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/collab/stream/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/collab/stream/`
 }
 
 /**
@@ -267,7 +267,7 @@ export const notebooksCollabStreamRetrieve = async (
 }
 
 export const getNotebooksInsightsqlExecuteCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/insightsql/execute/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/insightsql/execute/`
 }
 
 /**
@@ -288,7 +288,7 @@ export const notebooksInsightsqlExecuteCreate = async (
 }
 
 export const getNotebooksKernelConfigCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/config/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/config/`
 }
 
 /**
@@ -309,7 +309,7 @@ export const notebooksKernelConfigCreate = async (
 }
 
 export const getNotebooksKernelDataframeRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/dataframe/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/dataframe/`
 }
 
 /**
@@ -327,7 +327,7 @@ export const notebooksKernelDataframeRetrieve = async (
 }
 
 export const getNotebooksKernelExecuteCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/execute/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/execute/`
 }
 
 /**
@@ -348,7 +348,7 @@ export const notebooksKernelExecuteCreate = async (
 }
 
 export const getNotebooksKernelExecuteStreamCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/execute/stream/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/execute/stream/`
 }
 
 /**
@@ -369,7 +369,7 @@ export const notebooksKernelExecuteStreamCreate = async (
 }
 
 export const getNotebooksKernelRestartCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/restart/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/restart/`
 }
 
 /**
@@ -390,7 +390,7 @@ export const notebooksKernelRestartCreate = async (
 }
 
 export const getNotebooksKernelStartCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/start/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/start/`
 }
 
 /**
@@ -411,7 +411,7 @@ export const notebooksKernelStartCreate = async (
 }
 
 export const getNotebooksKernelStatusRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/status/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/status/`
 }
 
 /**
@@ -429,7 +429,7 @@ export const notebooksKernelStatusRetrieve = async (
 }
 
 export const getNotebooksKernelStopCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/stop/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/stop/`
 }
 
 /**
@@ -450,7 +450,7 @@ export const notebooksKernelStopCreate = async (
 }
 
 export const getNotebooksSqlV2RunCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/sql_v2/run/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/sql_v2/run/`
 }
 
 /**
@@ -471,7 +471,7 @@ export const notebooksSqlV2RunCreate = async (
 }
 
 export const getNotebooksSqlV2RunsRetrieveUrl = (projectId: string, shortId: string, runId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/sql_v2/runs/${runId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/sql_v2/runs/${runId}/`
 }
 
 /**
@@ -490,7 +490,7 @@ export const notebooksSqlV2RunsRetrieve = async (
 }
 
 export const getNotebooksSqlV2RunsInterruptCreateUrl = (projectId: string, shortId: string, runId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/sql_v2/runs/${runId}/interrupt/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/sql_v2/runs/${runId}/interrupt/`
 }
 
 /**
@@ -512,7 +512,7 @@ export const notebooksSqlV2RunsInterruptCreate = async (
 }
 
 export const getNotebooksSqlV2StateRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/sql_v2/state/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/sql_v2/state/`
 }
 
 /**
@@ -530,7 +530,7 @@ export const notebooksSqlV2StateRetrieve = async (
 }
 
 export const getNotebooksAllActivityRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notebooks/activity/`
+    return `/v1/projects/${projectId}/notebooks/activity/`
 }
 
 /**
@@ -544,7 +544,7 @@ export const notebooksAllActivityRetrieve = async (projectId: string, options?: 
 }
 
 export const getNotebooksRecordingCommentsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notebooks/recording_comments/`
+    return `/v1/projects/${projectId}/notebooks/recording_comments/`
 }
 
 /**

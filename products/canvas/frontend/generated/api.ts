@@ -41,8 +41,8 @@ export const getCanvasesListUrl = (projectId: string, params?: CanvasesListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/canvases/?${stringifiedParams}`
-        : `/api/projects/${projectId}/canvases/`
+        ? `/v1/projects/${projectId}/canvases/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/canvases/`
 }
 
 /**
@@ -63,7 +63,7 @@ export const canvasesList = async (
 }
 
 export const getCanvasesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/canvases/`
+    return `/v1/projects/${projectId}/canvases/`
 }
 
 /**
@@ -83,7 +83,7 @@ export const canvasesCreate = async (
 }
 
 export const getCanvasesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/`
+    return `/v1/projects/${projectId}/canvases/${id}/`
 }
 
 /**
@@ -100,7 +100,7 @@ export const canvasesRetrieve = async (projectId: string, id: string, options?: 
 }
 
 export const getCanvasesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/`
+    return `/v1/projects/${projectId}/canvases/${id}/`
 }
 
 /**
@@ -121,7 +121,7 @@ export const canvasesPartialUpdate = async (
 }
 
 export const getCanvasesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/`
+    return `/v1/projects/${projectId}/canvases/${id}/`
 }
 
 /**
@@ -138,7 +138,7 @@ export const canvasesDestroy = async (projectId: string, id: string, options?: R
 }
 
 export const getCanvasesBuildsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/builds/`
+    return `/v1/projects/${projectId}/canvases/${id}/builds/`
 }
 
 /**
@@ -160,7 +160,7 @@ export const canvasesBuildsRetrieve = async (
 }
 
 export const getCanvasesBuildActionCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/builds/action/`
+    return `/v1/projects/${projectId}/canvases/${id}/builds/action/`
 }
 
 /**
@@ -181,7 +181,7 @@ export const canvasesBuildActionCreate = async (
 }
 
 export const getCanvasesEditCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/edit/`
+    return `/v1/projects/${projectId}/canvases/${id}/edit/`
 }
 
 /**
@@ -208,7 +208,7 @@ export const canvasesEditCreate = async (
 }
 
 export const getCanvasesPublishCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/publish/`
+    return `/v1/projects/${projectId}/canvases/${id}/publish/`
 }
 
 /**
@@ -233,7 +233,7 @@ export const canvasesPublishCreate = async (
 }
 
 export const getCanvasesRevertCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/revert/`
+    return `/v1/projects/${projectId}/canvases/${id}/revert/`
 }
 
 /**
@@ -265,8 +265,8 @@ export const getCanvasesSourceRetrieveUrl = (projectId: string, id: string, para
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/canvases/${id}/source/?${stringifiedParams}`
-        : `/api/projects/${projectId}/canvases/${id}/source/`
+        ? `/v1/projects/${projectId}/canvases/${id}/source/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/canvases/${id}/source/`
 }
 
 /**
@@ -290,7 +290,7 @@ export const canvasesSourceRetrieve = async (
 }
 
 export const getCanvasesValidateCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/canvases/${id}/validate/`
+    return `/v1/projects/${projectId}/canvases/${id}/validate/`
 }
 
 /**
@@ -326,8 +326,8 @@ export const getCanvasesVersionsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/canvases/${id}/versions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/canvases/${id}/versions/`
+        ? `/v1/projects/${projectId}/canvases/${id}/versions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/canvases/${id}/versions/`
 }
 
 /**

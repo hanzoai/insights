@@ -70,8 +70,8 @@ export const getConversationsListUrl = (projectId: string, params?: Conversation
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/conversations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/conversations/`
+        ? `/v1/projects/${projectId}/conversations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/conversations/`
 }
 
 export const conversationsList = async (
@@ -86,7 +86,7 @@ export const conversationsList = async (
 }
 
 export const getConversationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/`
+    return `/v1/projects/${projectId}/conversations/`
 }
 
 /**
@@ -109,7 +109,7 @@ export const conversationsCreate = async (
 }
 
 export const getConversationsRetrieveUrl = (projectId: string, conversation: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/`
 }
 
 export const conversationsRetrieve = async (
@@ -124,7 +124,7 @@ export const conversationsRetrieve = async (
 }
 
 export const getConversationsDestroyUrl = (projectId: string, conversation: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/`
 }
 
 /**
@@ -142,7 +142,7 @@ export const conversationsDestroy = async (
 }
 
 export const getConversationsAppendMessageCreateUrl = (projectId: string, conversation: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/append_message/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/append_message/`
 }
 
 /**
@@ -165,7 +165,7 @@ export const conversationsAppendMessageCreate = async (
 }
 
 export const getConversationsCancelPartialUpdateUrl = (projectId: string, conversation: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/cancel/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/cancel/`
 }
 
 /**
@@ -186,7 +186,7 @@ export const conversationsCancelPartialUpdate = async (
 }
 
 export const getConversationsOpenCreateUrl = (projectId: string, conversation: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/open/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/open/`
 }
 
 /**
@@ -207,7 +207,7 @@ export const conversationsOpenCreate = async (
 }
 
 export const getConversationsQueueRetrieveUrl = (projectId: string, conversation: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/queue/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/queue/`
 }
 
 export const conversationsQueueRetrieve = async (
@@ -222,7 +222,7 @@ export const conversationsQueueRetrieve = async (
 }
 
 export const getConversationsQueueCreateUrl = (projectId: string, conversation: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/queue/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/queue/`
 }
 
 export const conversationsQueueCreate = async (
@@ -240,7 +240,7 @@ export const conversationsQueueCreate = async (
 }
 
 export const getConversationsQueuePartialUpdateUrl = (projectId: string, conversation: string, queueId: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/queue/${queueId}/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/queue/${queueId}/`
 }
 
 export const conversationsQueuePartialUpdate = async (
@@ -259,7 +259,7 @@ export const conversationsQueuePartialUpdate = async (
 }
 
 export const getConversationsQueueDestroyUrl = (projectId: string, conversation: string, queueId: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/queue/${queueId}/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/queue/${queueId}/`
 }
 
 export const conversationsQueueDestroy = async (
@@ -275,7 +275,7 @@ export const conversationsQueueDestroy = async (
 }
 
 export const getConversationsQueueClearCreateUrl = (projectId: string, conversation: string) => {
-    return `/api/projects/${projectId}/conversations/${conversation}/queue/clear/`
+    return `/v1/projects/${projectId}/conversations/${conversation}/queue/clear/`
 }
 
 export const conversationsQueueClearCreate = async (
@@ -304,8 +304,8 @@ export const getConversationsTicketsListUrl = (projectId: string, params?: Conve
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/conversations/tickets/?${stringifiedParams}`
-        : `/api/projects/${projectId}/conversations/tickets/`
+        ? `/v1/projects/${projectId}/conversations/tickets/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/conversations/tickets/`
 }
 
 /**
@@ -323,7 +323,7 @@ export const conversationsTicketsList = async (
 }
 
 export const getConversationsTicketsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/`
 }
 
 /**
@@ -341,7 +341,7 @@ export const conversationsTicketsRetrieve = async (
 }
 
 export const getConversationsTicketsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/`
 }
 
 /**
@@ -362,7 +362,7 @@ export const conversationsTicketsUpdate = async (
 }
 
 export const getConversationsTicketsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/`
 }
 
 export const conversationsTicketsPartialUpdate = async (
@@ -380,7 +380,7 @@ export const conversationsTicketsPartialUpdate = async (
 }
 
 export const getConversationsTicketsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/`
 }
 
 export const conversationsTicketsDestroy = async (
@@ -395,7 +395,7 @@ export const conversationsTicketsDestroy = async (
 }
 
 export const getConversationsTicketsAiFeedbackCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/ai_feedback/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/ai_feedback/`
 }
 
 /**
@@ -431,8 +431,8 @@ export const getConversationsTicketsMessagesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/conversations/tickets/${id}/messages/?${stringifiedParams}`
-        : `/api/projects/${projectId}/conversations/tickets/${id}/messages/`
+        ? `/v1/projects/${projectId}/conversations/tickets/${id}/messages/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/conversations/tickets/${id}/messages/`
 }
 
 /**
@@ -451,7 +451,7 @@ export const conversationsTicketsMessagesList = async (
 }
 
 export const getConversationsTicketsNotesPartialUpdateUrl = (projectId: string, id: string, messageId: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/notes/${messageId}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/notes/${messageId}/`
 }
 
 /**
@@ -476,7 +476,7 @@ export const conversationsTicketsNotesPartialUpdate = async (
 }
 
 export const getConversationsTicketsNotesDestroyUrl = (projectId: string, id: string, messageId: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/notes/${messageId}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/notes/${messageId}/`
 }
 
 /**
@@ -498,7 +498,7 @@ export const conversationsTicketsNotesDestroy = async (
 }
 
 export const getConversationsTicketsReplyCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/reply/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/reply/`
 }
 
 /**
@@ -523,7 +523,7 @@ export const conversationsTicketsReplyCreate = async (
 }
 
 export const getConversationsTicketsBulkUpdateStatusCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/bulk_update_status/`
+    return `/v1/projects/${projectId}/conversations/tickets/bulk_update_status/`
 }
 
 /**
@@ -549,7 +549,7 @@ export const conversationsTicketsBulkUpdateStatusCreate = async (
 }
 
 export const getConversationsTicketsBulkUpdateTagsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/bulk_update_tags/`
+    return `/v1/projects/${projectId}/conversations/tickets/bulk_update_tags/`
 }
 
 /**
@@ -585,7 +585,7 @@ export const conversationsTicketsBulkUpdateTagsCreate = async (
 }
 
 export const getConversationsTicketsComposeCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/compose/`
+    return `/v1/projects/${projectId}/conversations/tickets/compose/`
 }
 
 /**
@@ -605,7 +605,7 @@ export const conversationsTicketsComposeCreate = async (
 }
 
 export const getConversationsTicketsUnreadCountRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/unread_count/`
+    return `/v1/projects/${projectId}/conversations/tickets/unread_count/`
 }
 
 /**
@@ -639,8 +639,8 @@ export const getConversationsViewsListUrl = (projectId: string, params?: Convers
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/conversations/views/?${stringifiedParams}`
-        : `/api/projects/${projectId}/conversations/views/`
+        ? `/v1/projects/${projectId}/conversations/views/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/conversations/views/`
 }
 
 export const conversationsViewsList = async (
@@ -655,7 +655,7 @@ export const conversationsViewsList = async (
 }
 
 export const getConversationsViewsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/views/`
+    return `/v1/projects/${projectId}/conversations/views/`
 }
 
 export const conversationsViewsCreate = async (
@@ -672,7 +672,7 @@ export const conversationsViewsCreate = async (
 }
 
 export const getConversationsViewsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/conversations/views/${shortId}/`
+    return `/v1/projects/${projectId}/conversations/views/${shortId}/`
 }
 
 export const conversationsViewsRetrieve = async (
@@ -687,7 +687,7 @@ export const conversationsViewsRetrieve = async (
 }
 
 export const getConversationsViewsPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/conversations/views/${shortId}/`
+    return `/v1/projects/${projectId}/conversations/views/${shortId}/`
 }
 
 export const conversationsViewsPartialUpdate = async (
@@ -705,7 +705,7 @@ export const conversationsViewsPartialUpdate = async (
 }
 
 export const getConversationsViewsDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/conversations/views/${shortId}/`
+    return `/v1/projects/${projectId}/conversations/views/${shortId}/`
 }
 
 export const conversationsViewsDestroy = async (
@@ -720,7 +720,7 @@ export const conversationsViewsDestroy = async (
 }
 
 export const getConversationsZendeskImportsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/zendesk_imports/`
+    return `/v1/projects/${projectId}/conversations/zendesk_imports/`
 }
 
 export const conversationsZendeskImportsCreate = async (
@@ -737,7 +737,7 @@ export const conversationsZendeskImportsCreate = async (
 }
 
 export const getConversationsZendeskImportsStatusRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/zendesk_imports/status/`
+    return `/v1/projects/${projectId}/conversations/zendesk_imports/status/`
 }
 
 export const conversationsZendeskImportsStatusRetrieve = async (

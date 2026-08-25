@@ -54,8 +54,8 @@ export const getDataModelingDagsListUrl = (projectId: string, params?: DataModel
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_modeling_dags/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_modeling_dags/`
+        ? `/v1/projects/${projectId}/data_modeling_dags/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_modeling_dags/`
 }
 
 export const dataModelingDagsList = async (
@@ -70,7 +70,7 @@ export const dataModelingDagsList = async (
 }
 
 export const getDataModelingDagsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_modeling_dags/`
+    return `/v1/projects/${projectId}/data_modeling_dags/`
 }
 
 export const dataModelingDagsCreate = async (
@@ -87,7 +87,7 @@ export const dataModelingDagsCreate = async (
 }
 
 export const getDataModelingDagsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_dags/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_dags/${id}/`
 }
 
 export const dataModelingDagsRetrieve = async (
@@ -102,7 +102,7 @@ export const dataModelingDagsRetrieve = async (
 }
 
 export const getDataModelingDagsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_dags/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_dags/${id}/`
 }
 
 export const dataModelingDagsPartialUpdate = async (
@@ -120,7 +120,7 @@ export const dataModelingDagsPartialUpdate = async (
 }
 
 export const getDataModelingDagsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_dags/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_dags/${id}/`
 }
 
 export const dataModelingDagsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -142,8 +142,8 @@ export const getDataModelingEdgesListUrl = (projectId: string, params?: DataMode
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_modeling_edges/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_modeling_edges/`
+        ? `/v1/projects/${projectId}/data_modeling_edges/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_modeling_edges/`
 }
 
 export const dataModelingEdgesList = async (
@@ -158,7 +158,7 @@ export const dataModelingEdgesList = async (
 }
 
 export const getDataModelingEdgesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_modeling_edges/`
+    return `/v1/projects/${projectId}/data_modeling_edges/`
 }
 
 export const dataModelingEdgesCreate = async (
@@ -175,7 +175,7 @@ export const dataModelingEdgesCreate = async (
 }
 
 export const getDataModelingEdgesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_edges/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_edges/${id}/`
 }
 
 export const dataModelingEdgesRetrieve = async (
@@ -190,7 +190,7 @@ export const dataModelingEdgesRetrieve = async (
 }
 
 export const getDataModelingEdgesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_edges/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_edges/${id}/`
 }
 
 export const dataModelingEdgesUpdate = async (
@@ -208,7 +208,7 @@ export const dataModelingEdgesUpdate = async (
 }
 
 export const getDataModelingEdgesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_edges/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_edges/${id}/`
 }
 
 export const dataModelingEdgesPartialUpdate = async (
@@ -226,7 +226,7 @@ export const dataModelingEdgesPartialUpdate = async (
 }
 
 export const getDataModelingEdgesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_edges/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_edges/${id}/`
 }
 
 export const dataModelingEdgesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -248,8 +248,8 @@ export const getDataModelingNodesListUrl = (projectId: string, params?: DataMode
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_modeling_nodes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_modeling_nodes/`
+        ? `/v1/projects/${projectId}/data_modeling_nodes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_modeling_nodes/`
 }
 
 export const dataModelingNodesList = async (
@@ -264,7 +264,7 @@ export const dataModelingNodesList = async (
 }
 
 export const getDataModelingNodesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/`
 }
 
 export const dataModelingNodesCreate = async (
@@ -281,7 +281,7 @@ export const dataModelingNodesCreate = async (
 }
 
 export const getDataModelingNodesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/${id}/`
 }
 
 export const dataModelingNodesRetrieve = async (
@@ -296,7 +296,7 @@ export const dataModelingNodesRetrieve = async (
 }
 
 export const getDataModelingNodesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/${id}/`
 }
 
 export const dataModelingNodesUpdate = async (
@@ -314,7 +314,7 @@ export const dataModelingNodesUpdate = async (
 }
 
 export const getDataModelingNodesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/${id}/`
 }
 
 export const dataModelingNodesPartialUpdate = async (
@@ -332,7 +332,7 @@ export const dataModelingNodesPartialUpdate = async (
 }
 
 export const getDataModelingNodesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/${id}/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/${id}/`
 }
 
 export const dataModelingNodesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -343,7 +343,7 @@ export const dataModelingNodesDestroy = async (projectId: string, id: string, op
 }
 
 export const getDataModelingNodesMaterializeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/${id}/materialize/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/${id}/materialize/`
 }
 
 /**
@@ -364,7 +364,7 @@ export const dataModelingNodesMaterializeCreate = async (
 }
 
 export const getDataModelingNodesResumeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/${id}/resume/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/${id}/resume/`
 }
 
 /**
@@ -386,7 +386,7 @@ export const dataModelingNodesResumeCreate = async (
 }
 
 export const getDataModelingNodesRunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/${id}/run/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/${id}/run/`
 }
 
 /**
@@ -412,7 +412,7 @@ export const dataModelingNodesRunCreate = async (
 }
 
 export const getDataModelingNodesDagIdsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_modeling_nodes/dag_ids/`
+    return `/v1/projects/${projectId}/data_modeling_nodes/dag_ids/`
 }
 
 /**
@@ -440,8 +440,8 @@ export const getDataModelingNodesLineageRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_modeling_nodes/lineage/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_modeling_nodes/lineage/`
+        ? `/v1/projects/${projectId}/data_modeling_nodes/lineage/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_modeling_nodes/lineage/`
 }
 
 /**

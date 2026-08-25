@@ -113,8 +113,8 @@ export const getSignalsProcessingListUrl = (projectId: string, params?: SignalsP
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/processing/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/processing/`
+        ? `/v1/projects/${projectId}/signals/processing/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/processing/`
 }
 
 /**
@@ -132,7 +132,7 @@ export const signalsProcessingList = async (
 }
 
 export const getSignalsProcessingPauseUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/processing/pause/`
+    return `/v1/projects/${projectId}/signals/processing/pause/`
 }
 
 /**
@@ -152,7 +152,7 @@ export const signalsProcessingPauseUpdate = async (
 }
 
 export const getSignalsProcessingPauseDestroyUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/processing/pause/`
+    return `/v1/projects/${projectId}/signals/processing/pause/`
 }
 
 /**
@@ -180,8 +180,8 @@ export const getSignalsReportsListUrl = (projectId: string, params?: SignalsRepo
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/reports/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/reports/`
+        ? `/v1/projects/${projectId}/signals/reports/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/reports/`
 }
 
 export const signalsReportsList = async (
@@ -196,7 +196,7 @@ export const signalsReportsList = async (
 }
 
 export const getSignalsReportsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/`
 }
 
 export const signalsReportsRetrieve = async (
@@ -211,7 +211,7 @@ export const signalsReportsRetrieve = async (
 }
 
 export const getSignalsReportsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/`
 }
 
 /**
@@ -233,7 +233,7 @@ export const signalsReportsPartialUpdate = async (
 }
 
 export const getSignalsReportsFeedbackCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/feedback/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/feedback/`
 }
 
 /**
@@ -255,7 +255,7 @@ export const signalsReportsFeedbackCreate = async (
 }
 
 export const getSignalsReportPrChecksUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/pr_checks/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/pr_checks/`
 }
 
 /**
@@ -274,7 +274,7 @@ export const signalsReportPrChecks = async (
 }
 
 export const getSignalsReportPrCommentsUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/pr_comments/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/pr_comments/`
 }
 
 /**
@@ -293,7 +293,7 @@ export const signalsReportPrComments = async (
 }
 
 export const getSignalsReportPrReviewCommentsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/pr_review_comments/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/pr_review_comments/`
 }
 
 /**
@@ -318,7 +318,7 @@ export const signalsReportPrReviewCommentsCreate = async (
 }
 
 export const getSignalsReportPrReviewCommentUpdateUrl = (projectId: string, id: string, commentId: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/pr_review_comments/${commentId}/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/pr_review_comments/${commentId}/`
 }
 
 /**
@@ -343,7 +343,7 @@ export const signalsReportPrReviewCommentUpdate = async (
 }
 
 export const getSignalsReportPrReviewCommentDestroyUrl = (projectId: string, id: string, commentId: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/pr_review_comments/${commentId}/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/pr_review_comments/${commentId}/`
 }
 
 /**
@@ -362,7 +362,7 @@ export const signalsReportPrReviewCommentDestroy = async (
 }
 
 export const getSignalsReportPrReviewCommentReactionsCreateUrl = (projectId: string, id: string, commentId: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/pr_review_comments/${commentId}/reactions/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/pr_review_comments/${commentId}/reactions/`
 }
 
 /**
@@ -392,7 +392,7 @@ export const getSignalsReportPrReviewCommentReactionDestroyUrl = (
     commentId: string,
     reactionId: string
 ) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/pr_review_comments/${commentId}/reactions/${reactionId}/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/pr_review_comments/${commentId}/reactions/${reactionId}/`
 }
 
 /**
@@ -412,7 +412,7 @@ export const signalsReportPrReviewCommentReactionDestroy = async (
 }
 
 export const getSignalsReportsRefundCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/refund/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/refund/`
 }
 
 /**
@@ -434,7 +434,7 @@ export const signalsReportsRefundCreate = async (
 }
 
 export const getSignalsReportsSignalsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/signals/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/signals/`
 }
 
 /**
@@ -453,7 +453,7 @@ export const signalsReportsSignalsRetrieve = async (
 }
 
 export const getSignalsReportsStateCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${id}/state/`
+    return `/v1/projects/${projectId}/signals/reports/${id}/state/`
 }
 
 /**
@@ -503,8 +503,8 @@ export const getSignalsReportArtefactsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/reports/${reportId}/artefacts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/reports/${reportId}/artefacts/`
+        ? `/v1/projects/${projectId}/signals/reports/${reportId}/artefacts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/reports/${reportId}/artefacts/`
 }
 
 /**
@@ -527,7 +527,7 @@ export const signalsReportArtefactsList = async (
 }
 
 export const getSignalsReportArtefactsCreateUrl = (projectId: string, reportId: string) => {
-    return `/api/projects/${projectId}/signals/reports/${reportId}/artefacts/`
+    return `/v1/projects/${projectId}/signals/reports/${reportId}/artefacts/`
 }
 
 /**
@@ -549,7 +549,7 @@ export const signalsReportArtefactsCreate = async (
 }
 
 export const getSignalsReportArtefactsRetrieveUrl = (projectId: string, reportId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${reportId}/artefacts/${id}/`
+    return `/v1/projects/${projectId}/signals/reports/${reportId}/artefacts/${id}/`
 }
 
 /**
@@ -569,7 +569,7 @@ export const signalsReportArtefactsRetrieve = async (
 }
 
 export const getSignalsReportArtefactsPartialUpdateUrl = (projectId: string, reportId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${reportId}/artefacts/${id}/`
+    return `/v1/projects/${projectId}/signals/reports/${reportId}/artefacts/${id}/`
 }
 
 /**
@@ -595,7 +595,7 @@ export const signalsReportArtefactsPartialUpdate = async (
 }
 
 export const getSignalsReportArtefactsDestroyUrl = (projectId: string, reportId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${reportId}/artefacts/${id}/`
+    return `/v1/projects/${projectId}/signals/reports/${reportId}/artefacts/${id}/`
 }
 
 /**
@@ -615,7 +615,7 @@ export const signalsReportArtefactsDestroy = async (
 }
 
 export const getSignalsReportArtefactsDiffUrl = (projectId: string, reportId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/reports/${reportId}/artefacts/${id}/diff/`
+    return `/v1/projects/${projectId}/signals/reports/${reportId}/artefacts/${id}/diff/`
 }
 
 /**
@@ -635,7 +635,7 @@ export const signalsReportArtefactsDiff = async (
 }
 
 export const getSignalsReportsBulkStateCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/reports/bulk-state/`
+    return `/v1/projects/${projectId}/signals/reports/bulk-state/`
 }
 
 /**
@@ -661,7 +661,7 @@ export const signalsReportsBulkStateCreate = async (
 }
 
 export const getSignalsReportsRefundSummaryRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/reports/refund-summary/`
+    return `/v1/projects/${projectId}/signals/reports/refund-summary/`
 }
 
 /**
@@ -679,7 +679,7 @@ export const signalsReportsRefundSummaryRetrieve = async (
 }
 
 export const getSignalsScoutCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/`
+    return `/v1/projects/${projectId}/signals/scout/`
 }
 
 /**
@@ -711,8 +711,8 @@ export const getSignalsScoutConfigListUrl = (projectId: string, params?: Signals
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/scout/configs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/scout/configs/`
+        ? `/v1/projects/${projectId}/signals/scout/configs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/scout/configs/`
 }
 
 /**
@@ -731,7 +731,7 @@ export const signalsScoutConfigList = async (
 }
 
 export const getSignalsScoutConfigCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/configs/`
+    return `/v1/projects/${projectId}/signals/scout/configs/`
 }
 
 /**
@@ -752,7 +752,7 @@ export const signalsScoutConfigCreate = async (
 }
 
 export const getSignalsScoutConfigUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/scout/configs/${id}/`
+    return `/v1/projects/${projectId}/signals/scout/configs/${id}/`
 }
 
 /**
@@ -774,7 +774,7 @@ export const signalsScoutConfigUpdate = async (
 }
 
 export const getSignalsScoutConfigDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/scout/configs/${id}/`
+    return `/v1/projects/${projectId}/signals/scout/configs/${id}/`
 }
 
 /**
@@ -793,7 +793,7 @@ export const signalsScoutConfigDestroy = async (
 }
 
 export const getSignalsScoutConfigRunUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/scout/configs/${id}/run/`
+    return `/v1/projects/${projectId}/signals/scout/configs/${id}/run/`
 }
 
 /**
@@ -812,7 +812,7 @@ export const signalsScoutConfigRun = async (
 }
 
 export const getSignalsScoutConfigSyncUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/configs/sync/`
+    return `/v1/projects/${projectId}/signals/scout/configs/sync/`
 }
 
 /**
@@ -841,8 +841,8 @@ export const getSignalsScoutMembersListUrl = (projectId: string, params?: Signal
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/scout/members/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/scout/members/`
+        ? `/v1/projects/${projectId}/signals/scout/members/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/scout/members/`
 }
 
 /**
@@ -861,7 +861,7 @@ export const signalsScoutMembersList = async (
 }
 
 export const getSignalsScoutMetadataGetUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/metadata/current/`
+    return `/v1/projects/${projectId}/signals/scout/metadata/current/`
 }
 
 /**
@@ -887,8 +887,8 @@ export const getSignalsScoutNotesListUrl = (projectId: string, params?: SignalsS
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/scout/notes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/scout/notes/`
+        ? `/v1/projects/${projectId}/signals/scout/notes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/scout/notes/`
 }
 
 /**
@@ -907,7 +907,7 @@ export const signalsScoutNotesList = async (
 }
 
 export const getSignalsScoutNotesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/notes/`
+    return `/v1/projects/${projectId}/signals/scout/notes/`
 }
 
 /**
@@ -928,7 +928,7 @@ export const signalsScoutNotesCreate = async (
 }
 
 export const getSignalsScoutNotesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/scout/notes/${id}/`
+    return `/v1/projects/${projectId}/signals/scout/notes/${id}/`
 }
 
 /**
@@ -957,8 +957,8 @@ export const getSignalsScoutProjectProfileGetUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/scout/project_profile/current/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/scout/project_profile/current/`
+        ? `/v1/projects/${projectId}/signals/scout/project_profile/current/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/scout/project_profile/current/`
 }
 
 /**
@@ -988,8 +988,8 @@ export const getSignalsScoutRunsListUrl = (projectId: string, params?: SignalsSc
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/scout/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/scout/runs/`
+        ? `/v1/projects/${projectId}/signals/scout/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/scout/runs/`
 }
 
 /**
@@ -1008,7 +1008,7 @@ export const signalsScoutRunsList = async (
 }
 
 export const getSignalsScoutRunsRetrieveUrl = (projectId: string, runId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/${runId}/`
+    return `/v1/projects/${projectId}/signals/scout/runs/${runId}/`
 }
 
 /**
@@ -1027,7 +1027,7 @@ export const signalsScoutRunsRetrieve = async (
 }
 
 export const getSignalsScoutEditReportUrl = (projectId: string, runId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/${runId}/edit-report/`
+    return `/v1/projects/${projectId}/signals/scout/runs/${runId}/edit-report/`
 }
 
 /**
@@ -1049,7 +1049,7 @@ export const signalsScoutEditReport = async (
 }
 
 export const getSignalsScoutRunsEmissionsUrl = (projectId: string, runId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/${runId}/emissions/`
+    return `/v1/projects/${projectId}/signals/scout/runs/${runId}/emissions/`
 }
 
 /**
@@ -1068,7 +1068,7 @@ export const signalsScoutRunsEmissions = async (
 }
 
 export const getSignalsScoutRunsEmissionReportsUrl = (projectId: string, runId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/${runId}/emissions/reports/`
+    return `/v1/projects/${projectId}/signals/scout/runs/${runId}/emissions/reports/`
 }
 
 /**
@@ -1087,7 +1087,7 @@ export const signalsScoutRunsEmissionReports = async (
 }
 
 export const getSignalsScoutEmitReportUrl = (projectId: string, runId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/${runId}/emit-report/`
+    return `/v1/projects/${projectId}/signals/scout/runs/${runId}/emit-report/`
 }
 
 /**
@@ -1109,7 +1109,7 @@ export const signalsScoutEmitReport = async (
 }
 
 export const getSignalsScoutEmitSignalUrl = (projectId: string, runId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/${runId}/emit-signal/`
+    return `/v1/projects/${projectId}/signals/scout/runs/${runId}/emit-signal/`
 }
 
 /**
@@ -1131,7 +1131,7 @@ export const signalsScoutEmitSignal = async (
 }
 
 export const getSignalsScoutRecordOutputUrl = (projectId: string, runId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/${runId}/record-output/`
+    return `/v1/projects/${projectId}/signals/scout/runs/${runId}/record-output/`
 }
 
 /**
@@ -1153,7 +1153,7 @@ export const signalsScoutRecordOutput = async (
 }
 
 export const getSignalsScoutRunsEmissionsBatchUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/emissions/batch/`
+    return `/v1/projects/${projectId}/signals/scout/runs/emissions/batch/`
 }
 
 /**
@@ -1188,8 +1188,8 @@ export const getSignalsScoutRunsRecentEmissionsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/scout/runs/emissions/recent/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/scout/runs/emissions/recent/`
+        ? `/v1/projects/${projectId}/signals/scout/runs/emissions/recent/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/scout/runs/emissions/recent/`
 }
 
 /**
@@ -1208,7 +1208,7 @@ export const signalsScoutRunsRecentEmissions = async (
 }
 
 export const getSignalsScoutRunsEmissionReportsBatchUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/runs/emissions/reports/batch/`
+    return `/v1/projects/${projectId}/signals/scout/runs/emissions/reports/batch/`
 }
 
 /**
@@ -1243,8 +1243,8 @@ export const getSignalsScoutRunsFindingsSummaryUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/scout/runs/findings/summary/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/scout/runs/findings/summary/`
+        ? `/v1/projects/${projectId}/signals/scout/runs/findings/summary/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/scout/runs/findings/summary/`
 }
 
 /**
@@ -1274,8 +1274,8 @@ export const getSignalsScoutScratchpadSearchUrl = (projectId: string, params?: S
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/scout/scratchpad/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/scout/scratchpad/`
+        ? `/v1/projects/${projectId}/signals/scout/scratchpad/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/scout/scratchpad/`
 }
 
 /**
@@ -1294,7 +1294,7 @@ export const signalsScoutScratchpadSearch = async (
 }
 
 export const getSignalsScoutScratchpadRememberUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/scratchpad/`
+    return `/v1/projects/${projectId}/signals/scout/scratchpad/`
 }
 
 /**
@@ -1315,7 +1315,7 @@ export const signalsScoutScratchpadRemember = async (
 }
 
 export const getSignalsScoutScratchpadForgetUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/scout/scratchpad/forget/`
+    return `/v1/projects/${projectId}/signals/scout/scratchpad/forget/`
 }
 
 /**
@@ -1347,8 +1347,8 @@ export const getSignalsSourceConfigsListUrl = (projectId: string, params?: Signa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signals/source_configs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signals/source_configs/`
+        ? `/v1/projects/${projectId}/signals/source_configs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signals/source_configs/`
 }
 
 export const signalsSourceConfigsList = async (
@@ -1363,7 +1363,7 @@ export const signalsSourceConfigsList = async (
 }
 
 export const getSignalsSourceConfigsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signals/source_configs/`
+    return `/v1/projects/${projectId}/signals/source_configs/`
 }
 
 export const signalsSourceConfigsCreate = async (
@@ -1380,7 +1380,7 @@ export const signalsSourceConfigsCreate = async (
 }
 
 export const getSignalsSourceConfigsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/source_configs/${id}/`
+    return `/v1/projects/${projectId}/signals/source_configs/${id}/`
 }
 
 export const signalsSourceConfigsRetrieve = async (
@@ -1395,7 +1395,7 @@ export const signalsSourceConfigsRetrieve = async (
 }
 
 export const getSignalsSourceConfigsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/source_configs/${id}/`
+    return `/v1/projects/${projectId}/signals/source_configs/${id}/`
 }
 
 export const signalsSourceConfigsUpdate = async (
@@ -1413,7 +1413,7 @@ export const signalsSourceConfigsUpdate = async (
 }
 
 export const getSignalsSourceConfigsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/source_configs/${id}/`
+    return `/v1/projects/${projectId}/signals/source_configs/${id}/`
 }
 
 export const signalsSourceConfigsPartialUpdate = async (
@@ -1431,7 +1431,7 @@ export const signalsSourceConfigsPartialUpdate = async (
 }
 
 export const getSignalsSourceConfigsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/signals/source_configs/${id}/`
+    return `/v1/projects/${projectId}/signals/source_configs/${id}/`
 }
 
 export const signalsSourceConfigsDestroy = async (
@@ -1446,15 +1446,15 @@ export const signalsSourceConfigsDestroy = async (
 }
 
 export const getUsersSignalAutonomyRetrieveUrl = (userId: string) => {
-    return `/api/users/${userId}/signal_autonomy/`
+    return `/v1/users/${userId}/signal_autonomy/`
 }
 
 /**
  * Per-user signal autonomy config (singleton keyed by user).
  *
- * GET    /api/users/<id>/signal_autonomy/ → current config (or 404)
- * POST   /api/users/<id>/signal_autonomy/ → create or update
- * DELETE /api/users/<id>/signal_autonomy/ → remove (opt out)
+ * GET    /v1/users/<id>/signal_autonomy/ → current config (or 404)
+ * POST   /v1/users/<id>/signal_autonomy/ → create or update
+ * DELETE /v1/users/<id>/signal_autonomy/ → remove (opt out)
  */
 export const usersSignalAutonomyRetrieve = async (
     userId: string,
@@ -1467,15 +1467,15 @@ export const usersSignalAutonomyRetrieve = async (
 }
 
 export const getUsersSignalAutonomyCreateUrl = (userId: string) => {
-    return `/api/users/${userId}/signal_autonomy/`
+    return `/v1/users/${userId}/signal_autonomy/`
 }
 
 /**
  * Per-user signal autonomy config (singleton keyed by user).
  *
- * GET    /api/users/<id>/signal_autonomy/ → current config (or 404)
- * POST   /api/users/<id>/signal_autonomy/ → create or update
- * DELETE /api/users/<id>/signal_autonomy/ → remove (opt out)
+ * GET    /v1/users/<id>/signal_autonomy/ → current config (or 404)
+ * POST   /v1/users/<id>/signal_autonomy/ → create or update
+ * DELETE /v1/users/<id>/signal_autonomy/ → remove (opt out)
  */
 export const usersSignalAutonomyCreate = async (
     userId: string,
@@ -1491,15 +1491,15 @@ export const usersSignalAutonomyCreate = async (
 }
 
 export const getUsersSignalAutonomyDestroyUrl = (userId: string) => {
-    return `/api/users/${userId}/signal_autonomy/`
+    return `/v1/users/${userId}/signal_autonomy/`
 }
 
 /**
  * Per-user signal autonomy config (singleton keyed by user).
  *
- * GET    /api/users/<id>/signal_autonomy/ → current config (or 404)
- * POST   /api/users/<id>/signal_autonomy/ → create or update
- * DELETE /api/users/<id>/signal_autonomy/ → remove (opt out)
+ * GET    /v1/users/<id>/signal_autonomy/ → current config (or 404)
+ * POST   /v1/users/<id>/signal_autonomy/ → create or update
+ * DELETE /v1/users/<id>/signal_autonomy/ → remove (opt out)
  */
 export const usersSignalAutonomyDestroy = async (userId: string, options?: RequestInit): Promise<void> => {
     return apiMutator<void>(getUsersSignalAutonomyDestroyUrl(userId), {

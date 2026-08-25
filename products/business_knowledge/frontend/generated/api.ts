@@ -60,8 +60,8 @@ export const getBusinessKnowledgeDocumentsWindowListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/business_knowledge/documents/${id}/window/?${stringifiedParams}`
-        : `/api/projects/${projectId}/business_knowledge/documents/${id}/window/`
+        ? `/v1/projects/${projectId}/business_knowledge/documents/${id}/window/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/business_knowledge/documents/${id}/window/`
 }
 
 /**
@@ -96,8 +96,8 @@ export const getBusinessKnowledgeDocumentsSearchListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/business_knowledge/documents/search/?${stringifiedParams}`
-        : `/api/projects/${projectId}/business_knowledge/documents/search/`
+        ? `/v1/projects/${projectId}/business_knowledge/documents/search/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/business_knowledge/documents/search/`
 }
 
 /**
@@ -131,8 +131,8 @@ export const getBusinessKnowledgeGapSuggestionsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/business_knowledge/gap_suggestions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/business_knowledge/gap_suggestions/`
+        ? `/v1/projects/${projectId}/business_knowledge/gap_suggestions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/business_knowledge/gap_suggestions/`
 }
 
 /**
@@ -158,7 +158,7 @@ export const businessKnowledgeGapSuggestionsList = async (
 }
 
 export const getBusinessKnowledgeGapSuggestionsAcceptCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/business_knowledge/gap_suggestions/${id}/accept/`
+    return `/v1/projects/${projectId}/business_knowledge/gap_suggestions/${id}/accept/`
 }
 
 /**
@@ -184,7 +184,7 @@ export const businessKnowledgeGapSuggestionsAcceptCreate = async (
 }
 
 export const getBusinessKnowledgeGapSuggestionsDismissCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/business_knowledge/gap_suggestions/${id}/dismiss/`
+    return `/v1/projects/${projectId}/business_knowledge/gap_suggestions/${id}/dismiss/`
 }
 
 /**
@@ -207,7 +207,7 @@ export const businessKnowledgeGapSuggestionsDismissCreate = async (
 }
 
 export const getBusinessKnowledgeGapSuggestionsAcceptTopicCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/business_knowledge/gap_suggestions/accept_topic/`
+    return `/v1/projects/${projectId}/business_knowledge/gap_suggestions/accept_topic/`
 }
 
 /**
@@ -227,7 +227,7 @@ export const businessKnowledgeGapSuggestionsAcceptTopicCreate = async (
 }
 
 export const getBusinessKnowledgeGapSuggestionsDismissTopicCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/business_knowledge/gap_suggestions/dismiss_topic/`
+    return `/v1/projects/${projectId}/business_knowledge/gap_suggestions/dismiss_topic/`
 }
 
 /**
@@ -258,8 +258,8 @@ export const getBusinessKnowledgeSourcesListUrl = (projectId: string, params?: B
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/business_knowledge/sources/?${stringifiedParams}`
-        : `/api/projects/${projectId}/business_knowledge/sources/`
+        ? `/v1/projects/${projectId}/business_knowledge/sources/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/business_knowledge/sources/`
 }
 
 export const businessKnowledgeSourcesList = async (
@@ -274,7 +274,7 @@ export const businessKnowledgeSourcesList = async (
 }
 
 export const getBusinessKnowledgeSourcesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/business_knowledge/sources/`
+    return `/v1/projects/${projectId}/business_knowledge/sources/`
 }
 
 export const businessKnowledgeSourcesCreate = async (
@@ -291,7 +291,7 @@ export const businessKnowledgeSourcesCreate = async (
 }
 
 export const getBusinessKnowledgeSourcesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/business_knowledge/sources/${id}/`
+    return `/v1/projects/${projectId}/business_knowledge/sources/${id}/`
 }
 
 export const businessKnowledgeSourcesRetrieve = async (
@@ -306,7 +306,7 @@ export const businessKnowledgeSourcesRetrieve = async (
 }
 
 export const getBusinessKnowledgeSourcesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/business_knowledge/sources/${id}/`
+    return `/v1/projects/${projectId}/business_knowledge/sources/${id}/`
 }
 
 export const businessKnowledgeSourcesPartialUpdate = async (
@@ -324,7 +324,7 @@ export const businessKnowledgeSourcesPartialUpdate = async (
 }
 
 export const getBusinessKnowledgeSourcesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/business_knowledge/sources/${id}/`
+    return `/v1/projects/${projectId}/business_knowledge/sources/${id}/`
 }
 
 export const businessKnowledgeSourcesDestroy = async (
@@ -339,7 +339,7 @@ export const businessKnowledgeSourcesDestroy = async (
 }
 
 export const getBusinessKnowledgeSourcesRefreshCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/business_knowledge/sources/${id}/refresh/`
+    return `/v1/projects/${projectId}/business_knowledge/sources/${id}/refresh/`
 }
 
 export const businessKnowledgeSourcesRefreshCreate = async (
@@ -357,7 +357,7 @@ export const businessKnowledgeSourcesRefreshCreate = async (
 }
 
 export const getBusinessKnowledgeSourcesTextRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/business_knowledge/sources/${id}/text/`
+    return `/v1/projects/${projectId}/business_knowledge/sources/${id}/text/`
 }
 
 export const businessKnowledgeSourcesTextRetrieve = async (

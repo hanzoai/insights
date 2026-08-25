@@ -39,8 +39,8 @@ export const getExportsListUrl = (projectId: string, params?: ExportsListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/exports/?${stringifiedParams}`
-        : `/api/projects/${projectId}/exports/`
+        ? `/v1/projects/${projectId}/exports/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/exports/`
 }
 
 export const exportsList = async (
@@ -55,7 +55,7 @@ export const exportsList = async (
 }
 
 export const getExportsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/exports/`
+    return `/v1/projects/${projectId}/exports/`
 }
 
 export const exportsCreate = async (
@@ -72,7 +72,7 @@ export const exportsCreate = async (
 }
 
 export const getExportsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/exports/${id}/`
+    return `/v1/projects/${projectId}/exports/${id}/`
 }
 
 export const exportsRetrieve = async (
@@ -87,7 +87,7 @@ export const exportsRetrieve = async (
 }
 
 export const getExportsContentRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/exports/${id}/content/`
+    return `/v1/projects/${projectId}/exports/${id}/content/`
 }
 
 export const exportsContentRetrieve = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {

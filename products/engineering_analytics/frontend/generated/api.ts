@@ -80,8 +80,8 @@ export const getEngineeringAnalyticsAuthorWorkflowCostsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/author_workflow_costs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/author_workflow_costs/`
+        ? `/v1/projects/${projectId}/engineering_analytics/author_workflow_costs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/author_workflow_costs/`
 }
 
 /**
@@ -113,8 +113,8 @@ export const getEngineeringAnalyticsBrokenTestsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/broken_tests/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/broken_tests/`
+        ? `/v1/projects/${projectId}/engineering_analytics/broken_tests/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/broken_tests/`
 }
 
 /**
@@ -132,7 +132,7 @@ export const engineeringAnalyticsBrokenTests = async (
 }
 
 export const getEngineeringAnalyticsCiSignalsConfigRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/engineering_analytics/ci-signals-config/`
+    return `/v1/projects/${projectId}/engineering_analytics/ci-signals-config/`
 }
 
 /**
@@ -149,7 +149,7 @@ export const engineeringAnalyticsCiSignalsConfigRetrieve = async (
 }
 
 export const getEngineeringAnalyticsCiSignalsConfigUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/engineering_analytics/ci-signals-config/`
+    return `/v1/projects/${projectId}/engineering_analytics/ci-signals-config/`
 }
 
 /**
@@ -180,8 +180,8 @@ export const getEngineeringAnalyticsCiCardsUrl = (projectId: string, params?: En
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/ci_cards/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/ci_cards/`
+        ? `/v1/projects/${projectId}/engineering_analytics/ci_cards/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/ci_cards/`
 }
 
 /**
@@ -213,8 +213,8 @@ export const getEngineeringAnalyticsCiFailureLogsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/ci_failure_logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/ci_failure_logs/`
+        ? `/v1/projects/${projectId}/engineering_analytics/ci_failure_logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/ci_failure_logs/`
 }
 
 /**
@@ -246,8 +246,8 @@ export const getEngineeringAnalyticsCurrentBranchHealthUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/current_branch_health/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/current_branch_health/`
+        ? `/v1/projects/${projectId}/engineering_analytics/current_branch_health/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/current_branch_health/`
 }
 
 /**
@@ -279,8 +279,8 @@ export const getEngineeringAnalyticsFlakyTestsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/flaky_tests/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/flaky_tests/`
+        ? `/v1/projects/${projectId}/engineering_analytics/flaky_tests/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/flaky_tests/`
 }
 
 /**
@@ -312,8 +312,8 @@ export const getEngineeringAnalyticsJobAggregatesUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/job_aggregates/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/job_aggregates/`
+        ? `/v1/projects/${projectId}/engineering_analytics/job_aggregates/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/job_aggregates/`
 }
 
 /**
@@ -345,8 +345,8 @@ export const getEngineeringAnalyticsMasterFailuresUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/master_failures/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/master_failures/`
+        ? `/v1/projects/${projectId}/engineering_analytics/master_failures/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/master_failures/`
 }
 
 /**
@@ -375,8 +375,8 @@ export const getEngineeringAnalyticsPrCostUrl = (projectId: string, params: Engi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/pr_cost/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/pr_cost/`
+        ? `/v1/projects/${projectId}/engineering_analytics/pr_cost/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/pr_cost/`
 }
 
 /**
@@ -408,8 +408,8 @@ export const getEngineeringAnalyticsPrLifecycleUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/pr_lifecycle/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/pr_lifecycle/`
+        ? `/v1/projects/${projectId}/engineering_analytics/pr_lifecycle/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/pr_lifecycle/`
 }
 
 /**
@@ -438,8 +438,8 @@ export const getEngineeringAnalyticsPrRunsUrl = (projectId: string, params: Engi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/pr_runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/pr_runs/`
+        ? `/v1/projects/${projectId}/engineering_analytics/pr_runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/pr_runs/`
 }
 
 /**
@@ -471,8 +471,8 @@ export const getEngineeringAnalyticsPullRequestsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/pull_requests/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/pull_requests/`
+        ? `/v1/projects/${projectId}/engineering_analytics/pull_requests/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/pull_requests/`
 }
 
 /**
@@ -504,8 +504,8 @@ export const getEngineeringAnalyticsQuarantineUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/quarantine/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/quarantine/`
+        ? `/v1/projects/${projectId}/engineering_analytics/quarantine/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/quarantine/`
 }
 
 /**
@@ -524,7 +524,7 @@ export const engineeringAnalyticsQuarantine = async (
 }
 
 export const getEngineeringAnalyticsQuarantineRequestUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/engineering_analytics/quarantine/request/`
+    return `/v1/projects/${projectId}/engineering_analytics/quarantine/request/`
 }
 
 /**
@@ -559,8 +559,8 @@ export const getEngineeringAnalyticsRepoOverviewUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/repo_overview/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/repo_overview/`
+        ? `/v1/projects/${projectId}/engineering_analytics/repo_overview/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/repo_overview/`
 }
 
 /**
@@ -592,8 +592,8 @@ export const getEngineeringAnalyticsRepoRunActivityUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/repo_run_activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/repo_run_activity/`
+        ? `/v1/projects/${projectId}/engineering_analytics/repo_run_activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/repo_run_activity/`
 }
 
 /**
@@ -625,8 +625,8 @@ export const getEngineeringAnalyticsResolveBranchUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/resolve_branch/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/resolve_branch/`
+        ? `/v1/projects/${projectId}/engineering_analytics/resolve_branch/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/resolve_branch/`
 }
 
 /**
@@ -658,8 +658,8 @@ export const getEngineeringAnalyticsRunFailureLogsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/run_failure_logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/run_failure_logs/`
+        ? `/v1/projects/${projectId}/engineering_analytics/run_failure_logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/run_failure_logs/`
 }
 
 /**
@@ -677,7 +677,7 @@ export const engineeringAnalyticsRunFailureLogs = async (
 }
 
 export const getEngineeringAnalyticsSourcesUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/engineering_analytics/sources/`
+    return `/v1/projects/${projectId}/engineering_analytics/sources/`
 }
 
 /**
@@ -708,8 +708,8 @@ export const getEngineeringAnalyticsTeamCiActivityUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/team_ci_activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/team_ci_activity/`
+        ? `/v1/projects/${projectId}/engineering_analytics/team_ci_activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/team_ci_activity/`
 }
 
 /**
@@ -741,8 +741,8 @@ export const getEngineeringAnalyticsTeamCiHealthUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/team_ci_health/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/team_ci_health/`
+        ? `/v1/projects/${projectId}/engineering_analytics/team_ci_health/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/team_ci_health/`
 }
 
 /**
@@ -774,8 +774,8 @@ export const getEngineeringAnalyticsTeamMergeTrendUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/team_merge_trend/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/team_merge_trend/`
+        ? `/v1/projects/${projectId}/engineering_analytics/team_merge_trend/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/team_merge_trend/`
 }
 
 /**
@@ -807,8 +807,8 @@ export const getEngineeringAnalyticsWorkflowHealthUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/workflow_health/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/workflow_health/`
+        ? `/v1/projects/${projectId}/engineering_analytics/workflow_health/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/workflow_health/`
 }
 
 /**
@@ -840,8 +840,8 @@ export const getEngineeringAnalyticsWorkflowJobsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/workflow_jobs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/workflow_jobs/`
+        ? `/v1/projects/${projectId}/engineering_analytics/workflow_jobs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/workflow_jobs/`
 }
 
 /**
@@ -873,8 +873,8 @@ export const getEngineeringAnalyticsWorkflowRunUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/workflow_run/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/workflow_run/`
+        ? `/v1/projects/${projectId}/engineering_analytics/workflow_run/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/workflow_run/`
 }
 
 /**
@@ -906,8 +906,8 @@ export const getEngineeringAnalyticsWorkflowRunActivityUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/workflow_run_activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/workflow_run_activity/`
+        ? `/v1/projects/${projectId}/engineering_analytics/workflow_run_activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/workflow_run_activity/`
 }
 
 /**
@@ -939,8 +939,8 @@ export const getEngineeringAnalyticsWorkflowRunnerCostsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/workflow_runner_costs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/workflow_runner_costs/`
+        ? `/v1/projects/${projectId}/engineering_analytics/workflow_runner_costs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/workflow_runner_costs/`
 }
 
 /**
@@ -972,8 +972,8 @@ export const getEngineeringAnalyticsWorkflowRunsUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/engineering_analytics/workflow_runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/engineering_analytics/workflow_runs/`
+        ? `/v1/projects/${projectId}/engineering_analytics/workflow_runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/engineering_analytics/workflow_runs/`
 }
 
 /**

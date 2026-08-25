@@ -55,8 +55,8 @@ export const getVisualReviewReposListUrl = (projectId: string, params?: VisualRe
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/visual_review/repos/?${stringifiedParams}`
-        : `/api/projects/${projectId}/visual_review/repos/`
+        ? `/v1/projects/${projectId}/visual_review/repos/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/visual_review/repos/`
 }
 
 /**
@@ -74,7 +74,7 @@ export const visualReviewReposList = async (
 }
 
 export const getVisualReviewReposCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/visual_review/repos/`
+    return `/v1/projects/${projectId}/visual_review/repos/`
 }
 
 /**
@@ -94,7 +94,7 @@ export const visualReviewReposCreate = async (
 }
 
 export const getVisualReviewReposRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/repos/${id}/`
+    return `/v1/projects/${projectId}/visual_review/repos/${id}/`
 }
 
 /**
@@ -112,7 +112,7 @@ export const visualReviewReposRetrieve = async (
 }
 
 export const getVisualReviewReposPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/repos/${id}/`
+    return `/v1/projects/${projectId}/visual_review/repos/${id}/`
 }
 
 /**
@@ -133,7 +133,7 @@ export const visualReviewReposPartialUpdate = async (
 }
 
 export const getVisualReviewReposBaselinesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/repos/${id}/baselines/`
+    return `/v1/projects/${projectId}/visual_review/repos/${id}/baselines/`
 }
 
 /**
@@ -166,8 +166,8 @@ export const getVisualReviewReposQuarantineListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/visual_review/repos/${id}/quarantine/?${stringifiedParams}`
-        : `/api/projects/${projectId}/visual_review/repos/${id}/quarantine/`
+        ? `/v1/projects/${projectId}/visual_review/repos/${id}/quarantine/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/visual_review/repos/${id}/quarantine/`
 }
 
 /**
@@ -189,7 +189,7 @@ export const visualReviewReposQuarantineList = async (
 }
 
 export const getVisualReviewReposQuarantineCreateUrl = (projectId: string, id: string, runType: string) => {
-    return `/api/projects/${projectId}/visual_review/repos/${id}/quarantine/${runType}/`
+    return `/v1/projects/${projectId}/visual_review/repos/${id}/quarantine/${runType}/`
 }
 
 /**
@@ -211,7 +211,7 @@ export const visualReviewReposQuarantineCreate = async (
 }
 
 export const getVisualReviewReposQuarantineExpireCreateUrl = (projectId: string, id: string, runType: string) => {
-    return `/api/projects/${projectId}/visual_review/repos/${id}/quarantine/${runType}/expire/`
+    return `/v1/projects/${projectId}/visual_review/repos/${id}/quarantine/${runType}/expire/`
 }
 
 /**
@@ -233,7 +233,7 @@ export const visualReviewReposQuarantineExpireCreate = async (
 }
 
 export const getVisualReviewReposThumbnailsRetrieveUrl = (projectId: string, id: string, identifier: string) => {
-    return `/api/projects/${projectId}/visual_review/repos/${id}/thumbnails/${identifier}/`
+    return `/v1/projects/${projectId}/visual_review/repos/${id}/thumbnails/${identifier}/`
 }
 
 /**
@@ -267,8 +267,8 @@ export const getVisualReviewReposRunsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/visual_review/repos/${repoId}/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/visual_review/repos/${repoId}/runs/`
+        ? `/v1/projects/${projectId}/visual_review/repos/${repoId}/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/visual_review/repos/${repoId}/runs/`
 }
 
 /**
@@ -287,7 +287,7 @@ export const visualReviewReposRunsList = async (
 }
 
 export const getVisualReviewReposRunsCountsRetrieveUrl = (projectId: string, repoId: string) => {
-    return `/api/projects/${projectId}/visual_review/repos/${repoId}/runs/counts/`
+    return `/v1/projects/${projectId}/visual_review/repos/${repoId}/runs/counts/`
 }
 
 /**
@@ -322,8 +322,8 @@ export const getVisualReviewReposSnapshotsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/visual_review/repos/${repoId}/snapshots/${runType}/${identifier}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/visual_review/repos/${repoId}/snapshots/${runType}/${identifier}/`
+        ? `/v1/projects/${projectId}/visual_review/repos/${repoId}/snapshots/${runType}/${identifier}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/visual_review/repos/${repoId}/snapshots/${runType}/${identifier}/`
 }
 
 /**
@@ -358,8 +358,8 @@ export const getVisualReviewRunsListUrl = (projectId: string, params?: VisualRev
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/visual_review/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/visual_review/runs/`
+        ? `/v1/projects/${projectId}/visual_review/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/visual_review/runs/`
 }
 
 /**
@@ -377,7 +377,7 @@ export const visualReviewRunsList = async (
 }
 
 export const getVisualReviewRunsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/`
+    return `/v1/projects/${projectId}/visual_review/runs/`
 }
 
 /**
@@ -397,7 +397,7 @@ export const visualReviewRunsCreate = async (
 }
 
 export const getVisualReviewRunsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/${id}/`
+    return `/v1/projects/${projectId}/visual_review/runs/${id}/`
 }
 
 /**
@@ -415,7 +415,7 @@ export const visualReviewRunsRetrieve = async (
 }
 
 export const getVisualReviewRunsAddSnapshotsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/${id}/add-snapshots/`
+    return `/v1/projects/${projectId}/visual_review/runs/${id}/add-snapshots/`
 }
 
 /**
@@ -436,7 +436,7 @@ export const visualReviewRunsAddSnapshotsCreate = async (
 }
 
 export const getVisualReviewRunsApproveCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/${id}/approve/`
+    return `/v1/projects/${projectId}/visual_review/runs/${id}/approve/`
 }
 
 /**
@@ -460,7 +460,7 @@ export const visualReviewRunsApproveCreate = async (
 }
 
 export const getVisualReviewRunsCompleteCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/${id}/complete/`
+    return `/v1/projects/${projectId}/visual_review/runs/${id}/complete/`
 }
 
 /**
@@ -478,7 +478,7 @@ export const visualReviewRunsCompleteCreate = async (
 }
 
 export const getVisualReviewRunsFinalizeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/${id}/finalize/`
+    return `/v1/projects/${projectId}/visual_review/runs/${id}/finalize/`
 }
 
 /**
@@ -504,7 +504,7 @@ export const visualReviewRunsFinalizeCreate = async (
 }
 
 export const getVisualReviewRunsRecomputeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/${id}/recompute/`
+    return `/v1/projects/${projectId}/visual_review/runs/${id}/recompute/`
 }
 
 /**
@@ -537,8 +537,8 @@ export const getVisualReviewRunsSnapshotHistoryListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/visual_review/runs/${id}/snapshot-history/?${stringifiedParams}`
-        : `/api/projects/${projectId}/visual_review/runs/${id}/snapshot-history/`
+        ? `/v1/projects/${projectId}/visual_review/runs/${id}/snapshot-history/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/visual_review/runs/${id}/snapshot-history/`
 }
 
 /**
@@ -575,8 +575,8 @@ export const getVisualReviewRunsSnapshotsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/visual_review/runs/${id}/snapshots/?${stringifiedParams}`
-        : `/api/projects/${projectId}/visual_review/runs/${id}/snapshots/`
+        ? `/v1/projects/${projectId}/visual_review/runs/${id}/snapshots/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/visual_review/runs/${id}/snapshots/`
 }
 
 /**
@@ -595,7 +595,7 @@ export const visualReviewRunsSnapshotsList = async (
 }
 
 export const getVisualReviewRunsTolerateCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/${id}/tolerate/`
+    return `/v1/projects/${projectId}/visual_review/runs/${id}/tolerate/`
 }
 
 /**
@@ -631,8 +631,8 @@ export const getVisualReviewRunsToleratedHashesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/visual_review/runs/${id}/tolerated-hashes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/visual_review/runs/${id}/tolerated-hashes/`
+        ? `/v1/projects/${projectId}/visual_review/runs/${id}/tolerated-hashes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/visual_review/runs/${id}/tolerated-hashes/`
 }
 
 /**
@@ -654,7 +654,7 @@ export const visualReviewRunsToleratedHashesList = async (
 }
 
 export const getVisualReviewRunsCountsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/visual_review/runs/counts/`
+    return `/v1/projects/${projectId}/visual_review/runs/counts/`
 }
 
 /**

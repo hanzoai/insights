@@ -99,8 +99,8 @@ export const getCustomerAnalyticsExternalAccountsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/customer_analytics/external/accounts?${stringifiedParams}`
-        : `/api/customer_analytics/external/accounts`
+        ? `/v1/customer_analytics/external/accounts?${stringifiedParams}`
+        : `/v1/customer_analytics/external/accounts`
 }
 
 /**
@@ -129,8 +129,8 @@ export const getAccountNotesListUrl = (projectId: string, params?: AccountNotesL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/account_notes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/account_notes/`
+        ? `/v1/projects/${projectId}/account_notes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/account_notes/`
 }
 
 export const accountNotesList = async (
@@ -159,8 +159,8 @@ export const getAccountRelationshipDefinitionsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/account_relationship_definitions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/account_relationship_definitions/`
+        ? `/v1/projects/${projectId}/account_relationship_definitions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/account_relationship_definitions/`
 }
 
 export const accountRelationshipDefinitionsList = async (
@@ -178,7 +178,7 @@ export const accountRelationshipDefinitionsList = async (
 }
 
 export const getAccountRelationshipDefinitionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/account_relationship_definitions/`
+    return `/v1/projects/${projectId}/account_relationship_definitions/`
 }
 
 export const accountRelationshipDefinitionsCreate = async (
@@ -195,7 +195,7 @@ export const accountRelationshipDefinitionsCreate = async (
 }
 
 export const getAccountRelationshipDefinitionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/account_relationship_definitions/${id}/`
+    return `/v1/projects/${projectId}/account_relationship_definitions/${id}/`
 }
 
 export const accountRelationshipDefinitionsRetrieve = async (
@@ -210,7 +210,7 @@ export const accountRelationshipDefinitionsRetrieve = async (
 }
 
 export const getAccountRelationshipDefinitionsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/account_relationship_definitions/${id}/`
+    return `/v1/projects/${projectId}/account_relationship_definitions/${id}/`
 }
 
 export const accountRelationshipDefinitionsUpdate = async (
@@ -228,7 +228,7 @@ export const accountRelationshipDefinitionsUpdate = async (
 }
 
 export const getAccountRelationshipDefinitionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/account_relationship_definitions/${id}/`
+    return `/v1/projects/${projectId}/account_relationship_definitions/${id}/`
 }
 
 export const accountRelationshipDefinitionsPartialUpdate = async (
@@ -249,7 +249,7 @@ export const accountRelationshipDefinitionsPartialUpdate = async (
 }
 
 export const getAccountRelationshipDefinitionsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/account_relationship_definitions/${id}/`
+    return `/v1/projects/${projectId}/account_relationship_definitions/${id}/`
 }
 
 export const accountRelationshipDefinitionsDestroy = async (
@@ -275,8 +275,8 @@ export const getAccountsListUrl = (projectId: string, params?: AccountsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/accounts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/accounts/`
+        ? `/v1/projects/${projectId}/accounts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/accounts/`
 }
 
 export const accountsList = async (
@@ -291,7 +291,7 @@ export const accountsList = async (
 }
 
 export const getAccountsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/accounts/`
+    return `/v1/projects/${projectId}/accounts/`
 }
 
 export const accountsCreate = async (
@@ -308,7 +308,7 @@ export const accountsCreate = async (
 }
 
 export const getAccountsCustomPropertyValuesListUrl = (projectId: string, accountId: string) => {
-    return `/api/projects/${projectId}/accounts/${accountId}/custom_property_values/`
+    return `/v1/projects/${projectId}/accounts/${accountId}/custom_property_values/`
 }
 
 export const accountsCustomPropertyValuesList = async (
@@ -323,7 +323,7 @@ export const accountsCustomPropertyValuesList = async (
 }
 
 export const getAccountsCustomPropertyValuesCreateUrl = (projectId: string, accountId: string) => {
-    return `/api/projects/${projectId}/accounts/${accountId}/custom_property_values/`
+    return `/v1/projects/${projectId}/accounts/${accountId}/custom_property_values/`
 }
 
 export const accountsCustomPropertyValuesCreate = async (
@@ -356,8 +356,8 @@ export const getAccountsNotebooksListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/accounts/${accountId}/notebooks/?${stringifiedParams}`
-        : `/api/projects/${projectId}/accounts/${accountId}/notebooks/`
+        ? `/v1/projects/${projectId}/accounts/${accountId}/notebooks/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/accounts/${accountId}/notebooks/`
 }
 
 export const accountsNotebooksList = async (
@@ -373,7 +373,7 @@ export const accountsNotebooksList = async (
 }
 
 export const getAccountsNotebooksCreateUrl = (projectId: string, accountId: string) => {
-    return `/api/projects/${projectId}/accounts/${accountId}/notebooks/`
+    return `/v1/projects/${projectId}/accounts/${accountId}/notebooks/`
 }
 
 export const accountsNotebooksCreate = async (
@@ -391,7 +391,7 @@ export const accountsNotebooksCreate = async (
 }
 
 export const getAccountsNotebooksRetrieveUrl = (projectId: string, accountId: string, shortId: string) => {
-    return `/api/projects/${projectId}/accounts/${accountId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/accounts/${accountId}/notebooks/${shortId}/`
 }
 
 export const accountsNotebooksRetrieve = async (
@@ -407,7 +407,7 @@ export const accountsNotebooksRetrieve = async (
 }
 
 export const getAccountsNotebooksDestroyUrl = (projectId: string, accountId: string, shortId: string) => {
-    return `/api/projects/${projectId}/accounts/${accountId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/accounts/${accountId}/notebooks/${shortId}/`
 }
 
 export const accountsNotebooksDestroy = async (
@@ -438,8 +438,8 @@ export const getAccountsRelationshipsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/accounts/${accountId}/relationships/?${stringifiedParams}`
-        : `/api/projects/${projectId}/accounts/${accountId}/relationships/`
+        ? `/v1/projects/${projectId}/accounts/${accountId}/relationships/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/accounts/${accountId}/relationships/`
 }
 
 export const accountsRelationshipsList = async (
@@ -455,7 +455,7 @@ export const accountsRelationshipsList = async (
 }
 
 export const getAccountsRelationshipsCreateUrl = (projectId: string, accountId: string) => {
-    return `/api/projects/${projectId}/accounts/${accountId}/relationships/`
+    return `/v1/projects/${projectId}/accounts/${accountId}/relationships/`
 }
 
 export const accountsRelationshipsCreate = async (
@@ -473,7 +473,7 @@ export const accountsRelationshipsCreate = async (
 }
 
 export const getAccountsRelationshipsEndCreateUrl = (projectId: string, accountId: string, id: string) => {
-    return `/api/projects/${projectId}/accounts/${accountId}/relationships/${id}/end/`
+    return `/v1/projects/${projectId}/accounts/${accountId}/relationships/${id}/end/`
 }
 
 export const accountsRelationshipsEndCreate = async (
@@ -489,7 +489,7 @@ export const accountsRelationshipsEndCreate = async (
 }
 
 export const getAccountsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/accounts/${id}/`
+    return `/v1/projects/${projectId}/accounts/${id}/`
 }
 
 export const accountsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<AccountApi> => {
@@ -500,7 +500,7 @@ export const accountsRetrieve = async (projectId: string, id: string, options?: 
 }
 
 export const getAccountsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/accounts/${id}/`
+    return `/v1/projects/${projectId}/accounts/${id}/`
 }
 
 export const accountsUpdate = async (
@@ -518,7 +518,7 @@ export const accountsUpdate = async (
 }
 
 export const getAccountsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/accounts/${id}/`
+    return `/v1/projects/${projectId}/accounts/${id}/`
 }
 
 export const accountsPartialUpdate = async (
@@ -536,7 +536,7 @@ export const accountsPartialUpdate = async (
 }
 
 export const getAccountsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/accounts/${id}/`
+    return `/v1/projects/${projectId}/accounts/${id}/`
 }
 
 export const accountsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -558,8 +558,8 @@ export const getAccountsSummariesListUrl = (projectId: string, id: string, param
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/accounts/${id}/summaries/?${stringifiedParams}`
-        : `/api/projects/${projectId}/accounts/${id}/summaries/`
+        ? `/v1/projects/${projectId}/accounts/${id}/summaries/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/accounts/${id}/summaries/`
 }
 
 export const accountsSummariesList = async (
@@ -575,7 +575,7 @@ export const accountsSummariesList = async (
 }
 
 export const getAccountsSupportTicketsListUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/accounts/${id}/support_tickets/`
+    return `/v1/projects/${projectId}/accounts/${id}/support_tickets/`
 }
 
 export const accountsSupportTicketsList = async (
@@ -601,8 +601,8 @@ export const getAnnouncementsListUrl = (projectId: string, params?: Announcement
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/announcements/?${stringifiedParams}`
-        : `/api/projects/${projectId}/announcements/`
+        ? `/v1/projects/${projectId}/announcements/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/announcements/`
 }
 
 export const announcementsList = async (
@@ -617,7 +617,7 @@ export const announcementsList = async (
 }
 
 export const getAnnouncementsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/announcements/`
+    return `/v1/projects/${projectId}/announcements/`
 }
 
 export const announcementsCreate = async (
@@ -634,7 +634,7 @@ export const announcementsCreate = async (
 }
 
 export const getAnnouncementsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/announcements/${shortId}/`
+    return `/v1/projects/${projectId}/announcements/${shortId}/`
 }
 
 export const announcementsRetrieve = async (
@@ -649,7 +649,7 @@ export const announcementsRetrieve = async (
 }
 
 export const getAnnouncementsChannelsListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/announcements/channels/`
+    return `/v1/projects/${projectId}/announcements/channels/`
 }
 
 /**
@@ -680,8 +680,8 @@ export const getCustomPropertyDefinitionsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/custom_property_definitions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/custom_property_definitions/`
+        ? `/v1/projects/${projectId}/custom_property_definitions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/custom_property_definitions/`
 }
 
 export const customPropertyDefinitionsList = async (
@@ -699,7 +699,7 @@ export const customPropertyDefinitionsList = async (
 }
 
 export const getCustomPropertyDefinitionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/custom_property_definitions/`
+    return `/v1/projects/${projectId}/custom_property_definitions/`
 }
 
 export const customPropertyDefinitionsCreate = async (
@@ -716,7 +716,7 @@ export const customPropertyDefinitionsCreate = async (
 }
 
 export const getCustomPropertyDefinitionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_definitions/${id}/`
+    return `/v1/projects/${projectId}/custom_property_definitions/${id}/`
 }
 
 export const customPropertyDefinitionsRetrieve = async (
@@ -731,7 +731,7 @@ export const customPropertyDefinitionsRetrieve = async (
 }
 
 export const getCustomPropertyDefinitionsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_definitions/${id}/`
+    return `/v1/projects/${projectId}/custom_property_definitions/${id}/`
 }
 
 export const customPropertyDefinitionsUpdate = async (
@@ -749,7 +749,7 @@ export const customPropertyDefinitionsUpdate = async (
 }
 
 export const getCustomPropertyDefinitionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_definitions/${id}/`
+    return `/v1/projects/${projectId}/custom_property_definitions/${id}/`
 }
 
 export const customPropertyDefinitionsPartialUpdate = async (
@@ -767,7 +767,7 @@ export const customPropertyDefinitionsPartialUpdate = async (
 }
 
 export const getCustomPropertyDefinitionsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_definitions/${id}/`
+    return `/v1/projects/${projectId}/custom_property_definitions/${id}/`
 }
 
 export const customPropertyDefinitionsDestroy = async (
@@ -796,8 +796,8 @@ export const getCustomPropertyDefinitionsValuesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/custom_property_definitions/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/custom_property_definitions/values/`
+        ? `/v1/projects/${projectId}/custom_property_definitions/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/custom_property_definitions/values/`
 }
 
 export const customPropertyDefinitionsValuesRetrieve = async (
@@ -826,8 +826,8 @@ export const getCustomPropertySourcesListUrl = (projectId: string, params?: Cust
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/custom_property_sources/?${stringifiedParams}`
-        : `/api/projects/${projectId}/custom_property_sources/`
+        ? `/v1/projects/${projectId}/custom_property_sources/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/custom_property_sources/`
 }
 
 export const customPropertySourcesList = async (
@@ -842,7 +842,7 @@ export const customPropertySourcesList = async (
 }
 
 export const getCustomPropertySourcesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/custom_property_sources/`
+    return `/v1/projects/${projectId}/custom_property_sources/`
 }
 
 export const customPropertySourcesCreate = async (
@@ -859,7 +859,7 @@ export const customPropertySourcesCreate = async (
 }
 
 export const getCustomPropertySourcesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_sources/${id}/`
+    return `/v1/projects/${projectId}/custom_property_sources/${id}/`
 }
 
 export const customPropertySourcesRetrieve = async (
@@ -874,7 +874,7 @@ export const customPropertySourcesRetrieve = async (
 }
 
 export const getCustomPropertySourcesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_sources/${id}/`
+    return `/v1/projects/${projectId}/custom_property_sources/${id}/`
 }
 
 export const customPropertySourcesUpdate = async (
@@ -892,7 +892,7 @@ export const customPropertySourcesUpdate = async (
 }
 
 export const getCustomPropertySourcesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_sources/${id}/`
+    return `/v1/projects/${projectId}/custom_property_sources/${id}/`
 }
 
 export const customPropertySourcesPartialUpdate = async (
@@ -910,7 +910,7 @@ export const customPropertySourcesPartialUpdate = async (
 }
 
 export const getCustomPropertySourcesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_sources/${id}/`
+    return `/v1/projects/${projectId}/custom_property_sources/${id}/`
 }
 
 export const customPropertySourcesDestroy = async (
@@ -925,7 +925,7 @@ export const customPropertySourcesDestroy = async (
 }
 
 export const getCustomPropertySourcesBackfillUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_sources/${id}/backfill/`
+    return `/v1/projects/${projectId}/custom_property_sources/${id}/backfill/`
 }
 
 /**
@@ -960,8 +960,8 @@ export const getCustomPropertySourcesRunsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/custom_property_sources/${id}/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/custom_property_sources/${id}/runs/`
+        ? `/v1/projects/${projectId}/custom_property_sources/${id}/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/custom_property_sources/${id}/runs/`
 }
 
 /**
@@ -985,7 +985,7 @@ export const customPropertySourcesRunsList = async (
 }
 
 export const getCustomPropertySourcesSyncUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_property_sources/${id}/sync/`
+    return `/v1/projects/${projectId}/custom_property_sources/${id}/sync/`
 }
 
 /**
@@ -1016,8 +1016,8 @@ export const getCustomerJourneysListUrl = (projectId: string, params?: CustomerJ
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/customer_journeys/?${stringifiedParams}`
-        : `/api/projects/${projectId}/customer_journeys/`
+        ? `/v1/projects/${projectId}/customer_journeys/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/customer_journeys/`
 }
 
 export const customerJourneysList = async (
@@ -1032,7 +1032,7 @@ export const customerJourneysList = async (
 }
 
 export const getCustomerJourneysCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/customer_journeys/`
+    return `/v1/projects/${projectId}/customer_journeys/`
 }
 
 export const customerJourneysCreate = async (
@@ -1049,7 +1049,7 @@ export const customerJourneysCreate = async (
 }
 
 export const getCustomerJourneysRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/customer_journeys/${id}/`
+    return `/v1/projects/${projectId}/customer_journeys/${id}/`
 }
 
 export const customerJourneysRetrieve = async (
@@ -1064,7 +1064,7 @@ export const customerJourneysRetrieve = async (
 }
 
 export const getCustomerJourneysUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/customer_journeys/${id}/`
+    return `/v1/projects/${projectId}/customer_journeys/${id}/`
 }
 
 export const customerJourneysUpdate = async (
@@ -1082,7 +1082,7 @@ export const customerJourneysUpdate = async (
 }
 
 export const getCustomerJourneysPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/customer_journeys/${id}/`
+    return `/v1/projects/${projectId}/customer_journeys/${id}/`
 }
 
 export const customerJourneysPartialUpdate = async (
@@ -1100,7 +1100,7 @@ export const customerJourneysPartialUpdate = async (
 }
 
 export const getCustomerJourneysDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/customer_journeys/${id}/`
+    return `/v1/projects/${projectId}/customer_journeys/${id}/`
 }
 
 export const customerJourneysDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -1122,8 +1122,8 @@ export const getCustomerProfileConfigsListUrl = (projectId: string, params?: Cus
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/customer_profile_configs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/customer_profile_configs/`
+        ? `/v1/projects/${projectId}/customer_profile_configs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/customer_profile_configs/`
 }
 
 export const customerProfileConfigsList = async (
@@ -1138,7 +1138,7 @@ export const customerProfileConfigsList = async (
 }
 
 export const getCustomerProfileConfigsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/customer_profile_configs/`
+    return `/v1/projects/${projectId}/customer_profile_configs/`
 }
 
 export const customerProfileConfigsCreate = async (
@@ -1155,7 +1155,7 @@ export const customerProfileConfigsCreate = async (
 }
 
 export const getCustomerProfileConfigsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/customer_profile_configs/${id}/`
+    return `/v1/projects/${projectId}/customer_profile_configs/${id}/`
 }
 
 export const customerProfileConfigsRetrieve = async (
@@ -1170,7 +1170,7 @@ export const customerProfileConfigsRetrieve = async (
 }
 
 export const getCustomerProfileConfigsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/customer_profile_configs/${id}/`
+    return `/v1/projects/${projectId}/customer_profile_configs/${id}/`
 }
 
 export const customerProfileConfigsUpdate = async (
@@ -1188,7 +1188,7 @@ export const customerProfileConfigsUpdate = async (
 }
 
 export const getCustomerProfileConfigsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/customer_profile_configs/${id}/`
+    return `/v1/projects/${projectId}/customer_profile_configs/${id}/`
 }
 
 export const customerProfileConfigsPartialUpdate = async (
@@ -1206,7 +1206,7 @@ export const customerProfileConfigsPartialUpdate = async (
 }
 
 export const getCustomerProfileConfigsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/customer_profile_configs/${id}/`
+    return `/v1/projects/${projectId}/customer_profile_configs/${id}/`
 }
 
 export const customerProfileConfigsDestroy = async (
@@ -1221,7 +1221,7 @@ export const customerProfileConfigsDestroy = async (
 }
 
 export const getEventStreamsListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_streams/`
+    return `/v1/projects/${projectId}/event_streams/`
 }
 
 /**
@@ -1239,7 +1239,7 @@ export const eventStreamsList = async (projectId: string, options?: RequestInit)
 }
 
 export const getEventStreamsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_streams/`
+    return `/v1/projects/${projectId}/event_streams/`
 }
 
 /**
@@ -1263,7 +1263,7 @@ export const eventStreamsCreate = async (
 }
 
 export const getEventStreamsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_streams/${id}/`
+    return `/v1/projects/${projectId}/event_streams/${id}/`
 }
 
 /**
@@ -1288,7 +1288,7 @@ export const eventStreamsUpdate = async (
 }
 
 export const getEventStreamsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_streams/${id}/`
+    return `/v1/projects/${projectId}/event_streams/${id}/`
 }
 
 /**
@@ -1313,7 +1313,7 @@ export const eventStreamsPartialUpdate = async (
 }
 
 export const getEventStreamsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_streams/${id}/`
+    return `/v1/projects/${projectId}/event_streams/${id}/`
 }
 
 /**
@@ -1331,7 +1331,7 @@ export const eventStreamsDestroy = async (projectId: string, id: string, options
 }
 
 export const getEventStreamsAddAccountCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_streams/${id}/add_account/`
+    return `/v1/projects/${projectId}/event_streams/${id}/add_account/`
 }
 
 /**
@@ -1356,7 +1356,7 @@ export const eventStreamsAddAccountCreate = async (
 }
 
 export const getEventStreamsRemoveAccountCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_streams/${id}/remove_account/`
+    return `/v1/projects/${projectId}/event_streams/${id}/remove_account/`
 }
 
 /**
@@ -1381,7 +1381,7 @@ export const eventStreamsRemoveAccountCreate = async (
 }
 
 export const getEventStreamsSendTestMessageCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_streams/${id}/send_test_message/`
+    return `/v1/projects/${projectId}/event_streams/${id}/send_test_message/`
 }
 
 /**
@@ -1418,8 +1418,8 @@ export const getGroupsTypesMetricsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/?${stringifiedParams}`
-        : `/api/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/`
+        ? `/v1/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/`
 }
 
 export const groupsTypesMetricsList = async (
@@ -1438,7 +1438,7 @@ export const groupsTypesMetricsList = async (
 }
 
 export const getGroupsTypesMetricsCreateUrl = (projectId: string, groupTypeIndex: number) => {
-    return `/api/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/`
+    return `/v1/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/`
 }
 
 export const groupsTypesMetricsCreate = async (
@@ -1456,7 +1456,7 @@ export const groupsTypesMetricsCreate = async (
 }
 
 export const getGroupsTypesMetricsRetrieveUrl = (projectId: string, groupTypeIndex: number, id: string) => {
-    return `/api/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/${id}/`
+    return `/v1/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/${id}/`
 }
 
 export const groupsTypesMetricsRetrieve = async (
@@ -1472,7 +1472,7 @@ export const groupsTypesMetricsRetrieve = async (
 }
 
 export const getGroupsTypesMetricsUpdateUrl = (projectId: string, groupTypeIndex: number, id: string) => {
-    return `/api/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/${id}/`
+    return `/v1/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/${id}/`
 }
 
 export const groupsTypesMetricsUpdate = async (
@@ -1491,7 +1491,7 @@ export const groupsTypesMetricsUpdate = async (
 }
 
 export const getGroupsTypesMetricsPartialUpdateUrl = (projectId: string, groupTypeIndex: number, id: string) => {
-    return `/api/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/${id}/`
+    return `/v1/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/${id}/`
 }
 
 export const groupsTypesMetricsPartialUpdate = async (
@@ -1510,7 +1510,7 @@ export const groupsTypesMetricsPartialUpdate = async (
 }
 
 export const getGroupsTypesMetricsDestroyUrl = (projectId: string, groupTypeIndex: number, id: string) => {
-    return `/api/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/${id}/`
+    return `/v1/projects/${projectId}/groups_types/${groupTypeIndex}/metrics/${id}/`
 }
 
 export const groupsTypesMetricsDestroy = async (

@@ -124,8 +124,8 @@ export const getErrorTrackingAssignmentRulesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/assignment_rules/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/assignment_rules/`
+        ? `/v1/projects/${projectId}/error_tracking/assignment_rules/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/assignment_rules/`
 }
 
 export const errorTrackingAssignmentRulesList = async (
@@ -143,7 +143,7 @@ export const errorTrackingAssignmentRulesList = async (
 }
 
 export const getErrorTrackingAssignmentRulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/assignment_rules/`
+    return `/v1/projects/${projectId}/error_tracking/assignment_rules/`
 }
 
 export const errorTrackingAssignmentRulesCreate = async (
@@ -160,7 +160,7 @@ export const errorTrackingAssignmentRulesCreate = async (
 }
 
 export const getErrorTrackingAssignmentRulesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/assignment_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/assignment_rules/${id}/`
 }
 
 export const errorTrackingAssignmentRulesRetrieve = async (
@@ -175,7 +175,7 @@ export const errorTrackingAssignmentRulesRetrieve = async (
 }
 
 export const getErrorTrackingAssignmentRulesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/assignment_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/assignment_rules/${id}/`
 }
 
 export const errorTrackingAssignmentRulesUpdate = async (
@@ -193,7 +193,7 @@ export const errorTrackingAssignmentRulesUpdate = async (
 }
 
 export const getErrorTrackingAssignmentRulesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/assignment_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/assignment_rules/${id}/`
 }
 
 export const errorTrackingAssignmentRulesPartialUpdate = async (
@@ -211,7 +211,7 @@ export const errorTrackingAssignmentRulesPartialUpdate = async (
 }
 
 export const getErrorTrackingAssignmentRulesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/assignment_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/assignment_rules/${id}/`
 }
 
 export const errorTrackingAssignmentRulesDestroy = async (
@@ -226,7 +226,7 @@ export const errorTrackingAssignmentRulesDestroy = async (
 }
 
 export const getErrorTrackingAssignmentRulesReorderPartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/assignment_rules/reorder/`
+    return `/v1/projects/${projectId}/error_tracking/assignment_rules/reorder/`
 }
 
 export const errorTrackingAssignmentRulesReorderPartialUpdate = async (
@@ -254,8 +254,8 @@ export const getErrorTrackingBypassRulesListUrl = (projectId: string, params?: E
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/bypass_rules/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/bypass_rules/`
+        ? `/v1/projects/${projectId}/error_tracking/bypass_rules/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/bypass_rules/`
 }
 
 export const errorTrackingBypassRulesList = async (
@@ -270,7 +270,7 @@ export const errorTrackingBypassRulesList = async (
 }
 
 export const getErrorTrackingBypassRulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/bypass_rules/`
+    return `/v1/projects/${projectId}/error_tracking/bypass_rules/`
 }
 
 export const errorTrackingBypassRulesCreate = async (
@@ -287,7 +287,7 @@ export const errorTrackingBypassRulesCreate = async (
 }
 
 export const getErrorTrackingBypassRulesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/bypass_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/bypass_rules/${id}/`
 }
 
 export const errorTrackingBypassRulesRetrieve = async (
@@ -302,7 +302,7 @@ export const errorTrackingBypassRulesRetrieve = async (
 }
 
 export const getErrorTrackingBypassRulesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/bypass_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/bypass_rules/${id}/`
 }
 
 export const errorTrackingBypassRulesUpdate = async (
@@ -320,7 +320,7 @@ export const errorTrackingBypassRulesUpdate = async (
 }
 
 export const getErrorTrackingBypassRulesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/bypass_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/bypass_rules/${id}/`
 }
 
 export const errorTrackingBypassRulesPartialUpdate = async (
@@ -338,7 +338,7 @@ export const errorTrackingBypassRulesPartialUpdate = async (
 }
 
 export const getErrorTrackingBypassRulesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/bypass_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/bypass_rules/${id}/`
 }
 
 export const errorTrackingBypassRulesDestroy = async (
@@ -353,7 +353,7 @@ export const errorTrackingBypassRulesDestroy = async (
 }
 
 export const getErrorTrackingBypassRulesReorderPartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/bypass_rules/reorder/`
+    return `/v1/projects/${projectId}/error_tracking/bypass_rules/reorder/`
 }
 
 export const errorTrackingBypassRulesReorderPartialUpdate = async (
@@ -384,8 +384,8 @@ export const getErrorTrackingExternalReferencesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/external_references/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/external_references/`
+        ? `/v1/projects/${projectId}/error_tracking/external_references/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/external_references/`
 }
 
 export const errorTrackingExternalReferencesList = async (
@@ -403,7 +403,7 @@ export const errorTrackingExternalReferencesList = async (
 }
 
 export const getErrorTrackingExternalReferencesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/external_references/`
+    return `/v1/projects/${projectId}/error_tracking/external_references/`
 }
 
 export const errorTrackingExternalReferencesCreate = async (
@@ -420,7 +420,7 @@ export const errorTrackingExternalReferencesCreate = async (
 }
 
 export const getErrorTrackingExternalReferencesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/external_references/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/external_references/${id}/`
 }
 
 export const errorTrackingExternalReferencesRetrieve = async (
@@ -438,7 +438,7 @@ export const errorTrackingExternalReferencesRetrieve = async (
 }
 
 export const getErrorTrackingExternalReferencesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/external_references/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/external_references/${id}/`
 }
 
 /**
@@ -470,8 +470,8 @@ export const getErrorTrackingFingerprintsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/fingerprints/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/fingerprints/`
+        ? `/v1/projects/${projectId}/error_tracking/fingerprints/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/fingerprints/`
 }
 
 export const errorTrackingFingerprintsList = async (
@@ -489,7 +489,7 @@ export const errorTrackingFingerprintsList = async (
 }
 
 export const getErrorTrackingFingerprintsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/fingerprints/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/fingerprints/${id}/`
 }
 
 export const errorTrackingFingerprintsRetrieve = async (
@@ -504,7 +504,7 @@ export const errorTrackingFingerprintsRetrieve = async (
 }
 
 export const getErrorTrackingFingerprintsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/fingerprints/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/fingerprints/${id}/`
 }
 
 /**
@@ -536,8 +536,8 @@ export const getErrorTrackingFingerprintsResolveRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/fingerprints/resolve/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/fingerprints/resolve/`
+        ? `/v1/projects/${projectId}/error_tracking/fingerprints/resolve/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/fingerprints/resolve/`
 }
 
 export const errorTrackingFingerprintsResolveRetrieve = async (
@@ -566,8 +566,8 @@ export const getErrorTrackingGitProviderFileLinksResolveGithubRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/git-provider-file-links/resolve_github/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/git-provider-file-links/resolve_github/`
+        ? `/v1/projects/${projectId}/error_tracking/git-provider-file-links/resolve_github/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/git-provider-file-links/resolve_github/`
 }
 
 export const errorTrackingGitProviderFileLinksResolveGithubRetrieve = async (
@@ -599,8 +599,8 @@ export const getErrorTrackingGitProviderFileLinksResolveGitlabRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/git-provider-file-links/resolve_gitlab/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/git-provider-file-links/resolve_gitlab/`
+        ? `/v1/projects/${projectId}/error_tracking/git-provider-file-links/resolve_gitlab/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/git-provider-file-links/resolve_gitlab/`
 }
 
 export const errorTrackingGitProviderFileLinksResolveGitlabRetrieve = async (
@@ -618,7 +618,7 @@ export const errorTrackingGitProviderFileLinksResolveGitlabRetrieve = async (
 }
 
 export const getErrorTrackingGroupingRulesListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/grouping_rules/`
+    return `/v1/projects/${projectId}/error_tracking/grouping_rules/`
 }
 
 export const errorTrackingGroupingRulesList = async (
@@ -632,7 +632,7 @@ export const errorTrackingGroupingRulesList = async (
 }
 
 export const getErrorTrackingGroupingRulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/grouping_rules/`
+    return `/v1/projects/${projectId}/error_tracking/grouping_rules/`
 }
 
 export const errorTrackingGroupingRulesCreate = async (
@@ -649,7 +649,7 @@ export const errorTrackingGroupingRulesCreate = async (
 }
 
 export const getErrorTrackingGroupingRulesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/grouping_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/grouping_rules/${id}/`
 }
 
 export const errorTrackingGroupingRulesRetrieve = async (
@@ -664,7 +664,7 @@ export const errorTrackingGroupingRulesRetrieve = async (
 }
 
 export const getErrorTrackingGroupingRulesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/grouping_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/grouping_rules/${id}/`
 }
 
 export const errorTrackingGroupingRulesUpdate = async (
@@ -682,7 +682,7 @@ export const errorTrackingGroupingRulesUpdate = async (
 }
 
 export const getErrorTrackingGroupingRulesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/grouping_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/grouping_rules/${id}/`
 }
 
 export const errorTrackingGroupingRulesPartialUpdate = async (
@@ -700,7 +700,7 @@ export const errorTrackingGroupingRulesPartialUpdate = async (
 }
 
 export const getErrorTrackingGroupingRulesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/grouping_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/grouping_rules/${id}/`
 }
 
 export const errorTrackingGroupingRulesDestroy = async (
@@ -715,7 +715,7 @@ export const errorTrackingGroupingRulesDestroy = async (
 }
 
 export const getErrorTrackingGroupingRulesReorderPartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/grouping_rules/reorder/`
+    return `/v1/projects/${projectId}/error_tracking/grouping_rules/reorder/`
 }
 
 export const errorTrackingGroupingRulesReorderPartialUpdate = async (
@@ -743,8 +743,8 @@ export const getErrorTrackingIssuesListUrl = (projectId: string, params?: ErrorT
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/issues/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/issues/`
+        ? `/v1/projects/${projectId}/error_tracking/issues/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/issues/`
 }
 
 export const errorTrackingIssuesList = async (
@@ -759,7 +759,7 @@ export const errorTrackingIssuesList = async (
 }
 
 export const getErrorTrackingIssuesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/`
 }
 
 export const errorTrackingIssuesRetrieve = async (
@@ -774,7 +774,7 @@ export const errorTrackingIssuesRetrieve = async (
 }
 
 export const getErrorTrackingIssuesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/`
 }
 
 export const errorTrackingIssuesUpdate = async (
@@ -792,7 +792,7 @@ export const errorTrackingIssuesUpdate = async (
 }
 
 export const getErrorTrackingIssuesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/`
 }
 
 export const errorTrackingIssuesPartialUpdate = async (
@@ -810,7 +810,7 @@ export const errorTrackingIssuesPartialUpdate = async (
 }
 
 export const getErrorTrackingIssuesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/`
 }
 
 /**
@@ -828,7 +828,7 @@ export const errorTrackingIssuesDestroy = async (
 }
 
 export const getErrorTrackingIssuesActivityRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/activity/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/activity/`
 }
 
 export const errorTrackingIssuesActivityRetrieve = async (
@@ -843,7 +843,7 @@ export const errorTrackingIssuesActivityRetrieve = async (
 }
 
 export const getErrorTrackingIssuesAssignPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/assign/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/assign/`
 }
 
 export const errorTrackingIssuesAssignPartialUpdate = async (
@@ -861,7 +861,7 @@ export const errorTrackingIssuesAssignPartialUpdate = async (
 }
 
 export const getErrorTrackingIssuesCohortUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/cohort/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/cohort/`
 }
 
 export const errorTrackingIssuesCohortUpdate = async (
@@ -879,7 +879,7 @@ export const errorTrackingIssuesCohortUpdate = async (
 }
 
 export const getErrorTrackingIssuesMergeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/merge/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/merge/`
 }
 
 export const errorTrackingIssuesMergeCreate = async (
@@ -897,7 +897,7 @@ export const errorTrackingIssuesMergeCreate = async (
 }
 
 export const getErrorTrackingIssuesSplitCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/${id}/split/`
+    return `/v1/projects/${projectId}/error_tracking/issues/${id}/split/`
 }
 
 export const errorTrackingIssuesSplitCreate = async (
@@ -915,7 +915,7 @@ export const errorTrackingIssuesSplitCreate = async (
 }
 
 export const getErrorTrackingIssuesAllActivityRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/activity/`
+    return `/v1/projects/${projectId}/error_tracking/issues/activity/`
 }
 
 export const errorTrackingIssuesAllActivityRetrieve = async (
@@ -929,7 +929,7 @@ export const errorTrackingIssuesAllActivityRetrieve = async (
 }
 
 export const getErrorTrackingIssuesBulkCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/bulk/`
+    return `/v1/projects/${projectId}/error_tracking/issues/bulk/`
 }
 
 export const errorTrackingIssuesBulkCreate = async (
@@ -946,7 +946,7 @@ export const errorTrackingIssuesBulkCreate = async (
 }
 
 export const getErrorTrackingIssuesExistsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/exists/`
+    return `/v1/projects/${projectId}/error_tracking/issues/exists/`
 }
 
 export const errorTrackingIssuesExistsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -957,7 +957,7 @@ export const errorTrackingIssuesExistsRetrieve = async (projectId: string, optio
 }
 
 export const getErrorTrackingIssuesValuesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/issues/values/`
+    return `/v1/projects/${projectId}/error_tracking/issues/values/`
 }
 
 export const errorTrackingIssuesValuesRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -968,7 +968,7 @@ export const errorTrackingIssuesValuesRetrieve = async (projectId: string, optio
 }
 
 export const getErrorTrackingQueryIssueCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/query/issue/`
+    return `/v1/projects/${projectId}/error_tracking/query/issue/`
 }
 
 /**
@@ -989,7 +989,7 @@ export const errorTrackingQueryIssueCreate = async (
 }
 
 export const getErrorTrackingQueryIssueEventsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/query/issue_events/`
+    return `/v1/projects/${projectId}/error_tracking/query/issue_events/`
 }
 
 /**
@@ -1010,7 +1010,7 @@ export const errorTrackingQueryIssueEventsCreate = async (
 }
 
 export const getErrorTrackingQueryIssuesListCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/query/issues/`
+    return `/v1/projects/${projectId}/error_tracking/query/issues/`
 }
 
 /**
@@ -1045,8 +1045,8 @@ export const getErrorTrackingRecommendationsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/recommendations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/recommendations/`
+        ? `/v1/projects/${projectId}/error_tracking/recommendations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/recommendations/`
 }
 
 export const errorTrackingRecommendationsList = async (
@@ -1064,7 +1064,7 @@ export const errorTrackingRecommendationsList = async (
 }
 
 export const getErrorTrackingRecommendationsDismissCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/recommendations/${id}/dismiss/`
+    return `/v1/projects/${projectId}/error_tracking/recommendations/${id}/dismiss/`
 }
 
 export const errorTrackingRecommendationsDismissCreate = async (
@@ -1079,7 +1079,7 @@ export const errorTrackingRecommendationsDismissCreate = async (
 }
 
 export const getErrorTrackingRecommendationsRefreshCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/recommendations/${id}/refresh/`
+    return `/v1/projects/${projectId}/error_tracking/recommendations/${id}/refresh/`
 }
 
 export const errorTrackingRecommendationsRefreshCreate = async (
@@ -1094,7 +1094,7 @@ export const errorTrackingRecommendationsRefreshCreate = async (
 }
 
 export const getErrorTrackingRecommendationsRestoreCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/recommendations/${id}/restore/`
+    return `/v1/projects/${projectId}/error_tracking/recommendations/${id}/restore/`
 }
 
 export const errorTrackingRecommendationsRestoreCreate = async (
@@ -1120,8 +1120,8 @@ export const getErrorTrackingReleasesListUrl = (projectId: string, params?: Erro
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/releases/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/releases/`
+        ? `/v1/projects/${projectId}/error_tracking/releases/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/releases/`
 }
 
 export const errorTrackingReleasesList = async (
@@ -1136,7 +1136,7 @@ export const errorTrackingReleasesList = async (
 }
 
 export const getErrorTrackingReleasesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/releases/`
+    return `/v1/projects/${projectId}/error_tracking/releases/`
 }
 
 export const errorTrackingReleasesCreate = async (
@@ -1153,7 +1153,7 @@ export const errorTrackingReleasesCreate = async (
 }
 
 export const getErrorTrackingReleasesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/releases/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/releases/${id}/`
 }
 
 export const errorTrackingReleasesRetrieve = async (
@@ -1168,7 +1168,7 @@ export const errorTrackingReleasesRetrieve = async (
 }
 
 export const getErrorTrackingReleasesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/releases/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/releases/${id}/`
 }
 
 export const errorTrackingReleasesUpdate = async (
@@ -1186,7 +1186,7 @@ export const errorTrackingReleasesUpdate = async (
 }
 
 export const getErrorTrackingReleasesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/releases/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/releases/${id}/`
 }
 
 export const errorTrackingReleasesPartialUpdate = async (
@@ -1204,7 +1204,7 @@ export const errorTrackingReleasesPartialUpdate = async (
 }
 
 export const getErrorTrackingReleasesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/releases/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/releases/${id}/`
 }
 
 export const errorTrackingReleasesDestroy = async (
@@ -1219,7 +1219,7 @@ export const errorTrackingReleasesDestroy = async (
 }
 
 export const getErrorTrackingReleasesHashRetrieveUrl = (projectId: string, hashId: string) => {
-    return `/api/projects/${projectId}/error_tracking/releases/hash/${hashId}/`
+    return `/v1/projects/${projectId}/error_tracking/releases/hash/${hashId}/`
 }
 
 export const errorTrackingReleasesHashRetrieve = async (
@@ -1234,7 +1234,7 @@ export const errorTrackingReleasesHashRetrieve = async (
 }
 
 export const getErrorTrackingSettingsRetrieveSettingsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/settings/retrieve_settings/`
+    return `/v1/projects/${projectId}/error_tracking/settings/retrieve_settings/`
 }
 
 export const errorTrackingSettingsRetrieveSettingsRetrieve = async (
@@ -1248,7 +1248,7 @@ export const errorTrackingSettingsRetrieveSettingsRetrieve = async (
 }
 
 export const getErrorTrackingSettingsUpdateSettingsPartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/settings/update_settings/`
+    return `/v1/projects/${projectId}/error_tracking/settings/update_settings/`
 }
 
 export const errorTrackingSettingsUpdateSettingsPartialUpdate = async (
@@ -1265,7 +1265,7 @@ export const errorTrackingSettingsUpdateSettingsPartialUpdate = async (
 }
 
 export const getErrorTrackingSpikeDetectionConfigListUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/spike_detection_config/`
+    return `/v1/projects/${projectId}/error_tracking/spike_detection_config/`
 }
 
 export const errorTrackingSpikeDetectionConfigList = async (
@@ -1279,7 +1279,7 @@ export const errorTrackingSpikeDetectionConfigList = async (
 }
 
 export const getErrorTrackingSpikeDetectionConfigUpdateConfigPartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/spike_detection_config/update_config/`
+    return `/v1/projects/${projectId}/error_tracking/spike_detection_config/update_config/`
 }
 
 export const errorTrackingSpikeDetectionConfigUpdateConfigPartialUpdate = async (
@@ -1310,8 +1310,8 @@ export const getErrorTrackingSpikeEventsListUrl = (projectId: string, params?: E
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/spike_events/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/spike_events/`
+        ? `/v1/projects/${projectId}/error_tracking/spike_events/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/spike_events/`
 }
 
 export const errorTrackingSpikeEventsList = async (
@@ -1337,8 +1337,8 @@ export const getErrorTrackingStackFramesListUrl = (projectId: string, params?: E
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/stack_frames/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/stack_frames/`
+        ? `/v1/projects/${projectId}/error_tracking/stack_frames/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/stack_frames/`
 }
 
 export const errorTrackingStackFramesList = async (
@@ -1353,7 +1353,7 @@ export const errorTrackingStackFramesList = async (
 }
 
 export const getErrorTrackingStackFramesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/stack_frames/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/stack_frames/${id}/`
 }
 
 export const errorTrackingStackFramesRetrieve = async (
@@ -1368,7 +1368,7 @@ export const errorTrackingStackFramesRetrieve = async (
 }
 
 export const getErrorTrackingStackFramesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/stack_frames/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/stack_frames/${id}/`
 }
 
 /**
@@ -1386,7 +1386,7 @@ export const errorTrackingStackFramesDestroy = async (
 }
 
 export const getErrorTrackingStackFramesBatchGetCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/stack_frames/batch_get/`
+    return `/v1/projects/${projectId}/error_tracking/stack_frames/batch_get/`
 }
 
 export const errorTrackingStackFramesBatchGetCreate = async (
@@ -1420,8 +1420,8 @@ export const getErrorTrackingSuppressionRulesListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/suppression_rules/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/suppression_rules/`
+        ? `/v1/projects/${projectId}/error_tracking/suppression_rules/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/suppression_rules/`
 }
 
 export const errorTrackingSuppressionRulesList = async (
@@ -1439,7 +1439,7 @@ export const errorTrackingSuppressionRulesList = async (
 }
 
 export const getErrorTrackingSuppressionRulesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/suppression_rules/`
+    return `/v1/projects/${projectId}/error_tracking/suppression_rules/`
 }
 
 export const errorTrackingSuppressionRulesCreate = async (
@@ -1456,7 +1456,7 @@ export const errorTrackingSuppressionRulesCreate = async (
 }
 
 export const getErrorTrackingSuppressionRulesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/suppression_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/suppression_rules/${id}/`
 }
 
 export const errorTrackingSuppressionRulesRetrieve = async (
@@ -1471,7 +1471,7 @@ export const errorTrackingSuppressionRulesRetrieve = async (
 }
 
 export const getErrorTrackingSuppressionRulesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/suppression_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/suppression_rules/${id}/`
 }
 
 export const errorTrackingSuppressionRulesUpdate = async (
@@ -1489,7 +1489,7 @@ export const errorTrackingSuppressionRulesUpdate = async (
 }
 
 export const getErrorTrackingSuppressionRulesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/suppression_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/suppression_rules/${id}/`
 }
 
 export const errorTrackingSuppressionRulesPartialUpdate = async (
@@ -1507,7 +1507,7 @@ export const errorTrackingSuppressionRulesPartialUpdate = async (
 }
 
 export const getErrorTrackingSuppressionRulesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/suppression_rules/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/suppression_rules/${id}/`
 }
 
 export const errorTrackingSuppressionRulesDestroy = async (
@@ -1522,7 +1522,7 @@ export const errorTrackingSuppressionRulesDestroy = async (
 }
 
 export const getErrorTrackingSuppressionRulesReorderPartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/suppression_rules/reorder/`
+    return `/v1/projects/${projectId}/error_tracking/suppression_rules/reorder/`
 }
 
 export const errorTrackingSuppressionRulesReorderPartialUpdate = async (
@@ -1550,8 +1550,8 @@ export const getErrorTrackingSymbolSetsListUrl = (projectId: string, params?: Er
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/error_tracking/symbol_sets/?${stringifiedParams}`
-        : `/api/projects/${projectId}/error_tracking/symbol_sets/`
+        ? `/v1/projects/${projectId}/error_tracking/symbol_sets/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/error_tracking/symbol_sets/`
 }
 
 export const errorTrackingSymbolSetsList = async (
@@ -1566,7 +1566,7 @@ export const errorTrackingSymbolSetsList = async (
 }
 
 export const getErrorTrackingSymbolSetsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/symbol_sets/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/symbol_sets/${id}/`
 }
 
 export const errorTrackingSymbolSetsRetrieve = async (
@@ -1581,7 +1581,7 @@ export const errorTrackingSymbolSetsRetrieve = async (
 }
 
 export const getErrorTrackingSymbolSetsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/symbol_sets/${id}/`
+    return `/v1/projects/${projectId}/error_tracking/symbol_sets/${id}/`
 }
 
 export const errorTrackingSymbolSetsDestroy = async (
@@ -1596,7 +1596,7 @@ export const errorTrackingSymbolSetsDestroy = async (
 }
 
 export const getErrorTrackingSymbolSetsDownloadRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/symbol_sets/${id}/download/`
+    return `/v1/projects/${projectId}/error_tracking/symbol_sets/${id}/download/`
 }
 
 /**
@@ -1614,7 +1614,7 @@ export const errorTrackingSymbolSetsDownloadRetrieve = async (
 }
 
 export const getErrorTrackingSymbolSetsFinishUploadUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/error_tracking/symbol_sets/${id}/finish_upload/`
+    return `/v1/projects/${projectId}/error_tracking/symbol_sets/${id}/finish_upload/`
 }
 
 export const errorTrackingSymbolSetsFinishUploadUpdate = async (
@@ -1632,7 +1632,7 @@ export const errorTrackingSymbolSetsFinishUploadUpdate = async (
 }
 
 export const getErrorTrackingSymbolSetsBulkDeleteCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/symbol_sets/bulk_delete/`
+    return `/v1/projects/${projectId}/error_tracking/symbol_sets/bulk_delete/`
 }
 
 export const errorTrackingSymbolSetsBulkDeleteCreate = async (
@@ -1649,7 +1649,7 @@ export const errorTrackingSymbolSetsBulkDeleteCreate = async (
 }
 
 export const getErrorTrackingSymbolSetsBulkFinishUploadCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/symbol_sets/bulk_finish_upload/`
+    return `/v1/projects/${projectId}/error_tracking/symbol_sets/bulk_finish_upload/`
 }
 
 export const errorTrackingSymbolSetsBulkFinishUploadCreate = async (
@@ -1666,7 +1666,7 @@ export const errorTrackingSymbolSetsBulkFinishUploadCreate = async (
 }
 
 export const getErrorTrackingSymbolSetsBulkStartUploadCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/error_tracking/symbol_sets/bulk_start_upload/`
+    return `/v1/projects/${projectId}/error_tracking/symbol_sets/bulk_start_upload/`
 }
 
 export const errorTrackingSymbolSetsBulkStartUploadCreate = async (

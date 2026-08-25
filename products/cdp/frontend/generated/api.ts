@@ -65,8 +65,8 @@ export const getInsightsFunctionTemplatesListUrl = (projectId: string, params?: 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights_function_templates/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights_function_templates/`
+        ? `/v1/projects/${projectId}/insights_function_templates/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights_function_templates/`
 }
 
 export const insightsFunctionTemplatesList = async (
@@ -81,7 +81,7 @@ export const insightsFunctionTemplatesList = async (
 }
 
 export const getInsightsFunctionTemplatesRetrieveUrl = (projectId: string, templateId: string) => {
-    return `/api/projects/${projectId}/insights_function_templates/${templateId}/`
+    return `/v1/projects/${projectId}/insights_function_templates/${templateId}/`
 }
 
 export const insightsFunctionTemplatesRetrieve = async (
@@ -107,8 +107,8 @@ export const getInsightsFunctionsListUrl = (projectId: string, params?: Insights
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights_functions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights_functions/`
+        ? `/v1/projects/${projectId}/insights_functions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights_functions/`
 }
 
 export const insightsFunctionsList = async (
@@ -123,7 +123,7 @@ export const insightsFunctionsList = async (
 }
 
 export const getInsightsFunctionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/insights_functions/`
+    return `/v1/projects/${projectId}/insights_functions/`
 }
 
 export const insightsFunctionsCreate = async (
@@ -140,7 +140,7 @@ export const insightsFunctionsCreate = async (
 }
 
 export const getInsightsFunctionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/`
 }
 
 export const insightsFunctionsRetrieve = async (
@@ -155,7 +155,7 @@ export const insightsFunctionsRetrieve = async (
 }
 
 export const getInsightsFunctionsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/`
 }
 
 export const insightsFunctionsUpdate = async (
@@ -173,7 +173,7 @@ export const insightsFunctionsUpdate = async (
 }
 
 export const getInsightsFunctionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/`
 }
 
 export const insightsFunctionsPartialUpdate = async (
@@ -191,7 +191,7 @@ export const insightsFunctionsPartialUpdate = async (
 }
 
 export const getInsightsFunctionsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/`
 }
 
 /**
@@ -205,7 +205,7 @@ export const insightsFunctionsDestroy = async (projectId: string, id: string, op
 }
 
 export const getInsightsFunctionsDiscardDraftCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/discard_draft/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/discard_draft/`
 }
 
 export const insightsFunctionsDiscardDraftCreate = async (
@@ -220,7 +220,7 @@ export const insightsFunctionsDiscardDraftCreate = async (
 }
 
 export const getInsightsFunctionsEnableBackfillsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/enable_backfills/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/enable_backfills/`
 }
 
 export const insightsFunctionsEnableBackfillsCreate = async (
@@ -238,7 +238,7 @@ export const insightsFunctionsEnableBackfillsCreate = async (
 }
 
 export const getInsightsFunctionsInvocationsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/invocations/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/invocations/`
 }
 
 export const insightsFunctionsInvocationsCreate = async (
@@ -271,8 +271,8 @@ export const getInsightsFunctionsLogsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights_functions/${id}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights_functions/${id}/logs/`
+        ? `/v1/projects/${projectId}/insights_functions/${id}/logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights_functions/${id}/logs/`
 }
 
 export const insightsFunctionsLogsRetrieve = async (
@@ -303,8 +303,8 @@ export const getInsightsFunctionsMetricsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights_functions/${id}/metrics/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights_functions/${id}/metrics/`
+        ? `/v1/projects/${projectId}/insights_functions/${id}/metrics/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights_functions/${id}/metrics/`
 }
 
 export const insightsFunctionsMetricsRetrieve = async (
@@ -335,8 +335,8 @@ export const getInsightsFunctionsMetricsTotalsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights_functions/${id}/metrics/totals/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights_functions/${id}/metrics/totals/`
+        ? `/v1/projects/${projectId}/insights_functions/${id}/metrics/totals/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights_functions/${id}/metrics/totals/`
 }
 
 export const insightsFunctionsMetricsTotalsRetrieve = async (
@@ -352,7 +352,7 @@ export const insightsFunctionsMetricsTotalsRetrieve = async (
 }
 
 export const getInsightsFunctionsPublishCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/publish/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/publish/`
 }
 
 export const insightsFunctionsPublishCreate = async (
@@ -370,7 +370,7 @@ export const insightsFunctionsPublishCreate = async (
 }
 
 export const getInsightsFunctionsRerunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/rerun/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/rerun/`
 }
 
 /**
@@ -423,8 +423,8 @@ export const getInsightsFunctionsRevisionsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/insights_functions/${id}/revisions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/insights_functions/${id}/revisions/`
+        ? `/v1/projects/${projectId}/insights_functions/${id}/revisions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/insights_functions/${id}/revisions/`
 }
 
 export const insightsFunctionsRevisionsList = async (
@@ -443,7 +443,7 @@ export const insightsFunctionsRevisionsList = async (
 }
 
 export const getInsightsFunctionsRevisionsRetrieveUrl = (projectId: string, id: string, version: number) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/revisions/${version}/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/revisions/${version}/`
 }
 
 export const insightsFunctionsRevisionsRetrieve = async (
@@ -459,7 +459,7 @@ export const insightsFunctionsRevisionsRetrieve = async (
 }
 
 export const getInsightsFunctionsRevisionsRestoreCreateUrl = (projectId: string, id: string, version: number) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/revisions/${version}/restore/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/revisions/${version}/restore/`
 }
 
 export const insightsFunctionsRevisionsRestoreCreate = async (
@@ -478,7 +478,7 @@ export const insightsFunctionsRevisionsRestoreCreate = async (
 }
 
 export const getInsightsFunctionsIconRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/insights_functions/icon/`
+    return `/v1/projects/${projectId}/insights_functions/icon/`
 }
 
 export const insightsFunctionsIconRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -489,7 +489,7 @@ export const insightsFunctionsIconRetrieve = async (projectId: string, options?:
 }
 
 export const getInsightsFunctionsIconsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/insights_functions/icons/`
+    return `/v1/projects/${projectId}/insights_functions/icons/`
 }
 
 export const insightsFunctionsIconsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -500,7 +500,7 @@ export const insightsFunctionsIconsRetrieve = async (projectId: string, options?
 }
 
 export const getInsightsFunctionsRearrangePartialUpdateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/insights_functions/rearrange/`
+    return `/v1/projects/${projectId}/insights_functions/rearrange/`
 }
 
 /**
@@ -535,8 +535,8 @@ export const getPluginConfigsLogsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/plugin_configs/${pluginConfigId}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/plugin_configs/${pluginConfigId}/logs/`
+        ? `/v1/projects/${projectId}/plugin_configs/${pluginConfigId}/logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/plugin_configs/${pluginConfigId}/logs/`
 }
 
 export const pluginConfigsLogsList = async (
@@ -563,8 +563,8 @@ export const getPublicInsightsFunctionTemplatesListUrl = (params?: PublicInsight
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/public_insights_function_templates/?${stringifiedParams}`
-        : `/api/public_insights_function_templates/`
+        ? `/v1/public_insights_function_templates/?${stringifiedParams}`
+        : `/v1/public_insights_function_templates/`
 }
 
 export const publicInsightsFunctionTemplatesList = async (

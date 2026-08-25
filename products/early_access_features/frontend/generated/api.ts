@@ -45,8 +45,8 @@ export const getEarlyAccessFeatureListUrl = (projectId: string, params?: EarlyAc
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/early_access_feature/?${stringifiedParams}`
-        : `/api/projects/${projectId}/early_access_feature/`
+        ? `/v1/projects/${projectId}/early_access_feature/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/early_access_feature/`
 }
 
 export const earlyAccessFeatureList = async (
@@ -61,7 +61,7 @@ export const earlyAccessFeatureList = async (
 }
 
 export const getEarlyAccessFeatureCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/early_access_feature/`
+    return `/v1/projects/${projectId}/early_access_feature/`
 }
 
 export const earlyAccessFeatureCreate = async (
@@ -78,7 +78,7 @@ export const earlyAccessFeatureCreate = async (
 }
 
 export const getEarlyAccessFeatureRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/early_access_feature/${id}/`
+    return `/v1/projects/${projectId}/early_access_feature/${id}/`
 }
 
 export const earlyAccessFeatureRetrieve = async (
@@ -93,7 +93,7 @@ export const earlyAccessFeatureRetrieve = async (
 }
 
 export const getEarlyAccessFeatureUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/early_access_feature/${id}/`
+    return `/v1/projects/${projectId}/early_access_feature/${id}/`
 }
 
 export const earlyAccessFeatureUpdate = async (
@@ -111,7 +111,7 @@ export const earlyAccessFeatureUpdate = async (
 }
 
 export const getEarlyAccessFeaturePartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/early_access_feature/${id}/`
+    return `/v1/projects/${projectId}/early_access_feature/${id}/`
 }
 
 export const earlyAccessFeaturePartialUpdate = async (
@@ -129,7 +129,7 @@ export const earlyAccessFeaturePartialUpdate = async (
 }
 
 export const getEarlyAccessFeatureDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/early_access_feature/${id}/`
+    return `/v1/projects/${projectId}/early_access_feature/${id}/`
 }
 
 export const earlyAccessFeatureDestroy = async (

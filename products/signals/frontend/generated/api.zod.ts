@@ -1465,9 +1465,9 @@ export const SignalsSourceConfigsPartialUpdateBody = /* @__PURE__ */ zod.object(
 /**
  * Per-user signal autonomy config (singleton keyed by user).
  *
- * GET    /api/users/<id>/signal_autonomy/ → current config (or 404)
- * POST   /api/users/<id>/signal_autonomy/ → create or update
- * DELETE /api/users/<id>/signal_autonomy/ → remove (opt out)
+ * GET    /v1/users/<id>/signal_autonomy/ → current config (or 404)
+ * POST   /v1/users/<id>/signal_autonomy/ → create or update
+ * DELETE /v1/users/<id>/signal_autonomy/ → remove (opt out)
  */
 export const usersSignalAutonomyCreateBodySlackNotificationChannelMax = 255
 
