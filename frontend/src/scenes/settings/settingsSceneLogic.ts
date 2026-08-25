@@ -60,7 +60,7 @@ const canonicalSettingsSection = (section: string): string => {
         return LEGACY_SETTINGS_SECTIONS[section]
     }
 
-    if (section.startsWith('environment') && !section.endsWith('-details') && !section.endsWith('-danger-zone')) {
+    if (section.startsWith('environment')) {
         return section.replace(/^environment/, 'project')
     }
 
