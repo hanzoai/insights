@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, kea, listeners, path, reducers } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, kea, listeners, path, reducers } from 'kea'
 
 import api, { ApiError } from 'lib/api'
 import { toast } from 'lib/elements/Toast/Toast'

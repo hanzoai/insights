@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle, IconClock, IconRefresh, IconWarning } from '@hanzo/icons'
 import { Button, Skeleton, Table, Tag, Link } from '@hanzo/elements'
+import { IconCheckCircle, IconClock, IconRefresh, IconWarning } from '@hanzo/icons'
 
 import { dataColorVars } from 'lib/colors'
 import { ExplorerHog } from 'lib/components/mascots'

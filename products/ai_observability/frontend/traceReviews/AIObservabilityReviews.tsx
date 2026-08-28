@@ -1,15 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
+import { Button, Input, Menu, Select, Table, TableColumn, TableColumns } from '@hanzo/elements'
 import { IconDownload } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Menu,
-    Select,
-    Table,
-    TableColumn,
-    TableColumns,
-} from '@hanzo/elements'
 
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { Link } from 'lib/elements/Link'

@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { ApiError } from 'lib/api-error'
 import type { FeatureFlagsSet } from 'lib/logic/featureFlagLogic'

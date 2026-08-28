@@ -1,8 +1,8 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Menu, Table, TableColumns, Tag, TagType, Link, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { newInternalTab } from 'lib/utils/newInternalTab'

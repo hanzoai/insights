@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import { SurveyEventProperties } from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { Button, Checkbox, Label, Modal, TextArea, Tooltip } from '@hanzo/elements'

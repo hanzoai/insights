@@ -5,9 +5,9 @@ available as both a Python C++ extension and a WebAssembly module for JavaScript
 
 ## Packages
 
-| Package                 | Runtime                          | Registry                                                   |
-| ----------------------- | -------------------------------- | ---------------------------------------------------------- |
-| `insightsql_parser`          | CPython (native C++ extension)   | [PyPI](https://pypi.org/project/insightsql-parser/)             |
+| Package                    | Runtime                          | Registry                                                      |
+| -------------------------- | -------------------------------- | ------------------------------------------------------------- |
+| `insightsql_parser`        | CPython (native C++ extension)   | [PyPI](https://pypi.org/project/insightsql-parser/)           |
 | `@hanzo/insightsql-parser` | Any JS environment (WebAssembly) | [npm](https://www.npmjs.com/package/@hanzo/insightsql-parser) |
 
 Both packages share the same C++ parser core and ANTLR4 grammar,
@@ -52,10 +52,10 @@ if ('error' in result) {
 
 | Method                                        | Description                        |
 | --------------------------------------------- | ---------------------------------- |
-| `parseExpr(input, isInternal?)`               | Parse a InsightsQL expression           |
+| `parseExpr(input, isInternal?)`               | Parse a InsightsQL expression      |
 | `parseSelect(input, isInternal?)`             | Parse a SELECT statement           |
 | `parseOrderExpr(input, isInternal?)`          | Parse an ORDER BY expression       |
-| `parseProgram(input, isInternal?)`            | Parse a Script program                |
+| `parseProgram(input, isInternal?)`            | Parse a Script program             |
 | `parseFullTemplateString(input, isInternal?)` | Parse a template string (`f'...'`) |
 | `parseStringLiteralText(input)`               | Unquote a string literal           |
 

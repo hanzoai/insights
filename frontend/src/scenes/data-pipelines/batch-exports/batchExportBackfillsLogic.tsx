@@ -171,7 +171,8 @@ export const batchExportBackfillsLogic = kea<batchExportBackfillsLogicType>([
     selectors({
         recordLabel: [
             () => [(_, props) => props],
-            (props: BatchExportBackfillsLogicProps): string => (props.context === 'insights_function' ? 'events' : 'rows'),
+            (props: BatchExportBackfillsLogicProps): string =>
+                props.context === 'insights_function' ? 'events' : 'rows',
         ],
         hasMoreBackfillsToLoad: [
             (s) => [s.backfillsPaginatedResponse],

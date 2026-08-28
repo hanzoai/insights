@@ -3,19 +3,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useRef } from 'react'
 
+import { Banner, Button, Divider, Input, Label, Select, Skeleton, Switch, Tag, Tooltip } from '@hanzo/elements'
 import { IconInfo, IconX } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Divider,
-    Input,
-    Label,
-    Select,
-    Skeleton,
-    Switch,
-    Tag,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { Field } from 'lib/elements/Field'
@@ -38,7 +27,12 @@ export function InsightsFunctionSourceWebhookTest(): JSX.Element {
     const unsaved = !logicProps.id
 
     return (
-        <Form logic={insightsFunctionSourceWebhookTestLogic} props={logicProps} formKey="testInvocation" enableFormOnSubmit>
+        <Form
+            logic={insightsFunctionSourceWebhookTestLogic}
+            props={logicProps}
+            formKey="testInvocation"
+            enableFormOnSubmit
+        >
             <div
                 ref={testResultsRef}
                 className={clsx(

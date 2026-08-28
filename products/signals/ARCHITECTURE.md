@@ -444,7 +444,7 @@ An **append-only, attributed, schema-validated log of the work done on a report*
 | `priority_judgment`      | `{"priority": "P0"\|"P1"\|"P2"\|"P3"\|"P4", "explanation": "..."}`                                                                                              |
 | `signal_finding`         | `{"signal_id": "...", "relevant_code_paths": [...], "relevant_commit_hashes": {"abc1234": "reason"}, "data_queried": "...", "verified": bool}`                  |
 | `repo_selection`         | `{"repository": "owner/repo" \| null, "reason": "...", "task_id"?: "..."}`                                                                                      |
-| `suggested_reviewers`    | `[{"github_login": "...", "github_name": "...", "relevant_commits": [...]}]` — enriched with current Insights user data at serializer read time                  |
+| `suggested_reviewers`    | `[{"github_login": "...", "github_name": "...", "relevant_commits": [...]}]` — enriched with current Insights user data at serializer read time                 |
 | `dismissal`              | `{"reason"?, "note"?, "user_id"?, "user_uuid"?, "slack_user_id"?}` — stacking dismissal entries                                                                 |
 | `code_reference`         | `{"file_path": "...", "start_line": int, "end_line": int, "contents": "...", "relevance_note": "..."}` — a span of source lines (single line = equal start/end) |
 | `commit`                 | `{"repository": "owner/repo", "branch": "...", "commit_sha": "...", "message": "...", "note"?: "..."}` — one pushed commit                                      |
@@ -788,8 +788,8 @@ All signals endpoints live under the `projects/:team_id/signals/` path, register
 
 Internal-only service-to-service endpoint authenticated via `X-Internal-Api-Secret`.
 
-| Method | Path                                            | Description                       |
-| ------ | ----------------------------------------------- | --------------------------------- |
+| Method | Path                                           | Description                       |
+| ------ | ---------------------------------------------- | --------------------------------- |
 | POST   | `/v1/projects/{team_id}/internal/signals/emit` | Emit a signal for a specific team |
 
 #### `SignalSourceConfigViewSet`
@@ -844,11 +844,11 @@ Read + delete + state transitions. Uses `IsAuthenticated` + `APIScopePermission`
 | ------ | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `signals/reports/`                     | List reports. Excludes `deleted` always and excludes `suppressed` by default. Supports `?status=`, `?search=`, `?source_product=`, `?suggested_reviewers=`, `?task_id=` (resolved through `task_run` artefacts), and `?ordering=`.                                                                                                                  |
 | GET    | `signals/reports/{id}/`                | Retrieve a single report                                                                                                                                                                                                                                                                                                                            |
-| DELETE | `signals/reports/{id}/`                | Soft-delete a report and its signals. Starts `SignalReportDeletionWorkflow`. On success returns `202`. If the workflow is already running, returns `200 {"status": "already_running"}`. The API immediately transitions the Postgres report to `deleted` to hide it from list results while Datastore cleanup runs asynchronously.                 |
+| DELETE | `signals/reports/{id}/`                | Soft-delete a report and its signals. Starts `SignalReportDeletionWorkflow`. On success returns `202`. If the workflow is already running, returns `200 {"status": "already_running"}`. The API immediately transitions the Postgres report to `deleted` to hide it from list results while Datastore cleanup runs asynchronously.                  |
 | POST   | `signals/reports/{id}/state/`          | Transition report state. Body: `{ "state": "suppressed" \| "potential" \| "resolved", ...transition_to kwargs }`. `suppressed`, `potential`, and `resolved` are exposed via API (`resolved` for user-driven "work is done"; the model still gates which statuses may resolve). Returns `409` on invalid transitions and `400` on invalid arguments. |
 | POST   | `signals/reports/{id}/reingest/`       | Delete a report and re-ingest its signals. Starts `SignalReportReingestionWorkflow`. On success returns `202`. If already running, returns `200 {"status": "already_running"}`. Same team access as other report endpoints; personal API keys need `task:write`.                                                                                    |
 | GET    | `signals/reports/{id}/artefacts/`      | List **all** artefacts for a report, ordered by `-created_at`                                                                                                                                                                                                                                                                                       |
-| GET    | `signals/reports/{id}/signals/`        | Fetch all signals for a report from Datastore, including full metadata                                                                                                                                                                                                                                                                             |
+| GET    | `signals/reports/{id}/signals/`        | Fetch all signals for a report from Datastore, including full metadata                                                                                                                                                                                                                                                                              |
 | GET    | `signals/reports/available_reviewers/` | List available suggested reviewers for the team                                                                                                                                                                                                                                                                                                     |
 
 **Ordering:** Configurable via `?ordering=` with comma-separated fields. Supported fields: `status`, `is_suggested_reviewer`, `signal_count`, `total_weight`, `priority`, `created_at`, `updated_at`, `id`.
@@ -1155,9 +1155,9 @@ Cleared for the team:
 | Scout fleet config | `SignalScoutConfig` (all rows)                                                                                                                                                                                                                          |
 | Custom scouts      | `LLMSkill` rows whose `name` starts `signals-scout-` and are **not** seeded — i.e. not in the set of names carrying `metadata.seeded_by == "signals_scout_harness"` (covers the common case where the key is absent entirely) (cascades `LLMSkillFile`) |
 | Scout run-state    | `SignalScratchpad`, `SignalProjectProfile`, `SignalScoutRun`, `SignalEmissionRecord`                                                                                                                                                                    |
-| Emitted findings   | `SignalReport` + artefacts + Datastore rows + Temporal workflows (delegates to `cleanup_signals`; skip with `--keep-findings`)                                                                                                                         |
-| Wizard report      | `<install-dir>/insights-self-driving-report.md` (only if `--install-dir` is given)                                                                                                                                                                       |
-| Wizard log         | `/tmp/insights-wizard.log` → backed up to `/tmp/insights-wizard-previous-<timestamp>.log` then removed (override `--wizard-log`, skip `--keep-log`)                                                                                                       |
+| Emitted findings   | `SignalReport` + artefacts + Datastore rows + Temporal workflows (delegates to `cleanup_signals`; skip with `--keep-findings`)                                                                                                                          |
+| Wizard report      | `<install-dir>/insights-self-driving-report.md` (only if `--install-dir` is given)                                                                                                                                                                      |
+| Wizard log         | `/tmp/insights-wizard.log` → backed up to `/tmp/insights-wizard-previous-<timestamp>.log` then removed (override `--wizard-log`, skip `--keep-log`)                                                                                                     |
 
 Preserved: canonical scouts and the `authoring-scouts` companion, identified by `metadata.seeded_by == "signals_scout_harness"`. That tag is the practical marker this DEBUG reset uses; it is not a perfect canonical test on its own — `_scout_origin` also requires the name to ship on disk, since `duplicate_skill` copies the tag verbatim — but the wizard authors custom scouts via `llma-skill-create` with no tag, so tag-only suffices here. The command does **not** touch `SignalTeamConfig` or `SignalUserAutonomyConfig` (autostart / per-user opt-in are set by `enable_signals_autonomy`, not the wizard); `llm_analytics` sources are gated by their `SignalSourceConfig` rows like any other source.
 
@@ -1221,25 +1221,25 @@ Promotion-stage events are emitted only when the signal would actually have prom
 
 ## Data Types (`backend/temporal/types.py`)
 
-| Type                                    | Description                                                                                                                          |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `EmitSignalInputs`                      | Workflow input: `team_id`, `source_product`, `source_type`, `source_id`, `description`, `weight`, `extra`                            |
-| `BufferSignalsInput`                    | Buffer workflow input: `team_id`, `pending_signals: list[EmitSignalInputs]` (carried over on `continue_as_new`)                      |
-| `TeamSignalGroupingV2Input`             | Grouping v2 workflow input: `team_id`, `pending_batch_keys: list[str]` (carried over on `continue_as_new`)                           |
-| `TeamSignalGroupingInput`               | Legacy v1 entity workflow input: `team_id`, `pending_signals: list[EmitSignalInputs]` (carried over on `continue_as_new`)            |
-| `ReadSignalsFromS3Input`                | Activity input: `object_key`                                                                                                         |
-| `ReadSignalsFromS3Output`               | Activity output: `signals: list[EmitSignalInputs]`                                                                                   |
-| `SignalCandidate`                       | Search result: `signal_id`, `report_id`, `content`, `source_product`, `source_type`, `distance`                                      |
-| `MatchedMetadata`                       | Metadata when matched to existing report: `parent_signal_id`, `match_query`, `reason`                                                |
-| `NoMatchMetadata`                       | Metadata when no match found: `reason`, `rejected_signal_ids`                                                                        |
-| `MatchMetadata`                         | Union type: `MatchedMetadata \| NoMatchMetadata`                                                                                     |
-| `ExistingReportMatch`                   | LLM decided signal matches existing report: `report_id`, `match_metadata: MatchedMetadata`                                           |
-| `NewReportMatch`                        | LLM decided signal needs new group: `title`, `summary`, `match_metadata: NoMatchMetadata`                                            |
-| `MatchResult`                           | Union: `ExistingReportMatch \| NewReportMatch`                                                                                       |
-| `SignalReportSummaryWorkflowInputs`     | Summary workflow input: `team_id`, `report_id`                                                                                       |
-| `SignalReportDeletionWorkflowInputs`    | Deletion workflow input: `team_id`, `report_id`                                                                                      |
-| `SignalReportReingestionWorkflowInputs` | Reingestion workflow input: `team_id`, `report_id`                                                                                   |
-| `SignalTypeExample`                     | One example per `(source_product, source_type)` pair: `source_product`, `source_type`, `content`, `timestamp`, `extra`               |
+| Type                                    | Description                                                                                                                         |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `EmitSignalInputs`                      | Workflow input: `team_id`, `source_product`, `source_type`, `source_id`, `description`, `weight`, `extra`                           |
+| `BufferSignalsInput`                    | Buffer workflow input: `team_id`, `pending_signals: list[EmitSignalInputs]` (carried over on `continue_as_new`)                     |
+| `TeamSignalGroupingV2Input`             | Grouping v2 workflow input: `team_id`, `pending_batch_keys: list[str]` (carried over on `continue_as_new`)                          |
+| `TeamSignalGroupingInput`               | Legacy v1 entity workflow input: `team_id`, `pending_signals: list[EmitSignalInputs]` (carried over on `continue_as_new`)           |
+| `ReadSignalsFromS3Input`                | Activity input: `object_key`                                                                                                        |
+| `ReadSignalsFromS3Output`               | Activity output: `signals: list[EmitSignalInputs]`                                                                                  |
+| `SignalCandidate`                       | Search result: `signal_id`, `report_id`, `content`, `source_product`, `source_type`, `distance`                                     |
+| `MatchedMetadata`                       | Metadata when matched to existing report: `parent_signal_id`, `match_query`, `reason`                                               |
+| `NoMatchMetadata`                       | Metadata when no match found: `reason`, `rejected_signal_ids`                                                                       |
+| `MatchMetadata`                         | Union type: `MatchedMetadata \| NoMatchMetadata`                                                                                    |
+| `ExistingReportMatch`                   | LLM decided signal matches existing report: `report_id`, `match_metadata: MatchedMetadata`                                          |
+| `NewReportMatch`                        | LLM decided signal needs new group: `title`, `summary`, `match_metadata: NoMatchMetadata`                                           |
+| `MatchResult`                           | Union: `ExistingReportMatch \| NewReportMatch`                                                                                      |
+| `SignalReportSummaryWorkflowInputs`     | Summary workflow input: `team_id`, `report_id`                                                                                      |
+| `SignalReportDeletionWorkflowInputs`    | Deletion workflow input: `team_id`, `report_id`                                                                                     |
+| `SignalReportReingestionWorkflowInputs` | Reingestion workflow input: `team_id`, `report_id`                                                                                  |
+| `SignalTypeExample`                     | One example per `(source_product, source_type)` pair: `source_product`, `source_type`, `content`, `timestamp`, `extra`              |
 | `SignalData`                            | Signal fetched from Datastore: `signal_id`, `content`, `source_product`, `source_type`, `source_id`, `weight`, `timestamp`, `extra` |
 
 ### Rendering Helpers

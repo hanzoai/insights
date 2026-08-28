@@ -1,8 +1,8 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconExpand45 } from '@hanzo/icons'
 import { ButtonProps, MenuItem } from '@hanzo/elements'
+import { IconExpand45 } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'

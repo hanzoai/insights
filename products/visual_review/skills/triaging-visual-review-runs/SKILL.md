@@ -39,8 +39,8 @@ is faster — direct them there. This skill is for everything around the diff: s
 
 Read tools (safe to call freely):
 
-| Tool                                               | Purpose                                                                                                                                                                                                                                  |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tool                                                | Purpose                                                                                                                                                                                                                                  |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `insights:visual-review-runs-list`                  | List runs, filter by `pr_number` / `commit_sha` / `branch` / `review_state`. Start here.                                                                                                                                                 |
 | `insights:visual-review-runs-retrieve`              | Full detail for a single run (status, summary counts, supersession).                                                                                                                                                                     |
 | `insights:visual-review-runs-snapshots-list`        | Per-snapshot results inside a run: identifier, `result`, diff %, classification, baseline + current artifact URLs. Quarantined snapshots are excluded by default (see `quarantined_count`); pass `include_quarantined=true` to see them. |
@@ -52,15 +52,15 @@ Read tools (safe to call freely):
 
 Triage tools (reversible, DB-only — they record a review decision but do NOT change the baseline or the gate):
 
-| Tool                                         | Purpose                                                                                                                |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Tool                                          | Purpose                                                                                                                |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `insights:visual-review-runs-approve-create`  | Mark `changed` / `new` snapshots reviewed (approved) in the DB. Does NOT commit or green the gate — ship via finalize. |
 | `insights:visual-review-runs-tolerate-create` | Mark a single changed snapshot as a known tolerated alternate. Does NOT change the baseline — use for benign variants. |
 
 Ship tool (irreversible, outward-facing — requires explicit per-run human confirmation; see [the gate](#the-finalize-gate)):
 
-| Tool                                         | Purpose                                                                                                          |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Tool                                          | Purpose                                                                                                          |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `insights:visual-review-runs-finalize-create` | Commit the approved baseline to the PR branch and green the GitHub `visual-review` check. This ships the change. |
 
 Mark-reviewed call shape (`approve-create`):

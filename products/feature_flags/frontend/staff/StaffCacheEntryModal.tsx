@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCopy, IconSearch } from '@hanzo/icons'
 import { Button, Input, Modal, Tag, Spinner } from '@hanzo/elements'
+import { IconCopy, IconSearch } from '@hanzo/icons'
 
 import { HighlightedJSONViewer } from 'lib/components/HighlightedJSONViewer'
 import { useDebouncedValue } from 'lib/hooks/useDebouncedValue'

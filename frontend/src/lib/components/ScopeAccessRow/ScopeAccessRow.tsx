@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconInfo, IconWarning } from '@hanzo/icons'
 import { SegmentedButton, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconWarning } from '@hanzo/icons'
 
 interface ScopeAccessRowProps {
     /** Display label for the scope (e.g. 'Feature flag', 'Endpoint'). */

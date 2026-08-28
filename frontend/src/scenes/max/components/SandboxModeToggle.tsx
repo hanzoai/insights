@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
 import { Button, Tag } from '@hanzo/elements'

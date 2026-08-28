@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 
-import { IconUpload } from '@hanzo/icons'
 import { Button, FileInput, Input, Skeleton, Popover, Spinner, toast } from '@hanzo/elements'
+import { IconUpload } from '@hanzo/icons'
 
 import { InsightsFunctionIconLogicProps, insightsFunctionIconLogic } from './insightsFunctionIconLogic'
 
@@ -112,12 +112,7 @@ export function InsightsFunctionIconEditable({
                             >
                                 <InsightsFunctionIcon src={icon.url} />
                             </span>
-                        )) ??
-                            (possibleIconsLoading ? (
-                                <Skeleton className="w-14 h-14" repeat={4} />
-                            ) : (
-                                'No icons found'
-                            ))}
+                        )) ?? (possibleIconsLoading ? <Skeleton className="w-14 h-14" repeat={4} /> : 'No icons found')}
                     </div>
                 </div>
             }

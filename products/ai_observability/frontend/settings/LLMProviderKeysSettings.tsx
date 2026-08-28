@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
+import { Banner, Button, Input, Modal, Select, Skeleton, Table, Tag, Tooltip } from '@hanzo/elements'
 import { IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Input,
-    Modal,
-    Select,
-    Skeleton,
-    Table,
-    Tag,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'
@@ -801,11 +791,7 @@ export function LLMProviderKeysSettings(): JSX.Element {
                                     )}
                                 </p>
                                 {!restrictionReason && (
-                                    <Button
-                                        type="primary"
-                                        icon={<IconPlus />}
-                                        onClick={() => setNewKeyModalOpen(true)}
-                                    >
+                                    <Button type="primary" icon={<IconPlus />} onClick={() => setNewKeyModalOpen(true)}>
                                         Add API key
                                     </Button>
                                 )}

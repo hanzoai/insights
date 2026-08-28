@@ -187,7 +187,10 @@ const NotebooksPartialUpdateSchema = NotebooksPartialUpdateParams.omit({ project
     NotebooksPartialUpdateBody.shape
 )
 
-const notebooksPartialUpdate = (): ToolBase<typeof NotebooksPartialUpdateSchema, WithInsightsUrl<Schemas.Notebook>> => ({
+const notebooksPartialUpdate = (): ToolBase<
+    typeof NotebooksPartialUpdateSchema,
+    WithInsightsUrl<Schemas.Notebook>
+> => ({
     name: 'notebooks-partial-update',
     schema: NotebooksPartialUpdateSchema,
     handler: async (context: Context, params: z.infer<typeof NotebooksPartialUpdateSchema>) => {

@@ -1,17 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
+import { Button, Input, Menu, MenuItem, MenuItems, Modal, SegmentedButton, Tooltip } from '@hanzo/elements'
 import { IconChevronDown, IconDownload, IconGear, IconUser, IconGlobe, IconPlus } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Menu,
-    MenuItem,
-    MenuItems,
-    Modal,
-    SegmentedButton,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 
@@ -105,12 +96,7 @@ export function TableViewSelector({ contextKey, query, setQuery }: TableViewSele
                         </Button>
                     </Menu>
                 ) : (
-                    <Button
-                        icon={<IconDownload />}
-                        size="small"
-                        type="secondary"
-                        onClick={() => setIsCreating(true)}
-                    >
+                    <Button icon={<IconDownload />} size="small" type="secondary" onClick={() => setIsCreating(true)}>
                         Save current view
                     </Button>
                 )}

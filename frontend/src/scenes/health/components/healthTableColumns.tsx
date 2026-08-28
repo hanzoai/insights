@@ -1,5 +1,5 @@
-import { IconRevert, IconSparkles, IconX } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconRevert, IconSparkles, IconX } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { TableColumn } from 'lib/elements/Table'

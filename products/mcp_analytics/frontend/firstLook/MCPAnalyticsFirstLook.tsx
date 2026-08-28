@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconBolt, IconChevronDown, IconChevronRight, IconClock, IconSparkles, IconWarning } from '@hanzo/icons'
 import { Button, Card } from '@hanzo/elements'
+import { IconBolt, IconChevronDown, IconChevronRight, IconClock, IconSparkles, IconWarning } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { Link } from 'lib/elements/Link/Link'

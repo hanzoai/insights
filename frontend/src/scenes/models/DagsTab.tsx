@@ -1,15 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import {
-    Button,
-    Dialog,
-    Input,
-    Select,
-    Table,
-    TableColumns,
-    Tooltip,
-} from '@hanzo/elements'
+import { Button, Dialog, Input, Select, Table, TableColumns, Tooltip } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { More } from 'lib/elements/Button/More'

@@ -1,7 +1,7 @@
 import { combineUrl, encodeParams } from 'kea-router'
 
-import { toolbarLogger } from '~/toolbar/toolbarLogger'
 import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
+import { toolbarLogger } from '~/toolbar/toolbarLogger'
 
 import { withTokenRefresh } from './toolbarAuth'
 import { toolbarConfigLogic } from './toolbarConfigLogic'

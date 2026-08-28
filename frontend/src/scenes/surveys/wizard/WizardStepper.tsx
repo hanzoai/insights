@@ -1,5 +1,5 @@
-import { IconCheckCircle, IconWarning } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconCheckCircle, IconWarning } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 

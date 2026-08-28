@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconArrowLeft, IconArrowRight, IconCheck, IconDocument } from '@hanzo/icons'
 import { Button, Checkbox, Input, Switch, Tabs, TextArea } from '@hanzo/elements'
+import { IconArrowLeft, IconArrowRight, IconCheck, IconDocument } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { dayjs } from 'lib/dayjs'

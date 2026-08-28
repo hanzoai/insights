@@ -14,12 +14,7 @@ export function DashboardTileRefreshDataButton({
     const lastRefreshTime = lastRefresh != null ? dayjs(lastRefresh) : null
 
     return (
-        <Button
-            onClick={onRefresh}
-            disabledReason={disabledReason}
-            fullWidth
-            data-attr="dashboard-tile-refresh-data"
-        >
+        <Button onClick={onRefresh} disabledReason={disabledReason} fullWidth data-attr="dashboard-tile-refresh-data">
             {lastRefreshTime ? (
                 <div className="block my-1">
                     Refresh data

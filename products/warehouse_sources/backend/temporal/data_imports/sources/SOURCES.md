@@ -173,8 +173,8 @@ the row lists both.
 | cloudflare                       | HTTP                        | requests                                                        | ✅                          |
 | clari                            | HTTP                        | requests                                                        | ✅                          |
 | clerk                            | HTTP                        | requests + `rest_source.RESTClient`                             | ✅                          |
-| datastore                       | DB protocol (HTTP-based)    | datastore-connect / datastore-driver                          | ➖                          |
-| datastore_cloud                 | HTTP                        | requests                                                        | ✅                          |
+| datastore                        | DB protocol (HTTP-based)    | datastore-connect / datastore-driver                            | ➖                          |
+| datastore_cloud                  | HTTP                        | requests                                                        | ✅                          |
 | clickup                          | HTTP                        | requests                                                        | ✅                          |
 | clockify                         | HTTP                        | requests                                                        | ✅                          |
 | clockodo                         | HTTP                        | requests                                                        | ✅                          |

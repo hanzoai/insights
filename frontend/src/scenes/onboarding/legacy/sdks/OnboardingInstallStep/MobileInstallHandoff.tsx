@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconArrowUpRight, IconLaptop, IconShare } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowUpRight, IconLaptop, IconShare } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 

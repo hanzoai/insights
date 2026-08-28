@@ -1,15 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import {
-    IconArrowRight,
-    IconChevronRight,
-    IconEye,
-    IconPencil,
-    IconShortcut,
-    IconStar,
-    IconTrash,
-} from '@hanzo/icons'
+import { IconArrowRight, IconChevronRight, IconEye, IconPencil, IconShortcut, IconStar, IconTrash } from '@hanzo/icons'
 
 import { linkToLogic } from 'lib/components/FileSystem/LinkTo/linkToLogic'
 import { moveToLogic } from 'lib/components/FileSystem/MoveTo/moveToLogic'

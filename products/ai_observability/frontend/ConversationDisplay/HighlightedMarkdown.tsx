@@ -8,11 +8,7 @@ interface HighlightedMarkdownProps {
     searchQuery?: string
 }
 
-export function HighlightedMarkdown({
-    children,
-    className,
-    searchQuery,
-}: HighlightedMarkdownProps): JSX.Element {
+export function HighlightedMarkdown({ children, className, searchQuery }: HighlightedMarkdownProps): JSX.Element {
     return (
         <HighlightedContentWrapper searchQuery={searchQuery}>
             <Markdown className={className}>{children}</Markdown>

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconExternal } from '@hanzo/icons'
 import { Table, TableColumns, Link } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { ErrorTrackingRelease } from 'lib/components/Errors/types'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
@@ -113,8 +113,8 @@ const ReleasesTable = (): JSX.Element => {
         <div className="flex flex-col justify-center items-center gap-2 p-4 text-center">
             <div className="font-semibold">No releases found</div>
             <div className="text-secondary">
-                Releases are automatically created when Insights detects version information in your error tracking data.
-                Learn more in the{' '}
+                Releases are automatically created when Insights detects version information in your error tracking
+                data. Learn more in the{' '}
                 <Link to="https://hanzo.ai/docs/error-tracking" target="_blank">
                     docs
                 </Link>

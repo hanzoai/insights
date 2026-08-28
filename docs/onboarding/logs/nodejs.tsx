@@ -12,8 +12,8 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Insights logs uses the standard OpenTelemetry SDK. No Insights-specific packages required. Install
-                        the OTel SDK and the logs signal package:
+                        Insights logs uses the standard OpenTelemetry SDK. No Insights-specific packages required.
+                        Install the OTel SDK and the logs signal package:
                     </Markdown>
                     <CodeBlock
                         blocks={[

@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { projectLogic } from 'scenes/projectLogic'

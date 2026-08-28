@@ -182,21 +182,21 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase {
 
         await yieldEach('cdp-precalculated-filters-parse', messages, (message) => {
             try {
-                const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
-                if (!clickHouseEvent.person_id) {
+                if (!datastoreEvent.person_id) {
                     logger.error('Event missing person_id', {
-                        teamId: clickHouseEvent.team_id,
-                        event: clickHouseEvent.event,
-                        uuid: clickHouseEvent.uuid,
+                        teamId: datastoreEvent.team_id,
+                        event: datastoreEvent.event,
+                        uuid: datastoreEvent.uuid,
                     })
                     return // Skip events without person_id
                 }
 
-                if (!eventsByTeam.has(clickHouseEvent.team_id)) {
-                    eventsByTeam.set(clickHouseEvent.team_id, [])
+                if (!eventsByTeam.has(datastoreEvent.team_id)) {
+                    eventsByTeam.set(datastoreEvent.team_id, [])
                 }
-                eventsByTeam.get(clickHouseEvent.team_id)!.push(clickHouseEvent)
+                eventsByTeam.get(datastoreEvent.team_id)!.push(datastoreEvent)
             } catch (e) {
                 logger.error('Error parsing message', e)
             }
@@ -222,9 +222,9 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase {
                 }
 
                 // Process each event for this team
-                await yieldEach('cdp-precalculated-filters', teamEvents, async (clickHouseEvent) => {
+                await yieldEach('cdp-precalculated-filters', teamEvents, async (datastoreEvent) => {
                     // Convert to filter globals for filter evaluation
-                    const filterGlobals = convertDatastoreRawEventToFilterGlobals(clickHouseEvent)
+                    const filterGlobals = convertDatastoreRawEventToFilterGlobals(datastoreEvent)
 
                     // Evaluate behavioral filters
                     for (const filter of behavioralFilters) {
@@ -235,8 +235,8 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase {
                             const preCalculatedEvent: ProducedEvent = {
                                 payload: {
                                     uuid: filterGlobals.uuid,
-                                    team_id: clickHouseEvent.team_id,
-                                    person_id: clickHouseEvent.person_id!,
+                                    team_id: datastoreEvent.team_id,
+                                    person_id: datastoreEvent.person_id!,
                                     distinct_id: filterGlobals.distinct_id,
                                     condition: filter.conditionHash,
                                     source: `cohort_filter_${filter.conditionHash}`,
@@ -248,16 +248,16 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase {
                     }
 
                     // Evaluate person property filters using person_properties from the event
-                    if (personPropertyFilters.length > 0 && clickHouseEvent.person_properties) {
-                        const personProperties = parseJSON(clickHouseEvent.person_properties)
+                    if (personPropertyFilters.length > 0 && datastoreEvent.person_properties) {
+                        const personProperties = parseJSON(datastoreEvent.person_properties)
 
                         const personGlobals: PersonPropertyFilterGlobals = {
                             person: {
-                                id: clickHouseEvent.person_id,
+                                id: datastoreEvent.person_id,
                                 properties: personProperties,
                             },
                             project: {
-                                id: clickHouseEvent.team_id,
+                                id: datastoreEvent.team_id,
                             },
                         }
 
@@ -268,9 +268,9 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase {
                             // Person properties are mutable state, need to track changes
                             const personPropertyEvent: ProducedPersonPropertiesEvent = {
                                 payload: {
-                                    distinct_id: clickHouseEvent.distinct_id,
-                                    person_id: clickHouseEvent.person_id!,
-                                    team_id: clickHouseEvent.team_id,
+                                    distinct_id: datastoreEvent.distinct_id,
+                                    person_id: datastoreEvent.person_id!,
+                                    team_id: datastoreEvent.team_id,
                                     condition: filter.conditionHash,
                                     matches: matches,
                                     source: `cohort_filter_${filter.conditionHash}`,

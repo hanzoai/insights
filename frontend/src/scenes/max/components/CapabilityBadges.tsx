@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
-import { IconCode } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconCode } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { cn } from 'lib/utils/css-classes'

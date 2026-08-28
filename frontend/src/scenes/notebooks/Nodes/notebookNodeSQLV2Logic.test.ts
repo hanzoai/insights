@@ -53,7 +53,10 @@ describe('notebookNodeSQLV2Logic', () => {
             content: children,
         })
 
-        const insightsql = (node_id: string): { node_id: string; kind: 'insightsql' } => ({ node_id, kind: 'insightsql' })
+        const insightsql = (node_id: string): { node_id: string; kind: 'insightsql' } => ({
+            node_id,
+            kind: 'insightsql',
+        })
         const local = (node_id: string): { node_id: string; kind: 'local' } => ({ node_id, kind: 'local' })
 
         it('maps each named sibling to its node id, excluding the running node itself', () => {

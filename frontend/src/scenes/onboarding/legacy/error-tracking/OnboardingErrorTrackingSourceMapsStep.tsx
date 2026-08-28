@@ -79,8 +79,8 @@ export const OnboardingErrorTrackingSourceMapsStep: OnboardingStepComponentType 
                             <p className="text-sm mb-2">
                                 Once you've built your application and have bundled assets that serve your site, inject
                                 the context required by Insights to associate the maps with the served code. You will
-                                then need to upload the modified assets to Insights. Both of these operations can be done
-                                by running the respective sourcemap commands.
+                                then need to upload the modified assets to Insights. Both of these operations can be
+                                done by running the respective sourcemap commands.
                             </p>
                             <CodeSnippet language={Language.Bash}>
                                 insights-cli sourcemap process --directory ./path/to/assets

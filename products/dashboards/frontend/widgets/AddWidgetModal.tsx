@@ -1,14 +1,14 @@
 import clsx from 'clsx'
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { Fragment } from 'react'
 
 import { IconChevronDown, IconChevronRight, IconLightBulb } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
-import { Modal } from 'lib/elements/Modal'
 import { Link } from 'lib/elements/Link'
+import { Modal } from 'lib/elements/Modal'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 import { teamLogic } from 'scenes/teamLogic'
 

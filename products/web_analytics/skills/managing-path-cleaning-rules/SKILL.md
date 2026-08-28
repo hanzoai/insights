@@ -82,7 +82,7 @@ Scan the result for:
 | ------------------- | ---------------------- | ---------------------------- | ---------------------- |
 | Numeric segment     | `/users/123/profile`   | `/users/\d+/profile`         | `/users/<id>/profile`  |
 | UUID v4             | `/sessions/8f3c1a3b-…` | `/sessions/[0-9a-f-]{36}`    | `/sessions/<uuid>`     |
-| Slug                | `/posts/why-insights`   | `/posts/[a-z0-9-]+$`         | `/posts/<slug>`        |
+| Slug                | `/posts/why-insights`  | `/posts/[a-z0-9-]+$`         | `/posts/<slug>`        |
 | ISO date            | `/archive/2024-09-12`  | `/archive/\d{4}-\d{2}-\d{2}` | `/archive/<date>`      |
 | Locale prefix       | `/en-US/about`         | `^/[a-z]{2}-[A-Z]{2}/`       | `/<locale>/`           |
 | Trailing query/page | `/blog?page=3`         | `\?page=\d+$`                | (empty alias drops it) |

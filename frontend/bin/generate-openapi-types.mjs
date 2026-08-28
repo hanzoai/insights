@@ -32,7 +32,9 @@ const schemaPath = process.env.OPENAPI_SCHEMA_PATH
     : defaultSchemaPath
 
 if (!fs.existsSync(schemaPath)) {
-    console.error(`OpenAPI schema not found at ${schemaPath}. Generate it with \`insightscli build:openapi-schema\` first.`)
+    console.error(
+        `OpenAPI schema not found at ${schemaPath}. Generate it with \`insightscli build:openapi-schema\` first.`
+    )
     process.exit(1)
 }
 

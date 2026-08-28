@@ -38,17 +38,17 @@ summary of pass/fail/N/A patterns across many boolean runs.
 
 ## Tools
 
-| Tool                                     | Purpose                                                        |
-| ---------------------------------------- | -------------------------------------------------------------- |
+| Tool                                      | Purpose                                                        |
+| ----------------------------------------- | -------------------------------------------------------------- |
 | `insights:llma-evaluation-list`           | List/search evaluation configs (filter by name, enabled flag)  |
 | `insights:llma-evaluation-get`            | Get a single evaluation config by UUID                         |
-| `insights:llma-evaluation-create`         | Create a new `llm_judge`, `script`, or `sentiment` evaluation     |
+| `insights:llma-evaluation-create`         | Create a new `llm_judge`, `script`, or `sentiment` evaluation  |
 | `insights:llma-evaluation-update`         | Update an existing evaluation (name, prompt, enabled, …)       |
 | `insights:llma-evaluation-delete`         | Soft-delete an evaluation                                      |
 | `insights:llma-evaluation-run`            | Run an evaluation against a specific `$ai_generation` event    |
-| `insights:llma-evaluation-test-script`       | Dry-run Script source against recent generations (no save)        |
+| `insights:llma-evaluation-test-script`    | Dry-run Script source against recent generations (no save)     |
 | `insights:llma-evaluation-summary-create` | AI-powered summary of pass/fail/N/A patterns across runs       |
-| `insights:execute-sql`                    | Ad-hoc InsightsQL over `$ai_evaluation` events                      |
+| `insights:execute-sql`                    | Ad-hoc InsightsQL over `$ai_evaluation` events                 |
 | `insights:query-llm-trace`                | Drill into the underlying generation that an evaluation scored |
 
 All `llma-evaluation-*` tools are defined in `products/ai_observability/mcp/tools.yaml`.
@@ -65,7 +65,7 @@ Every run of an evaluation emits an `$ai_evaluation` event. Key properties:
 | `$ai_trace_id`               | Parent trace ID (for jumping to the trace UI)                   |
 | `$ai_evaluation_result_type` | Result kind: `boolean` or `sentiment`                           |
 | `$ai_evaluation_result`      | For boolean evaluations: `true` = pass, `false` = fail          |
-| `$ai_evaluation_reasoning`   | Free-text explanation (set by the LLM judge or Script code)        |
+| `$ai_evaluation_reasoning`   | Free-text explanation (set by the LLM judge or Script code)     |
 | `$ai_evaluation_applicable`  | `false` when the evaluator decided the generation is N/A        |
 | `$ai_sentiment_label`        | For sentiment evaluations: `positive`, `neutral`, or `negative` |
 | `$ai_sentiment_score`        | Confidence score for the winning sentiment label                |
@@ -269,9 +269,9 @@ LLM judges require organisation AI data processing approval. Script evaluators d
 
 | Action                     | Tool                                                                                                                  |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Add a Script evaluator        | `llma-evaluation-create` with `evaluation_type: "script"` and `evaluation_config.source`                                 |
+| Add a Script evaluator     | `llma-evaluation-create` with `evaluation_type: "script"` and `evaluation_config.source`                              |
 | Add an LLM-judge evaluator | `llma-evaluation-create` with `evaluation_type: "llm_judge"`, `evaluation_config.prompt`, and a `model_configuration` |
-| Tweak the source or prompt | `llma-evaluation-update` (edits `evaluation_config.source` for Script, `evaluation_config.prompt` for LLM judge)         |
+| Tweak the source or prompt | `llma-evaluation-update` (edits `evaluation_config.source` for Script, `evaluation_config.prompt` for LLM judge)      |
 | Toggle N/A handling        | `llma-evaluation-update` with `output_config.allows_na`                                                               |
 | Disable temporarily        | `llma-evaluation-update` with `enabled: false`                                                                        |
 | Remove                     | `llma-evaluation-delete` (soft-delete via PATCH `{deleted: true}`)                                                    |
@@ -286,7 +286,7 @@ LLM judges require organisation AI data processing approval. Script evaluators d
 Reach for **Script** by default. Switch to LLM judge only when the criterion can't be
 expressed as code.
 
-| Use Script when…                                         | Use LLM judge when…                                     |
+| Use Script when…                                      | Use LLM judge when…                                     |
 | ----------------------------------------------------- | ------------------------------------------------------- |
 | The check is structural (JSON parses, schema matches) | The check is about meaning (on-topic, helpful, factual) |
 | You need a deterministic, reproducible result         | A small amount of judgement variability is acceptable   |

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconHome, IconInfo, IconPlus } from '@hanzo/icons'
 import { Button, Divider, Dropdown, Modal, Select, Link, Tooltip } from '@hanzo/elements'
+import { IconHome, IconInfo, IconPlus } from '@hanzo/icons'
 
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
 import { toSentenceCase } from 'lib/utils/strings'
@@ -38,11 +38,7 @@ function GroupedAccessControlRuleModalFooter(props: {
 }): JSX.Element {
     return (
         <div className="flex items-center justify-end gap-2">
-            <Button
-                type="secondary"
-                onClick={props.close}
-                disabledReason={props.loading ? 'Cannot close' : undefined}
-            >
+            <Button type="secondary" onClick={props.close} disabledReason={props.loading ? 'Cannot close' : undefined}>
                 Cancel
             </Button>
             <Button

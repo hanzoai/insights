@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconEllipsis, IconX } from '@hanzo/icons'
 import { Button, ButtonDropdown, ButtonWithDropdown } from '@hanzo/elements'
+import { IconEllipsis, IconX } from '@hanzo/icons'
 
 import { HoqQLPropertyInfo } from 'lib/components/HoqQLPropertyInfo'
 import { PROPERTY_FILTER_TYPE_TO_TAXONOMIC_FILTER_GROUP_TYPE } from 'lib/components/PropertyFilters/utils'

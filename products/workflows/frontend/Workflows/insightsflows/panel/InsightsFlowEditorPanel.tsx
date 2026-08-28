@@ -2,8 +2,8 @@ import { useReactFlow } from '@xyflow/react'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconArrowLeft, IconTrash } from '@hanzo/icons'
 import { Badge, Button, Tab, Tabs, Tooltip } from '@hanzo/elements'
+import { IconArrowLeft, IconTrash } from '@hanzo/icons'
 
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 
@@ -71,12 +71,7 @@ export function InsightsFlowEditorPanel(): JSX.Element | null {
                     </div>
 
                     <div className="flex-1">
-                        <Tabs
-                            activeKey={mode}
-                            onChange={(key) => setMode(key)}
-                            tabs={tabs}
-                            barClassName="-mb-px "
-                        />
+                        <Tabs activeKey={mode} onChange={(key) => setMode(key)} tabs={tabs} barClassName="-mb-px " />
                     </div>
 
                     {selectedNode && (

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall, IconRefresh } from '@hanzo/icons'
 import { Button, Dialog } from '@hanzo/elements'
+import { IconPlusSmall, IconRefresh } from '@hanzo/icons'
 
 import { More } from 'lib/elements/Button/More'
 import { Input } from 'lib/elements/Input'

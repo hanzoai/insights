@@ -1,8 +1,8 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, isBreakpoint, kea, listeners, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -267,7 +267,10 @@ export interface viewLinkLogicMeta {
             selectedJoiningTableName: string | null,
             fieldName: string
         ) => string | null
-        sourceKeyMode: (sourceKeyModeOverride: JoinKeyMode | null, sourceIsUsingInsightsQLExpression: boolean) => JoinKeyMode
+        sourceKeyMode: (
+            sourceKeyModeOverride: JoinKeyMode | null,
+            sourceIsUsingInsightsQLExpression: boolean
+        ) => JoinKeyMode
         joiningKeyMode: (
             joiningKeyModeOverride: JoinKeyMode | null,
             joiningIsUsingInsightsQLExpression: boolean

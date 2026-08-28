@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
+import { IconDownload } from '@hanzo/icons'
 
 import { humanFriendlyNumber } from 'lib/utils/numbers'
 

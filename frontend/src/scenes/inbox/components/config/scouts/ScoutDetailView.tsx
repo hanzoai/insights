@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button, Skeleton } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { pluralize } from 'lib/utils/strings'
 

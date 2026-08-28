@@ -147,7 +147,11 @@ export function InsightsFunctionOrderModal(): JSX.Element {
                 <DndContext modifiers={[restrictToVerticalAxis, restrictToParentElement]} onDragEnd={handleDragEnd}>
                     <SortableContext items={sortedInsightsFunctions} strategy={verticalListSortingStrategy}>
                         {sortedInsightsFunctions.map((insightsFunction, index) => (
-                            <MinimalTransformationView key={insightsFunction.id} insightsFunction={insightsFunction} order={index} />
+                            <MinimalTransformationView
+                                key={insightsFunction.id}
+                                insightsFunction={insightsFunction}
+                                order={index}
+                            />
                         ))}
                     </SortableContext>
                 </DndContext>

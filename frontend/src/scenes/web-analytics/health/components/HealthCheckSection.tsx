@@ -1,5 +1,5 @@
-import { IconChevronDown, IconGear, IconGraph, IconPulse } from '@hanzo/icons'
 import { Collapse, Tag } from '@hanzo/elements'
+import { IconChevronDown, IconGear, IconGraph, IconPulse } from '@hanzo/icons'
 
 import { HealthCheck, HealthCheckCategory } from '../healthCheckTypes'
 import { HealthCheckItem } from './HealthCheckItem'

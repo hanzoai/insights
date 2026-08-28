@@ -4,8 +4,8 @@ import { combineUrl, encodeParams, router } from 'kea-router'
 import { IconX } from '@hanzo/icons'
 
 import { PathItemSelector } from 'lib/components/PropertyFilters/components/PathItemSelector'
-import { IconFunnelVertical } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconFunnelVertical } from 'lib/elements/icons'
 import { pathsDataLogic } from 'scenes/paths/pathsDataLogic'
 
 import { queryNodeToFilter } from '~/queries/nodes/InsightQuery/utils/queryNodeToFilter'

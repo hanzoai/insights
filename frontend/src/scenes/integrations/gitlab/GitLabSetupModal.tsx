@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconGitLab } from '@hanzo/icons'
 import { Button, Input, Modal, Link } from '@hanzo/elements'
+import { IconGitLab } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 

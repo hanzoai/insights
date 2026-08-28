@@ -1,13 +1,13 @@
-import { BindLogic, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 
 import { Badge, Banner, Button, Tab, Tabs, Link, Spinner } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { AccessDenied } from 'lib/components/AccessDenied'
+import { IconFeedback } from 'lib/elements/icons'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { IconFeedback } from 'lib/elements/icons'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -226,12 +226,7 @@ const Header = (): JSX.Element => {
                         >
                             Feedback
                         </Button>
-                        <Button
-                            size="small"
-                            to="https://hanzo.ai/docs/error-tracking"
-                            type="secondary"
-                            targetBlank
-                        >
+                        <Button size="small" to="https://hanzo.ai/docs/error-tracking" type="secondary" targetBlank>
                             Documentation
                         </Button>
                     </>

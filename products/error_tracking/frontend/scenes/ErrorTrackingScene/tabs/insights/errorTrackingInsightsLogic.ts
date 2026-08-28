@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, afterMount, connect, kea, listeners, path, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { isUniversalGroupFilterLike } from 'lib/components/UniversalFilters/utils'

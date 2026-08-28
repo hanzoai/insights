@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconExpand45, IconFeatures, IconHelmet, IconMap, IconWarning } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconExpand45, IconFeatures, IconHelmet, IconMap, IconWarning } from '@hanzo/icons'
 
 import { incidentStatusLogic } from 'lib/components/HelpMenu/incidentStatusLogic'
 import { SupportForm } from 'lib/components/Support/SupportForm'
@@ -364,7 +364,9 @@ export function SidePanelSupport(): JSX.Element {
                             {showMaxAI && isBillingLoaded && (
                                 <Section title="Ask Insights AI">
                                     <div>
-                                        <p>Insights AI can now answer 80%+ of the support questions we receive! Nice.</p>
+                                        <p>
+                                            Insights AI can now answer 80%+ of the support questions we receive! Nice.
+                                        </p>
                                         <p>
                                             Let Insights AI read 100s of pages of docs for you, write SQL queries and
                                             expressions, regex patterns, etc.

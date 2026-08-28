@@ -117,8 +117,8 @@ After any interaction, call `await waitForChart()` to get the updated chart.
 Canned data lives in `test-data.ts`. The mock query handler automatically resolves
 queries to the right data based on event name and breakdown property.
 
-| Series                             | Data                                                 |
-| ---------------------------------- | ---------------------------------------------------- |
-| `$pageview`                        | `[45, 82, 134, 210, 95]` over Mon–Fri                |
-| `Napped`                           | `[1, 3, 5, 8, 2]` over Mon–Fri                       |
+| Series                           | Data                                                 |
+| -------------------------------- | ---------------------------------------------------- |
+| `$pageview`                      | `[45, 82, 134, 210, 95]` over Mon–Fri                |
+| `Napped`                         | `[1, 3, 5, 8, 2]` over Mon–Fri                       |
 | `Napped` + breakdown by `mascot` | 5 series (Spike, Bramble, Thistle, Conker, Prickles) |

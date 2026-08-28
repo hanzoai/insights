@@ -15,13 +15,7 @@ jest.mock('kea', () => ({
 
 jest.mock('@hanzo/elements', () => ({
     ...jest.requireActual('@hanzo/elements'),
-    Banner: ({
-        children,
-        action,
-    }: {
-        children: ReactNode
-        action: { children: ReactNode; onClick: () => void }
-    }) => (
+    Banner: ({ children, action }: { children: ReactNode; action: { children: ReactNode; onClick: () => void } }) => (
         <div>
             {children}
             <button onClick={action.onClick}>{action.children}</button>

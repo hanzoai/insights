@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconExternal } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { Markdown } from 'lib/elements/Markdown'
 import type { SignalNode } from 'scenes/debug/signals/types'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, Input, Table, TableColumn, TableColumns, Link } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MemberSelect } from 'lib/components/MemberSelect'

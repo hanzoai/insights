@@ -3,8 +3,8 @@ import insights from 'insights-js'
 import { useState } from 'react'
 import { TextMorph } from 'torph/react'
 
-import { IconChevronRight, IconInfo } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconChevronRight, IconInfo } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'

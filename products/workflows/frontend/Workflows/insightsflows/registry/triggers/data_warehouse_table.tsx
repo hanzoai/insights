@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconServer } from '@hanzo/icons'
 import { Banner, Select } from '@hanzo/elements'
+import { IconServer } from '@hanzo/icons'
 
 import { DataWarehouseColumnsHint } from 'lib/components/CyclotronJob/DataWarehouseColumnsHint'
 import { Field } from 'lib/elements/Field'

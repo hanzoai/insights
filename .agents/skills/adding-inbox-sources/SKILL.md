@@ -19,11 +19,11 @@ the source during onboarding.
 This skill lives in `insights/insights`; the UI lives in the separate `insights/code`
 repo; the wizard's onboarding script lives in `Insights/context-mill`:
 
-| Surface                       | What changes                                                                                                                                                                                                                                                            |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `insights/insights` (this repo) | New scout emitter + registry entry + `SignalSourceProduct` enum value (+ migration) + contract variant. **The data-warehouse source itself must already exist** (all Tier-1 sources do).                                                                                |
-| `insights/code`                | ~8 UI/wiring files: the source-product unions, toggle card, setup form, hook maps, icon, filter option (+ OAuth service/router only for OAuth sources).                                                                                                                 |
-| `Insights/context-mill`        | The `self-driving` skill's connected-tools list, so `npx @hanzo/wizard self-driving` offers the source. **Optional** — skip it and the source still works everywhere else; the wizard just won't proactively suggest it. See "The self-driving wizard surface" below. |
+| Surface                         | What changes                                                                                                                                                                                                                                                          |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `insights/insights` (this repo) | New scout emitter + registry entry + `SignalSourceProduct` enum value (+ migration) + contract variant. **The data-warehouse source itself must already exist** (all Tier-1 sources do).                                                                              |
+| `insights/code`                 | ~8 UI/wiring files: the source-product unions, toggle card, setup form, hook maps, icon, filter option (+ OAuth service/router only for OAuth sources).                                                                                                               |
+| `Insights/context-mill`         | The `self-driving` skill's connected-tools list, so `npx @hanzo/wizard self-driving` offers the source. **Optional** — skip it and the source still works everywhere else; the wizard just won't proactively suggest it. See "The self-driving wizard surface" below. |
 
 > Backend work in `insights/insights` should be done in a **git worktree** (see
 > "Worktree setup" below). Merges in both repos go through the Trunk merge queue —
@@ -209,11 +209,11 @@ directly, which is deliberate (otherwise any client could self-label). A new sou
 inherits this for free; there is nothing per-source to wire. For reference, the machine
 value `mcp` is upgraded based on the caller:
 
-| Caller                                       | Transport                  | `created_via`  |
-| -------------------------------------------- | -------------------------- | -------------- |
-| Insights Desktop app inbox (`insights/code`)   | `EventSource.INSIGHTS_CODE` | `self_driving` |
-| `npx @hanzo/wizard` (self-driving program) | `EventSource.WIZARD`       | `self_driving` |
-| Other MCP clients                            | `EventSource.MCP`          | `mcp`          |
+| Caller                                       | Transport                   | `created_via`  |
+| -------------------------------------------- | --------------------------- | -------------- |
+| Insights Desktop app inbox (`insights/code`) | `EventSource.INSIGHTS_CODE` | `self_driving` |
+| `npx @hanzo/wizard` (self-driving program)   | `EventSource.WIZARD`        | `self_driving` |
+| Other MCP clients                            | `EventSource.MCP`           | `mcp`          |
 
 The upgrade lives in `_create_external_data_source` in
 `products/warehouse_sources/backend/presentation/views/external_data_source.py`.

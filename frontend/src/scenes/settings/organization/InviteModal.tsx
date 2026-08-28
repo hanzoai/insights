@@ -2,8 +2,8 @@ import './InviteModal.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 import { Input, Select, TextArea, Link, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { RestrictionScope } from 'lib/components/RestrictedArea'
@@ -418,9 +418,9 @@ export function InviteModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                 description={
                     preflight?.email_service_available ? (
                         <p>
-                            Invite others to your organization to collaborate together in Insights. An invite is specific
-                            to an email address and expires after 3 days. Name can be provided for the team member's
-                            convenience.{' '}
+                            Invite others to your organization to collaborate together in Insights. An invite is
+                            specific to an email address and expires after 3 days. Name can be provided for the team
+                            member's convenience.{' '}
                             <Link
                                 to="https://hanzo.ai/docs/settings/organizations#adding-new-members"
                                 target="_blank"

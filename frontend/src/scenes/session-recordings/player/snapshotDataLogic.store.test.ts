@@ -1,6 +1,7 @@
 import { api } from 'lib/api.mock'
 
 import { expectLogic } from 'kea-test-utils'
+
 import { EventType } from '@hanzo/insights-rrweb-types'
 
 import { RecordingSnapshot, SessionRecordingSnapshotSource } from '~/types'

@@ -1,5 +1,5 @@
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import type { LLMSentimentResult } from '~/queries/schema/schema-general'
 import { EventDetails } from '~/scenes/activity/explore/EventDetails'

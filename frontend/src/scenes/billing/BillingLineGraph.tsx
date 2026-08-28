@@ -11,9 +11,9 @@ import { Chart, ChartDataset, ChartOptions, TooltipModel } from 'lib/Chart'
 import { getSeriesColor } from 'lib/colors'
 import { getGraphColors } from 'lib/colors'
 import { Dayjs } from 'lib/dayjs'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { useChart } from 'lib/hooks/useChart'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { Tooltip } from 'lib/elements/Tooltip'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 

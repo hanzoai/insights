@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Input, Select } from '@hanzo/elements'
+import { IconPlus, IconTrash } from '@hanzo/icons'
 
 import { OperatorValueSelect } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

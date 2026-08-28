@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     LogicWrapper,
@@ -11,7 +12,6 @@ import {
     reducers,
     selectors,
 } from 'kea'
-import insights from 'insights-js'
 
 import { Dialog } from '@hanzo/elements'
 

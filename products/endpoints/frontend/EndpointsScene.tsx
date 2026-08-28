@@ -1,8 +1,8 @@
 import { BindLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { BigLeaguesHog } from 'lib/components/mascots'

@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -14,7 +15,6 @@ import {
 } from 'kea'
 import { loaders } from 'kea-loaders'
 import { combineUrl } from 'kea-router'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { formatPropertyLabel } from 'lib/components/PropertyFilters/utils'

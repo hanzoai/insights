@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import { CAPABILITIES } from 'lib/capabilities'
 import { Unavailable } from 'lib/components/Unavailable/Unavailable'

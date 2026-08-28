@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArrowRight, IconCopy, IconGear, IconGithub, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Input, SearchableSelect, Skeleton, Switch, Spinner } from '@hanzo/elements'
+import { IconArrowRight, IconCopy, IconGear, IconGithub, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'

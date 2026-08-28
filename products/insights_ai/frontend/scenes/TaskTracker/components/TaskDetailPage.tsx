@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal, IconGithub, IconPlay } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconExternal, IconGithub, IconPlay } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'

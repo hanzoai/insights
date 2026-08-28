@@ -176,8 +176,8 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                         ]}
                     />
                     <Markdown>
-                        The Insights module will automatically **generate and upload source maps** to Insights during the
-                        build process.
+                        The Insights module will automatically **generate and upload source maps** to Insights during
+                        the build process.
                     </Markdown>
                 </>
             ),

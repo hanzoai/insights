@@ -68,7 +68,10 @@ test('buildImportMap resolves every import shape end-to-end (via the AST scanner
             'from insights import schema\nx = schema.InsightVizNode\ny = schema.DataVisualizationNode\n'
         )
         // `import insights.schema` + dotted ref
-        fs.writeFileSync(path.join(mk('alerts'), 'c.py'), 'import insights.schema\ns = insights.schema.AlertState["FIRING"]\n')
+        fs.writeFileSync(
+            path.join(mk('alerts'), 'c.py'),
+            'import insights.schema\ns = insights.schema.AlertState["FIRING"]\n'
+        )
         // module bound but used dynamically → wildcard
         fs.writeFileSync(path.join(mk('mystery'), 'd.py'), 'from insights import schema\nregister(schema)\n')
         // noise: no schema usage at all

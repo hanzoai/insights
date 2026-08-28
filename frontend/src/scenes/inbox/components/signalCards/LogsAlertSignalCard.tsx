@@ -1,5 +1,5 @@
-import { IconWarning } from '@hanzo/icons'
 import { Tag, Link } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { Markdown } from 'lib/elements/Markdown'
 import { urls } from 'scenes/urls'

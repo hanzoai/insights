@@ -25,8 +25,8 @@ export function InsightsSDKIssueBanner({ event }: InsightsSDKIssueBannerProps): 
             action={{ to: 'https://status.hanzo.ai/incidents/l70cgmt7475m', children: 'Read more' }}
             className="mb-4"
         >
-            This issue was captured because of a bug in the Insights SDK. We've fixed the issue, and you won't be charged
-            for any of these exception events. We recommend setting this issue's status to "Suppressed".
+            This issue was captured because of a bug in the Insights SDK. We've fixed the issue, and you won't be
+            charged for any of these exception events. We recommend setting this issue's status to "Suppressed".
         </Banner>
     )
 }

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button, Tag, TextArea } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { NotebookNodeProps, NotebookNodeType } from 'scenes/notebooks/types'

@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { PropsWithChildren, useCallback, useMemo, useRef } from 'react'
 import { match } from 'ts-pattern'
 
-import { IconChevronRight, IconTrending } from '@hanzo/icons'
 import { Skeleton, Tooltip } from '@hanzo/elements'
+import { IconChevronRight, IconTrending } from '@hanzo/icons'
 
 import { ErrorTrackingSpikeEvent } from 'lib/components/Errors/types'
 import { dayjs } from 'lib/dayjs'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus, IconTrash } from '@hanzo/icons'
 import { Banner, Button, Checkbox, Select } from '@hanzo/elements'
+import { IconPlus, IconTrash } from '@hanzo/icons'
 
 import { getSeriesColor } from 'lib/colors'
 import { ModalContent, ModalFooter, ModalHeader } from 'lib/elements/Modal/Modal'

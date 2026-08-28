@@ -5,8 +5,8 @@ import Suggestion, { exitSuggestion } from '@tiptap/suggestion'
 import { useActions } from 'kea'
 
 import { EmojiPickerPanel } from 'lib/components/EmojiPicker/EmojiPickerPanel'
-import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
 import { Popover } from 'lib/elements/Popover'
+import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
 
 import { EditorRange } from './types'
 

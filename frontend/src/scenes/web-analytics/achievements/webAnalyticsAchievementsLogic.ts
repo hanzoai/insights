@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -291,15 +291,12 @@ export const webAnalyticsAchievementsLogic = kea<webAnalyticsAchievementsLogicTy
             if (pending.length === 1) {
                 const entry = pending[0]
                 const track = values.definitions.find((t) => t.key === entry.track_key)
-                toast.success(
-                    `Achievement unlocked — ${track?.display_name ?? entry.track_key}: ${entry.stage_name}`,
-                    {
-                        button: {
-                            label: 'View',
-                            action: () => actions.openModal(),
-                        },
-                    }
-                )
+                toast.success(`Achievement unlocked — ${track?.display_name ?? entry.track_key}: ${entry.stage_name}`, {
+                    button: {
+                        label: 'View',
+                        action: () => actions.openModal(),
+                    },
+                })
             } else {
                 toast.success(`You've unlocked ${pending.length} web analytics achievements`, {
                     button: {

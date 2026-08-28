@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPeople } from '@hanzo/icons'
 import { Button, Tag, Spinner } from '@hanzo/elements'
+import { IconPeople } from '@hanzo/icons'
 import { BarChart } from '@hanzo/quill-charts'
 
 import { useChartConfig, useChartTheme } from 'lib/charts/hooks'

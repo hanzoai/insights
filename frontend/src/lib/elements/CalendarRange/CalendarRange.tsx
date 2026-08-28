@@ -39,9 +39,7 @@ export function CalendarRange({
         <div className="CalendarRange" data-attr="lemon-calendar-range">
             <div className="flex justify-between border-b p-2 pb-4">
                 <h3 className="text-base mb-0">Select a date range</h3>
-                {onClose && (
-                    <Button icon={<IconX />} size="small" noPadding onClick={onClose} aria-label="close" />
-                )}
+                {onClose && <Button icon={<IconX />} size="small" noPadding onClick={onClose} aria-label="close" />}
             </div>
             <div className="p-2">
                 <CalendarRangeInline value={value} onChange={setRange} months={months} />

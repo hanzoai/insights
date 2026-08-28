@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown, IconPlay } from '@hanzo/icons'
 import { Button, MenuItems, MenuOverlay } from '@hanzo/elements'
+import { IconChevronDown, IconPlay } from '@hanzo/icons'
 
 import { notebookSettingsLogic } from '../../Notebook/notebookSettingsLogic'
 import { NotebookRunMode, buildRunMenuItems } from './runMenuItems'

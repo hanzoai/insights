@@ -1,6 +1,6 @@
 import insights from 'insights-js'
-import { EventType } from '@hanzo/insights-rrweb-types'
 
+import { EventType } from '@hanzo/insights-rrweb-types'
 import { ReplayTelemetry } from '@hanzo/replay-shared'
 import {
     ProcessingCache,

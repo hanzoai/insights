@@ -111,13 +111,7 @@ export function SettingsMenu({
 
 export function SettingsToggle({ tooltip, icon, label, active, ...props }: SettingsToggleProps): JSX.Element {
     const button = (
-        <Button
-            className="rounded-[0px]"
-            icon={icon}
-            size="xsmall"
-            status={active ? 'danger' : 'default'}
-            {...props}
-        >
+        <Button className="rounded-[0px]" icon={icon} size="xsmall" status={active ? 'danger' : 'default'} {...props}>
             {label}
         </Button>
     )

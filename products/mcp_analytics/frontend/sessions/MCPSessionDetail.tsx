@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBolt, IconClock, IconSparkles, IconUser, IconWarning } from '@hanzo/icons'
 import { Button, Skeleton, Tag } from '@hanzo/elements'
+import { IconBolt, IconClock, IconSparkles, IconUser, IconWarning } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'

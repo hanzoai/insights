@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { ReactNode } from 'react'
 
-import { IconFilter } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 interface OverviewItemBase {
     icon?: ReactNode

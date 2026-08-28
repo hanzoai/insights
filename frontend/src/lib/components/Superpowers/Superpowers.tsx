@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, Divider, Select, Switch, Tag } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { SupermanHog } from 'lib/components/mascots'
 import { Modal } from 'lib/elements/Modal'

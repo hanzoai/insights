@@ -102,13 +102,9 @@ test.describe('SQL Editor dual-mode synced Postgres source', () => {
             })
 
             await test.step('Refresh schemas so schema metadata is captured', async () => {
-                await callProjectApi(
-                    page,
-                    `/v1/projects/@current/external_data_sources/${sourceId}/refresh_schemas/`,
-                    {
-                        method: 'POST',
-                    }
-                )
+                await callProjectApi(page, `/v1/projects/@current/external_data_sources/${sourceId}/refresh_schemas/`, {
+                    method: 'POST',
+                })
             })
 
             await test.step('Run a InsightsQL query against the synced connection', async () => {

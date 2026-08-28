@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconCheck, IconExternal, IconLock, IconSparkles, IconTarget } from '@hanzo/icons'
 import { Button, Select, Link } from '@hanzo/elements'
+import { IconCheck, IconExternal, IconLock, IconSparkles, IconTarget } from '@hanzo/icons'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { SetupTaskId } from 'lib/components/ProductSetup'
@@ -781,12 +781,7 @@ function TaskActions({
     if (isSkipped) {
         return (
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                <Button
-                    type="tertiary"
-                    size="xsmall"
-                    onClick={(e) => onUnskip(e, task.id)}
-                    tooltip="Restore this task"
-                >
+                <Button type="tertiary" size="xsmall" onClick={(e) => onUnskip(e, task.id)} tooltip="Restore this task">
                     Restore
                 </Button>
             </div>

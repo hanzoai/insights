@@ -1,5 +1,5 @@
-import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
+import { expectLogic } from 'kea-test-utils'
 
 import { initKeaTests } from '~/test/init'
 import { SessionPlayerData, SessionRecordingType } from '~/types'

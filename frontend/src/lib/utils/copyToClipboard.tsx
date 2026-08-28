@@ -1,5 +1,5 @@
-import { IconCopy } from '@hanzo/icons'
 import { toast } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 export async function copyToClipboard(
     value: string,

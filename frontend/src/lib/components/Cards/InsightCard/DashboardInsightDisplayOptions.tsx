@@ -13,12 +13,7 @@ export function DashboardInsightDisplayOptions({ items }: { items: MenuItems }):
     return (
         <>
             <Divider />
-            <Menu
-                items={items}
-                closeOnClickInside={false}
-                placement="right-start"
-                fallbackPlacements={['left-start']}
-            >
+            <Menu items={items} closeOnClickInside={false} placement="right-start" fallbackPlacements={['left-start']}>
                 <Button fullWidth>Display options</Button>
             </Menu>
         </>

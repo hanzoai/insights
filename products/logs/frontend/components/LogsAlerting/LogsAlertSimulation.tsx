@@ -4,8 +4,8 @@ import { Button, Select, Skeleton, Tag } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
-import { useChart } from 'lib/hooks/useChart'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { useChart } from 'lib/hooks/useChart'
 import { humanFriendlyDuration } from 'lib/utils/durations'
 
 import { LogsAlertSimulateBucketApi, LogsAlertSimulateResponseApi } from 'products/logs/frontend/generated/api.schemas'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconArrowRight, IconCheckCircle, IconInfo } from '@hanzo/icons'
 import { Button, Card, Link, Tooltip } from '@hanzo/elements'
+import { IconArrowRight, IconCheckCircle, IconInfo } from '@hanzo/icons'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { cn } from 'lib/utils/css-classes'

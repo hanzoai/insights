@@ -22,14 +22,14 @@ shipping anything broad.
 
 ## Prop combinations to think about
 
-| Prop                   | Why it matters                                                                              |
-| ---------------------- | ------------------------------------------------------------------------------------------- |
-| `taxonomicGroupTypes`  | Drives which tabs appear and their order. Single-group, subset, and full-default all exist. |
-| `excludedProperties`   | Hides already-selected keys; some scenes hide system-only properties this way.              |
-| `metadataSource`       | Drives whether the property panel queries events / persons / sessions / warehouse.          |
-| `eventNames`           | Insight-series names so per-event property promotion can run; reactive via `propsChanged`.  |
-| `onChange` / `onEnter` | Both shapes exist; `onEnter` is used for InsightsQL expression entry without a concrete pick.    |
-| `optionsFromProp`      | Some pickers inject local items instead of fetching from the API.                           |
+| Prop                   | Why it matters                                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| `taxonomicGroupTypes`  | Drives which tabs appear and their order. Single-group, subset, and full-default all exist.   |
+| `excludedProperties`   | Hides already-selected keys; some scenes hide system-only properties this way.                |
+| `metadataSource`       | Drives whether the property panel queries events / persons / sessions / warehouse.            |
+| `eventNames`           | Insight-series names so per-event property promotion can run; reactive via `propsChanged`.    |
+| `onChange` / `onEnter` | Both shapes exist; `onEnter` is used for InsightsQL expression entry without a concrete pick. |
+| `optionsFromProp`      | Some pickers inject local items instead of fetching from the API.                             |
 
 ## Smoke test before shipping a broad change
 

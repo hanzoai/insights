@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCode, IconCopy, IconPlus, IconX } from '@hanzo/icons'
 import { Button, Dialog, Input, Label, toast } from '@hanzo/elements'
+import { IconCode, IconCopy, IconPlus, IconX } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { Field } from 'lib/elements/Field/Field'

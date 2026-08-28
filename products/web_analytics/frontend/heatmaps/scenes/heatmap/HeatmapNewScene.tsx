@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import useResizeObserver from 'use-resize-observer'
 
-import { IconCheckCircle, IconWarning } from '@hanzo/icons'
 import { Banner, Button, Card, Label, Spinner } from '@hanzo/elements'
+import { IconCheckCircle, IconWarning } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'

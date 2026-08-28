@@ -1,12 +1,12 @@
 import { useValues } from 'kea'
 
-import { IconWrench } from '@hanzo/icons'
 import { Button, Dialog, Input, TextArea, toast } from '@hanzo/elements'
+import { IconWrench } from '@hanzo/icons'
 
 import api from 'lib/api'
+import { Field } from 'lib/elements/Field'
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { Field } from 'lib/elements/Field'
 
 import { IntegrationType } from '~/types'
 

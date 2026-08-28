@@ -3,8 +3,8 @@ import './LiveUserCount.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconPerson, IconVideoCamera } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconPerson, IconVideoCamera } from '@hanzo/icons'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { cn } from 'lib/utils/css-classes'

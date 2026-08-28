@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 
-import { IconArrowRight, IconChevronDown, IconExternal } from '@hanzo/icons'
 import { Button, Tag, Link } from '@hanzo/elements'
+import { IconArrowRight, IconChevronDown, IconExternal } from '@hanzo/icons'
 
 import { IconLink } from 'lib/elements/icons'
 import { Markdown } from 'lib/elements/Markdown'

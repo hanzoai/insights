@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconArrowLeft, IconCheckCircle } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconArrowLeft, IconCheckCircle } from '@hanzo/icons'
 
 import { sidepanelTicketsLogic } from './sidepanelTicketsLogic'
 

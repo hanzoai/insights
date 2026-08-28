@@ -90,8 +90,8 @@
 
 ## Per-review-unit breakdown
 
-| pass | chunk | perspective                                    | raw issues |
-| ---- | ----- | ---------------------------------------------- | ---------- |
+| pass | chunk | perspective                                       | raw issues |
+| ---- | ----- | ------------------------------------------------- | ---------- |
 | 1    | 1     | review-script-perspective-contracts-security      | 2          |
 | 1    | 2     | review-script-perspective-contracts-security      | 3          |
 | 1    | 3     | review-script-perspective-contracts-security      | 2          |

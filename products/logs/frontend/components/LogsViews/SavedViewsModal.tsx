@@ -3,9 +3,9 @@ import { useActions, useValues } from 'kea'
 import { Button, Dialog, Input, Modal, Table, TableColumns } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { useKeepMountedWhileOpen } from 'lib/hooks/useKeepMountedWhileOpen'
 import { More } from 'lib/elements/Button/More'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { useKeepMountedWhileOpen } from 'lib/hooks/useKeepMountedWhileOpen'
 
 import { getFiltersSummaryLines } from 'products/logs/frontend/utils'
 

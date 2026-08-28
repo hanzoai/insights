@@ -504,26 +504,26 @@ WHERE team_id = X AND distinct_id = 'anon-123'
 
 ### PostgreSQL schema (Python/Django)
 
-| File                              | Purpose                                                       |
-| --------------------------------- | ------------------------------------------------------------- |
+| File                               | Purpose                                                       |
+| ---------------------------------- | ------------------------------------------------------------- |
 | `insights/models/person/person.py` | Django models: Person, PersonDistinctId, PersonlessDistinctId |
 
 ### Datastore schema (Python)
 
-| File                           | Purpose                                                                    |
-| ------------------------------ | -------------------------------------------------------------------------- |
+| File                            | Purpose                                                                    |
+| ------------------------------- | -------------------------------------------------------------------------- |
 | `insights/models/person/sql.py` | Person, person_distinct_id, person_distinct_id_overrides table definitions |
 
 ### Squashing job (Python)
 
-| File                               | Purpose                                       |
-| ---------------------------------- | --------------------------------------------- |
+| File                                | Purpose                                       |
+| ----------------------------------- | --------------------------------------------- |
 | `insights/dags/person_overrides.py` | Dagster job that squashes person_id overrides |
 
 ### InsightsQL (Python)
 
-| File                                                            | Purpose                                    |
-| --------------------------------------------------------------- | ------------------------------------------ |
+| File                                                                  | Purpose                                         |
+| --------------------------------------------------------------------- | ----------------------------------------------- |
 | `insights/insightsql/database/schema/persons.py`                      | InsightsQL schema for persons table             |
 | `insights/insightsql/database/schema/person_distinct_ids.py`          | InsightsQL schema for person_distinct_id tables |
 | `insights/insightsql/database/schema/person_distinct_id_overrides.py` | InsightsQL schema for overrides table           |

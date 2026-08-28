@@ -96,8 +96,8 @@ Source: `products/tasks/backend/metrics.py`, emitted from `products/tasks/backen
 
 Prometheus counters (not `hanzo_insights.capture()` events):
 
-| Metric                                 | Labels   | Description                                                                                                                                                                 |
-| -------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Metric                                  | Labels   | Description                                                                                                                                                                 |
+| --------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `insights_tasks_loop_fire_total`        | `reason` | One increment per `fire_loop()` call, labeled with the `LoopFireResult.reason` outcome (`created`, `deduped`, `overlap_skipped`, `rate_capped`, `disabled`, `gate_blocked`) |
 | `insights_tasks_loop_auto_paused_total` | (none)   | One increment each time a loop is auto-paused after `consecutive_failures` reaches the threshold                                                                            |
 

@@ -1,5 +1,5 @@
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'

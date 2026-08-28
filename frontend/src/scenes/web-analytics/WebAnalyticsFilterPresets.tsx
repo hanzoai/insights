@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
+import { Button, Divider, Input, Modal, Skeleton, TextArea, Popover } from '@hanzo/elements'
 import {
     IconBookmark,
     IconBookmarkSolid,
@@ -12,15 +13,6 @@ import {
     IconTrash,
     IconX,
 } from '@hanzo/icons'
-import {
-    Button,
-    Divider,
-    Input,
-    Modal,
-    Skeleton,
-    TextArea,
-    Popover,
-} from '@hanzo/elements'
 
 import { IconSync } from 'lib/elements/icons'
 
@@ -94,12 +86,7 @@ export const FilterPresetsDropdown = (): JSX.Element => {
                         onClick={(e) => handleTogglePin(preset, e)}
                         tooltip={preset.pinned ? 'Unpin' : 'Pin'}
                     />
-                    <Button
-                        size="xsmall"
-                        icon={<IconPencil />}
-                        onClick={(e) => handleEdit(preset, e)}
-                        tooltip="Edit"
-                    />
+                    <Button size="xsmall" icon={<IconPencil />} onClick={(e) => handleEdit(preset, e)} tooltip="Edit" />
                     <Button
                         size="xsmall"
                         icon={<IconTrash />}

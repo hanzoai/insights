@@ -1,12 +1,12 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { ReactNode, useState } from 'react'
 
-import { IconChevronRight } from '@hanzo/icons'
 import { Select, Skeleton, Switch, Link } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
+import { IconSlack } from 'lib/elements/icons'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
-import { IconSlack } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import { IntegrationType } from '~/types'
@@ -82,8 +82,8 @@ function TeamChannelCard({ integration }: { integration: IntegrationType }): JSX
                     title="Notify the whole team"
                     description={
                         <>
-                            Post every report to one channel, whether or not a reviewer is suggested. Insights must be in
-                            the channel. Invite it with <code>/invite @Insights</code>.
+                            Post every report to one channel, whether or not a reviewer is suggested. Insights must be
+                            in the channel. Invite it with <code>/invite @Insights</code>.
                         </>
                     }
                 />

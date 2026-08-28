@@ -49,10 +49,7 @@ export function NextJSSourceMapsInstructions(): JSX.Element {
     )
 }
 
-const nextConfig = (
-    teamId: string,
-    host: string
-): string => `import { withInsightsConfig } from "@hanzo/nextjs-config";
+const nextConfig = (teamId: string, host: string): string => `import { withInsightsConfig } from "@hanzo/nextjs-config";
 
 const nextConfig = {
   //...your nextjs config,

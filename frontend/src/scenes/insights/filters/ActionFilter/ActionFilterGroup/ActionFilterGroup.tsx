@@ -1,11 +1,11 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconEllipsis, IconPencil, IconPlusSmall, IconTrash, IconUndo } from '@hanzo/icons'
 import { Button, Menu, Tooltip } from '@hanzo/elements'
+import { IconCopy, IconEllipsis, IconPencil, IconPlusSmall, IconTrash, IconUndo } from '@hanzo/icons'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -21,8 +21,8 @@ import {
     TaxonomicPopoverProps,
     TaxonomicStringPopover,
 } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
-import { SortableDragIcon } from 'lib/elements/icons'
 import { Dropdown } from 'lib/elements/Dropdown'
+import { SortableDragIcon } from 'lib/elements/icons'
 import { teamLogic } from 'scenes/teamLogic'
 import { MathCategory, mathsLogic } from 'scenes/trends/mathsLogic'
 

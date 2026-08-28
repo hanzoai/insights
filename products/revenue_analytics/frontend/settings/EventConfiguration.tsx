@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, toast } from '@hanzo/elements'
+import { IconGear, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'

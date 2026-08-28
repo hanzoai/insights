@@ -29,8 +29,8 @@ one short question or offer the menu before querying.
 
 ## Available tools
 
-| Tool                                        | Purpose                                                                  |
-| ------------------------------------------- | ------------------------------------------------------------------------ |
+| Tool                                         | Purpose                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
 | `insights:query-session-recordings-list`     | Find/filter recordings (the workhorse). Returns metadata + `id` per row. |
 | `insights:read-data-schema`                  | Confirm real event names, URLs, and property values before filtering.    |
 | `insights:execute-sql`                       | Collect `$session_id`s for sessions where a specific **event** happened. |

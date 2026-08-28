@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconNotification } from '@hanzo/icons'
 import { SegmentedButton, Tabs, Link, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconNotification } from '@hanzo/icons'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'

@@ -30,8 +30,8 @@ A run of one-shot suites never pays for — or fails preflight on — the sandbo
 | `tunnels.py`       | `TailscaleFunnel`. Modal only: enables Tailscale Funnel on the host services and resolves their public URLs.                      |
 | `requirements.py`  | `SuiteKind`, `Infra`, and the kind → infrastructure mapping (with implication closure).                                           |
 | `django_env.py`    | `setup_django()`, the `NullDbBlocker` shim, and `EvalDatabase` (test database lifecycle).                                         |
-| `live_server.py`   | `EvalLiveServer`, a session-lifetime Uvicorn server for Insights's full ASGI application.                                          |
-| `services.py`      | Starts the LLM gateway, MCP server, and personinsights subprocesses; builds local skills.                                              |
+| `live_server.py`   | `EvalLiveServer`, a session-lifetime Uvicorn server for Insights's full ASGI application.                                         |
+| `services.py`      | Starts the LLM gateway, MCP server, and personinsights subprocesses; builds local skills.                                         |
 | `temporal_env.py`  | Local Temporal dev server, stale-workflow cleanup, and the worker thread.                                                         |
 | `demo_data.py`     | `SandboxedDemoData`: seeds the master Hedgebox team once, then mints an isolated team per case.                                   |
 | `discovery.py`     | Walks the tree for `eval_*.py` and collects `eval_*` coroutines into `EvalSuite` objects.                                         |

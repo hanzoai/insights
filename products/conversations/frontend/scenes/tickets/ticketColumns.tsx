@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconClock } from '@hanzo/icons'
 import { Badge, TableColumns, Tag, Spinner, Tooltip } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -174,9 +174,7 @@ const TICKET_COLUMNS: Record<TicketColumnKey, TicketColumnDefinition> = {
                         .join(' · ')
                     return (
                         <Tooltip title={tooltipContent || undefined}>
-                            <Tag type={aiTriageResultTagType(triage.result)}>
-                                {aiTriageResultLabel[triage.result]}
-                            </Tag>
+                            <Tag type={aiTriageResultTagType(triage.result)}>{aiTriageResultLabel[triage.result]}</Tag>
                         </Tooltip>
                     )
                 }

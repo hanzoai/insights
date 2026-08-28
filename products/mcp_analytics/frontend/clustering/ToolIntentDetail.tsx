@@ -1,15 +1,6 @@
-import { IconArrowRight } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
-import {
-    Badge,
-    Progress,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@hanzo/quill-primitives'
+import { IconArrowRight } from '@hanzo/icons'
+import { Badge, Progress, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@hanzo/quill-primitives'
 
 import { LinkPrimitive } from 'lib/elements/Link/Link'
 import { humanFriendlyNumber } from 'lib/utils/numbers'

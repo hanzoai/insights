@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCursorClick, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Input, SegmentedButton, Slider, Tooltip } from '@hanzo/elements'
+import { IconCursorClick, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { PositionSelector } from 'scenes/surveys/survey-appearance/SurveyAppearancePositionSelector'
 

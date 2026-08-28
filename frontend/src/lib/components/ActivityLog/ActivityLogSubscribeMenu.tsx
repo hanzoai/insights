@@ -1,7 +1,7 @@
 import { combineUrl, router } from 'kea-router'
 
-import { IconBell } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
+import { IconBell } from '@hanzo/icons'
 
 import { MenuItems } from 'lib/elements/Menu/Menu'
 import { INSIGHTS_FUNCTION_SUB_TEMPLATES } from 'scenes/insights-functions/sub-templates/sub-templates'

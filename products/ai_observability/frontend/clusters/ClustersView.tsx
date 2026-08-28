@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown, IconChevronRight, IconGear, IconInfo, IconQuestion, IconStack } from '@hanzo/icons'
 import { Button, SegmentedButton, Select, Spinner, Tooltip } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight, IconGear, IconInfo, IconQuestion, IconStack } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

@@ -8,7 +8,6 @@ jest.mock('lib/api', () => ({
     default: { get: jest.fn().mockResolvedValue(null), update: jest.fn().mockResolvedValue(null) },
 }))
 
-
 import { initKeaTests } from '~/test/init'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
 import { AppContext } from '~/types'
@@ -33,7 +32,6 @@ describe('shim consumer integration', () => {
         toolbarConfigLogic.build({ apiURL: 'http://localhost' }).mount()
         jest.clearAllMocks()
     })
-
 
     describe('themeLogic with shims', () => {
         it('mounts without error and provides isDarkModeOn', async () => {

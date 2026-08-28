@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconGraph, IconInfo } from '@hanzo/icons'
 import { Banner, Button, Table } from '@hanzo/elements'
+import { IconGraph, IconInfo } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'

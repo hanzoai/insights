@@ -12,7 +12,11 @@ export const defaultDataTableEventColumns: InsightsQLExpression[] = [
     'timestamp',
 ]
 
-export const defaultDataTablePersonColumns: InsightsQLExpression[] = [PERSON_DISPLAY_NAME_COLUMN_NAME, 'id', 'created_at']
+export const defaultDataTablePersonColumns: InsightsQLExpression[] = [
+    PERSON_DISPLAY_NAME_COLUMN_NAME,
+    'id',
+    'created_at',
+]
 
 export function getDefaultDataTablePersonColumns(personLastSeenAtEnabled: boolean): InsightsQLExpression[] {
     const columns = [...defaultDataTablePersonColumns]

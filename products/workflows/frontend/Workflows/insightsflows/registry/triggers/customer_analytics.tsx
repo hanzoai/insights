@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBolt, IconPencil } from '@hanzo/icons'
 import { Banner, InputSelect } from '@hanzo/elements'
+import { IconBolt, IconPencil } from '@hanzo/icons'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'

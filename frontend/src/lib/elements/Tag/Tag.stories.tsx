@@ -59,12 +59,7 @@ export const CloseOnClick: Story = {
                     Hover to see the icon swap to close (X), click anywhere on the tag to close it
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                    <TagComponent
-                        icon={<IconFlag />}
-                        closeOnClick
-                        onClose={() => alert('Tag closed!')}
-                        type="primary"
-                    >
+                    <TagComponent icon={<IconFlag />} closeOnClick onClose={() => alert('Tag closed!')} type="primary">
                         Primary tag with icon
                     </TagComponent>
                     <TagComponent

@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { SetupTaskId } from 'lib/components/ProductSetup'
 import { preflightLogic } from 'lib/logic/preflightLogic'

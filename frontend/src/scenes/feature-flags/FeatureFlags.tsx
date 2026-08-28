@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconLock, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Tag, toast } from '@hanzo/elements'
+import { IconLock, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
@@ -228,11 +228,7 @@ function FeatureFlagRowActions({ featureFlag }: { featureFlag: FeatureFlagType }
                             Try out in Insights
                         </Button>
 
-                        <Button
-                            onClick={() => setIsQuickSurveyModalOpen(true)}
-                            data-attr="create-survey"
-                            fullWidth
-                        >
+                        <Button onClick={() => setIsQuickSurveyModalOpen(true)} data-attr="create-survey" fullWidth>
                             Create survey
                         </Button>
 

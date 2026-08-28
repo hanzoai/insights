@@ -67,9 +67,7 @@ export interface TableColumnGroup<T extends Record<string, any>> {
     title?: string | React.ReactNode
     children: TableColumn<T, keyof T | undefined>[]
 }
-export type TableColumns<T extends Record<string, any>> =
-    | TableColumn<T, keyof T | undefined>[]
-    | TableColumnGroup<T>[]
+export type TableColumns<T extends Record<string, any>> = TableColumn<T, keyof T | undefined>[] | TableColumnGroup<T>[]
 
 export interface ExpandableConfig<T extends Record<string, any>> {
     /** Row expansion render function. */

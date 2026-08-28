@@ -137,9 +137,9 @@ using `datasourceUid: "victoriametrics"` and `regex: "<prefix>.*"`.
 | `capture_billing_*`            | Billing/quota tokens loaded             | `namespace`, `cache_key`                       |
 | `capture_event_restrictions_*` | Event restrictions (6 metrics)          | `namespace`, `restriction_type`                |
 | `capture_ai_otel_*`            | AI/OTel capture (12 metrics)            | `namespace="capture-ai"`                       |
-| `envoy_cluster_*`              | L7 proxy                                | `envoy_cluster_name=~"insights_capture-.*"`     |
+| `envoy_cluster_*`              | L7 proxy                                | `envoy_cluster_name=~"insights_capture-.*"`    |
 | `aws_msk_*`                    | MSK broker-side (JMX)                   | `environment="prod-us"` or `"prod-eu"`         |
-| `ratelimit_service_*`          | Contour rate limit                      | `domain="insights"`                             |
+| `ratelimit_service_*`          | Contour rate limit                      | `domain="insights"`                            |
 | `overflow_redirect_*`          | Node.js ingestion overflow (downstream) | `ingestion_pipeline`                           |
 | `kube_*` / `container_*`       | K8s resources                           | `namespace=~"capture-.*"`, `pod=~"capture-.*"` |
 
@@ -196,7 +196,7 @@ Profile types: `process_cpu:cpu:nanoseconds:cpu:nanoseconds`,
 | `ingestion-pipelines`     | Ingestion - Pipelines      | End-to-end pipeline throughput and lag                                     |
 | `ingestion-reliability`   | Ingestion - Reliability    | Ingested-event trends, processing-lag SLOs, pod restarts                   |
 | `ingestion-sessionreplay` | Ingestion - Session Replay | Session replay ingestion                                                   |
-| `contour`                 | Contour Ingress            | Envoy L7 proxy (set `envoy_cluster_name=insights_capture-analytics_3000`)   |
+| `contour`                 | Contour Ingress            | Envoy L7 proxy (set `envoy_cluster_name=insights_capture-analytics_3000`)  |
 | `AWSRedis`                | AWS ElastiCache Redis      | Per-cluster CloudWatch Redis metrics (filter `cacheclusterId`)             |
 
 The two details boards live under `Capture/Ingestion/` and cross-link each other

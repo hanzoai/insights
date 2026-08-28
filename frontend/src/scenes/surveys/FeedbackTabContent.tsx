@@ -1,7 +1,7 @@
 import { BindLogic, useValues } from 'kea'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Banner, Table, TableColumn, Link, Spinner } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { createdAtColumn } from 'lib/elements/Table/columnUtils'
 import { TableLink } from 'lib/elements/Table/TableLink'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconAtSign, IconBug, IconDashboard, IconGraph, IconNotebook } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconAtSign, IconBug, IconDashboard, IconGraph, IconNotebook } from '@hanzo/icons'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'

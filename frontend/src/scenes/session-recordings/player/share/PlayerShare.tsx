@@ -1,10 +1,10 @@
 import clsx from 'clsx'
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
-import insights from 'insights-js'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button, Checkbox, Input } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { SharingModalContent } from 'lib/components/Sharing/SharingModal'
 import { Dialog } from 'lib/elements/Dialog'

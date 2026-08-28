@@ -1,8 +1,8 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconBell, IconRefresh } from '@hanzo/icons'
 import { Banner, Button, Tag, Link } from '@hanzo/elements'
+import { IconBell, IconRefresh } from '@hanzo/icons'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
@@ -88,8 +88,8 @@ export function SdkHealthScene(): JSX.Element {
                 <div>
                     <Banner type="info">
                         <strong>DEVELOPMENT WARNING!</strong> When running in development, make sure you've run the
-                        Dagster job <Tag>cache_github_sdk_versions_job</Tag>. Team SDK version data is cached
-                        by the Temporal <Tag>sdk_outdated</Tag> health check.
+                        Dagster job <Tag>cache_github_sdk_versions_job</Tag>. Team SDK version data is cached by the
+                        Temporal <Tag>sdk_outdated</Tag> health check.
                     </Banner>
                 </div>
             )}

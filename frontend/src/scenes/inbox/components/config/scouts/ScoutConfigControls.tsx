@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Input, Select, Switch, Tooltip } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { teamLogic } from 'scenes/teamLogic'
 

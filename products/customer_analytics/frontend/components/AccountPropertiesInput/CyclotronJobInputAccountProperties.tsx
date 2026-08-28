@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconPlus, IconX } from '@hanzo/icons'
 import { Button, ColorGlyph, Select } from '@hanzo/elements'
+import { IconPlus, IconX } from '@hanzo/icons'
 
 import type { DataColorToken } from 'lib/colors'
 import type { CustomInputRendererProps } from 'lib/components/CyclotronJob/customInputRenderers'

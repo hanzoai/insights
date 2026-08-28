@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Table, TableColumns } from 'lib/elements/Table'
 import { Link } from 'lib/elements/Link'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { urls } from 'scenes/urls'
 
 import { CohortType } from '~/types'

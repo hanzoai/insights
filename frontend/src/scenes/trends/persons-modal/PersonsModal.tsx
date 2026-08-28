@@ -4,19 +4,8 @@ import { useActions, useValues } from 'kea'
 import React, { useCallback, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import { Badge, Banner, Button, Divider, Input, Modal, ModalProps, Select, Skeleton, Link } from '@hanzo/elements'
 import { IconCollapse, IconExpand } from '@hanzo/icons'
-import {
-    Badge,
-    Banner,
-    Button,
-    Divider,
-    Input,
-    Modal,
-    ModalProps,
-    Select,
-    Skeleton,
-    Link,
-} from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
@@ -25,9 +14,9 @@ import { PropertiesTimeline } from 'lib/components/PropertiesTimeline'
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
 import { IconPlayCircle } from 'lib/elements/icons'
-import { Tabs } from 'lib/elements/Tabs'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tabs } from 'lib/elements/Tabs'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { isGroupType, isSessionType } from 'lib/utils/guards'

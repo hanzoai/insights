@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { IconPlay } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlay } from '@hanzo/icons'
 
 import { EventType } from '~/types'
 

@@ -34,8 +34,7 @@ const meta: Meta = {
                 [`/v1/projects/:team_id/experiment_holdouts`]: [],
                 [`/v1/projects/:team_id/experiment_saved_metrics/`]: [],
                 [`/v1/projects/:team_id/feature_flags/${EXPERIMENT_WITH_MULTIPLE_METRICS.feature_flag.id}/`]: {},
-                [`/v1/projects/:team_id/feature_flags/${EXPERIMENT_WITH_MULTIPLE_METRICS.feature_flag.id}/status/`]:
-                    {},
+                [`/v1/projects/:team_id/feature_flags/${EXPERIMENT_WITH_MULTIPLE_METRICS.feature_flag.id}/status/`]: {},
                 [`/v1/environments/:team_id/default_release_conditions/`]: [],
             },
             post: {

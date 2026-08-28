@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -11,7 +12,6 @@ import {
     selectors,
 } from 'kea'
 import { router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { toast } from 'lib/elements/Toast/Toast'

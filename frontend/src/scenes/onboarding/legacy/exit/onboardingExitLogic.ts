@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { toast } from 'lib/elements/Toast/Toast'
@@ -217,9 +217,7 @@ export const onboardingExitLogic = kea<onboardingExitLogicType>([
                 values.currentOrganizationId &&
                 values.orgIdAtOpen !== values.currentOrganizationId
             ) {
-                toast.error(
-                    'Your active organization changed while this dialog was open. Please reopen and try again.'
-                )
+                toast.error('Your active organization changed while this dialog was open. Please reopen and try again.')
                 actions.closeExitModal()
                 return
             }

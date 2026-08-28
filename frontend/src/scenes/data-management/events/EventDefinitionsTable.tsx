@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconApps, IconChevronDown, IconPlus } from '@hanzo/icons'
 import { Button, Input, Select, SelectOptions, Link } from '@hanzo/elements'
+import { IconApps, IconChevronDown, IconPlus } from '@hanzo/icons'
 
 import { BulkUpdateTagsModal } from 'lib/components/BulkActions/BulkUpdateTagsModal'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'

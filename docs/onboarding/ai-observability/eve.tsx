@@ -26,8 +26,8 @@ export const getEveSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
 
                     <Blockquote>
                         <Markdown>
-                            **Version note:** This example uses `projectToken`, which is available in `@hanzo/ai`
-                            7.19.6 and later. Earlier 7.x versions use `apiKey`.
+                            **Version note:** This example uses `projectToken`, which is available in `@hanzo/ai` 7.19.6
+                            and later. Earlier 7.x versions use `apiKey`.
                         </Markdown>
                     </Blockquote>
                 </>
@@ -106,8 +106,8 @@ export const getEveSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                     <Blockquote>
                         <Markdown>
                             **Note:** To capture LLM events anonymously, omit the `events` handler. See our docs on
-                            [anonymous vs identified
-                            events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
+                            [anonymous vs identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events)
+                            to learn more.
                         </Markdown>
                     </Blockquote>
 

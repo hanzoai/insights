@@ -33,17 +33,17 @@
 
 ## Per-review-unit breakdown
 
-| pass | chunk | perspective                                    | raw issues |
-| ---- | ----- | ---------------------------------------------- | ---------- |
+| pass | chunk | perspective                                       | raw issues |
+| ---- | ----- | ------------------------------------------------- | ---------- |
 | 1    | 1     | review-script-perspective-contracts-security      | 2          |
 | 1    | 2     | review-script-perspective-contracts-security      | 2          |
-| 1    | 3     | ?                                              | 0          |
+| 1    | 3     | ?                                                 | 0          |
 | 2    | 1     | review-script-perspective-logic-correctness       | 3          |
 | 2    | 2     | review-script-perspective-logic-correctness       | 2          |
-| 2    | 3     | ?                                              | 0          |
+| 2    | 3     | ?                                                 | 0          |
 | 3    | 1     | review-script-perspective-performance-reliability | 2          |
 | 3    | 2     | review-script-perspective-performance-reliability | 1          |
-| 3    | 3     | ?                                              | 0          |
+| 3    | 3     | ?                                                 | 0          |
 | 1000 | 1     | review-script-blind-spots-general                 | 1          |
 | 1000 | 2     | review-script-blind-spots-general                 | 1          |
 | 1000 | 3     | review-script-blind-spots-general                 | 1          |

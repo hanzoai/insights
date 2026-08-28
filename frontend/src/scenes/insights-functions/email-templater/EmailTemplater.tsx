@@ -4,14 +4,14 @@ import { ChildFunctionProps, Form } from 'kea-forms'
 import { useEffect, useState } from 'react'
 import EmailEditor, { EditorRef } from 'react-email-editor'
 
-import { IconCollapse, IconExpand, IconExternal, IconPlus, IconX } from '@hanzo/icons'
 import { Button, Card, Label, Modal, SegmentedButton, Select } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconExternal, IconPlus, IconX } from '@hanzo/icons'
 
 import { CyclotronJobTemplateSuggestionsButton } from 'lib/components/CyclotronJob/CyclotronJobTemplateSuggestions'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { Field } from 'lib/elements/Field'
 import { Input } from 'lib/elements/Input/Input'
 import { TextArea } from 'lib/elements/TextArea'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { urls } from 'scenes/urls'
@@ -675,12 +675,7 @@ function SaveTemplateModal({
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
                     <Label>Template name</Label>
-                    <Input
-                        placeholder="My Email Template"
-                        value={templateName}
-                        onChange={setTemplateName}
-                        autoFocus
-                    />
+                    <Input placeholder="My Email Template" value={templateName} onChange={setTemplateName} autoFocus />
                 </div>
                 <div className="flex flex-col gap-1">
                     <Label showOptional>Description</Label>

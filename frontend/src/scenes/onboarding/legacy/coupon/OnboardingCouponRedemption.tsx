@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { CouponRedemption } from 'scenes/coupons/CouponRedemption'
 import { parseCouponCampaign } from 'scenes/coupons/utils'
@@ -24,12 +24,7 @@ export function OnboardingCouponRedemption(): JSX.Element {
             <CouponRedemption
                 campaign={campaign}
                 renderSuccessActions={() => (
-                    <Button
-                        type="primary"
-                        status="alt"
-                        sideIcon={<IconArrowRight />}
-                        onClick={continueToOnboarding}
-                    >
+                    <Button type="primary" status="alt" sideIcon={<IconArrowRight />} onClick={continueToOnboarding}>
                         Continue to setup
                     </Button>
                 )}

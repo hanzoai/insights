@@ -202,24 +202,29 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
         setWebhookUrl('')
     }
 
-    const existingDestinations: AlertNotificationDestinationView[] = existingInsightsFunctions.map((insightsFunction) => {
-        const destination = getInsightsFunctionDestination(insightsFunction, slackIntegrations)
-        return {
-            key: insightsFunction.id,
-            title: destination.type,
-            detail: destination.detail,
-            tags: [
-                { label: insightsFunction.enabled ? 'Active' : 'Paused', type: insightsFunction.enabled ? 'success' : 'default' },
-            ],
-            viewAction: {
-                kind: 'icon',
-                url: urls.insightsFunction(insightsFunction.id),
-                tooltip: 'Open destination',
-                targetBlank: true,
-            },
-            onDelete: () => deleteExistingInsightsFunction(insightsFunction),
+    const existingDestinations: AlertNotificationDestinationView[] = existingInsightsFunctions.map(
+        (insightsFunction) => {
+            const destination = getInsightsFunctionDestination(insightsFunction, slackIntegrations)
+            return {
+                key: insightsFunction.id,
+                title: destination.type,
+                detail: destination.detail,
+                tags: [
+                    {
+                        label: insightsFunction.enabled ? 'Active' : 'Paused',
+                        type: insightsFunction.enabled ? 'success' : 'default',
+                    },
+                ],
+                viewAction: {
+                    kind: 'icon',
+                    url: urls.insightsFunction(insightsFunction.id),
+                    tooltip: 'Open destination',
+                    targetBlank: true,
+                },
+                onDelete: () => deleteExistingInsightsFunction(insightsFunction),
+            }
         }
-    })
+    )
 
     const pendingDestinations: PendingAlertNotificationDestinationView[] = pendingNotifications.map(
         (notification, index) => ({

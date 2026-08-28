@@ -1,13 +1,13 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 
-import { IconRewind } from '@hanzo/icons'
 import { Dialog, Input } from '@hanzo/elements'
+import { IconRewind } from '@hanzo/icons'
 
 import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Field } from 'lib/elements/Field'
 import { Link } from 'lib/elements/Link'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { isUUIDLike } from 'lib/utils/guards'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'
@@ -166,10 +166,9 @@ export function PersonsScene(): JSX.Element {
                         ) : currentTeam?.ingested_event ? (
                             <>
                                 This page only shows{' '}
-                                <Link to="https://hanzo.ai/docs/data/persons">identified persons</Link>. Try
-                                adjusting your property filters, or make sure you're calling{' '}
-                                <Link to="https://hanzo.ai/docs/product-analytics/identify">identify</Link> in your
-                                app.
+                                <Link to="https://hanzo.ai/docs/data/persons">identified persons</Link>. Try adjusting
+                                your property filters, or make sure you're calling{' '}
+                                <Link to="https://hanzo.ai/docs/product-analytics/identify">identify</Link> in your app.
                             </>
                         ) : (
                             <>

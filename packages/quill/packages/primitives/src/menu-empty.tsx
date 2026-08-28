@@ -1,8 +1,9 @@
+import './menu-empty.css'
+
 import * as React from 'react'
 
 import { buttonVariants } from './button'
 import { cn } from './lib/utils'
-import './menu-empty.css'
 
 function MenuEmpty({ className, children, ...props }: React.ComponentProps<'div'>): React.ReactElement {
     return (

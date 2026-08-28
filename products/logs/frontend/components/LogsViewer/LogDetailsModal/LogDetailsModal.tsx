@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconX } from '@hanzo/icons'
 import { Button, Checkbox, Drawer, Tabs } from '@hanzo/elements'
+import { IconCopy, IconX } from '@hanzo/icons'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { TZLabel } from 'lib/components/TZLabel'

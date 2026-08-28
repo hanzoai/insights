@@ -1,16 +1,16 @@
 import './NotFound.scss'
 
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
-import insights from 'insights-js'
 import { useState } from 'react'
 
-import { IconArrowRight, IconCheckCircle } from '@hanzo/icons'
 import { Button, Checkbox, ProfilePicture, SpinnerOverlay, toast } from '@hanzo/elements'
+import { IconArrowRight, IconCheckCircle } from '@hanzo/icons'
 
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { Link } from 'lib/elements/Link'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { preflightLogic } from 'lib/logic/preflightLogic'
 import { cn } from 'lib/utils/css-classes'
 import { getAppContext } from 'lib/utils/getAppContext'

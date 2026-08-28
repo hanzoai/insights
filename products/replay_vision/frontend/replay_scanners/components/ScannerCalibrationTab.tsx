@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { Button, Input, SegmentedButton, Table, Tag, TagType, Link, Spinner, Tooltip } from '@hanzo/elements'
 import { IconChevronDown, IconChevronRight, IconRefresh, IconRewindPlay, IconSparkles } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    SegmentedButton,
-    Table,
-    Tag,
-    TagType,
-    Link,
-    Spinner,
-    Tooltip,
-} from '@hanzo/elements'
 import { BarChart, useChartLayout } from '@hanzo/quill-charts'
 
 import { buildTheme } from 'lib/charts/utils/theme'

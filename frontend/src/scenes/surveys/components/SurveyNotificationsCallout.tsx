@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBell } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
+import { IconBell } from '@hanzo/icons'
 
 import { NEW_SURVEY } from 'scenes/surveys/constants'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'

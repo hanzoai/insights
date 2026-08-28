@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Input, Link } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { PathCleanFilterAddItemButton } from 'lib/components/PathCleanFilters/PathCleanFilterAddItemButton'
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'

@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 
-import { IconNotebook } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconNotebook } from '@hanzo/icons'
 
 import { JSONContent, RichContentNodeType } from 'lib/components/RichContentEditor/types'
 

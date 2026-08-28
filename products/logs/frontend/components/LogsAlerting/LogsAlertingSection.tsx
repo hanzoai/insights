@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconTestTube } from '@hanzo/icons'
 import { Banner, Button, Link } from '@hanzo/elements'
+import { IconTestTube } from '@hanzo/icons'
 
 import { Modal } from 'lib/elements/Modal'
 

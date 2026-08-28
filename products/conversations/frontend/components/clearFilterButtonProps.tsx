@@ -1,5 +1,5 @@
-import { IconChevronDown, IconX } from '@hanzo/icons'
 import { SideAction } from '@hanzo/elements'
+import { IconChevronDown, IconX } from '@hanzo/icons'
 
 export function clearFilterButtonProps(
     onClear: (() => void) | null,

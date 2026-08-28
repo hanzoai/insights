@@ -2,16 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import React from 'react'
 
-import {
-    Banner,
-    Button,
-    Collapse,
-    Divider,
-    Label,
-    Modal,
-    Skeleton,
-    Tag,
-} from '@hanzo/elements'
+import { Banner, Button, Collapse, Divider, Label, Modal, Skeleton, Tag } from '@hanzo/elements'
 
 import type { ApiError } from 'lib/api-error'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -99,13 +90,7 @@ export const DatasetItemModal = React.memo(function DatasetItemModal({
     const storedDatasetItem = isStoredDatasetItem(partialDatasetItem) ? partialDatasetItem : null
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={() => onClose(refetchDatasetItems)}
-            maxWidth="56rem"
-            simple
-            className="w-full"
-        >
+        <Modal isOpen={isOpen} onClose={() => onClose(refetchDatasetItems)} maxWidth="56rem" simple className="w-full">
             <Form
                 logic={datasetItemModalLogic}
                 props={logicProps}
@@ -126,9 +111,7 @@ export const DatasetItemModal = React.memo(function DatasetItemModal({
                                       : 'New dataset item')}
                         </h3>
                         {storedDatasetItem?.archived && <Tag type="muted">Archived</Tag>}
-                        {storedDatasetItem && (
-                            <Tag type="default">Revision {storedDatasetItem.dataset_revision}</Tag>
-                        )}
+                        {storedDatasetItem && <Tag type="default">Revision {storedDatasetItem.dataset_revision}</Tag>}
                     </div>
                 </ModalHeader>
 

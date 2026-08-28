@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconPencil, IconWarning } from '@hanzo/icons'
 import { Button, Tag, Link, ProfilePicture, Tooltip } from '@hanzo/elements'
+import { IconPencil, IconWarning } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { IconOpenInNew } from 'lib/elements/icons'

@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useCallback, useMemo } from 'react'
 
-import { IconArrowRight, IconWrench } from '@hanzo/icons'
 import { Select, SelectSection, Tag } from '@hanzo/elements'
+import { IconArrowRight, IconWrench } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

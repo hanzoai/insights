@@ -8,13 +8,13 @@ import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkli
 import { MailHog } from 'lib/components/mascots'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { updatedAtColumn } from 'lib/elements/Table/columnUtils'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 
@@ -393,12 +393,7 @@ export function WorkflowsTable(): JSX.Element {
                             <span className="text-muted text-sm">
                                 {selectedArchivedCount} workflow{selectedArchivedCount !== 1 ? 's' : ''} selected
                             </span>
-                            <Button
-                                type="secondary"
-                                status="danger"
-                                size="small"
-                                onClick={deleteSelectedWorkflows}
-                            >
+                            <Button type="secondary" status="danger" size="small" onClick={deleteSelectedWorkflows}>
                                 Delete selected
                             </Button>
                         </div>

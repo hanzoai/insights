@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useActions } from 'kea'
 
+import { Button, Tooltip } from '@hanzo/elements'
 import {
     BaseIcon,
     IconBolt,
@@ -13,7 +14,6 @@ import {
     IconTerminal,
     IconVideoCamera,
 } from '@hanzo/icons'
-import { Button, Tooltip } from '@hanzo/elements'
 
 import { getExceptionAttributes } from 'lib/components/Errors/utils'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -203,12 +203,7 @@ export function SessionEventItem({
                 <div className="flex items-center gap-1">
                     {hasRecording && (
                         <Tooltip title="Jump to this event in recording">
-                            <Button
-                                icon={<IconVideoCamera />}
-                                size="small"
-                                noPadding
-                                onClick={handleJumpToRecording}
-                            />
+                            <Button icon={<IconVideoCamera />} size="small" noPadding onClick={handleJumpToRecording} />
                         </Tooltip>
                     )}
                     <Button

@@ -185,8 +185,8 @@ export const getAWSBedrockSteps = (ctx: OnboardingComponentsContext): StepDefini
 
                     <Blockquote>
                         <Markdown>
-                            **Note:** If you want to capture LLM events anonymously, omit the `insights_distinct_id`. See
-                            our docs on [anonymous vs identified
+                            **Note:** If you want to capture LLM events anonymously, omit the `insights_distinct_id`.
+                            See our docs on [anonymous vs identified
                             events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>

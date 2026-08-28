@@ -5,11 +5,11 @@ import { useContext, useEffect, useMemo, useRef } from 'react'
 import { Input, InputSelect, Tag, Link } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { integrationAccountsLogic } from 'lib/integrations/integrationAccountsLogic'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { Field } from 'lib/elements/Field'
 import type { InputSelectOption } from 'lib/elements/InputSelect/InputSelect'
 import { Markdown } from 'lib/elements/Markdown'
+import { integrationAccountsLogic } from 'lib/integrations/integrationAccountsLogic'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 
 import { InputSuggestion, InputWithSuggestionsDropdown } from './InputWithSuggestionsDropdown'
 

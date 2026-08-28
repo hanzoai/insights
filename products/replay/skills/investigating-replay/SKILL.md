@@ -18,8 +18,8 @@ ask for each piece.
 
 ## Available tools
 
-| Tool                                       | Purpose                                                  |
-| ------------------------------------------ | -------------------------------------------------------- |
+| Tool                                        | Purpose                                                  |
+| ------------------------------------------- | -------------------------------------------------------- |
 | `insights:session-recording-get`            | Recording metadata (duration, counts, status)            |
 | `insights:persons-retrieve`                 | Person profile (properties, distinct IDs)                |
 | `insights:execute-sql`                      | Query events, errors, and page views in session          |

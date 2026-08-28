@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, SpinnerOverlay } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { AnyScaleOptions, Sparkline } from 'lib/components/Sparkline'
 import { dayjs } from 'lib/dayjs'

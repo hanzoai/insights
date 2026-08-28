@@ -4,11 +4,11 @@
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
     "dependencies": {
+        "insights-js": "catalog:",
         "kea": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "insights-js": "catalog:",
         "ts-pattern": "catalog:"
     },
     "devDependencies": {
@@ -19,8 +19,8 @@
         "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/icons": "catalog:",
         "@hanzo/elements": "*",
+        "@hanzo/icons": "catalog:",
         "@storybook/react": "catalog:",
         "@testing-library/jest-dom": "*",
         "@testing-library/react": "*",

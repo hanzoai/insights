@@ -10,8 +10,7 @@ const INSIGHTS_UI_APPS_TOKEN = process.env.INSIGHTS_UI_APPS_TOKEN || ''
 
 // Analytics base URL for MCP Apps - where events are sent
 // For local development, set to http://localhost:8010
-const INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL =
-    process.env.INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL || 'https://us.i.hanzo.ai'
+const INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL = process.env.INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL || 'https://us.i.hanzo.ai'
 
 // Apps directory - each .tsx file is an app
 const APPS_DIR = resolve(__dirname, 'src/ui-apps/apps')

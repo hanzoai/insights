@@ -3,8 +3,8 @@ import './MarketingAnalyticsTableStyleOverride.scss'
 import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconGear, IconInfo } from '@hanzo/icons'
 import { Button, Input, Select, Tooltip } from '@hanzo/elements'
+import { IconGear, IconInfo } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 

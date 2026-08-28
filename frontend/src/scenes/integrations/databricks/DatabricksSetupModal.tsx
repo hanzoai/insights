@@ -3,8 +3,8 @@ import { Form } from 'kea-forms'
 
 import { Button, Input, Modal } from '@hanzo/elements'
 
-import { IconDatabricks } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
+import { IconDatabricks } from 'lib/elements/icons'
 
 import { DatabricksSetupModalLogicProps, databricksSetupModalLogic } from './databricksSetupModalLogic'
 

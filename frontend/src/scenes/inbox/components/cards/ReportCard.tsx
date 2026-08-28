@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { combineUrl, router } from 'kea-router'
 
-import { IconArchive, IconUndo } from '@hanzo/icons'
 import { Button, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconArchive, IconUndo } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { derivePrState } from 'lib/signals/prState'

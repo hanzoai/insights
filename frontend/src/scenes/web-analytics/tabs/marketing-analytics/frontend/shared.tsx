@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconGraph, IconLineGraph, IconTrending } from '@hanzo/icons'
 import { SegmentedButtonOption } from '@hanzo/elements'
+import { IconGraph, IconLineGraph, IconTrending } from '@hanzo/icons'
 
 import { getColorVar } from 'lib/colors'
 import { IconAreaChart, IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'

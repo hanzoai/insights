@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button, Switch } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'

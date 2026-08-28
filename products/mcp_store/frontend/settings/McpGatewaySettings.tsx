@@ -76,9 +76,7 @@ export function McpGatewaySettings(): JSX.Element {
     return (
         <div className="flex flex-col gap-4">
             {configLoadFailed && (
-                <Banner type="warning">
-                    Couldn't load MCP server access. Refresh the page to try again.
-                </Banner>
+                <Banner type="warning">Couldn't load MCP server access. Refresh the page to try again.</Banner>
             )}
             <Tabs
                 activeKey={activeTab}

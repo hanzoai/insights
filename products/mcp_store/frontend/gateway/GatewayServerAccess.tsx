@@ -1,16 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { Button, Modal, SegmentedButton, Select, Switch, Tag, ProfilePicture, Spinner } from '@hanzo/elements'
 import { IconCheck, IconPlus, IconSparkles, IconX } from '@hanzo/icons'
-import {
-    Button,
-    Modal,
-    SegmentedButton,
-    Select,
-    Switch,
-    Tag,
-    ProfilePicture,
-    Spinner,
-} from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 

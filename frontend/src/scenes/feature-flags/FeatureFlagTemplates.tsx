@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFlask, IconPeople, IconTestTube, IconToggle } from '@hanzo/icons'
 import { Button, Collapse } from '@hanzo/elements'
+import { IconFlask, IconPeople, IconTestTube, IconToggle } from '@hanzo/icons'
 
 import { featureFlagLogic } from './featureFlagLogic'
 

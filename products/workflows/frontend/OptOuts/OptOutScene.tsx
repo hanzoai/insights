@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload, IconExternal } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconDownload, IconExternal } from '@hanzo/icons'
 
 import { userLogic } from 'scenes/userLogic'
 

@@ -114,9 +114,9 @@ describe('FunnelLineChart', () => {
             // the tooltip datum, both rows collapsed into one shared column and only the current
             // value rendered, leaving the previous row showing "–". Rows are sorted by value
             // descending, so the four distinct conversion values must all render.
-            const rowValues = Array.from(tooltip.element.querySelectorAll('[data-attr="script-chart-tooltip-row"]')).map(
-                (row) => row.querySelector('[data-attr="script-chart-tooltip-value"]')?.textContent
-            )
+            const rowValues = Array.from(
+                tooltip.element.querySelectorAll('[data-attr="script-chart-tooltip-row"]')
+            ).map((row) => row.querySelector('[data-attr="script-chart-tooltip-value"]')?.textContent)
             expect(rowValues).toEqual(['50%', '45%', '30%', '25%'])
         })
     })

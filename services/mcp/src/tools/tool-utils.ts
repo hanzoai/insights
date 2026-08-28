@@ -1,4 +1,8 @@
-import { INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY, INSIGHTS_INFORMATIONAL_RESPONSE_KEY, type Context } from '@/tools/types'
+import {
+    INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY,
+    INSIGHTS_INFORMATIONAL_RESPONSE_KEY,
+    type Context,
+} from '@/tools/types'
 
 /**
  * Adds a _insightsUrl field to a result. For object results it's a sibling field; for raw

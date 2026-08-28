@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconChevronDown, IconCopy, IconMagicWand, IconX } from '@hanzo/icons'
 import { Banner, Button, Spinner } from '@hanzo/elements'
+import { IconChevronDown, IconCopy, IconMagicWand, IconX } from '@hanzo/icons'
 
 import { AllowTrainingCallout } from 'lib/components/AllowTrainingCallout/AllowTrainingCallout'
 import { Resizer } from 'lib/components/Resizer/Resizer'

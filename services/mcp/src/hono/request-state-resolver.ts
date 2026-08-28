@@ -15,8 +15,8 @@ import type { McpMode } from '@/lib/utils'
 import { getRequiredFeatureFlags, getScopeGatedTools, type ScopeGatedTool } from '@/tools/toolDefinitions'
 import type { Context, Tool, Env, ZodObjectAny } from '@/tools/types'
 
-import type { RedisLike } from './cache/RedisCache'
 import { McpSessionRedisStore } from './cache/McpSessionRedisStore'
+import type { RedisLike } from './cache/RedisCache'
 import {
     buildMCPRequestContext,
     getEffectiveMCPClientContext,

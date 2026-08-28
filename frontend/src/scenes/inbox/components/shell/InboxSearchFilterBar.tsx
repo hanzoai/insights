@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconChevronDown, IconFlag, IconRefresh, IconSearch, IconSort, IconTarget } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconChevronDown, IconFlag, IconRefresh, IconSearch, IconSort, IconTarget } from '@hanzo/icons'
 
 import {
     INBOX_PRIORITY_OPTIONS,

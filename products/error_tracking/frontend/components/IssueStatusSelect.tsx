@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import {
     DropdownMenu,

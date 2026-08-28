@@ -2,18 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
+import { Banner, Button, Checkbox, InputSelect, Label, Modal, Select, TextArea, Link } from '@hanzo/elements'
 import { IconCheckCircle, IconGlobe, IconList } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Checkbox,
-    InputSelect,
-    Label,
-    Modal,
-    Select,
-    TextArea,
-    Link,
-} from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { FEATURE_FLAGS, OrganizationMembershipLevel } from 'lib/constants'

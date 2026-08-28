@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { ApiConfig } from '~/lib/api'
 import { toast } from '~/lib/elements/Toast/Toast'

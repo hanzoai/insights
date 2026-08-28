@@ -3,11 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 
 import { dayjs } from 'lib/dayjs'
-import {
-    CalendarSelect,
-    CalendarSelectProps,
-    getTimeElement,
-} from 'lib/elements/Calendar/CalendarSelect'
+import { CalendarSelect, CalendarSelectProps, getTimeElement } from 'lib/elements/Calendar/CalendarSelect'
 
 import { getByDataAttr } from '~/test/byDataAttr'
 

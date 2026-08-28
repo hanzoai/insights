@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, afterMount, kea, key, path, props } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 

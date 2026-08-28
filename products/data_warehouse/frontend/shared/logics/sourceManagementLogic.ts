@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -12,7 +13,6 @@ import {
 } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { toast } from 'lib/elements/Toast/Toast'

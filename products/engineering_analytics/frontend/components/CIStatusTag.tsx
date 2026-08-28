@@ -1,5 +1,5 @@
-import { IconCheck, IconClock, IconX } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconClock, IconX } from '@hanzo/icons'
 
 import { CIRollup } from '../lib/ci'
 

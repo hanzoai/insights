@@ -169,7 +169,10 @@ const workflowsGlobalStats = (): ToolBase<
 
 const WorkflowsListSchema = InsightsFlowsListQueryParams
 
-const workflowsList = (): ToolBase<typeof WorkflowsListSchema, WithInsightsUrl<Schemas.PaginatedInsightsFlowMinimalList>> =>
+const workflowsList = (): ToolBase<
+    typeof WorkflowsListSchema,
+    WithInsightsUrl<Schemas.PaginatedInsightsFlowMinimalList>
+> =>
     withUiApp('workflow-list', {
         name: 'workflows-list',
         schema: WorkflowsListSchema,

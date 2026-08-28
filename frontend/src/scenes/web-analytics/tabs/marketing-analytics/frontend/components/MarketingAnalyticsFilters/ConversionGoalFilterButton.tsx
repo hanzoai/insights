@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBookmark, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconBookmark, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { marketingAnalyticsLogic } from '../../logic/marketingAnalyticsLogic'
 

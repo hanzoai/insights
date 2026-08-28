@@ -5,8 +5,8 @@ import { CSSProperties, useMemo, useState } from 'react'
 import { List } from 'react-window'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button, Checkbox, Tag } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { Input } from 'lib/elements/Input/Input'

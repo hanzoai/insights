@@ -160,7 +160,9 @@ export function generateAlertHCL(alert: Partial<AlertType>, options: AlertHclExp
             hclSections.push('')
             hclSections.push(insightsFunctionResult.hcl)
             allWarnings.push(
-                ...insightsFunctionResult.warnings.map((w) => `[Script Function: ${insightsFunction.name || insightsFunction.id}] ${w}`)
+                ...insightsFunctionResult.warnings.map(
+                    (w) => `[Script Function: ${insightsFunction.name || insightsFunction.id}] ${w}`
+                )
             )
         }
     }

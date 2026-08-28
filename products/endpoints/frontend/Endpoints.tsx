@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconRefresh } from '@hanzo/icons'
 import { Button, Dialog } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
@@ -145,13 +145,7 @@ export const EndpointsTable = (): JSX.Element => {
             dataIndex: 'is_active',
             align: 'center',
             render: (_, record) => (
-                <span>
-                    {record.is_active ? (
-                        <Tag type="success">Active</Tag>
-                    ) : (
-                        <Tag type="danger">Inactive</Tag>
-                    )}
-                </span>
+                <span>{record.is_active ? <Tag type="success">Active</Tag> : <Tag type="danger">Inactive</Tag>}</span>
             ),
             sorter: (a: EndpointType, b: EndpointType) => Number(b.is_active) - Number(a.is_active),
         },

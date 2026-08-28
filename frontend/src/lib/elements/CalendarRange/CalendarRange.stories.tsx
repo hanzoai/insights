@@ -16,10 +16,7 @@ const meta: Meta<CalendarRangeProps> = {
     },
     tags: ['autodocs'],
     render: (props) => {
-        const [value, setValue] = useState([
-            dayjs('2022-08-11'),
-            dayjs('2022-08-26'),
-        ] as CalendarRangeProps['value'])
+        const [value, setValue] = useState([dayjs('2022-08-11'), dayjs('2022-08-26')] as CalendarRangeProps['value'])
         const [visible, setVisible] = useState(true)
 
         return (

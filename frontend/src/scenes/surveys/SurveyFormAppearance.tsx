@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import { getNextSurveyStep } from 'insights-js/dist/surveys-preview'
+import { useValues } from 'kea'
 
 import { Select } from '@hanzo/elements'
 

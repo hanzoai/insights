@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
+import { InputSelect, InputSelectOption, Tag } from '@hanzo/elements'
 import {
     IconC,
     IconCode,
@@ -22,7 +23,6 @@ import {
     IconRust,
     IconSwift,
 } from '@hanzo/icons'
-import { InputSelect, InputSelectOption, Tag } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { Field } from 'lib/elements/Field'

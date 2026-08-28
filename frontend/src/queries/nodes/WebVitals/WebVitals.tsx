@@ -3,8 +3,8 @@ import { useMemo, useState } from 'react'
 
 import { Link } from '@hanzo/elements'
 
-import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { urls } from 'scenes/urls'

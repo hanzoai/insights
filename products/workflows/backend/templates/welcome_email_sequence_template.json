@@ -31,33 +31,14 @@
             ],
             "source": "events",
             "actions": [],
-            "bytecode": [
-                "_H",
-                1,
-                32,
-                "user signed up",
-                32,
-                "event",
-                1,
-                1,
-                11
-            ]
+            "bytecode": ["_H", 1, 32, "user signed up", 32, "event", 1, 1, 11]
         }
     },
     "trigger_masking": {
         "ttl": null,
         "threshold": null,
         "hash": "{person.id}",
-        "bytecode": [
-            "_H",
-            1,
-            32,
-            "id",
-            32,
-            "person",
-            1,
-            2
-        ]
+        "bytecode": ["_H", 1, 32, "id", 32, "person", 1, 2]
     },
     "conversion": {
         "filters": [],
@@ -110,17 +91,7 @@
                     ],
                     "source": "events",
                     "actions": [],
-                    "bytecode": [
-                        "_H",
-                        1,
-                        32,
-                        "user signed up",
-                        32,
-                        "event",
-                        1,
-                        1,
-                        11
-                    ]
+                    "bytecode": ["_H", 1, 32, "user signed up", 32, "event", 1, 1, 11]
                 }
             },
             "output_variable": null
@@ -154,9 +125,7 @@
                                     "rows": [
                                         {
                                             "id": "Bl8ZJpyRQR",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -180,10 +149,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -361,9 +327,7 @@
                                     "rows": [
                                         {
                                             "id": "i_RJrsPJ_N",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -387,10 +351,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""

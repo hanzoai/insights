@@ -1,8 +1,8 @@
 import type { Monaco } from '@monaco-editor/react'
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { router, urlToAction } from 'kea-router'
 import type { editor } from 'monaco-editor'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

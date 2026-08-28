@@ -1,5 +1,5 @@
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Checkbox, Menu, MenuItems } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import type { ScoutTagOption } from '../../../utils/scoutTags'
 
@@ -39,12 +39,7 @@ export function ScoutTagsFilter({
 
     return (
         <Menu items={items} closeOnClickInside={false} placement="bottom-end">
-            <Button
-                type="secondary"
-                size="xsmall"
-                sideIcon={<IconChevronDown />}
-                aria-label="Filter scouts by tag"
-            >
+            <Button type="secondary" size="xsmall" sideIcon={<IconChevronDown />} aria-label="Filter scouts by tag">
                 {label}
             </Button>
         </Menu>

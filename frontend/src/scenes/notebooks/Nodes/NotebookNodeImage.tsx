@@ -1,8 +1,8 @@
 import { ReactEventHandler, useEffect, useMemo, useState } from 'react'
 
-import { uploadFile } from 'lib/hooks/useUploadFiles'
 import { Banner } from 'lib/elements/Banner'
 import { SpinnerOverlay } from 'lib/elements/Spinner'
+import { uploadFile } from 'lib/hooks/useUploadFiles'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'

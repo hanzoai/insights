@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus, IconRefresh } from '@hanzo/icons'
 import { Button, Dialog } from '@hanzo/elements'
+import { IconPlus, IconRefresh } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet/CodeSnippet'
 import { More } from 'lib/elements/Button/More'
@@ -143,12 +143,7 @@ export function RelationshipsTab(): JSX.Element {
                         >
                             Accept
                         </Button>
-                        <Button
-                            type="secondary"
-                            size="small"
-                            disabled={inFlight}
-                            onClick={() => confirmReject(row)}
-                        >
+                        <Button type="secondary" size="small" disabled={inFlight} onClick={() => confirmReject(row)}>
                             Reject
                         </Button>
                     </div>

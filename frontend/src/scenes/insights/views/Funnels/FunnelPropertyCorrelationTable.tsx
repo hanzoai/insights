@@ -4,8 +4,8 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import { useState } from 'react'
 
-import { IconArchive, IconTrending } from '@hanzo/icons'
 import { Button, Checkbox, Table } from '@hanzo/elements'
+import { IconArchive, IconTrending } from '@hanzo/icons'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { PropertySelect } from 'lib/components/PropertySelect/PropertySelect'

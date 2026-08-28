@@ -170,12 +170,17 @@ describe('isInsightsCodeConsumer', () => {
         expect(isInsightsCodeConsumer('insights-code')).toBe(true)
     })
 
-    it.each([['insights_code'], ['Insights-Code'], ['insights-code-v2'], ['insights'], ['slack'], ['insights_ai'], ['']])(
-        'returns false for %s (must be exact match — insights_ai is not a UI-apps host)',
-        (consumer) => {
-            expect(isInsightsCodeConsumer(consumer)).toBe(false)
-        }
-    )
+    it.each([
+        ['insights_code'],
+        ['Insights-Code'],
+        ['insights-code-v2'],
+        ['insights'],
+        ['slack'],
+        ['insights_ai'],
+        [''],
+    ])('returns false for %s (must be exact match — insights_ai is not a UI-apps host)', (consumer) => {
+        expect(isInsightsCodeConsumer(consumer)).toBe(false)
+    })
 
     it('returns false for undefined', () => {
         expect(isInsightsCodeConsumer(undefined)).toBe(false)

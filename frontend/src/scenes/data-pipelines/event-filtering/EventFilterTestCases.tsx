@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Button, Input, Label, Select, Tag } from '@hanzo/elements'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { eventFilterLogic, TestCase, TestResult } from './eventFilterLogic'
 

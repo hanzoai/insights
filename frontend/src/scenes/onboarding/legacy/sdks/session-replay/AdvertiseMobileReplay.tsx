@@ -1,7 +1,7 @@
 import { Banner } from 'lib/elements/Banner'
 import { Divider } from 'lib/elements/Divider'
-import { Tag } from 'lib/elements/Tag'
 import { Link } from 'lib/elements/Link'
+import { Tag } from 'lib/elements/Tag'
 import { urls } from 'scenes/urls'
 
 import { OnboardingStepKey, SDKKey } from '~/types'

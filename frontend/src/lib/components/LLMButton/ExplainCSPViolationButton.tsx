@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconWarning } from '@hanzo/icons'
 import { Popover, Spinner } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { Button, ButtonProps } from 'lib/elements/Button'

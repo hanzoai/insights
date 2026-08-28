@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCursorClick, IconTrash } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCursorClick, IconTrash } from '@hanzo/icons'
 
 import { Spinner } from 'lib/elements/Spinner'
 

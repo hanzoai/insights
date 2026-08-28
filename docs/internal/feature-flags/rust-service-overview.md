@@ -35,8 +35,8 @@ Key routing details:
 
 The Rust service runs as two separate fleets controlled by the `SERVICE_MODE` env var:
 
-| Fleet                               | `SERVICE_MODE` | Routes                                                     | Purpose                                   |
-| ----------------------------------- | -------------- | ---------------------------------------------------------- | ----------------------------------------- |
+| Fleet                                | `SERVICE_MODE` | Routes                                                     | Purpose                                   |
+| ------------------------------------ | -------------- | ---------------------------------------------------------- | ----------------------------------------- |
 | `insights-feature-flags`             | `flags`        | `/flags`, `/decide`                                        | Runtime flag evaluation                   |
 | `insights-feature-flags-definitions` | `definitions`  | `/flags/definitions`, `/api/feature_flag/local_evaluation` | Flag definitions for local SDK evaluation |
 
@@ -224,18 +224,18 @@ All values come from environment variables via the `envconfig` crate. Defined in
 
 ### PostgreSQL
 
-| Variable                                  | Default                                             | Purpose                               |
-| ----------------------------------------- | --------------------------------------------------- | ------------------------------------- |
+| Variable                                  | Default                                                | Purpose                               |
+| ----------------------------------------- | ------------------------------------------------------ | ------------------------------------- |
 | `WRITE_DATABASE_URL`                      | `postgres://insights:insights@localhost:5432/insights` | Main database primary                 |
-| `READ_DATABASE_URL`                       | same                                                | Main database replica                 |
-| `PERSONS_WRITE_DATABASE_URL`              | (empty, aliases to main)                            | Persons database primary              |
-| `PERSONS_READ_DATABASE_URL`               | (empty, aliases to main)                            | Persons database replica              |
-| `MAX_PG_CONNECTIONS`                      | `10`                                                | Max connections per pool              |
-| `ACQUIRE_TIMEOUT_SECS`                    | `5`                                                 | Connection acquisition timeout        |
-| `IDLE_TIMEOUT_SECS`                       | `300`                                               | Close idle connections after this     |
-| `NON_PERSONS_READER_STATEMENT_TIMEOUT_MS` | `2000`                                              | Statement timeout for flag/team reads |
-| `PERSONS_READER_STATEMENT_TIMEOUT_MS`     | `3000`                                              | Statement timeout for person lookups  |
-| `WRITER_STATEMENT_TIMEOUT_MS`             | `3000`                                              | Statement timeout for writes          |
+| `READ_DATABASE_URL`                       | same                                                   | Main database replica                 |
+| `PERSONS_WRITE_DATABASE_URL`              | (empty, aliases to main)                               | Persons database primary              |
+| `PERSONS_READ_DATABASE_URL`               | (empty, aliases to main)                               | Persons database replica              |
+| `MAX_PG_CONNECTIONS`                      | `10`                                                   | Max connections per pool              |
+| `ACQUIRE_TIMEOUT_SECS`                    | `5`                                                    | Connection acquisition timeout        |
+| `IDLE_TIMEOUT_SECS`                       | `300`                                                  | Close idle connections after this     |
+| `NON_PERSONS_READER_STATEMENT_TIMEOUT_MS` | `2000`                                                 | Statement timeout for flag/team reads |
+| `PERSONS_READER_STATEMENT_TIMEOUT_MS`     | `3000`                                                 | Statement timeout for person lookups  |
+| `WRITER_STATEMENT_TIMEOUT_MS`             | `3000`                                                 | Statement timeout for writes          |
 
 ### Behavioral cohorts
 
@@ -269,7 +269,7 @@ Cache and query health are observable via the `flags_cohort_membership_cache_*` 
 
 | Variable                  | Default     | Purpose                          |
 | ------------------------- | ----------- | -------------------------------- |
-| `OBJECT_STORAGE_BUCKET`   | `insights`   | S3 bucket name                   |
+| `OBJECT_STORAGE_BUCKET`   | `insights`  | S3 bucket name                   |
 | `OBJECT_STORAGE_REGION`   | `us-east-1` | AWS region                       |
 | `OBJECT_STORAGE_ENDPOINT` | (empty)     | Custom S3 endpoint for local dev |
 
@@ -299,12 +299,12 @@ See [Behavioral cohorts](#behavioral-cohorts) for cohort membership cache settin
 
 ### Observability
 
-| Variable                      | Default                 | Purpose                                                                               |
-| ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------- |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | (disabled)              | OpenTelemetry collector endpoint                                                      |
-| `OTEL_TRACES_SAMPLER_ARG`     | `0.001`                 | Trace sampling rate (0.1%)                                                            |
+| Variable                      | Default                  | Purpose                                                                               |
+| ----------------------------- | ------------------------ | ------------------------------------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | (disabled)               | OpenTelemetry collector endpoint                                                      |
+| `OTEL_TRACES_SAMPLER_ARG`     | `0.001`                  | Trace sampling rate (0.1%)                                                            |
 | `OTEL_SERVICE_NAME`           | `insights-feature-flags` | Service name in traces                                                                |
-| `TEAM_IDS_TO_TRACK`           | `all`                   | Teams to emit detailed metrics for (`all`, `none`, comma-separated, or range `1:100`) |
+| `TEAM_IDS_TO_TRACK`           | `all`                    | Teams to emit detailed metrics for (`all`, `none`, comma-separated, or range `1:100`) |
 
 ### Other
 
@@ -383,17 +383,17 @@ Applied in order via Axum layers (defined in `router.rs`):
 
 ## Related files
 
-| File                                                         | Purpose                                           |
-| ------------------------------------------------------------ | ------------------------------------------------- |
-| `rust/feature-flags/src/main.rs`                             | Binary entry point, tracing setup                 |
-| `rust/feature-flags/src/server.rs`                           | Service initialization, resource creation         |
-| `rust/feature-flags/src/router.rs`                           | Axum router, routes, shared state                 |
-| `rust/feature-flags/src/config.rs`                           | Environment variable configuration                |
-| `rust/feature-flags/src/api/endpoint.rs`                     | `/flags` and `/decide` handler                    |
-| `rust/feature-flags/src/api/flag_definitions.rs`             | `/flags/definitions` handler                      |
-| `rust/feature-flags/src/api/auth.rs`                         | Authentication (secret tokens, personal API keys) |
-| `rust/feature-flags/src/api/types.rs`                        | Request/response types                            |
-| `rust/feature-flags/src/handler/flags.rs`                    | Core request processing pipeline                  |
+| File                                                          | Purpose                                           |
+| ------------------------------------------------------------- | ------------------------------------------------- |
+| `rust/feature-flags/src/main.rs`                              | Binary entry point, tracing setup                 |
+| `rust/feature-flags/src/server.rs`                            | Service initialization, resource creation         |
+| `rust/feature-flags/src/router.rs`                            | Axum router, routes, shared state                 |
+| `rust/feature-flags/src/config.rs`                            | Environment variable configuration                |
+| `rust/feature-flags/src/api/endpoint.rs`                      | `/flags` and `/decide` handler                    |
+| `rust/feature-flags/src/api/flag_definitions.rs`              | `/flags/definitions` handler                      |
+| `rust/feature-flags/src/api/auth.rs`                          | Authentication (secret tokens, personal API keys) |
+| `rust/feature-flags/src/api/types.rs`                         | Request/response types                            |
+| `rust/feature-flags/src/handler/flags.rs`                     | Core request processing pipeline                  |
 | `insights/storage/team_access_cache.py`                       | Token auth cache with targeted invalidation       |
 | `insights/management/commands/invalidate_flags_auth_cache.py` | Bulk cache invalidation management command        |
 

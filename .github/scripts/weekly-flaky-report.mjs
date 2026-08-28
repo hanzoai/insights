@@ -284,11 +284,14 @@ function tableRows(items, ownerFor, extrasFor) {
     return items.map((item) => {
         const { owner, repoPath } = ownerFor(item)
         const { runsRescued, evidence } = extrasFor(item)
-        const name = item.cluster_size ? `${item.selector.split('/').pop()} (${item.cluster_size} tests)` : shortName(item.selector)
+        const name = item.cluster_size
+            ? `${item.selector.split('/').pop()} (${item.cluster_size} tests)`
+            : shortName(item.selector)
         const testCell = repoPath
             ? mrkdwnCell(`<${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/master/${repoPath}|${name}>`)
             : cell(name)
-        const quarantined = item.classification === 'quarantined' || item.quarantined_failed_run_count > 0 ? ' (quarantined)' : ''
+        const quarantined =
+            item.classification === 'quarantined' || item.quarantined_failed_run_count > 0 ? ' (quarantined)' : ''
         const logs = evidence
             .map(({ runId, jobId }, i) => {
                 const url = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${runId}${jobId ? `/job/${jobId}` : ''}`
@@ -310,7 +313,10 @@ function buildBlocks(now, rows) {
     const blocks = [
         {
             type: 'section',
-            text: { type: 'mrkdwn', text: `*Top ${rows.length} flaky tests — ${dateLabel}* _(backend CI, last 7 days)_` },
+            text: {
+                type: 'mrkdwn',
+                text: `*Top ${rows.length} flaky tests — ${dateLabel}* _(backend CI, last 7 days)_`,
+            },
         },
         {
             type: 'table',
@@ -369,7 +375,11 @@ async function main() {
     const extrasFor = await enrich(pool.filter((item) => !item.cluster_size))
     // Rescued runs first (the strongest per-test signal), clusters and the rest by volume.
     const flaky = pool
-        .sort((a, b) => (extrasFor(b).runsRescued ?? 0) - (extrasFor(a).runsRescued ?? 0) || b.failed_run_count - a.failed_run_count)
+        .sort(
+            (a, b) =>
+                (extrasFor(b).runsRescued ?? 0) - (extrasFor(a).runsRescued ?? 0) ||
+                b.failed_run_count - a.failed_run_count
+        )
         .slice(0, TOP_N)
     if (flaky.length === 0) {
         console.info('No qualifying flaky tests this week — nothing to post.')

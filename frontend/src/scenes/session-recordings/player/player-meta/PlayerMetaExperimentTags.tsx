@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFlask } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconFlask } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 

@@ -123,7 +123,9 @@ export const pipelineNotificationsLogic = kea<pipelineNotificationsLogicType>([
                                 )
                                 const hfs: InsightsFunctionMinimalApi[] = [
                                     ...initial.results,
-                                    ...(await api.loadPaginatedResults<InsightsFunctionMinimalApi>(initial.next ?? null)),
+                                    ...(await api.loadPaginatedResults<InsightsFunctionMinimalApi>(
+                                        initial.next ?? null
+                                    )),
                                 ]
                                 for (const hf of hfs) {
                                     items.push({

@@ -33,14 +33,14 @@ actually act on.
 
 ## Tools
 
-| Tool                                           | Job                                                              | Where it fits                |
-| ---------------------------------------------- | ---------------------------------------------------------------- | ---------------------------- |
-| `insights:error-tracking-alerts-list`           | List existing alerts; dedupe before creating.                    | Step 2 — dedupe.             |
-| `insights:integrations-list`                    | Find the user's Slack workspace id (filter by `kind=slack`).     | Step 3 — pick channel.       |
-| `insights:integrations-channels-retrieve`       | List Slack channels for a workspace.                             | Step 3 — pick channel.       |
+| Tool                                            | Job                                                                   | Where it fits                |
+| ----------------------------------------------- | --------------------------------------------------------------------- | ---------------------------- |
+| `insights:error-tracking-alerts-list`           | List existing alerts; dedupe before creating.                         | Step 2 — dedupe.             |
+| `insights:integrations-list`                    | Find the user's Slack workspace id (filter by `kind=slack`).          | Step 3 — pick channel.       |
+| `insights:integrations-channels-retrieve`       | List Slack channels for a workspace.                                  | Step 3 — pick channel.       |
 | `insights:error-tracking-alerts-create`         | Create the alert (InsightsFunction with `type=internal_destination`). | Step 4 — ship.               |
-| `insights:error-tracking-alerts-partial-update` | Toggle, rename, or modify an existing alert.                     | When tuning, not authoring.  |
-| `insights:error-tracking-alerts-delete`         | Soft-delete an alert.                                            | When the user says "remove". |
+| `insights:error-tracking-alerts-partial-update` | Toggle, rename, or modify an existing alert.                          | When tuning, not authoring.  |
+| `insights:error-tracking-alerts-delete`         | Soft-delete an alert.                                                 | When the user says "remove". |
 
 ## Trigger events — pick exactly one per alert
 

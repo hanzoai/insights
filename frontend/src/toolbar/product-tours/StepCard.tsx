@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArrowRight, IconChevronDown, IconCursorClick, IconTrash, IconWarning } from '@hanzo/icons'
 import { Button, Input, SegmentedButton, Slider, Switch, Tooltip } from '@hanzo/elements'
+import { IconArrowRight, IconChevronDown, IconCursorClick, IconTrash, IconWarning } from '@hanzo/icons'
 
 import { IconDragHandle } from 'lib/elements/icons'
 import { getStepIcon, getStepTitle, hasElementTarget, hasIncompleteTargeting } from 'scenes/product-tours/stepUtils'

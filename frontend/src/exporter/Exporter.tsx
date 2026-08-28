@@ -6,10 +6,10 @@ import { BindLogic, useValues } from 'kea'
 import { Suspense, useEffect, useSyncExternalStore } from 'react'
 
 import { Logo } from 'lib/brand'
+import { Link } from 'lib/elements/Link'
+import { Markdown } from 'lib/elements/Markdown'
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { useThemedHtml } from 'lib/hooks/useThemedHtml'
-import { Markdown } from 'lib/elements/Markdown'
-import { Link } from 'lib/elements/Link'
 import { WrappingLoadingSkeleton } from 'lib/ui/WrappingLoadingSkeleton/WrappingLoadingSkeleton'
 import { humanFriendlyDuration } from 'lib/utils/durations'
 import { lazyWithRetry } from 'lib/utils/retryImport'
@@ -181,10 +181,7 @@ export function Exporter(props: ExportedData): JSX.Element {
                             </div>
                         </div>
                     ) : type === ExportType.Embed && !whitelabel ? (
-                        <Link
-                            to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-dashboard"
-                            target="_blank"
-                        >
+                        <Link to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-dashboard" target="_blank">
                             <Logo size="xs" />
                         </Link>
                     ) : type === ExportType.Image && !whitelabel ? (

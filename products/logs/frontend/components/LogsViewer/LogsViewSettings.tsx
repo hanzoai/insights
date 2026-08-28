@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconEye } from '@hanzo/icons'
 import { Button, Switch } from '@hanzo/elements'
+import { IconEye } from '@hanzo/icons'
 
 import { TimezoneSelect } from 'lib/components/TimezoneSelect'
 import { Popover } from 'lib/elements/Popover'

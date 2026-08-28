@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, Input, Modal, Tag } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { Table, TableColumns } from 'lib/elements/Table'
 
@@ -19,11 +19,7 @@ function PropertyRow({ property }: { property: SchemaPropertyGroupProperty }): J
                 <Tag type="muted">{property.property_type}</Tag>
             </div>
             <div className="w-24">
-                {property.is_required ? (
-                    <Tag type="danger">Required</Tag>
-                ) : (
-                    <Tag type="muted">Optional</Tag>
-                )}
+                {property.is_required ? <Tag type="danger">Required</Tag> : <Tag type="muted">Optional</Tag>}
             </div>
             <div className="flex-1 text-muted">{property.description || '—'}</div>
         </div>

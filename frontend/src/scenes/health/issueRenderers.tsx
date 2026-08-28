@@ -1,7 +1,7 @@
 import { ComponentType } from 'react'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { urls } from 'scenes/urls'

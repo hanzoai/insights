@@ -1,16 +1,6 @@
 import { useActions, useValues } from 'kea'
 
 import {
-    IconCalendar,
-    IconInfo,
-    IconList,
-    IconPause,
-    IconPencil,
-    IconPlay,
-    IconToggle,
-    IconTrash,
-} from '@hanzo/icons'
-import {
     Banner,
     Button,
     CalendarSelectInput,
@@ -23,6 +13,7 @@ import {
     TagType,
     Link,
 } from '@hanzo/elements'
+import { IconCalendar, IconInfo, IconList, IconPause, IconPencil, IconPlay, IconToggle, IconTrash } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
@@ -357,12 +348,7 @@ function ScheduleCard({
             </div>
             {!isCompleted && canEdit && (
                 <div className="flex items-center gap-1 shrink-0">
-                    <Button
-                        size="small"
-                        icon={<IconPencil />}
-                        tooltip="Edit"
-                        onClick={() => onEdit(scheduledChange)}
-                    />
+                    <Button size="small" icon={<IconPencil />} tooltip="Edit" onClick={() => onEdit(scheduledChange)} />
                     {scheduledChange.is_recurring && (
                         <Button
                             size="small"

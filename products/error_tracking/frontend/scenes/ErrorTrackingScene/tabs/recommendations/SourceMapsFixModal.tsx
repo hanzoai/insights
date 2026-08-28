@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconCheckCircle, IconCopy, IconTerminal, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
 import { Button, Modal, SegmentedButton, TextArea } from '@hanzo/elements'
+import { IconCheckCircle, IconCopy, IconTerminal, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
 
 import { Popover } from 'lib/elements/Popover'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

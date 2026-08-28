@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from '@storybook/react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { KeyboardShortcut, KeyboardShortcutProps } from './KeyboardShortcut'
 

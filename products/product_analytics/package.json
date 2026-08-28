@@ -5,10 +5,10 @@
     },
     "dependencies": {
         "@hanzo/quill-charts": "workspace:*",
+        "insights-js": "catalog:",
         "kea": "catalog:",
         "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "insights-js": "catalog:"
+        "kea-router": "catalog:"
     },
     "devDependencies": {
         "@storybook/react": "catalog:",

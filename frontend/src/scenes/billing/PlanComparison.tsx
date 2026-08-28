@@ -5,8 +5,8 @@ import { useValues } from 'kea'
 import React, { useState } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
-import { IconCheckCircle, IconWarning, IconX } from '@hanzo/icons'
 import { Modal, Tag, Link } from '@hanzo/elements'
+import { IconCheckCircle, IconWarning, IconX } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Tooltip } from 'lib/elements/Tooltip'

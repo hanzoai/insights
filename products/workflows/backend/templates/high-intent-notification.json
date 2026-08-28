@@ -79,11 +79,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -145,13 +141,8 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": [
-        "function"
-    ],
+    "billable_action_types": ["function"],
     "image_url": null,
-    "tags": [
-        "sales",
-        "slack"
-    ],
+    "tags": ["sales", "slack"],
     "scope": "global"
 }

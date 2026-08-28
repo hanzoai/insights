@@ -3,8 +3,8 @@ import './SegmentedDropdown.scss'
 import clsx from 'clsx'
 import React, { useMemo } from 'react'
 
-import { useSliderPositioning } from '../hooks'
 import { Button, ButtonProps } from '../Button'
+import { useSliderPositioning } from '../hooks'
 import { Menu } from '../Menu/Menu'
 import { SegmentedButtonOption } from './SegmentedButton'
 

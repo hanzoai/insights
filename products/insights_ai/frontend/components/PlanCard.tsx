@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCopy, IconExpand45, IconListCheck, IconX } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
+import { IconCopy, IconExpand45, IconListCheck, IconX } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 

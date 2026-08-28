@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 import { TextMorph } from 'torph/react'
 
-import { IconCheck, IconCopy, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Collapse, Modal } from '@hanzo/elements'
+import { IconCheck, IconCopy, IconWarning, IconX } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 

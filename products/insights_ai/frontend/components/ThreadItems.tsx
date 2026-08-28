@@ -1,5 +1,5 @@
-import { IconCheck, IconCollapse, IconWarning, IconX } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconCheck, IconCollapse, IconWarning, IconX } from '@hanzo/icons'
 
 import { humanFriendlyNumber } from 'lib/utils/numbers'
 

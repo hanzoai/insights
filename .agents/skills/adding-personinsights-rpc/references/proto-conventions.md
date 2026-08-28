@@ -33,8 +33,8 @@ For NonPersonData, the replica handles consistency internally — the router alw
 
 ## File organization
 
-| Proto file                                    | Purpose                                                                       |
-| --------------------------------------------- | ----------------------------------------------------------------------------- |
+| Proto file                                         | Purpose                                                                       |
+| -------------------------------------------------- | ----------------------------------------------------------------------------- |
 | `proto/personinsights/types/v1/person.proto`       | Person, DistinctId messages and all person-related request/response types     |
 | `proto/personinsights/types/v1/group.proto`        | Group, GroupTypeMapping messages and all group-related request/response types |
 | `proto/personinsights/types/v1/cohort.proto`       | CohortMembership messages and cohort-related request/response types           |

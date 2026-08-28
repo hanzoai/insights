@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconSparkles, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconSparkles, IconWarning, IconX } from '@hanzo/icons'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Popover } from 'lib/elements/Popover/Popover'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { urls } from 'scenes/urls'
 
 import { AlertEntry, ChangelogEntry, maxChangelogLogic } from '../maxChangelogLogic'

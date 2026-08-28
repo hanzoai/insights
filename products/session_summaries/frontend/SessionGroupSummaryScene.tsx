@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Banner, Button, Checkbox, Collapse, Input, Skeleton, Tag, Tooltip } from '@hanzo/elements'
 import { IconCheck, IconSearch, IconShare, IconSort, IconSparkles } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Checkbox,
-    Collapse,
-    Input,
-    Skeleton,
-    Tag,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { IconPlayCircle } from 'lib/elements/icons'
 import { Menu } from 'lib/elements/Menu'

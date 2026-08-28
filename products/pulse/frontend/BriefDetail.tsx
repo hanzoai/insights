@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { Banner } from 'lib/elements/Banner'
-import { Markdown } from 'lib/elements/Markdown'
-import { Tag } from 'lib/elements/Tag'
 import { Link } from 'lib/elements/Link'
+import { Markdown } from 'lib/elements/Markdown'
 import { Spinner } from 'lib/elements/Spinner'
+import { Tag } from 'lib/elements/Tag'
 
 import type { BriefSectionApi, BriefSectionCitationApi } from './generated/api.schemas'
 import { ProductBriefStatusEnumApi } from './generated/api.schemas'

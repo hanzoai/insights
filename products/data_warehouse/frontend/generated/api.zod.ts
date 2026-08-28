@@ -822,7 +822,9 @@ export const WarehouseSavedQueriesResumeSchedulesCreateBody = /* @__PURE__ */ zo
             ),
         query: zod
             .object({
-                kind: zod.enum(['InsightsQLQuery']).default(warehouseSavedQueriesResumeSchedulesCreateBodyQueryKindDefault),
+                kind: zod
+                    .enum(['InsightsQLQuery'])
+                    .default(warehouseSavedQueriesResumeSchedulesCreateBodyQueryKindDefault),
                 query: zod.string(),
             })
             .describe(

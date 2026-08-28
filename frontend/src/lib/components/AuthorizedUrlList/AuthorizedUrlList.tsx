@@ -3,9 +3,9 @@ import { useActions, useValues } from 'kea'
 
 import { IconCopy, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
-import { IconOpenInApp } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Dialog } from 'lib/elements/Dialog'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { Tag } from 'lib/elements/Tag/Tag'
 import { Tooltip } from 'lib/elements/Tooltip'
 

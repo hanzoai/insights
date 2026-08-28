@@ -242,13 +242,13 @@ GROUP BY variant
 
 ## Key files
 
-| File                                                          | Purpose                                                                                                                                                                                     |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `experiment_query_runner.py`                                  | Orchestrates experiment query execution, including `_ensure_exposures_precomputed()`                                                                                                        |
-| `experiment_query_builder.py`                                 | Builds the SQL query: `_build_exposure_select_query()` (events scan), `_build_exposure_from_precomputed()` (lazy-computed read), `get_exposure_query_for_precomputation()` (write template) |
-| `lazy_computation_executor.py`                                | Core lazy computation logic: `ensure_precomputed()`, job management                                                                                                                         |
-| `models/preaggregation_job.py`                                | PostgreSQL model for tracking computation jobs                                                                                                                                              |
-| `insightsql/database/schema/experiment_exposures_preaggregated.py` | InsightsQL schema for the lazy-computed Datastore table                                                                                                                                         |
+| File                                                               | Purpose                                                                                                                                                                                     |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `experiment_query_runner.py`                                       | Orchestrates experiment query execution, including `_ensure_exposures_precomputed()`                                                                                                        |
+| `experiment_query_builder.py`                                      | Builds the SQL query: `_build_exposure_select_query()` (events scan), `_build_exposure_from_precomputed()` (lazy-computed read), `get_exposure_query_for_precomputation()` (write template) |
+| `lazy_computation_executor.py`                                     | Core lazy computation logic: `ensure_precomputed()`, job management                                                                                                                         |
+| `models/preaggregation_job.py`                                     | PostgreSQL model for tracking computation jobs                                                                                                                                              |
+| `insightsql/database/schema/experiment_exposures_preaggregated.py` | InsightsQL schema for the lazy-computed Datastore table                                                                                                                                     |
 
 ---
 

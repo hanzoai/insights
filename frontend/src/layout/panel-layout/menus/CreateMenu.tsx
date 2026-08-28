@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { ReactNode } from 'react'
 
 import { IconChevronRight, IconSparkles } from '@hanzo/icons'

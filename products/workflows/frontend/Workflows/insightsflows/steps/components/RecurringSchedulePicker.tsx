@@ -1,15 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useMemo, useState } from 'react'
 
+import { Button, CalendarSelectInput, Input, SearchableSelect, Select, Switch } from '@hanzo/elements'
 import { IconCalendar } from '@hanzo/icons'
-import {
-    Button,
-    CalendarSelectInput,
-    Input,
-    SearchableSelect,
-    Select,
-    Switch,
-} from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { timeZoneLabel } from 'lib/utils/timezones'

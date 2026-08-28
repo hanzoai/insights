@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Checkbox, Dialog, Menu, Tag } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { Card } from 'lib/elements/Card'
 import { TableColumns } from 'lib/elements/Table'
@@ -77,7 +77,9 @@ export function WebhookLogsSection({ insightsFunctionId }: { insightsFunctionId:
                             title: 'Status',
                             key: 'status',
                             width: 0,
-                            render: (_, record) => <WebhookLogStatus record={record} insightsFunctionId={insightsFunctionId} />,
+                            render: (_, record) => (
+                                <WebhookLogStatus record={record} insightsFunctionId={insightsFunctionId} />
+                            ),
                         },
                         ...columns.filter((column) => column.key !== 'logLevel'),
                     ]
@@ -91,7 +93,13 @@ export function WebhookLogsSection({ insightsFunctionId }: { insightsFunctionId:
 
 type WebhookLogStatusType = 'success' | 'failure' | 'running'
 
-function WebhookLogStatus({ record, insightsFunctionId }: { record: GroupedLogEntry; insightsFunctionId: string }): JSX.Element {
+function WebhookLogStatus({
+    record,
+    insightsFunctionId,
+}: {
+    record: GroupedLogEntry
+    insightsFunctionId: string
+}): JSX.Element {
     const logicProps: LogsViewerLogicProps = {
         sourceType: 'insights_function',
         sourceId: insightsFunctionId,
@@ -154,11 +162,7 @@ function WebhookLogStatus({ record, insightsFunctionId }: { record: GroupedLogEn
                     },
                 ]}
             >
-                <Button
-                    size="xsmall"
-                    icon={<IconEllipsis className="rotate-90" />}
-                    loading={thisRetry === 'pending'}
-                />
+                <Button size="xsmall" icon={<IconEllipsis className="rotate-90" />} loading={thisRetry === 'pending'} />
             </Menu>
         </div>
     )

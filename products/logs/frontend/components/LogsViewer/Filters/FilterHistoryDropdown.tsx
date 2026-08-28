@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconClock, IconTrash } from '@hanzo/icons'
 import { Button, Menu, MenuSection } from '@hanzo/elements'
+import { IconClock, IconTrash } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 

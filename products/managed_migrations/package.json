@@ -10,8 +10,8 @@
         "kea-router": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/icons": "catalog:",
         "@hanzo/elements": "*",
+        "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "react": "*"
     }

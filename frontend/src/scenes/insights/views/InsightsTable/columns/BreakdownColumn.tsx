@@ -1,5 +1,5 @@
-import { IconPin, IconPinFilled } from '@hanzo/icons'
 import { Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
 
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'

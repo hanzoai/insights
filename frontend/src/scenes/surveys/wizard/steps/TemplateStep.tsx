@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
+import { Button, SegmentedButton, Tag, TextArea } from '@hanzo/elements'
 import {
     IconArrowRight,
     IconChevronDown,
@@ -21,7 +22,6 @@ import {
     IconTrending,
     IconWarning,
 } from '@hanzo/icons'
-import { Button, SegmentedButton, Tag, TextArea } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

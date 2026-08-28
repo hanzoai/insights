@@ -262,9 +262,7 @@ export const materializationJobsLogic = kea<materializationJobsLogicType>([
                 actions.loadSavedQuery()
                 actions.loadDataModelingJobs()
             } catch {
-                toast.error(
-                    "Couldn't resume materialization. Try again, and contact support if it keeps happening."
-                )
+                toast.error("Couldn't resume materialization. Try again, and contact support if it keeps happening.")
             } finally {
                 actions.setResumingMaterialization(false)
             }

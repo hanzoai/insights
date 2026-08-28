@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 
 import { backendAssetUrl } from 'lib/utils/apiHost'
 
-import { Skeleton } from '../Skeleton'
 import { Lettermark } from '../Lettermark'
+import { Skeleton } from '../Skeleton'
 
 export interface UploadedLogoProps {
     name: string

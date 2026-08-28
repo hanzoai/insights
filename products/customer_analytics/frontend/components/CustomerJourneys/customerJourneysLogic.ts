@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { SelectOptions } from 'lib/elements/Select/Select'

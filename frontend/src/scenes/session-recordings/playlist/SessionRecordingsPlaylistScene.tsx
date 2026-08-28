@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { IconCopy, IconTrash } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCopy, IconTrash } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { SceneDuplicate } from 'lib/components/Scenes/SceneDuplicate'
@@ -13,8 +13,8 @@ import { SceneMetalyticsSummaryButton } from 'lib/components/Scenes/SceneMetalyt
 import { ScenePin } from 'lib/components/Scenes/ScenePin'
 import { SceneActivityIndicator } from 'lib/components/Scenes/SceneUpdateActivityInfo'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { Skeleton } from 'lib/elements/Skeleton'
+import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { SceneExport } from 'scenes/sceneTypes'

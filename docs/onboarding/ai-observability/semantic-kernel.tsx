@@ -80,8 +80,8 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
             content: (
                 <>
                     <Markdown>
-                        Use Semantic Kernel as normal. Insights automatically captures an `$ai_generation` event for each
-                        LLM call made through the OpenAI SDK that Semantic Kernel uses internally.
+                        Use Semantic Kernel as normal. Insights automatically captures an `$ai_generation` event for
+                        each LLM call made through the OpenAI SDK that Semantic Kernel uses internally.
                     </Markdown>
 
                     <CodeBlock

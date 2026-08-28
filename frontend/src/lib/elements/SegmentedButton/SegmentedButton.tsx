@@ -3,8 +3,8 @@ import './SegmentedButton.scss'
 import clsx from 'clsx'
 import React from 'react'
 
-import { useSliderPositioning } from '../hooks'
 import { Button, ButtonProps } from '../Button'
+import { useSliderPositioning } from '../hooks'
 
 // Expects at least one of label or icon to be provided
 export type SegmentedButtonOption<T extends React.Key> = { value: T } & (

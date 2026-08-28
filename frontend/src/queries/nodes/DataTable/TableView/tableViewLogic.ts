@@ -1,9 +1,9 @@
 import { deepEqual as equal } from 'fast-equals'
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { lazyLoaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { toast } from 'lib/elements/Toast/Toast'

@@ -1,8 +1,9 @@
 import clsx from 'clsx'
-import { BindLogic, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 import React, { useLayoutEffect, useMemo, useState } from 'react'
 
+import { Banner, Button, ButtonPropsBase, Checkbox, Dialog, Divider, Input, Skeleton, Tooltip } from '@hanzo/elements'
 import {
     IconChevronRight,
     IconCollapse,
@@ -20,17 +21,6 @@ import {
     IconWrench,
     IconX,
 } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    ButtonPropsBase,
-    Checkbox,
-    Dialog,
-    Divider,
-    Input,
-    Skeleton,
-    Tooltip,
-} from '@hanzo/elements'
 
 import {
     InsightBreakdownSummary,

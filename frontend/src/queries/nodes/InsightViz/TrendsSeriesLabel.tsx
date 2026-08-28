@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalculator } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCalculator } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'

@@ -2,8 +2,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { ReactNode, useState } from 'react'
 
-import { IconCheck, IconGraph, IconPencil, IconPlay, IconRefresh, IconServer, IconTrash } from '@hanzo/icons'
 import { Banner, Button, Dialog, Divider, Tag } from '@hanzo/elements'
+import { IconCheck, IconGraph, IconPencil, IconPlay, IconRefresh, IconServer, IconTrash } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet/CodeSnippet'
 import { NotFound } from 'lib/components/NotFound'
@@ -13,9 +13,9 @@ import { Collapse } from 'lib/elements/Collapse'
 import { Field } from 'lib/elements/Field'
 import { Input } from 'lib/elements/Input'
 import { Markdown } from 'lib/elements/Markdown'
+import { Spinner } from 'lib/elements/Spinner'
 import { Table } from 'lib/elements/Table'
 import { TextAreaMarkdown } from 'lib/elements/TextArea/TextAreaMarkdown'
-import { Spinner } from 'lib/elements/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -490,12 +490,7 @@ function MetricDefinition({
                         </Markdown>
                         <div className="flex gap-2">
                             {runButton}
-                            <Button
-                                type="secondary"
-                                size="small"
-                                icon={<IconPencil />}
-                                onClick={() => onEdit(true)}
-                            >
+                            <Button type="secondary" size="small" icon={<IconPencil />} onClick={() => onEdit(true)}>
                                 Edit
                             </Button>
                         </div>

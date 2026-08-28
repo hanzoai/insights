@@ -146,8 +146,8 @@ export const getJavaSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                         ]}
                     />
                     <Markdown>
-                        Logs appear in Insights within a few seconds. Use the [Logs page](https://app.hanzo.ai/logs)
-                        to search and filter by service name, severity, or any attribute you attach.
+                        Logs appear in Insights within a few seconds. Use the [Logs page](https://app.hanzo.ai/logs) to
+                        search and filter by service name, severity, or any attribute you attach.
                     </Markdown>
                 </>
             ),

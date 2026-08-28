@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react'
 import Stripe from 'stripe'
 
 import { BRAND_COLOR, BrandIcon, getConstants } from '../constants'
-import { logger } from '../logger'
 import { loadCredentials } from '../insights/auth'
+import { logger } from '../logger'
 
 const stripe = new Stripe(STRIPE_API_KEY, {
     httpClient: createHttpClient(),

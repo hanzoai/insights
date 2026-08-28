@@ -1,5 +1,5 @@
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Dropdown, Input } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { fullName } from 'lib/utils/strings'
 

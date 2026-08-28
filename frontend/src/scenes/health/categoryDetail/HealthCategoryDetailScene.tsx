@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconEllipsis, IconExternal, IconRefresh, IconWarning } from '@hanzo/icons'
 import { Banner, Button, Collapse, Menu, Skeleton, Tag, Link } from '@hanzo/elements'
+import { IconCheck, IconEllipsis, IconExternal, IconRefresh, IconWarning } from '@hanzo/icons'
 
 import { SceneExport } from 'scenes/sceneTypes'
 
@@ -127,12 +127,7 @@ function GenericCategoryContent({
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     {detailConfig?.deepDiveUrl && (
-                        <Button
-                            type="secondary"
-                            size="small"
-                            icon={<IconExternal />}
-                            to={detailConfig.deepDiveUrl}
-                        >
+                        <Button type="secondary" size="small" icon={<IconExternal />} to={detailConfig.deepDiveUrl}>
                             {detailConfig.deepDiveLabel ?? 'View details'}
                         </Button>
                     )}

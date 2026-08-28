@@ -28,9 +28,7 @@ export class RetentionInsight extends ChartInsightBase {
         this.breakdownButton = page.getByTestId('add-breakdown-button')
         this.alertsButton = page.getByTestId('insight-alerts-dropdown-menu-item')
         this.chartFilter = page.getByTestId('chart-filter')
-        this.personsModal = page
-            .locator('.Modal')
-            .filter({ has: page.locator('.RetentionTable--non-interactive') })
+        this.personsModal = page.locator('.Modal').filter({ has: page.locator('.RetentionTable--non-interactive') })
         this.customBracketsCheckbox = page.locator('.Checkbox', { hasText: 'Use custom return ranges' })
         this.sectionHeaders = this.table.locator('tr.cursor-pointer')
         this.taxonomicFilter = new TaxonomicFilter(page)

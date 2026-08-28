@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar } from '@hanzo/icons'
 import { Select } from '@hanzo/elements'
+import { IconCalendar } from '@hanzo/icons'
 
 import { DateFilter } from '../DateFilter/DateFilter'
 import { appMetricsLogic } from './appMetricsLogic'

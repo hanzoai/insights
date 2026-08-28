@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconLetter, IconGear, IconPlusSmall } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconCheck, IconLetter, IconGear, IconPlusSmall } from '@hanzo/icons'
 
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
 import { IconBlank } from 'lib/elements/icons'

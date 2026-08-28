@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 /**
  * Preview pane — right column of the combobox panel. Shows metadata for
  * the currently highlighted row (description, property type, sent-as,
@@ -10,7 +11,6 @@
  * falls back to the shared header + description.
  */
 import { useValues } from 'kea'
-import insights from 'insights-js'
 
 import { IconPin } from '@hanzo/icons'
 import { Button, cn, ScrollArea, Separator } from '@hanzo/quill'

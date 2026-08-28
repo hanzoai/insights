@@ -1,6 +1,7 @@
 import { ReactNode, createElement, useMemo } from 'react'
 import { P, match } from 'ts-pattern'
 
+import { Tag, TagProps, Link, Tooltip } from '@hanzo/elements'
 import {
     IconCommit,
     IconGitBranch,
@@ -9,7 +10,6 @@ import {
     type IconComponent,
     type IconProps,
 } from '@hanzo/icons'
-import { Tag, TagProps, Link, Tooltip } from '@hanzo/elements'
 
 import { ErrorTrackingRelease, ReleaseGitMetadata } from 'lib/components/Errors/types'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

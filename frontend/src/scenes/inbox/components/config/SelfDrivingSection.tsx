@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus, IconRocket, IconX } from '@hanzo/icons'
 import { SegmentedButton, Skeleton, Switch } from '@hanzo/elements'
+import { IconPlus, IconRocket, IconX } from '@hanzo/icons'
 import {
     Button,
     ButtonGroup,

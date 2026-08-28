@@ -4,8 +4,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Button, Input, Select } from '@hanzo/elements'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { IconDragHandle } from 'lib/elements/icons'
 

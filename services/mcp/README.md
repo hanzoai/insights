@@ -212,37 +212,37 @@ https://mcp.hanzo.ai/mcp?features=flags,workspace,dashboards
 
 Available features:
 
-| Feature                  | Description                                                                                               |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `workspace`              | Organization and project management                                                                       |
-| `actions`                | [Action definitions](https://hanzo.ai/docs/data/actions)                                               |
-| `activity_logs`          | Activity log viewing                                                                                      |
-| `alerts`                 | [Alert management](https://hanzo.ai/docs/product-analytics/alerts)                                     |
-| `annotations`            | [Annotation management](https://hanzo.ai/docs/product-analytics/annotations)                           |
-| `cohorts`                | [Cohort management](https://hanzo.ai/docs/data/cohorts)                                                |
-| `dashboards`             | [Dashboard creation and management](https://hanzo.ai/docs/product-analytics/dashboards)                |
-| `data_schema`            | Data schema exploration                                                                                   |
-| `data_warehouse`         | [Data warehouse management](https://hanzo.ai/docs/data-warehouse)                                      |
-| `debug`                  | Debug and diagnostic tools                                                                                |
-| `docs`                   | Insights documentation search                                                                              |
-| `early_access_features`  | [Early access feature management](https://hanzo.ai/docs/feature-flags/early-access-feature-management) |
-| `error_tracking`         | [Error monitoring and debugging](https://hanzo.ai/docs/error-tracking)                                 |
-| `events`                 | Event and property definitions                                                                            |
-| `experiments`            | [A/B testing experiments](https://hanzo.ai/docs/experiments)                                           |
-| `flags`                  | [Feature flag management](https://hanzo.ai/docs/feature-flags)                                         |
+| Feature                       | Description                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `workspace`                   | Organization and project management                                                                    |
+| `actions`                     | [Action definitions](https://hanzo.ai/docs/data/actions)                                               |
+| `activity_logs`               | Activity log viewing                                                                                   |
+| `alerts`                      | [Alert management](https://hanzo.ai/docs/product-analytics/alerts)                                     |
+| `annotations`                 | [Annotation management](https://hanzo.ai/docs/product-analytics/annotations)                           |
+| `cohorts`                     | [Cohort management](https://hanzo.ai/docs/data/cohorts)                                                |
+| `dashboards`                  | [Dashboard creation and management](https://hanzo.ai/docs/product-analytics/dashboards)                |
+| `data_schema`                 | Data schema exploration                                                                                |
+| `data_warehouse`              | [Data warehouse management](https://hanzo.ai/docs/data-warehouse)                                      |
+| `debug`                       | Debug and diagnostic tools                                                                             |
+| `docs`                        | Insights documentation search                                                                          |
+| `early_access_features`       | [Early access feature management](https://hanzo.ai/docs/feature-flags/early-access-feature-management) |
+| `error_tracking`              | [Error monitoring and debugging](https://hanzo.ai/docs/error-tracking)                                 |
+| `events`                      | Event and property definitions                                                                         |
+| `experiments`                 | [A/B testing experiments](https://hanzo.ai/docs/experiments)                                           |
+| `flags`                       | [Feature flag management](https://hanzo.ai/docs/feature-flags)                                         |
 | `insights_functions`          | [CDP function management](https://hanzo.ai/docs/cdp)                                                   |
-| `insights_function_templates` | CDP function template browsing                                                                            |
-| `insights`               | [Analytics insights](https://hanzo.ai/docs/product-analytics/insights)                                 |
-| `llm_analytics`          | [AI observability evaluations](https://hanzo.ai/docs/ai-engineering)                                   |
-| `prompts`                | [LLM prompt management](https://hanzo.ai/docs/ai-engineering)                                          |
-| `logs`                   | [Log querying](https://hanzo.ai/docs/ai-engineering/observability)                                     |
-| `notebooks`              | [Notebook management](https://hanzo.ai/docs/notebooks)                                                 |
-| `persons`                | [Person and group management](https://hanzo.ai/docs/data/persons)                                      |
-| `reverse_proxy`          | Reverse proxy record management                                                                           |
-| `search`                 | Entity search across the project                                                                          |
-| `sql`                    | SQL query execution                                                                                       |
-| `surveys`                | [Survey management](https://hanzo.ai/docs/surveys)                                                     |
-| `workflows`              | [Workflow management](https://hanzo.ai/docs/cdp)                                                       |
+| `insights_function_templates` | CDP function template browsing                                                                         |
+| `insights`                    | [Analytics insights](https://hanzo.ai/docs/product-analytics/insights)                                 |
+| `llm_analytics`               | [AI observability evaluations](https://hanzo.ai/docs/ai-engineering)                                   |
+| `prompts`                     | [LLM prompt management](https://hanzo.ai/docs/ai-engineering)                                          |
+| `logs`                        | [Log querying](https://hanzo.ai/docs/ai-engineering/observability)                                     |
+| `notebooks`                   | [Notebook management](https://hanzo.ai/docs/notebooks)                                                 |
+| `persons`                     | [Person and group management](https://hanzo.ai/docs/data/persons)                                      |
+| `reverse_proxy`               | Reverse proxy record management                                                                        |
+| `search`                      | Entity search across the project                                                                       |
+| `sql`                         | SQL query execution                                                                                    |
+| `surveys`                     | [Survey management](https://hanzo.ai/docs/surveys)                                                     |
+| `workflows`                   | [Workflow management](https://hanzo.ai/docs/cdp)                                                       |
 
 > **Note:** Hyphens and underscores are treated as equivalent in feature names (e.g., `error-tracking` and `error_tracking` both work).
 
@@ -282,8 +282,8 @@ x-insights-mcp-mode: cli
 x-insights-mcp-mode: tools
 ```
 
-| Value   | Behavior                                                |
-| ------- | ------------------------------------------------------- |
+| Value   | Behavior                                                 |
+| ------- | -------------------------------------------------------- |
 | `tools` | Force tools mode (one MCP tool per Insights tool).       |
 | `cli`   | Force cli mode (single `insights` tool wraps all tools). |
 

@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import { renderSurveysPreview } from 'insights-js/dist/surveys-preview'
+import { useValues } from 'kea'
 import { useEffect, useMemo, useRef } from 'react'
 
 import { toast } from 'lib/elements/Toast/Toast'

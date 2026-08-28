@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
+import { Button, Tag, Link, Tooltip } from '@hanzo/elements'
 import {
     IconActivity,
     IconCheckCircle,
@@ -15,7 +16,6 @@ import {
     IconShieldPeople,
     IconX,
 } from '@hanzo/icons'
-import { Button, Tag, Link, Tooltip } from '@hanzo/elements'
 
 import { UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'

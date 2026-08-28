@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconLightBulb, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconLightBulb, IconX } from '@hanzo/icons'
 
 import { ExperimentWizardStep, experimentWizardLogic } from './experimentWizardLogic'
 
@@ -49,13 +49,7 @@ export function ExperimentWizardGuide(): JSX.Element {
                     <IconLightBulb className="size-4" />
                     Guide
                 </div>
-                <Button
-                    type="tertiary"
-                    size="xsmall"
-                    icon={<IconX />}
-                    onClick={toggleGuide}
-                    tooltip="Hide guide"
-                />
+                <Button type="tertiary" size="xsmall" icon={<IconX />} onClick={toggleGuide} tooltip="Hide guide" />
             </div>
 
             <h4 className="text-sm font-semibold">{guide.title}</h4>

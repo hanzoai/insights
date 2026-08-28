@@ -32,8 +32,8 @@ high volume, `exploring-llm-clusters`.
 
 ## Tools
 
-| Tool                                     | Purpose                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------ |
+| Tool                                      | Purpose                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
 | `insights:query-llm-traces-list`          | List candidate traces — filter by error, sort by a metric, scope by type |
 | `insights:query-llm-trace`                | Read a trace in full to see what actually went wrong                     |
 | `insights:execute-sql`                    | Find metric outliers, discover the trace taxonomy, count failure modes   |

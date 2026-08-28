@@ -267,7 +267,9 @@ function summarizeQueryChanges(query: InsightQueryNode | InsightsQLQuery): Chang
         extendedDescription: (
             <div className="ActivityDescription">
                 <SeriesSummary query={query} />
-                <PropertiesSummary properties={isInsightsQLQuery(query) ? query.filters?.properties : query.properties} />
+                <PropertiesSummary
+                    properties={isInsightsQLQuery(query) ? query.filters?.properties : query.properties}
+                />
                 <InsightBreakdownSummary query={query} />
             </div>
         ),

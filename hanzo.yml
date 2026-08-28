@@ -28,10 +28,10 @@
 # way on 08-01 and it was found on 08-08, two rebases later. Runs first because
 # it needs no install.
 test:
-  - name: fork inventory
-    run: python3 scripts/fork-inventory.py
-  - name: lint
-    run: |
-      set -e
-      pnpm install --frozen-lockfile --ignore-scripts
-      pnpm run lint
+    - name: fork inventory
+      run: python3 scripts/fork-inventory.py
+    - name: lint
+      run: |
+          set -e
+          pnpm install --frozen-lockfile --ignore-scripts
+          pnpm run lint

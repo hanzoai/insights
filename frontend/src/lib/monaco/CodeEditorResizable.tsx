@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCheck, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCheck, IconX } from '@hanzo/icons'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { CodeEditor, CodeEditorProps } from 'lib/monaco/CodeEditor'

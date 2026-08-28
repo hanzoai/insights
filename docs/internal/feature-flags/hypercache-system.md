@@ -33,8 +33,8 @@ Insights's HyperCache provides multi-tier caching with Redis → S3 → Database
 
 ## Core components
 
-| Component        | File                                              | Purpose                          |
-| ---------------- | ------------------------------------------------- | -------------------------------- |
+| Component        | File                                               | Purpose                          |
+| ---------------- | -------------------------------------------------- | -------------------------------- |
 | HyperCache class | `insights/storage/hypercache.py`                   | Multi-tier cache with fallback   |
 | Local evaluation | `insights/models/feature_flag/local_evaluation.py` | Feature flag caching for SDKs    |
 | Remote config    | `insights/models/remote_config.py`                 | Client configuration caching     |
@@ -263,8 +263,8 @@ The cached team is serialized using `CachingTeamSerializer` and reconstructed as
 
 ## Prometheus metrics
 
-| Metric                                     | Labels                         | Purpose                         |
-| ------------------------------------------ | ------------------------------ | ------------------------------- |
+| Metric                                      | Labels                         | Purpose                         |
+| ------------------------------------------- | ------------------------------ | ------------------------------- |
 | `insights_hypercache_get_from_cache`        | `result`, `namespace`, `value` | Cache hit/miss tracking         |
 | `insights_hypercache_sync`                  | `result`, `namespace`, `value` | Cache sync task outcomes        |
 | `insights_hypercache_sync_duration_seconds` | `result`, `namespace`, `value` | Cache sync timing               |

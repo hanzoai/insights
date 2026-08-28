@@ -8,8 +8,8 @@ import {
     useState,
 } from 'react'
 
-import { IconCode, IconComment, IconCopy, IconExternal, IconQuote, IconSparkles } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconCode, IconComment, IconCopy, IconExternal, IconQuote, IconSparkles } from '@hanzo/icons'
 
 import { IconBold, IconItalic, IconLink } from 'lib/elements/icons'
 

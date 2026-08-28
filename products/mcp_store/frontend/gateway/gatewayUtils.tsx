@@ -1,5 +1,5 @@
-import { IconCheck, IconShieldLock, IconX } from '@hanzo/icons'
 import { Badge, Tag } from '@hanzo/elements'
+import { IconCheck, IconShieldLock, IconX } from '@hanzo/icons'
 
 import { MCPToolApprovalStateEnumApi, UserBasicApi } from '../generated/api.schemas'
 

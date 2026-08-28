@@ -277,7 +277,11 @@ export const getInsightsFlowsRetrieveUrl = (projectId: string, id: string) => {
     return `/api/projects/${projectId}/hog_flows/${id}/`
 }
 
-export const hogFlowsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<InsightsFlowApi> => {
+export const hogFlowsRetrieve = async (
+    projectId: string,
+    id: string,
+    options?: RequestInit
+): Promise<InsightsFlowApi> => {
     return apiMutator<InsightsFlowApi>(getInsightsFlowsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
@@ -350,7 +354,11 @@ export const hogFlowsActionsEmailPartialUpdate = async (
     })
 }
 
-export const getInsightsFlowsAssetsRetrieveUrl = (projectId: string, id: string, params?: InsightsFlowsAssetsRetrieveParams) => {
+export const getInsightsFlowsAssetsRetrieveUrl = (
+    projectId: string,
+    id: string,
+    params?: InsightsFlowsAssetsRetrieveParams
+) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -545,7 +553,11 @@ export const hogFlowsInvocationsCreate = async (
     })
 }
 
-export const getInsightsFlowsLogsRetrieveUrl = (projectId: string, id: string, params?: InsightsFlowsLogsRetrieveParams) => {
+export const getInsightsFlowsLogsRetrieveUrl = (
+    projectId: string,
+    id: string,
+    params?: InsightsFlowsLogsRetrieveParams
+) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -684,7 +696,11 @@ export const hogFlowsRerunCreate = async (
     })
 }
 
-export const getInsightsFlowsRevisionsListUrl = (projectId: string, id: string, params?: InsightsFlowsRevisionsListParams) => {
+export const getInsightsFlowsRevisionsListUrl = (
+    projectId: string,
+    id: string,
+    params?: InsightsFlowsRevisionsListParams
+) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -706,10 +722,13 @@ export const hogFlowsRevisionsList = async (
     params?: InsightsFlowsRevisionsListParams,
     options?: RequestInit
 ): Promise<PaginatedInsightsFlowRevisionBasicListApi> => {
-    return apiMutator<PaginatedInsightsFlowRevisionBasicListApi>(getInsightsFlowsRevisionsListUrl(projectId, id, params), {
-        ...options,
-        method: 'GET',
-    })
+    return apiMutator<PaginatedInsightsFlowRevisionBasicListApi>(
+        getInsightsFlowsRevisionsListUrl(projectId, id, params),
+        {
+            ...options,
+            method: 'GET',
+        }
+    )
 }
 
 export const getInsightsFlowsRevisionsRetrieveUrl = (projectId: string, id: string, version: number) => {
@@ -881,7 +900,10 @@ export const hogFlowsMetricsGlobalRetrieve = async (
     })
 }
 
-export const getInsightsFlowsReputationRetrieveUrl = (projectId: string, params?: InsightsFlowsReputationRetrieveParams) => {
+export const getInsightsFlowsReputationRetrieveUrl = (
+    projectId: string,
+    params?: InsightsFlowsReputationRetrieveParams
+) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -939,7 +961,10 @@ export const getInternalInsightsFlowsAccountAudienceCreateUrl = (teamId: string)
  * Internal endpoint for the Node batch resolver to page an account audience.
  * Requires Bearer token authentication via INTERNAL_API_SECRET.
  */
-export const internalInsightsFlowsAccountAudienceCreate = async (teamId: string, options?: RequestInit): Promise<void> => {
+export const internalInsightsFlowsAccountAudienceCreate = async (
+    teamId: string,
+    options?: RequestInit
+): Promise<void> => {
     return apiMutator<void>(getInternalInsightsFlowsAccountAudienceCreateUrl(teamId), {
         ...options,
         method: 'POST',
@@ -977,7 +1002,10 @@ export const getInternalInsightsFlowsUserBlastRadiusCreateUrl = (teamId: string)
  * Internal endpoint for Node.js services to query user blast radius.
  * Requires Bearer token authentication via INTERNAL_API_SECRET.
  */
-export const internalInsightsFlowsUserBlastRadiusCreate = async (teamId: string, options?: RequestInit): Promise<void> => {
+export const internalInsightsFlowsUserBlastRadiusCreate = async (
+    teamId: string,
+    options?: RequestInit
+): Promise<void> => {
     return apiMutator<void>(getInternalInsightsFlowsUserBlastRadiusCreateUrl(teamId), {
         ...options,
         method: 'POST',

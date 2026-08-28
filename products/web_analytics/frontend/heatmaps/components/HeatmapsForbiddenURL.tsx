@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Banner } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import {
     AuthorizedUrlListType,

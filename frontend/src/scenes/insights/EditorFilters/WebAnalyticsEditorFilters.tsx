@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconFilter } from '@hanzo/icons'
 import { Button, Switch, Tooltip } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 import { FilterBar } from 'lib/components/FilterBar'
 import { insightLogic } from 'scenes/insights/insightLogic'
@@ -92,8 +92,7 @@ function FilterTestAccountsToggle({
                 type="secondary"
                 size="small"
             >
-                Filter out internal and test users:{' '}
-                <Switch checked={isFilterTestAccountsEnabled} className="ml-1" />
+                Filter out internal and test users: <Switch checked={isFilterTestAccountsEnabled} className="ml-1" />
             </Button>
         </Tooltip>
     )

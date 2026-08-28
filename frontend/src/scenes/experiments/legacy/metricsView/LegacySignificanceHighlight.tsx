@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useValues } from 'kea'
 
-import { IconMinus, IconTrending } from '@hanzo/icons'
 import { TagType, Tooltip } from '@hanzo/elements'
+import { IconMinus, IconTrending } from '@hanzo/icons'
 
 import {
     getIsPrimaryMetricSignificant,

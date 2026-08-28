@@ -9,8 +9,8 @@ import { FileDiff } from '@pierre/diffs/react'
 import { useValues } from 'kea'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconArrowRight, IconMinus, IconPencil, IconPlus } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconArrowRight, IconMinus, IconPencil, IconPlus } from '@hanzo/icons'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 

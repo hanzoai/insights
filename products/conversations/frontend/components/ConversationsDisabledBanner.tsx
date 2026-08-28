@@ -1,5 +1,5 @@
-import { IconOpenSidebar } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
+import { IconOpenSidebar } from '@hanzo/icons'
 
 import { SupportHeroHog } from 'lib/components/mascots'
 import { urls } from 'scenes/urls'
@@ -14,8 +14,8 @@ export function ConversationsDisabledBanner(): JSX.Element {
                 <div className="flex flex-col gap-2 flex-shrink max-w-180">
                     <h2 className="text-lg font-semibold">Welcome to Support</h2>
                     <p className="font-normal">
-                        Support lets you manage customer conversations directly inside Insights. Enable the conversations
-                        API to get started.
+                        Support lets you manage customer conversations directly inside Insights. Enable the
+                        conversations API to get started.
                     </p>
                     <ul className="list-disc list-inside font-normal space-y-2">
                         <li>

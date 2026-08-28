@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, afterMount, kea, key, path, props, propsChanged } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import { insightsqlQuery } from '~/queries/query'
 import { insightsql } from '~/queries/utils'

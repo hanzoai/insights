@@ -194,7 +194,8 @@ export interface TrendsAlertConfigApi {
     type: TrendsAlertConfigApiType
 }
 
-export type InsightsQLAlertEvaluationApi = (typeof InsightsQLAlertEvaluationApi)[keyof typeof InsightsQLAlertEvaluationApi]
+export type InsightsQLAlertEvaluationApi =
+    (typeof InsightsQLAlertEvaluationApi)[keyof typeof InsightsQLAlertEvaluationApi]
 
 export const InsightsQLAlertEvaluationApi = {
     LastRow: 'last_row',
@@ -202,7 +203,8 @@ export const InsightsQLAlertEvaluationApi = {
     AnyRow: 'any_row',
 } as const
 
-export type InsightsQLAlertConfigApiType = (typeof InsightsQLAlertConfigApiType)[keyof typeof InsightsQLAlertConfigApiType]
+export type InsightsQLAlertConfigApiType =
+    (typeof InsightsQLAlertConfigApiType)[keyof typeof InsightsQLAlertConfigApiType]
 
 export const InsightsQLAlertConfigApiType = {
     InsightsQLAlertConfig: 'InsightsQLAlertConfig',

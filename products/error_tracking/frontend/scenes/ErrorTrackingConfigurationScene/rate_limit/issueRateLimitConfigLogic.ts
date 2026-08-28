@@ -1,8 +1,8 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, kea, listeners, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { ErrorTrackingSettings } from 'lib/components/Errors/types'

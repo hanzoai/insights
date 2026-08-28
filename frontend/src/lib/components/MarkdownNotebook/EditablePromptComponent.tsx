@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { KeyboardEvent, MutableRefObject, useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconSend, IconTrash } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconSend, IconTrash } from '@hanzo/icons'
 
 import { getNotebookStringProp, isPromptComponentNode } from './documentModel'
 import { RestoreSelectionRequest } from './editorTypes'

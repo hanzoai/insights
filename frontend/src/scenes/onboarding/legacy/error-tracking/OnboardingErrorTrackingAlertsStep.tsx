@@ -4,8 +4,8 @@ import { Form } from 'kea-forms'
 import { Button, ButtonProps, Input, Select, Table, Link } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
 import { Field } from 'lib/elements/Field'
+import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
 import { InsightsFunctionIcon } from 'scenes/insights-functions/configuration/InsightsFunctionIcon'
 
 import { IntegrationType, OnboardingStepKey } from '~/types'

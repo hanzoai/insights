@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
 import { IconCheck, IconX } from '@hanzo/icons'
 
@@ -11,8 +11,8 @@ import { Button } from 'lib/elements/Button'
 import { Dialog } from 'lib/elements/Dialog'
 import { Input } from 'lib/elements/Input'
 import { Label } from 'lib/elements/Label'
-import { Tag } from 'lib/elements/Tag'
 import { Spinner } from 'lib/elements/Spinner'
+import { Tag } from 'lib/elements/Tag'
 
 import type {
     WarehouseConnectionApi,

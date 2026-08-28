@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconArrowRight, IconAtSign, IconSparkles } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowRight, IconAtSign, IconSparkles } from '@hanzo/icons'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { NotFound } from 'lib/components/NotFound'

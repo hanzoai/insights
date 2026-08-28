@@ -1,5 +1,5 @@
-import { IconWarning } from '@hanzo/icons'
 import { Banner } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { checkSelectorFragilityCached } from '~/toolbar/utils/selectorQuality'
 

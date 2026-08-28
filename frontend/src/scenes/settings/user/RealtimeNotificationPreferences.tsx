@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronRight } from '@hanzo/icons'
 import { Button, Checkbox, Tag } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { REALTIME_NOTIFICATION_TYPE_META } from 'lib/components/NotificationsMenu/NotificationRow'
 import { userLogic } from 'scenes/userLogic'

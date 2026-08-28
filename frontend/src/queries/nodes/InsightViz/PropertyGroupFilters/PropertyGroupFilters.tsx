@@ -3,8 +3,8 @@ import './PropertyGroupFilters.scss'
 import { BindLogic, useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconCopy, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
+import { IconCopy, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isPropertyGroupFilterLike } from 'lib/components/PropertyFilters/utils'

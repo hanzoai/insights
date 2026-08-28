@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconAI } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconAI } from '@hanzo/icons'
 
 import { ErrorEventType } from 'lib/components/Errors/types'
 import { getExceptionAttributes, getRecordingStatus, getSessionId } from 'lib/components/Errors/utils'

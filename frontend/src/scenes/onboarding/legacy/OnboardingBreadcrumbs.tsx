@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconChevronRight } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { availableOnboardingProducts } from 'scenes/onboarding/shared/utils'

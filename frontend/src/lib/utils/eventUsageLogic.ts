@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, connect, kea, listeners, path } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, connect, kea, listeners, path } from 'kea'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import type { Dayjs } from 'lib/dayjs'

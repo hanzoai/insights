@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconTrash } from '@hanzo/icons'
 import { Banner, Button, Tooltip } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'

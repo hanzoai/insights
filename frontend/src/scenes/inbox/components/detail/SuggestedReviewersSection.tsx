@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconCheck, IconInfo, IconPeople, IconPlus, IconX } from '@hanzo/icons'
 import { Button, Input, Link, Spinner, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconInfo, IconPeople, IconPlus, IconX } from '@hanzo/icons'
 
 import { Dropdown } from 'lib/elements/Dropdown'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'

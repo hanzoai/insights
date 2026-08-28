@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconChevronDown, IconExpand45 } from '@hanzo/icons'
 import { Button, Modal, Tooltip } from '@hanzo/elements'
+import { IconChevronDown, IconExpand45 } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { cn } from 'lib/utils/css-classes'

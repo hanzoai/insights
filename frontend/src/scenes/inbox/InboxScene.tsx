@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconArrowLeft, IconBug } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconArrowLeft, IconBug } from '@hanzo/icons'
 
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -171,13 +171,7 @@ function InboxPanelView({ onBack, children }: { onBack: () => void; children: JS
     return (
         <div className="flex flex-col min-h-0 flex-1 overflow-auto">
             <div className="px-4 pt-3">
-                <Button
-                    type="tertiary"
-                    size="small"
-                    icon={<IconArrowLeft />}
-                    onClick={onBack}
-                    className="self-start"
-                >
+                <Button type="tertiary" size="small" icon={<IconArrowLeft />} onClick={onBack} className="self-start">
                     Scouts
                 </Button>
             </div>

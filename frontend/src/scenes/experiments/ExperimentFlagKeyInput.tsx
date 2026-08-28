@@ -1,8 +1,8 @@
-import { IconCopy } from '@hanzo/icons'
 import { Banner, Input, Table, Link } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
-import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { PaginationManual } from 'lib/elements/PaginationControl'
 import { hasEnded, isLaunched } from 'scenes/experiments/experimentsLogic'
 import { FeatureFlagFiltersSection } from 'scenes/feature-flags/FeatureFlagFilters'
@@ -85,12 +85,7 @@ export function ExperimentFlagKeyInput({
 
             {!showReuseFlag ? (
                 <div>
-                    <Button
-                        type="secondary"
-                        size="small"
-                        icon={<IconCopy />}
-                        onClick={() => onToggleReuseFlag(true)}
-                    >
+                    <Button type="secondary" size="small" icon={<IconCopy />} onClick={() => onToggleReuseFlag(true)}>
                         Reuse an existing feature flag
                     </Button>
                 </div>

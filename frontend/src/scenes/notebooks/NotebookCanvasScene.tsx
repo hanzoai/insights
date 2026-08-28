@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { useMemo } from 'react'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Menu, toast } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { uuid } from 'lib/utils/dom'

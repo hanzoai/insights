@@ -1,9 +1,9 @@
 import './MCPToolCallPreview.scss'
 
 import type { ProductEmptyStateMode } from 'lib/components/ProductEmptyState/types'
-import { Tag } from 'lib/elements/Tag'
 import { Link } from 'lib/elements/Link'
 import { Spinner } from 'lib/elements/Spinner'
+import { Tag } from 'lib/elements/Tag'
 import { cn } from 'lib/utils/css-classes'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 

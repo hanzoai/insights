@@ -1,19 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
+import { Banner, Button, Input, Select, Skeleton, Table, Tabs, Tag, Popover, Tooltip } from '@hanzo/elements'
 import { IconCheck, IconEllipsis, IconWarning } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Input,
-    Select,
-    Skeleton,
-    Table,
-    Tabs,
-    Tag,
-    Popover,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { IconLink } from 'lib/elements/icons'
 

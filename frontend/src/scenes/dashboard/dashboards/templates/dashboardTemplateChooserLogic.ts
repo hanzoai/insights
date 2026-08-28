@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, connect, kea, key, listeners, path, props, selectors } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, connect, kea, key, listeners, path, props, selectors } from 'kea'
 
 import { newDashboardLogic } from 'scenes/dashboard/newDashboardLogic'
 

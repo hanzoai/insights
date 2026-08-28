@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
-import { IconPencil } from '@hanzo/icons'
 import { Button, InputSelect, Popover } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
 import { COMMON_LANGUAGES, isValidLanguageCode, normalizeLanguageCode } from './language'
 

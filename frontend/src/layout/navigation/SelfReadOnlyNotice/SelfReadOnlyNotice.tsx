@@ -6,14 +6,14 @@ import '../ImpersonationNotice/ImpersonationNotice.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCollapse, IconWarning } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconCollapse, IconWarning } from '@hanzo/icons'
 
 import { DraggableWithSnapZones, DraggableWithSnapZonesRef } from 'lib/components/DraggableWithSnapZones'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { IconDragHandle } from 'lib/elements/icons'
+import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { cn } from 'lib/utils/css-classes'
 
 import { ESCALATION_OPTIONS, selfReadOnlyModeLogic } from './selfReadOnlyModeLogic'

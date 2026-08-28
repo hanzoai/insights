@@ -1,7 +1,7 @@
 import { Group } from 'kea-forms'
 
-import { IconInfo } from '@hanzo/icons'
 import { Checkbox, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 

@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Button, toast } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
-import { TextArea } from 'lib/elements/TextArea'
 import { Popover } from 'lib/elements/Popover'
+import { TextArea } from 'lib/elements/TextArea'
 
 import { captureInboxReportAction } from '../../inboxAnalytics'
 import { inboxTaskKickoffLogic } from '../../inboxTaskKickoffLogic'

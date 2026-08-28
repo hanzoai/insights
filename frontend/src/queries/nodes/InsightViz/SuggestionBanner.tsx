@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
-import { IconInfo, IconX } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconX } from '@hanzo/icons'
 
 import { pluralize } from 'lib/utils/strings'
 import { compareInsightTopLevelSections } from 'scenes/insights/utils'

@@ -1,5 +1,5 @@
-import { IconExternal } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { Markdown } from 'lib/elements/Markdown'
@@ -84,9 +84,7 @@ export function PgAnalyzeSignalCard({ signal }: SignalCardProps): JSX.Element {
     const serverLabel = extra.server_name ?? extra.server_human_id
     const metaChips = (
         <>
-            {extra.severity !== null && (
-                <Tag type={severityTone(extra.severity)}>{sentenceCase(extra.severity)}</Tag>
-            )}
+            {extra.severity !== null && <Tag type={severityTone(extra.severity)}>{sentenceCase(extra.severity)}</Tag>}
             {serverLabel && <Tag type="muted">{serverLabel}</Tag>}
         </>
     )

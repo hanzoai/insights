@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconBalance, IconSend } from '@hanzo/icons'
 import { Banner, Button, Input, Select, Link } from '@hanzo/elements'
+import { IconBalance, IconSend } from '@hanzo/icons'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { Field } from 'lib/elements/Field'
@@ -220,18 +220,11 @@ export function LegalDocumentNewScene(): JSX.Element {
                         </Field>
 
                         <Field name="company_address" label="Company address">
-                            <Input
-                                id={FIELD_IDS.company_address}
-                                placeholder="1 Analytics Way, San Francisco, CA"
-                            />
+                            <Input id={FIELD_IDS.company_address} placeholder="1 Analytics Way, San Francisco, CA" />
                         </Field>
 
                         <Field name="representative_email" label="Signer email">
-                            <Input
-                                id={FIELD_IDS.representative_email}
-                                type="email"
-                                placeholder="jane@example.com"
-                            />
+                            <Input id={FIELD_IDS.representative_email} type="email" placeholder="jane@example.com" />
                         </Field>
 
                         {documentType === 'DPA' && (

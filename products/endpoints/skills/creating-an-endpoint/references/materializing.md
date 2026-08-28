@@ -10,7 +10,7 @@ detailed flow behind step 6 of `creating-an-endpoint` and the step 2 decision in
 | Signal                                                       | Means                                                                |
 | ------------------------------------------------------------ | -------------------------------------------------------------------- |
 | Endpoint is called more than ~10 times per minute, sustained | Reads will dominate cost — pre-computing saves a lot                 |
-| Query takes more than ~1s of Datastore time inline          | Latency on the read path matters; materialisation collapses it       |
+| Query takes more than ~1s of Datastore time inline           | Latency on the read path matters; materialisation collapses it       |
 | Callers can tolerate 5-15 minute staleness                   | The refresh interval becomes the freshness floor                     |
 | Variables are bounded — small known set of values            | Bucket overrides become tractable; the materialised view stays small |
 
@@ -42,7 +42,7 @@ rejection reasons:
 | `Query has unresolved variables`               | A variable in the query has no default and the materialisation can't pick a value                                                                                           | Set defaults for all variables                                                                |
 | `Query references non-deterministic functions` | `now()`, `today()`, `rand()` change between refresh runs                                                                                                                    | Replace with a `date_from` / `date_to` variable                                               |
 | `CTE variables with JOINs … not supported`     | A variable filter combined with a top-level `JOIN` changes joined-row cardinality, silently producing wrong results (e.g. `LEFT JOIN` non-matches lose the variable column) | Filter inside a subquery/CTE, then join the result — don't apply the variable across the JOIN |
-| `Query kind not supported`                     | Some query kinds (e.g. funnels) don't have a materialisation path yet                                                                                                       | Rewrite in InsightsQL                                                                              |
+| `Query kind not supported`                     | Some query kinds (e.g. funnels) don't have a materialisation path yet                                                                                                       | Rewrite in InsightsQL                                                                         |
 
 Always call `endpoints-materialization-preview` before enabling — it returns the exact
 rejection reason if any, plus the transformed query so the user can sanity-check what will be

@@ -70,8 +70,7 @@ export const getAPISteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                     />
                     <CalloutBox type="fyi" title="Learn more">
                         <Markdown>
-                            Read more about [person profiles](https://hanzo.ai/docs/data/persons) in our
-                            documentation.
+                            Read more about [person profiles](https://hanzo.ai/docs/data/persons) in our documentation.
                         </Markdown>
                     </CalloutBox>
                 </>

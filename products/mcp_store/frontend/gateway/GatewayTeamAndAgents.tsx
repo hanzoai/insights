@@ -1,8 +1,8 @@
 import { MakeLogicType, actions, kea, path, reducers, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconChevronRight, IconSparkles } from '@hanzo/icons'
 import { Button, Input, Switch, Table, Tag, ProfilePicture, Spinner } from '@hanzo/elements'
+import { IconChevronRight, IconSparkles } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

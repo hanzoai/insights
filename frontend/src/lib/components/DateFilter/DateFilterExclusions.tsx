@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { IconChevronRight } from '@hanzo/icons'
 import { Button, Divider, Switch, Popover } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
 import {
     type DateFilterExclusions,
@@ -89,10 +89,7 @@ export function DateFilterExclusions({
                                 })}
                             </div>
                             <div className="flex items-center justify-center gap-3">
-                                <Button
-                                    size="xsmall"
-                                    onClick={() => onChange({ ...exclusions, days: ['6', '7'] })}
-                                >
+                                <Button size="xsmall" onClick={() => onChange({ ...exclusions, days: ['6', '7'] })}>
                                     Weekends
                                 </Button>
                                 <Button

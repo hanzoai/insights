@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconFlag } from '@hanzo/icons'
 import { Button, Label, Snack, Tag } from '@hanzo/elements'
+import { IconFlag } from '@hanzo/icons'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { isPropertyFilterWithOperator } from 'lib/components/PropertyFilters/utils'

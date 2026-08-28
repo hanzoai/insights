@@ -1,7 +1,7 @@
 import { MOCK_DEFAULT_USER } from 'lib/api.mock'
 
-import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
+import { expectLogic } from 'kea-test-utils'
 
 import { toast } from 'lib/elements/Toast'
 import { userLogic } from 'scenes/userLogic'
@@ -231,9 +231,7 @@ describe('featurePreviewsLogic - submitConceptSurvey', () => {
 
         expect(mockCapture).not.toHaveBeenCalled()
         expect(mockUpdateEnrollment).not.toHaveBeenCalled()
-        expect(toast.error).toHaveBeenCalledWith(
-            "This feature isn't accepting sign-ups yet. Please try again later."
-        )
+        expect(toast.error).toHaveBeenCalledWith("This feature isn't accepting sign-ups yet. Please try again later.")
         await expectLogic(logic).toMatchValues({ conceptSurveySubmissions: {} })
     })
 

@@ -17,14 +17,14 @@ All findings below reference `master` as of this doc's creation.
 
 ## Verdict: none are cleanly answerable today
 
-| #   | Question                          | Answerable now? | Blocking gap                                                                                                                                                                                                                         |
-| --- | --------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | Re-visit own notebooks            | ❌              | No open/view event exists anywhere                                                                                                                                                                                                   |
-| 2   | Share notebooks                   | ❌              | No analytics event on actual share/enable/grant (only an interest CTA + activity-log rows)                                                                                                                                           |
-| 3   | Visit others' notebooks           | ❌              | No view event; no owner-vs-viewer property on any event                                                                                                                                                                              |
+| #   | Question                           | Answerable now? | Blocking gap                                                                                                                                                                                                                          |
+| --- | ---------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Re-visit own notebooks             | ❌              | No open/view event exists anywhere                                                                                                                                                                                                    |
+| 2   | Share notebooks                    | ❌              | No analytics event on actual share/enable/grant (only an interest CTA + activity-log rows)                                                                                                                                            |
+| 3   | Visit others' notebooks            | ❌              | No view event; no owner-vs-viewer property on any event                                                                                                                                                                               |
 | 4   | Max / Insights Desktop create rate | ❌              | `notebook created` is origin-agnostic; Max backend path emits no event. Insights Desktop creates via the MCP `notebooks-create` tool, so it shares the MCP path with Q5 — `creation_source: mcp` alone won't separate them (see note) |
-| 5   | MCP create rate                   | ❌              | MCP `notebooks-create` → DRF create → activity-log row only, no analytics event, no source marker                                                                                                                                    |
-| 6   | Problems → notebook               | ⚠️ DB-join only | Link exists via `short_id`→`AgentArtifact.conversation`→`Conversation.topic`, but not in event stream; fragile; absent for MCP                                                                                                       |
+| 5   | MCP create rate                    | ❌              | MCP `notebooks-create` → DRF create → activity-log row only, no analytics event, no source marker                                                                                                                                     |
+| 6   | Problems → notebook                | ⚠️ DB-join only | Link exists via `short_id`→`AgentArtifact.conversation`→`Conversation.topic`, but not in event stream; fragile; absent for MCP                                                                                                        |
 
 ## Current state (what exists today)
 
@@ -61,8 +61,8 @@ and `NotebookSerializer.create` (`products/notebooks/backend/presentation/views/
 | 2    | MCP `notebooks-create`        | same as 1 (`mcp/tools.yaml:33`)                                          | none      | same as 1                                 |
 | 3    | Max `create_notebook` tool    | `ee/hogai/tools/create_notebook/helpers.py:105-192` (`aupsert_notebook`) | **none**  | **none**                                  |
 | 4    | Max `upsert_account_notebook` | `products/customer_analytics/backend/max_tools.py:403`                   | none      | none                                      |
-| 5    | Anomaly investigation agent   | `insights/temporal/ai/anomaly_investigation/workflow.py:149`              | none      | none                                      |
-| 6    | Group notebook auto-create    | `ee/datastore/views/groups.py:873`                                      | none      | none                                      |
+| 5    | Anomaly investigation agent   | `insights/temporal/ai/anomaly_investigation/workflow.py:149`             | none      | none                                      |
+| 6    | Group notebook auto-create    | `ee/datastore/views/groups.py:873`                                       | none      | none                                      |
 
 The `Notebook` model (`products/notebooks/backend/models.py:19-64`) has **no origin/source
 field**. AI-created notebooks are attributed to the human user Max acts for and are
@@ -384,7 +384,7 @@ is even meaningful or just noise. Scope it as its own investigation.
 | Q1 re-visit own                                        | PR 1 (`is_creator = true` on `notebook opened`)                                                                                                                       |
 | Q2 share                                               | PR 3                                                                                                                                                                  |
 | Q3 visit others'                                       | PR 1 (`is_creator = false`)                                                                                                                                           |
-| Q4 Max / Insights Desktop create                        | PR 2 (`creation_source` + `mcp_client`/`api_key_type`)                                                                                                                |
+| Q4 Max / Insights Desktop create                       | PR 2 (`creation_source` + `mcp_client`/`api_key_type`)                                                                                                                |
 | Q5 MCP create                                          | PR 2 (`creation_source = mcp`)                                                                                                                                        |
 | Q6 problems → notebook                                 | PR 2 (`conversation_id` + `topic` on AI paths)                                                                                                                        |
 | Q7 agents read notebooks (+ AI-created consumed later) | PR 2e (`notebook read`, `read_source`) — REST/MCP reads, a lower bound; SQL `SELECT FROM notebooks` reads deferred to optional PR 5 (needs SQL-access analysis first) |

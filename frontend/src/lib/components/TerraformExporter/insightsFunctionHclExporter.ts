@@ -1,6 +1,11 @@
 import { formatJsonForHcl } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
-import { CyclotronJobFiltersType, CyclotronJobInputType, InsightsFunctionMappingType, InsightsFunctionType } from '~/types'
+import {
+    CyclotronJobFiltersType,
+    CyclotronJobInputType,
+    InsightsFunctionMappingType,
+    InsightsFunctionType,
+} from '~/types'
 
 import { FieldMapping, HclExportOptions, HclExportResult, ResourceExporter, generateHCL } from './hclExporter'
 
@@ -15,7 +20,10 @@ export interface InsightsFunctionHclExportOptions extends HclExportOptions {
 /**
  * @see https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/insights_function
  */
-const INSIGHTS_FUNCTION_FIELD_MAPPINGS: FieldMapping<Partial<InsightsFunctionType>, InsightsFunctionHclExportOptions>[] = [
+const INSIGHTS_FUNCTION_FIELD_MAPPINGS: FieldMapping<
+    Partial<InsightsFunctionType>,
+    InsightsFunctionHclExportOptions
+>[] = [
     {
         source: 'name',
         target: 'name',

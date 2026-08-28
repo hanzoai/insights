@@ -5,13 +5,13 @@ import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { Snack } from 'lib/elements/Snack/Snack'
 import { Popover } from 'lib/elements/Popover/Popover'
+import { Snack } from 'lib/elements/Snack/Snack'
 
 export interface PropertySelectProps {
     addText: string

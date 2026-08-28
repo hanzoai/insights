@@ -20,12 +20,7 @@ describe('Dropdown', () => {
         const onVisibilityChange = jest.fn()
 
         render(
-            <Dropdown
-                trigger="hover"
-                startVisible
-                onVisibilityChange={onVisibilityChange}
-                overlay={<div>Menu</div>}
-            >
+            <Dropdown trigger="hover" startVisible onVisibilityChange={onVisibilityChange} overlay={<div>Menu</div>}>
                 <button>Open</button>
             </Dropdown>
         )

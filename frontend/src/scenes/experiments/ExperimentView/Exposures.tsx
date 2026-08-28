@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconCheckCircle, IconCorrelationAnalysis, IconInfo, IconPencil, IconWarning } from '@hanzo/icons'
 import { Button, Collapse, Table, Tag, Spinner, Tooltip } from '@hanzo/elements'
+import { IconCheckCircle, IconCorrelationAnalysis, IconInfo, IconPencil, IconWarning } from '@hanzo/icons'
 import {
     LineChart,
     type LineChartConfig,

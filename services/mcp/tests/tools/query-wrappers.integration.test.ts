@@ -229,7 +229,9 @@ describe('Query Wrapper Integration Tests', { concurrent: false }, () => {
             // Paths demo data can have pageviews without a path edge in the selected window.
             expect(typeof result.results).toBe('object')
             expect(typeof result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toBe('string')
-            expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toMatch(/\||No data recorded for this time period\./)
+            expect(result[INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]).toMatch(
+                /\||No data recorded for this time period\./
+            )
         })
 
         it('should execute a paths query with start point', async () => {

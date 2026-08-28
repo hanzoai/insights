@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGlobe } from '@hanzo/icons'
 import { Input, Tag } from '@hanzo/elements'
+import { IconGlobe } from '@hanzo/icons'
 
 import { productTourLogic } from '../productTourLogic'
 

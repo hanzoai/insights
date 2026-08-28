@@ -82,11 +82,7 @@ function timeStateToButtonProps(state: CalendarTimeState, opts: GetTimeStateOpts
     }
 }
 
-function dateStateToButtonProps(
-    state: CalendarDateState,
-    defaultProps: ButtonProps,
-    dayIndex: number
-): ButtonProps {
+function dateStateToButtonProps(state: CalendarDateState, defaultProps: ButtonProps, dayIndex: number): ButtonProps {
     const props: ButtonProps = { ...defaultProps, disabledReason: state.disabledReason }
     const isFirstDayOfWeek = dayIndex === 0
     const isLastDayOfWeek = dayIndex === 6
@@ -156,10 +152,7 @@ export const Calendar = forwardRef(function Calendar(
     return (
         <div
             ref={ref}
-            className={clsx(
-                'Calendar relative flex items-start gap-4 tabular-nums',
-                `Calendar--${granularity}`
-            )}
+            className={clsx('Calendar relative flex items-start gap-4 tabular-nums', `Calendar--${granularity}`)}
             data-attr="lemon-calendar"
         >
             {range(0, months).map((month) => {

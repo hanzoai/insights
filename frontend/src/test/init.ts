@@ -1,8 +1,8 @@
 import { MOCK_DEFAULT_ORGANIZATION, MOCK_DEFAULT_PROJECT, MOCK_DEFAULT_TEAM, MOCK_DEFAULT_USER } from 'lib/api.mock'
 
 import { createMemoryHistory } from 'history'
-import { testUtilsPlugin } from 'kea-test-utils'
 import insights from 'insights-js'
+import { testUtilsPlugin } from 'kea-test-utils'
 
 import { dayjs } from 'lib/dayjs'
 import { organizationLogic } from 'scenes/organizationLogic'

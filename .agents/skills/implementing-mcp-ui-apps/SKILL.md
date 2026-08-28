@@ -181,7 +181,7 @@ Renders one entity using a view component wrapped in `AppWrapper`.
 
 | Field              | Default                           | Description                                                                                              |
 | ------------------ | --------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `app_name`         | `"Insights " + titleCase(key)`     | Display name shown in the MCP client. Example: key `error-details` → `"Insights Error Details"`.          |
+| `app_name`         | `"Insights " + titleCase(key)`    | Display name shown in the MCP client. Example: key `error-details` → `"Insights Error Details"`.         |
 | `description`      | `titleCase(key) + " detail view"` | Short description for the MCP resource registry.                                                         |
 | `component_import` | `products/{product}/mcp/apps`     | Import path for the view component. Auto-derived from the YAML file's location in the product directory. |
 | `data_type`        | `PascalCase(key) + "Data"`        | TypeScript type for the tool result. Example: key `error-details` → `ErrorDetailsData`.                  |
@@ -233,7 +233,7 @@ message if the MCP client doesn't support tool calls from apps.
 
 | Field              | Default                                | Description                                                                           |
 | ------------------ | -------------------------------------- | ------------------------------------------------------------------------------------- |
-| `app_name`         | `"Insights " + titleCase(key)`          | Display name.                                                                         |
+| `app_name`         | `"Insights " + titleCase(key)`         | Display name.                                                                         |
 | `description`      | `titleCase(key) + " view"`             | Short description.                                                                    |
 | `component_import` | `products/{product}/mcp/apps`          | Import path.                                                                          |
 | `list_data_type`   | `PascalCase(singularKey) + "ListData"` | TypeScript type for the list response. Example: key `action-list` → `ActionListData`. |

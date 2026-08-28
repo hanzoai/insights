@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import React, { useMemo, useState } from 'react'
 
-import { IconCollapse, IconExpand, IconEye, IconHide, IconWarning } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconEye, IconHide, IconWarning } from '@hanzo/icons'
 
 import {
     InsightBreakdownSummary,
@@ -128,13 +128,7 @@ export const VisualizationWidget = React.memo(function VisualizationWidget({
                 <div className="flex items-center gap-1.5">
                     {extraActions}
                     {openUrl && (
-                        <Button
-                            to={openUrl}
-                            targetBlank
-                            icon={<IconOpenInNew />}
-                            size="xsmall"
-                            tooltip={openTooltip}
-                        />
+                        <Button to={openUrl} targetBlank icon={<IconOpenInNew />} size="xsmall" tooltip={openTooltip} />
                     )}
                     <Button
                         icon={isCollapsed ? <IconEye /> : <IconHide />}

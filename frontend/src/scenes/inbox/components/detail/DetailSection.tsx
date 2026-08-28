@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react'
 
-import { IconCollapse, IconExpand } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCollapse, IconExpand } from '@hanzo/icons'
 
 interface DetailSectionProps {
     icon: ReactNode

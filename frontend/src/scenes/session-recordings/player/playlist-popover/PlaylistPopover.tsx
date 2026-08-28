@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconPin, IconPlus } from '@hanzo/icons'
 import { Checkbox, Divider } from '@hanzo/elements'
+import { IconPin, IconPlus } from '@hanzo/icons'
 
-import { IconOpenInNew, IconWithCount } from 'lib/elements/icons'
 import { Button, ButtonProps } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
+import { IconOpenInNew, IconWithCount } from 'lib/elements/icons'
 import { Input } from 'lib/elements/Input/Input'
-import { Skeleton } from 'lib/elements/Skeleton'
 import { Popover } from 'lib/elements/Popover'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { Spinner } from 'lib/elements/Spinner'
 import { urls } from 'scenes/urls'
 

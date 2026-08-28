@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
+import { Button, Card, Input, Modal, SegmentedButton, Tag, TagType, TextArea, Tooltip } from '@hanzo/elements'
 import { IconExpand45, IconPencil, IconRevert } from '@hanzo/icons'
-import {
-    Button,
-    Card,
-    Input,
-    Modal,
-    SegmentedButton,
-    Tag,
-    TagType,
-    TextArea,
-    Tooltip,
-} from '@hanzo/elements'
 
 import MonacoDiffEditor from 'lib/components/MonacoDiffEditor'
 import { objectsEqual } from 'lib/utils/objects'

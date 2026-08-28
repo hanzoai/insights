@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { IconWarning } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
-import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { IconOpenInNew } from 'lib/elements/icons'
 import { Table, TableColumns } from 'lib/elements/Table'
+import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { pluralize } from 'lib/utils/strings'
 import { EnvironmentConfigOption, preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconWarning } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { propertyDefinitionsModel } from '~/models/propertyDefinitionsModel'
 import { PropertyDefinitionType } from '~/types'

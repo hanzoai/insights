@@ -19,10 +19,7 @@ export const createOrganizationOption = (org: OrganizationOption): InputSelectOp
     ),
 })
 
-export const createTeamOption = (
-    team: TeamOption,
-    organizations: OrganizationOption[]
-): InputSelectOption<string> => {
+export const createTeamOption = (team: TeamOption, organizations: OrganizationOption[]): InputSelectOption<string> => {
     const orgName = organizations.find((org) => org.id === team.organization)?.name
     const displayLabel = organizations.length > 1 && orgName ? `${orgName} / ${team.name}` : team.name
 

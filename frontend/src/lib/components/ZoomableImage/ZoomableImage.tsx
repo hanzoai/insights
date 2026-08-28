@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconMinus, IconPlus, IconRefresh } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconMinus, IconPlus, IconRefresh } from '@hanzo/icons'
 
 const MIN_SCALE = 1
 const MAX_SCALE = 8

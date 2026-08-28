@@ -72,9 +72,7 @@ export function AnalyticsStep(): JSX.Element {
                 </div>
             </div>
 
-            <Banner type="info">
-                You can always refine your analytics configuration and metrics after saving.
-            </Banner>
+            <Banner type="info">You can always refine your analytics configuration and metrics after saving.</Banner>
         </div>
     )
 }

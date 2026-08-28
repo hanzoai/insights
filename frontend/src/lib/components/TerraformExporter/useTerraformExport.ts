@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { teamLogic } from 'scenes/teamLogic'
@@ -72,7 +72,11 @@ async function fetchInsightsFunctionsForAlerts(alerts: AlertType[]): Promise<Map
             return { alertId: alert.id, insightsFunctions: response.results }
         } catch (e) {
             insights.captureException(e instanceof Error ? e : new Error(String(e)), {
-                extra: { context: 'TerraformExporter', operation: 'fetchInsightsFunctionsForAlerts', alertId: alert.id },
+                extra: {
+                    context: 'TerraformExporter',
+                    operation: 'fetchInsightsFunctionsForAlerts',
+                    alertId: alert.id,
+                },
             })
             return { alertId: alert.id, insightsFunctions: [] }
         }

@@ -1,5 +1,5 @@
-import { IconPullRequest, IconX as IconXCircle } from '@hanzo/icons'
 import { Tag, TagType } from '@hanzo/elements'
+import { IconPullRequest, IconX as IconXCircle } from '@hanzo/icons'
 
 import { PRState } from '../scenes/engineeringAnalyticsLogic'
 

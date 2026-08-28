@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconBug, IconCursorClick, IconGlobe, IconKeyboard } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
 import type { TagType } from '@hanzo/elements'
+import { IconBug, IconCursorClick, IconGlobe, IconKeyboard } from '@hanzo/icons'
 
 import { sessionRecordingInfoLogic } from 'lib/components/ViewRecordingButton/sessionRecordingInfoLogic'
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'

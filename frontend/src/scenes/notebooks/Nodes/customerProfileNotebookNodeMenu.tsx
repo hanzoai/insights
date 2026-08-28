@@ -1,5 +1,5 @@
-import { IconX } from '@hanzo/icons'
 import type { MenuItem } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { customerProfileLogic } from 'products/customer_analytics/frontend/customerProfileLogic'
 

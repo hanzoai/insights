@@ -1,9 +1,9 @@
-import { BindLogic, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconArrowLeft, IconArrowRight } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowLeft, IconArrowRight } from '@hanzo/icons'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 

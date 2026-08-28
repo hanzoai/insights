@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPeople } from '@hanzo/icons'
 import { Table, TableColumns, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconPeople } from '@hanzo/icons'
 import { TimeSeriesLineChart, useChartTheme } from '@hanzo/quill-charts'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

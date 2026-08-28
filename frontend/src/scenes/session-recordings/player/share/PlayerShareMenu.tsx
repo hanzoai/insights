@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal, IconGlobe, IconShare, IconShield } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
+import { IconExternal, IconGlobe, IconShare, IconShield } from '@hanzo/icons'
 
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { newInternalTab } from 'lib/utils/newInternalTab'

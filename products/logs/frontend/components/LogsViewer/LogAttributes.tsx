@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFilter, IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
 import { Button, Table } from '@hanzo/elements'
+import { IconFilter, IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import ViewRecordingButton, {

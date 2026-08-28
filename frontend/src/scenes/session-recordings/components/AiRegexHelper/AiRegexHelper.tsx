@@ -1,11 +1,11 @@
+import insights from 'insights-js'
 /**
  * @fileoverview A component that helps you to generate regex for your settings using Max AI
  */
 import { useActions, useValues } from 'kea'
-import insights from 'insights-js'
 
-import { IconAI, IconCopy, IconPlus } from '@hanzo/icons'
 import { Banner, Button, Modal, TextArea } from '@hanzo/elements'
+import { IconAI, IconCopy, IconPlus } from '@hanzo/icons'
 
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'

@@ -16,8 +16,8 @@ export type ProgressProps = React.HTMLAttributes<HTMLDivElement> & {
     className?: string
 }
 
-export const Progress: React.FunctionComponent<ProgressProps & React.RefAttributes<HTMLDivElement>> =
-    forwardRef(function Progress(
+export const Progress: React.FunctionComponent<ProgressProps & React.RefAttributes<HTMLDivElement>> = forwardRef(
+    function Progress(
         {
             size = 'medium',
             percent,
@@ -57,4 +57,5 @@ export const Progress: React.FunctionComponent<ProgressProps & React.RefAttribut
                 </span>
             </div>
         )
-    })
+    }
+)

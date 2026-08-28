@@ -104,9 +104,9 @@ pub struct PostgresRouter {
 
 ### Routing rules
 
-| Tables                                                                              | Pool            |
-| ----------------------------------------------------------------------------------- | --------------- |
-| `insights_person`, `insights_persondistinctid`, `insights_featureflaghashkeyoverride`  | `persons_*`     |
+| Tables                                                                                  | Pool            |
+| --------------------------------------------------------------------------------------- | --------------- |
+| `insights_person`, `insights_persondistinctid`, `insights_featureflaghashkeyoverride`   | `persons_*`     |
 | `insights_featureflag`, `insights_team`, `insights_grouptypemapping`, `insights_cohort` | `non_persons_*` |
 
 **Note:** `cohort_membership` queries bypass `PostgresRouter` entirely. They are served by the `behavioral_cohorts` pool on `DatabasePools`, accessed directly via `DatabasePools.behavioral_cohorts_reader`. See [Architecture overview](#architecture-overview).

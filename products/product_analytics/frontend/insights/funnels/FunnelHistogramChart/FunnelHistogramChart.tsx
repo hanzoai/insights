@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useMemo, type ErrorInfo } from 'react'
 
 import { BarChart, ValueLabels } from '@hanzo/quill-charts'

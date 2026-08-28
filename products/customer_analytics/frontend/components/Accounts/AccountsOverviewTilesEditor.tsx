@@ -5,8 +5,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconPlus, IconX } from '@hanzo/icons'
 import { Button, Input, Modal, Select } from '@hanzo/elements'
+import { IconPlus, IconX } from '@hanzo/icons'
 
 import { SortableDragIcon } from 'lib/elements/icons'
 import { Tooltip } from 'lib/elements/Tooltip'

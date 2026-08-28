@@ -1,5 +1,5 @@
-import { IconClock, IconLive } from '@hanzo/icons'
 import { SelectOptions, Tag } from '@hanzo/elements'
+import { IconClock, IconLive } from '@hanzo/icons'
 
 import { InsightsFunctionDeliveryType, getInsightsFunctionDeliveryType } from '../script-function-utils'
 

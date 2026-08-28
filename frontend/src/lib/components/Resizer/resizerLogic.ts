@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, beforeUnmount, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, beforeUnmount, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 
 export type ResizerEvent = {
     desiredSize: number

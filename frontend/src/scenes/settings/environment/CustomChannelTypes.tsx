@@ -10,8 +10,8 @@ import { VerticalNestedDND } from 'lib/components/VerticalNestedDND/VerticalNest
 import { TeamMembershipLevel } from 'lib/constants'
 import { Button } from 'lib/elements/Button'
 import { InputSelect, InputSelectOption } from 'lib/elements/InputSelect'
-import { Select } from 'lib/elements/Select'
 import { Link } from 'lib/elements/Link'
+import { Select } from 'lib/elements/Select'
 import { uuid } from 'lib/utils/dom'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { UnexpectedNeverError } from 'lib/utils/guards'
@@ -160,9 +160,7 @@ export function CustomChannelTypes(): JSX.Element {
             <p>
                 You can create custom channel types by defining rules that match incoming events. The first matching
                 rule is used, and if no rule matches (or if none are defined) then the{' '}
-                <Link to="https://hanzo.ai/docs/data/channel-type#channel-type-calculation">
-                    default channel type
-                </Link>{' '}
+                <Link to="https://hanzo.ai/docs/data/channel-type#channel-type-calculation">default channel type</Link>{' '}
                 is used.
             </p>
             <p>

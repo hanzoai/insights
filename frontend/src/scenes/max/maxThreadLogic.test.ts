@@ -1,9 +1,9 @@
 import { MOCK_DEFAULT_BASIC_USER } from 'lib/api.mock'
 
+import insights from 'insights-js'
 import { router } from 'kea-router'
 import { partial } from 'kea-test-utils'
 import { expectLogic } from 'kea-test-utils'
-import insights from 'insights-js'
 import React from 'react'
 
 import api, { ApiError } from 'lib/api'

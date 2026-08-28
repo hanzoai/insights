@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Banner, Button, SpinnerOverlay } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'

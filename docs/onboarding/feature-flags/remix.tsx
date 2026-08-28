@@ -31,8 +31,8 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Use `insights-node` to evaluate feature flags on the server. Initialize Insights in your API route
-                        or loader:
+                        Use `insights-node` to evaluate feature flags on the server. Initialize Insights in your API
+                        route or loader:
                     </Markdown>
                     <CodeBlock
                         blocks={[

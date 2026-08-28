@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { combineUrl } from 'kea-router/lib/utils'
 
-import { IconCheck, IconX } from '@hanzo/icons'
 import { Link, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconX } from '@hanzo/icons'
 
 import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'

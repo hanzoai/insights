@@ -53,11 +53,7 @@ describe('featureFlagLogic', () => {
      * the rule does not inspect. This one needs the verdict per call, so it lives in a
      * named helper and the rule applies. There is no React tree in this file at all.
      */
-    async function mountFlags(
-        verdict: any,
-        persisted: string[] = [],
-        anonymous = false
-    ): Promise<jest.SpyInstance> {
+    async function mountFlags(verdict: any, persisted: string[] = [], anonymous = false): Promise<jest.SpyInstance> {
         // The directive is the line IMMEDIATELY above the call, and nothing may come
         // between them. `-next-line` covers exactly one line, so the explanation lives
         // in the docblock above rather than here — parked between the two, it disabled

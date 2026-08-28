@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArchive, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArchive, IconX } from '@hanzo/icons'
 
 import { inboxBulkActionsLogic } from '../../logics/inboxBulkActionsLogic'
 import { openDismissReportDialog } from './DismissReportDialog'

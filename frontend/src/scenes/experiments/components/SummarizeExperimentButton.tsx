@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import { addProductIntent } from 'lib/utils/product-intents'
 import { useMaxTool } from 'scenes/max/useMaxTool'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@hanzo/icons'
 import { Banner, Button, Select, Skeleton, Switch, Link } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
@@ -128,11 +128,7 @@ export function CustomerAnalyticsEventStream(): JSX.Element {
                 )}
 
             <div className="flex flex-row gap-2 pt-2">
-                <Button
-                    type="secondary"
-                    onClick={resetDraft}
-                    disabledReason={hasChanges ? undefined : 'No changes'}
-                >
+                <Button type="secondary" onClick={resetDraft} disabledReason={hasChanges ? undefined : 'No changes'}>
                     Clear changes
                 </Button>
                 <Button

@@ -24,20 +24,20 @@
 name: names
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
+    push:
+        branches: [main]
+    pull_request:
+    workflow_dispatch:
 
 jobs:
-  tables:
-    runs-on: hanzo-build-linux-amd64
-    steps:
-      - uses: actions/checkout@v4
+    tables:
+        runs-on: hanzo-build-linux-amd64
+        steps:
+            - uses: actions/checkout@v4
 
-      # No dependencies and no services on purpose. bin/tables is stdlib-only —
-      # it reads source, it does not import the modules it reads — so this job
-      # cannot be broken by a database, a settings module or a driver, and it
-      # runs the same on a laptop as it does here.
-      - name: Refuse a version-suffixed table name
-        run: python3 bin/tables --check
+            # No dependencies and no services on purpose. bin/tables is stdlib-only —
+            # it reads source, it does not import the modules it reads — so this job
+            # cannot be broken by a database, a settings module or a driver, and it
+            # runs the same on a laptop as it does here.
+            - name: Refuse a version-suffixed table name
+              run: python3 bin/tables --check

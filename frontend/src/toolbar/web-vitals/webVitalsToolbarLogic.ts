@@ -1,7 +1,7 @@
+import type { Insights } from 'insights-js/dist/module'
 import { MakeLogicType, actions, afterMount, connect, kea, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
-import type { Insights } from 'insights-js/dist/module'
 
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'

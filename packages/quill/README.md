@@ -6,8 +6,8 @@ A React component library powering Insights's unified UI surfaces (web, MCP, ele
 
 Quill publishes two independent packages to npm. Everything else in `packages/quill/packages/*` is internal workspace infrastructure and never ships.
 
-| Package                 | Description                                                                                                                                                         |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package               | Description                                                                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@hanzo/quill`        | The library — React components, bundled types, and three small CSS files that wire quill into your Tailwind build. Install this.                                    |
 | `@hanzo/quill-tokens` | Typed JavaScript exports of the design tokens (semantic colors, spacing, shadows, etc.) for consumers who want programmatic access outside of components. Optional. |
 

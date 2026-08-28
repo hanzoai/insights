@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFilter } from '@hanzo/icons'
 import { Button, Checkbox, Divider, Table, Tag, Link, Spinner } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { NODE_TYPE_TAG_SETTINGS } from 'scenes/models/nodeDetailConstants'

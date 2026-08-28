@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { IconCopy, IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
 import { Button, Dropdown } from '@hanzo/elements'
+import { IconCopy, IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
 
 import { IconTableChart } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

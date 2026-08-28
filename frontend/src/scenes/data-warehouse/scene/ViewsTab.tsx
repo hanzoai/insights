@@ -142,12 +142,7 @@ export function ViewsTab({ getViewUrl }: ViewsTabProps = {}): JSX.Element {
             ) : null}
             {(filteredViews.length > 0 || filteredMaterializedViews.length > 0 || searchTerm) && (
                 <div className="flex gap-2 justify-between items-center">
-                    <Input
-                        type="search"
-                        placeholder="Search views..."
-                        onChange={setSearchTerm}
-                        value={searchTerm}
-                    />
+                    <Input type="search" placeholder="Search views..." onChange={setSearchTerm} value={searchTerm} />
                 </div>
             )}
 
@@ -238,11 +233,7 @@ export function ViewsTab({ getViewUrl }: ViewsTabProps = {}): JSX.Element {
                                             </Tooltip>
                                         )
                                     }
-                                    return (
-                                        <Tag type={STATUS_TAG_SETTINGS[view.status] || 'default'}>
-                                            {view.status}
-                                        </Tag>
-                                    )
+                                    return <Tag type={STATUS_TAG_SETTINGS[view.status] || 'default'}>{view.status}</Tag>
                                 },
                             },
                             {

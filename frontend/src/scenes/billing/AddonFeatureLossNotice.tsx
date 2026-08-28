@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useState } from 'react'
 
 import { Banner } from '@hanzo/elements'

@@ -1,5 +1,5 @@
-import { IconCheckCircle, IconX } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconCheckCircle, IconX } from '@hanzo/icons'
 
 import { BillingFeatureType } from '~/types'
 

@@ -1,16 +1,16 @@
 import { MakeLogicType, actions, connect, kea, path, props, reducers, selectors, useActions, useValues } from 'kea'
 import { urlToAction } from 'kea-router'
 
-import { IconApple, IconAndroid, IconLetter, IconPlusSmall } from '@hanzo/icons'
 import { Banner, Button, Menu, MenuItems, Tag } from '@hanzo/elements'
+import { IconApple, IconAndroid, IconLetter, IconPlusSmall } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { FEATURE_FLAGS, TeamMembershipLevel } from 'lib/constants'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { IconSlack, IconTwilio } from 'lib/elements/icons'
 import { Tab, Tabs } from 'lib/elements/Tabs'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { trackedActionToUrl } from 'lib/logic/scenes/trackedActionToUrl'
 import { addProductIntent } from 'lib/utils/product-intents'

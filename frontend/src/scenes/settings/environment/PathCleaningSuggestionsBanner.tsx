@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Banner, Button, Modal, Spinner } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

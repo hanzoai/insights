@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { IconLogomark } from '@hanzo/icons'
 import { Card } from '@hanzo/elements'
+import { IconLogomark } from '@hanzo/icons'
 
 import { ErrorPropertiesLogicProps, errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
 import { ErrorEventType } from 'lib/components/Errors/types'

@@ -8,8 +8,8 @@ import { useSecondRender } from 'lib/hooks/useSecondRender'
 
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
 import { ToolbarContainer } from '~/toolbar/ToolbarContainer'
-import { toolbarLogger } from '~/toolbar/toolbarLogger'
 import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
+import { toolbarLogger } from '~/toolbar/toolbarLogger'
 import { ToolbarProps } from '~/types'
 
 import { TOOLBAR_ID } from './utils'

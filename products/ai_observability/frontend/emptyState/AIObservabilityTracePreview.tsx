@@ -1,6 +1,6 @@
 import type { ProductEmptyStateMode } from 'lib/components/ProductEmptyState/types'
-import { Tag } from 'lib/elements/Tag'
 import { Spinner } from 'lib/elements/Spinner'
+import { Tag } from 'lib/elements/Tag'
 
 import slackLogo from 'public/services/slack.png'
 

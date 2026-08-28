@@ -132,11 +132,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -172,9 +168,7 @@
                                     "rows": [
                                         {
                                             "id": "hRyXdBXlFw",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -198,10 +192,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -430,11 +421,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -470,9 +457,7 @@
                                     "rows": [
                                         {
                                             "id": "raAlZJvm2u",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -496,10 +481,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -728,11 +710,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -782,9 +760,7 @@
                                     "rows": [
                                         {
                                             "id": "rEPj_az68m",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -808,10 +784,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""

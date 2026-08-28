@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCopy, IconEllipsis, IconPencil, IconStack, IconTarget, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Dropdown, Menu, Tag, Tooltip } from '@hanzo/elements'
+import { IconCopy, IconEllipsis, IconPencil, IconStack, IconTarget, IconTrash } from '@hanzo/icons'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Spinner } from 'lib/elements/Spinner'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { experimentMetricsLogic } from 'scenes/experiments/experimentMetricsLogic'
 import { isMetricThresholdCueVisible } from 'scenes/experiments/ExperimentMetricThreshold'
 import {

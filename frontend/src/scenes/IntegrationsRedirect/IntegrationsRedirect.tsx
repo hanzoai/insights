@@ -1,5 +1,5 @@
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
 export const scene: SceneExport = {

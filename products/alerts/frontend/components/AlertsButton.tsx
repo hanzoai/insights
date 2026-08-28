@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconBell } from '@hanzo/icons'
 import { Button, ButtonProps } from '@hanzo/elements'
+import { IconBell } from '@hanzo/icons'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { IconWithCount } from 'lib/elements/icons'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { urls } from 'scenes/urls'
 
 import { InsightLogicProps, QueryBasedInsightModel } from '~/types'

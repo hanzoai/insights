@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSearch, IconSparkles } from '@hanzo/icons'
 import { Button, Input, Table, Tag, Link } from '@hanzo/elements'
+import { IconSearch, IconSparkles } from '@hanzo/icons'
 
 import { TableLink } from 'lib/elements/Table/TableLink'
 import { cn } from 'lib/utils/css-classes'

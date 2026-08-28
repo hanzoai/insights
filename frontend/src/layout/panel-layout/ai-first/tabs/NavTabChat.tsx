@@ -3,8 +3,8 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 import { useId, useMemo, useState } from 'react'
 
-import { IconPlusSmall, IconSearch, IconX } from '@hanzo/icons'
 import { Skeleton, Tooltip } from '@hanzo/elements'
+import { IconPlusSmall, IconSearch, IconX } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { Link } from 'lib/elements/Link'

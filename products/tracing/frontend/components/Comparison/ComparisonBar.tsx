@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 

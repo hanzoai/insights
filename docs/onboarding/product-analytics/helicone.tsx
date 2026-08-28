@@ -24,8 +24,8 @@ export const getHeliconeSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                     <Markdown>
                         Similar to how you add a [Helicone-Auth
                         header](https://docs.helicone.ai/helicone-headers/header-directory#supported-headers) when
-                        installing Helicone, add two new headers **Helicone-Insights-Key** and **Helicone-Insights-Host**
-                        with your Insights details:
+                        installing Helicone, add two new headers **Helicone-Insights-Key** and
+                        **Helicone-Insights-Host** with your Insights details:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -48,7 +48,9 @@ export const getHeliconeSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                             },
                         ]}
                     />
-                    <Markdown>Helicone events will now be exported into Insights as soon as they're available.</Markdown>
+                    <Markdown>
+                        Helicone events will now be exported into Insights as soon as they're available.
+                    </Markdown>
                 </>
             ),
         },

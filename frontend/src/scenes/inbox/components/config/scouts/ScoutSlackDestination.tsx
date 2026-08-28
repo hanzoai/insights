@@ -1,7 +1,7 @@
 import { useMountedLogic, useValues } from 'kea'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, Select, Link } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'

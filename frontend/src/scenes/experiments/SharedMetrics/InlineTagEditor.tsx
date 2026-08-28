@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconPencil, IconPlus } from '@hanzo/icons'
 import { Dropdown, InputSelect, Tag } from '@hanzo/elements'
+import { IconPencil, IconPlus } from '@hanzo/icons'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { Spinner } from 'lib/elements/Spinner'

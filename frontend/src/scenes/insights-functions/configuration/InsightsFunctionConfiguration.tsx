@@ -6,15 +6,7 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import {
-    Banner,
-    Button,
-    Dropdown,
-    Label,
-    Switch,
-    Tag,
-    SpinnerOverlay,
-} from '@hanzo/elements'
+import { Banner, Button, Dropdown, Label, Switch, Tag, SpinnerOverlay } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { Field } from 'lib/elements/Field'
@@ -27,9 +19,9 @@ import { SurveyResponseKeysReference } from 'scenes/surveys/components/SurveyRes
 import { useAttachedContext, useToolStreamListener } from 'products/insights_ai/frontend/api/logics'
 import { resolveToolCall } from 'products/insights_ai/frontend/api/tools'
 
-import { humanizeInsightsFunctionType } from '../script-function-utils'
 import { InsightsFunctionStatusIndicator } from '../misc/InsightsFunctionStatusIndicator'
 import { InsightsFunctionStatusTag } from '../misc/InsightsFunctionStatusTag'
+import { humanizeInsightsFunctionType } from '../script-function-utils'
 import { InsightsFunctionCode } from './components/InsightsFunctionCode'
 import {
     InsightsFunctionConfigurationClearChangesButton,
@@ -159,9 +151,9 @@ export function InsightsFunctionConfiguration({
                     <div>
                         <Banner type="warning">
                             <p>
-                                This {humanizeInsightsFunctionType(type)} is currently in an experimental state. For many
-                                cases this will work just fine but for others there may be unexpected issues and we do
-                                not offer official customer support for it in these cases.
+                                This {humanizeInsightsFunctionType(type)} is currently in an experimental state. For
+                                many cases this will work just fine but for others there may be unexpected issues and we
+                                do not offer official customer support for it in these cases.
                             </p>
                             {['template-reddit-conversions-api', 'template-snapchat-ads'].includes(
                                 templateId ?? insightsFunction?.template?.id ?? ''
@@ -191,7 +183,9 @@ export function InsightsFunctionConfiguration({
                             <div className={clsx('p-3 rounded border deprecated-space-y-2 bg-surface-primary')}>
                                 <div className="flex items-center justify-between">
                                     <Label>Status</Label>
-                                    {insightsFunction && <InsightsFunctionStatusIndicator insightsFunction={insightsFunction} />}
+                                    {insightsFunction && (
+                                        <InsightsFunctionStatusIndicator insightsFunction={insightsFunction} />
+                                    )}
                                 </div>
                                 <Field name="enabled">
                                     {({ value, onChange }) => (

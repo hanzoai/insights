@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSearch } from '@hanzo/icons'
 import { Button, Checkbox, Input, Snack, Table } from '@hanzo/elements'
+import { IconSearch } from '@hanzo/icons'
 
 import { LOGS_PORTION_LIMIT } from 'lib/constants'
 import { pluralize } from 'lib/utils/strings'

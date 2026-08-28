@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { Children, ComponentProps, MouseEvent, ReactNode, useContext, useEffect } from 'react'
 
 import { IconExternal, IconSidePanel, IconSparkles } from '@hanzo/icons'

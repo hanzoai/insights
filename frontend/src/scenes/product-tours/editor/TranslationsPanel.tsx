@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconCopy, IconTrash } from '@hanzo/icons'
 import { Button, Tag, Link } from '@hanzo/elements'
+import { IconCopy, IconTrash } from '@hanzo/icons'
 
 import { InputSelect, InputSelectOption } from 'lib/elements/InputSelect/InputSelect'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

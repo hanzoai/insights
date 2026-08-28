@@ -3,8 +3,8 @@ import { BindLogic, BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useCallback, useRef, useState } from 'react'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { ExportButton } from 'lib/components/ExportButton/ExportButton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'

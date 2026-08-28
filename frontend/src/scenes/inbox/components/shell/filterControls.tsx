@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconCheck, IconChevronDown } from '@hanzo/icons'
 import { Dropdown } from '@hanzo/elements'
+import { IconCheck, IconChevronDown } from '@hanzo/icons'
 
 /** A single filter trigger + dropdown overlay, matching desktop's `InboxFilterPopover`. */
 export function FilterPopover({

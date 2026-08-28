@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconMegaphone, IconPlusSmall } from '@hanzo/icons'
 import { Button, Input, Select, Table, Link } from '@hanzo/elements'
+import { IconMegaphone, IconPlusSmall } from '@hanzo/icons'
 
 import { TableLink } from 'lib/elements/Table/TableLink'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
@@ -16,7 +16,10 @@ import { InsightsFunctionIcon } from '../configuration/InsightsFunctionIcon'
 import { InsightsFunctionStatusTag } from '../misc/InsightsFunctionStatusTag'
 import { DELIVERY_TYPE_FILTER_OPTIONS, DeliveryTypeTag } from './DeliveryTypeTag'
 import { insightsFunctionRequestModalLogic } from './insightsFunctionRequestModalLogic'
-import { InsightsFunctionTemplateListLogicProps, insightsFunctionTemplateListLogic } from './insightsFunctionTemplateListLogic'
+import {
+    InsightsFunctionTemplateListLogicProps,
+    insightsFunctionTemplateListLogic,
+} from './insightsFunctionTemplateListLogic'
 
 export function InsightsFunctionTemplateList({
     extraControls,

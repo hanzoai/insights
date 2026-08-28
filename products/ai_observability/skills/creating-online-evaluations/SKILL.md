@@ -37,19 +37,19 @@ debugging a live eval), defer to `exploring-llm-evaluations`.
 
 ## Tools
 
-| Tool                                       | Purpose                                                       |
-| ------------------------------------------ | ------------------------------------------------------------- |
-| `insights:llma-evaluation-config-get`       | Check the active provider key used by unpinned judges         |
-| `insights:llma-provider-key-list`           | Find a usable (`ok` state) provider key to pin                |
-| `insights:llma-evaluation-judge-models`     | List valid provider+model combos                              |
-| `insights:llma-evaluation-directory-list`   | List directories available for organizing the evaluation      |
-| `insights:llma-evaluation-directory-create` | Create a directory when the user asks for a new one           |
-| `insights:llma-evaluation-test-script`         | Dry-run Script source against recent generations before creating |
-| `insights:llma-evaluation-create`           | Create the evaluation (always `enabled: false` first)         |
-| `insights:llma-evaluation-run`              | Spot-run a draft eval against one generation                  |
-| `insights:llma-evaluation-update`           | Iterate config, then flip `enabled: true`                     |
-| `insights:execute-sql`                      | Verify a condition matches the events and volume you expect   |
-| `insights:generate-app-url`                 | Build a region- and project-qualified deep link to the eval   |
+| Tool                                        | Purpose                                                          |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| `insights:llma-evaluation-config-get`       | Check the active provider key used by unpinned judges            |
+| `insights:llma-provider-key-list`           | Find a usable (`ok` state) provider key to pin                   |
+| `insights:llma-evaluation-judge-models`     | List valid provider+model combos                                 |
+| `insights:llma-evaluation-directory-list`   | List directories available for organizing the evaluation         |
+| `insights:llma-evaluation-directory-create` | Create a directory when the user asks for a new one              |
+| `insights:llma-evaluation-test-script`      | Dry-run Script source against recent generations before creating |
+| `insights:llma-evaluation-create`           | Create the evaluation (always `enabled: false` first)            |
+| `insights:llma-evaluation-run`              | Spot-run a draft eval against one generation                     |
+| `insights:llma-evaluation-update`           | Iterate config, then flip `enabled: true`                        |
+| `insights:execute-sql`                      | Verify a condition matches the events and volume you expect      |
+| `insights:generate-app-url`                 | Build a region- and project-qualified deep link to the eval      |
 
 The full create payload (every field, the config schemas, the exact `conditions` shape) is in
 [references/evaluation-payload.md](references/evaluation-payload.md).
@@ -131,7 +131,7 @@ set into production, which is noise and (for a judge) cost the user didn't agree
 
 | Use…        | When the criterion is…                                                                                                                |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `script`       | Structural / rule-based (JSON parses, length, regex, tool-call shape). Cheap, deterministic, **no provider key needed.**              |
+| `script`    | Structural / rule-based (JSON parses, length, regex, tool-call shape). Cheap, deterministic, **no provider key needed.**              |
 | `llm_judge` | Subjective / fuzzy (tone, factuality, on-topic). Costs an LLM call per run; needs a provider, model, and usable provider key.         |
 | `sentiment` | You want sentiment labels on user messages, not a pass/fail (unless very specifically asked for, usually not relevant to this skill). |
 

@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, kea, key, listeners, path, props } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 

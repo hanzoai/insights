@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { QueuedMessageList } from '../QueuedMessageList'
 import { Composer } from './Composer'

@@ -59,7 +59,12 @@ describe('getDataWarehouseItemWithFieldDefaults', () => {
             name: 'prefers distinct_id when multiple distinct ID candidates are present',
             fields: {
                 ...baseTable.fields,
-                distinct_id: { name: 'distinct_id', insightsql_value: 'distinct_id', type: 'string', schema_valid: true },
+                distinct_id: {
+                    name: 'distinct_id',
+                    insightsql_value: 'distinct_id',
+                    type: 'string',
+                    schema_valid: true,
+                },
                 email: { name: 'email', insightsql_value: 'email', type: 'string', schema_valid: true },
             },
             expected: 'distinct_id',
@@ -96,8 +101,18 @@ describe('getDataWarehouseItemWithFieldDefaults', () => {
             name: 'prefers a named timestamp candidate over another datetime column',
             fields: {
                 id: { name: 'id', insightsql_value: 'id', type: 'integer', schema_valid: true },
-                happened_at: { name: 'happened_at', insightsql_value: 'happened_at', type: 'datetime', schema_valid: true },
-                updated_at: { name: 'updated_at', insightsql_value: 'updated_at', type: 'datetime', schema_valid: true },
+                happened_at: {
+                    name: 'happened_at',
+                    insightsql_value: 'happened_at',
+                    type: 'datetime',
+                    schema_valid: true,
+                },
+                updated_at: {
+                    name: 'updated_at',
+                    insightsql_value: 'updated_at',
+                    type: 'datetime',
+                    schema_valid: true,
+                },
             },
             expected: 'updated_at',
         },
@@ -105,7 +120,12 @@ describe('getDataWarehouseItemWithFieldDefaults', () => {
             name: 'falls back to the first datetime or date field when no timestamp candidate exists',
             fields: {
                 id: { name: 'id', insightsql_value: 'id', type: 'integer', schema_valid: true },
-                happened_at: { name: 'happened_at', insightsql_value: 'happened_at', type: 'datetime', schema_valid: true },
+                happened_at: {
+                    name: 'happened_at',
+                    insightsql_value: 'happened_at',
+                    type: 'datetime',
+                    schema_valid: true,
+                },
                 event_date: { name: 'event_date', insightsql_value: 'event_date', type: 'date', schema_valid: true },
             },
             expected: 'happened_at',

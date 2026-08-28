@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useLayoutEffect, useState } from 'react'
 
-import { IconCollapse, IconExpand } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCollapse, IconExpand } from '@hanzo/icons'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightSceneLogic } from 'scenes/insights/insightSceneLogic'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button, Divider, Skeleton } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { BurningMoneyHog } from 'lib/components/mascots'
 

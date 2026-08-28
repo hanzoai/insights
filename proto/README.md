@@ -18,11 +18,11 @@ proto/
 
 ## Consumers
 
-| Proto             | Rust                                         | Python                                                   |
-| ----------------- | -------------------------------------------- | -------------------------------------------------------- |
-| `cymbal/`         | `rust/cymbal-proto` (auto via tonic)         | —                                                        |
-| `personinsights/`      | `rust/personinsights-proto` (auto via tonic)      | `insights/personinsights_client/proto/generated/` (checked in) |
-| `kafka_assigner/` | `rust/kafka-assigner-proto` (auto via tonic) | —                                                        |
+| Proto             | Rust                                         | Python                                                         |
+| ----------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| `cymbal/`         | `rust/cymbal-proto` (auto via tonic)         | —                                                              |
+| `personinsights/` | `rust/personinsights-proto` (auto via tonic) | `insights/personinsights_client/proto/generated/` (checked in) |
+| `kafka_assigner/` | `rust/kafka-assigner-proto` (auto via tonic) | —                                                              |
 
 ## Updating protos
 

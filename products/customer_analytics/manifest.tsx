@@ -1,5 +1,5 @@
-import { combineUrl } from 'kea-router'
 import insights from 'insights-js'
+import { combineUrl } from 'kea-router'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { urls } from 'scenes/urls'

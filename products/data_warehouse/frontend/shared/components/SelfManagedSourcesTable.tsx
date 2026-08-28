@@ -32,10 +32,7 @@ export function SelfManagedSourcesTable(): JSX.Element {
                         title: 'Source',
                         key: 'name',
                         render: (_, table) => (
-                            <TableLink
-                                to={urls.dataWarehouseSource(`self-managed-${table.id}`)}
-                                title={table.name}
-                            />
+                            <TableLink to={urls.dataWarehouseSource(`self-managed-${table.id}`)} title={table.name} />
                         ),
                     },
                     {

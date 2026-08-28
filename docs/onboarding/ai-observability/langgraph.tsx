@@ -16,7 +16,8 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
                     <CalloutBox type="info" icon="IconInfo" title="Full working examples">
                         <Markdown>
                             See the complete
-                            [Node.js](https://github.com/Insights/insights-js/tree/main/examples/example-ai-langgraph) and
+                            [Node.js](https://github.com/Insights/insights-js/tree/main/examples/example-ai-langgraph)
+                            and
                             [Python](https://github.com/Insights/insights-python/tree/master/examples/example-ai-langgraph)
                             examples on GitHub.
                         </Markdown>

@@ -8,13 +8,13 @@ used by integration tests across revenue analytics and the persons/groups join t
 6 customers across 3 countries, created in early January 2023.
 
 | Customer | Name           | Email                    | Country | `insights_person_distinct_id` | Resolution path                                                  |
-| -------- | -------------- | ------------------------ | ------- | ---------------------------- | ---------------------------------------------------------------- |
-| `cus_1`  | John Doe       | john.doe@example.com     | US      | `person_cus_1` (on customer) | Direct on customer                                               |
-| `cus_2`  | Jane Doe       | jane.doe@example.com     | US      | (none)                       | Resolved from subscription `sub_2`                               |
-| `cus_3`  | John Smith     | john.smith@example.com   | CA      | (none)                       | Resolved from charge `ch_3`                                      |
-| `cus_4`  | Jane Smith     | jane.smith@example.com   | CA      | (none)                       | No distinct ID anywhere                                          |
-| `cus_5`  | John Doe Jr    | john.doejr@example.com   | UK      | (none)                       | Resolved from charge `ch_15` (fresher than subscription `sub_5`) |
-| `cus_6`  | John Doe Jr Jr | john.doejrjr@example.com | UK      | (none)                       | No distinct ID anywhere                                          |
+| -------- | -------------- | ------------------------ | ------- | ----------------------------- | ---------------------------------------------------------------- |
+| `cus_1`  | John Doe       | john.doe@example.com     | US      | `person_cus_1` (on customer)  | Direct on customer                                               |
+| `cus_2`  | Jane Doe       | jane.doe@example.com     | US      | (none)                        | Resolved from subscription `sub_2`                               |
+| `cus_3`  | John Smith     | john.smith@example.com   | CA      | (none)                        | Resolved from charge `ch_3`                                      |
+| `cus_4`  | Jane Smith     | jane.smith@example.com   | CA      | (none)                        | No distinct ID anywhere                                          |
+| `cus_5`  | John Doe Jr    | john.doejr@example.com   | UK      | (none)                        | Resolved from charge `ch_15` (fresher than subscription `sub_5`) |
+| `cus_6`  | John Doe Jr Jr | john.doejrjr@example.com | UK      | (none)                        | No distinct ID anywhere                                          |
 
 All customers have a legacy `id` key in their metadata (e.g. `cus_1_metadata`),
 used by the `test_get_revenue_for_schema_source_for_metadata_join` test in `test_persons_revenue_analytics.py`.
@@ -25,13 +25,13 @@ One subscription per customer. All have status `active`.
 The first two are roughly annual (ending January 2026), the rest are ~3 months (ending May 2025).
 
 | Subscription | Customer | Product  | Created    | Ends       | `insights_person_distinct_id` |
-| ------------ | -------- | -------- | ---------- | ---------- | ---------------------------- |
-| `sub_1`      | `cus_1`  | `prod_1` | 2025-01-23 | 2026-01-23 | (none)                       |
-| `sub_2`      | `cus_2`  | `prod_2` | 2025-01-23 | 2026-01-23 | `person_cus_2`               |
-| `sub_3`      | `cus_3`  | `prod_3` | 2025-01-23 | 2025-06-23 | (none)                       |
-| `sub_4`      | `cus_4`  | `prod_4` | 2025-02-23 | 2025-05-23 | (none)                       |
-| `sub_5`      | `cus_5`  | `prod_5` | 2025-02-23 | 2025-05-23 | `person_cus_5_from_sub`      |
-| `sub_6`      | `cus_6`  | `prod_6` | 2025-02-23 | 2025-05-23 | (none)                       |
+| ------------ | -------- | -------- | ---------- | ---------- | ----------------------------- |
+| `sub_1`      | `cus_1`  | `prod_1` | 2025-01-23 | 2026-01-23 | (none)                        |
+| `sub_2`      | `cus_2`  | `prod_2` | 2025-01-23 | 2026-01-23 | `person_cus_2`                |
+| `sub_3`      | `cus_3`  | `prod_3` | 2025-01-23 | 2025-06-23 | (none)                        |
+| `sub_4`      | `cus_4`  | `prod_4` | 2025-02-23 | 2025-05-23 | (none)                        |
+| `sub_5`      | `cus_5`  | `prod_5` | 2025-02-23 | 2025-05-23 | `person_cus_5_from_sub`       |
+| `sub_6`      | `cus_6`  | `prod_6` | 2025-02-23 | 2025-05-23 | (none)                        |
 
 For `cus_5`, the subscription (`sub_5`, February 2025) is **older** than the charge (`ch_15`, March 2025),
 so the resolution should prefer the charge's value.
@@ -66,9 +66,9 @@ so the resolution should prefer the charge's value.
 ### Person distinct ID on charges
 
 | Charge  | Customer | `insights_person_distinct_id` | Created    |
-| ------- | -------- | ---------------------------- | ---------- |
-| `ch_3`  | `cus_3`  | `person_cus_3`               | 2025-01-31 |
-| `ch_15` | `cus_5`  | `person_cus_5_from_charge`   | 2025-03-03 |
+| ------- | -------- | ----------------------------- | ---------- |
+| `ch_3`  | `cus_3`  | `person_cus_3`                | 2025-01-31 |
+| `ch_15` | `cus_5`  | `person_cus_5_from_charge`    | 2025-03-03 |
 
 ## Invoices (`stripe_invoices.csv`)
 

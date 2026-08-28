@@ -1,5 +1,4 @@
 import { eventWithTime } from '@hanzo/insights-rrweb-types'
-
 import { createSegments as _createSegments, mapSnapshotsToWindowId } from '@hanzo/replay-shared'
 
 import { Dayjs } from 'lib/dayjs'

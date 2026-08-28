@@ -1,5 +1,5 @@
-import { IconLaptop, IconServer } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconLaptop, IconServer } from '@hanzo/icons'
 
 import { FilterLogicalOperator, UniversalFiltersGroup, UniversalFiltersGroupValue } from '~/types'
 

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconChevronDown, IconCursorClick, IconEye, IconGlobe, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Menu, Modal, Tag } from '@hanzo/elements'
+import { IconChevronDown, IconCursorClick, IconEye, IconGlobe, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { PositionSelector } from 'scenes/surveys/survey-appearance/SurveyAppearancePositionSelector'
 

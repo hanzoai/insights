@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useRef } from 'react'
 
-import { IconRefresh } from '@hanzo/icons'
 import { Badge, Button, Switch } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
-import { usePageVisibilityCb } from 'lib/hooks/usePageVisibility'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { Radio } from 'lib/elements/Radio'
 import { Spinner } from 'lib/elements/Spinner'
+import { usePageVisibilityCb } from 'lib/hooks/usePageVisibility'
 import { Label } from 'lib/ui/Label/Label'
 import { humanFriendlyDuration } from 'lib/utils/durations'
 

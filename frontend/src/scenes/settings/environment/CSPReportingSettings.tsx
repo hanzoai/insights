@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useState } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Banner, Checkbox, Link } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'

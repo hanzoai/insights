@@ -80,10 +80,7 @@ function PerformanceHelpMessage(): JSX.Element {
                     </Link>
                 </li>
                 <li>
-                    <Link
-                        to="https://hanzo.ai/docs/session-replay/troubleshooting#angular-performance"
-                        target="_blank"
-                    >
+                    <Link to="https://hanzo.ai/docs/session-replay/troubleshooting#angular-performance" target="_blank">
                         Angular performance
                     </Link>
                 </li>

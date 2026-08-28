@@ -139,9 +139,7 @@ describe('Field', () => {
             label: 'Where did you hear about us?',
             field: (
                 <Field name="referral_source" label="Where did you hear about us?">
-                    {({ value, onChange }) => (
-                        <Input value={value ?? ''} onChange={(val: string) => onChange(val)} />
-                    )}
+                    {({ value, onChange }) => <Input value={value ?? ''} onChange={(val: string) => onChange(val)} />}
                 </Field>
             ),
         },

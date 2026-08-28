@@ -17,8 +17,8 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
         content: (
             <>
                 <Markdown>
-                    Capture a structured log record with `captureLog`. Records are batched and shipped to Insights's logs
-                    product.
+                    Capture a structured log record with `captureLog`. Records are batched and shipped to Insights's
+                    logs product.
                 </Markdown>
                 <CodeBlock
                     blocks={[

@@ -22,11 +22,7 @@ export const Default: Story = {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const [colorToken, setColorToken] = useState<DataColorToken>('preset-1')
         return (
-            <ColorPicker
-                colorTokens={colorTokens}
-                selectedColorToken={colorToken}
-                onSelectColorToken={setColorToken}
-            />
+            <ColorPicker colorTokens={colorTokens} selectedColorToken={colorToken} onSelectColorToken={setColorToken} />
         )
     },
 }

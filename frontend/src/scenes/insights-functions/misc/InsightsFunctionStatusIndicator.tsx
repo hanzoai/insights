@@ -69,7 +69,9 @@ export type InsightsFunctionStatusIndicatorProps = {
 
 const HIDE_STATUS_FOR_TYPES: InsightsFunctionType['type'][] = ['site_destination', 'site_app']
 
-export function InsightsFunctionStatusIndicator({ insightsFunction }: InsightsFunctionStatusIndicatorProps): JSX.Element | null {
+export function InsightsFunctionStatusIndicator({
+    insightsFunction,
+}: InsightsFunctionStatusIndicatorProps): JSX.Element | null {
     if (!insightsFunction || HIDE_STATUS_FOR_TYPES.includes(insightsFunction.type)) {
         return null
     }

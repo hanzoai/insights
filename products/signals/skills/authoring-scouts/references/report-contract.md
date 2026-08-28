@@ -55,13 +55,13 @@ The result tells you what happened: `report_id` (always set when a report was pe
 Worth it when the _shape_ is the point — a trend that broke, a distribution that shifted, a funnel step that collapsed.
 A chart restating one number the summary already gives is noise; just write the number.
 
-| Field      | Type             | Notes                                                                                                                                                                                                  |
-| ---------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `chart_id` | string, required | Your own slug (lowercase letters, numbers, `_`, `-`). How the summary points at the chart, and the key a later edit refreshes it under. Unique within the report.                                      |
-| `title`    | string, required | Heading above the chart.                                                                                                                                                                               |
+| Field      | Type             | Notes                                                                                                                                                                                                       |
+| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `chart_id` | string, required | Your own slug (lowercase letters, numbers, `_`, `-`). How the summary points at the chart, and the key a later edit refreshes it under. Unique within the report.                                           |
+| `title`    | string, required | Heading above the chart.                                                                                                                                                                                    |
 | `query`    | object, required | An `InsightVizNode`, `DataVisualizationNode` (a `InsightsQLQuery` source, plus `display` and `chartSettings` for a graph), or `SavedInsightNode` (by `shortId`). Any other `kind` is refused at write time. |
-| `caption`  | string, optional | One line on what to look at.                                                                                                                                                                           |
-| `size`     | enum, optional   | `small` / `medium` / `large`. Leave it out unless the default looks wrong — the inbox sizes a chart from its query (a big single number gets a short box, a retention grid a tall scrolling one).      |
+| `caption`  | string, optional | One line on what to look at.                                                                                                                                                                                |
+| `size`     | enum, optional   | `small` / `medium` / `large`. Leave it out unless the default looks wrong — the inbox sizes a chart from its query (a big single number gets a short box, a retention grid a tall scrolling one).           |
 
 A trends chart and a graph built from SQL, as they arrive in `charts`:
 

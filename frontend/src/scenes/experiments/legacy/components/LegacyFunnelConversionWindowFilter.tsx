@@ -1,6 +1,6 @@
-import { IconInfo } from '@hanzo/icons'
 import type { SelectOption } from '@hanzo/elements'
 import { Input, Select } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
@@ -25,12 +25,10 @@ export function LegacyFunnelConversionWindowFilter({
     onFunnelWindowIntervalChange: (funnelWindowInterval: number | undefined) => void
     onFunnelWindowIntervalUnitChange: (funnelWindowIntervalUnit: FunnelConversionWindowTimeUnit) => void
 }): JSX.Element {
-    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
-        (unit) => ({
-            label: capitalizeFirstLetter(pluralize(funnelWindowInterval ?? 7, unit, `${unit}s`, false)),
-            value: unit as FunnelConversionWindowTimeUnit,
-        })
-    )
+    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map((unit) => ({
+        label: capitalizeFirstLetter(pluralize(funnelWindowInterval ?? 7, unit, `${unit}s`, false)),
+        value: unit as FunnelConversionWindowTimeUnit,
+    }))
     const intervalBounds = TIME_INTERVAL_BOUNDS[funnelWindowIntervalUnit ?? FunnelConversionWindowTimeUnit.Day]
 
     return (

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCopy } from '@hanzo/icons'
 import { Banner, Button, Collapse, Skeleton, Table, Tag } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { getColorVar } from 'lib/colors'
 import { AppMetricsFilters } from 'lib/components/AppMetrics/AppMetricsFilters'

@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
+import { Button, Link, Select, Skeleton, Tag, Tooltip } from '@hanzo/elements'
 import {
     IconArrowRight,
     IconCheckCircle,
@@ -11,7 +12,6 @@ import {
     IconTerminal,
     IconWarning,
 } from '@hanzo/icons'
-import { Button, Link, Select, Skeleton, Tag, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Markdown } from 'lib/elements/Markdown'

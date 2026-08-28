@@ -1,5 +1,5 @@
-import { IconTrending } from '@hanzo/icons'
 import { Card, Skeleton, Tooltip } from '@hanzo/elements'
+import { IconTrending } from '@hanzo/icons'
 
 import { Sparkline } from 'lib/components/Sparkline'
 import { IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'

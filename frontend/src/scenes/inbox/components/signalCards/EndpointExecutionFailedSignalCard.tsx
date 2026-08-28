@@ -1,7 +1,7 @@
 import { combineUrl } from 'kea-router'
 
-import { IconWarning } from '@hanzo/icons'
 import { Tag, Link } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { Markdown } from 'lib/elements/Markdown'

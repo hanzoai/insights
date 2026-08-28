@@ -1,5 +1,5 @@
-import { IconArrowRight } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { ExperimentTabContent } from 'scenes/experiments/ExperimentTabContent'
 import { urls } from 'scenes/urls'

@@ -1,12 +1,12 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { IconCode, IconWarning, IconX } from '@hanzo/icons'
 import { Link, Tooltip } from '@hanzo/elements'
+import { IconCode, IconWarning, IconX } from '@hanzo/icons'
 
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { IconBranch } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconBranch } from 'lib/elements/icons'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { getRegionForHost, getStoredSession, OAUTH_REGIONS } from 'lib/oauth/oauthClient'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 

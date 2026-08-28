@@ -1,5 +1,5 @@
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Dialog, Menu, Table, TableColumn, Tag, Tooltip } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { Link } from 'lib/elements/Link'
 import { detailedTime, humanFriendlyDetailedTime } from 'lib/utils/datetime'

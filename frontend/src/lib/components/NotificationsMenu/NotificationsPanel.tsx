@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArchive, IconArrowRight, IconNotification } from '@hanzo/icons'
 import { Button, Skeleton } from '@hanzo/elements'
+import { IconArchive, IconArrowRight, IconNotification } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 

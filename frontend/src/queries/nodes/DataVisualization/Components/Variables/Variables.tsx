@@ -3,17 +3,8 @@ import './Variables.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
+import { Button, Divider, Input, SegmentedButton, Select, Switch, Popover, toast } from '@hanzo/elements'
 import { IconCodeInsert, IconCopy, IconGear, IconTrash, IconX } from '@hanzo/icons'
-import {
-    Button,
-    Divider,
-    Input,
-    SegmentedButton,
-    Select,
-    Switch,
-    Popover,
-    toast,
-} from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { Field } from 'lib/elements/Field'
@@ -407,8 +398,8 @@ export const VariableComponent = ({
                                     navigator.clipboard.writeText(variableAsInsightsQL)
                                     toast.success(
                                         <span>
-                                            <code className="text-sm">{variableAsInsightsQL}</code> copied to clipboard. Use
-                                            it anywhere in InsightsQL.
+                                            <code className="text-sm">{variableAsInsightsQL}</code> copied to clipboard.
+                                            Use it anywhere in InsightsQL.
                                         </span>
                                     )
                                 }}

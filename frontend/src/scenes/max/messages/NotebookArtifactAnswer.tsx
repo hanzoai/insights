@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconCollapse, IconExpand, IconNotebook } from '@hanzo/icons'
 import { Button, Skeleton } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconNotebook } from '@hanzo/icons'
 
 import {
     InsightBreakdownSummary,

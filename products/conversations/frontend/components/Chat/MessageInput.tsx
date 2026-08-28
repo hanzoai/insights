@@ -1,8 +1,8 @@
 import { JSONContent } from '@tiptap/core'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconLock } from '@hanzo/icons'
 import { Button, Checkbox, Switch, Tooltip } from '@hanzo/elements'
+import { IconLock } from '@hanzo/icons'
 
 import { RichContentEditorType } from 'lib/components/RichContentEditor/types'
 import { Dialog } from 'lib/elements/Dialog'

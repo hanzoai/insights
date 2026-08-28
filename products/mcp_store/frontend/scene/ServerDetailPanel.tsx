@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconCheck, IconChevronLeft, IconRefresh, IconShare, IconShieldLock, IconTrash, IconX } from '@hanzo/icons'
 import { Button, Dialog, Divider, Snack, Switch, Tag, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconChevronLeft, IconRefresh, IconShare, IconShieldLock, IconTrash, IconX } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel, TeamMembershipLevel } from 'lib/constants'

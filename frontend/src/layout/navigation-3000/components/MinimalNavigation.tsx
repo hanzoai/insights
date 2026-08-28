@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconLogomark } from '@hanzo/icons'
 import { Button, ProfilePicture } from '@hanzo/elements'
+import { IconLogomark } from '@hanzo/icons'
 
 import { AccountMenu } from 'lib/components/Account/AccountMenu'
 import { ProjectMenu } from 'lib/components/Account/ProjectMenu'

@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { Banner, Button, InputSelect, toast } from '@hanzo/elements'
 
 import api from 'lib/api'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { SegmentedButton } from 'lib/elements/SegmentedButton'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { projectLogic } from 'scenes/projectLogic'
 
 import { tagsModel } from '~/models/tagsModel'

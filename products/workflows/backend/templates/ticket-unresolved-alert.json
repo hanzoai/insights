@@ -27,17 +27,7 @@
                     "type": "events"
                 }
             ],
-            "bytecode": [
-                "_H",
-                1,
-                32,
-                "$conversation_ticket_created",
-                32,
-                "event",
-                1,
-                1,
-                11
-            ]
+            "bytecode": ["_H", 1, 32, "$conversation_ticket_created", 32, "event", 1, 1, 11]
         }
     },
     "trigger_masking": null,
@@ -96,17 +86,7 @@
                             "type": "events"
                         }
                     ],
-                    "bytecode": [
-                        "_H",
-                        1,
-                        32,
-                        "$conversation_ticket_created",
-                        32,
-                        "event",
-                        1,
-                        1,
-                        11
-                    ]
+                    "bytecode": ["_H", 1, 32, "$conversation_ticket_created", 32, "event", 1, 1, 11]
                 }
             },
             "output_variable": null
@@ -176,11 +156,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -204,14 +180,8 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": [
-        "function"
-    ],
+    "billable_action_types": ["function"],
     "image_url": null,
-    "tags": [
-        "support",
-        "support ticket",
-        "slack"
-    ],
+    "tags": ["support", "support ticket", "slack"],
     "scope": "global"
 }

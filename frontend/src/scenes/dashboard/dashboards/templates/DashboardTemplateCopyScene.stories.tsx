@@ -142,10 +142,7 @@ export const Default: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/v1/organizations/@current/': (): [number, OrganizationType] => [
-                    200,
-                    organizationWithSeveralProjects,
-                ],
+                '/v1/organizations/@current/': (): [number, OrganizationType] => [200, organizationWithSeveralProjects],
                 [templateDetailPath]: [200, mockSourceTemplate],
             },
             post: {

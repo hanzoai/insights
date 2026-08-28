@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, connect, events, kea, key, path, props, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { BREAKDOWN_OTHER_DISPLAY } from 'scenes/insights/utils'

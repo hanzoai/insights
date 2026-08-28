@@ -40,9 +40,7 @@ Example: Is this response helpful and accurate? Return true if yes, false if no.
                         <div>{prompt.length}/2000 characters</div>
                         <div className="flex items-center gap-2">
                             <span>Expected output:</span>
-                            <Tag type="completion">
-                                {allowsNA ? 'Boolean (true/false/NA)' : 'Boolean (true/false)'}
-                            </Tag>
+                            <Tag type="completion">{allowsNA ? 'Boolean (true/false/NA)' : 'Boolean (true/false)'}</Tag>
                         </div>
                     </div>
                 </div>

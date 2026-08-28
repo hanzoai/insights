@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconNotebook } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconNotebook } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

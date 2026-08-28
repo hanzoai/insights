@@ -1,5 +1,5 @@
-import { IconShield, IconShield as IconShieldEmpty, IconShieldLock as IconShieldExclamation } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconShield, IconShield as IconShieldEmpty, IconShieldLock as IconShieldExclamation } from '@hanzo/icons'
 
 const DOCS_URL = 'https://hanzo.ai/docs/support/widget#identity-verification'
 

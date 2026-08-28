@@ -4,14 +4,14 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { useActions, useValues } from 'kea'
 
-import { IconPencil, IconPlusSmall, IconX } from '@hanzo/icons'
 import { Button, Input, Modal, Select, Tooltip } from '@hanzo/elements'
+import { IconPencil, IconPlusSmall, IconX } from '@hanzo/icons'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroup, TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { IconTuning, SortableDragIcon } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
+import { IconTuning, SortableDragIcon } from 'lib/elements/icons'
 
 import { NodeKind } from '~/queries/schema/schema-general'
 

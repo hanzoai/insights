@@ -50,8 +50,8 @@ On `$mcp_tool_call` unless noted. These are the properties any instrumented serv
 | `$mcp_protocol_version`                    | Since TS 0.10.0. The negotiated MCP spec version, stamped on `$mcp_initialize` **and every subsequent event of the session**. Use it to track spec-revision adoption or to break metrics down by revision.                           |
 | `$mcp_conversation_id`                     | Agent-supplied conversation id. **Survives reconnects** — see identifiers below.                                                                                                                                                     |
 | `$mcp_resource_name`                       | On resource events.                                                                                                                                                                                                                  |
-| `$session_id`                              | The standard Insights session id, materialized. The usual grouping key.                                                                                                                                                               |
-| `$mcp_source`                              | Always `insights_mcp_analytics`. The reliable way to isolate MCP events from everything else on the `events` table.                                                                                                                   |
+| `$session_id`                              | The standard Insights session id, materialized. The usual grouping key.                                                                                                                                                              |
+| `$mcp_source`                              | Always `insights_mcp_analytics`. The reliable way to isolate MCP events from everything else on the `events` table.                                                                                                                  |
 
 ## Server-stamped properties
 
@@ -80,11 +80,11 @@ it to `trackToolCall()` as the tool name, falling back to the literal `exec` whe
 isn't recognized — so in current data the inner tool arrives in `$mcp_tool_name`, and these
 dedicated fields are empty. A query built only on them returns nothing.
 
-| Property                          | Notes                                                                                                                                                   |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Property                          | Notes                                                                                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `$mcp_exec_tool_call_name`        | The inner tool invoked. Read it via `EFFECTIVE_TOOL_SQL` (`backend/insightsql_queries/base.py`), which coalesces it ahead of `$mcp_tool_name` — never alone. |
-| `$mcp_exec_tool_call_description` | The inner tool's description rather than the dispatcher's static text.                                                                                  |
-| `$mcp_exec_inner_tool_names`      | On `$mcp_tools_list`: the inner catalog, intended to stand in for `$mcp_listed_tool_names` in this mode.                                                |
+| `$mcp_exec_tool_call_description` | The inner tool's description rather than the dispatcher's static text.                                                                                       |
+| `$mcp_exec_inner_tool_names`      | On `$mcp_tools_list`: the inner catalog, intended to stand in for `$mcp_listed_tool_names` in this mode.                                                     |
 
 So for per-tool aggregation, always go through `EFFECTIVE_TOOL_SQL` — it is correct whether the
 inner tool arrives in `$mcp_tool_name` (current) or in the dedicated property (historical rows,

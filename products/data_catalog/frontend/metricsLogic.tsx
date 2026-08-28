@@ -362,9 +362,7 @@ export const metricsLogic = kea<metricsLogicType>([
                 actions.closeNewMetricModal()
                 toast.success('Metric created')
             } catch (error) {
-                toast.error(
-                    apiErrorDetail(error) || 'Could not create the metric. Check the fields and try again.'
-                )
+                toast.error(apiErrorDetail(error) || 'Could not create the metric. Check the fields and try again.')
             } finally {
                 actions.setCreatingMetric(false)
             }
@@ -435,9 +433,7 @@ export const metricsLogic = kea<metricsLogicType>([
                 )
                 toast.success('Metric refreshed from its source insight')
             } catch (error) {
-                toast.error(
-                    apiErrorDetail(error) || 'Could not refresh the metric from its source insight. Try again.'
-                )
+                toast.error(apiErrorDetail(error) || 'Could not refresh the metric from its source insight. Try again.')
             } finally {
                 actions.setActionInFlight(name, false)
             }

@@ -15,15 +15,15 @@ Where to look, in order:
 
 Common reinventions and what to use instead:
 
-| You're about to build…              | Use instead                                                                               |
-| ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| You're about to build…              | Use instead                                                                     |
+| ----------------------------------- | ------------------------------------------------------------------------------- |
 | a `<table>`                         | `Table` (`lib/elements/Table`) — has sorting, pagination, loading, empty states |
-| a colored status pill / count badge | `Badge`                                                                              |
+| a colored status pill / count badge | `Badge`                                                                         |
 | a small removable chip              | `Snack` or `Tag`                                                                |
-| a form field label                  | `Label`                                                                              |
+| a form field label                  | `Label`                                                                         |
 | a dropdown menu of actions          | `Menu` with a `Button` trigger (not a new `lib/ui/DropdownMenu`)                |
 | a select / combobox / autocomplete  | `Select`, `InputSelect`                                                         |
-| a card / panel                      | `Card`                                                                               |
+| a card / panel                      | `Card`                                                                          |
 | a modal / confirm dialog            | `Modal` / `Dialog`                                                              |
 
 If nothing fits, say so and propose extending the existing component before adding a new one. Don't silently fork.

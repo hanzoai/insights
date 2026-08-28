@@ -259,7 +259,9 @@ const PathsFilter = z.object({
     pathsInsightsQLExpression: z
         .string()
         .optional()
-        .describe('A InsightsQL expression to use as the path step name. Requires includeEventTypes to contain "insightsql".'),
+        .describe(
+            'A InsightsQL expression to use as the path step name. Requires includeEventTypes to contain "insightsql".'
+        ),
     startPoint: z.string().optional().describe('Only show paths starting at this step'),
     endPoint: z.string().optional().describe('Only show paths ending at this step'),
     stepLimit: z.number().optional().default(5).describe('Maximum number of path steps (default 5)'),

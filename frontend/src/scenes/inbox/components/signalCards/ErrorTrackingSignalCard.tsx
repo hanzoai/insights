@@ -1,7 +1,7 @@
 import { BindLogic, useValues } from 'kea'
 
-import { IconExternal, IconTrending } from '@hanzo/icons'
 import { Skeleton, Tag, TagType, Link } from '@hanzo/elements'
+import { IconExternal, IconTrending } from '@hanzo/icons'
 
 import { Markdown } from 'lib/elements/Markdown'
 import type { SignalNode } from 'scenes/debug/signals/types'

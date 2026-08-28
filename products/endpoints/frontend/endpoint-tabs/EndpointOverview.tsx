@@ -3,8 +3,8 @@ import { useValues } from 'kea'
 import { Button, Label, Tag, ProfilePicture } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { toast } from 'lib/elements/Toast/Toast'
 import { Link } from 'lib/elements/Link'
+import { toast } from 'lib/elements/Toast/Toast'
 import { urls } from 'scenes/urls'
 
 import { endpointLogic } from '../endpointLogic'

@@ -93,11 +93,7 @@ export function BillingDataTable({
                     const isHidden = hiddenSeries.includes(record.id)
                     return (
                         <div className="flex items-center gap-1">
-                            <Checkbox
-                                checked={!isHidden}
-                                onChange={() => toggleSeries(record.id)}
-                                className="mr-2"
-                            />
+                            <Checkbox checked={!isHidden} onChange={() => toggleSeries(record.id)} className="mr-2" />
                             <SeriesColorDot colorIndex={record.id} />
                             <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-xs">
                                 {record.label}

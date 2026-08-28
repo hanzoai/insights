@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCopy, IconPlus, IconRefresh } from '@hanzo/icons'
 import { Banner, Button, Card, Collapse, Input, Tag } from '@hanzo/elements'
+import { IconCopy, IconPlus, IconRefresh } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'

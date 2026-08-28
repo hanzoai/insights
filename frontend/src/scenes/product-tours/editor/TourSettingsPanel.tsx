@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Collapse, Input, Switch, Tag, Tooltip } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'

@@ -20,8 +20,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button, Switch } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { SortableDragIcon } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'

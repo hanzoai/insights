@@ -1,5 +1,5 @@
-import { IconLock } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconLock } from '@hanzo/icons'
 
 /**
  * Marks a thread entry as team-only. Shared because the thread's whole purpose is sending things to

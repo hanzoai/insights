@@ -98,7 +98,9 @@ export interface SurveyNotificationModalLogicProps {
 }
 
 type SurveyMessageField = 'slackMessage' | 'discordMessage' | 'teamsMessage'
-type InsightsFunctionInputValue = InsightsFunctionType['inputs'] extends Record<string, infer T> | null | undefined ? T : never
+type InsightsFunctionInputValue = InsightsFunctionType['inputs'] extends Record<string, infer T> | null | undefined
+    ? T
+    : never
 export type SurveyNotificationTestSource = 'sample' | 'last_response'
 export type SurveyNotificationModalIntent = 'add' | 'edit' | 'copy'
 export type OpenSurveyNotificationDialogPayload = {
@@ -1241,9 +1243,7 @@ export const surveyNotificationModalLogic = kea<surveyNotificationModalLogicType
                             globals = lookup.globals
                         } else if (lookup.status === 'failed') {
                             usingSample = true
-                            toast.warning(
-                                'Could not fetch the last response — sent the test with sample data instead.'
-                            )
+                            toast.warning('Could not fetch the last response — sent the test with sample data instead.')
                         } else {
                             usingSample = true
                             toast.info('No survey responses yet — sent the test with sample data instead.')

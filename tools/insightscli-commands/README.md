@@ -58,11 +58,11 @@ Add a new boot module by creating a file that calls one of the `register_*` help
 ## When to Use Python vs YAML
 
 | Use Python here when...            | Use YAML (`insightscli.yaml`) when...  |
-| ---------------------------------- | -------------------------------- |
-| Complex logic, loops, conditionals | Simple shell one-liners          |
-| Need Click's argument parsing      | Delegating to bin/ scripts       |
+| ---------------------------------- | -------------------------------------- |
+| Complex logic, loops, conditionals | Simple shell one-liners                |
+| Need Click's argument parsing      | Delegating to bin/ scripts             |
 | Interactive prompts or menus       | Chaining existing insightscli commands |
-| Accessing Python libraries         | Quick prototypes                 |
+| Accessing Python libraries         | Quick prototypes                       |
 
 ## File Structure
 

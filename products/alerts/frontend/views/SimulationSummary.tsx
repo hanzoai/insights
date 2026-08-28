@@ -2,8 +2,8 @@ import annotationPlugin from 'chartjs-plugin-annotation'
 import { useState } from 'react'
 
 import { Chart } from 'lib/Chart'
-import { useChart } from 'lib/hooks/useChart'
 import { Button } from 'lib/elements/Button'
+import { useChart } from 'lib/hooks/useChart'
 
 import { DetectorConfig } from '~/queries/schema/schema-general'
 

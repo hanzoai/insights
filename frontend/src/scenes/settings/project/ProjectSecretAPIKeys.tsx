@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button, Input, Modal, Select } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { ScopeAccessRow } from 'lib/components/ScopeAccessRow/ScopeAccessRow'

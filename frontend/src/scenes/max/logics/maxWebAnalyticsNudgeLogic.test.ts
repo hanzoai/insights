@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -341,7 +341,9 @@ describe('maxWebAnalyticsNudgeLogic', () => {
             expect(
                 captureSpy.mock.calls.filter((c) => c[0] === 'insights ai web analytics nudge eligible')
             ).toHaveLength(1)
-            expect(captureSpy.mock.calls.filter((c) => c[0] === 'insights ai web analytics nudge shown')).toHaveLength(1)
+            expect(captureSpy.mock.calls.filter((c) => c[0] === 'insights ai web analytics nudge shown')).toHaveLength(
+                1
+            )
         })
 
         it('fires "eligible" only (no "shown") for variant "control"', () => {
@@ -459,7 +461,9 @@ describe('maxWebAnalyticsNudgeLogic', () => {
             expect(
                 captureSpy.mock.calls.filter((c) => c[0] === 'insights ai web analytics nudge eligible')
             ).toHaveLength(0)
-            expect(captureSpy.mock.calls.filter((c) => c[0] === 'insights ai web analytics nudge shown')).toHaveLength(0)
+            expect(captureSpy.mock.calls.filter((c) => c[0] === 'insights ai web analytics nudge shown')).toHaveLength(
+                0
+            )
 
             expect(logic2.values.shouldShowNudge).toBe(false)
         })

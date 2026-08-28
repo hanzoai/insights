@@ -168,13 +168,13 @@ Signals to read off the plan:
 
 ## Codebase map (in `../insights` or the public repo)
 
-| Path                                            | What it explains                                                                                             |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `insights/insightsql/printer/base.py`                 | InsightsQL → SQL; the materialization decision tree (`mat_*` → `dmat_*` → property groups → JSONExtract fallback) |
-| `insights/insightsql/transforms/property_types.py`    | Whether a property access uses a materialized column or JSON extraction                                      |
-| `insights/insightsql/property.py`                     | How property filters become AST (person properties → `["person","properties"]` chain)                        |
-| `insights/insightsql/database/schema/events.py`       | Events table schema; lazy joins to person, pdi, sessions, groups                                             |
-| `insights/insightsql/database/database.py`            | Person-on-events mode: how `person_id` resolves via overrides vs pdi2                                        |
-| `insights/insightsql_queries/experiments/`            | How experiment queries build exposure CTEs and resolve persons                                               |
-| `ee/datastore/materialized_columns/analyze.py` | Auto-materialization logic (properties in 10+ slow queries reading >20GB or >5M rows)                        |
-| `insights/datastore/query_tagging.py`           | The `QueryTags` model behind the `lc_*` columns                                                              |
+| Path                                               | What it explains                                                                                                  |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `insights/insightsql/printer/base.py`              | InsightsQL → SQL; the materialization decision tree (`mat_*` → `dmat_*` → property groups → JSONExtract fallback) |
+| `insights/insightsql/transforms/property_types.py` | Whether a property access uses a materialized column or JSON extraction                                           |
+| `insights/insightsql/property.py`                  | How property filters become AST (person properties → `["person","properties"]` chain)                             |
+| `insights/insightsql/database/schema/events.py`    | Events table schema; lazy joins to person, pdi, sessions, groups                                                  |
+| `insights/insightsql/database/database.py`         | Person-on-events mode: how `person_id` resolves via overrides vs pdi2                                             |
+| `insights/insightsql_queries/experiments/`         | How experiment queries build exposure CTEs and resolve persons                                                    |
+| `ee/datastore/materialized_columns/analyze.py`     | Auto-materialization logic (properties in 10+ slow queries reading >20GB or >5M rows)                             |
+| `insights/datastore/query_tagging.py`              | The `QueryTags` model behind the `lc_*` columns                                                                   |

@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconPauseFilled, IconPlayFilled, IconRefresh, IconTerminal } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconPauseFilled, IconPlayFilled, IconRefresh, IconTerminal } from '@hanzo/icons'
 
 import { LiveRecordingsCount, LiveUserCount } from 'lib/components/LiveUserCount'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { Banner } from 'lib/elements/Banner'
+import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ActivitySceneTabs } from 'scenes/activity/ActivitySceneTabs'
 import { sceneConfigurations } from 'scenes/scenes'

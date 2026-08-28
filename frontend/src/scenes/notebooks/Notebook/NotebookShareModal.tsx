@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCopy } from '@hanzo/icons'
 import { Banner, Button, Divider, Modal } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { SHARING_MODAL_WIDTH, SharingModalContent } from 'lib/components/Sharing/SharingModal'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

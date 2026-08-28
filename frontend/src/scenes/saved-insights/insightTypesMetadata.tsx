@@ -1,3 +1,4 @@
+import { SelectOptions } from '@hanzo/elements'
 import {
     IconAI,
     IconApps,
@@ -16,7 +17,6 @@ import {
     IconVideoCamera,
     IconWarning,
 } from '@hanzo/icons'
-import { SelectOptions } from '@hanzo/elements'
 
 import {
     IconAction,

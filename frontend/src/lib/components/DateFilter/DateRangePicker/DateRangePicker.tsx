@@ -3,8 +3,8 @@ import './DateRangePicker.scss'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCalendar, IconClock } from '@hanzo/icons'
 import { Button, Divider, Input, Popover } from '@hanzo/elements'
+import { IconCalendar, IconClock } from '@hanzo/icons'
 
 import { RollingDateRangeFilter } from 'lib/components/DateFilter/RollingDateRangeFilter'
 import { DateOption } from 'lib/components/DateFilter/rollingDateRangeFilterLogic'
@@ -245,12 +245,7 @@ export const DateRangePicker = ({
                 </div>
             }
         >
-            <Button
-                size="small"
-                type="secondary"
-                icon={<IconCalendar />}
-                onClick={() => setPopoverOpen(!popoverOpen)}
-            >
+            <Button size="small" type="secondary" icon={<IconCalendar />} onClick={() => setPopoverOpen(!popoverOpen)}>
                 {currentLabel}
             </Button>
         </Popover>

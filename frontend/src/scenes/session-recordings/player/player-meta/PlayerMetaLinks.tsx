@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
+import { Button, ButtonProps, Dialog, Menu, MenuItems } from '@hanzo/elements'
 import {
     IconCheck,
     IconDownload,
@@ -10,7 +11,6 @@ import {
     IconPlusSmall,
     IconTrash,
 } from '@hanzo/icons'
-import { Button, ButtonProps, Dialog, Menu, MenuItems } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { IconBlank } from 'lib/elements/icons'

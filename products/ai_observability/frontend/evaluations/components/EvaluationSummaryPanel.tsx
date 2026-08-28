@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconChevronDown, IconMinus, IconX } from '@hanzo/icons'
 import { Button, SegmentedButton, Spinner, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconChevronDown, IconMinus, IconX } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 

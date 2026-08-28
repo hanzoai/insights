@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { type MouseEvent, useState } from 'react'
 
-import { IconArchive, IconPullRequest, IconReceipt, IconUndo } from '@hanzo/icons'
 import { toast } from '@hanzo/elements'
+import { IconArchive, IconPullRequest, IconReceipt, IconUndo } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { urls } from 'scenes/urls'

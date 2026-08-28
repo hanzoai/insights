@@ -63,8 +63,8 @@ export function VerificationBadge({
             <TooltipContent className="max-w-64 flex-col items-start">
                 {isCore ? (
                     <>
-                        <strong>Built into Insights.</strong> A core definition Insights ships, maintains, and documents.
-                        Its name, type, and description are managed for you, so you don't need to verify it.
+                        <strong>Built into Insights.</strong> A core definition Insights ships, maintains, and
+                        documents. Its name, type, and description are managed for you, so you don't need to verify it.
                     </>
                 ) : (
                     <>

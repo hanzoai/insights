@@ -17,8 +17,8 @@ or duplicate occurrences. This skill picks the most useful one.
 
 ## Available tools
 
-| Tool                                    | Purpose                                                    |
-| --------------------------------------- | ---------------------------------------------------------- |
+| Tool                                     | Purpose                                                    |
+| ---------------------------------------- | ---------------------------------------------------------- |
 | `insights:query-error-tracking-issue`    | Get issue details (fingerprint, status, volume)            |
 | `insights:execute-sql`                   | Query exception events to find linked sessions             |
 | `insights:query-session-recordings-list` | Fetch recording metadata for candidate sessions            |

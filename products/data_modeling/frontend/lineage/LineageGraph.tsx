@@ -4,8 +4,8 @@ import { Background, BackgroundVariant, Controls, MiniMap, Panel, ReactFlow, Rea
 import { useValues } from 'kea'
 import { ReactNode } from 'react'
 
-import { IconArchive } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconArchive } from '@hanzo/icons'
 
 import { ElkDirection } from 'scenes/data-warehouse/scene/modeling/types'
 

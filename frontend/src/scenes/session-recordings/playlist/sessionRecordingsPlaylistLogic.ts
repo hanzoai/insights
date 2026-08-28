@@ -1,4 +1,5 @@
 import { deepEqual as equal } from 'fast-equals'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -15,7 +16,6 @@ import {
 } from 'kea'
 import { lazyLoaders, loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 import { z } from 'zod'
 
 import { toast } from '@hanzo/elements'

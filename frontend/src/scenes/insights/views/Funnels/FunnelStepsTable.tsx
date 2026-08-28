@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 import { compare as compareFn } from 'natural-orderby'
 
-import { IconFlag } from '@hanzo/icons'
 import { ColorButton, Tag } from '@hanzo/elements'
+import { IconFlag } from '@hanzo/icons'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { Checkbox } from 'lib/elements/Checkbox'
+import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
 import { Row } from 'lib/elements/Row'
 import { Table, TableColumn, TableColumnGroup, Sorting } from 'lib/elements/Table'
-import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
 import { humanFriendlyDuration } from 'lib/utils/durations'
 import { humanFriendlyNumber, percentage } from 'lib/utils/numbers'
 import { capitalizeFirstLetter } from 'lib/utils/strings'

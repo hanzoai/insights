@@ -2,8 +2,8 @@ import './BreakdownTagMenu.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconGear, IconInfo } from '@hanzo/icons'
 import { Button, Divider, Input, Switch } from '@hanzo/elements'
+import { IconGear, IconInfo } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 import { urls } from 'scenes/urls'

@@ -2,8 +2,8 @@ import './EditSurvey.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Banner, Input, Snack, Link } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { Field } from 'lib/elements/Field'

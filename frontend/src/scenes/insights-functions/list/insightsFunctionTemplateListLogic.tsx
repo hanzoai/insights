@@ -1,8 +1,8 @@
 import FuseClass from 'fuse.js'
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, combineUrl, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

@@ -1,4 +1,11 @@
-import type { FunnelResult, InsightsQLResult, LifecycleResult, PathsResult, RetentionResult, TrendsResult } from './types'
+import type {
+    FunnelResult,
+    InsightsQLResult,
+    LifecycleResult,
+    PathsResult,
+    RetentionResult,
+    TrendsResult,
+} from './types'
 
 export type VisualizationType = 'trends' | 'stickiness' | 'funnel' | 'lifecycle' | 'retention' | 'paths' | 'table'
 

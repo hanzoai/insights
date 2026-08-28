@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconGear } from '@hanzo/icons'
 import { Banner, Button, Divider, Select, Switch, Popover } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FilterBar } from 'lib/components/FilterBar'

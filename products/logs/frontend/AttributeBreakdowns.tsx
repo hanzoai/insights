@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
 import { Button, Table } from '@hanzo/elements'
+import { IconMinusSquare, IconPlusSquare } from '@hanzo/icons'
 
 import { PropertyFilterType, PropertyOperator } from '~/types'
 

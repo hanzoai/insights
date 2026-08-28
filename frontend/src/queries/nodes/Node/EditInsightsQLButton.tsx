@@ -1,5 +1,5 @@
-import { IconQueryEditor } from 'lib/elements/icons'
 import { Button, ButtonWithoutSideActionProps } from 'lib/elements/Button'
+import { IconQueryEditor } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 export interface EditInsightsQLButtonProps extends ButtonWithoutSideActionProps {

@@ -1,5 +1,5 @@
-import { IconArrowRight, IconCheck, IconExternal } from '@hanzo/icons'
 import { Button, Tag, Tooltip } from '@hanzo/elements'
+import { IconArrowRight, IconCheck, IconExternal } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'

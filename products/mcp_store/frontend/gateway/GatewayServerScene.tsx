@@ -1,7 +1,6 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconArrowLeft, IconExternal, IconLock, IconRefresh, IconTrash, IconX } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -14,6 +13,7 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import { IconArrowLeft, IconExternal, IconLock, IconRefresh, IconTrash, IconX } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { SceneExport } from 'scenes/sceneTypes'

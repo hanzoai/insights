@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { Field, Form } from 'kea-forms'
 
-import { IconExternal, IconX } from '@hanzo/icons'
 import { Banner, Button, Input, Menu, Select, Switch, Spinner } from '@hanzo/elements'
+import { IconExternal, IconX } from '@hanzo/icons'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
-import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { Modal } from 'lib/elements/Modal'
+import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { DESTINATION_OPTIONS } from 'scenes/insights-functions/list/newNotificationDialogLogic'
 import { SurveyResponseFilters } from 'scenes/surveys/components/SurveyResponseFilters'
@@ -471,12 +471,7 @@ export function SurveyNotificationModal({ surveyId }: { surveyId: string }): JSX
                             <>
                                 <Field name="teamsWebhookUrl" label="Microsoft Teams webhook URL">
                                     {({ value, onChange }) => (
-                                        <Input
-                                            value={value}
-                                            onChange={onChange}
-                                            placeholder="https://..."
-                                            fullWidth
-                                        />
+                                        <Input value={value} onChange={onChange} placeholder="https://..." fullWidth />
                                     )}
                                 </Field>
                                 <Field name="teamsMessage">
@@ -510,12 +505,7 @@ export function SurveyNotificationModal({ surveyId }: { surveyId: string }): JSX
                             <>
                                 <Field name="webhookUrl" label="Webhook URL">
                                     {({ value, onChange }) => (
-                                        <Input
-                                            value={value}
-                                            onChange={onChange}
-                                            placeholder="https://..."
-                                            fullWidth
-                                        />
+                                        <Input value={value} onChange={onChange} placeholder="https://..." fullWidth />
                                     )}
                                 </Field>
                                 <div className="space-y-3">

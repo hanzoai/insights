@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useState } from 'react'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, Select } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { getCookie } from 'lib/api'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'

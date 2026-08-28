@@ -92,9 +92,7 @@ export function useWidgetTileConfigPersist(
             ) {
                 const fieldErrors = error.fieldErrors as Record<string, string | undefined>
                 const validationMessage = Object.values(fieldErrors).find((message) => !!message)
-                toast.error(
-                    validationMessage ?? 'Could not update widget filters. Check the values and try again.'
-                )
+                toast.error(validationMessage ?? 'Could not update widget filters. Check the values and try again.')
             }
         } finally {
             pendingPersistCountRef.current -= 1

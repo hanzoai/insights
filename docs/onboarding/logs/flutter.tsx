@@ -14,8 +14,8 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
         content: (
             <>
                 <Markdown>
-                    Capture a structured log record with `Insights().logger`. Requires `insights_flutter` 5.27.0 or later.
-                    Records are batched and shipped to Insights's logs product.
+                    Capture a structured log record with `Insights().logger`. Requires `insights_flutter` 5.27.0 or
+                    later. Records are batched and shipped to Insights's logs product.
                 </Markdown>
                 <CodeBlock
                     blocks={[

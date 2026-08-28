@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import React from 'react'
 
-import { IconFilter, IconLogomark, IconX } from '@hanzo/icons'
 import { Button, PopoverReferenceContext } from '@hanzo/elements'
+import { IconFilter, IconLogomark, IconX } from '@hanzo/icons'
 
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { IconWithCount } from 'lib/elements/icons'

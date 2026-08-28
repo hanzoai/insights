@@ -4,9 +4,9 @@ import { useCallback, useState } from 'react'
 import { Button, Tabs } from '@hanzo/elements'
 
 import { DebugCHQueries } from 'lib/components/Shortcuts/utils/DebugCHQueries'
+import { Spinner } from 'lib/elements/Spinner'
 import { Table, TableColumns } from 'lib/elements/Table'
 import { Tag } from 'lib/elements/Tag'
-import { Spinner } from 'lib/elements/Spinner'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { runWithLimit } from 'scenes/dashboard/dashboardUtils'
 
@@ -204,13 +204,7 @@ function MetricComparisonResults({
             title: 'Match',
             key: 'match',
             render: (_, row) =>
-                row.match === null ? (
-                    '—'
-                ) : row.match ? (
-                    <Tag type="success">Yes</Tag>
-                ) : (
-                    <Tag type="danger">No</Tag>
-                ),
+                row.match === null ? '—' : row.match ? <Tag type="success">Yes</Tag> : <Tag type="danger">No</Tag>,
         },
     ]
 

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Link, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { NON_BREAKDOWN_DISPLAY_TYPES } from 'lib/constants'
 import { pluralize } from 'lib/utils/strings'

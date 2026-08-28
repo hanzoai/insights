@@ -1,8 +1,8 @@
 import { deepEqual as equal } from 'fast-equals'
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, path, reducers, selectors } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { Params } from 'scenes/sceneTypes'
 import { settingsLogic } from 'scenes/settings/settingsLogic'

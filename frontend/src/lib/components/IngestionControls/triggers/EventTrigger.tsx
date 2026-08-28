@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button, Snack, Popover } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'

@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { router, combineUrl } from 'kea-router'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Button, Tab, Tabs, Tag } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

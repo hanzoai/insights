@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Menu, MenuItems } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'

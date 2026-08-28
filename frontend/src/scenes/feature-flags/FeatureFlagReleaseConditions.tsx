@@ -3,8 +3,8 @@ import './FeatureFlag.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconFlag, IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 import { Label, Select, Snack, Link, Tooltip } from '@hanzo/elements'
+import { IconCopy, IconFlag, IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { EditableField } from 'lib/components/EditableField/EditableField'
@@ -12,19 +12,19 @@ import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isPropertyFilterWithOperator } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { INSTANTLY_AVAILABLE_PROPERTIES } from 'lib/constants'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
-import { GroupsIntroductionOption } from 'lib/introductions/GroupsIntroductionOption'
-import { IconArrowDown, IconArrowUp, IconErrorOutline, IconOpenInNew, IconSubArrowRight } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
 import { Dialog } from 'lib/elements/Dialog'
 import { Divider } from 'lib/elements/Divider'
 import { Field } from 'lib/elements/Field'
+import { IconArrowDown, IconArrowUp, IconErrorOutline, IconOpenInNew, IconSubArrowRight } from 'lib/elements/icons'
 import { Radio } from 'lib/elements/Radio'
 import { Slider } from 'lib/elements/Slider'
-import { Tag } from 'lib/elements/Tag/Tag'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tag } from 'lib/elements/Tag/Tag'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
+import { GroupsIntroductionOption } from 'lib/introductions/GroupsIntroductionOption'
 import { dateFilterToText, dateStringToComponents } from 'lib/utils/dateFilters'
 import { clamp } from 'lib/utils/numbers'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
@@ -310,10 +310,7 @@ export function FeatureFlagReleaseConditions({
                             {group.properties?.map((property, idx) => (
                                 <div className="feature-flag-property-display" key={idx}>
                                     {idx === 0 ? (
-                                        <Button
-                                            icon={<IconSubArrowRight className="arrow-right" />}
-                                            size="small"
-                                        />
+                                        <Button icon={<IconSubArrowRight className="arrow-right" />} size="small" />
                                     ) : (
                                         <Button icon={<span className="text-sm">&</span>} size="small" />
                                     )}
@@ -335,11 +332,7 @@ export function FeatureFlagReleaseConditions({
                                             const flagId = property.key || ''
                                             return (
                                                 <Tooltip title={flagId}>
-                                                    <Button
-                                                        to={urls.featureFlag(flagId)}
-                                                        size="small"
-                                                        className="p-0"
-                                                    >
+                                                    <Button to={urls.featureFlag(flagId)} size="small" className="p-0">
                                                         <Snack>
                                                             <IconFlag className="mr-1" />
                                                             {flagKeysLoading ? 'Loading...' : flagKeyData(flagId)}
@@ -389,9 +382,7 @@ export function FeatureFlagReleaseConditions({
                             />
                         </div>
                     )}
-                    {(!readOnly || (readOnly && (group.properties?.length || 0) > 0)) && (
-                        <Divider className="my-3" />
-                    )}
+                    {(!readOnly || (readOnly && (group.properties?.length || 0) > 0)) && <Divider className="my-3" />}
                     {readOnly ? (
                         <Tag
                             type={
@@ -588,10 +579,7 @@ export function FeatureFlagReleaseConditions({
                 )}
             {!readOnly && showGroupsOptions && !hideMatchOptions && (
                 <div className="mb-4">
-                    <Label
-                        className="mb-2"
-                        info="Changing match criteria may remove existing variants or payloads."
-                    >
+                    <Label className="mb-2" info="Changing match criteria may remove existing variants or payloads.">
                         Match by
                     </Label>
                     <Radio
@@ -678,10 +666,7 @@ export function FeatureFlagReleaseConditions({
                                 description: (
                                     <span>
                                         Stable assignment per device. Good fit for experiments on anonymous users.{' '}
-                                        <Link
-                                            to="https://hanzo.ai/docs/feature-flags/device-bucketing"
-                                            target="_blank"
-                                        >
+                                        <Link to="https://hanzo.ai/docs/feature-flags/device-bucketing" target="_blank">
                                             Learn more
                                         </Link>
                                     </span>
@@ -744,12 +729,7 @@ export function FeatureFlagReleaseConditions({
                 ))}
             </div>
             {!readOnly && (
-                <Button
-                    type="secondary"
-                    className="mt-0 w-max"
-                    onClick={() => addConditionSet()}
-                    icon={<IconPlus />}
-                >
+                <Button type="secondary" className="mt-0 w-max" onClick={() => addConditionSet()} icon={<IconPlus />}>
                     Add condition set
                 </Button>
             )}

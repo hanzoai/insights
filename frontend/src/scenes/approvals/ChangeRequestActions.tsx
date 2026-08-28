@@ -1,5 +1,5 @@
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Dialog, Input, Menu, toast } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { getApproveDisabledReason, getChangeRequestButtonVisibility } from 'scenes/approvals/changeRequestsLogic'
 import { urls } from 'scenes/urls'

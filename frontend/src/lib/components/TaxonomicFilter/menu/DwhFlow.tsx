@@ -416,7 +416,12 @@ function ActiveFieldEditor({
                     <AggregationTargetContext insightProps={insightProps} isInsightsQL={isInsightsQL} />
                 )}
 
-                <ColumnSelect options={options} value={value} onChange={onChange} allowInsightsQL={!!field.allowInsightsQL} />
+                <ColumnSelect
+                    options={options}
+                    value={value}
+                    onChange={onChange}
+                    allowInsightsQL={!!field.allowInsightsQL}
+                />
 
                 {field.allowInsightsQL &&
                     isInsightsQL && (

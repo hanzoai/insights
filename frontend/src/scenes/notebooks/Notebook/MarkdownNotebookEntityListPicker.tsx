@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button, Input, Tooltip } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { Modal } from 'lib/elements/Modal'
 import { Table, TableColumns } from 'lib/elements/Table'
@@ -126,13 +126,7 @@ export function MarkdownNotebookEntityListPicker({
             }
         >
             <div className="mb-3">
-                <Input
-                    type="search"
-                    placeholder={searchPlaceholder}
-                    autoFocus
-                    value={search}
-                    onChange={setSearch}
-                />
+                <Input type="search" placeholder={searchPlaceholder} autoFocus value={search} onChange={setSearch} />
             </div>
             <Table
                 dataSource={filteredItems}

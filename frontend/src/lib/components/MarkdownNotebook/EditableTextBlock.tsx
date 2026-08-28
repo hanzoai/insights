@@ -10,8 +10,8 @@ import {
     useRef,
 } from 'react'
 
-import { IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import {
     getSlashCommandQuery,

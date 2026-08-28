@@ -278,9 +278,7 @@ describe('impersonationNoticeLogic', () => {
                     isReImpersonating: false,
                 })
 
-            expect(toast.error).toHaveBeenCalledWith(
-                'Popup blocked. Please allow popups for this site and try again.'
-            )
+            expect(toast.error).toHaveBeenCalledWith('Popup blocked. Please allow popups for this site and try again.')
             openSpy.mockRestore()
         })
 

@@ -5,11 +5,11 @@ import React, { useEffect, useState } from 'react'
 
 import { IconPieChart } from '@hanzo/icons'
 
-import { useResizeObserver } from 'lib/hooks/useResizeObserver'
-import { IconSubtitles, IconSubtitlesOff } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
+import { IconSubtitles, IconSubtitlesOff } from 'lib/elements/icons'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 
 import { InsightColor } from '~/types'

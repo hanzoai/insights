@@ -1,8 +1,8 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MemberSelect } from 'lib/components/MemberSelect'
@@ -121,11 +121,7 @@ export function LLMPromptsScene(): JSX.Element {
                     <More
                         overlay={
                             <>
-                                <Button
-                                    to={promptUrl(prompt.name)}
-                                    data-attr="llma-prompt-dropdown-view"
-                                    fullWidth
-                                >
+                                <Button to={promptUrl(prompt.name)} data-attr="llma-prompt-dropdown-view" fullWidth>
                                     View
                                 </Button>
 

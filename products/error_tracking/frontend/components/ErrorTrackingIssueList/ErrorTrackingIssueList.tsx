@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { useMemo } from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'
 import { TZLabel } from 'lib/components/TZLabel'

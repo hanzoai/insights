@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconGear, IconSparkles } from '@hanzo/icons'
 import { Banner, Button, Skeleton, Tabs, Link } from '@hanzo/elements'
+import { IconGear, IconSparkles } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -248,9 +248,7 @@ const MarketingAnalyticsContent = (): JSX.Element => {
         return dashboard
     }
 
-    return (
-        <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as MarketingAnalyticsTab)} tabs={tabs} />
-    )
+    return <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as MarketingAnalyticsTab)} tabs={tabs} />
 }
 
 const TAB_DESCRIPTIONS: Record<string, string> = {

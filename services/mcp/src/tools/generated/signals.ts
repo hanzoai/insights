@@ -310,7 +310,10 @@ const InboxReportsSetStateSchema = SignalsReportsStateCreateParams.omit({ projec
     SignalsReportsStateCreateBody.shape
 )
 
-const inboxReportsSetState = (): ToolBase<typeof InboxReportsSetStateSchema, WithInsightsUrl<Schemas.SignalReport>> => ({
+const inboxReportsSetState = (): ToolBase<
+    typeof InboxReportsSetStateSchema,
+    WithInsightsUrl<Schemas.SignalReport>
+> => ({
     name: 'inbox-reports-set-state',
     schema: InboxReportsSetStateSchema,
     handler: async (context: Context, params: z.infer<typeof InboxReportsSetStateSchema>) => {

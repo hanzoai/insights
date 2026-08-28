@@ -1,8 +1,8 @@
 import { Tabs } from '@base-ui/react/tabs'
 import { useActions, useValues } from 'kea'
 
-import { IconSparkles, IconX } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconSparkles, IconX } from '@hanzo/icons'
 
 import { RenderKeybind } from 'lib/components/Shortcuts/ShortcutMenu'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'

@@ -57,7 +57,7 @@ Categorize changed files to determine which agents are relevant:
 | `*.py` (Celery tasks)                                 | reliability, performance, data-integrity           |
 | `*.rs` (Rust services)                                | security, performance, compatibility, reliability  |
 | `*.tsx`, `*.ts` (frontend)                            | frontend, security, performance, copy              |
-| `*.sql`, Datastore queries                           | database, performance, data-integrity              |
+| `*.sql`, Datastore queries                            | database, performance, data-integrity              |
 | Helm charts, ArgoCD, k8s                              | compatibility, reliability                         |
 | `requirements*.txt`, `pyproject.toml`, `package.json` | security, compatibility                            |
 | SDK/extension code                                    | compatibility, frontend, security, copy            |

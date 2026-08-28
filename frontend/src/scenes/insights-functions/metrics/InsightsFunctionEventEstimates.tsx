@@ -17,8 +17,9 @@ import { insightsFunctionConfigurationLogic } from '../configuration/insightsFun
 const EVENT_THRESHOLD_ALERT_LEVEL = 8000
 
 export function InsightsFunctionEventEstimates(): JSX.Element | null {
-    const { sparkline, sparklineLoading, eventsDataTableNode, showEventsList, type, configuration } =
-        useValues(insightsFunctionConfigurationLogic)
+    const { sparkline, sparklineLoading, eventsDataTableNode, showEventsList, type, configuration } = useValues(
+        insightsFunctionConfigurationLogic
+    )
 
     const { setShowEventsList } = useActions(insightsFunctionConfigurationLogic)
 
@@ -74,9 +75,7 @@ export function InsightsFunctionEventEstimates(): JSX.Element | null {
 
                     {hasMasking && <p>The estimate does not take into account trigger options.</p>}
 
-                    {'warning' in sparkline && sparkline.warning && (
-                        <Banner type="info">{sparkline.warning}</Banner>
-                    )}
+                    {'warning' in sparkline && sparkline.warning && <Banner type="info">{sparkline.warning}</Banner>}
                     <Sparkline type="bar" className="w-full h-20" data={sparkline.data} labels={sparkline.labels} />
                 </>
             ) : sparklineLoading ? (

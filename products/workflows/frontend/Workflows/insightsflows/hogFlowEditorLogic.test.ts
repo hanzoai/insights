@@ -522,7 +522,9 @@ describe('hogFlowEditorLogic', () => {
         // kea-test-utils consumes matched actions in order, so awaiting one setNodesRaw per
         // rebuild is the deterministic "layout finished" signal.
         const applyFlow = async (flow: InsightsFlow): Promise<void> => {
-            await expectLogic(logic, () => logic.actions.resetFlowFromInsightsFlow(flow)).toDispatchActions(['setNodesRaw'])
+            await expectLogic(logic, () => logic.actions.resetFlowFromInsightsFlow(flow)).toDispatchActions([
+                'setNodesRaw',
+            ])
         }
 
         beforeEach(async () => {

@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Skeleton, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { webAnalyticsLogic } from 'scenes/web-analytics/webAnalyticsLogic'
 

@@ -5,8 +5,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { teamLogic } from 'scenes/teamLogic'

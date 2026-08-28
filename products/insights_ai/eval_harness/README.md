@@ -60,21 +60,21 @@ python -m products.insights_ai.eval_harness.harness --provider modal
 python -m products.insights_ai.eval_harness.harness --list
 ```
 
-| Flag                             | Meaning                                                                          |
-| -------------------------------- | -------------------------------------------------------------------------------- |
-| `--eval <substr>`                | Only run cases whose name contains the substring.                                |
-| `--provider {docker,modal}`      | Where sandboxes run. Default `docker`.                                           |
-| `--max-sandboxes N`              | Cap concurrently live sandboxes across all suites.                               |
-| `--agent-model <model>`          | Model the sandboxed agent runs against, pinned for stable cross-run comparison.  |
-| `--agent-runtime {claude,codex}` | Agent runtime serving the model. Default `claude`.                               |
-| `--reasoning-effort <effort>`    | Agent reasoning effort; valid values depend on runtime+model.                    |
-| `--keep-sandbox-containers`      | Skip the end-of-run Docker sweep, to inspect a leftover container. Docker only.  |
+| Flag                             | Meaning                                                                           |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| `--eval <substr>`                | Only run cases whose name contains the substring.                                 |
+| `--provider {docker,modal}`      | Where sandboxes run. Default `docker`.                                            |
+| `--max-sandboxes N`              | Cap concurrently live sandboxes across all suites.                                |
+| `--agent-model <model>`          | Model the sandboxed agent runs against, pinned for stable cross-run comparison.   |
+| `--agent-runtime {claude,codex}` | Agent runtime serving the model. Default `claude`.                                |
+| `--reasoning-effort <effort>`    | Agent reasoning effort; valid values depend on runtime+model.                     |
+| `--keep-sandbox-containers`      | Skip the end-of-run Docker sweep, to inspect a leftover container. Docker only.   |
 | `--rebuild-sandbox-image`        | Force a rebuild of the `insights-sandbox-base` image before the run. Docker only. |
-| `--create-db`                    | Rebuild the eval test database instead of reusing it.                            |
-| `--case-timeout <seconds>`       | Agent-run budget (minimum 1 second), started after the case's team setup.        |
-| `--trials N`                     | Run every case N times (Braintrust trials), for variance on stochastic agents.   |
-| `--fail-under <fraction>`        | Exit nonzero when the mean score across all experiments falls below this (0-1).  |
-| `--list`                         | Print the discovered suite ids (with their kinds) and exit.                      |
+| `--create-db`                    | Rebuild the eval test database instead of reusing it.                             |
+| `--case-timeout <seconds>`       | Agent-run budget (minimum 1 second), started after the case's team setup.         |
+| `--trials N`                     | Run every case N times (Braintrust trials), for variance on stochastic agents.    |
+| `--fail-under <fraction>`        | Exit nonzero when the mean score across all experiments falls below this (0-1).   |
+| `--list`                         | Print the discovered suite ids (with their kinds) and exit.                       |
 
 Sandbox-only flags (`--provider`, `--max-sandboxes`, `--agent-runtime`, `--reasoning-effort`, `--keep-sandbox-containers`, `--rebuild-sandbox-image`) are rejected in preflight when no selected suite is sandboxed, instead of being silently ignored.
 
@@ -140,9 +140,9 @@ The per-case timeout starts after team setup, so neither sandbox nor setup queue
 
 Each eval module declares how its suites execute with a module-level `SUITE_KIND` (from `products.insights_ai.eval_harness.harness.requirements`); a module without one is sandboxed.
 
-| Kind                | Marker                            | What runs per case                      | Infrastructure booted               |
-| ------------------- | --------------------------------- | --------------------------------------- | ----------------------------------- |
-| sandboxed (default) | none, or `SuiteKind.SANDBOXED`    | the real coding agent in a real sandbox | everything                          |
+| Kind                | Marker                            | What runs per case                      | Infrastructure booted                    |
+| ------------------- | --------------------------------- | --------------------------------------- | ---------------------------------------- |
+| sandboxed (default) | none, or `SuiteKind.SANDBOXED`    | the real coding agent in a real sandbox | everything                               |
 | one-shot            | `SUITE_KIND = SuiteKind.ONE_SHOT` | one in-process model invocation         | test database, personinsights, demo data |
 
 The harness boots the union of what the selected suites require, and a suite that under-declares its kind fails loudly when its runner finds the infrastructure it needed was never booted.

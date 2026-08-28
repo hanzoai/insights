@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
-import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Modal } from 'lib/elements/Modal'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { urls } from 'scenes/urls'

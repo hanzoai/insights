@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconApps, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Input, Tag, Link } from '@hanzo/elements'
+import { IconApps, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -46,14 +46,8 @@ function PropertyRow({ property }: { property: SchemaPropertyGroupProperty }): J
                 <PropertyTypeTag propertyName={property.name} schemaPropertyType={property.property_type} />
             </div>
             <div className="w-24 flex gap-1 flex-wrap">
-                {property.is_required ? (
-                    <Tag type="danger">Required</Tag>
-                ) : (
-                    <Tag type="muted">Optional</Tag>
-                )}
-                {property.is_required && property.is_optional_in_types && (
-                    <Tag type="muted">Optional in types</Tag>
-                )}
+                {property.is_required ? <Tag type="danger">Required</Tag> : <Tag type="muted">Optional</Tag>}
+                {property.is_required && property.is_optional_in_types && <Tag type="muted">Optional in types</Tag>}
             </div>
             <div className="flex-1 text-muted">{property.description || '—'}</div>
         </div>

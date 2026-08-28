@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconFilter } from '@hanzo/icons'
 import { Popover } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isWebAnalyticsPropertyFilter } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconWithCount } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconWithCount } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { AnyPropertyFilter } from '~/types'

@@ -33,16 +33,16 @@ Raw rows (`insights:query-logs`) are the last step of an investigation, never th
 
 ## Tools
 
-| Tool                                                                  | Job                                                                                           |
-| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `insights:logs-services-create`                                        | Top-25 services with log_count, error_count, error_rate, sparkline. Orientation.              |
-| `insights:logs-patterns`                                               | Mine one window's message templates, ordered by frequency. "What is this stream saying?"      |
-| `insights:logs-patterns-diff`                                          | Diff templates between two windows: new / rate-shifted / gone. "What changed?"                |
+| Tool                                                                    | Job                                                                                           |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `insights:logs-services-create`                                         | Top-25 services with log_count, error_count, error_rate, sparkline. Orientation.              |
+| `insights:logs-patterns`                                                | Mine one window's message templates, ordered by frequency. "What is this stream saying?"      |
+| `insights:logs-patterns-diff`                                           | Diff templates between two windows: new / rate-shifted / gone. "What changed?"                |
 | `insights:logs-count` / `insights:logs-count-ranges`                    | Scalar and time-bucketed counts for a filter. Localize volume before pulling rows.            |
-| `insights:logs-sparkline-query`                                        | Volume over time broken down by severity or service (the one bucketed view with a breakdown). |
-| `insights:logs-facet-values-create`                                    | Distribution of severity/service (or a resource attribute) under a filter.                    |
+| `insights:logs-sparkline-query`                                         | Volume over time broken down by severity or service (the one bucketed view with a breakdown). |
+| `insights:logs-facet-values-create`                                     | Distribution of severity/service (or a resource attribute) under a filter.                    |
 | `insights:logs-attributes-list` / `insights:logs-attribute-values-list` | Discover attribute keys and values before building filters.                                   |
-| `insights:query-logs`                                                  | Raw rows. Endpoint of every drill-down, entry point of none.                                  |
+| `insights:query-logs`                                                   | Raw rows. Endpoint of every drill-down, entry point of none.                                  |
 
 Each tool's own description documents its parameters and response shape — read it before calling.
 

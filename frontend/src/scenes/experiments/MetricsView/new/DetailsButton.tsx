@@ -1,5 +1,5 @@
-import { IconGraph } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconGraph } from '@hanzo/icons'
 
 import { ExperimentMetric } from '~/queries/schema/schema-general'
 

@@ -1,15 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { Button, Checkbox, ColorPicker, Input, Label, Select, Tag } from '@hanzo/elements'
 import { IconPlusSmall, IconTrash } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    ColorPicker,
-    Input,
-    Label,
-    Select,
-    Tag,
-} from '@hanzo/elements'
 
 import { getSeriesColorPalette } from 'lib/colors'
 

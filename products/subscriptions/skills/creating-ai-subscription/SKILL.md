@@ -37,8 +37,8 @@ re-enable it, send a test delivery, or delete it.
 
 ## Tools
 
-| Tool                                         | Purpose                                             |
-| -------------------------------------------- | --------------------------------------------------- |
+| Tool                                          | Purpose                                             |
+| --------------------------------------------- | --------------------------------------------------- |
 | `insights:subscriptions-create`               | Create the recurring prompt subscription            |
 | `insights:subscriptions-list`                 | Confirm it landed; inspect existing subscriptions   |
 | `insights:subscriptions-partial-update`       | Edit, disable (`enabled: false`), or re-enable it   |

@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { organizationLogic } from 'scenes/organizationLogic'

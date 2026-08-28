@@ -91,7 +91,7 @@ retrain or serving change.
 
 | Artifact                                        | Source of truth for            | Relationship           |
 | ----------------------------------------------- | ------------------------------ | ---------------------- |
-| `fetch_features_sql()` final SELECT aliases     | What Datastore returns        | == `FEATURE_RANGES`    |
+| `fetch_features_sql()` final SELECT aliases     | What Datastore returns         | == `FEATURE_RANGES`    |
 | `FEATURE_RANGES` keys in `features.py`          | Runtime dtype/range validation | == SQL aliases         |
 | `booster.feature_names` in the S3-hosted `.ubj` | What XGBoost predicts on       | ⊆ the SQL / ranges set |
 

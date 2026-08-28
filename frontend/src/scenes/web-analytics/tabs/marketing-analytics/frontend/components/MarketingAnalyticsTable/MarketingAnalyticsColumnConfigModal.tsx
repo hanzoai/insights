@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconEye, IconHide, IconPin, IconPinFilled } from '@hanzo/icons'
 import { Button, Checkbox, Modal, Select } from '@hanzo/elements'
+import { IconEye, IconHide, IconPin, IconPinFilled } from '@hanzo/icons'
 
 import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'
 

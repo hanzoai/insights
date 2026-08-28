@@ -109,13 +109,8 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": [
-        "function"
-    ],
+    "billable_action_types": ["function"],
     "image_url": null,
-    "tags": [
-        "webhook",
-        "upgrade"
-    ],
+    "tags": ["webhook", "upgrade"],
     "scope": "global"
 }

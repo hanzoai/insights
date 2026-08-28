@@ -1,4 +1,5 @@
 import { deepEqual as equal } from 'fast-equals'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -12,7 +13,6 @@ import {
     reducers,
     selectors,
 } from 'kea'
-import insights from 'insights-js'
 
 import { zoomDateRange } from 'lib/components/DateFilter/DateRangePicker'
 import { DEFAULT_UNIVERSAL_GROUP_FILTER } from 'lib/components/UniversalFilters/constants'

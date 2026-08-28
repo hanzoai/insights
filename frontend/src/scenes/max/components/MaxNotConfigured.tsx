@@ -1,5 +1,5 @@
-import { IconLock } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconLock } from '@hanzo/icons'
 
 import { Logomark } from 'lib/brand'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'

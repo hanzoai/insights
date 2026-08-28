@@ -21,11 +21,7 @@ export function FocusModeOnboardingModal(): JSX.Element {
                     <Button type="secondary" onClick={dismissFocusModeOnboarding}>
                         Skip for now
                     </Button>
-                    <Button
-                        type="primary"
-                        onClick={startFocusModeOnboarding}
-                        data-attr="focus-mode-onboarding-start"
-                    >
+                    <Button type="primary" onClick={startFocusModeOnboarding} data-attr="focus-mode-onboarding-start">
                         Set up focus mode
                     </Button>
                 </div>

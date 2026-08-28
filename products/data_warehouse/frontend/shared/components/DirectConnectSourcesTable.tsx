@@ -16,12 +16,7 @@ export function DirectConnectSourcesTable(): JSX.Element {
     return (
         <div>
             <div className="flex gap-2 justify-between items-center mb-4">
-                <Input
-                    type="search"
-                    placeholder="Search..."
-                    onChange={setDirectSearchTerm}
-                    value={directSearchTerm}
-                />
+                <Input type="search" placeholder="Search..." onChange={setDirectSearchTerm} value={directSearchTerm} />
             </div>
             <Table
                 id="direct-connect-sources"

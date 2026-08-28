@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconOpenSidebar } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
+import { IconOpenSidebar } from '@hanzo/icons'
 
 import { captureAccessControlEvent, resourceTypeToString } from 'lib/utils/accessControlUtils'
 import { toSentenceCase } from 'lib/utils/strings'

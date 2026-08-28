@@ -1,7 +1,6 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconInfo, IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -17,6 +16,7 @@ import {
     Link,
     Tooltip,
 } from '@hanzo/elements'
+import { IconInfo, IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
 
 import type { DataColorToken } from 'lib/colors'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -594,12 +594,7 @@ export function CustomPropertyModal(): JSX.Element {
                                     </Field>
                                     <Field name="isEnabled">
                                         {({ value, onChange }) => (
-                                            <Switch
-                                                checked={value}
-                                                onChange={onChange}
-                                                label="Sync enabled"
-                                                bordered
-                                            />
+                                            <Switch checked={value} onChange={onChange} label="Sync enabled" bordered />
                                         )}
                                     </Field>
                                 </>

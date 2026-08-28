@@ -16,9 +16,9 @@ import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedAr
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TeamMembershipLevel } from 'lib/constants'
-import { IconTuning, SortableDragIcon } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Checkbox } from 'lib/elements/Checkbox'
+import { IconTuning, SortableDragIcon } from 'lib/elements/icons'
 import { Modal } from 'lib/elements/Modal'
 import { Tooltip } from 'lib/elements/Tooltip'
 

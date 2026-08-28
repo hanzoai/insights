@@ -1,8 +1,8 @@
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TZLabel } from 'lib/components/TZLabel'
-import { Skeleton } from 'lib/elements/Skeleton'
 import { Link } from 'lib/elements/Link'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
 

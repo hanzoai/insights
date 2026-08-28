@@ -5,8 +5,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { useActions, useValues } from 'kea'
 import { Group } from 'kea-forms'
 
-import { IconPlusSmall, IconTrash, IconWarning } from '@hanzo/icons'
 import { Button, Checkbox, Dialog, Input, Select, Tag, Tooltip } from '@hanzo/elements'
+import { IconPlusSmall, IconTrash, IconWarning } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { QuestionBranchingInput } from 'scenes/surveys/components/question-branching/QuestionBranchingInput'
@@ -513,9 +513,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                     <Input
                                         value={(displayQuestion as LinkSurveyQuestion).link || ''}
                                         placeholder={
-                                            editingLanguage
-                                                ? question.link || 'https://hanzo.ai'
-                                                : 'https://hanzo.ai'
+                                            editingLanguage ? question.link || 'https://hanzo.ai' : 'https://hanzo.ai'
                                         }
                                         onChange={(val) => handleQuestionValueChange('link', val)}
                                         className={getFieldErrorClass('link')}
@@ -718,9 +716,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                                                                     className={getChoiceErrorClass(index)}
                                                                     suffix={
                                                                         isOpenChoice ? (
-                                                                            <Tag type="highlight">
-                                                                                open-ended
-                                                                            </Tag>
+                                                                            <Tag type="highlight">open-ended</Tag>
                                                                         ) : null
                                                                     }
                                                                 />

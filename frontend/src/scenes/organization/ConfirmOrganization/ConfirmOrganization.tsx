@@ -85,13 +85,7 @@ export function ConfirmOrganization(): JSX.Element {
                 <SignupRoleSelect />
                 <SignupReferralSource disabled={isConfirmOrganizationSubmitting} />
 
-                <Button
-                    htmlType="submit"
-                    fullWidth
-                    center
-                    type="primary"
-                    loading={isConfirmOrganizationSubmitting}
-                >
+                <Button htmlType="submit" fullWidth center type="primary" loading={isConfirmOrganizationSubmitting}>
                     Create organization
                 </Button>
             </Form>

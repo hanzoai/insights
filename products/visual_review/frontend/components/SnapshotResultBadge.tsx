@@ -1,5 +1,5 @@
-import { IconCheck } from '@hanzo/icons'
 import { Tag, TagType, Tooltip } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
 
 export type SnapshotResult = 'unchanged' | 'changed' | 'new' | 'removed'
 

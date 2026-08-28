@@ -1,14 +1,14 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconBolt, IconCheckCircle, IconChevronRight, IconCompass, IconGithub, IconServer } from '@hanzo/icons'
 import { Modal, Skeleton, Tag, Link } from '@hanzo/elements'
+import { IconBolt, IconCheckCircle, IconChevronRight, IconCompass, IconGithub, IconServer } from '@hanzo/icons'
 import { ServerIcon } from '@hanzo/products-mcp-store/frontend/scene/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
+import { IconSlack } from 'lib/elements/icons'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { slackChannelDisplayName } from 'lib/integrations/slackChannel'
-import { IconSlack } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { cn } from 'lib/utils/css-classes'
 import { GithubIntegration } from 'scenes/integrations/components/GithubIntegration'

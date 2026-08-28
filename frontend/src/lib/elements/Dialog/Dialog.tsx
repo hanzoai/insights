@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { ReactNode, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Root, createRoot } from 'react-dom/client'
 

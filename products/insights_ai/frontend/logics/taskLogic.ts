@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, kea, key, listeners, path, props, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

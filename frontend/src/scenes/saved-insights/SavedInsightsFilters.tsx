@@ -134,8 +134,8 @@ const FeatureFlagInsightsToggle = ({
             title={
                 <div>
                     <p>
-                        Insights automatically creates insights by default for feature flags to help you understand their
-                        performance.
+                        Insights automatically creates insights by default for feature flags to help you understand
+                        their performance.
                     </p>
                     <p className="mb-0">
                         Use this toggle to hide these auto-generated insights from your insights list.
@@ -144,12 +144,7 @@ const FeatureFlagInsightsToggle = ({
             }
             placement="top"
         >
-            <Button
-                icon={<IconFlag />}
-                onClick={() => onToggle(!hideFeatureFlagInsights)}
-                type="tertiary"
-                size="small"
-            >
+            <Button icon={<IconFlag />} onClick={() => onToggle(!hideFeatureFlagInsights)} type="tertiary" size="small">
                 Hide feature flag insights: <Switch checked={hideFeatureFlagInsights || false} className="ml-1" />
             </Button>
         </Tooltip>

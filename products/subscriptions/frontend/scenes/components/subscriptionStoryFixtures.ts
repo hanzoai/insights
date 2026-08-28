@@ -125,14 +125,16 @@ export const MOCK_SUBSCRIPTION_DELIVERIES: SubscriptionDeliveryApi[] = [
         ai_report_diagnostics: [
             {
                 description: 'Daily active users (7-day total)',
-                insightsql: 'SELECT count(DISTINCT person_id) AS dau FROM events WHERE timestamp >= now() - INTERVAL 7 DAY',
+                insightsql:
+                    'SELECT count(DISTINCT person_id) AS dau FROM events WHERE timestamp >= now() - INTERVAL 7 DAY',
                 ok: true,
                 error_type: null,
                 human_readable_error: null,
             },
             {
                 description: 'New signups',
-                insightsql: "SELECT count() AS signups FROM events WHERE event = 'signed_up' AND timestamp >= now() - INTERVAL 7 DAY",
+                insightsql:
+                    "SELECT count() AS signups FROM events WHERE event = 'signed_up' AND timestamp >= now() - INTERVAL 7 DAY",
                 ok: true,
                 error_type: null,
                 human_readable_error: null,
@@ -161,8 +163,7 @@ export const MOCK_SUBSCRIPTION_DELIVERIES: SubscriptionDeliveryApi[] = [
         trigger_type: 'scheduled',
         scheduled_at: '2026-04-06T17:00:00Z',
         target_type: 'email',
-        target_value:
-            'matt.p@hanzo.ai, rollups@hanzo.ai, exec@hanzo.ai, analytics@hanzo.ai, oncall@hanzo.ai',
+        target_value: 'matt.p@hanzo.ai, rollups@hanzo.ai, exec@hanzo.ai, analytics@hanzo.ai, oncall@hanzo.ai',
         exported_asset_ids: [],
         content_snapshot: {},
         ai_report: null,

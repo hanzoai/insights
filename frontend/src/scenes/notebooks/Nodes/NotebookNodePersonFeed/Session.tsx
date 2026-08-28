@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCollapse, IconExpand, IconRewindPlay } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconRewindPlay } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'

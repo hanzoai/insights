@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconFilter, IconWarning } from '@hanzo/icons'
 import { Button, Menu, MenuItems } from '@hanzo/elements'
+import { IconFilter, IconWarning } from '@hanzo/icons'
 
 import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 

@@ -31,8 +31,8 @@ import '../Nodes/NotebookNodeUsageMetrics'
 import '../Nodes/NotebookNodeZendeskTickets'
 
 import clsx from 'clsx'
-import { BindLogic, useMountedLogic, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useMountedLogic, useValues } from 'kea'
 import {
     type CSSProperties,
     type PointerEvent as ReactPointerEvent,
@@ -43,8 +43,8 @@ import {
     useRef,
 } from 'react'
 
-import { IconComment, IconImage } from '@hanzo/icons'
 import { Button, Input, TextArea, toast } from '@hanzo/elements'
+import { IconComment, IconImage } from '@hanzo/icons'
 
 import {
     COMMON_INSERT_COMMAND_CATEGORY,
@@ -64,9 +64,9 @@ import {
 } from 'lib/components/MarkdownNotebook/types'
 import { isNotebookPropValue, toSerializablePropValue } from 'lib/components/MarkdownNotebook/utils'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { FileInput } from 'lib/elements/FileInput'
 import { Spinner } from 'lib/elements/Spinner'
+import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { type FeatureFlagsSet } from 'lib/logic/featureFlagLogic'
 import { uuid } from 'lib/utils/dom'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'

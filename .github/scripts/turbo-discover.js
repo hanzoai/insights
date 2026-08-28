@@ -174,9 +174,15 @@ function quarantinedSkipProducts(jsonText, todayISO) {
     }
     const products = new Set()
     for (const entry of parsed.entries) {
-        if (typeof entry?.id !== 'string' || !entry.id.startsWith('product:')) {continue}
-        if ((entry.runner ?? 'pytest') !== 'pytest' || entry.mode !== 'skip') {continue}
-        if (typeof entry.expires !== 'string' || entry.expires < todayISO) {continue}
+        if (typeof entry?.id !== 'string' || !entry.id.startsWith('product:')) {
+            continue
+        }
+        if ((entry.runner ?? 'pytest') !== 'pytest' || entry.mode !== 'skip') {
+            continue
+        }
+        if (typeof entry.expires !== 'string' || entry.expires < todayISO) {
+            continue
+        }
         products.add(entry.id.slice('product:'.length))
     }
     return products
@@ -262,7 +268,9 @@ function parseTachModules(tomlText) {
         const pathMatch = block.match(/path\s*=\s*"([^"]+)"/)
         if (!pathMatch) {
             if (/^\s*path\s*=/m.test(block)) {
-                throw new Error('unsupported `path` syntax in a tach.toml module block (expected a double-quoted string)')
+                throw new Error(
+                    'unsupported `path` syntax in a tach.toml module block (expected a double-quoted string)'
+                )
             }
             continue
         }
@@ -280,7 +288,9 @@ function parseTachModules(tomlText) {
             )
         }
         const modulePath = pathMatch[1]
-        if (!modulePath.startsWith(TACH_MODULE_PREFIX)) {continue}
+        if (!modulePath.startsWith(TACH_MODULE_PREFIX)) {
+            continue
+        }
         const product = modulePath.slice(TACH_MODULE_PREFIX.length)
         const deps = [...dependsMatch[1].matchAll(/"([^"]+)"/g)]
             .map((m) => m[1])
@@ -319,7 +329,9 @@ function tachDependents(changedProducts, moduleGraph, { direct = false } = {}) {
     const reverse = new Map()
     for (const [product, deps] of moduleGraph) {
         for (const dep of deps) {
-            if (!reverse.has(dep)) {reverse.set(dep, [])}
+            if (!reverse.has(dep)) {
+                reverse.set(dep, [])
+            }
             reverse.get(dep).push(product)
         }
     }
@@ -330,9 +342,13 @@ function tachDependents(changedProducts, moduleGraph, { direct = false } = {}) {
     while (queue.length > 0) {
         const current = queue.shift()
         for (const dependent of reverse.get(current) || []) {
-            if (visited.has(dependent) || changedSet.has(dependent)) {continue}
+            if (visited.has(dependent) || changedSet.has(dependent)) {
+                continue
+            }
             visited.add(dependent)
-            if (!direct) {queue.push(dependent)}
+            if (!direct) {
+                queue.push(dependent)
+            }
         }
     }
     return [...visited].map(moduleToProduct)
@@ -346,13 +362,17 @@ function loadTachModuleGraph() {
     try {
         text = fs.readFileSync(TACH_TOML_FILE, 'utf-8')
     } catch (e) {
-        console.error(`::warning::Could not read ${TACH_TOML_FILE} (${e.message}) — falling back to testing all products`)
+        console.error(
+            `::warning::Could not read ${TACH_TOML_FILE} (${e.message}) — falling back to testing all products`
+        )
         return null
     }
     try {
         return parseTachModules(text)
     } catch (e) {
-        console.error(`::warning::Could not parse ${TACH_TOML_FILE} (${e.message}) — falling back to testing all products`)
+        console.error(
+            `::warning::Could not parse ${TACH_TOML_FILE} (${e.message}) — falling back to testing all products`
+        )
         return null
     }
 }
@@ -416,11 +436,15 @@ function productPrefix(product) {
 // Check if .test_durations is stale for a product by comparing on-disk test
 // file coverage vs recorded entries. Returns { stale, fileCount, coveredCount, coverage }.
 function checkProductStaleness(product, durations) {
-    if (!durations) {return { stale: true, fileCount: 0, coveredCount: 0, coverage: 0 }}
+    if (!durations) {
+        return { stale: true, fileCount: 0, coveredCount: 0, coverage: 0 }
+    }
     const dirName = productToModule(product)
     const productDir = path.join('products', dirName)
     const testFiles = collectTestFiles(productDir)
-    if (testFiles.length === 0) {return { stale: false, fileCount: 0, coveredCount: 0, coverage: 0 }}
+    if (testFiles.length === 0) {
+        return { stale: false, fileCount: 0, coveredCount: 0, coverage: 0 }
+    }
 
     const prefix = productPrefix(product)
     // Build set of file paths that have at least one entry in durations
@@ -435,7 +459,9 @@ function checkProductStaleness(product, durations) {
 
     let coveredCount = 0
     for (const file of testFiles) {
-        if (coveredFiles.has(file)) {coveredCount++}
+        if (coveredFiles.has(file)) {
+            coveredCount++
+        }
     }
 
     const coverage = coveredCount / testFiles.length
@@ -513,21 +539,37 @@ const DJANGO_SEGMENTS = {
             'insights/api/test/dashboards/test_dashboard.py',
             'ee/datastore/',
         ],
-        exclude: ['insights/temporal/', 'insights/dags/', 'common/scriptvm/', 'insights/insightsql_queries/', 'insights/insightsql/'],
+        exclude: [
+            'insights/temporal/',
+            'insights/dags/',
+            'common/scriptvm/',
+            'insights/insightsql_queries/',
+            'insights/insightsql/',
+        ],
     },
     Temporal: {
-        include: ['insights/temporal/', 'products/batch_exports/backend/tests/temporal/', 'products/tasks/backend/temporal/'],
+        include: [
+            'insights/temporal/',
+            'products/batch_exports/backend/tests/temporal/',
+            'products/tasks/backend/temporal/',
+        ],
         exclude: [],
     },
 }
 
 function getSegmentDuration(segment, durations) {
-    if (!durations) {return 0}
+    if (!durations) {
+        return 0
+    }
     const { include, exclude } = DJANGO_SEGMENTS[segment]
     let total = 0
     for (const [test, dur] of Object.entries(durations)) {
-        if (!include.some((p) => test.startsWith(p))) {continue}
-        if (exclude.some((p) => test.startsWith(p))) {continue}
+        if (!include.some((p) => test.startsWith(p))) {
+            continue
+        }
+        if (exclude.some((p) => test.startsWith(p))) {
+            continue
+        }
         total += dur
     }
     return total
@@ -538,7 +580,9 @@ const DJANGO_FALLBACK_SHARDS = { Core: 38, CorePOE: 7, Temporal: 7 }
 
 function calculateShards(totalWorkSeconds, overheadSeconds) {
     const testBudget = DJANGO_TARGET_WALL_SECONDS - overheadSeconds
-    if (testBudget <= 0) {return DJANGO_MAX_SHARDS}
+    if (testBudget <= 0) {
+        return DJANGO_MAX_SHARDS
+    }
     const shards = Math.ceil((totalWorkSeconds * DJANGO_SAFETY_FACTOR) / testBudget)
     return Math.max(DJANGO_MIN_SHARDS, Math.min(DJANGO_MAX_SHARDS, shards))
 }
@@ -581,15 +625,16 @@ function buildMatrix(products, durations) {
         // Staleness guard: if .test_durations has poor coverage for this product,
         // use a file-count-based fallback to avoid under-sharding.
         if (staleness.stale && staleness.fileCount > 0) {
-            const fallbackRaw = staleness.fileCount * STALENESS_FALLBACK_SECONDS_PER_FILE + PRODUCT_PER_PRODUCT_OVERHEAD_SECONDS
+            const fallbackRaw =
+                staleness.fileCount * STALENESS_FALLBACK_SECONDS_PER_FILE + PRODUCT_PER_PRODUCT_OVERHEAD_SECONDS
             if (fallbackRaw > raw) {
                 console.error(
                     `  ${product}: .test_durations stale — ${staleness.coveredCount}/${staleness.fileCount} test files covered ` +
-                    `(${(staleness.coverage * 100).toFixed(0)}%). Using fallback estimate: ${(fallbackRaw / 60).toFixed(1)} min (was ${(raw / 60).toFixed(1)} min)`
+                        `(${(staleness.coverage * 100).toFixed(0)}%). Using fallback estimate: ${(fallbackRaw / 60).toFixed(1)} min (was ${(raw / 60).toFixed(1)} min)`
                 )
                 console.error(
                     `::warning title=Stale .test_durations::Product '${product}' has only ${staleness.coveredCount}/${staleness.fileCount} ` +
-                    `test files covered in .test_durations. Duration estimates are unreliable — using fallback sharding.`
+                        `test files covered in .test_durations. Duration estimates are unreliable — using fallback sharding.`
                 )
                 raw = fallbackRaw
             }
@@ -624,9 +669,7 @@ function buildMatrix(products, durations) {
     }
 
     for (const bucket of packProducts(packable, durations)) {
-        console.error(
-            `  bucket (${(bucket.cost / 60).toFixed(1)} min effective): ${bucket.products.join(', ')}`
-        )
+        console.error(`  bucket (${(bucket.cost / 60).toFixed(1)} min effective): ${bucket.products.join(', ')}`)
         matrix.push({
             group: bucket.products.join(', '),
             filters: bucket.products.map((p) => `--filter=@hanzo/products-${p}`).join(' '),
@@ -651,160 +694,174 @@ module.exports = {
 
 // --- Main ---
 if (require.main === module) {
+    const legacyChanged = process.env.LEGACY_CHANGED === 'true'
+    const schemaChanged = process.env.SCHEMA_CHANGED === 'true'
 
-const legacyChanged = process.env.LEGACY_CHANGED === 'true'
-const schemaChanged = process.env.SCHEMA_CHANGED === 'true'
-
-let allTestTasks, affectedTestTasks, affectedContractTasks, contractTasks
-try {
-    allTestTasks = parseTurboTasks(runTurbo(['run', 'backend:test', '--dry-run=json']))
-    if (!legacyChanged) {
-        console.error(`Turbo affected base: ${process.env.TURBO_SCM_BASE || '(default)'}`)
-        console.error(`Turbo affected head: ${process.env.TURBO_SCM_HEAD || '(default)'}`)
-        affectedTestTasks = parseAffectedTasks(runTurbo(affectedArgs('backend:test')))
-        affectedContractTasks = parseAffectedTasks(runTurbo(affectedArgs('backend:contract-check')))
-        contractTasks = parseTurboTasks(runTurbo(['run', 'backend:contract-check', '--dry-run=json']))
+    let allTestTasks, affectedTestTasks, affectedContractTasks, contractTasks
+    try {
+        allTestTasks = parseTurboTasks(runTurbo(['run', 'backend:test', '--dry-run=json']))
+        if (!legacyChanged) {
+            console.error(`Turbo affected base: ${process.env.TURBO_SCM_BASE || '(default)'}`)
+            console.error(`Turbo affected head: ${process.env.TURBO_SCM_HEAD || '(default)'}`)
+            affectedTestTasks = parseAffectedTasks(runTurbo(affectedArgs('backend:test')))
+            affectedContractTasks = parseAffectedTasks(runTurbo(affectedArgs('backend:contract-check')))
+            contractTasks = parseTurboTasks(runTurbo(['run', 'backend:contract-check', '--dry-run=json']))
+        }
+    } catch (e) {
+        console.error(`turbo discovery failed: ${e.message}`)
+        if (e.stderr) {
+            console.error(e.stderr.toString().slice(0, 1000))
+        }
+        process.exit(1)
     }
-} catch (e) {
-    console.error(`turbo discovery failed: ${e.message}`)
-    if (e.stderr) {
-        console.error(e.stderr.toString().slice(0, 1000))
-    }
-    process.exit(1)
-}
-const allProducts = getAllProducts(allTestTasks)
-const allProductSet = new Set(allProducts)
+    const allProducts = getAllProducts(allTestTasks)
+    const allProductSet = new Set(allProducts)
 
-let products
-let runLegacy
+    let products
+    let runLegacy
 
-if (legacyChanged) {
-    console.error('Legacy code changed — testing all products')
-    products = allProducts
-    runLegacy = true
-} else {
-    const isolatedProducts = getIsolatedProducts(contractTasks)
-    const affectedProducts = getAffectedTaskProducts(affectedTestTasks)
-    const nonIsolatedAffectedProducts = affectedProducts.filter((p) => !isolatedProducts.has(p))
-
-    console.error(`Isolated products (have contract-check): ${JSON.stringify([...isolatedProducts].sort())}`)
-    console.error(`Affected products: ${JSON.stringify(affectedProducts)}`)
-    logAffectedReasons('backend:test', affectedTestTasks)
-
-    if (nonIsolatedAffectedProducts.length > 0) {
-        // Non-isolated product changed — must test everything
-        console.error(
-            `Non-isolated products changed: ${JSON.stringify(nonIsolatedAffectedProducts)} — testing all products + Django`
-        )
+    if (legacyChanged) {
+        console.error('Legacy code changed — testing all products')
         products = allProducts
         runLegacy = true
-    } else if (affectedProducts.length > 0) {
-        // Only isolated products changed — check whether their contract surface was affected
-        const affectedProductSet = new Set(affectedProducts)
-        const affectedContracts = getAffectedTaskProducts(affectedContractTasks)
-            .filter((p) => affectedProductSet.has(p))
-        logAffectedReasons('backend:contract-check', affectedContractTasks)
-        if (affectedContracts.length > 0) {
-            console.error(`Isolated product contracts changed: ${JSON.stringify(affectedContracts)} — Django will run`)
-            runLegacy = true
-            const tachGraph = loadTachModuleGraph()
-            if (tachGraph === null) {
-                // Fail toward over-testing, like the quarantine loaders above: without the
-                // graph we cannot know which products depend on the changed contract, and
-                // guessing "none" silently recreates the gap this cascade exists to close.
-                console.error('Dependent cascade unavailable — testing all products rather than risk skipping a dependent')
-                products = allProducts
-            } else {
-                const dependents = tachDependents(affectedContracts, tachGraph).filter((p) => allProductSet.has(p))
-                if (dependents.length > 0) {
-                    console.error(
-                        `Dependent products cascaded in via tach.toml: ${JSON.stringify(dependents)} (transitively depend on ${JSON.stringify(affectedContracts)})`
-                    )
-                }
-                products = [...new Set([...affectedProducts, ...dependents])].sort()
-            }
-        } else {
-            console.error('Only isolated product internals changed — Django can be skipped')
-            runLegacy = false
-            products = affectedProducts
-        }
     } else {
-        console.error('No product changes detected')
-        products = []
-        runLegacy = false
-    }
+        const isolatedProducts = getIsolatedProducts(contractTasks)
+        const affectedProducts = getAffectedTaskProducts(affectedTestTasks)
+        const nonIsolatedAffectedProducts = affectedProducts.filter((p) => !isolatedProducts.has(p))
 
-    if (schemaChanged) {
-        const impact = analyzeSchemaImpact({ scmBase: process.env.TURBO_SCM_BASE })
-        console.error(`Schema impact: ${JSON.stringify({ kind: impact.kind, counts: impact.counts, reason: impact.reason })}`)
-        if (impact.kind === 'fallback') {
-            console.error(`Schema diff unavailable (${impact.reason}) — falling back to all products + Django`)
+        console.error(`Isolated products (have contract-check): ${JSON.stringify([...isolatedProducts].sort())}`)
+        console.error(`Affected products: ${JSON.stringify(affectedProducts)}`)
+        logAffectedReasons('backend:test', affectedTestTasks)
+
+        if (nonIsolatedAffectedProducts.length > 0) {
+            // Non-isolated product changed — must test everything
+            console.error(
+                `Non-isolated products changed: ${JSON.stringify(nonIsolatedAffectedProducts)} — testing all products + Django`
+            )
             products = allProducts
             runLegacy = true
-        } else {
-            if (impact.kind === 'impacting') {
-                console.error(`Schema-affected products: ${JSON.stringify(impact.affectedProducts)}`)
-                if (impact.wildcardProducts && impact.wildcardProducts.length > 0) {
+        } else if (affectedProducts.length > 0) {
+            // Only isolated products changed — check whether their contract surface was affected
+            const affectedProductSet = new Set(affectedProducts)
+            const affectedContracts = getAffectedTaskProducts(affectedContractTasks).filter((p) =>
+                affectedProductSet.has(p)
+            )
+            logAffectedReasons('backend:contract-check', affectedContractTasks)
+            if (affectedContracts.length > 0) {
+                console.error(
+                    `Isolated product contracts changed: ${JSON.stringify(affectedContracts)} — Django will run`
+                )
+                runLegacy = true
+                const tachGraph = loadTachModuleGraph()
+                if (tachGraph === null) {
+                    // Fail toward over-testing, like the quarantine loaders above: without the
+                    // graph we cannot know which products depend on the changed contract, and
+                    // guessing "none" silently recreates the gap this cascade exists to close.
                     console.error(
-                        `Products with unresolved schema module imports (always tested): ${JSON.stringify(impact.wildcardProducts)}`
+                        'Dependent cascade unavailable — testing all products rather than risk skipping a dependent'
                     )
+                    products = allProducts
+                } else {
+                    const dependents = tachDependents(affectedContracts, tachGraph).filter((p) => allProductSet.has(p))
+                    if (dependents.length > 0) {
+                        console.error(
+                            `Dependent products cascaded in via tach.toml: ${JSON.stringify(dependents)} (transitively depend on ${JSON.stringify(affectedContracts)})`
+                        )
+                    }
+                    products = [...new Set([...affectedProducts, ...dependents])].sort()
                 }
-                products = [...new Set([...products, ...impact.affectedProducts])].sort()
             } else {
-                console.error('Schema change is purely additive — no extra products needed')
+                console.error('Only isolated product internals changed — Django can be skipped')
+                runLegacy = false
+                products = affectedProducts
             }
-            // Core (insights/, ee/, etc.) imports schema heavily; always run Django on schema changes.
-            runLegacy = true
+        } else {
+            console.error('No product changes detected')
+            products = []
+            runLegacy = false
+        }
+
+        if (schemaChanged) {
+            const impact = analyzeSchemaImpact({ scmBase: process.env.TURBO_SCM_BASE })
+            console.error(
+                `Schema impact: ${JSON.stringify({ kind: impact.kind, counts: impact.counts, reason: impact.reason })}`
+            )
+            if (impact.kind === 'fallback') {
+                console.error(`Schema diff unavailable (${impact.reason}) — falling back to all products + Django`)
+                products = allProducts
+                runLegacy = true
+            } else {
+                if (impact.kind === 'impacting') {
+                    console.error(`Schema-affected products: ${JSON.stringify(impact.affectedProducts)}`)
+                    if (impact.wildcardProducts && impact.wildcardProducts.length > 0) {
+                        console.error(
+                            `Products with unresolved schema module imports (always tested): ${JSON.stringify(impact.wildcardProducts)}`
+                        )
+                    }
+                    products = [...new Set([...products, ...impact.affectedProducts])].sort()
+                } else {
+                    console.error('Schema change is purely additive — no extra products needed')
+                }
+                // Core (insights/, ee/, etc.) imports schema heavily; always run Django on schema changes.
+                runLegacy = true
+            }
         }
     }
-}
 
-// Kill switch: products named in the SKIP_PRODUCT_TESTS repo variable (comma-
-// separated) are dropped from the matrix without a code change — use it to stop
-// running, and blocking on, a product whose tests are temporarily too flaky.
-const skipProducts = new Set((process.env.SKIP_PRODUCT_TESTS || '').split(',').map((p) => p.trim()).filter(Boolean))
-if (skipProducts.size > 0) {
-    products = dropProducts(products, allProducts, skipProducts, 'SKIP_PRODUCT_TESTS')
-}
-
-const todayISO = new Date().toISOString().slice(0, 10)
-const quarantinedProducts = loadQuarantinedSkipProducts(todayISO)
-if (quarantinedProducts.size > 0) {
-    products = dropProducts(products, allProducts, quarantinedProducts, 'Quarantined products (mode: skip)')
-}
-
-// Un-quarantining must re-run the suite. Today the ci-backend `legacy` paths-
-// filter already forces a full run on any PR touching the quarantine file, so
-// this diff against the merge base rarely changes the outcome — it is the
-// backstop that keeps product re-runs correct if that coarse trigger is ever
-// narrowed (Turbo itself never sees .test_quarantine.json as a product input).
-if (process.env.TURBO_SCM_BASE) {
-    const baseQuarantined = loadBaseQuarantinedSkipProducts(process.env.TURBO_SCM_BASE, todayISO)
-    const allProductSet = new Set(allProducts)
-    const productSet = new Set(products)
-    for (const name of baseQuarantined) {
-        if (quarantinedProducts.has(name) || skipProducts.has(name)) {continue}
-        if (!allProductSet.has(name) || productSet.has(name)) {continue}
-        console.error(`Quarantine lifted for '${name}' since ${process.env.TURBO_SCM_BASE} — forced into matrix`)
-        products.push(name)
+    // Kill switch: products named in the SKIP_PRODUCT_TESTS repo variable (comma-
+    // separated) are dropped from the matrix without a code change — use it to stop
+    // running, and blocking on, a product whose tests are temporarily too flaky.
+    const skipProducts = new Set(
+        (process.env.SKIP_PRODUCT_TESTS || '')
+            .split(',')
+            .map((p) => p.trim())
+            .filter(Boolean)
+    )
+    if (skipProducts.size > 0) {
+        products = dropProducts(products, allProducts, skipProducts, 'SKIP_PRODUCT_TESTS')
     }
-    products.sort()
-}
 
-console.error(`Products to test: ${JSON.stringify(products)}`)
-console.error(`Run legacy (Django): ${runLegacy}`)
+    const todayISO = new Date().toISOString().slice(0, 10)
+    const quarantinedProducts = loadQuarantinedSkipProducts(todayISO)
+    if (quarantinedProducts.size > 0) {
+        products = dropProducts(products, allProducts, quarantinedProducts, 'Quarantined products (mode: skip)')
+    }
 
-const durations = loadTestDurations()
+    // Un-quarantining must re-run the suite. Today the ci-backend `legacy` paths-
+    // filter already forces a full run on any PR touching the quarantine file, so
+    // this diff against the merge base rarely changes the outcome — it is the
+    // backstop that keeps product re-runs correct if that coarse trigger is ever
+    // narrowed (Turbo itself never sees .test_quarantine.json as a product input).
+    if (process.env.TURBO_SCM_BASE) {
+        const baseQuarantined = loadBaseQuarantinedSkipProducts(process.env.TURBO_SCM_BASE, todayISO)
+        const allProductSet = new Set(allProducts)
+        const productSet = new Set(products)
+        for (const name of baseQuarantined) {
+            if (quarantinedProducts.has(name) || skipProducts.has(name)) {
+                continue
+            }
+            if (!allProductSet.has(name) || productSet.has(name)) {
+                continue
+            }
+            console.error(`Quarantine lifted for '${name}' since ${process.env.TURBO_SCM_BASE} — forced into matrix`)
+            products.push(name)
+        }
+        products.sort()
+    }
 
-console.error('\nDjango shard calculation:')
-const djangoShards = buildDjangoShards(durations)
+    console.error(`Products to test: ${JSON.stringify(products)}`)
+    console.error(`Run legacy (Django): ${runLegacy}`)
 
-const result = {
-    matrix: buildMatrix(products, durations),
-    run_legacy: runLegacy,
-    django_shards: djangoShards,
-}
-// eslint-disable-next-line no-console
-process.stdout.write(JSON.stringify(result) + '\n')
+    const durations = loadTestDurations()
 
+    console.error('\nDjango shard calculation:')
+    const djangoShards = buildDjangoShards(durations)
+
+    const result = {
+        matrix: buildMatrix(products, durations),
+        run_legacy: runLegacy,
+        django_shards: djangoShards,
+    }
+    // eslint-disable-next-line no-console
+    process.stdout.write(JSON.stringify(result) + '\n')
 } // end if (require.main === module)

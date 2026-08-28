@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useCallback, useMemo, type ErrorInfo } from 'react'
 
 import { DEFAULT_MARGINS, FunnelChart } from '@hanzo/quill-charts'

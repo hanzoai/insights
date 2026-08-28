@@ -104,8 +104,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                     <CalloutBox type="fyi" title="defaults option">
                         <Markdown>
                             The `defaults` option automatically configures Insights with recommended settings for new
-                            projects. See [SDK defaults](https://hanzo.ai/docs/libraries/js#sdk-defaults) for
-                            details.
+                            projects. See [SDK defaults](https://hanzo.ai/docs/libraries/js#sdk-defaults) for details.
                         </Markdown>
                     </CalloutBox>
                 </>

@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconPencil, IconTrash, IconWarning } from '@hanzo/icons'
 import { Checkbox, Dialog, Input, Menu, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconPencil, IconTrash, IconWarning } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Table, TableColumns, TableProps } from 'lib/elements/Table'

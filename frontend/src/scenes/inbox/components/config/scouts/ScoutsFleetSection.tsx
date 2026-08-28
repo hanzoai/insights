@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconCompass, IconSparkles } from '@hanzo/icons'
 import { Banner, Button, Skeleton } from '@hanzo/elements'
+import { IconCompass, IconSparkles } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { percentage } from 'lib/utils/numbers'

@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@hanzo/icons'
 import { Divider, Modal, Link } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { Button } from 'lib/elements/Button'
 import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Table, TableColumns } from 'lib/elements/Table'
 import { Tag } from 'lib/elements/Tag/Tag'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { userLogic } from 'scenes/userLogic'
 
 import { UserType } from '~/types'
@@ -148,13 +148,7 @@ const StaffUsersRemovalModal = ({
                     <Button type="secondary" onClick={onClose}>
                         Cancel
                     </Button>
-                    <Button
-                        form="text-tile-form"
-                        htmlType="submit"
-                        type="primary"
-                        status="danger"
-                        onClick={onRemove}
-                    >
+                    <Button form="text-tile-form" htmlType="submit" type="primary" status="danger" onClick={onRemove}>
                         Remove user
                     </Button>
                 </>

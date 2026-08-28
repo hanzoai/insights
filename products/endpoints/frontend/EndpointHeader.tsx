@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBug } from '@hanzo/icons'
 import { Button, Label, Switch } from '@hanzo/elements'
+import { IconBug } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'

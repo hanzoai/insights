@@ -82,7 +82,11 @@ export async function getPersonPushNotifications(
 }
 
 // Same-origin URL — used as an `<iframe src>` so the browser carries session auth.
-export function getMessageAssetContentUrl(hogFlowId: InsightsFlow['id'], invocationId: string, actionId: string): string {
+export function getMessageAssetContentUrl(
+    hogFlowId: InsightsFlow['id'],
+    invocationId: string,
+    actionId: string
+): string {
     return new ApiRequest()
         .hogFlow(hogFlowId)
         .withAction('assets/content')

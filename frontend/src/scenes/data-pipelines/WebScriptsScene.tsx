@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, Tabs } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'

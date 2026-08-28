@@ -1,10 +1,10 @@
 import clsx from 'clsx'
-import { useActions, useValues } from 'kea'
 import { getNextSurveyStep } from 'insights-js/dist/surveys-preview'
+import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Divider, Modal, Select, Switch, Tabs } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { Field } from 'lib/elements/Field'

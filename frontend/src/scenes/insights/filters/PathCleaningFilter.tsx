@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Switch } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { PathCleanFilters } from 'lib/components/PathCleanFilters/PathCleanFilters'
 import { Tooltip } from 'lib/elements/Tooltip'

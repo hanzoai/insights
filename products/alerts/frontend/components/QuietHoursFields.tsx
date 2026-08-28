@@ -1,7 +1,7 @@
 import { useMemo, type FocusEvent } from 'react'
 
-import { IconTrash } from '@hanzo/icons'
 import { Banner, Button, Checkbox, Input } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { AlertCalculationInterval } from '~/queries/schema/schema-general'
 

@@ -1,9 +1,9 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
-import insights from 'insights-js'
 
-import { IconArrowLeft, IconCode, IconFlask, IconPeople, IconPlus, IconTestTube, IconToggle } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowLeft, IconCode, IconFlask, IconPeople, IconPlus, IconTestTube, IconToggle } from '@hanzo/icons'
 
 import { FlagIntent } from 'scenes/feature-flags/featureFlagIntentWarningLogic'
 import { SceneExport } from 'scenes/sceneTypes'

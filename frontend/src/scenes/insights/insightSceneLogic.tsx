@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     BuiltLogic,
@@ -13,7 +14,6 @@ import {
 import type { BreakPointFunction } from 'kea'
 import { urlToAction } from 'kea-router'
 import { objectsEqual } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

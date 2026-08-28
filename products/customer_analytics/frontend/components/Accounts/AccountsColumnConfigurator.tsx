@@ -7,17 +7,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
+import { Button, Input, Modal, SearchableSelect, SegmentedButton, Select, TextArea, Link } from '@hanzo/elements'
 import { IconPencil, IconX } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Modal,
-    SearchableSelect,
-    SegmentedButton,
-    Select,
-    TextArea,
-    Link,
-} from '@hanzo/elements'
 
 import { IconOpenInNew, IconTuning, SortableDragIcon } from 'lib/elements/icons'
 import { Tooltip } from 'lib/elements/Tooltip'
@@ -280,12 +271,7 @@ function ExpressionEditor({ column, columnIndex }: { column: string; columnIndex
 
     return (
         <div className="flex flex-col gap-2">
-            <Input
-                value={expression}
-                onChange={setExpression}
-                fullWidth
-                data-attr="accounts-column-edit-expression"
-            />
+            <Input value={expression} onChange={setExpression} fullWidth data-attr="accounts-column-edit-expression" />
             <div className="flex justify-end">
                 <Button
                     type="primary"

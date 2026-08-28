@@ -1,7 +1,7 @@
 import { useMountedLogic, useValues } from 'kea'
 
-import { IconChevronRight, IconServer } from '@hanzo/icons'
 import { Tag, TagType, Link, Spinner } from '@hanzo/elements'
+import { IconChevronRight, IconServer } from '@hanzo/icons'
 import { ServerIcon } from '@hanzo/products-mcp-store/frontend/scene/icons'
 
 import { urls } from 'scenes/urls'
@@ -10,10 +10,7 @@ import type { MCPServiceAccountServerApi } from 'products/mcp_store/frontend/gen
 
 import { scoutMcpServersLogic } from '../../logics/scoutMcpServersLogic'
 
-const CONNECTION_STATE: Record<
-    MCPServiceAccountServerApi['connection_state'],
-    { label: string; tagType: TagType }
-> = {
+const CONNECTION_STATE: Record<MCPServiceAccountServerApi['connection_state'], { label: string; tagType: TagType }> = {
     ready: { label: 'Connection ready', tagType: 'success' },
     pending_oauth: { label: 'Pending OAuth', tagType: 'warning' },
     needs_reauth: { label: 'Reconnect', tagType: 'danger' },

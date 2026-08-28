@@ -139,9 +139,7 @@ export const SyncsTab = ({ id, lockedSchema }: SyncsTabProps): JSX.Element => {
                     {
                         title: 'Status',
                         render: (_, job) => {
-                            const tagContent = (
-                                <Tag type={StatusTagSetting[job.status] || 'default'}>{job.status}</Tag>
-                            )
+                            const tagContent = <Tag type={StatusTagSetting[job.status] || 'default'}>{job.status}</Tag>
                             return (
                                 <span className="flex items-center gap-1">
                                     {job.latest_error && job.status === ExternalDataJobStatus.Failed ? (

@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { Form, Group, capitalizeFirstLetter } from 'kea-forms'
 import { router } from 'kea-router'
 
-import { IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Divider, Input, SegmentedButton } from '@hanzo/elements'
+import { IconPlus, IconTrash } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { GroupsNewLogicProps, groupsNewLogic } from 'scenes/groups/groupsNewLogic'
@@ -43,13 +43,7 @@ export function GroupsNew(): JSX.Element {
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                size="small"
-                                type="primary"
-                                data-attr="save-group"
-                                htmlType="submit"
-                                form="group"
-                            >
+                            <Button size="small" type="primary" data-attr="save-group" htmlType="submit" form="group">
                                 Save
                             </Button>
                         </>
@@ -173,12 +167,7 @@ export function GroupsNew(): JSX.Element {
                                 </Group>
                             ))}
 
-                        <Button
-                            icon={<IconPlus />}
-                            type="secondary"
-                            onClick={addFormProperty}
-                            data-attr="add-property"
-                        >
+                        <Button icon={<IconPlus />} type="secondary" onClick={addFormProperty} data-attr="add-property">
                             Add property
                         </Button>
                     </div>

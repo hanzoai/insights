@@ -1,8 +1,8 @@
 import '../ErrorTrackingIssueScene/ErrorTrackingIssueScene.scss'
 
 import clsx from 'clsx'
-import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
 import { IconFilter, IconList, IconRefresh, IconRewindPlay, IconX } from '@hanzo/icons'

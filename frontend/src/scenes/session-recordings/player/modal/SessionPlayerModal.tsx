@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { IconHeatmap } from 'lib/elements/icons'
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'

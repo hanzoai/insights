@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconCheckCircle } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { onboardingEventUsageLogic } from 'scenes/onboarding/onboardingEventUsageLogic'
 import { CheckList } from 'scenes/onboarding/shared/components/CheckList'

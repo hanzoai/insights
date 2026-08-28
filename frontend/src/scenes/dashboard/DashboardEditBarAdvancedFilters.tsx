@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconEllipsis, IconGear, IconPalette } from '@hanzo/icons'
 import { Badge, Button, Divider, Label, SegmentedButton } from '@hanzo/elements'
+import { IconEllipsis, IconGear, IconPalette } from '@hanzo/icons'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Popover } from 'lib/elements/Popover'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { DashboardEventSource } from 'lib/utils/eventUsageLogic'
 import { dashboardInsightColorsModalLogic } from 'scenes/dashboard/dashboardInsightColorsModalLogic'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'

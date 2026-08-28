@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconPlus } from '@hanzo/icons'
 import { Banner, Button, Dropdown, Input, Skeleton, Switch } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { ConfirmDeleteButton } from 'lib/components/ConfirmDeleteButton'
 import { MailHog } from 'lib/components/mascots'

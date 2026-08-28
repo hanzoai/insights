@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconBolt } from '@hanzo/icons'
 import { Select } from '@hanzo/elements'
+import { IconBolt } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 

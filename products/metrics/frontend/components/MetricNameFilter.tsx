@@ -2,8 +2,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { CSSProperties, useCallback, useMemo } from 'react'
 import { List } from 'react-window'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Dropdown, Input } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { metricNamePickerLogic } from './metricNamePickerLogic'
 

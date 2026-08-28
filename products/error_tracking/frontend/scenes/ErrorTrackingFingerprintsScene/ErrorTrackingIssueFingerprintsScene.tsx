@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { IconGitBranch } from '@hanzo/icons'
 import { Button, Skeleton, Table, TableColumns } from '@hanzo/elements'
+import { IconGitBranch } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { ErrorPropertiesLogicProps, errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'

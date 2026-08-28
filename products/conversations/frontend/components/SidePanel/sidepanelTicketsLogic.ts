@@ -1,4 +1,5 @@
 import { JSONContent } from '@tiptap/core'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -13,7 +14,6 @@ import {
 } from 'kea'
 import { router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { appendExceptionToMessage, supportLogic, warnIfMessageTooLong } from 'lib/components/Support/supportLogic'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -661,9 +661,7 @@ export const sidepanelTicketsLogic = kea<sidepanelTicketsLogicType>([
                 if (result?.status === 'success') {
                     const count = result.migrated_ticket_ids?.length ?? 0
                     if (count > 0) {
-                        toast.success(
-                            `Restored ${count} ticket${count === 1 ? '' : 's'} from your previous session.`
-                        )
+                        toast.success(`Restored ${count} ticket${count === 1 ? '' : 's'} from your previous session.`)
                     }
                 }
             } catch (e) {

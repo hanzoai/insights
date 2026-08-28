@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { IconCheck, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCheck, IconX } from '@hanzo/icons'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { HeartHog } from 'lib/components/mascots'

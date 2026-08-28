@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBell, IconCheck, IconInfo } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconBell, IconCheck, IconInfo } from '@hanzo/icons'
 import { useAnimatedNumber } from '@hanzo/quill-charts'
 
 import { Spinner } from 'lib/elements/Spinner'

@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     BuiltLogic,
@@ -16,13 +17,12 @@ import {
 import { router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import { delay } from 'kea-test-utils'
-import insights from 'insights-js'
-import { ReplayPlugin, Replayer, playerConfig } from '@hanzo/insights-rrweb'
-import { EventType, IncrementalSource, eventWithTime } from '@hanzo/insights-rrweb-types'
-import type { customEvent } from '@hanzo/insights-rrweb-types'
 import { RefObject } from 'react'
 
 import { toast } from '@hanzo/elements'
+import { ReplayPlugin, Replayer, playerConfig } from '@hanzo/insights-rrweb'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/insights-rrweb-types'
+import type { customEvent } from '@hanzo/insights-rrweb-types'
 import {
     AudioMuteReplayerPlugin,
     COMMON_REPLAYER_CONFIG,

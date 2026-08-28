@@ -11,8 +11,8 @@
  * commit. Esc → onBack.
  */
 import { Autocomplete } from '@base-ui/react/autocomplete'
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { MutableRefObject, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconCheck, IconChevronRight, IconClock, IconPinFilled } from '@hanzo/icons'

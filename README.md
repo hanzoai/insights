@@ -78,8 +78,8 @@ Once you've got a Insights instance, you can set it up by installing our [JavaSc
 
 We have SDKs and libraries for popular languages and frameworks like:
 
-| Frontend                                              | Mobile                                                          | Backend                                             |
-| ----------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------- |
+| Frontend                                           | Mobile                                                       | Backend                                          |
+| -------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------ |
 | [JavaScript](https://hanzo.ai/docs/libraries/js)   | [React Native](https://hanzo.ai/docs/libraries/react-native) | [Python](https://hanzo.ai/docs/libraries/python) |
 | [Next.js](https://hanzo.ai/docs/libraries/next-js) | [Android](https://hanzo.ai/docs/libraries/android)           | [Node](https://hanzo.ai/docs/libraries/node)     |
 | [React](https://hanzo.ai/docs/libraries/react)     | [iOS](https://hanzo.ai/docs/libraries/ios)                   | [PHP](https://hanzo.ai/docs/libraries/php)       |

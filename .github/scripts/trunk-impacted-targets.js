@@ -275,8 +275,7 @@ function compileContractMatcher(inputs) {
     if (include.length === 0) {
         return null
     }
-    return (relativePath) =>
-        include.some((re) => re.test(relativePath)) && !exclude.some((re) => re.test(relativePath))
+    return (relativePath) => include.some((re) => re.test(relativePath)) && !exclude.some((re) => re.test(relativePath))
 }
 
 // Only products that narrow `backend:contract-check` in their own turbo.json get

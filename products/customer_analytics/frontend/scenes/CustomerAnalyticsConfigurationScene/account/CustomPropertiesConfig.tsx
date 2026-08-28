@@ -1,16 +1,16 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconInfo, IconLogomark, IconPencil, IconTrash } from '@hanzo/icons'
 import { Button, Input, Table, TableColumns, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconLogomark, IconPencil, IconTrash } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TZLabel } from 'lib/components/TZLabel'
 import { TeamMembershipLevel } from 'lib/constants'
 import { Dialog } from 'lib/elements/Dialog'
-import { Tag, TagType } from 'lib/elements/Tag'
 import { Link } from 'lib/elements/Link'
 import { Popover } from 'lib/elements/Popover'
+import { Tag, TagType } from 'lib/elements/Tag'
 import { urls } from 'scenes/urls'
 
 import type {

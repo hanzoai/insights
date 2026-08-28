@@ -269,10 +269,9 @@ export function DPALegalPreview({ lawyerMode = false }: DPALegalPreviewProps): J
             <h4>5. Subprocessing</h4>
             <p>
                 5.1. The Company provides Processor with general authorization to engage the Subprocessors set out on
-                https://hanzo.ai/subprocessors (the "<strong>Subprocessor Page</strong>"). These will differ
-                depending on the Data Center Location chosen by the Company. In addition, Company provides Processor
-                with general authorization to engage other third parties as Subprocessors, in accordance with this
-                Section 5.
+                https://hanzo.ai/subprocessors (the "<strong>Subprocessor Page</strong>"). These will differ depending
+                on the Data Center Location chosen by the Company. In addition, Company provides Processor with general
+                authorization to engage other third parties as Subprocessors, in accordance with this Section 5.
             </p>
             <p>
                 5.2. Processor shall enter into a written contract with any Subprocessor and this contract shall impose
@@ -480,8 +479,7 @@ export function DPALegalPreview({ lawyerMode = false }: DPALegalPreviewProps): J
             <p>
                 <strong>B. List of Parties.</strong> The data exporter is the Company ({CompanyPlaceholder}) at{' '}
                 {AddressPlaceholder}; contact {EmailPlaceholder}; role controller. The data importer is the Processor at
-                2261 Market St., #4008, San Francisco, CA 94114, USA; contact person privacy@hanzo.ai; role
-                processor.
+                2261 Market St., #4008, San Francisco, CA 94114, USA; contact person privacy@hanzo.ai; role processor.
             </p>
             <p>
                 <strong>C. Description of Transfer.</strong> Categories of data subjects and personal data transferred:

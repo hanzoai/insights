@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconPlus, IconWarning } from '@hanzo/icons'
 import { Banner, Button, Card, Skeleton, Switch, Link } from '@hanzo/elements'
+import { IconPlus, IconWarning } from '@hanzo/icons'
 
 import { ConfirmDeleteButton } from 'lib/components/ConfirmDeleteButton'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'

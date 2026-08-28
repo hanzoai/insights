@@ -14,12 +14,12 @@ it's simpler and doesn't need a sandbox.
 
 ## When to use what
 
-| Example                                                                                         | Solution                                                   |
-| ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Example                                                                                          | Solution                                                   |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
 | Signals team building an enrichment pipeline that generates reports from Insights analytics data | Sandboxed agent (this page)                                |
 | Conversations team building a support agent that queries Insights and customer documentation     | Sandboxed agent (this page)                                |
-| AI observability summarizing a funnel, generating a natural-language insight title              | LLM gateway via `get_llm_client(product=..., team_id=...)` |
-| Not sure                                                                                        | Ask in `#team-insights-ai`                                  |
+| AI observability summarizing a funnel, generating a natural-language insight title               | LLM gateway via `get_llm_client(product=..., team_id=...)` |
+| Not sure                                                                                         | Ask in `#team-insights-ai`                                 |
 
 **Rule of thumb**: if the LLM needs to _do things_ (query data, read files, create branches, open PRs), use a sandboxed agent.
 If it just needs to _answer a question_ given some context you already have, use the LLM gateway.
@@ -77,8 +77,8 @@ task = Task.create_and_run(
 | `description`            | Yes      | Detailed description of what the agent should do                           |
 | `origin_product`         | Yes      | Which product created this task (see `Task.OriginProduct` choices)         |
 | `user_id`                | Yes      | User ID — used for feature flag validation and creating the scoped API key |
-| `repository`             | Yes      | GitHub repo in `org/repo` format (e.g., `insights/insights-js`)              |
-| `insights_mcp_scopes`     | No       | Scope preset or explicit scope list (default: `"full"`)                    |
+| `repository`             | Yes      | GitHub repo in `org/repo` format (e.g., `insights/insights-js`)            |
+| `insights_mcp_scopes`    | No       | Scope preset or explicit scope list (default: `"full"`)                    |
 | `create_pr`              | No       | Whether the agent should create a PR (default: `True`)                     |
 | `mode`                   | No       | Execution mode (default: `"background"`)                                   |
 | `slack_thread_context`   | No       | Slack thread context for agents triggered from Slack                       |
@@ -108,9 +108,9 @@ Tokens expire after 6 hours and are scoped to a single team.
 
 Use the `insights_mcp_scopes` parameter to control access:
 
-| Preset             | What it grants                                                                                            | When to use                                                                                        |
-| ------------------ | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `"read_only"`      | Read access to actions, cohorts, dashboards, experiments, feature flags, insights, queries, surveys, etc. | Agent only needs to read data for analysis or reporting                                            |
+| Preset             | What it grants                                                                                            | When to use                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `"read_only"`      | Read access to actions, cohorts, dashboards, experiments, feature flags, insights, queries, surveys, etc. | Agent only needs to read data for analysis or reporting                                             |
 | `"full"` (default) | Read + write access to all MCP-exposed resources                                                          | Agent needs to create or modify Insights resources (e.g., create feature flags, update experiments) |
 
 ### Custom scopes
@@ -254,12 +254,12 @@ Agents should stage changes with `git add`, then use the `git_signed_commit` too
 
 ### Sandbox isolation
 
-|           | Production (Modal)                     | Local dev (Docker)                      |
-| --------- | -------------------------------------- | --------------------------------------- |
-| Isolation | gVisor kernel-level sandboxing         | Standard Docker container               |
-| Network   | Configurable via `SandboxEnvironment`  | Host network via `host.docker.internal` |
+|           | Production (Modal)                       | Local dev (Docker)                      |
+| --------- | ---------------------------------------- | --------------------------------------- |
+| Isolation | gVisor kernel-level sandboxing           | Standard Docker container               |
+| Network   | Configurable via `SandboxEnvironment`    | Host network via `host.docker.internal` |
 | Image     | `ghcr.io/insights/insights-sandbox-base` | Local Dockerfile build                  |
-| Auth      | Modal connect token                    | No token needed                         |
+| Auth      | Modal connect token                      | No token needed                         |
 
 ### Runtime selection (gVisor vs Modal VM)
 

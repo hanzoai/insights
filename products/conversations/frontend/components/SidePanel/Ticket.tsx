@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button, Divider, Tag } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { MessageInput } from '../Chat/MessageInput'
 import { MessageList } from '../Chat/MessageList'

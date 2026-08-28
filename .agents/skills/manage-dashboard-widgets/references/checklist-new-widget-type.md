@@ -90,9 +90,9 @@ Use when introducing a new **`groupId`**, not just another variant in an existin
 - [ ] Storybook title path: `'Dashboards/Dashboard Widgets/Widget types/<groupLabel>/<label>'`
 - [ ] **UI + query reuse** — pick one pattern (do not fork query paths):
 
-| Pattern                 | Backend `run_*`                                           | Frontend UI                                             | Shipped example       |
-| ----------------------- | --------------------------------------------------------- | ------------------------------------------------------- | --------------------- |
-| Product module          | Import query runner from `products/<product>/backend/…`   | Import list/UI from `products/<product>/frontend/…`     | `error_tracking_list` |
+| Pattern                  | Backend `run_*`                                            | Frontend UI                                             | Shipped example       |
+| ------------------------ | ---------------------------------------------------------- | ------------------------------------------------------- | --------------------- |
+| Product module           | Import query runner from `products/<product>/backend/…`    | Import list/UI from `products/<product>/frontend/…`     | `error_tracking_list` |
 | Scenes / insights helper | Import shared helper (e.g. `insights.session_recordings…`) | Import from `scenes/<area>/…` when UI still lives there | `session_replay_list` |
 
 - [ ] If importing **`products/<product>/frontend/…`**: add **`products.<product>`** to `tach.toml` → `products.dashboards` `depends_on`

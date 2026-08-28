@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBookmark } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconBookmark } from '@hanzo/icons'
 
 import { DataTableNode } from '~/queries/schema/schema-general'
 

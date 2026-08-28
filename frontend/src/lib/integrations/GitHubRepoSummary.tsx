@@ -1,5 +1,5 @@
-import { IconGear } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { IconBranch } from 'lib/elements/icons'
 

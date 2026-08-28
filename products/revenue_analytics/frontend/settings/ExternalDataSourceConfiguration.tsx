@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Divider, Switch, Link, Spinner, Tooltip, toast } from '@hanzo/elements'
+import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'

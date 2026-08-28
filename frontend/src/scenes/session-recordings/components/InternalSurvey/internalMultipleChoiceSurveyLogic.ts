@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, afterMount, kea, key, listeners, path, props, reducers } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, afterMount, kea, key, listeners, path, props, reducers } from 'kea'
 
 import { Survey } from '~/types'
 

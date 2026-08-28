@@ -2,18 +2,7 @@ import { useActions, useValues } from 'kea'
 import { FieldName, Form, Group } from 'kea-forms'
 import React, { useEffect, useState } from 'react'
 
-import {
-    Button,
-    Divider,
-    FileInput,
-    Input,
-    Select,
-    Skeleton,
-    Switch,
-    Tag,
-    TextArea,
-    Link,
-} from '@hanzo/elements'
+import { Button, Divider, FileInput, Input, Select, Skeleton, Switch, Tag, TextArea, Link } from '@hanzo/elements'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -126,8 +115,8 @@ export function SourceAccessMethodSelector({
                             <div>
                                 <div>Sync and query live</div>
                                 <div className="text-xs text-secondary">
-                                    Sync selected tables into Insights-managed storage, and also run live queries against
-                                    this database from the SQL editor.
+                                    Sync selected tables into Insights-managed storage, and also run live queries
+                                    against this database from the SQL editor.
                                 </div>
                             </div>
                         ),
@@ -501,8 +490,8 @@ function CDCPrerequisitesCheck(): JSX.Element {
                             {checkedManagementMode === 'self_managed' && (
                                 <p className="m-0 text-xs mt-1">
                                     After you pick your tables in the next step, we'll show you the{' '}
-                                    <code>CREATE PUBLICATION</code> statement to run as the table owner. Insights creates
-                                    the replication slot itself.
+                                    <code>CREATE PUBLICATION</code> statement to run as the table owner. Insights
+                                    creates the replication slot itself.
                                 </p>
                             )}
                         </>

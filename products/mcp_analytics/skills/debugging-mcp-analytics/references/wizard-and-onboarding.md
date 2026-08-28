@@ -58,13 +58,13 @@ context-mill first, then wizard.
 Defined in the skill's `description.md`. Each detects a server shape and applies the matching
 instrumentation:
 
-| Path        | Target                                                        | Approach                                                                    |
-| ----------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Path        | Target                                                        | Approach                                                                     |
+| ----------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | **A**       | official `@modelcontextprotocol/sdk` (`Server` / `McpServer`) | `instrument(server, insights)`                                               |
-| **B**       | `mcp-handler` (Vercel/Next)                                   | `instrument()` plus `identify` plus a per-invocation flush                  |
+| **B**       | `mcp-handler` (Vercel/Next)                                   | `instrument()` plus `identify` plus a per-invocation flush                   |
 | **C**       | custom dispatcher (Hono/edge, no server object)               | `InsightsMCP` with `captureToolCall` / `captureInitialize`                   |
-| **D**       | `@rekog/mcp-nest` (NestJS)                                    | `instrumentMutator()` through the framework's `serverMutator` hook          |
-| **P1 / P2** | Python (`insights.mcp`)                                        | official-SDK/FastMCP `instrument()`, or `InsightsMCP` for custom dispatchers |
+| **D**       | `@rekog/mcp-nest` (NestJS)                                    | `instrumentMutator()` through the framework's `serverMutator` hook           |
+| **P1 / P2** | Python (`insights.mcp`)                                       | official-SDK/FastMCP `instrument()`, or `InsightsMCP` for custom dispatchers |
 
 Only path A has been verified against a real third-party server. B, C, D and the Python paths
 are unverified — treat a report of them working as new information.

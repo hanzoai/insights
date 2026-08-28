@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
-import { IconArrowLeft, IconArrowRight } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowLeft, IconArrowRight } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'

@@ -56,10 +56,10 @@ export const getOpenTelemetrySteps = (ctx: OnboardingComponentsContext): StepDef
             content: (
                 <>
                     <Markdown>
-                        Configure OpenTelemetry to export spans to Insights via the `InsightsSpanProcessor`. The processor
-                        only forwards AI-related spans — spans whose name or attribute keys start with `gen_ai.`,
-                        `llm.`, `ai.`, or `traceloop.` — and drops everything else. Insights converts `gen_ai.*` spans
-                        into `$ai_generation` events automatically.
+                        Configure OpenTelemetry to export spans to Insights via the `InsightsSpanProcessor`. The
+                        processor only forwards AI-related spans — spans whose name or attribute keys start with
+                        `gen_ai.`, `llm.`, `ai.`, or `traceloop.` — and drops everything else. Insights converts
+                        `gen_ai.*` spans into `$ai_generation` events automatically.
                     </Markdown>
 
                     <CodeBlock

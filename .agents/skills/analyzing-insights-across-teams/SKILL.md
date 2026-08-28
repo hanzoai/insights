@@ -25,8 +25,8 @@ applies only to agents working in this repo, and must not move into the packaged
 
 ## Synced tables
 
-| Entity           | US (prod-us)                     | EU (prod-eu)                        |
-| ---------------- | -------------------------------- | ----------------------------------- |
+| Entity           | US (prod-us)                      | EU (prod-eu)                         |
+| ---------------- | --------------------------------- | ------------------------------------ |
 | Insights         | `postgres.insights_dashboarditem` | `eu_postgres_insights_dashboarditem` |
 | Dashboards       | `postgres.insights_dashboard`     | `eu_postgres_insights_dashboard`     |
 | Teams / projects | `postgres.insights_team`          | `eu_postgres_insights_team`          |

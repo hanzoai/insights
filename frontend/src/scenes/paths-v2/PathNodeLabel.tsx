@@ -1,8 +1,8 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Menu, Tooltip } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { IconOpenInNew } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

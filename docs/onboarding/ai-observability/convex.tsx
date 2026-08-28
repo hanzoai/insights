@@ -30,8 +30,8 @@ export const getConvexSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Set your Insights project API key and host as Convex environment variables. You can find these in
-                        your [project settings](https://app.hanzo.ai/settings/project).
+                        Set your Insights project API key and host as Convex environment variables. You can find these
+                        in your [project settings](https://app.hanzo.ai/settings/project).
                     </Markdown>
 
                     <CodeBlock
@@ -120,9 +120,9 @@ export const getConvexSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            The `InsightsSpanProcessor` sends AI-related OpenTelemetry spans to Insights's OTLP ingestion
-                            endpoint. `provider.forceFlush()` ensures its batch is sent before the Convex action
-                            returns. Insights converts these into `$ai_generation` events automatically. The
+                            The `InsightsSpanProcessor` sends AI-related OpenTelemetry spans to Insights's OTLP
+                            ingestion endpoint. `provider.forceFlush()` ensures its batch is sent before the Convex
+                            action returns. Insights converts these into `$ai_generation` events automatically. The
                             `insights_distinct_id` metadata field links events to a specific user.
                         </Markdown>
                     </CalloutBox>

@@ -1,15 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { Button, Select, SelectOptions, Snack, Table, Tag, ProfilePicture } from '@hanzo/elements'
 import { IconSparkles } from '@hanzo/icons'
-import {
-    Button,
-    Select,
-    SelectOptions,
-    Snack,
-    Table,
-    Tag,
-    ProfilePicture,
-} from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 

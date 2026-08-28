@@ -3,8 +3,8 @@ import { useValues } from 'kea'
 
 import { Divider, Tooltip } from '@hanzo/elements'
 
-import { Progress } from 'lib/elements/Progress'
 import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
+import { Progress } from 'lib/elements/Progress'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 

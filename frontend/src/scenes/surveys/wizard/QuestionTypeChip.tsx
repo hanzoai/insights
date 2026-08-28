@@ -1,7 +1,7 @@
 import { cloneElement } from 'react'
 
-import { IconChevronDown, IconComment } from '@hanzo/icons'
 import { Dropdown } from '@hanzo/elements'
+import { IconChevronDown, IconComment } from '@hanzo/icons'
 
 import { SurveyQuestionType } from '~/types'
 

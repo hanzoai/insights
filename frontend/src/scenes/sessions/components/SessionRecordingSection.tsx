@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCollapse, IconExpand, IconVideoCamera } from '@hanzo/icons'
 import { Button, Card, Spinner } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconVideoCamera } from '@hanzo/icons'
 
 import { ReplayCaptureDiagnosticsPanel } from 'scenes/session-recordings/components/ReplayCaptureDiagnosticsPanel'
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'

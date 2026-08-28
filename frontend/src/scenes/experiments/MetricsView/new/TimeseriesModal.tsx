@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconClock, IconInfo } from '@hanzo/icons'
 import { Banner, Button, Dialog, Divider, Modal, Link, Tooltip } from '@hanzo/elements'
+import { IconClock, IconInfo } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { More } from 'lib/elements/Button/More'

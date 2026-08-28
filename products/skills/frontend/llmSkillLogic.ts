@@ -668,9 +668,7 @@ export const llmSkillLogic = kea<llmSkillLogicType>([
             for (const { path, file } of files) {
                 // Case-insensitive to match the backend's reserved-path validation
                 if (path.toLowerCase() === 'skill.md') {
-                    toast.info(
-                        "SKILL.md wasn't added as a bundled file. Its body belongs in the skill body field."
-                    )
+                    toast.info("SKILL.md wasn't added as a bundled file. Its body belongs in the skill body field.")
                     continue
                 }
                 if (file.size > SKILL_FILE_MAX_BYTES) {
@@ -706,9 +704,7 @@ export const llmSkillLogic = kea<llmSkillLogicType>([
             })
             const combined = [...merged, ...uploadedByPath.values()]
             if (combined.length > SKILL_FILE_MAX_COUNT) {
-                toast.error(
-                    `Some files weren't added: a skill can have at most ${SKILL_FILE_MAX_COUNT} bundled files`
-                )
+                toast.error(`Some files weren't added: a skill can have at most ${SKILL_FILE_MAX_COUNT} bundled files`)
             }
             actions.setSkillFormValues({ files: combined.slice(0, SKILL_FILE_MAX_COUNT) })
         },

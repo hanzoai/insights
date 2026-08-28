@@ -2,8 +2,8 @@ import './InboxOnboarding.scss'
 
 import { useActions } from 'kea'
 
-import { IconBolt, IconGithub, IconInfo, IconNotebook, IconPause, IconX } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconBolt, IconGithub, IconInfo, IconNotebook, IconPause, IconX } from '@hanzo/icons'
 
 import { Logomark } from 'lib/brand'
 import { CommandBlock } from 'lib/components/CommandBlock/CommandBlock'

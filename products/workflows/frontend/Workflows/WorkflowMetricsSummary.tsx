@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useCallback, useMemo } from 'react'
 
-import { IconArrowRight, IconLetter, IconNotification } from '@hanzo/icons'
 import { Label, Table, TableColumns, Tag, Link, SpinnerOverlay } from '@hanzo/elements'
+import { IconArrowRight, IconLetter, IconNotification } from '@hanzo/icons'
 
 import { getColorVar } from 'lib/colors'
 import { type AppMetricsTimeSeriesResponse } from 'lib/components/AppMetrics/appMetricsLogic'

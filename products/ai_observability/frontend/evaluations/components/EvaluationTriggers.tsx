@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconCopy, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

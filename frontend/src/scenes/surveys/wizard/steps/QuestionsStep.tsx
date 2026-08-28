@@ -6,8 +6,8 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { IconEmoji, IconPlusSmall, IconRevert, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Input, SegmentedButton, Switch, Tag } from '@hanzo/elements'
+import { IconEmoji, IconPlusSmall, IconRevert, IconTrash } from '@hanzo/icons'
 
 import { EditableField } from 'lib/components/EditableField/EditableField'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -253,12 +253,7 @@ function QuestionOptions({ question, onUpdate }: QuestionOptionsProps): JSX.Elem
                         </Button>
                     )}
                     {!hasOpenChoice && choices.length < MAX_CHOICES && (
-                        <Button
-                            icon={<IconPlusSmall />}
-                            size="xsmall"
-                            type="secondary"
-                            onClick={addOpenEndedChoice}
-                        >
+                        <Button icon={<IconPlusSmall />} size="xsmall" type="secondary" onClick={addOpenEndedChoice}>
                             Add "Other"
                         </Button>
                     )}
@@ -332,10 +327,7 @@ function ConfirmationScreenEditor({ appearance, onUpdate }: ConfirmationScreenEd
             {/* Always visible header with toggle */}
             <div className="flex items-center justify-between gap-2 px-3 py-2.5">
                 <span className="text-sm font-medium">Confirmation screen</span>
-                <Switch
-                    checked={isEnabled}
-                    onChange={(checked) => onUpdate({ displayThankYouMessage: checked })}
-                />
+                <Switch checked={isEnabled} onChange={(checked) => onUpdate({ displayThankYouMessage: checked })} />
             </div>
 
             {/* Animated expandable content */}
@@ -590,12 +582,7 @@ export function QuestionsStep({ editingLanguage, setEditingLanguage }: Questions
                 descriptionClassName="text-sm"
                 actions={
                     hasChanges ? (
-                        <Button
-                            type="tertiary"
-                            size="small"
-                            icon={<IconRevert />}
-                            onClick={restoreDefaultQuestions}
-                        >
+                        <Button type="tertiary" size="small" icon={<IconRevert />} onClick={restoreDefaultQuestions}>
                             Restore defaults
                         </Button>
                     ) : null

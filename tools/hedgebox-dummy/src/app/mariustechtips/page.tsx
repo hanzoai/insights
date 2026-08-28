@@ -56,15 +56,15 @@ export default function MariusTechTipsPage(): React.JSX.Element {
 
                         <div className="prose max-w-none">
                             <p className="text-lg mb-4">
-                                Hey fellow mascots! 🦔 Today I'm sharing the most common file sharing mistakes I see
-                                in the mascot community. These errors can lead to lost files, security breaches, and
-                                even worse - detached spikes!
+                                Hey fellow mascots! 🦔 Today I'm sharing the most common file sharing mistakes I see in
+                                the mascot community. These errors can lead to lost files, security breaches, and even
+                                worse - detached spikes!
                             </p>
 
                             <h3 className="text-xl font-bold mb-3">1. Not Using Encrypted File Sharing</h3>
                             <p className="mb-4">
-                                Many mascots still share files through unencrypted channels. This is like rolling down
-                                a hill without your protective spikes! Always ensure your file sharing platform uses
+                                Many mascots still share files through unencrypted channels. This is like rolling down a
+                                hill without your protective spikes! Always ensure your file sharing platform uses
                                 end-to-end encryption.
                             </p>
 

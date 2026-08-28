@@ -2,7 +2,6 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
-import { IconInfo, IconPlayFilled, IconTestTube } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -16,6 +15,7 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import { IconInfo, IconPlayFilled, IconTestTube } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { isEmail } from 'lib/utils/url'

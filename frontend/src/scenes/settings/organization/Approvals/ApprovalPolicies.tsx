@@ -1,16 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
+import { Button, Input, InputSelect, Select, Switch, Table, Tooltip } from '@hanzo/elements'
 import { IconInfo, IconX } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    InputSelect,
-    Select,
-    Switch,
-    Table,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { CAPABILITIES } from 'lib/capabilities'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'

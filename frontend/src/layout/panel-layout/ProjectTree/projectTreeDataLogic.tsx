@@ -1346,7 +1346,6 @@ export const projectTreeDataLogic = kea<projectTreeDataLogicType>([
                     return []
                 }
 
-
                 const showGroupsIntroductionPage = [
                     GroupsAccessStatus.HasAccess,
                     GroupsAccessStatus.HasGroupTypes,

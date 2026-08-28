@@ -4,8 +4,8 @@ import { Field, Form } from 'kea-forms'
 import { Button, Input, Select } from '@hanzo/elements'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
-import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
 import { Modal } from 'lib/elements/Modal'
+import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
 
 import { InsightsFunctionSubTemplateIdType } from '~/types'
 

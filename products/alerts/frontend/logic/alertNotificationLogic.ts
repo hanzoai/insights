@@ -1,10 +1,10 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { toast } from 'lib/elements/Toast/Toast'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { projectLogic } from 'scenes/projectLogic'
 
@@ -328,7 +328,8 @@ export const alertNotificationLogic = kea<alertNotificationLogicType>([
             [] as InsightsFunctionType[],
             {
                 // Optimistic removal so the item disappears immediately
-                deleteExistingInsightsFunction: (state, { insightsFunction }) => state.filter((hf) => hf.id !== insightsFunction.id),
+                deleteExistingInsightsFunction: (state, { insightsFunction }) =>
+                    state.filter((hf) => hf.id !== insightsFunction.id),
             },
         ],
     }),

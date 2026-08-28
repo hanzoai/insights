@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Input, Link } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'
-import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { Banner } from 'lib/elements/Banner'
 import { Table, TableColumns } from 'lib/elements/Table'
+import { GroupsAccessStatus, groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { GroupsIntroduction } from 'scenes/groups/GroupsIntroduction'
 
 import { GroupType } from '~/types'

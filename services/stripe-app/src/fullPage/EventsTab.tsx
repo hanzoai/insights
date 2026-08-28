@@ -2,8 +2,8 @@ import { Banner, Box, DataTable, Spinner, type DataTableColumn, type DataTableIt
 import { useEffect, useState } from 'react'
 
 import { DEFAULT_TIMEFRAME, getTimeframe } from '../constants'
-import { logger } from '../logger'
 import type { InsightsClient } from '../insights/client'
+import { logger } from '../logger'
 import ExternalLink from './components/ExternalLink'
 import TimeframeSelector from './components/TimeframeSelector'
 

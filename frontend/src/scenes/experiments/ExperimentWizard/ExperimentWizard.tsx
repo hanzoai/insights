@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArrowLeft, IconLightBulb } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconArrowLeft, IconLightBulb } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 import { urls } from 'scenes/urls'

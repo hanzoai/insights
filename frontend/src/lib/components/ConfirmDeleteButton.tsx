@@ -2,8 +2,8 @@ import { AnimatePresence, useReducedMotion } from 'motion/react'
 import * as motion from 'motion/react-client'
 import { useEffect, useState } from 'react'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 const CONFIRM_RESET_MS = 5000
 

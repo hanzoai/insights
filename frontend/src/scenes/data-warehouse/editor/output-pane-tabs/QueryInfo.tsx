@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTarget } from '@hanzo/icons'
 import { Table, Link, Spinner, toast } from '@hanzo/elements'
+import { IconTarget } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'

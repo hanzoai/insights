@@ -14,8 +14,8 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the Insights SDK. The DSPy integration uses Insights's
-                        LiteLLM callback.
+                        Setting up analytics starts with installing the Insights SDK. The DSPy integration uses
+                        Insights's LiteLLM callback.
                     </Markdown>
 
                     <CodeBlock
@@ -33,8 +33,8 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             content: (
                 <>
                     <Markdown>
-                        Install DSPy and LiteLLM. DSPy uses LiteLLM natively for provider access, and Insights integrates
-                        with LiteLLM's callback system.
+                        Install DSPy and LiteLLM. DSPy uses LiteLLM natively for provider access, and Insights
+                        integrates with LiteLLM's callback system.
                     </Markdown>
 
                     <CodeBlock

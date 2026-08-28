@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar, IconInfo } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconCalendar, IconInfo } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { insightLogic } from 'scenes/insights/insightLogic'

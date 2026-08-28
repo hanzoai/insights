@@ -262,5 +262,8 @@ console.log(`MCP Orval: ${outputDirs.length} module(s), ${totalEnabledOps} enabl
 
 if (outputDirs.length > 0) {
     const generatedFiles = outputDirs.map((d) => path.join(d, 'api.ts'))
-    spawnSync(path.join(repoRoot, 'bin/insightscli'), ['format:js', ...generatedFiles], { stdio: 'pipe', cwd: repoRoot })
+    spawnSync(path.join(repoRoot, 'bin/insightscli'), ['format:js', ...generatedFiles], {
+        stdio: 'pipe',
+        cwd: repoRoot,
+    })
 }

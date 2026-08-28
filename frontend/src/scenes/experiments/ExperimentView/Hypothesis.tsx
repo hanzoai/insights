@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconPencil } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
 import { TextArea } from 'lib/elements/TextArea/TextArea'
 

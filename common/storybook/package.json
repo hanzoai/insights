@@ -12,9 +12,9 @@
     },
     "dependencies": {
         "@babel/runtime": "^7.26.10",
+        "@hanzo/frontend": "workspace:*",
         "@jest/globals": "^30.0.5",
         "@jest/test-sequencer": "^30.0.5",
-        "@hanzo/frontend": "workspace:*",
         "@storybook/addon-a11y": "^10.4.3",
         "@storybook/addon-docs": "^10.4.3",
         "@storybook/addon-links": "^10.4.3",

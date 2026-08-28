@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconPerson, IconPlusSmall } from '@hanzo/icons'
 import { Button, Checkbox, Dropdown, Input } from '@hanzo/elements'
+import { IconPerson, IconPlusSmall } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 
@@ -57,14 +57,7 @@ export function AssigneeMultiSelect({
             }}
             overlay={
                 <div className="max-w-100 deprecated-space-y-2">
-                    <Input
-                        type="search"
-                        placeholder="Search"
-                        autoFocus
-                        value={search}
-                        onChange={setSearch}
-                        fullWidth
-                    />
+                    <Input type="search" placeholder="Search" autoFocus value={search} onChange={setSearch} fullWidth />
                     <ul className="deprecated-space-y-2">
                         {currentUserMember && (
                             <li>
@@ -91,9 +84,7 @@ export function AssigneeMultiSelect({
                                 fullWidth
                                 role="menuitem"
                                 size="small"
-                                icon={
-                                    <Checkbox checked={isSelected('unassigned')} className="pointer-events-none" />
-                                }
+                                icon={<Checkbox checked={isSelected('unassigned')} className="pointer-events-none" />}
                                 disabledReason={isSelected('unassigned') ? undefined : selectionCapReason}
                                 onClick={() => toggleEntry('unassigned')}
                             >

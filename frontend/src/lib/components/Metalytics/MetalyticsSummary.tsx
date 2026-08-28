@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPulse } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPulse } from '@hanzo/icons'
 
 import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePanelStateLogic'
 import { SidePanelTab } from '~/types'

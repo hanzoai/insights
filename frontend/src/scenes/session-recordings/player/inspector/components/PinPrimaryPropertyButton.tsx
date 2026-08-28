@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPin, IconPinFilled } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
 
 import { getPrimaryPropertyForEvent, hasTaxonomyPrimaryProperty } from 'lib/utils/events'
 

@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import React, { useLayoutEffect, useState } from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { MarkdownMessage } from '../messages/MarkdownMessage'
 

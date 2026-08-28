@@ -1,5 +1,5 @@
-import { IconDatabase, IconPiggyBank } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconDatabase, IconPiggyBank } from '@hanzo/icons'
 
 export function DataSourceIcon({ source }: { source: 'revenue-analytics' | 'properties' | null }): JSX.Element | null {
     if (!source) {

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { IconFeedback } from 'lib/elements/icons'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'

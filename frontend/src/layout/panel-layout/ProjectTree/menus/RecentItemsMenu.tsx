@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconClock } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { keybindToKeyboardShortcutProps } from 'lib/components/Shortcuts/Shortcut'

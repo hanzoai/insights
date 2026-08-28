@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, kea, listeners, path, reducers } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, kea, listeners, path, reducers } from 'kea'
 
 import api from 'lib/api'
 import { tryShowMCPHint } from 'lib/components/MCPHint/mcpHintLogic'

@@ -2,18 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import { P, match } from 'ts-pattern'
 
+import { Button, Checkbox, Dialog, Input, SegmentedButton, Table, TableColumns, Link, Tooltip } from '@hanzo/elements'
 import { IconCheckCircle, IconDownload, IconSort, IconTrash, IconWarning } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Dialog,
-    Input,
-    SegmentedButton,
-    Table,
-    TableColumns,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { ErrorTrackingSymbolSet, SymbolSetStatusFilter } from 'lib/components/Errors/types'
 import { IconArrowDown, IconArrowUp } from 'lib/elements/icons'

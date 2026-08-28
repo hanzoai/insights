@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Divider } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { Tooltip } from 'lib/elements/Tooltip'

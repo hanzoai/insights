@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconPin, IconPinFilled } from '@hanzo/icons'
 import { Button, Checkbox, Input } from '@hanzo/elements'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'

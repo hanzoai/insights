@@ -2,8 +2,8 @@ import './FeatureFlag.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconCode, IconFlag, IconGlobe, IconLaptop, IconList, IconServer } from '@hanzo/icons'
 import { Collapse, Switch, Tag } from '@hanzo/elements'
+import { IconCode, IconFlag, IconGlobe, IconLaptop, IconList, IconServer } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'

@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconChevronDown, IconRefresh } from '@hanzo/icons'
 import { Button, Checkbox, Dropdown, Input, Tag } from '@hanzo/elements'
+import { IconChevronDown, IconRefresh } from '@hanzo/icons'
 
 import { DateRangePickerWithZoom } from 'lib/components/DateFilter/DateRangePicker'
 import { InfiniteSelectResults } from 'lib/components/TaxonomicFilter/InfiniteSelectResults'
@@ -315,9 +315,7 @@ function TracingServiceFilterInner({
                                             type="tertiary"
                                             size="small"
                                             fullWidth
-                                            icon={
-                                                <Checkbox checked={isSelected} className="pointer-events-none" />
-                                            }
+                                            icon={<Checkbox checked={isSelected} className="pointer-events-none" />}
                                             onClick={() => {
                                                 const newNames = isSelected
                                                     ? selected.filter((n) => n !== name)

@@ -767,9 +767,7 @@ export const experimentMetricsLogic = kea<experimentMetricsLogicType>([
                         emitTerminalEvent(recalculation)
                     } else {
                         if (trigger === 'manual' && !recalculation.is_existing) {
-                            toast.info(
-                                'Recalculating metrics in the background. Results will update as they finish.'
-                            )
+                            toast.info('Recalculating metrics in the background. Results will update as they finish.')
                         }
                         actions.pollRecalculation(recalculation.id)
                     }

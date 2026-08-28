@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconCheckCircle, IconExternal, IconHourglass, IconPause, IconX as IconXCircle } from '@hanzo/icons'
 import { Button, Skeleton, Link } from '@hanzo/elements'
+import { IconCheckCircle, IconExternal, IconHourglass, IconPause, IconX as IconXCircle } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
@@ -120,13 +120,7 @@ export function WorkflowRunDetailScene(): JSX.Element {
                 resourceType={{ type: 'health' }}
                 actions={
                     githubUrl ? (
-                        <Button
-                            type="secondary"
-                            size="small"
-                            to={githubUrl}
-                            targetBlank
-                            sideIcon={<IconExternal />}
-                        >
+                        <Button type="secondary" size="small" to={githubUrl} targetBlank sideIcon={<IconExternal />}>
                             View on GitHub
                         </Button>
                     ) : undefined

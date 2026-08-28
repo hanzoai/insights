@@ -132,11 +132,7 @@ export const RelatedExperimentsTable = ({
                                 return (
                                     <Tooltip title="Remaining time will be calculated once the experiment has enough data">
                                         <div className="w-full">
-                                            <Progress
-                                                percent={0}
-                                                bgColor="var(--border)"
-                                                strokeColor="var(--border)"
-                                            />
+                                            <Progress percent={0} bgColor="var(--border)" strokeColor="var(--border)" />
                                         </div>
                                     </Tooltip>
                                 )

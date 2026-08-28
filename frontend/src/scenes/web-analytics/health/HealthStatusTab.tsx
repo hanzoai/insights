@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRefresh } from '@hanzo/icons'
 import { Banner, Button, Skeleton } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { HealthCheckSection } from './components/HealthCheckSection'
 import { HealthCheck } from './healthCheckTypes'

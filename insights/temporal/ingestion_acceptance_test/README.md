@@ -85,14 +85,14 @@ class TestExample(AcceptanceTest):
 
 All configuration is loaded from environment variables with the `INGESTION_ACCEPTANCE_TEST_` prefix:
 
-| Variable                | Required | Default | Description                                       |
-| ----------------------- | -------- | ------- | ------------------------------------------------- |
-| `API_HOST`              | Yes      | -       | Insights API host (e.g., `https://us.hanzo.ai`) |
-| `PROJECT_API_KEY`       | Yes      | -       | Project token for capturing events                |
+| Variable                | Required | Default | Description                                      |
+| ----------------------- | -------- | ------- | ------------------------------------------------ |
+| `API_HOST`              | Yes      | -       | Insights API host (e.g., `https://us.hanzo.ai`)  |
+| `PROJECT_API_KEY`       | Yes      | -       | Project token for capturing events               |
 | `TEAM_ID`               | Yes      | -       | Team ID for Datastore queries                    |
-| `EVENT_TIMEOUT_SECONDS` | No       | 90      | Max time to wait for events to appear             |
-| `POLL_INTERVAL_SECONDS` | No       | 10.0    | Interval between query attempts                   |
-| `SLACK_WEBHOOK_URL`     | No       | -       | Slack incoming webhook for failure notifications  |
+| `EVENT_TIMEOUT_SECONDS` | No       | 90      | Max time to wait for events to appear            |
+| `POLL_INTERVAL_SECONDS` | No       | 10.0    | Interval between query attempts                  |
+| `SLACK_WEBHOOK_URL`     | No       | -       | Slack incoming webhook for failure notifications |
 
 ## Running Locally
 

@@ -1,3 +1,4 @@
+import insights, { JsonRecord } from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -12,7 +13,6 @@ import {
 } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import insights, { JsonRecord } from 'insights-js'
 
 import api from 'lib/api'
 import { describerFor, ensureActivityDescribersLoaded } from 'lib/components/ActivityLog/activityLogLogic'

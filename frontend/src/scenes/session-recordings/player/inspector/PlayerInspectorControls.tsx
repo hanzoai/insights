@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
+import { Button, Input, SideAction, Tooltip } from '@hanzo/elements'
 import {
     BaseIcon,
     IconCheck,
@@ -14,7 +15,6 @@ import {
     IconStethoscope,
     IconTerminal,
 } from '@hanzo/icons'
-import { Button, Input, SideAction, Tooltip } from '@hanzo/elements'
 
 import { SettingsBar, SettingsButton, SettingsToggle } from 'lib/components/PanelSettings/PanelSettings'
 import { FEATURE_FLAGS } from 'lib/constants'

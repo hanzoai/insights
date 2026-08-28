@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload } from '@hanzo/icons'
 import { Button, Dropdown } from '@hanzo/elements'
+import { IconDownload } from '@hanzo/icons'
 
 import { ActivityLogSubscribeMenu } from 'lib/components/ActivityLog/ActivityLogSubscribeMenu'
 import { FEATURE_FLAGS } from 'lib/constants'

@@ -5,17 +5,16 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconPencil, IconTrash } from '@hanzo/icons'
 import { Dialog, Tag } from '@hanzo/elements'
+import { IconPencil, IconTrash } from '@hanzo/icons'
 
 import { FallbackCoverImage } from 'lib/components/FallbackCoverImage/FallbackCoverImage'
 import { More } from 'lib/elements/Button/More'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
-import { toast } from 'lib/elements/Toast'
 import { Spinner } from 'lib/elements/Spinner'
+import { toast } from 'lib/elements/Toast'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
-
 
 import type { InsightsFlowTemplate } from '../insightsflows/types'
 import { newWorkflowLogic } from '../newWorkflowLogic'

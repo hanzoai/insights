@@ -17,8 +17,8 @@ a single AI interaction — from the top-level agent invocation down to individu
 
 ## Available tools
 
-| Tool                            | Purpose                                                       |
-| ------------------------------- | ------------------------------------------------------------- |
+| Tool                             | Purpose                                                       |
+| -------------------------------- | ------------------------------------------------------------- |
 | `insights:query-llm-traces-list` | Search and list traces; can return large multi-trace payloads |
 | `insights:query-llm-trace`       | Get a single trace by ID with full event tree                 |
 | `insights:read-data-schema`      | Discover custom event/person properties before filtering      |

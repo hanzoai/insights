@@ -1,5 +1,5 @@
-import { IconPause, IconPlay } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPause, IconPlay } from '@hanzo/icons'
 
 import {
     DropdownMenu,

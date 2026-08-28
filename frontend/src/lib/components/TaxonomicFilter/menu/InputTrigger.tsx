@@ -37,13 +37,7 @@ export function MenuInputTrigger({
     if (spacerOnly) {
         return (
             <div aria-hidden="true">
-                <Input
-                    fullWidth={fullWidth}
-                    size="small"
-                    disabled
-                    placeholder={placeholder}
-                    className="invisible"
-                />
+                <Input fullWidth={fullWidth} size="small" disabled placeholder={placeholder} className="invisible" />
             </div>
         )
     }

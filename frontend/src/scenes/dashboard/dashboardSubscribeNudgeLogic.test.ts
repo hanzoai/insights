@@ -5,8 +5,8 @@ import { expectLogic } from 'kea-test-utils'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { toast } from 'lib/elements/Toast/Toast'
-import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import insights from 'lib/insights-typed'
+import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { dashboardLogic } from 'scenes/dashboard/dashboardLogic'
 import {
     dashboardNudgeScopeKey,

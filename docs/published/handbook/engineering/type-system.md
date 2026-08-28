@@ -8,9 +8,9 @@ Insights has two type generation systems that keep frontend and backend in sync.
 
 ## Overview
 
-| Flow               | Source of truth        | Generated output         | Used for                                                  |
-| ------------------ | ---------------------- | ------------------------ | --------------------------------------------------------- |
-| Backend → Frontend | Django serializers     | TypeScript + Zod (Orval) | API types, client functions, and validation schemas       |
+| Flow               | Source of truth        | Generated output         | Used for                                                       |
+| ------------------ | ---------------------- | ------------------------ | -------------------------------------------------------------- |
+| Backend → Frontend | Django serializers     | TypeScript + Zod (Orval) | API types, client functions, and validation schemas            |
 | Frontend → Backend | TypeScript `schema.ts` | Pydantic `schema.py`     | Query types (InsightsQL, filters, insights), some legacy types |
 
 These are independent systems. Don't conflate them.

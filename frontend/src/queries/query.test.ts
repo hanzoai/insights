@@ -19,7 +19,12 @@ describe('query', () => {
                     if (data.query?.kind === 'InsightsQLQuery') {
                         return [
                             200,
-                            { results: [], datastore: 'datastore string', insightsql: 'insightsql string', is_cached: false },
+                            {
+                                results: [],
+                                datastore: 'datastore string',
+                                insightsql: 'insightsql string',
+                                is_cached: false,
+                            },
                         ]
                     }
                     if (data.query?.kind === 'WebStatsTableQuery') {

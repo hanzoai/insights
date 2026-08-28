@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { InsightsApiError, InsightsPermissionError, InsightsRateLimitError, InsightsValidationError } from '@/lib/errors'
+import {
+    InsightsApiError,
+    InsightsPermissionError,
+    InsightsRateLimitError,
+    InsightsValidationError,
+} from '@/lib/errors'
 import { invokeMcpTool } from '@/tools/insightsAiTools/invokeTool'
 import type { Context } from '@/tools/types'
 

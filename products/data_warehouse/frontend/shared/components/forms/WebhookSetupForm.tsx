@@ -1,12 +1,12 @@
 import { BuiltLogic, LogicWrapper } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCopy, IconRefresh } from '@hanzo/icons'
 import { Banner, Button, Tag, Spinner } from '@hanzo/elements'
+import { IconCopy, IconRefresh } from '@hanzo/icons'
 
 import { Card } from 'lib/elements/Card'
-import { Markdown } from 'lib/elements/Markdown'
 import { Link } from 'lib/elements/Link'
+import { Markdown } from 'lib/elements/Markdown'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { SourceConfig, SourceFieldConfig } from '~/queries/schema/schema-general'
@@ -171,9 +171,7 @@ export function WebhookSetupForm({
         <WebhookSetupCard>
             <h3 className="text-lg font-semibold">Manual webhook setup for {sourceName}</h3>
             {!manualOnly && (
-                <Banner type="warning">
-                    {webhookResult?.error || 'Could not create the webhook automatically.'}
-                </Banner>
+                <Banner type="warning">{webhookResult?.error || 'Could not create the webhook automatically.'}</Banner>
             )}
             <p>
                 {manualOnly

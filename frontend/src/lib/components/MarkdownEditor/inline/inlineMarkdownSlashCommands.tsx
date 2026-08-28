@@ -14,8 +14,8 @@ import {
     type MutableRefObject,
 } from 'react'
 
-import { IconCode, IconImage, IconList, IconMinus, IconQuote } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
+import { IconCode, IconImage, IconList, IconMinus, IconQuote } from '@hanzo/icons'
 
 import { IconBold, IconItalic, IconLink, IconTextSize } from 'lib/elements/icons'
 import { Popover } from 'lib/elements/Popover'

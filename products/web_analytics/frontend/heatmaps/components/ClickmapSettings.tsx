@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { IconCursorClick } from '@hanzo/icons'
 import { Button, Switch, Spinner, Tooltip } from '@hanzo/elements'
+import { IconCursorClick } from '@hanzo/icons'
 
 import { Popover } from 'lib/elements/Popover'
 import { humanFriendlyLargeNumber } from 'lib/utils/numbers'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Button, type ButtonProps } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 

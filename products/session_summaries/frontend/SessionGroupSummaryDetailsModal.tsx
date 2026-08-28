@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconShare, IconX } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
+import { IconShare, IconX } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { colonDelimitedDuration } from 'lib/utils/durations'
@@ -59,15 +59,7 @@ export function SessionGroupSummaryDetailsModal({ isOpen, onClose, event }: Sess
         throw new Error('Session recording id not found')
     }
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            simple
-            title=""
-            width={1600}
-            closable={true}
-            hideCloseButton={true}
-        >
+        <Modal isOpen={isOpen} onClose={onClose} simple title="" width={1600} closable={true} hideCloseButton={true}>
             <Modal.Content embedded>
                 <div className="flex flex-col">
                     {/* Header */}

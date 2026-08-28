@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconChevronLeft } from '@hanzo/icons'
 import { Input, TextArea, Link } from '@hanzo/elements'
+import { IconChevronLeft } from '@hanzo/icons'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
@@ -12,9 +12,6 @@ import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/User
 import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
@@ -24,8 +21,11 @@ import { Modal } from 'lib/elements/Modal'
 import { SegmentedButton } from 'lib/elements/SegmentedButton'
 import { Select } from 'lib/elements/Select'
 import { Skeleton } from 'lib/elements/Skeleton'
-import { Switch } from 'lib/elements/Switch'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Switch } from 'lib/elements/Switch'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
+import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { preflightLogic } from 'lib/logic/preflightLogic'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
 import { membersLogic } from 'scenes/organization/membersLogic'
@@ -611,10 +611,7 @@ function EditSubscriptionForm({
                                                 help={
                                                     <>
                                                         Private channels are only shown if you have{' '}
-                                                        <Link
-                                                            to="https://hanzo.ai/docs/webhooks/slack"
-                                                            target="_blank"
-                                                        >
+                                                        <Link to="https://hanzo.ai/docs/webhooks/slack" target="_blank">
                                                             added the Insights Slack App
                                                         </Link>{' '}
                                                         to them. You can also paste the channel ID (e.g.{' '}
@@ -892,12 +889,7 @@ function EditSubscriptionForm({
             <Modal.Footer>
                 <div className="flex-1">
                     {subscription && id !== 'new' && (
-                        <Button
-                            type="secondary"
-                            status="danger"
-                            onClick={_onDelete}
-                            disabled={subscriptionLoading}
-                        >
+                        <Button type="secondary" status="danger" onClick={_onDelete} disabled={subscriptionLoading}>
                             Delete subscription
                         </Button>
                     )}

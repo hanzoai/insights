@@ -1,16 +1,16 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@hanzo/icons'
 import { Dialog, Input, TextArea, Link } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { ErrorTrackingFingerprint } from 'lib/components/Errors/types'
+import { Field } from 'lib/elements/Field'
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { JiraProjectSelectField } from 'lib/integrations/JiraIntegrationHelpers'
 import { LinearTeamSelectField } from 'lib/integrations/LinearIntegrationHelpers'
 import { ICONS } from 'lib/integrations/utils'
-import { Field } from 'lib/elements/Field'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenu,

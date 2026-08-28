@@ -8,7 +8,10 @@ import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
 import { InsightsFlowAction, InsightsFlowActionNode } from '../types'
 import { hogFlowOutputMappingLogic, normalizeOutputVariable } from './hogFlowOutputMappingLogic'
 
-const makeActionNode = (id: string, outputVariable?: InsightsFlowAction['output_variable']): InsightsFlowActionNode => ({
+const makeActionNode = (
+    id: string,
+    outputVariable?: InsightsFlowAction['output_variable']
+): InsightsFlowActionNode => ({
     id,
     type: 'hogFlowAction',
     position: { x: 0, y: 0 },

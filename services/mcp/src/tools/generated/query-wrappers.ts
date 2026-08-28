@@ -440,7 +440,10 @@ const AssistantTrendsGroupNode = z.object({
         'Math aggregation for the combined series. The engine reads aggregation from here, not from inner nodes.'
     ).optional(),
     math_group_type_index: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).optional(),
-    math_insightsql: z.string().describe('Custom InsightsQL aggregation. When set, `math` must be `insightsql`.').optional(),
+    math_insightsql: z
+        .string()
+        .describe('Custom InsightsQL aggregation. When set, `math` must be `insightsql`.')
+        .optional(),
     math_multiplier: z.coerce.number().optional(),
     math_property: z.string().optional(),
     math_property_type: z.string().optional(),

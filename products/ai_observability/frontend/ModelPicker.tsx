@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Button, Input, Skeleton, Link } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { Menu, MenuItem, MenuItems } from 'lib/elements/Menu'
 
@@ -202,12 +202,7 @@ export function ModelPicker({
     ]
 
     return (
-        <Menu
-            items={menuItems}
-            closeOnClickInside
-            placement="bottom-start"
-            onVisibilityChange={handleVisibilityChange}
-        >
+        <Menu items={menuItems} closeOnClickInside placement="bottom-start" onVisibilityChange={handleVisibilityChange}>
             <Button
                 type="secondary"
                 fullWidth

@@ -44,12 +44,7 @@ export function CompareMenuButton(): JSX.Element {
         <DropdownMenu>
             <DropdownMenuTrigger
                 render={
-                    <Button
-                        size="small"
-                        type="secondary"
-                        active={compareActive}
-                        data-attr="tracing-compare-menu"
-                    />
+                    <Button size="small" type="secondary" active={compareActive} data-attr="tracing-compare-menu" />
                 }
             >
                 Compare

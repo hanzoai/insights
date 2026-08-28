@@ -1,23 +1,14 @@
-import { MakeLogicType, BindLogic, connect, kea, path, selectors, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, BindLogic, connect, kea, path, selectors, useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { Button, Checkbox, Divider, Modal, Skeleton, Tag, Link, Tooltip } from '@hanzo/elements'
 import { IconCopy, IconQuestion } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Divider,
-    Modal,
-    Skeleton,
-    Tag,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { Banner } from 'lib/elements/Banner'
 import { Markdown } from 'lib/elements/Markdown'
+import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
@@ -536,9 +527,7 @@ function SecondStep({ sourceWizardLogicProps }: { sourceWizardLogicProps?: Sourc
             <div className="flex flex-row gap-1">
                 {selectedConnector.permissionsCaption && (
                     <Tooltip
-                        title={
-                            <Markdown className="text-sm">{selectedConnector.permissionsCaption}</Markdown>
-                        }
+                        title={<Markdown className="text-sm">{selectedConnector.permissionsCaption}</Markdown>}
                         interactive
                     >
                         <Tag type="muted" size="small">
@@ -598,11 +587,7 @@ function AutoConfigureTablesStep(): JSX.Element {
                 </Banner>
             )}
             <div>
-                <Button
-                    type="secondary"
-                    onClick={() => setCustomize(true)}
-                    data-attr="dwh-onboarding-customize-tables"
-                >
+                <Button type="secondary" onClick={() => setCustomize(true)} data-attr="dwh-onboarding-customize-tables">
                     Review and customize tables
                 </Button>
             </div>

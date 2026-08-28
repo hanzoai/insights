@@ -8,15 +8,15 @@ import Fuse from 'fuse.js'
 import { CSSProperties, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { List } from 'react-window'
 
-import { IconCheck, IconPencil, IconX } from '@hanzo/icons'
 import { Checkbox, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconPencil, IconX } from '@hanzo/icons'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
-import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { SortableDragIcon } from 'lib/elements/icons'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Snack } from 'lib/elements/Snack/Snack'
+import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { range } from 'lib/utils/arrays'
 import { createFuse } from 'lib/utils/fuseSearch'
 

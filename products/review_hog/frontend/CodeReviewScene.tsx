@@ -1,19 +1,6 @@
 import { useActions, useValues } from 'kea'
 
 import {
-    IconBalance,
-    IconChevronDown,
-    IconDirectedGraph,
-    IconExternal,
-    IconFilter,
-    IconGithub,
-    IconPlus,
-    IconPullRequest,
-    IconSearch,
-    IconShield,
-    IconStack,
-} from '@hanzo/icons'
-import {
     Banner,
     Button,
     Input,
@@ -27,15 +14,28 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import {
+    IconBalance,
+    IconChevronDown,
+    IconDirectedGraph,
+    IconExternal,
+    IconFilter,
+    IconGithub,
+    IconPlus,
+    IconPullRequest,
+    IconSearch,
+    IconShield,
+    IconStack,
+} from '@hanzo/icons'
 
 import { Logomark } from 'lib/brand'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'
-import { IconStamphog } from 'lib/elements/icons'
 import { Card } from 'lib/elements/Card'
 import { Collapse } from 'lib/elements/Collapse'
 import { Drawer } from 'lib/elements/Drawer'
+import { IconStamphog } from 'lib/elements/icons'
 import { Markdown } from 'lib/elements/Markdown'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'

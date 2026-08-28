@@ -1,7 +1,7 @@
 import { useValues, useActions } from 'kea'
 
-import { IconPlus } from '@hanzo/icons'
 import { Input, Button, Spinner } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 

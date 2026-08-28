@@ -48,9 +48,7 @@ function LookupPanel(): JSX.Element {
                     Look up
                 </Button>
             </div>
-            {notFound.length > 0 && (
-                <Banner type="warning">Cohort ids not found: {notFound.join(', ')}</Banner>
-            )}
+            {notFound.length > 0 && <Banner type="warning">Cohort ids not found: {notFound.join(', ')}</Banner>}
             <StaffCohortsTable
                 cohorts={lookedUpCohorts}
                 loading={lookupResponseLoading}

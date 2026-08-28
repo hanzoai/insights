@@ -1,23 +1,13 @@
 import './UnsubscribeSurveyModal.scss'
 
-import { useActions, useValues } from 'kea'
 import { SurveyEventProperties } from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import {
-    Banner,
-    Button,
-    Checkbox,
-    Divider,
-    Label,
-    Modal,
-    TextArea,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
+import { Banner, Button, Checkbox, Divider, Label, Modal, TextArea, Link, Tooltip } from '@hanzo/elements'
 
-import { HeartHog } from 'lib/components/mascots'
 import { useConfetti } from 'lib/components/Confetti/Confetti'
+import { HeartHog } from 'lib/components/mascots'
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 import { humanFriendlyCurrency } from 'lib/utils/numbers'

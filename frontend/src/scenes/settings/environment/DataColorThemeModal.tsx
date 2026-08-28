@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCopy, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, ColorGlyph, Input, Label, Modal, Table } from '@hanzo/elements'
+import { IconCopy, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 

@@ -1,9 +1,9 @@
-import { BindLogic, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconArrowLeft, IconArrowRight, IconGraph, IconPeople, IconRewindPlay } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconArrowLeft, IconArrowRight, IconGraph, IconPeople, IconRewindPlay } from '@hanzo/icons'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
@@ -118,23 +118,28 @@ function DataWarehouseValuePropInner(): JSX.Element {
                                     Insights
                                 </span>
                             </div>
-                            {EXAMPLE_QUERIES.map(({ question, sourceIcon, sourceName, insightsIcon, insightsLabel }) => (
-                                <div key={question} className="grid grid-cols-[1fr_110px_140px] px-3 py-2 items-center">
-                                    <span className="text-sm">{question}</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <img
-                                            src={sourceIcon}
-                                            alt={sourceName}
-                                            className="size-4 object-contain rounded shrink-0"
-                                        />
-                                        <span className="text-xs text-muted">{sourceName}</span>
+                            {EXAMPLE_QUERIES.map(
+                                ({ question, sourceIcon, sourceName, insightsIcon, insightsLabel }) => (
+                                    <div
+                                        key={question}
+                                        className="grid grid-cols-[1fr_110px_140px] px-3 py-2 items-center"
+                                    >
+                                        <span className="text-sm">{question}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <img
+                                                src={sourceIcon}
+                                                alt={sourceName}
+                                                className="size-4 object-contain rounded shrink-0"
+                                            />
+                                            <span className="text-xs text-muted">{sourceName}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="shrink-0">{insightsIcon}</span>
+                                            <span className="text-xs text-muted">{insightsLabel}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="shrink-0">{insightsIcon}</span>
-                                        <span className="text-xs text-muted">{insightsLabel}</span>
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            )}
                         </div>
                     </div>
 

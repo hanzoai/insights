@@ -103,7 +103,8 @@ export const Animated = {
             return () => clearInterval(id)
         }, [])
 
-        const variant: 'destructive' | 'warning' | 'success' = value < 33 ? 'destructive' : value < 66 ? 'warning' : 'success'
+        const variant: 'destructive' | 'warning' | 'success' =
+            value < 33 ? 'destructive' : value < 66 ? 'warning' : 'success'
 
         return (
             <Progress value={value} variant={variant} className="w-full max-w-sm">
@@ -119,8 +120,7 @@ export const ComposedManually = {
     parameters: {
         docs: {
             description: {
-                story:
-                    'Use `ProgressTrack` + `ProgressIndicator` directly when the convenience `Progress` shell is not what you want — for example, when the consumer wants control over child order, or to render multiple indicators inside a single track.',
+                story: 'Use `ProgressTrack` + `ProgressIndicator` directly when the convenience `Progress` shell is not what you want — for example, when the consumer wants control over child order, or to render multiple indicators inside a single track.',
             },
         },
     },

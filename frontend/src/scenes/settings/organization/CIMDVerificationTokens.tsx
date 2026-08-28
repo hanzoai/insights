@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Input, Modal, Table, Link } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
-import { IconKey } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
+import { IconKey } from 'lib/elements/icons'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
 import { cimdVerificationTokensLogic, CIMDVerificationToken } from './cimdVerificationTokensLogic'
@@ -23,10 +23,7 @@ export function CIMDVerificationTokens(): JSX.Element {
                 metadata document as <code>verification_token</code> inside the <code>com.insights</code> object.
                 Verified partners get a higher default rate limit for account provisioning and a clear identity trail.
                 See the{' '}
-                <Link
-                    to="https://hanzo.ai/docs/integrate/provisioning#host-a-cimd-metadata-document"
-                    target="_blank"
-                >
+                <Link to="https://hanzo.ai/docs/integrate/provisioning#host-a-cimd-metadata-document" target="_blank">
                     docs
                 </Link>{' '}
                 for the metadata format.

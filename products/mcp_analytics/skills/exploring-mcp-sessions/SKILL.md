@@ -23,8 +23,8 @@ and query recipes live in the shared reference:
 
 ## Tools
 
-| Tool                                             | Purpose                                                    |
-| ------------------------------------------------ | ---------------------------------------------------------- |
+| Tool                                              | Purpose                                                    |
+| ------------------------------------------------- | ---------------------------------------------------------- |
 | `insights:mcp-analytics-sessions-list`            | List sessions — one row per session, newest first          |
 | `insights:mcp-analytics-sessions-tool-calls`      | One session's tool calls, chronological                    |
 | `insights:mcp-analytics-sessions-generate-intent` | LLM summary of a session's goal (cached after first call)  |

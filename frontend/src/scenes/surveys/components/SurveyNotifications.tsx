@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconPlus } from '@hanzo/icons'
 import { Button, Menu, Skeleton, Switch } from '@hanzo/elements'
+import { IconCopy, IconPlus } from '@hanzo/icons'
 
 import { ConfirmDeleteButton } from 'lib/components/ConfirmDeleteButton'
 import { MailHog } from 'lib/components/mascots'

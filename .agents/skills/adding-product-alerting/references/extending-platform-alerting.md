@@ -4,15 +4,15 @@ Use this path when adding a reusable alert capability, option, or advanced behav
 
 ## 1. Classify the extension
 
-| Capability                                                                       | Primary source of truth                                              | Also inspect                                                                           |
-| -------------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Lifecycle state, notification action, control-plane transition, or policy option | `products/alerts/backend/state_machine.py`                           | Shared decision tests, every adopter policy and adapter, semgrep rule                  |
-| Fixed-cadence, calendar, timezone, or schedule-restriction behavior              | `products/alerts/backend/scheduling.py`                              | Product wrappers, create/update paths, due queries, scheduler interval, DST boundaries |
+| Capability                                                                       | Primary source of truth                                              | Also inspect                                                                                |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Lifecycle state, notification action, control-plane transition, or policy option | `products/alerts/backend/state_machine.py`                           | Shared decision tests, every adopter policy and adapter, semgrep rule                       |
+| Fixed-cadence, calendar, timezone, or schedule-restriction behavior              | `products/alerts/backend/scheduling.py`                              | Product wrappers, create/update paths, due queries, scheduler interval, DST boundaries      |
 | Destination type or destination-wide option                                      | `products/alerts/backend/destination_configs.py`                     | InsightsFunction templates/sub-templates, facade exports, product allowlists, `AlertWizard` |
-| InsightsFunction persistence or delivery semantics                                    | `products/alerts/backend/destinations.py`                            | Worker batching, rollback, delivery metrics, destination tests                         |
-| Email transport capability                                                       | `products/alerts/backend/email_notifications.py`                     | Facade export, campaign-key semantics, adopter templates and tests                     |
-| Shared insight query evaluation                                                  | `products/alerts/backend/evaluation/`                                | Alert config schema, API validation, query-kind gates, generated API types             |
-| Shared alert model or API option                                                 | `products/alerts/backend/models/` and `products/alerts/backend/api/` | Migrations, OpenAPI, frontend logic, MCP schema                                        |
+| InsightsFunction persistence or delivery semantics                               | `products/alerts/backend/destinations.py`                            | Worker batching, rollback, delivery metrics, destination tests                              |
+| Email transport capability                                                       | `products/alerts/backend/email_notifications.py`                     | Facade export, campaign-key semantics, adopter templates and tests                          |
+| Shared insight query evaluation                                                  | `products/alerts/backend/evaluation/`                                | Alert config schema, API validation, query-kind gates, generated API types                  |
+| Shared alert model or API option                                                 | `products/alerts/backend/models/` and `products/alerts/backend/api/` | Migrations, OpenAPI, frontend logic, MCP schema                                             |
 | Wizard trigger, destination, or advanced creation option                         | `frontend/src/lib/components/Alerting/AlertWizard/`                  | InsightsFunction sub-template compatibility, adopter props, kea tests                       |
 
 If the change crosses rows, update each row deliberately. Do not hide a cross-layer contract in one product adapter.

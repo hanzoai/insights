@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, ButtonPropsBase } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { inviteLogic } from 'scenes/settings/organization/inviteLogic'

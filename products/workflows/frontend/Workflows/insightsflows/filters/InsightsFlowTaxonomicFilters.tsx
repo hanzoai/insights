@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCode } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCode } from '@hanzo/icons'
 
 import { infiniteListLogic } from 'lib/components/TaxonomicFilter/infiniteListLogic'
 import { TaxonomicFilterGroupType, TaxonomicFilterRenderProps } from 'lib/components/TaxonomicFilter/types'

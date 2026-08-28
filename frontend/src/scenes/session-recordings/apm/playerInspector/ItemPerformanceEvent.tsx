@@ -395,10 +395,7 @@ export function BodyDisplay({
         <>
             <p>
                 This content was redacted by Insights to protect sensitive data.{' '}
-                <Link
-                    to="https://hanzo.ai/docs/session-replay/network-recording?utm_medium=in-product"
-                    target="_blank"
-                >
+                <Link to="https://hanzo.ai/docs/session-replay/network-recording?utm_medium=in-product" target="_blank">
                     Learn how to override Insights's automatic redaction code.
                 </Link>
             </p>

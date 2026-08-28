@@ -28,11 +28,7 @@ export function MetricsStarterDashboardModal(): JSX.Element {
             description="One insight per metric, charted with its recommended aggregation."
             footer={
                 <>
-                    <Button
-                        type="secondary"
-                        onClick={closeModal}
-                        disabledReason={creating ? 'Creating…' : undefined}
-                    >
+                    <Button type="secondary" onClick={closeModal} disabledReason={creating ? 'Creating…' : undefined}>
                         Cancel
                     </Button>
                     <Button

@@ -181,8 +181,7 @@ export const NewSelectVariables: Story = {
                     },
                 ],
                 tags: [],
-                image_url:
-                    'https://hanzo.ai/static/5e5cf65347bfb25f1dfc9792b18e87cb/6b063/insights-bye-kubernetes.png',
+                image_url: 'https://hanzo.ai/static/5e5cf65347bfb25f1dfc9792b18e87cb/6b063/insights-bye-kubernetes.png',
             })
         })
 

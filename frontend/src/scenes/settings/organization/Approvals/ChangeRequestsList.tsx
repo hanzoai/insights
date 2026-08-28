@@ -6,14 +6,14 @@ import { Button, Dialog, Input, Select, Table, Tag, toast } from '@hanzo/element
 import { CAPABILITIES } from 'lib/capabilities'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
-import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { TZLabel } from 'lib/components/TZLabel'
+import { Unavailable } from 'lib/components/Unavailable/Unavailable'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
 import { More } from 'lib/elements/Button/More'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { TableColumn } from 'lib/elements/Table'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { cn } from 'lib/utils/css-classes'
 import { approvalsLogic } from 'scenes/approvals/approvalsLogic'
 import { getChangeRequestButtonVisibility } from 'scenes/approvals/changeRequestsLogic'
@@ -251,10 +251,7 @@ function ChangeRequestTableActions({
                                             <div className="text-sm text-secondary mb-2">
                                                 This will reject the change request and prevent it from being applied.
                                             </div>
-                                            <Input
-                                                id="reject-reason"
-                                                placeholder="Reason for rejection (required)"
-                                            />
+                                            <Input id="reject-reason" placeholder="Reason for rejection (required)" />
                                         </div>
                                     ),
                                     primaryButton: {

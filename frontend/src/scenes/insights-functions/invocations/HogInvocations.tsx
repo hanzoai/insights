@@ -1,7 +1,6 @@
 import { useActions, useValues } from 'kea'
 import { ReactNode, useEffect, useState } from 'react'
 
-import { IconChevronDown, IconPerson, IconRefresh, IconRevert, IconSearch, IconWarning, IconX } from '@hanzo/icons'
 import {
     Button,
     Checkbox,
@@ -20,6 +19,7 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import { IconChevronDown, IconPerson, IconRefresh, IconRevert, IconSearch, IconWarning, IconX } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
@@ -181,7 +181,9 @@ async function countRerunMatches(
         ? insightsql.raw(`AND error_kind IN (${params.error_kind.map(escapeInsightsQLString).join(',')})`)
         : insightsql.raw('')
     const maxAttemptsClause =
-        typeof params.max_attempts === 'number' ? insightsql.raw(`AND attempts < ${params.max_attempts}`) : insightsql.raw('')
+        typeof params.max_attempts === 'number'
+            ? insightsql.raw(`AND attempts < ${params.max_attempts}`)
+            : insightsql.raw('')
     // Reuse the same inline date clause shape the list / sparkline use.
     const dateClause = dateClauseFor({
         date_from: params.date_from,
@@ -1032,9 +1034,7 @@ function StatusFilterDropdown({
                             type="tertiary"
                             size="small"
                             fullWidth
-                            icon={
-                                <Checkbox checked={value.includes(option.value)} className="pointer-events-none" />
-                            }
+                            icon={<Checkbox checked={value.includes(option.value)} className="pointer-events-none" />}
                             onClick={() =>
                                 onChange(
                                     value.includes(option.value)

@@ -14,8 +14,8 @@ import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
-import { IconPencil, IconTrash } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconPencil, IconTrash } from '@hanzo/icons'
 
 import { TeamMembershipLevel } from 'lib/constants'
 import { SortableDragIcon } from 'lib/elements/icons'

@@ -2,8 +2,8 @@ import { DismissableLayer } from '@radix-ui/react-dismissable-layer'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

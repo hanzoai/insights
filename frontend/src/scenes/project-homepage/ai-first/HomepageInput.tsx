@@ -1,10 +1,10 @@
+import insights from 'insights-js'
 import { BindLogic, useActions, useAsyncActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconArrowRight, IconClock, IconInfo, IconLock, IconPin, IconStar } from '@hanzo/icons'
 import { Button, Skeleton, Tooltip } from '@hanzo/elements'
+import { IconArrowRight, IconClock, IconInfo, IconLock, IconPin, IconStar } from '@hanzo/icons'
 
 import { Search } from 'lib/components/Search/Search'
 import { FEATURE_FLAGS } from 'lib/constants'

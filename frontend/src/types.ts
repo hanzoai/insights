@@ -1,10 +1,10 @@
 import type { Insights, PropertyMatchType, SupportedWebVitalsMetrics } from 'insights-js'
-import { eventWithTime } from '@hanzo/insights-rrweb-types'
 import { LogicWrapper } from 'kea'
 import { ReactNode } from 'react'
 import { LayoutItem } from 'react-grid-layout'
 
 import { TableColumns } from '@hanzo/elements'
+import { eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import { PaginatedResponse } from 'lib/api'
 import { ChartDataset, ChartType, InteractionItem } from 'lib/Chart'

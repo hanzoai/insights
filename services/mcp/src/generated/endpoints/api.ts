@@ -1666,7 +1666,9 @@ export const EndpointsRunCreateBody = /* @__PURE__ */ zod.object({
     offset: zod
         .union([zod.number(), zod.null()])
         .optional()
-        .describe('Number of results to skip. Must be used together with limit. Only supported for InsightsQL endpoints.'),
+        .describe(
+            'Number of results to skip. Must be used together with limit. Only supported for InsightsQL endpoints.'
+        ),
     refresh: zod
         .union([zod.enum(['cache', 'force', 'direct']), zod.null()])
         .default(endpointsRunCreateBodyRefreshDefault),

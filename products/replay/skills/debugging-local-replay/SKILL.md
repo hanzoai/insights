@@ -101,10 +101,10 @@ These Docker containers must be running and healthy:
 
 | Container              | Purpose                          |
 | ---------------------- | -------------------------------- |
-| `insights-kafka-1`      | Message bus for recording events |
-| `insights-db-1`         | Postgres for metadata            |
-| `insights-redis7-1`     | Redis for state                  |
-| `insights-datastore-1` | Datastore for session data      |
+| `insights-kafka-1`     | Message bus for recording events |
+| `insights-db-1`        | Postgres for metadata            |
+| `insights-redis7-1`    | Redis for state                  |
+| `insights-datastore-1` | Datastore for session data       |
 | `seaweedfs-main`       | Blob storage for recording data  |
 
 Check with:

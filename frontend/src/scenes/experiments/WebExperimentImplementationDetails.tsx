@@ -1,8 +1,8 @@
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
-import { IconOpenInApp } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Dialog } from 'lib/elements/Dialog'
+import { IconOpenInApp } from 'lib/elements/icons'
 
 import { Experiment } from '~/types'
 
@@ -39,12 +39,7 @@ export function WebExperimentImplementationDetails({ experiment }: WebExperiment
                         Use our toolbar to select elements and apply transformations for each variant.
                     </div>
                     <div>
-                        <Button
-                            size="small"
-                            type="secondary"
-                            onClick={onSelectElement}
-                            sideIcon={<IconOpenInApp />}
-                        >
+                        <Button size="small" type="secondary" onClick={onSelectElement} sideIcon={<IconOpenInApp />}>
                             Launch toolbar on your website
                         </Button>
                     </div>

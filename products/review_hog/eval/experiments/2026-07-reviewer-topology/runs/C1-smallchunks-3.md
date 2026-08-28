@@ -35,14 +35,14 @@
 
 ## Per-review-unit breakdown
 
-| pass | chunk | perspective                                    | raw issues |
-| ---- | ----- | ---------------------------------------------- | ---------- |
+| pass | chunk | perspective                                       | raw issues |
+| ---- | ----- | ------------------------------------------------- | ---------- |
 | 1    | 1     | review-script-perspective-contracts-security      | 2          |
-| 1    | 2     | ?                                              | 0          |
+| 1    | 2     | ?                                                 | 0          |
 | 2    | 1     | review-script-perspective-logic-correctness       | 2          |
 | 2    | 2     | review-script-perspective-logic-correctness       | 1          |
 | 3    | 1     | review-script-perspective-performance-reliability | 1          |
-| 3    | 2     | ?                                              | 0          |
+| 3    | 2     | ?                                                 | 0          |
 
 ## Findings (post-dedup) with validator verdict
 

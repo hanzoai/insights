@@ -39,21 +39,21 @@ HedgeboxMatrix(
 
 These are the custom events the simulation captures. Property keys are exact.
 
-| Event                  | Properties                                                                                           | Notes                                                                                           |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `signed_up`            | `from_invite` (bool)                                                                                 | `False` for new account, `True` when joining a team via invite                                  |
-| `logged_in`            | —                                                                                                    |                                                                                                 |
-| `logged_out`           | —                                                                                                    |                                                                                                 |
-| `uploaded_file`        | `file_type` (mime str), `file_size_b` (int bytes), `used_mb` (int), optional `file_name` (hex, ~50%) |                                                                                                 |
-| `downloaded_file`      | `file_type`, `file_size_b`, `file_name` (hex)                                                        | also fired (~70%) when viewing a shared file                                                    |
-| `deleted_file`         | `file_type`, `file_size_b`                                                                           | no `file_name`                                                                                  |
-| `shared_file_link`     | `file_type`, `file_size_b`                                                                           |                                                                                                 |
-| `upgraded_plan`        | `previous_plan`, `new_plan` (plan strings, see below)                                                |                                                                                                 |
-| `downgraded_plan`      | `previous_plan`, `new_plan`                                                                          |                                                                                                 |
-| `invited_team_member`  | —                                                                                                    | business plans only                                                                             |
-| `removed_team_member`  | —                                                                                                    | business plans only                                                                             |
+| Event                  | Properties                                                                                           | Notes                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `signed_up`            | `from_invite` (bool)                                                                                 | `False` for new account, `True` when joining a team via invite                                   |
+| `logged_in`            | —                                                                                                    |                                                                                                  |
+| `logged_out`           | —                                                                                                    |                                                                                                  |
+| `uploaded_file`        | `file_type` (mime str), `file_size_b` (int bytes), `used_mb` (int), optional `file_name` (hex, ~50%) |                                                                                                  |
+| `downloaded_file`      | `file_type`, `file_size_b`, `file_name` (hex)                                                        | also fired (~70%) when viewing a shared file                                                     |
+| `deleted_file`         | `file_type`, `file_size_b`                                                                           | no `file_name`                                                                                   |
+| `shared_file_link`     | `file_type`, `file_size_b`                                                                           |                                                                                                  |
+| `upgraded_plan`        | `previous_plan`, `new_plan` (plan strings, see below)                                                |                                                                                                  |
+| `downgraded_plan`      | `previous_plan`, `new_plan`                                                                          |                                                                                                  |
+| `invited_team_member`  | —                                                                                                    | business plans only                                                                              |
+| `removed_team_member`  | —                                                                                                    | business plans only                                                                              |
 | `paid_bill`            | `amount_usd` (float), `plan` (plan string)                                                           | **server-side** event (`$lib = insights-python`), future-dated every 30 days after first upgrade |
-| `$feature_flag_called` | `$feature_flag`, `$feature_flag_response`, `<flag_key>`                                              | fired at session start, only for experiment flags                                               |
+| `$feature_flag_called` | `$feature_flag`, `$feature_flag_response`, `<flag_key>`                                              | fired at session start, only for experiment flags                                                |
 
 Standard autocapture/web events are also present: `$pageview`, `$pageleave`, `$autocapture` (only for two outbound ad clicks, with `$event_type=click` and `$external_click_url`), `$identify`, `$groupidentify`. Error-tracking demo `$exception` events also exist (see "Error tracking" below).
 

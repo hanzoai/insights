@@ -1,7 +1,7 @@
 import { ReactNode, useMemo, useState } from 'react'
 
-import { IconCheck } from '@hanzo/icons'
 import { Button, Input, Spinner } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
 
 import { Popover } from 'lib/elements/Popover/Popover'
 

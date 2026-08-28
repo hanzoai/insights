@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Input, Select, SelectOption } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
@@ -23,14 +23,10 @@ export function FunnelConversionWindowFilter({ insightProps }: Pick<EditorFilter
     const displayUnit = conversionWindowUnit ?? conversionWindow.funnelWindowIntervalUnit
     const intervalBounds = TIME_INTERVAL_BOUNDS[displayUnit]
 
-    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
-        (unit) => ({
-            label: capitalizeFirstLetter(
-                pluralize(conversionWindow.funnelWindowInterval ?? 7, unit, `${unit}s`, false)
-            ),
-            value: unit as FunnelConversionWindowTimeUnit,
-        })
-    )
+    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map((unit) => ({
+        label: capitalizeFirstLetter(pluralize(conversionWindow.funnelWindowInterval ?? 7, unit, `${unit}s`, false)),
+        value: unit as FunnelConversionWindowTimeUnit,
+    }))
 
     return (
         <div className="flex items-center gap-2 flex-wrap" data-attr="funnel-conversion-window-filter">

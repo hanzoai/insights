@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useState } from 'react'
 
-import { IconX } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { FloatingContainerContext } from 'lib/hooks/useFloatingContainerContext'
 import { useKeepMountedWhileOpen } from 'lib/hooks/useKeepMountedWhileOpen'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRefresh } from '@hanzo/icons'
 import { Button, SegmentedButton, Table, Tag, Tooltip } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { TableColumns } from 'lib/elements/Table'

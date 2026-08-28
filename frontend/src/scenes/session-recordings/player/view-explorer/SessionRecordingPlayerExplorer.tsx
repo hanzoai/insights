@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { IconRevert, IconX } from '@hanzo/icons'
 
 import { SettingsBar, SettingsButton } from 'lib/components/PanelSettings/PanelSettings'
-import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { Banner } from 'lib/elements/Banner'
+import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { Timestamp } from 'scenes/session-recordings/player/controller/PlayerControllerTime'
 
 export type SessionRecordingPlayerExplorerProps = {

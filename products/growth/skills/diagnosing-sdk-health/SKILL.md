@@ -18,8 +18,8 @@ detected issues and act on the fix-it guidance each one carries.
 
 ## Available tools
 
-| Tool                            | Purpose                                                                                      |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
+| Tool                             | Purpose                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------- |
 | `insights:health-issues-summary` | Aggregated counts of active issues by severity and kind. Quick triage before drilling in.    |
 | `insights:health-issues-list`    | Lists issues. Filter with `kind=sdk_outdated` to get just the SDK ones.                      |
 | `insights:health-issues-get`     | One issue, enriched with a `title`, `summary`, `link`, and **`remediation.{human, agent}`**. |

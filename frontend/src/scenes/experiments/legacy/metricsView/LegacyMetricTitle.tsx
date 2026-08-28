@@ -1,5 +1,5 @@
-import { IconArrowRight, IconFunnels } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconArrowRight, IconFunnels } from '@hanzo/icons'
 
 import { InsightType } from '~/types'
 

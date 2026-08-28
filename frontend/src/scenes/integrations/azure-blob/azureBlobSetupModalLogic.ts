@@ -3,8 +3,8 @@ import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 
 import api from 'lib/api'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { toast } from 'lib/elements/Toast'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 
 import { IntegrationType } from '~/types'
 

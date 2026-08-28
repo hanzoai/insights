@@ -1,12 +1,12 @@
 import { MOCK_DEFAULT_ORGANIZATION, MOCK_DEFAULT_USER } from 'lib/api.mock'
 
+import insights from 'insights-js'
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import { ApiError } from 'lib/api'
-import { getRecentSlackChannelIds } from 'lib/integrations/slackChannel'
 import { toast } from 'lib/elements/Toast/Toast'
+import { getRecentSlackChannelIds } from 'lib/integrations/slackChannel'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -473,11 +473,7 @@ describe('subscriptionLogic', () => {
 
     it.each<[string, Partial<SubscriptionType>, string[]]>([
         ['a slack subscription', { target_type: 'slack', target_value: 'C123|#general', integration_id: 7 }, ['C123']],
-        [
-            'a non-slack target type',
-            { target_type: 'email', target_value: 'ben@hanzo.ai', integration_id: null },
-            [],
-        ],
+        ['a non-slack target type', { target_type: 'email', target_value: 'ben@hanzo.ai', integration_id: null }, []],
     ])('records the channel recency for %s', async (_label, subscription, expectedIds) => {
         await expectLogic(newLogic, () => {
             newLogic.actions.submitSubscriptionSuccess(subscription as SubscriptionType)

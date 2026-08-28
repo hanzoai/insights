@@ -1,8 +1,8 @@
 import { MOCK_TEAM_ID } from 'lib/api.mock'
 
+import insights from 'insights-js'
 import { getContext } from 'kea'
 import { expectLogic, partial } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import {
     hasRecentContext,

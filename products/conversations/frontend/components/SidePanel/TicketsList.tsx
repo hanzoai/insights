@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconChevronRight } from '@hanzo/icons'
 import { Badge, Button, Tag, Spinner } from '@hanzo/elements'
 import { Link } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { stripMarkdown } from 'lib/utils/markdown'
@@ -102,11 +102,7 @@ export function TicketsList({ selectedTicketId = null }: TicketsListProps): JSX.
                                         {ticket.status === 'on_hold' ? 'On hold' : ticket.status}
                                     </Tag>
                                     {(ticket.unread_count ?? 0) > 0 && (
-                                        <Badge.Number
-                                            count={ticket.unread_count ?? 0}
-                                            size="small"
-                                            status="primary"
-                                        />
+                                        <Badge.Number count={ticket.unread_count ?? 0} size="small" status="primary" />
                                     )}
                                 </div>
                                 {ticket.last_message && (

@@ -13,7 +13,7 @@ A request walks down this ladder and stops at the first tier whose conditions it
 
 | Tier                                     | What it is                                                                                                                                         | Typical latency |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| 0. Result cache                          | Django/InsightsQL cached response for the exact query fingerprint                                                                                       | ~ms             |
+| 0. Result cache                          | Django/InsightsQL cached response for the exact query fingerprint                                                                                  | ~ms             |
 | 1. Lazy precompute                       | Hourly UTC buckets (vitals: team-tz daily) on the aux cluster, built by background daily-UTC jobs, TTL-refreshed                                   | ~80–200ms       |
 | 2. Preaggregated tables (**deprecated**) | Daily preagg tables, modifier-gated; no new enrollments — retained only for the largest existing customers until lazy precompute fully replaces it | ~100ms–1s       |
 | 3. Live fast paths                       | Session-id-set (filtered) and no-join (unfiltered) shapes that avoid the full events↔sessions join                                                 | ~1–20s          |

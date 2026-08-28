@@ -28,8 +28,8 @@ export function InstructionsModal({ onClose, visible, flag }: InstructionsModalP
                     content: (
                         <div>
                             Give your users a{' '}
-                            <Link to={urls.insightsFunctionNew('template-early-access-features')}>prebuilt widget</Link> to
-                            opt-in to features
+                            <Link to={urls.insightsFunctionNew('template-early-access-features')}>prebuilt widget</Link>{' '}
+                            to opt-in to features
                         </div>
                     ),
                 },

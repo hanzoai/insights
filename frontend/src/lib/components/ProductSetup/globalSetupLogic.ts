@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { SetupTaskId } from 'lib/components/ProductSetup'
 import { sceneLogic } from 'scenes/sceneLogic'

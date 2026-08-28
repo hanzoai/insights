@@ -1,5 +1,5 @@
-import { IconPlay } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconPlay } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { pluralize } from 'lib/utils/strings'

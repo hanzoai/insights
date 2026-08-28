@@ -15,6 +15,7 @@ import { useActions, useValues } from 'kea'
 import React, { useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
+import { Banner, Button, Checkbox, Input, Label, Menu, Select, Spinner, Tooltip } from '@hanzo/elements'
 import {
     IconBrackets,
     IconCollapse,
@@ -29,17 +30,6 @@ import {
     IconTrash,
     IconCheckCircle,
 } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Checkbox,
-    Input,
-    Label,
-    Menu,
-    Select,
-    Spinner,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { EditableField } from 'lib/components/EditableField/EditableField'
@@ -47,12 +37,12 @@ import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isPropertyFilterWithOperator } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType, TaxonomicFilterProps } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { IconArrowDown, IconArrowUp, IconErrorOutline } from 'lib/elements/icons'
 import { Dialog } from 'lib/elements/Dialog'
+import { IconArrowDown, IconArrowUp, IconErrorOutline } from 'lib/elements/icons'
+import { Link } from 'lib/elements/Link'
 import { Slider } from 'lib/elements/Slider'
 import { Tag } from 'lib/elements/Tag/Tag'
-import { Link } from 'lib/elements/Link'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { clamp, humanFriendlyNumber } from 'lib/utils/numbers'
 import { pluralize } from 'lib/utils/strings'

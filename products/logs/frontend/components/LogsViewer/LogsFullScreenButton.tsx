@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconExpand45 } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconExpand45 } from '@hanzo/icons'
 
 import { logsViewerModalLogic } from './LogsViewerModal/logsViewerModalLogic'
 

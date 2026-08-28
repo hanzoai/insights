@@ -1,5 +1,6 @@
 import { useActions, useValues } from 'kea'
 
+import { Button, Modal, Skeleton, Tag, Widget } from '@hanzo/elements'
 import {
     IconArrowLeft,
     IconCheck,
@@ -10,12 +11,11 @@ import {
     IconEye,
     IconFlask,
 } from '@hanzo/icons'
-import { Button, Modal, Skeleton, Tag, Widget } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { dayjs } from 'lib/dayjs'
-import { Markdown } from 'lib/elements/Markdown'
 import { Link } from 'lib/elements/Link'
+import { Markdown } from 'lib/elements/Markdown'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'

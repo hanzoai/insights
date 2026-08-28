@@ -35,14 +35,7 @@ type ColorGlyphTokenProps = ColorGlyphBaseProps & {
 export type ColorGlyphProps = ColorGlyphColorProps | ColorGlyphTokenProps
 
 /** Takes a 6-digit hex color or a color token and displays it as a glyph. */
-export function ColorGlyph({
-    color,
-    colorToken,
-    themeId,
-    size,
-    className,
-    children,
-}: ColorGlyphProps): JSX.Element {
+export function ColorGlyph({ color, colorToken, themeId, size, className, children }: ColorGlyphProps): JSX.Element {
     const { isDarkModeOn } = useValues(themeLogic)
     const { getTheme, getColorFromToken } = useValues(dataThemeLogic)
 
@@ -68,13 +61,7 @@ export function ColorGlyph({
     // display a glyph for an unset color
     if (effectiveColor == null) {
         return (
-            <div
-                className={cn(
-                    'ColorGlyph ColorGlyph--unset',
-                    { 'ColorGlyph--small': size === 'small' },
-                    className
-                )}
-            >
+            <div className={cn('ColorGlyph ColorGlyph--unset', { 'ColorGlyph--small': size === 'small' }, className)}>
                 <div className="ColorGlyph__strikethrough" />
                 {children}
             </div>

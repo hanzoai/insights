@@ -1,16 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
+import { Button, Input, SegmentedButton, Table, TableColumns, Tag, Link } from '@hanzo/elements'
 import { IconGear, IconGithub } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    SegmentedButton,
-    Table,
-    TableColumns,
-    Tag,
-    Link,
-} from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { SceneExport } from 'scenes/sceneTypes'

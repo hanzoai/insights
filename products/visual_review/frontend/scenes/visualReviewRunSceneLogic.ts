@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'
@@ -655,9 +655,7 @@ export const visualReviewRunSceneLogic = kea<visualReviewRunSceneLogicType>([
                 actions.recomputeRunSuccess()
 
                 if (result.ci_rerun_triggered) {
-                    toast.success(
-                        result.counts_changed ? 'Counts updated, CI job re-triggered' : 'CI job re-triggered'
-                    )
+                    toast.success(result.counts_changed ? 'Counts updated, CI job re-triggered' : 'CI job re-triggered')
                 } else if (result.ci_rerun_error) {
                     if (result.counts_changed) {
                         toast.success('Counts updated')

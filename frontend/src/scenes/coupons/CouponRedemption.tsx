@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconArrowRight, IconCheck } from '@hanzo/icons'
 import { Button, Input, Spinner } from '@hanzo/elements'
+import { IconArrowRight, IconCheck } from '@hanzo/icons'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { NotFound } from 'lib/components/NotFound'
@@ -216,18 +216,10 @@ export function CouponRedemption({
                                     renderSuccessActions()
                                 ) : (
                                     <div className="flex gap-2">
-                                        <Button
-                                            type="primary"
-                                            to={urls.organizationBilling()}
-                                            disableClientSideRouting
-                                        >
+                                        <Button type="primary" to={urls.organizationBilling()} disableClientSideRouting>
                                             View in billing
                                         </Button>
-                                        <Button
-                                            type="secondary"
-                                            to={urls.projectHomepage()}
-                                            disableClientSideRouting
-                                        >
+                                        <Button type="secondary" to={urls.projectHomepage()} disableClientSideRouting>
                                             Return to Insights
                                         </Button>
                                     </div>
@@ -247,11 +239,7 @@ export function CouponRedemption({
                                 {renderSuccessActions ? (
                                     renderSuccessActions()
                                 ) : (
-                                    <Button
-                                        type="primary"
-                                        to={urls.organizationBilling()}
-                                        disableClientSideRouting
-                                    >
+                                    <Button type="primary" to={urls.organizationBilling()} disableClientSideRouting>
                                         View in billing
                                     </Button>
                                 )}

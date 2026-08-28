@@ -9,7 +9,6 @@ import { newDashboardLogic } from 'scenes/dashboard/newDashboardLogic'
 
 import { DashboardTemplateType, TemplateAvailabilityContext } from '~/types'
 
-
 import { runBlankDashboardFlow, runDashboardTemplateClickFlow } from './dashboardTemplateCreationFlows'
 import { TemplateItem } from './DashboardTemplateItem'
 import { DashboardTemplateItemSkeleton } from './DashboardTemplateItemSkeleton'

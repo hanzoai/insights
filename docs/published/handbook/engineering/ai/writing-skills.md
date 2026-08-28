@@ -158,10 +158,10 @@ Key points are summarized below.
 
 Use lowercase kebab-case. Prefer gerund form (verb + -ing):
 
-| Pattern                   | Examples                                                                  |
-| ------------------------- | ------------------------------------------------------------------------- |
+| Pattern                   | Examples                                                                   |
+| ------------------------- | -------------------------------------------------------------------------- |
 | Gerund form (preferred)   | `querying-insights-data`, `exploring-llm-traces`, `managing-feature-flags` |
-| Noun phrases (acceptable) | `error-tracking-guide`                                                    |
+| Noun phrases (acceptable) | `error-tracking-guide`                                                     |
 
 Skills **must not** be prefixed with `insights-*`.
 The `insights-` prefix is added automatically depending on the consumer agent.

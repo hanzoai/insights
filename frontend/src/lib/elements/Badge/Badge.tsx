@@ -74,8 +74,8 @@ const BadgeComponent: React.FunctionComponent<BadgeProps & React.RefAttributes<H
  * JSX elements are rendered outright to support use cases where the badge is meant to show an icon.
  * If `showZero` is set to `true`, the component won't be hidden if the count is 0.
  */
-const BadgeNumber: React.FunctionComponent<BadgeNumberProps & React.RefAttributes<HTMLSpanElement>> =
-    forwardRef(function BadgeNumber(
+const BadgeNumber: React.FunctionComponent<BadgeNumberProps & React.RefAttributes<HTMLSpanElement>> = forwardRef(
+    function BadgeNumber(
         { count, maxDigits = 1, showZero = false, forcePlus = false, ...badgeProps },
         ref
     ): JSX.Element {
@@ -109,6 +109,7 @@ const BadgeNumber: React.FunctionComponent<BadgeNumberProps & React.RefAttribute
                 {...badgeProps}
             />
         )
-    })
+    }
+)
 
 export const Badge = Object.assign(BadgeComponent, { Number: BadgeNumber })

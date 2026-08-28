@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Banner, Button, Checkbox, Input, Switch, Tag, Spinner } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { organizationLogic } from 'scenes/organizationLogic'
 import { userLogic } from 'scenes/userLogic'
@@ -273,9 +273,7 @@ function PipelineNotificationSelector(): JSX.Element {
                                                 label={
                                                     <div className="flex items-center gap-2">
                                                         <span>{pipeline.name}</span>
-                                                        <Tag type="default">
-                                                            {PIPELINE_KIND_LABELS[pipeline.kind]}
-                                                        </Tag>
+                                                        <Tag type="default">{PIPELINE_KIND_LABELS[pipeline.kind]}</Tag>
                                                     </div>
                                                 }
                                             />

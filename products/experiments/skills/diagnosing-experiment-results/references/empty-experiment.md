@@ -69,10 +69,10 @@ If the experiment is older than ~15 minutes and still shows 0 exposures, walk B1
 Only the _single-flag evaluation_ methods record exposure. The "bulk" and "payload-only" methods
 don't fire `$feature_flag_called` — they read from the local flag cache without notifying Insights.
 
-| SDK                       | Records `$feature_flag_called`                                                                                           | Does NOT record                                                                                 |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| insights-js                | `getFeatureFlag()`, `getFeatureFlagResult()`, `isFeatureEnabled()`, framework hooks (`useFeatureFlagVariantKey()`, etc.) | `getFeatureFlagPayload()` (deprecated for this reason), `getFlags()`, `getFeatureFlagDetails()` |
-| insights-node              | `getFeatureFlag()`, `isFeatureEnabled()`                                                                                 | `getFeatureFlagPayload()`, `getAllFlags()`, `getAllFlagsAndPayloads()`                          |
+| SDK                     | Records `$feature_flag_called`                                                                                           | Does NOT record                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| insights-js             | `getFeatureFlag()`, `getFeatureFlagResult()`, `isFeatureEnabled()`, framework hooks (`useFeatureFlagVariantKey()`, etc.) | `getFeatureFlagPayload()` (deprecated for this reason), `getFlags()`, `getFeatureFlagDetails()` |
+| insights-node           | `getFeatureFlag()`, `isFeatureEnabled()`                                                                                 | `getFeatureFlagPayload()`, `getAllFlags()`, `getAllFlagsAndPayloads()`                          |
 | hanzo_insights (Python) | `get_feature_flag()`, `get_feature_flag_result()`, `feature_enabled()`                                                   | `get_feature_flag_payload()`, `get_all_flags()`, `get_all_flags_and_payloads()`                 |
 
 The pattern across SDKs: **methods that ask about one specific flag fire exposure; methods that

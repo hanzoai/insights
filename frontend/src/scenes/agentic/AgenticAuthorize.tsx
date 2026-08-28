@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCheck } from '@hanzo/icons'
 import { Label } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Card } from 'lib/elements/Card/Card'

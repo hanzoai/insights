@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import type React from 'react'
 
-import { IconTrending, IconWarning } from '@hanzo/icons'
 import { Banner, Skeleton, Link } from '@hanzo/elements'
+import { IconTrending, IconWarning } from '@hanzo/icons'
 
 import { getColorVar } from 'lib/colors'
 import { PreAggregatedBadge } from 'lib/components/PreAggregatedBadge'

@@ -111,19 +111,19 @@ explains the run's conclusion. Keep excerpts under 40 lines.
 
 ## Classification
 
-| Signal in the log                                                        | Class               | First action                                                       |
-| ------------------------------------------------------------------------ | ------------------- | ------------------------------------------------------------------ |
-| `AssertionError`, test diff, `FAILED test_...` in a committed test file  | code regression     | reproduce with `insightscli test <path>::<test>`                         |
-| Test failed here, passed on `master` or on rerun in the same PR          | flaky test          | confirm against `master` history; to fix, use `fixing-flaky-tests` |
-| `ruff`, `oxlint`, `stylelint`, `markdownlint`, `prettier` errors         | lint                | `insightscli lint:python:fix` or `insightscli format` on touched files         |
-| `mypy`, `pyright`, `tsc`, `typescript:check` errors                      | typecheck           | run the same checker locally, not the full suite                   |
-| Chromatic / Storybook / Playwright visual diff, snapshot mismatch        | snapshot / visual   | surface the diff URL; do NOT auto-accept snapshots                 |
-| `manage.py migrate` error, `migrations:check` failure, missing migration | migration / schema  | `insightscli migrations:check` locally                                   |
-| OpenAPI schema diff, generated API types out of sync                     | codegen drift       | `insightscli build:openapi`                                              |
-| `Cannot connect`, `ECONNREFUSED`, OOM, runner killed, setup step timeout | infra / runner      | treat as transient; report, do not fix                             |
-| `apt-get`, `uv sync`, `pnpm install`, docker pull, setup action failures | environment / setup | diff `.nvmrc`, `pyproject.toml`, `package.json`, Dockerfiles       |
-| `insightscli lint:skills`, `insightscli build:skills` failure                        | skills build        | run the same `insightscli` command locally                               |
-| SDK compat check, `ci-survey-sdk-check`, cross-version failure           | SDK compatibility   | check SDK version matrix for the affected package                  |
+| Signal in the log                                                        | Class               | First action                                                           |
+| ------------------------------------------------------------------------ | ------------------- | ---------------------------------------------------------------------- |
+| `AssertionError`, test diff, `FAILED test_...` in a committed test file  | code regression     | reproduce with `insightscli test <path>::<test>`                       |
+| Test failed here, passed on `master` or on rerun in the same PR          | flaky test          | confirm against `master` history; to fix, use `fixing-flaky-tests`     |
+| `ruff`, `oxlint`, `stylelint`, `markdownlint`, `prettier` errors         | lint                | `insightscli lint:python:fix` or `insightscli format` on touched files |
+| `mypy`, `pyright`, `tsc`, `typescript:check` errors                      | typecheck           | run the same checker locally, not the full suite                       |
+| Chromatic / Storybook / Playwright visual diff, snapshot mismatch        | snapshot / visual   | surface the diff URL; do NOT auto-accept snapshots                     |
+| `manage.py migrate` error, `migrations:check` failure, missing migration | migration / schema  | `insightscli migrations:check` locally                                 |
+| OpenAPI schema diff, generated API types out of sync                     | codegen drift       | `insightscli build:openapi`                                            |
+| `Cannot connect`, `ECONNREFUSED`, OOM, runner killed, setup step timeout | infra / runner      | treat as transient; report, do not fix                                 |
+| `apt-get`, `uv sync`, `pnpm install`, docker pull, setup action failures | environment / setup | diff `.nvmrc`, `pyproject.toml`, `package.json`, Dockerfiles           |
+| `insightscli lint:skills`, `insightscli build:skills` failure            | skills build        | run the same `insightscli` command locally                             |
+| SDK compat check, `ci-survey-sdk-check`, cross-version failure           | SDK compatibility   | check SDK version matrix for the affected package                      |
 
 If multiple signals match, choose the most specific class. For example, prefer
 codegen drift over lint, migration over typecheck, and snapshot / visual over a
@@ -134,18 +134,18 @@ generic Playwright test failure.
 Run only the narrowest command that exercises the failure. If the command shape
 is unclear, read `.agents/skills/insightscli/SKILL.md` and `insightscli <command> --help`.
 
-| Class               | Repro guidance                                                                       |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| code regression     | `insightscli test path/to/test.py::TestClass::test_method` or `insightscli test <file.test.ts>`  |
-| flaky test          | Hand off to the `fixing-flaky-tests` skill.                                          |
-| lint                | Use the failing formatter/linter on touched files, e.g. `insightscli format:python`.       |
-| typecheck           | Run the failing checker, e.g. `pnpm --filter=@hanzo/frontend typescript:check`.    |
-| snapshot / visual   | Run the specific Playwright or Storybook workflow; read `playwright-test` if needed. |
-| migration / schema  | `insightscli migrations:check`; run migrations only if the user agrees.                    |
-| codegen drift       | `insightscli build:openapi`.                                                               |
-| infra / runner      | No local repro. Report and stop.                                                     |
-| environment / setup | Reproduce the setup step only if cheap and relevant to changed files.                |
-| skills build        | `insightscli lint:skills`; if that passes, `insightscli build:skills`.                           |
+| Class               | Repro guidance                                                                                  |
+| ------------------- | ----------------------------------------------------------------------------------------------- |
+| code regression     | `insightscli test path/to/test.py::TestClass::test_method` or `insightscli test <file.test.ts>` |
+| flaky test          | Hand off to the `fixing-flaky-tests` skill.                                                     |
+| lint                | Use the failing formatter/linter on touched files, e.g. `insightscli format:python`.            |
+| typecheck           | Run the failing checker, e.g. `pnpm --filter=@hanzo/frontend typescript:check`.                 |
+| snapshot / visual   | Run the specific Playwright or Storybook workflow; read `playwright-test` if needed.            |
+| migration / schema  | `insightscli migrations:check`; run migrations only if the user agrees.                         |
+| codegen drift       | `insightscli build:openapi`.                                                                    |
+| infra / runner      | No local repro. Report and stop.                                                                |
+| environment / setup | Reproduce the setup step only if cheap and relevant to changed files.                           |
+| skills build        | `insightscli lint:skills`; if that passes, `insightscli build:skills`.                          |
 
 Do NOT run `insightscli test` with no arguments. Do NOT run `insightscli nuke` or
 `insightscli dev:reset` as a shortcut. Do NOT bypass hooks with `--no-verify`.

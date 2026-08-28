@@ -53,7 +53,9 @@ describe('FunnelChart', () => {
         await waitFor(() => {
             fireEvent.mouseMove(chart.element, { clientX: hoverX, clientY: hoverY })
             const tooltipEl = document.querySelector('[data-script-charts-tooltip]') as HTMLElement | null
-            expect(tooltipEl?.querySelector('[data-attr="script-chart-tooltip-label"]')?.textContent?.trim()).toBeTruthy()
+            expect(
+                tooltipEl?.querySelector('[data-attr="script-chart-tooltip-label"]')?.textContent?.trim()
+            ).toBeTruthy()
         })
         const tooltipEl = document.querySelector('[data-script-charts-tooltip]') as HTMLElement
         const tooltip = createDefaultTooltipAccessor(tooltipEl)

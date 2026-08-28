@@ -1,12 +1,12 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { IconBell, IconWarning } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconWithCount } from 'lib/elements/icons/icons'
 import { Button } from 'lib/elements/Button'
+import { IconWithCount } from 'lib/elements/icons/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {

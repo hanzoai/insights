@@ -7,9 +7,7 @@ import { IntegrationType } from '~/types'
 
 import { clickupIntegrationLogic } from './clickupIntegrationLogic'
 
-const getClickUpSpaceOptions = (
-    clickUpSpaces?: { id: string; name: string }[] | null
-): InputSelectOption[] | null => {
+const getClickUpSpaceOptions = (clickUpSpaces?: { id: string; name: string }[] | null): InputSelectOption[] | null => {
     return clickUpSpaces
         ? clickUpSpaces.map((space) => ({
               key: space.id,
@@ -39,9 +37,7 @@ const getClickUpWorkspaceOptions = (
         : null
 }
 
-const getClickUpListOptions = (
-    clickUpLists?: { id: string; name: string }[] | null
-): InputSelectOption[] | null => {
+const getClickUpListOptions = (clickUpLists?: { id: string; name: string }[] | null): InputSelectOption[] | null => {
     return clickUpLists
         ? clickUpLists.map(({ id, name }) => ({
               key: id,

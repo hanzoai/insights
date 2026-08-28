@@ -464,7 +464,9 @@ export const biEditorLogic = kea<biEditorLogicType>([
                 const visibleInsightsTableNames = new Set(insightsTables.map((table) => table.name))
                 const availableTables = databaseConnectionId
                     ? allTables
-                    : allTables.filter((table) => table.type !== 'insights' || visibleInsightsTableNames.has(table.name))
+                    : allTables.filter(
+                          (table) => table.type !== 'insights' || visibleInsightsTableNames.has(table.name)
+                      )
 
                 return availableTables
                     .map((table) => ({ table: table.name, connectionId: databaseConnectionId ?? undefined }))

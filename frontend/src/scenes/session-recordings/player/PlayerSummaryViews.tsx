@@ -1,9 +1,10 @@
 import clsx from 'clsx'
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import React, { ReactNode, useEffect, useRef, useState } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
+import { Banner, Divider, Tag, TextArea, Link, Tooltip } from '@hanzo/elements'
 import {
     IconAIText,
     IconCheckCircle,
@@ -20,14 +21,13 @@ import {
     IconThumbsUp,
     IconWarning,
 } from '@hanzo/icons'
-import { Banner, Divider, Tag, TextArea, Link, Tooltip } from '@hanzo/elements'
 
 import { SESSION_SUMMARY_FEEDBACK_SURVEY_ID } from 'lib/constants'
-import { useAnimatedPresence } from 'lib/hooks/useAnimatedPresence'
-import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { Button } from 'lib/elements/Button'
 import { Progress } from 'lib/elements/Progress'
 import { Spinner } from 'lib/elements/Spinner'
+import { useAnimatedPresence } from 'lib/hooks/useAnimatedPresence'
+import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { playerMetaLogic } from 'scenes/session-recordings/player/player-meta/playerMetaLogic'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'

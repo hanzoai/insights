@@ -1,7 +1,7 @@
 import { BindLogic, useValues } from 'kea'
 
-import { IconExternal } from '@hanzo/icons'
 import { Skeleton, Link } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { Markdown } from 'lib/elements/Markdown'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'

@@ -1,5 +1,5 @@
-import { MakeLogicType, afterMount, connect, kea, path } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, afterMount, connect, kea, path } from 'kea'
 
 import api from 'lib/api'
 import { getAppContext } from 'lib/utils/getAppContext'

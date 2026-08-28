@@ -1,16 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
+import { Badge, Button, Input, Table, TableColumn, TableColumns, Tooltip } from '@hanzo/elements'
 import { IconShare, IconTrash } from '@hanzo/icons'
-import {
-    Badge,
-    Button,
-    Input,
-    Table,
-    TableColumn,
-    TableColumns,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MemberSelect } from 'lib/components/MemberSelect'

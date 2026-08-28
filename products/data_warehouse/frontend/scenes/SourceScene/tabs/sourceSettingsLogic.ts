@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -16,7 +17,6 @@ import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 
@@ -1078,9 +1078,7 @@ export const sourceSettingsLogic = kea<sourceSettingsLogicType>([
                                 newJobInputs[field.name] = JSON.parse(loadedFile)
                             } catch (e: any) {
                                 insights.captureException(e)
-                                toast.error(
-                                    `The "${field.name}" file is not valid — it must be a readable JSON file.`
-                                )
+                                toast.error(`The "${field.name}" file is not valid — it must be a readable JSON file.`)
                                 return
                             }
                         }

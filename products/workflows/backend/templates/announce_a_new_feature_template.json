@@ -31,17 +31,7 @@
             ],
             "source": "events",
             "actions": [],
-            "bytecode": [
-                "_H",
-                1,
-                32,
-                "$feature_view",
-                32,
-                "event",
-                1,
-                1,
-                11
-            ]
+            "bytecode": ["_H", 1, 32, "$feature_view", 32, "event", 1, 1, 11]
         }
     },
     "trigger_masking": null,
@@ -139,17 +129,7 @@
                     ],
                     "source": "events",
                     "actions": [],
-                    "bytecode": [
-                        "_H",
-                        1,
-                        32,
-                        "$feature_view",
-                        32,
-                        "event",
-                        1,
-                        1,
-                        11
-                    ]
+                    "bytecode": ["_H", 1, 32, "$feature_view", 32, "event", 1, 1, 11]
                 }
             },
             "output_variable": null
@@ -168,11 +148,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -208,9 +184,7 @@
                                     "rows": [
                                         {
                                             "id": "GYHnX-Y3UN",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -234,10 +208,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -466,11 +437,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -506,9 +473,7 @@
                                     "rows": [
                                         {
                                             "id": "COIHSVdxrl",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -532,10 +497,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -778,11 +740,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -818,9 +776,7 @@
                                     "rows": [
                                         {
                                             "id": "Vr7NvY0HaA",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -844,10 +800,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""

@@ -128,8 +128,8 @@ function ConfigureStep(): JSX.Element {
                 left={
                     mappingUnresolvedCount > 0 ? (
                         <span className="text-xs text-warning">
-                            {mappingUnresolvedCount} owner{mappingUnresolvedCount === 1 ? '' : 's'} still need a Insights
-                            mapping.
+                            {mappingUnresolvedCount} owner{mappingUnresolvedCount === 1 ? '' : 's'} still need a
+                            Insights mapping.
                         </span>
                     ) : (
                         <span className="text-xs text-success">All owners are mapped.</span>

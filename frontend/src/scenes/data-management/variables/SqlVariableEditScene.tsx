@@ -1,15 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
+import { Input, InputSelect, SegmentedButton, Select, Skeleton, Table } from '@hanzo/elements'
 import { IconCopy, IconInfo } from '@hanzo/icons'
-import {
-    Input,
-    InputSelect,
-    SegmentedButton,
-    Select,
-    Skeleton,
-    Table,
-} from '@hanzo/elements'
 
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'

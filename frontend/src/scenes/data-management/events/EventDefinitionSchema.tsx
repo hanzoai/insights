@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconInfo, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 
@@ -28,11 +28,7 @@ function PropertyRow({ property }: { property: SchemaPropertyGroupProperty }): J
                 <PropertyTypeTag propertyName={property.name} schemaPropertyType={property.property_type} />
             </div>
             <div className="w-24">
-                {property.is_required ? (
-                    <Tag type="danger">Required</Tag>
-                ) : (
-                    <Tag type="muted">Optional</Tag>
-                )}
+                {property.is_required ? <Tag type="danger">Required</Tag> : <Tag type="muted">Optional</Tag>}
             </div>
             <div className="flex-1 text-muted">{property.description || '—'}</div>
         </div>
@@ -81,12 +77,7 @@ function PropertyGroupCard({
                     </Tag>
                 </div>
                 <div className="flex gap-1">
-                    <Button
-                        icon={<IconPencil />}
-                        size="small"
-                        onClick={onEdit}
-                        tooltip="Edit this property group"
-                    />
+                    <Button icon={<IconPencil />} size="small" onClick={onEdit} tooltip="Edit this property group" />
                     <Button
                         icon={<IconTrash />}
                         size="small"

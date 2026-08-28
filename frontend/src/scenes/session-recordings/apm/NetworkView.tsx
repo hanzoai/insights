@@ -3,8 +3,8 @@ import './NetworkView.scss'
 import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback, useRef, useState } from 'react'
 
-import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { Table, Link } from '@hanzo/elements'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { Button } from 'lib/elements/Button'

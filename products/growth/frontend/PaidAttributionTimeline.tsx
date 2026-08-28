@@ -1,5 +1,5 @@
-import { IconArrowRight, IconExternal, IconTarget } from '@hanzo/icons'
 import { Button, Table, TableColumns, Tag, Tooltip } from '@hanzo/elements'
+import { IconArrowRight, IconExternal, IconTarget } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
@@ -268,11 +268,7 @@ function PaidAttributionTable({ links }: { links: IdentityMatchingLinkApi[] }): 
             key: 'type',
             width: 110,
             render: (_, link) =>
-                link.anchor_paid_touch ? (
-                    <Tag type="highlight">Confirmed</Tag>
-                ) : (
-                    <Tag type="completion">Recovered</Tag>
-                ),
+                link.anchor_paid_touch ? <Tag type="highlight">Confirmed</Tag> : <Tag type="completion">Recovered</Tag>,
         },
         {
             title: 'Computed',

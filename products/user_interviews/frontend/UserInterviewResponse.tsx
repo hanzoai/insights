@@ -1,13 +1,13 @@
 import { useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconArrowLeft, IconCalendar, IconPerson, IconSend, IconShare } from '@hanzo/icons'
 import { Button, Skeleton, Tag, Widget } from '@hanzo/elements'
+import { IconArrowLeft, IconCalendar, IconPerson, IconSend, IconShare } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { NotFound } from 'lib/components/NotFound'
-import { Markdown } from 'lib/elements/Markdown'
 import { Link } from 'lib/elements/Link'
+import { Markdown } from 'lib/elements/Markdown'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'

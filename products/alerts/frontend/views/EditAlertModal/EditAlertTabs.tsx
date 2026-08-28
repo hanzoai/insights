@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import { IconBell, IconClock, IconGraph, IconPulse } from '@hanzo/icons'
 import { Tabs } from '@hanzo/elements'
 import type { Tab } from '@hanzo/elements'
+import { IconBell, IconClock, IconGraph, IconPulse } from '@hanzo/icons'
 
 import { AlertSummaryBanner, AlertSummarySection } from 'products/alerts/frontend/components/AlertSummaryBanner'
 

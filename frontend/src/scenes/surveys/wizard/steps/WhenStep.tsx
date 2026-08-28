@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconX } from '@hanzo/icons'
 import { Button, Checkbox, Input, SegmentedButton, Snack } from '@hanzo/elements'
+import { IconInfo, IconX } from '@hanzo/icons'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

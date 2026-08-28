@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCollapse, IconExpand, IconInfo } from '@hanzo/icons'
 import { Badge, Button, Select, Tooltip } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconInfo } from '@hanzo/icons'
 
 import { humanizeActivity, humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'

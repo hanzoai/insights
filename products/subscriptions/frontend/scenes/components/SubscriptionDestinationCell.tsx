@@ -1,5 +1,5 @@
-import { IconChevronDown, IconCopy } from '@hanzo/icons'
 import { Menu, Tag } from '@hanzo/elements'
+import { IconChevronDown, IconCopy } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

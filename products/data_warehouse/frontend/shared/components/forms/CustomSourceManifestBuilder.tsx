@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus, IconSparkles, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Divider, Input, Select } from '@hanzo/elements'
+import { IconPlus, IconSparkles, IconTrash } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet/CodeSnippet'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -308,9 +308,7 @@ function AuthSection({
                             options={API_KEY_LOCATION_OPTIONS}
                         />
                     </Field.Pure>
-                    <Field.Pure
-                        label={state.auth_api_key_location === 'header' ? 'Header name' : 'Parameter name'}
-                    >
+                    <Field.Pure label={state.auth_api_key_location === 'header' ? 'Header name' : 'Parameter name'}>
                         <Input
                             placeholder={state.auth_api_key_location === 'header' ? 'Authorization' : 'api_key'}
                             value={state.auth_api_key_name}
@@ -549,11 +547,7 @@ function TableCard({
             </div>
             <div className="grid grid-cols-2 gap-2">
                 <Field.Pure label="Table name">
-                    <Input
-                        placeholder="users"
-                        value={table.name}
-                        onChange={(value) => onUpdate({ name: value })}
-                    />
+                    <Input placeholder="users" value={table.name} onChange={(value) => onUpdate({ name: value })} />
                 </Field.Pure>
                 <Field.Pure label="Primary key">
                     <Input
@@ -565,11 +559,7 @@ function TableCard({
             </div>
             <div className="grid grid-cols-2 gap-2">
                 <Field.Pure label="Path">
-                    <Input
-                        placeholder="/v1/users"
-                        value={table.path}
-                        onChange={(value) => onUpdate({ path: value })}
-                    />
+                    <Input placeholder="/v1/users" value={table.path} onChange={(value) => onUpdate({ path: value })} />
                 </Field.Pure>
                 <Field.Pure label="HTTP method">
                     <Select
@@ -741,11 +731,7 @@ function PaginatorSection({
     return (
         <div className="space-y-2">
             <Field.Pure label="Paginator">
-                <Select
-                    value={paginator.type}
-                    onChange={(value) => switchType(value)}
-                    options={PAGINATOR_OPTIONS}
-                />
+                <Select value={paginator.type} onChange={(value) => switchType(value)} options={PAGINATOR_OPTIONS} />
             </Field.Pure>
             {paginator.type === 'json_response' && (
                 <Field.Pure label="Next-URL JSONPath">

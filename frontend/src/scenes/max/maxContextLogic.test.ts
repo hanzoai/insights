@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { router } from 'kea-router'
 import { expectLogic, partial } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import '@hanzo/icons'
 

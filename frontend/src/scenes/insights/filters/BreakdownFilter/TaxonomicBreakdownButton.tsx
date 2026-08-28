@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { ReactElement, useState } from 'react'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 

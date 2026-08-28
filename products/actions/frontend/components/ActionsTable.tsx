@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPin, IconPinFilled } from '@hanzo/icons'
 import { Input } from '@hanzo/elements'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MemberSelectMultiplePopover } from 'lib/components/MemberSelectMultiplePopover'
@@ -16,8 +16,8 @@ import { Divider } from 'lib/elements/Divider'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Table } from 'lib/elements/Table'
 import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
-import { TableLink } from 'lib/elements/Table/TableLink'
 import { Sorting } from 'lib/elements/Table/sorting'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { TableColumn, TableColumns } from 'lib/elements/Table/types'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

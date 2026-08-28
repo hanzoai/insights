@@ -149,8 +149,8 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <Blockquote>
                         <Markdown>
-                            **Note:** If you want to capture LLM events anonymously, omit `insights_distinct_id` from the
-                            call. See our docs on [anonymous vs identified
+                            **Note:** If you want to capture LLM events anonymously, omit `insights_distinct_id` from
+                            the call. See our docs on [anonymous vs identified
                             events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconRefresh } from '@hanzo/icons'
 import { SegmentedButton, Select, Link } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'

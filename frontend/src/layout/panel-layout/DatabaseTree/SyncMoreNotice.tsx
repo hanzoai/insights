@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconX } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { queryDatabaseLogic } from 'scenes/data-warehouse/editor/sidebar/queryDatabaseLogic'
 import { teamLogic } from 'scenes/teamLogic'

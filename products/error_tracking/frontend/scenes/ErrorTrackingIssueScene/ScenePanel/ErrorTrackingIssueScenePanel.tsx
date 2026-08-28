@@ -1,15 +1,15 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconMessage } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconMessage } from '@hanzo/icons'
 
 import { SceneComment } from 'lib/components/Scenes/SceneComment'
 import { SceneShareButton } from 'lib/components/Scenes/SceneShareButton'
 import { SceneActivityIndicator } from 'lib/components/Scenes/SceneUpdateActivityInfo'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { IconFingerprint } from 'lib/elements/icons'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

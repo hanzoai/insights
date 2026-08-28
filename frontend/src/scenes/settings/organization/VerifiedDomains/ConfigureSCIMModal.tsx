@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconRefresh } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { Banner } from 'lib/elements/Banner'

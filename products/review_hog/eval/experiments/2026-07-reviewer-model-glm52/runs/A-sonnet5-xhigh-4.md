@@ -89,8 +89,8 @@
 
 ## Per-review-unit breakdown
 
-| pass | chunk | perspective                                    | raw issues |
-| ---- | ----- | ---------------------------------------------- | ---------- |
+| pass | chunk | perspective                                       | raw issues |
+| ---- | ----- | ------------------------------------------------- | ---------- |
 | 1    | 1     | review-script-perspective-contracts-security      | 3          |
 | 1    | 2     | review-script-perspective-contracts-security      | 2          |
 | 1    | 3     | review-script-perspective-contracts-security      | 3          |
@@ -99,7 +99,7 @@
 | 2    | 3     | review-script-perspective-logic-correctness       | 1          |
 | 3    | 1     | review-script-perspective-performance-reliability | 4          |
 | 3    | 2     | review-script-perspective-performance-reliability | 5          |
-| 1000 | 1     | ?                                              | 0          |
+| 1000 | 1     | ?                                                 | 0          |
 | 1000 | 2     | review-script-blind-spots-general                 | 1          |
 | 1000 | 3     | review-script-blind-spots-general                 | 3          |
 | 1000 | 4     | review-script-blind-spots-general                 | 3          |

@@ -1,17 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
+import { Badge, Button, Divider, Input, Select, Table, Link, Tooltip } from '@hanzo/elements'
 import { IconCalendar, IconPin, IconPinFilled } from '@hanzo/icons'
-import {
-    Badge,
-    Button,
-    Divider,
-    Input,
-    Select,
-    Table,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

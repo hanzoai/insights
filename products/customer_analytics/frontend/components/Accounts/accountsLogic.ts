@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from 'lib/elements/Toast/Toast'
 import { isUUIDLike } from 'lib/utils/guards'
@@ -449,7 +449,10 @@ export interface accountsLogicMeta {
             customPropertyDefinitionsById: Record<string, CustomPropertyDefinitionApi>,
             aliasToDefinition: Record<string, CustomPropertyDefinitionApi>
         ) => DataTableNode
-        accountsQuerySource: (insightsqlQuery: DataTableNode, relationshipDefinitionsLoaded: boolean) => AccountsQuery | null
+        accountsQuerySource: (
+            insightsqlQuery: DataTableNode,
+            relationshipDefinitionsLoaded: boolean
+        ) => AccountsQuery | null
         metricsQuery: (
             overviewMetrics: string[],
             searchQuery: string,

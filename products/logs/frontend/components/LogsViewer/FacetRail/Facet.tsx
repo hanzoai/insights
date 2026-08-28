@@ -1,8 +1,8 @@
 import { CSSProperties, useMemo } from 'react'
 import { List } from 'react-window'
 
-import { IconChevronDown, IconChevronRight, IconMinusSmall } from '@hanzo/icons'
 import { Button, Checkbox, Input } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight, IconMinusSmall } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 import { humanFriendlyLargeNumber } from 'lib/utils/numbers'

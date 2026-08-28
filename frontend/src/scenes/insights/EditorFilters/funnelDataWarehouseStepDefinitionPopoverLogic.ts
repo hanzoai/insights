@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 
 import { definitionPopoverLogic } from 'lib/components/DefinitionPopover/definitionPopoverLogic'
 import type { TablePreviewExpressionColumn } from 'lib/components/TablePreview/types'
@@ -366,8 +366,9 @@ export const funnelDataWarehouseStepDefinitionPopoverLogic = kea<funnelDataWareh
                 activeFieldKey: FunnelFieldKey,
                 activeFieldValue: string | undefined
             ) =>
-                previewExpressionColumns.find((column) => column.key.startsWith(`__${activeFieldKey}_insightsql_expression`))
-                    ?.key ?? activeFieldValue,
+                previewExpressionColumns.find((column) =>
+                    column.key.startsWith(`__${activeFieldKey}_insightsql_expression`)
+                )?.key ?? activeFieldValue,
         ],
         activeFieldOptions: [
             (s) => [s.columnOptions, s.activeField, s.activeFieldKey],

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
-import { IconCheckCircle } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { IconRadioButtonUnchecked } from 'lib/elements/icons'
 

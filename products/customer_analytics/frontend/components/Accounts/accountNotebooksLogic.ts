@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -13,7 +14,6 @@ import {
     selectors,
 } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import { PaginationManual, Sorting } from '@hanzo/elements'
 

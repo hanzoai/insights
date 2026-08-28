@@ -269,9 +269,7 @@ export const dataCatalogMetricSceneLogic = kea<dataCatalogMetricSceneLogicType>(
                 actions.setMetric(await dataCatalogMetricsRefreshFromInsightCreate(projectId(), props.name))
                 toast.success('Metric refreshed from its source insight')
             } catch (error) {
-                toast.error(
-                    apiErrorDetail(error) || 'Could not refresh the metric from its source insight. Try again.'
-                )
+                toast.error(apiErrorDetail(error) || 'Could not refresh the metric from its source insight. Try again.')
             } finally {
                 actions.setMutating(false)
             }

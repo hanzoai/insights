@@ -62,13 +62,7 @@ export function ScoutTagsEditor({
         <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-1">
                 {tags.map((tag) => (
-                    <Tag
-                        key={tag}
-                        type="highlight"
-                        size="small"
-                        closable={!updating}
-                        onClose={() => removeTag(tag)}
-                    >
+                    <Tag key={tag} type="highlight" size="small" closable={!updating} onClose={() => removeTag(tag)}>
                         {tag}
                     </Tag>
                 ))}

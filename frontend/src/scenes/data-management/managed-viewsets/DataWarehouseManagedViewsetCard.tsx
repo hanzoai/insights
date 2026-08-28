@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPiggyBank } from '@hanzo/icons'
 import { Switch, Link } from '@hanzo/elements'
+import { IconPiggyBank } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { teamLogic } from 'scenes/teamLogic'

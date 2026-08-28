@@ -1,6 +1,6 @@
 import DOMPurify from 'dompurify'
-import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 import insights from 'insights-js'
+import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 
 import { dayjs } from 'lib/dayjs'
 import { dateStringToDayJs } from 'lib/utils/dateFilters'

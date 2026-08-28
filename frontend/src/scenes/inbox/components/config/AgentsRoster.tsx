@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { memo, useCallback } from 'react'
 
-import { IconArrowUpRight } from '@hanzo/icons'
 import { Button, Skeleton, Switch, Tag, Link, Spinner } from '@hanzo/elements'
+import { IconArrowUpRight } from '@hanzo/icons'
 
 import { TagType } from 'lib/elements/Tag/Tag'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

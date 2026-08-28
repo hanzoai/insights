@@ -19,8 +19,8 @@ new (first seen in the last 24-48h), spiking, or affecting many distinct users.
 
 ## Available tools
 
-| Tool                                        | Purpose                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------------- |
+| Tool                                         | Purpose                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------- |
 | `insights:query-error-tracking-issues-list`  | List + rank issues with aggregate metrics (occurrences, users, sessions)  |
 | `insights:query-error-tracking-issue`        | Compact details for a single issue (status, assignee, top frame, release) |
 | `insights:query-error-tracking-issue-events` | Sampled `$exception` events with stack, URL, browser, and `$session_id`   |

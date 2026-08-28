@@ -101,9 +101,7 @@ export const loginSessionsLogic = kea<loginSessionsLogicType>([
                 },
                 revokeOtherSessions: async () => {
                     const { revoked_count } = await usersLoginSessionsRevokeOthersCreate('@me')
-                    toast.success(
-                        `Logged out of ${revoked_count} other ${revoked_count === 1 ? 'device' : 'devices'}`
-                    )
+                    toast.success(`Logged out of ${revoked_count} other ${revoked_count === 1 ? 'device' : 'devices'}`)
                     return values.loginSessions.filter((session) => session.is_current)
                 },
             },

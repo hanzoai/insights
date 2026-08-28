@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
+import { Button, Input, Skeleton, Switch, Table, Tag, Link, Tooltip } from '@hanzo/elements'
 import { IconPencil, IconPlus, IconSearch, IconTrash, IconWarning } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Skeleton,
-    Switch,
-    Table,
-    Tag,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

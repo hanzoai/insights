@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis, IconTrash } from '@hanzo/icons'
 import { Button, Input, Tag } from '@hanzo/elements'
+import { IconEllipsis, IconTrash } from '@hanzo/icons'
 
 import { AllowTrainingCallout } from 'lib/components/AllowTrainingCallout/AllowTrainingCallout'
 import { MemberSelect } from 'lib/components/MemberSelect'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
+import { Link } from 'lib/elements/Link'
 import { Menu } from 'lib/elements/Menu'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { atColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
-import { Link } from 'lib/elements/Link'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { sceneConfigurations } from 'scenes/scenes'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'

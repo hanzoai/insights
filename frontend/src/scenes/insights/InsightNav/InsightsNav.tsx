@@ -1,8 +1,8 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { Tabs } from 'lib/elements/Tabs'
 import { Link } from 'lib/elements/Link'
+import { Tabs } from 'lib/elements/Tabs'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { insightNavLogic } from 'scenes/insights/InsightNav/insightNavLogic'
 import { INSIGHT_TYPE_URLS } from 'scenes/insights/utils'

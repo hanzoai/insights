@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFilter, IconTrash } from '@hanzo/icons'
 import { Button, Select } from '@hanzo/elements'
+import { IconFilter, IconTrash } from '@hanzo/icons'
 
 import { IconWithCount } from 'lib/elements/icons'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'

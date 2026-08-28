@@ -64,7 +64,10 @@ export const manifest: ProductManifest = {
     routes: {
         '/logs': ['Logs', 'logs'],
         '/logs/alerts/:id': ['LogsAlertDetail', 'logsAlertDetail'],
-        '/logs/alerts/:id/notifications/:insightsFunctionId': ['LogsAlertNotificationDetail', 'logsAlertNotificationDetail'],
+        '/logs/alerts/:id/notifications/:insightsFunctionId': [
+            'LogsAlertNotificationDetail',
+            'logsAlertNotificationDetail',
+        ],
         '/logs/drop-rules/new': ['LogsSamplingNew', 'logsSamplingNew'],
         '/logs/drop-rules/:id': ['LogsSamplingDetail', 'logsSamplingDetail'],
         '/logs/retention-rules/new': ['LogsRetentionNew', 'logsRetentionNew'],

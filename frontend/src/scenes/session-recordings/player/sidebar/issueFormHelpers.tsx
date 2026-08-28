@@ -1,9 +1,9 @@
 import { Dialog, Input, TextArea } from '@hanzo/elements'
 
+import { Field } from 'lib/elements/Field'
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
 import { JiraProjectSelectField } from 'lib/integrations/JiraIntegrationHelpers'
 import { LinearTeamSelectField } from 'lib/integrations/LinearIntegrationHelpers'
-import { Field } from 'lib/elements/Field'
 
 import { IntegrationType } from '~/types'
 

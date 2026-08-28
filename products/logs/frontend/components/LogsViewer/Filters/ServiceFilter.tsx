@@ -2,8 +2,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { CSSProperties, useCallback, useMemo } from 'react'
 import { List } from 'react-window'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Checkbox, Dropdown, Input, Tag } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { DateRange, LogsQuery } from '~/queries/schema/schema-general'
 

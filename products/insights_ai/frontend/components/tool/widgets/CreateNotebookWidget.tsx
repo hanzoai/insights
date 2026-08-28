@@ -1,5 +1,5 @@
-import { IconNotebook } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconNotebook } from '@hanzo/icons'
 
 import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'

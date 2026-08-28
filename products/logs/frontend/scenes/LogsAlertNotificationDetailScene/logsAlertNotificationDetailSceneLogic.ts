@@ -1,8 +1,8 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 
@@ -100,7 +100,10 @@ export interface logsAlertNotificationDetailSceneLogicMeta {
         alertId: (arg: any) => string
         insightsFunctionId: (arg: any) => string
         firstSlackIntegration: (slackIntegrations: IntegrationType[] | undefined) => IntegrationType | undefined
-        destinationGroup: (insightsFunctions: InsightsFunctionType[], insightsFunctionId: string) => LogsAlertDestinationGroup | null
+        destinationGroup: (
+            insightsFunctions: InsightsFunctionType[],
+            insightsFunctionId: string
+        ) => LogsAlertDestinationGroup | null
         breadcrumbs: (
             alert: LogsAlertConfigurationApi | null,
             destinationGroup: LogsAlertDestinationGroup | null,
@@ -151,7 +154,8 @@ export const logsAlertNotificationDetailSceneLogic = kea<logsAlertNotificationDe
             {
                 loadInsightsFunctions: () => null,
                 loadInsightsFunctionsSuccess: () => null,
-                loadInsightsFunctionsFailure: (_, { error }: { error: string }) => error || 'Failed to load destinations',
+                loadInsightsFunctionsFailure: (_, { error }: { error: string }) =>
+                    error || 'Failed to load destinations',
             },
         ],
         isDeleting: [
@@ -211,7 +215,10 @@ export const logsAlertNotificationDetailSceneLogic = kea<logsAlertNotificationDe
         ],
         destinationGroup: [
             (s) => [s.insightsFunctions, s.insightsFunctionId],
-            (insightsFunctions: InsightsFunctionType[], insightsFunctionId: string): LogsAlertDestinationGroup | null => {
+            (
+                insightsFunctions: InsightsFunctionType[],
+                insightsFunctionId: string
+            ): LogsAlertDestinationGroup | null => {
                 const groups = groupLogsAlertDestinations(insightsFunctions, () => null)
                 return groups.find((g) => g.insightsFunctions.some((hf) => hf.id === insightsFunctionId)) ?? null
             },
@@ -261,9 +268,7 @@ export const logsAlertNotificationDetailSceneLogic = kea<logsAlertNotificationDe
                 insights.captureException(error, { tag: 'logs-alert-destination-delete' })
                 const detail =
                     (error as { detail?: string; message?: string })?.detail ?? (error as { message?: string })?.message
-                toast.error(
-                    detail ? `Failed to remove ${displayLabel}: ${detail}` : `Failed to remove ${displayLabel}`
-                )
+                toast.error(detail ? `Failed to remove ${displayLabel}: ${detail}` : `Failed to remove ${displayLabel}`)
             } finally {
                 actions.deleteDestinationDone()
             }

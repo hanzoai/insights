@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Skeleton } from '@hanzo/elements'
+import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 
 import { Link } from 'lib/elements/Link'
 import { isExternalLink } from 'lib/utils/url'

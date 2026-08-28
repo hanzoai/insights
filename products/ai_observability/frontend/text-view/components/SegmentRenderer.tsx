@@ -1,8 +1,8 @@
+import { Link, Tooltip } from '@hanzo/elements'
 /**
  * Component for rendering different segment types (truncated, gen_expandable, tools_expandable)
  */
 import { IconExternal } from '@hanzo/icons'
-import { Link, Tooltip } from '@hanzo/elements'
 
 import { urls } from 'scenes/urls'
 

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Banner, Button, Input, Modal, Select, Switch, Link } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { CurrencyDropdown } from 'lib/components/BaseCurrency/CurrencyDropdown'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

@@ -1,5 +1,5 @@
-import { IconEllipsis } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { ButtonGroupPrimitive, ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from 'lib/ui/DropdownMenu/DropdownMenu'

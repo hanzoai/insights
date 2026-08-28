@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconRefresh } from '@hanzo/icons'
 import { Button, Checkbox, Table, TableColumns } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { Collapse } from 'lib/elements/Collapse'
 import { systemStatusLogic } from 'scenes/instance/SystemStatus/systemStatusLogic'
@@ -38,11 +38,7 @@ export function InternalMetricsTab(): JSX.Element {
                         content: (
                             <>
                                 <div className="flex mb-4 float-right deprecated-space-x-2">
-                                    <Checkbox
-                                        checked={showIdle}
-                                        onChange={setShowIdle}
-                                        label="Show idle queries"
-                                    />
+                                    <Checkbox checked={showIdle} onChange={setShowIdle} label="Show idle queries" />
                                     <Button
                                         type="secondary"
                                         size="small"

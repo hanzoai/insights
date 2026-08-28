@@ -1,6 +1,6 @@
-import { IconExternal } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
 import { Banner } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

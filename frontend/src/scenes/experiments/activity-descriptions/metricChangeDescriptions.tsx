@@ -145,8 +145,7 @@ export const getMetricChanges = (
     if (metricAfter.metric_type !== metricBefore.metric_type) {
         changes.push(
             <span>
-                changed the type from <Tag>{metricBefore.metric_type}</Tag> to{' '}
-                <Tag>{metricAfter.metric_type}</Tag>
+                changed the type from <Tag>{metricBefore.metric_type}</Tag> to <Tag>{metricAfter.metric_type}</Tag>
             </span>
         )
     }

@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 /* oxlint-disable react-hooks/rules-of-hooks -- useMocks is a test helper, not a React hook */
 import { expectLogic } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import { dayjs } from 'lib/dayjs'
 // Imported from the source module rather than the `@hanzo/elements` barrel so the spy below

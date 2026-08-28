@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
+import { Popover } from 'lib/elements/Popover/Popover'
 import { Snack } from 'lib/elements/Snack/Snack'
 import { Tag } from 'lib/elements/Tag/Tag'
-import { Popover } from 'lib/elements/Popover/Popover'
 
 interface EventSelectProps {
     onItemChange?: (values: any[]) => void

@@ -3,17 +3,6 @@ import { combineUrl, router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
 import {
-    IconArrowLeft,
-    IconEye,
-    IconFolder,
-    IconHide,
-    IconPencil,
-    IconPlus,
-    IconSearch,
-    IconTrash,
-    IconWarning,
-} from '@hanzo/icons'
-import {
     Banner,
     Button,
     Dialog,
@@ -28,12 +17,23 @@ import {
     Link,
     Tooltip,
 } from '@hanzo/elements'
+import {
+    IconArrowLeft,
+    IconEye,
+    IconFolder,
+    IconHide,
+    IconPencil,
+    IconPlus,
+    IconSearch,
+    IconTrash,
+    IconWarning,
+} from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { TableColumns } from 'lib/elements/Table'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { TableColumns } from 'lib/elements/Table'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
@@ -150,11 +150,7 @@ function EvaluationDescription({ description }: { description: string }): JSX.El
                 {description}
             </div>
             {(isClamped || expanded) && (
-                <Button
-                    size="xsmall"
-                    onClick={() => setExpanded(!expanded)}
-                    data-attr="toggle-evaluation-description"
-                >
+                <Button size="xsmall" onClick={() => setExpanded(!expanded)} data-attr="toggle-evaluation-description">
                     {expanded ? 'Show less' : 'Show more'}
                 </Button>
             )}
@@ -318,9 +314,7 @@ function AIObservabilityEvaluationsContent(): JSX.Element {
             title: 'Method',
             key: 'method',
             render: (_, evaluation) => (
-                <Tag type={getEvaluationMethodTagType(evaluation)}>
-                    {getEvaluationMethodLabel(evaluation)}
-                </Tag>
+                <Tag type={getEvaluationMethodTagType(evaluation)}>{getEvaluationMethodLabel(evaluation)}</Tag>
             ),
         },
         {

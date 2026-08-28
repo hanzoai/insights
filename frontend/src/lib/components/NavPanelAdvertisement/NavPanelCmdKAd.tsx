@@ -1,5 +1,5 @@
-import { BindLogic, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { Link } from '@hanzo/elements'

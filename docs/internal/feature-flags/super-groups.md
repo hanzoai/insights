@@ -124,7 +124,7 @@ This is the most confusing aspect. Insights has a separate "groups" feature for 
 
 | Concept             | What it means                                    |
 | ------------------- | ------------------------------------------------ |
-| Insights groups      | Company/account-level entities for B2B analytics |
+| Insights groups     | Company/account-level entities for B2B analytics |
 | Feature flag groups | Release condition sets (targeting rules)         |
 | Super groups        | Early access enrollment checks                   |
 
@@ -164,7 +164,7 @@ The enrollment property key can be derived from the flag key, eliminating the ne
 
 | Component         | Path                                                                     |
 | ----------------- | ------------------------------------------------------------------------ |
-| Python evaluation | `insights/models/feature_flag/flag_matching.py`                           |
+| Python evaluation | `insights/models/feature_flag/flag_matching.py`                          |
 | Rust evaluation   | `rust/feature-flags/src/flags/flag_matching.rs`                          |
 | Early access API  | `products/early_access_features/backend/api.py`                          |
 | Frontend types    | `frontend/src/types.ts`                                                  |

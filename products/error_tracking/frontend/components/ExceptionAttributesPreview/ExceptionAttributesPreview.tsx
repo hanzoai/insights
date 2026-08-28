@@ -1,8 +1,8 @@
 import { Children } from 'react'
 import { match } from 'ts-pattern'
 
-import { IconBug } from '@hanzo/icons'
 import { Tag, Spinner, Tooltip } from '@hanzo/elements'
+import { IconBug } from '@hanzo/icons'
 
 import { ExceptionAttributes } from 'lib/components/Errors/types'
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'

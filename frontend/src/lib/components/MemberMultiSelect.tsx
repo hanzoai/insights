@@ -97,14 +97,7 @@ export function MemberMultiSelect({
             onVisibilityChange={handleVisibilityChange}
             overlay={
                 <div className="max-w-100 deprecated-space-y-2">
-                    <Input
-                        type="search"
-                        placeholder="Search"
-                        autoFocus
-                        value={search}
-                        onChange={setSearch}
-                        fullWidth
-                    />
+                    <Input type="search" placeholder="Search" autoFocus value={search} onChange={setSearch} fullWidth />
                     <ul className="deprecated-space-y-px">
                         {members.map((member) => (
                             <MemberSelectRow

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import { IconChat } from '@hanzo/icons'
 import { Tag, Spinner } from '@hanzo/elements'
+import { IconChat } from '@hanzo/icons'
 
 import type { MultiQuestionFormQuestion } from '~/queries/schema/schema-assistant-messages'
 

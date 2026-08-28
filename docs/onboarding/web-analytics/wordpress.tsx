@@ -20,8 +20,8 @@ export const getWordpressSteps = (ctx: OnboardingComponentsContext): StepDefinit
                 <>
                     {WebFinalSteps && <WebFinalSteps />}
                     <Markdown>
-                        See the [WordPress integration docs](https://hanzo.ai/docs/libraries/wordpress) for more
-                        details on tracking events.
+                        See the [WordPress integration docs](https://hanzo.ai/docs/libraries/wordpress) for more details
+                        on tracking events.
                     </Markdown>
                 </>
             ),

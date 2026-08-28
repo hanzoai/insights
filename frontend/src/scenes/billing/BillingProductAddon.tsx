@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ReactNode, useRef } from 'react'
 
-import { IconCheckCircle, IconInfo } from '@hanzo/icons'
 import { SelectOptions, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconCheckCircle, IconInfo } from '@hanzo/icons'
 
 import { humanFriendlyCurrency } from 'lib/utils/numbers'
 import { getProductIcon } from 'scenes/onboarding/shared/utils'
@@ -40,9 +40,7 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
     const { toggleIsPricingModalOpen } = useActions(billingProductLogic({ product: addon }))
 
     const productType = { plural: `${addon.unit}s`, singular: addon.unit }
-    const tierDisplayOptions: SelectOptions<string> = [
-        { label: `Per ${productType.singular}`, value: 'individual' },
-    ]
+    const tierDisplayOptions: SelectOptions<string> = [{ label: `Per ${productType.singular}`, value: 'individual' }]
 
     if (billing?.has_active_subscription) {
         tierDisplayOptions.push({ label: `Current bill`, value: 'total' })

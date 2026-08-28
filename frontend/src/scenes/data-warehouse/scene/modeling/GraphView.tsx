@@ -12,8 +12,8 @@ import {
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconArrowRight, IconCollapse, IconDatabase, IconExpand } from '@hanzo/icons'
 import { Button, SegmentedButton } from '@hanzo/elements'
+import { IconArrowRight, IconCollapse, IconDatabase, IconExpand } from '@hanzo/icons'
 
 import { IconArrowDown } from 'lib/elements/icons'
 

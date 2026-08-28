@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconPlus, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlus, IconX } from '@hanzo/icons'
 
 import type { CustomInputRendererProps } from 'lib/components/CyclotronJob/customInputRenderers'
 import { MemberSelect } from 'lib/components/MemberSelect'

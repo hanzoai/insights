@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconPerson } from '@hanzo/icons'
 import { Input, Switch } from '@hanzo/elements'
+import { IconPerson } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'

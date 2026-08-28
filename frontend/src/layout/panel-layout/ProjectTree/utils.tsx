@@ -1,5 +1,5 @@
-import { IconPlus, IconShortcut } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconPlus, IconShortcut } from '@hanzo/icons'
 
 import { TreeDataItem } from 'lib/elements/Tree/Tree'
 

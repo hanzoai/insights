@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCursorClick } from '@hanzo/icons'
 import { Label, Select } from '@hanzo/elements'
+import { IconCursorClick } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { TextArea } from 'lib/elements/TextArea/TextArea'

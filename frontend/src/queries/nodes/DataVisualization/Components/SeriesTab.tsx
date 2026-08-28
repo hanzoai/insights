@@ -1,7 +1,6 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconGear, IconInfo, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import {
     Button,
     ColorButton,
@@ -17,6 +16,7 @@ import {
     Popover,
     Tooltip,
 } from '@hanzo/elements'
+import { IconGear, IconInfo, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { DataColorToken, getSeriesColor, getSeriesColorPalette } from 'lib/colors'
 import { Field } from 'lib/elements/Field'

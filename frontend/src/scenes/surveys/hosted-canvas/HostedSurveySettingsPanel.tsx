@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPhone, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Dialog, SegmentedButton, Select } from '@hanzo/elements'
+import { IconPhone, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { IconMonitor } from 'lib/elements/icons'
 import { SCALE_OPTIONS, SURVEY_RATING_SCALE, SurveyQuestionLabel } from 'scenes/surveys/constants'

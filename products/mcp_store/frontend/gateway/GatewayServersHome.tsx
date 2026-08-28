@@ -1,7 +1,6 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconGear, IconPlus } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -15,6 +14,7 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import { IconGear, IconPlus } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { urls } from 'scenes/urls'
@@ -145,8 +145,7 @@ export function GatewayServersHome({ onOpenServer }: { onOpenServer?: (serverId:
                         aria-pressed={categoryFilter === category}
                         onClick={() => setCategoryFilter(category)}
                     >
-                        {GATEWAY_CATEGORY_LABELS[category]}{' '}
-                        <Snack className="ml-1">{categoryCounts[category]}</Snack>
+                        {GATEWAY_CATEGORY_LABELS[category]} <Snack className="ml-1">{categoryCounts[category]}</Snack>
                     </Button>
                 ))}
             </div>

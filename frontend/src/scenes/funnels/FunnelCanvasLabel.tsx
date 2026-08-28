@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconInfo, IconTestTube } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconInfo, IconTestTube } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 import { humanFriendlyDuration } from 'lib/utils/durations'

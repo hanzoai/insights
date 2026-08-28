@@ -4,8 +4,8 @@ import { Skeleton } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
-import { humanizeInsightsFunctionType } from 'scenes/insights-functions/script-function-utils'
 import { InsightsFunctionTemplateList } from 'scenes/insights-functions/list/InsightsFunctionTemplateList'
+import { humanizeInsightsFunctionType } from 'scenes/insights-functions/script-function-utils'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -114,7 +114,10 @@ export function DataPipelinesNewScene(): JSX.Element {
             {kind === 'transformation' ? (
                 <InsightsFunctionTemplateList type="transformation" />
             ) : kind === 'destination' ? (
-                <InsightsFunctionTemplateList type="destination" manualTemplates={insightsFunctionTemplatesBatchExports} />
+                <InsightsFunctionTemplateList
+                    type="destination"
+                    manualTemplates={insightsFunctionTemplatesBatchExports}
+                />
             ) : kind === 'site_app' ? (
                 <InsightsFunctionTemplateList type="site_app" />
             ) : kind === 'source' ? (

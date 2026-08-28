@@ -148,10 +148,7 @@ export function MetricTile({
         label
     )
     return (
-        <Card
-            hoverEffect={false}
-            className={cn('flex min-w-44 flex-1 flex-col justify-center px-5 py-4', className)}
-        >
+        <Card hoverEffect={false} className={cn('flex min-w-44 flex-1 flex-col justify-center px-5 py-4', className)}>
             {/* MetricCard has no loading prop; skeleton the whole tile on a genuine reload so it never
                 flashes a stale/zero headline (the loading-states rule). */}
             {loading ? (

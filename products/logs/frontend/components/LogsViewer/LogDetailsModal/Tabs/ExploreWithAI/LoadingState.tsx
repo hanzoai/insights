@@ -1,5 +1,5 @@
-import { IconAIText } from '@hanzo/icons'
 import { Skeleton } from '@hanzo/elements'
+import { IconAIText } from '@hanzo/icons'
 
 export function LoadingState(): JSX.Element {
     return (

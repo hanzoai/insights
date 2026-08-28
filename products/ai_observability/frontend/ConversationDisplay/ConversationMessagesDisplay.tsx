@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import React from 'react'
 
-import { IconCode, IconEye, IconMarkdown, IconMarkdownFilled, IconWrench } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCode, IconEye, IconMarkdown, IconMarkdownFilled, IconWrench } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { HighlightedJSONViewer } from 'lib/components/HighlightedJSONViewer'
@@ -855,9 +855,7 @@ export const LLMMessageDisplay = React.memo(
                 {show && !!content && (
                     <div className={!minimal ? 'p-2 border-t' : 'p-1'}>
                         {minimal ? (
-                            <Markdown className="whitespace-pre-wrap">
-                                {extractMinimalPreview(content)}
-                            </Markdown>
+                            <Markdown className="whitespace-pre-wrap">{extractMinimalPreview(content)}</Markdown>
                         ) : (
                             renderMessageContent(content, searchQuery)
                         )}

@@ -70,8 +70,8 @@ Survey SDK feature parity has no central tracking issue. Visibility lives at rep
 
 ## SDK Paths and Changelogs
 
-| SDK                  | Code Path                                | Changelog                                             |
-| -------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| SDK                   | Code Path                                 | Changelog                                              |
+| --------------------- | ----------------------------------------- | ------------------------------------------------------ |
 | insights-js (browser) | `$INSIGHTS_JS_PATH/packages/browser`      | `$INSIGHTS_JS_PATH/packages/browser/CHANGELOG.md`      |
 | insights-react-native | `$INSIGHTS_JS_PATH/packages/react-native` | `$INSIGHTS_JS_PATH/packages/react-native/CHANGELOG.md` |
 | insights-ios          | `$INSIGHTS_IOS_PATH`                      | `$INSIGHTS_IOS_PATH/CHANGELOG.md`                      |
@@ -230,8 +230,8 @@ Always search issues in the main repo `Insights/insights` AND the SDK-specific r
 
 ### Labels by Repository
 
-| Repository              | Labels for Survey Features |
-| ----------------------- | -------------------------- |
+| Repository                | Labels for Survey Features |
+| ------------------------- | -------------------------- |
 | Insights/insights-js      | `feature/surveys`          |
 | Insights/insights-ios     | `Survey`, `enhancement`    |
 | Insights/insights-android | `Survey`, `enhancement`    |

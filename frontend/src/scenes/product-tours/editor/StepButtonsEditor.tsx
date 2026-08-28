@@ -151,11 +151,7 @@ export function StepButtonsEditor({
         return (
             <div className="space-y-3">
                 {isTourContext && (
-                    <Switch
-                        checked={customButtonsEnabled}
-                        onChange={toggleCustomButtons}
-                        label="Use custom buttons"
-                    />
+                    <Switch checked={customButtonsEnabled} onChange={toggleCustomButtons} label="Use custom buttons" />
                 )}
                 {(customButtonsEnabled || !isTourContext) && (
                     <div className="flex gap-4">
@@ -173,11 +169,7 @@ export function StepButtonsEditor({
                         <div className="flex-1 space-y-2">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-muted">Secondary</span>
-                                <Switch
-                                    checked={!!secondaryButton}
-                                    onChange={toggleSecondaryButton}
-                                    size="small"
-                                />
+                                <Switch checked={!!secondaryButton} onChange={toggleSecondaryButton} size="small" />
                             </div>
                             {secondaryButton ? (
                                 <ButtonEditor

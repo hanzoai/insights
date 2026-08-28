@@ -1,5 +1,5 @@
-import { IconCode, IconEye } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconCode, IconEye } from '@hanzo/icons'
 
 import { IconAdsClick, IconExclamation, IconEyeHidden } from 'lib/elements/icons'
 

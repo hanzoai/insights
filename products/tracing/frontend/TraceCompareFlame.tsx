@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 import React from 'react'
 
-import { IconChevronRight } from '@hanzo/icons'
 import { Dropdown, Link, SpinnerOverlay, Tooltip } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { humanFriendlyNumber } from 'lib/utils/numbers'
 

@@ -1,7 +1,7 @@
 import { capitalizeFirstLetter } from 'kea-forms'
 
-import { IconPencil } from '@hanzo/icons'
 import { Button, Table, TableColumns, Tag, ProfilePicture } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
 import { pluralizeResource } from 'lib/utils/accessControlUtils'
 import { fullName } from 'lib/utils/strings'

@@ -15,10 +15,10 @@ Keys match the GitHub repo names under the `Insights` org:
 
 | Key                | Why you'd need it                                                                               |
 | ------------------ | ----------------------------------------------------------------------------------------------- |
-| `insights`          | The monorepo: the product, `services/mcp`, the skills. Usually the checkout you are already in. |
-| `insights-js`       | The TypeScript SDK, at `packages/mcp/`. The event-vocabulary source of truth.                   |
-| `insights-python`   | The Python SDK, at `insights/mcp/`.                                                              |
-| `hanzo.ai`      | Docs under `contents/docs/mcp-analytics/`, plus the product-data and tools entries.             |
+| `insights`         | The monorepo: the product, `services/mcp`, the skills. Usually the checkout you are already in. |
+| `insights-js`      | The TypeScript SDK, at `packages/mcp/`. The event-vocabulary source of truth.                   |
+| `insights-python`  | The Python SDK, at `insights/mcp/`.                                                             |
+| `hanzo.ai`         | Docs under `contents/docs/mcp-analytics/`, plus the product-data and tools entries.             |
 | `context-mill`     | The `wizard mcp-analytics` install codemod.                                                     |
 | `wizard`           | The wizard CLI that registers the command.                                                      |
 | `wizard-workbench` | Local harness and fixtures for exercising the install flow.                                     |

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Dispatch, SetStateAction, useState } from 'react'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, Input, Modal } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'

@@ -1,5 +1,5 @@
-import { IconCopy } from '@hanzo/icons'
 import { Button, Collapse } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { SURVEY_EVENT_TOKEN, SURVEY_STATUS_TOKEN } from 'scenes/surveys/surveyNotificationModalLogic'

@@ -10,6 +10,7 @@ import * as XyflowReact from '@xyflow/react'
 // module via highlight.js/lib/index.js's registerLanguage() side effects,
 // adding ~1 MB of unused languages to disk.
 import * as HighlightJsCore from 'highlight.js/lib/core'
+import * as InsightsJs from 'insights-js'
 import * as Kea from 'kea'
 import * as KeaForms from 'kea-forms'
 import * as KeaLoaders from 'kea-loaders'
@@ -19,8 +20,6 @@ import * as KeaSubscriptions from 'kea-subscriptions'
 import * as KeaWindowValues from 'kea-window-values'
 import * as Liquidjs from 'liquidjs'
 import * as Marked from 'marked'
-import * as InsightsJs from 'insights-js'
-import * as InsightsRrweb from '@hanzo/insights-rrweb'
 import * as Re2Js from 're2js'
 import * as React from 'react'
 import * as ReactDom from 'react-dom'
@@ -28,6 +27,7 @@ import * as ReactDomClient from 'react-dom/client'
 import * as Zod from 'zod'
 
 import * as InsightsIcons from '@hanzo/icons'
+import * as InsightsRrweb from '@hanzo/insights-rrweb'
 
 import * as Chart from 'lib/Chart'
 

@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 
 import api from '~/lib/api'
 

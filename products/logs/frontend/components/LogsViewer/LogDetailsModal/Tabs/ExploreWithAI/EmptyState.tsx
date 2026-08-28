@@ -1,5 +1,5 @@
-import { IconAIText } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconAIText } from '@hanzo/icons'
 
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 

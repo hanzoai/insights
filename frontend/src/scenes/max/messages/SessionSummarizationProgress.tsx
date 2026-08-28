@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconCheck, IconX } from '@hanzo/icons'
 import { Spinner, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconX } from '@hanzo/icons'
 
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'

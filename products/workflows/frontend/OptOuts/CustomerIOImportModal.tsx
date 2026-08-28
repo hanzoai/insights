@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
+import { Banner, Button, Collapse, Input, Modal, SegmentedButton, Tag, Link, Spinner } from '@hanzo/elements'
 import { IconCopy, IconTrash } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Collapse,
-    Input,
-    Modal,
-    SegmentedButton,
-    Tag,
-    Link,
-    Spinner,
-} from '@hanzo/elements'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -83,9 +73,7 @@ function Step1Content(): JSX.Element {
                         )}
                         <div className="flex items-center justify-between">
                             <span>Categories imported:</span>
-                            <Tag>
-                                {displayResult?.categories_created ?? persistedResult?.categories_created ?? 0}
-                            </Tag>
+                            <Tag>{displayResult?.categories_created ?? persistedResult?.categories_created ?? 0}</Tag>
                         </div>
                         <div className="flex items-center justify-between">
                             <span>Globally unsubscribed users:</span>
@@ -248,9 +236,7 @@ function Step2Content(): JSX.Element {
     const csvFailureDetail = csvProgress?.details || persistedCSVResult?.error
 
     if (csvFailed) {
-        return (
-            <Banner type="error">CSV import failed{csvFailureDetail ? `: ${csvFailureDetail}` : ''}</Banner>
-        )
+        return <Banner type="error">CSV import failed{csvFailureDetail ? `: ${csvFailureDetail}` : ''}</Banner>
     }
 
     return (
@@ -332,11 +318,7 @@ function Step3Content(): JSX.Element {
             <div className="space-y-2">
                 <label className="Label">Webhook URL</label>
                 <div className="flex items-center gap-2">
-                    <Input
-                        value={webhookUrl}
-                        disabledReason="Copy this URL"
-                        className="flex-1 font-mono text-xs"
-                    />
+                    <Input value={webhookUrl} disabledReason="Copy this URL" className="flex-1 font-mono text-xs" />
                     <Button
                         type="secondary"
                         size="small"

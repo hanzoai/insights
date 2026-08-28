@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBalance, IconCheckCircle, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Spinner } from '@hanzo/elements'
+import { IconBalance, IconCheckCircle, IconTrash } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'

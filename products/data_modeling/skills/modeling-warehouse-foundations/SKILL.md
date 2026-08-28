@@ -22,10 +22,10 @@ relevant reference on demand — this entry point is a map, not the whole story.
 A "model" here is a named, queryable object that encodes a metric or dimension once so every insight,
 dashboard, and downstream model reuses the same definition instead of re-deriving it. Two ways to build one:
 
-| Stack              | What a model is                                                             | Build with                                                 | Best when                                                                                                                                            |
-| ------------------ | --------------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stack               | What a model is                                                             | Build with                                                        | Best when                                                                                                                                             |
+| ------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Insights-native** | A **saved query (view)**, optionally **materialized** into a physical table | `insights:view-create` → `insights:view-materialize` (InsightsQL) | Data already lives in Insights (events, persons, or a connected warehouse source); you want it usable in insights/dashboards/SQL with no extra infra. |
-| **dbt / external** | A dbt model (`.sql`) in `staging/` → `marts/`, tested via `schema.yml`      | dbt, run in the user's own scheduler/CI                    | The team already runs dbt, needs multi-step lineage/tests/CI, or models data that lives outside Insights.                                             |
+| **dbt / external**  | A dbt model (`.sql`) in `staging/` → `marts/`, tested via `schema.yml`      | dbt, run in the user's own scheduler/CI                           | The team already runs dbt, needs multi-step lineage/tests/CI, or models data that lives outside Insights.                                             |
 
 Pick one per model; you can run both stacks side by side across a project. Details:
 [`references/insights-views.md`](references/insights-views.md) and
@@ -83,13 +83,13 @@ for headline numbers, propose it to the semantic layer so other models discover 
 
 ## File map
 
-| File                                                                       | Read when                                                                                                     |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [`references/insights-views.md`](references/insights-views.md)               | Creating/materializing a Insights view; the `view-*` tools, aliasing rule, `sync_frequency`, nesting, cleanup. |
-| [`references/dbt-project.md`](references/dbt-project.md)                   | Building the dbt version; project layout, where dbt runs, the managed-warehouse note, when dbt beats a view.  |
-| [`references/dbt-skeleton/`](references/dbt-skeleton/)                     | Copy-paste starting files: `dbt_project.yml`, `sources.yml`, a staging model, a mart, `schema.yml`.           |
-| [`references/joins-and-dimensions.md`](references/joins-and-dimensions.md) | Joining warehouse tables, star-schema dimensions, person joins, `convertCurrency()`.                          |
-| [`references/governance.md`](references/governance.md)                     | The semantic-layer check before deriving, and registering a model after building.                             |
+| File                                                                       | Read when                                                                                                      |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [`references/insights-views.md`](references/insights-views.md)             | Creating/materializing a Insights view; the `view-*` tools, aliasing rule, `sync_frequency`, nesting, cleanup. |
+| [`references/dbt-project.md`](references/dbt-project.md)                   | Building the dbt version; project layout, where dbt runs, the managed-warehouse note, when dbt beats a view.   |
+| [`references/dbt-skeleton/`](references/dbt-skeleton/)                     | Copy-paste starting files: `dbt_project.yml`, `sources.yml`, a staging model, a mart, `schema.yml`.            |
+| [`references/joins-and-dimensions.md`](references/joins-and-dimensions.md) | Joining warehouse tables, star-schema dimensions, person joins, `convertCurrency()`.                           |
+| [`references/governance.md`](references/governance.md)                     | The semantic-layer check before deriving, and registering a model after building.                              |
 
 ## Companions
 

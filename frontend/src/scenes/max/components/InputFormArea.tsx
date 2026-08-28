@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import useResizeObserver from 'use-resize-observer'
 
-import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Divider, Tabs, Tag, Spinner } from '@hanzo/elements'
+import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 
 import {
     DangerousOperationResponse,

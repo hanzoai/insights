@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCheckCircle, IconChevronRight, IconGithub } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCheckCircle, IconChevronRight, IconGithub } from '@hanzo/icons'
 
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { urls } from 'scenes/urls'

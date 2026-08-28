@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconTrash } from '@hanzo/icons'
 import { Input } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { usersSelectOptions } from 'lib/components/UserSelectItem'
 import { Button } from 'lib/elements/Button'

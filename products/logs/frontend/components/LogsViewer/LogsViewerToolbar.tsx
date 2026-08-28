@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 
-import { IconKeyboard } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconKeyboard } from '@hanzo/icons'
 
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { IconPauseCircle, IconPlayCircle } from 'lib/elements/icons'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Scene } from 'scenes/sceneTypes'
 
 import { logsViewerDataLogic } from 'products/logs/frontend/components/LogsViewer/data/logsViewerDataLogic'

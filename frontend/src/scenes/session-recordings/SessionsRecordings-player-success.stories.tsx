@@ -172,7 +172,10 @@ const meta: Meta = {
                 '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
 
-                    if (body.query.kind === 'InsightsQLQuery' && body.query.query.includes('$session_id as session_id')) {
+                    if (
+                        body.query.kind === 'InsightsQLQuery' &&
+                        body.query.query.includes('$session_id as session_id')
+                    ) {
                         return HttpResponse.json({
                             results: recordings.map((r) => [
                                 r.id,

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSparkles, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, InputSelect, Tag } from '@hanzo/elements'
+import { IconSparkles, IconTrash } from '@hanzo/icons'
 
 import { BaseLanguagePicker } from '../../BaseLanguagePicker'
 import { COMMON_LANGUAGES, getSurveyLanguageLabel, getSurveyLanguageName } from '../../language'

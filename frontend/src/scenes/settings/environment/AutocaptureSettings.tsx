@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import { SupportedWebVitalsMetrics } from 'insights-js'
+import { useActions, useValues } from 'kea'
 
 import { Divider, Switch } from '@hanzo/elements'
 

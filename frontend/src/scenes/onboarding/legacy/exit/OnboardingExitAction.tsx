@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { MailHog } from 'lib/components/mascots'
 

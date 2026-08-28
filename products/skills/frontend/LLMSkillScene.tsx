@@ -3,6 +3,7 @@ import { Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 import { Fragment, Suspense, useEffect, useRef, useState } from 'react'
 
+import { Banner, Button, Select, Tag, TextArea, Link } from '@hanzo/elements'
 import {
     IconChevronRight,
     IconColumns,
@@ -14,14 +15,13 @@ import {
     IconUpload,
     IconX,
 } from '@hanzo/icons'
-import { Banner, Button, Select, Tag, TextArea, Link } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet/CodeSnippet'
 import { NotFound } from 'lib/components/NotFound'
 import { dayjs } from 'lib/dayjs'
-import { IconLink } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
+import { IconLink } from 'lib/elements/icons'
 import { Input } from 'lib/elements/Input'
 import { MarkdownWithMermaid } from 'lib/elements/Markdown/MarkdownWithMermaid'
 import { Skeleton } from 'lib/elements/Skeleton'
@@ -404,10 +404,7 @@ function SkillViewDetails(): JSX.Element {
                             onToggleExpanded={toggleOutlineExpanded}
                         />
                         <div ref={markdownContainerRef}>
-                            <MarkdownWithMermaid
-                                className="mt-1 rounded border bg-bg-light p-3"
-                                generateHeadingIds
-                            >
+                            <MarkdownWithMermaid className="mt-1 rounded border bg-bg-light p-3" generateHeadingIds>
                                 {skill.body}
                             </MarkdownWithMermaid>
                         </div>

@@ -1,5 +1,4 @@
 import { eventWithTime } from '@hanzo/insights-rrweb-types'
-
 import { RegisterWindowIdCallback, createWindowIdRegistry } from '@hanzo/replay-shared'
 
 import { RecordingSnapshot } from '~/types'

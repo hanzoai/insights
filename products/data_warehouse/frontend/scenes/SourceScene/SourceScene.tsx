@@ -15,8 +15,8 @@ import {
 import { actionToUrl, urlToAction } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconArrowUpRight } from '@hanzo/icons'
 import { Banner, Skeleton } from '@hanzo/elements'
+import { IconArrowUpRight } from '@hanzo/icons'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { NotFound } from 'lib/components/NotFound'

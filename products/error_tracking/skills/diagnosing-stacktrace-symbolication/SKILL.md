@@ -139,9 +139,9 @@ captured generated position should point into the same binary that was uploaded 
 | Evidence                                         | Likely cause                                                            | Next check                                                                    |
 | ------------------------------------------------ | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | No `chunk_id` on frames                          | Chunk ID injection missing or SDK frame parser did not map the filename | Inspect deployed binary and raw frame filenames.                              |
-| Symbol set row missing                           | Upload went to another Insights project/host or skipped this asset       | Compare plugin `projectId`, `host`, and `ref`.                                |
-| `has_uploaded_file: false`                       | Upload did not finish                                                   | Check build logs; compare `insights-cli` output to the symbol set row.         |
-| Non-null `failure_reason`                        | Insights could not parse the uploaded symbol data                        | Download via Step 3 and inspect the extracted contents.                       |
+| Symbol set row missing                           | Upload went to another Insights project/host or skipped this asset      | Compare plugin `projectId`, `host`, and `ref`.                                |
+| `has_uploaded_file: false`                       | Upload did not finish                                                   | Check build logs; compare `insights-cli` output to the symbol set row.        |
+| Non-null `failure_reason`                        | Insights could not parse the uploaded symbol data                       | Download via Step 3 and inspect the extracted contents.                       |
 | Uploaded artifact valid, deployed binary differs | Deployment/CDN/post-build transform changed the binary after upload     | Compare deployed bytes to local build output.                                 |
 | `Token not found`                                | Captured position has no token in the uploaded symbol data              | Verify captured position, deployed binary identity, and symbol-data coverage. |
 

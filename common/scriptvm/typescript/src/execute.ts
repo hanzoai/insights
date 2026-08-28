@@ -198,7 +198,9 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
         memUsed += memStack[memStack.length - 1]
         maxMemUsed = Math.max(maxMemUsed, memUsed)
         if (memUsed > memLimit && memLimit > 0) {
-            throw new ScriptVMException(`Memory limit of ${memLimit} bytes exceeded. Tried to allocate ${memUsed} bytes.`)
+            throw new ScriptVMException(
+                `Memory limit of ${memLimit} bytes exceeded. Tried to allocate ${memUsed} bytes.`
+            )
         }
         return stack.push(value)
     }

@@ -209,5 +209,5 @@ Currently implemented for **ordered funnels only**. Unordered funnels, mean, rat
 | `experiment_query_builder.py`               | `get_funnel_metric_events_query_for_precomputation()` (write), precomputed CTE in `_build_funnel_query_legacy()` (read) |
 | `experiment_query_runner.py`                | `_ensure_metric_events_precomputed()`, wiring in `_get_experiment_query()`                                              |
 | `lazy_computation_executor.py`              | Core lazy computation: `ensure_precomputed()`, job management                                                           |
-| `experiment_metric_events_sql.py`           | Datastore table definition                                                                                             |
-| `experiment_metric_events_preaggregated.py` | InsightsQL schema for the table                                                                                              |
+| `experiment_metric_events_sql.py`           | Datastore table definition                                                                                              |
+| `experiment_metric_events_preaggregated.py` | InsightsQL schema for the table                                                                                         |

@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, afterMount, connect, kea, path, reducers, selectors } from 'kea'
 import type { Insights } from 'insights-js/dist/module'
+import { MakeLogicType, actions, afterMount, connect, kea, path, reducers, selectors } from 'kea'
 
 import { uuid } from 'lib/utils/dom'
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'

@@ -4,10 +4,10 @@ import { IconTrash } from '@hanzo/icons'
 
 import { useDelayedOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
-import { IconLink } from '../icons'
 import { Button } from '../Button'
 import { More } from '../Button/More'
 import { Divider } from '../Divider'
+import { IconLink } from '../icons'
 import { Table, TableProps } from './Table'
 import { TableLink } from './TableLink'
 import { TableColumns } from './types'

@@ -34,9 +34,7 @@ describe('getToolRecoveryHint', () => {
     })
 
     it('does not fire for unrelated endpoints', () => {
-        expect(
-            getToolRecoveryHint({ url: 'https://us.hanzo.ai/v1/projects/2/insights/', status: 500 })
-        ).toBeUndefined()
+        expect(getToolRecoveryHint({ url: 'https://us.hanzo.ai/v1/projects/2/insights/', status: 500 })).toBeUndefined()
     })
 
     it('fires when status is unknown but the URL is a logs query endpoint', () => {

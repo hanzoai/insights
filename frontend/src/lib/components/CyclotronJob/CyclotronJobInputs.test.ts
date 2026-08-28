@@ -18,7 +18,10 @@ describe('coerceTemplateValueForDisplay', () => {
         ['boolean (no templating)', true, false, 'true'],
         ['object', { a: 1 }, 'script', '{"a":1}'],
         ['array', [1, 'two'], 'script', '[1,"two"]'],
-    ] as [string, unknown, 'script' | 'liquid' | false, string][])('coerces %s', (_name, value, templating, expected) => {
-        expect(coerceTemplateValueForDisplay(value, templating)).toBe(expected)
-    })
+    ] as [string, unknown, 'script' | 'liquid' | false, string][])(
+        'coerces %s',
+        (_name, value, templating, expected) => {
+            expect(coerceTemplateValueForDisplay(value, templating)).toBe(expected)
+        }
+    )
 })

@@ -1,5 +1,5 @@
-import { IconCheck, IconEllipsis, IconRefresh, IconRevert, IconServer, IconX } from '@hanzo/icons'
 import { Banner, Button, Menu, Tag, Link } from '@hanzo/elements'
+import { IconCheck, IconEllipsis, IconRefresh, IconRevert, IconServer, IconX } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 

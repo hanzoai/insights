@@ -19,8 +19,8 @@ changed, where it happens, and whether a replay shows the cause.
 
 ## Available tools
 
-| Tool                                        | Purpose                                                                                     |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Tool                                         | Purpose                                                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `insights:query-error-tracking-issue`        | Compact issue details (status, assignee, top frame, release, aggregates)                    |
 | `insights:query-error-tracking-issue-events` | Sampled `$exception` events with stack, URL, browser, `$session_id`                         |
 | `insights:execute-sql`                       | Breakdowns, release / flag correlations, surrounding events + console logs around the error |
@@ -99,11 +99,11 @@ synthesis.
 Insights emits three version-shaped fields. They mean different things and only
 one of them answers "what version of the user's app introduced this?":
 
-| Property              | What it is                                                | Auto-captured by                                                                   | Use for                                                                  |
-| --------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `$exception_releases` | Cymbal-managed release map, keyed by release ID           | Only when SDK publishes release metadata (e.g. sourcemap upload tied to a release) | Most precise release attribution **when present**                        |
-| `$app_version`        | The user's deployed app version                           | iOS (`CFBundleShortVersionString`), React Native (Expo / react-native-device-info) | "What deploy of my app introduced this?" — the question users care about |
-| `$lib_version`        | The Insights SDK library version (e.g. insights-js 1.298.0) | Every SDK on every event                                                           | The narrow "did upgrading the Insights SDK introduce this?" question      |
+| Property              | What it is                                                  | Auto-captured by                                                                   | Use for                                                                  |
+| --------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `$exception_releases` | Cymbal-managed release map, keyed by release ID             | Only when SDK publishes release metadata (e.g. sourcemap upload tied to a release) | Most precise release attribution **when present**                        |
+| `$app_version`        | The user's deployed app version                             | iOS (`CFBundleShortVersionString`), React Native (Expo / react-native-device-info) | "What deploy of my app introduced this?" — the question users care about |
+| `$lib_version`        | The Insights SDK library version (e.g. insights-js 1.298.0) | Every SDK on every event                                                           | The narrow "did upgrading the Insights SDK introduce this?" question     |
 
 `$lib_version` is on virtually every event, which makes it tempting — but it's
 the Insights library version, not the user's app version. A constant

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Input, Modal, Select, Table, Tag } from '@hanzo/elements'
+import { IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { DatePicker } from 'lib/components/DatePicker/DatePicker'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -136,11 +136,7 @@ function ReminderModal(): JSX.Element {
                 )}
 
                 {reminderForm.scheduleType === 'advanced' && (
-                    <Field
-                        name="cron_expression"
-                        label="Cron expression"
-                        info="5-field cron, max 4 fires per day."
-                    >
+                    <Field name="cron_expression" label="Cron expression" info="5-field cron, max 4 fires per day.">
                         <Input placeholder="0 9 * * 1" disabled={!isScheduleEditable} />
                     </Field>
                 )}
@@ -219,9 +215,7 @@ export function Reminders(): JSX.Element {
                     {
                         title: 'Status',
                         render: (_, reminder) => (
-                            <Tag type={STATUS_TAG_TYPE[reminder.status]}>
-                                {capitalizeFirstLetter(reminder.status)}
-                            </Tag>
+                            <Tag type={STATUS_TAG_TYPE[reminder.status]}>{capitalizeFirstLetter(reminder.status)}</Tag>
                         ),
                     },
                     {

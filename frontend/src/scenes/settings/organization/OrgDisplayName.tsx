@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconUpload, IconX } from '@hanzo/icons'
 import { Button, FileInput, Input, toast } from '@hanzo/elements'
+import { IconUpload, IconX } from '@hanzo/icons'
 
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
-import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { UploadedLogo } from 'lib/elements/UploadedLogo/UploadedLogo'
+import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { organizationLogic } from 'scenes/organizationLogic'
 
 export function OrganizationDisplayName(): JSX.Element {

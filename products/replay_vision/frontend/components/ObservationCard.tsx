@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCopy, IconRewindPlay, IconSparkles } from '@hanzo/icons'
 import { Button, Tag, Link, Spinner, Tooltip } from '@hanzo/elements'
+import { IconCopy, IconRewindPlay, IconSparkles } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { colonDelimitedDuration } from 'lib/utils/durations'

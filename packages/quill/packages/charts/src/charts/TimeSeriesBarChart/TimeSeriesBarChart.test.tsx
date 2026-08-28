@@ -332,7 +332,9 @@ describe('TimeSeriesBarChart', () => {
             const { chart: defaultChart } = renderHogChart(
                 <TimeSeriesBarChart series={SERIES} labels={LABELS} theme={THEME} />
             )
-            const defaultTick = defaultChart.element.querySelector<HTMLElement>('[data-attr="script-chart-axis-tick-y"]')
+            const defaultTick = defaultChart.element.querySelector<HTMLElement>(
+                '[data-attr="script-chart-axis-tick-y"]'
+            )
             const { chart: widenedChart } = renderHogChart(
                 <TimeSeriesBarChart series={SERIES} labels={LABELS} theme={THEME} config={{ margins: { left: 200 } }} />
             )

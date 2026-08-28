@@ -2,10 +2,10 @@ import { useState } from 'react'
 
 import { IconX } from '@hanzo/icons'
 
-import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
-import { Tag } from 'lib/elements/Tag'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link'
+import { Tag } from 'lib/elements/Tag'
 import { urls } from 'scenes/urls'
 
 import type { FeatureFlagType } from '~/types'
@@ -134,12 +134,7 @@ export const VariantsPanelLinkFeatureFlag = ({
                             Change
                         </Button>
                         {onRemove && (
-                            <Button
-                                size="small"
-                                icon={<IconX />}
-                                onClick={onRemove}
-                                tooltip="Remove linked flag"
-                            />
+                            <Button size="small" icon={<IconX />} onClick={onRemove} tooltip="Remove linked flag" />
                         )}
                     </div>
                 </div>

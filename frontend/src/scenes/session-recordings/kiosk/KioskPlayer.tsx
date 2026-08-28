@@ -6,8 +6,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { IconX } from '@hanzo/icons'
 
-import { useEventListener } from 'lib/hooks/useEventListener'
 import { Button } from 'lib/elements/Button'
+import { useEventListener } from 'lib/hooks/useEventListener'
 import { urls } from 'scenes/urls'
 
 import { SessionRecordingPlayer } from '../player/SessionRecordingPlayer'

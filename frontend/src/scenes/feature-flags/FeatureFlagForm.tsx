@@ -18,20 +18,6 @@ import { router } from 'kea-router'
 import { useRef, useState } from 'react'
 
 import {
-    IconBalance,
-    IconCheckCircle,
-    IconCode,
-    IconFlag,
-    IconCollapse,
-    IconExpand,
-    IconGlobe,
-    IconInfo,
-    IconList,
-    IconPlus,
-    IconServer,
-    IconTrash,
-} from '@hanzo/icons'
-import {
     Button,
     Checkbox,
     Collapse,
@@ -47,13 +33,27 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import {
+    IconBalance,
+    IconCheckCircle,
+    IconCode,
+    IconFlag,
+    IconCollapse,
+    IconExpand,
+    IconGlobe,
+    IconInfo,
+    IconList,
+    IconPlus,
+    IconServer,
+    IconTrash,
+} from '@hanzo/icons'
 
 import { approvalsGateLogic } from 'lib/approvals/approvalsGateLogic'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { IconArrowDown, IconArrowUp, SortableDragIcon } from 'lib/elements/icons'
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
+import { IconArrowDown, IconArrowUp, SortableDragIcon } from 'lib/elements/icons'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import 'lib/elements/Lettermark'
 import { alphabet } from 'lib/utils/strings'
 import { ApprovalActionKey } from 'scenes/approvals/utils'
@@ -963,9 +963,7 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                 {/* Payload section - for boolean and remote config flags */}
                                 {!multivariateEnabled && featureFlag.is_remote_configuration && (
                                     <div className="flex flex-col gap-2">
-                                        <Label info="JSON data returned by this remote config.">
-                                            Payload
-                                        </Label>
+                                        <Label info="JSON data returned by this remote config.">Payload</Label>
                                         <div className="text-secondary text-xs mb-1">
                                             Remote config flags always return the payload. Access it via{' '}
                                             <code className="text-xs">
@@ -1106,11 +1104,7 @@ export function FeatureFlagForm({ id }: FeatureFlagLogicProps): JSX.Element {
                                 </div>
                             ) : (
                                 <div className="rounded border bg-bg-light gap-2 flex flex-col p-3 mb-4">
-                                    <Button
-                                        className="-m-2"
-                                        icon={<IconCode />}
-                                        onClick={handleShowImplementation}
-                                    >
+                                    <Button className="-m-2" icon={<IconCode />} onClick={handleShowImplementation}>
                                         Show implementation
                                     </Button>
                                 </div>

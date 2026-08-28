@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconSupport } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconSupport } from '@hanzo/icons'
 
 import { Link } from 'lib/elements/Link'
 

@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 
 import { buildJsHtmlSnippet, SnippetOption } from '@hanzo/shared-onboarding/product-analytics'
 

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconChevronDown, IconChevronRight, IconMinus } from '@hanzo/icons'
 import { Checkbox, Skeleton, Link } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight, IconMinus } from '@hanzo/icons'
 
 import { ErrorTrackingRuntime } from 'lib/components/Errors/types'
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'

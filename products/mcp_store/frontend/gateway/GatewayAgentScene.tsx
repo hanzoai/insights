@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconArrowLeft, IconClock, IconSparkles } from '@hanzo/icons'
 import { Button, Divider, Switch, Table, Tag, Spinner } from '@hanzo/elements'
+import { IconArrowLeft, IconClock, IconSparkles } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'

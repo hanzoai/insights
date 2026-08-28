@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, kea, key, listeners, path, props, reducers } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, kea, key, listeners, path, props, reducers } from 'kea'
 
 import { toast } from '@hanzo/elements'
 

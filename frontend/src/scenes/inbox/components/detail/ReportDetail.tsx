@@ -2,8 +2,8 @@ import { BindLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 import { ReactNode, useCallback, useState } from 'react'
 
-import { IconArrowLeft, IconDocument, IconEllipsis, IconExternal, IconPullRequest, IconSearch } from '@hanzo/icons'
 import { Button, Tabs, Tooltip } from '@hanzo/elements'
+import { IconArrowLeft, IconDocument, IconEllipsis, IconExternal, IconPullRequest, IconSearch } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Markdown } from 'lib/elements/Markdown'

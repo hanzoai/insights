@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { navigation3000Logic } from '../navigationLogic'
 

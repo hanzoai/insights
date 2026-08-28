@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconCheckCircle, IconCircleDashed, IconWarning } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconCheckCircle, IconCircleDashed, IconWarning } from '@hanzo/icons'
 
+import { Progress } from 'lib/elements/Progress'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
-import { Progress } from 'lib/elements/Progress'
 
 import { observationProgressLogic } from '../observations/observationProgressLogic'
 

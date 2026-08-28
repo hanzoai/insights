@@ -2,11 +2,7 @@ import './PanelSettings.scss'
 
 import { PropsWithChildren } from 'react'
 
-import {
-    Button,
-    ButtonWithSideActionProps,
-    ButtonWithoutSideActionProps,
-} from 'lib/elements/Button'
+import { Button, ButtonWithSideActionProps, ButtonWithoutSideActionProps } from 'lib/elements/Button'
 import { Menu, MenuItem, MenuProps } from 'lib/elements/Menu/Menu'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'

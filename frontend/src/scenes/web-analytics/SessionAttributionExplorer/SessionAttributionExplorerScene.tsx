@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconCollapse, IconExpand, IconPlus } from '@hanzo/icons'
 import { Menu, Switch } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconPlus } from '@hanzo/icons'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { IconFeedback } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
+import { IconFeedback } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'

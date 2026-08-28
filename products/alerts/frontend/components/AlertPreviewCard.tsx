@@ -1,5 +1,5 @@
-import { IconInfo } from '@hanzo/icons'
 import { Skeleton, Tag, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Sparkline, SparklineReferenceLine } from 'lib/components/Sparkline'
 import type { AnyScaleOptions } from 'lib/components/Sparkline'

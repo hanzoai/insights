@@ -1,5 +1,5 @@
-import { IconAIText } from '@hanzo/icons'
 import { Banner, Tag, TagType, Tooltip } from '@hanzo/elements'
+import { IconAIText } from '@hanzo/icons'
 
 const BANNER_TO_TAG_TYPE: Record<SeverityBannerProps['type'], TagType> = {
     error: 'danger',

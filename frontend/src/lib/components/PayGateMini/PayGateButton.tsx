@@ -1,8 +1,8 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconLock } from '@hanzo/icons'
 import { Button, ButtonProps } from '@hanzo/elements'
+import { IconLock } from '@hanzo/icons'
 
 import { paymentEntryLogic } from 'scenes/billing/paymentEntryLogic'
 

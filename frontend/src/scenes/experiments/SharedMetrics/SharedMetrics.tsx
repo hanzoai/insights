@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
+import { Banner, Button, Dialog, Input, Table, TableColumn, TableColumns, Tag, Tooltip } from '@hanzo/elements'
 import { IconChevronLeft, IconChevronRight, IconCopy, IconPencil, IconTrash } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Dialog,
-    Input,
-    Table,
-    TableColumn,
-    TableColumns,
-    Tag,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { More } from 'lib/elements/Button/More'
 import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'

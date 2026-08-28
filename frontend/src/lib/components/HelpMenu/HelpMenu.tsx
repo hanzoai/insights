@@ -1,12 +1,12 @@
 import { Menu } from '@base-ui/react/menu'
 import { useActions, useValues } from 'kea'
 
-import { IconCopy, IconDatabase, IconOpenSidebar, IconServer, IconShieldLock, IconSparkles } from '@hanzo/icons'
 import { ProfilePicture } from '@hanzo/elements'
+import { IconCopy, IconDatabase, IconOpenSidebar, IconServer, IconShieldLock, IconSparkles } from '@hanzo/icons'
 
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
-import { IconMenu, IconWithBadge } from 'lib/elements/icons'
 import { Badge } from 'lib/elements/Badge/Badge'
+import { IconMenu, IconWithBadge } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link/Link'
 import { preflightLogic } from 'lib/logic/preflightLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

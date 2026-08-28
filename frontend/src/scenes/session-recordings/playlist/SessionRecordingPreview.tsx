@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { memo } from 'react'
 
+import { Button, Tag, Spinner } from '@hanzo/elements'
 import {
     IconAIText,
     IconBug,
@@ -13,7 +14,6 @@ import {
     IconLive,
     IconPlusSmall,
 } from '@hanzo/icons'
-import { Button, Tag, Spinner } from '@hanzo/elements'
 
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { TZLabel } from 'lib/components/TZLabel'
