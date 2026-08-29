@@ -30,7 +30,6 @@
  */
 
 @import 'tailwindcss';
-@import '@fontsource-variable/inter';
 
 /* Edge-fade utilities (`scroll-mask-*`) for scrollable lists/popups. */
 @import 'tailwindcss-scroll-mask';

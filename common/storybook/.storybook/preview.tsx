@@ -59,12 +59,7 @@ setupInsightsJs()
 // every story's render until the app fonts (the set the visual-regression runner preloads) are in.
 export const loaders: Preview['loaders'] = [
     async () => {
-        await Promise.all(
-            ['400', '500', '700', '800'].flatMap((weight) => [
-                document.fonts.load(`${weight} 16px Inter`),
-                document.fonts.load(`${weight} 16px Zen`),
-            ])
-        )
+        await Promise.all(['400', '500', '700', '800'].map((weight) => document.fonts.load(`${weight} 16px Zen`)))
             .then(() => document.fonts.ready)
             .catch(() => undefined)
         return {}

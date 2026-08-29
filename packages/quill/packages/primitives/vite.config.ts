@@ -34,7 +34,6 @@ export default defineConfig({
                 'clsx',
                 'tailwind-merge',
                 'tw-animate-css',
-                '@fontsource-variable/inter',
             ],
         },
         cssCodeSplit: false,
