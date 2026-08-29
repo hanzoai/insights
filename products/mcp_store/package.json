@@ -1,21 +1,21 @@
 {
-    "name": "@hanzo/products-mcp-store",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/test -v --tb=short"
-    },
-    "dependencies": {
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:"
-    },
-    "devDependencies": {
-        "@testing-library/jest-dom": "^5.17.0",
-        "@testing-library/react": "^14.3.1"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@types/react": "*",
-        "react": "*"
-    }
+  "name": "@hanzo/products-mcp-store",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/test -v --tb=short"
+  },
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@types/react": ">=19.2.18",
+    "react": ">=19.2.8"
+  }
 }

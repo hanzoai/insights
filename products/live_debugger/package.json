@@ -1,23 +1,23 @@
 {
-    "name": "@hanzo/products-live-debugger",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
-    },
-    "dependencies": {
-        "fuse.js": "catalog:"
-    },
-    "devDependencies": {
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@hanzo/elements": "*",
-        "@types/react": "*",
-        "@types/react-dom": "*",
-        "clsx": "*",
-        "kea": "catalog:",
-        "kea-loaders": "catalog:",
-        "react": "*",
-        "react-dom": "*"
-    }
+  "name": "@hanzo/products-live-debugger",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+  },
+  "dependencies": {
+    "fuse.js": "catalog:"
+  },
+  "devDependencies": {
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@hanzo/elements": "*",
+    "@types/react": ">=19.2.18",
+    "@types/react-dom": ">=19.2.5",
+    "clsx": ">=2",
+    "kea": "catalog:",
+    "kea-loaders": "catalog:",
+    "react": ">=19.2.8",
+    "react-dom": ">=19.2.8"
+  }
 }

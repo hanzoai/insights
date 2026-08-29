@@ -1,12 +1,12 @@
 {
-    "name": "@hanzo/tailwind",
-    "exports": {
-        "./tailwind.css": "./tailwind.css",
-        "./tailwind.config.js": "./tailwind.config.js"
-    },
-    "dependencies": {
-        "@tailwindcss/container-queries": "0.1.1",
-        "tailwindcss": "4.3.0",
-        "tailwindcss-scroll-mask": "^0.0.3"
-    }
+  "name": "@hanzo/tailwind",
+  "exports": {
+    "./tailwind.css": "./tailwind.css",
+    "./tailwind.config.js": "./tailwind.config.js"
+  },
+  "dependencies": {
+    "@tailwindcss/container-queries": "catalog:",
+    "tailwindcss": "catalog:",
+    "tailwindcss-scroll-mask": "catalog:"
+  }
 }

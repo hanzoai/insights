@@ -1,22 +1,22 @@
 {
-    "name": "@hanzo/products-data-warehouse",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short",
-        "backend:contract-check": "echo 'Contract files unchanged'"
-    },
-    "dependencies": {
-        "insights-js": "catalog:",
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/elements": "*",
-        "@hanzo/icons": "catalog:",
-        "@storybook/react": "catalog:",
-        "@types/react": "*",
-        "react": "*"
-    }
+  "name": "@hanzo/products-data-warehouse",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short",
+    "backend:contract-check": "echo 'Contract files unchanged'"
+  },
+  "dependencies": {
+    "insights-js": "catalog:",
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:",
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/elements": "*",
+    "@hanzo/icons": "catalog:",
+    "@storybook/react": "catalog:",
+    "@types/react": ">=19.2.18",
+    "react": ">=19.2.8"
+  }
 }

@@ -1,24 +1,24 @@
 {
-    "name": "@hanzo/products-data-modeling",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short",
-        "backend:contract-check": "echo 'Contract files unchanged'"
-    },
-    "dependencies": {
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:"
-    },
-    "devDependencies": {
-        "@storybook/react": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@types/react": "*",
-        "@xyflow/react": "*",
-        "clsx": "*",
-        "react": "*",
-        "react-dom": "*"
-    }
+  "name": "@hanzo/products-data-modeling",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short",
+    "backend:contract-check": "echo 'Contract files unchanged'"
+  },
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:"
+  },
+  "devDependencies": {
+    "@storybook/react": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@types/react": ">=19.2.18",
+    "@xyflow/react": ">=12",
+    "clsx": ">=2",
+    "react": ">=19.2.8",
+    "react-dom": ">=19.2.8"
+  }
 }

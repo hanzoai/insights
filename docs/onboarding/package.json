@@ -1,7 +1,7 @@
 {
-    "name": "@hanzo/docs-onboarding",
-    "peerDependencies": {
-        "@types/react": "*",
-        "react": "*"
-    }
+  "name": "@hanzo/docs-onboarding",
+  "peerDependencies": {
+    "@types/react": ">=19.2.18",
+    "react": ">=19.2.8"
+  }
 }

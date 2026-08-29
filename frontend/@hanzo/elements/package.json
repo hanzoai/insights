@@ -1,30 +1,30 @@
 {
-    "name": "@hanzo/elements",
-    "version": "0.0.0",
-    "homepage": "https://storybook.dev.insights.dev/",
-    "license": "MIT",
-    "source": "src/index.ts",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "scripts": {
-        "build": "pnpm build:source && pnpm build:types && ls -lah dist/",
-        "build:source": "echo \"Building source\" && node build.mjs",
-        "build:types": "echo \"Building types\" && tsup src/index.ts --dts-only",
-        "prepublishOnly": "pnpm build",
-        "typecheck": "tsc --noEmit",
-        "typecheck:tsgo": "tsgo --noEmit"
-    },
-    "dependencies": {
-        "kea": "^4.0.0-pre.3",
-        "kea-router": "^3.4.1"
-    },
-    "devDependencies": {
-        "@hanzo/esbuilder": "workspace:*",
-        "tsup": "^5.12.8",
-        "typescript": "catalog:"
-    },
-    "peerDependencies": {
-        "react": "*",
-        "react-dom": "*"
-    }
+  "name": "@hanzo/elements",
+  "version": "0.0.0",
+  "homepage": "https://storybook.dev.insights.dev/",
+  "license": "MIT",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm build:source && pnpm build:types && ls -lah dist/",
+    "build:source": "echo \"Building source\" && node build.mjs",
+    "build:types": "echo \"Building types\" && tsup src/index.ts --dts-only",
+    "prepublishOnly": "pnpm build",
+    "typecheck": "tsc --noEmit",
+    "typecheck:tsgo": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-router": "catalog:"
+  },
+  "devDependencies": {
+    "@hanzo/esbuilder": "workspace:*",
+    "tsup": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=19.2.8",
+    "react-dom": ">=19.2.8"
+  }
 }

@@ -1,38 +1,38 @@
 {
-    "name": "@hanzo/products-ai-observability",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
-    },
-    "dependencies": {
-        "insights-js": "catalog:",
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "kea-subscriptions": "catalog:",
-        "partial-json": "^0.1.7",
-        "torph": "^0.0.9",
-        "yaml": "catalog:"
-    },
-    "devDependencies": {
-        "@testing-library/react": "^14.3.1",
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@storybook/react": "catalog:",
-        "@testing-library/jest-dom": "*",
-        "@testing-library/react": "*",
-        "@testing-library/user-event": "*",
-        "@types/papaparse": "*",
-        "@types/react": "*",
-        "clsx": "*",
-        "eslint": "*",
-        "jest": "*",
-        "papaparse": "*",
-        "react": "*",
-        "stylelint": "*",
-        "typescript": "catalog:*",
-        "use-debounce": "*"
-    }
+  "name": "@hanzo/products-ai-observability",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+  },
+  "dependencies": {
+    "insights-js": "catalog:",
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:",
+    "kea-subscriptions": "catalog:",
+    "partial-json": "catalog:",
+    "torph": "catalog:",
+    "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@testing-library/react": "catalog:",
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@storybook/react": "catalog:",
+    "@testing-library/jest-dom": ">=7",
+    "@testing-library/react": ">=16",
+    "@testing-library/user-event": ">=14",
+    "@types/papaparse": ">=5",
+    "@types/react": ">=19.2.18",
+    "clsx": ">=2",
+    "eslint": ">=10",
+    "jest": ">=30",
+    "papaparse": ">=5",
+    "react": ">=19.2.8",
+    "stylelint": ">=17",
+    "typescript": ">=7.0.2",
+    "use-debounce": ">=10"
+  }
 }

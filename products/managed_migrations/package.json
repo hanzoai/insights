@@ -1,18 +1,18 @@
 {
-    "name": "@hanzo/products-managed-migrations",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests backend/api/test -v --tb=short"
-    },
-    "dependencies": {
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@hanzo/elements": "*",
-        "@types/react": "*",
-        "react": "*"
-    }
+  "name": "@hanzo/products-managed-migrations",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests backend/api/test -v --tb=short"
+  },
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@hanzo/elements": "*",
+    "@types/react": ">=19.2.18",
+    "react": ">=19.2.8"
+  }
 }

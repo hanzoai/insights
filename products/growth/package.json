@@ -1,19 +1,19 @@
 {
-    "name": "@hanzo/products-growth",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
-    },
-    "dependencies": {
-        "kea": "catalog:",
-        "kea-loaders": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@storybook/react": "catalog:",
-        "@types/react": "*",
-        "clsx": "*",
-        "jest": "*",
-        "react": "*",
-        "typescript": "catalog:*"
-    }
+  "name": "@hanzo/products-growth",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+  },
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-loaders": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@storybook/react": "catalog:",
+    "@types/react": ">=19.2.18",
+    "clsx": ">=2",
+    "jest": ">=30",
+    "react": ">=19.2.8",
+    "typescript": ">=7.0.2"
+  }
 }

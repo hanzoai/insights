@@ -1,36 +1,36 @@
 {
-    "name": "@hanzo/products-insights-ai",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ scripts/ eval_harness/test/ -v --tb=short"
-    },
-    "dependencies": {
-        "@hanzo/quill-primitives": "workspace:*",
-        "@tanstack/react-virtual": "*",
-        "@toon-format/toon": "^2.1.0",
-        "eventsource-parser": "*",
-        "kea-subscriptions": "catalog:",
-        "marked": "*",
-        "monaco-editor": "^0.55.1",
-        "insights-js": "catalog:",
-        "react-intersection-observer": "^9.5.3",
-        "tailwind-merge": "*"
-    },
-    "devDependencies": {
-        "@testing-library/react": "*",
-        "kea-test-utils": "catalog:",
-        "msw": "*"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@storybook/react": "catalog:",
-        "@types/react": "*",
-        "@types/react-dom": "*",
-        "clsx": "*",
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "react": "*",
-        "react-dom": "*"
-    }
+  "name": "@hanzo/products-insights-ai",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ scripts/ eval_harness/test/ -v --tb=short"
+  },
+  "dependencies": {
+    "@hanzo/quill-primitives": "workspace:*",
+    "@tanstack/react-virtual": "catalog:",
+    "@toon-format/toon": "catalog:",
+    "eventsource-parser": "catalog:",
+    "kea-subscriptions": "catalog:",
+    "marked": "catalog:",
+    "monaco-editor": "catalog:",
+    "insights-js": "catalog:",
+    "react-intersection-observer": "catalog:",
+    "tailwind-merge": "catalog:"
+  },
+  "devDependencies": {
+    "@testing-library/react": "catalog:",
+    "kea-test-utils": "catalog:",
+    "msw": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@storybook/react": "catalog:",
+    "@types/react": ">=19.2.18",
+    "@types/react-dom": ">=19.2.5",
+    "clsx": ">=2",
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:",
+    "react": ">=19.2.8",
+    "react-dom": ">=19.2.8"
+  }
 }

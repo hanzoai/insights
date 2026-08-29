@@ -1,13 +1,13 @@
 {
-    "name": "@hanzo/playwright",
-    "scripts": {
-        "build:products": "pnpm --filter=@hanzo/frontend build:products",
-        "test": "pnpm build:products && playwright test"
-    },
-    "dependencies": {
-        "@playwright/test": "catalog:",
-        "@hanzo/frontend": "workspace:*",
-        "snappyjs": "^0.7.0"
-    },
-    "peerDependencies": {}
+  "name": "@hanzo/playwright",
+  "scripts": {
+    "build:products": "pnpm --filter=@hanzo/frontend build:products",
+    "test": "pnpm build:products && playwright test"
+  },
+  "dependencies": {
+    "@playwright/test": "catalog:",
+    "@hanzo/frontend": "workspace:*",
+    "snappyjs": "catalog:"
+  },
+  "peerDependencies": {}
 }

@@ -1,13 +1,13 @@
 {
-    "name": "@hanzo/products-session-summaries",
-    "dependencies": {
-        "kea": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@types/react": "*",
-        "react": "*"
-    }
+  "name": "@hanzo/products-session-summaries",
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@types/react": ">=19.2.18",
+    "react": ">=19.2.8"
+  }
 }

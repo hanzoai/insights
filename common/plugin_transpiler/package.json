@@ -1,21 +1,21 @@
 {
-    "name": "@hanzo/plugin-transpiler",
-    "version": "1.0.0",
-    "description": "Transpiles site apps TSX to browser JS via stdin/stdout",
-    "license": "MIT",
-    "author": "Insights Inc.",
-    "main": "transpile.mjs",
-    "scripts": {
-        "build": "tsc -b && node build.mjs",
-        "start:dist": "node dist/index.js",
-        "start": "npm run build && npm run start:dist"
-    },
-    "dependencies": {
-        "@babel/standalone": "^7.23.2",
-        "@hanzo/esbuilder": "workspace:*",
-        "@types/babel__standalone": "^7.1.6",
-        "@types/node": "^22.13.14",
-        "typescript": "catalog:"
-    },
-    "devDependencies": {}
+  "name": "@hanzo/plugin-transpiler",
+  "version": "1.0.0",
+  "description": "Transpiles site apps TSX to browser JS via stdin/stdout",
+  "license": "MIT",
+  "author": "Insights Inc.",
+  "main": "transpile.mjs",
+  "scripts": {
+    "build": "tsc -b && node build.mjs",
+    "start:dist": "node dist/index.js",
+    "start": "npm run build && npm run start:dist"
+  },
+  "dependencies": {
+    "@babel/standalone": "catalog:",
+    "@hanzo/esbuilder": "workspace:*",
+    "@types/babel__standalone": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "devDependencies": {}
 }

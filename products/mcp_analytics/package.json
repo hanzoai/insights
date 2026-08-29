@@ -1,24 +1,24 @@
 {
-    "name": "@hanzo/products-mcp-analytics",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests -v --tb=short"
-    },
-    "dependencies": {
-        "@hanzo/icons": "catalog:",
-        "@hanzo/quill-charts": "workspace:*",
-        "@hanzo/quill-components": "workspace:*",
-        "@hanzo/quill-primitives": "workspace:*",
-        "kea": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:"
-    },
-    "devDependencies": {
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@storybook/react": "catalog:",
-        "@types/react": "*",
-        "react": "*"
-    }
+  "name": "@hanzo/products-mcp-analytics",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests -v --tb=short"
+  },
+  "dependencies": {
+    "@hanzo/icons": "catalog:",
+    "@hanzo/quill-charts": "workspace:*",
+    "@hanzo/quill-components": "workspace:*",
+    "@hanzo/quill-primitives": "workspace:*",
+    "kea": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:"
+  },
+  "devDependencies": {
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@storybook/react": "catalog:",
+    "@types/react": ">=19.2.18",
+    "react": ">=19.2.8"
+  }
 }

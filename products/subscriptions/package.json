@@ -1,26 +1,26 @@
 {
-    "name": "@hanzo/products-subscriptions",
-    "scripts": {},
-    "dependencies": {
-        "insights-js": "catalog:",
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "rrule": "^2.8.1"
-    },
-    "devDependencies": {
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@storybook/react": "catalog:",
-        "@testing-library/jest-dom": "*",
-        "@testing-library/react": "*",
-        "@testing-library/user-event": "*",
-        "@types/react": "*",
-        "@types/react-dom": "*",
-        "react": "*",
-        "react-dom": "*"
-    }
+  "name": "@hanzo/products-subscriptions",
+  "scripts": {},
+  "dependencies": {
+    "insights-js": "catalog:",
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:",
+    "rrule": "catalog:"
+  },
+  "devDependencies": {
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@storybook/react": "catalog:",
+    "@testing-library/jest-dom": ">=7",
+    "@testing-library/react": ">=16",
+    "@testing-library/user-event": ">=14",
+    "@types/react": ">=19.2.18",
+    "@types/react-dom": ">=19.2.5",
+    "react": ">=19.2.8",
+    "react-dom": ">=19.2.8"
+  }
 }

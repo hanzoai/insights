@@ -1,29 +1,29 @@
 {
-    "name": "@hanzo/products-web-analytics",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
-    },
-    "dependencies": {
-        "insights-js": "catalog:",
-        "kea": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "kea-subscriptions": "catalog:",
-        "query-selector-shadow-dom": "catalog:"
-    },
-    "devDependencies": {
-        "@types/query-selector-shadow-dom": "catalog:",
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/elements": "*",
-        "@hanzo/icons": "catalog:",
-        "@storybook/react": "catalog:",
-        "@types/react": "*",
-        "clsx": "*",
-        "fuse.js": "*",
-        "react": "*",
-        "use-debounce": "*",
-        "use-resize-observer": "*"
-    }
+  "name": "@hanzo/products-web-analytics",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+  },
+  "dependencies": {
+    "insights-js": "catalog:",
+    "kea": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:",
+    "kea-subscriptions": "catalog:",
+    "query-selector-shadow-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/query-selector-shadow-dom": "catalog:",
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/elements": "*",
+    "@hanzo/icons": "catalog:",
+    "@storybook/react": "catalog:",
+    "@types/react": ">=19.2.18",
+    "clsx": ">=2",
+    "fuse.js": ">=7",
+    "react": ">=19.2.8",
+    "use-debounce": ">=10",
+    "use-resize-observer": ">=10"
+  }
 }

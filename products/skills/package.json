@@ -1,23 +1,23 @@
 {
-    "name": "@hanzo/products-skills",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
-    },
-    "dependencies": {
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:"
-    },
-    "devDependencies": {
-        "@storybook/react": "catalog:",
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@types/react": "*",
-        "clsx": "*",
-        "react": "*",
-        "typescript": "catalog:*"
-    }
+  "name": "@hanzo/products-skills",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+  },
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:"
+  },
+  "devDependencies": {
+    "@storybook/react": "catalog:",
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@types/react": ">=19.2.18",
+    "clsx": ">=2",
+    "react": ">=19.2.8",
+    "typescript": ">=7.0.2"
+  }
 }

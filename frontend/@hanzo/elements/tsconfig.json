@@ -24,7 +24,9 @@
     // blast radius of this line is one package's build.
     "extends": "../../../tsconfig.json",
     "compilerOptions": {
-        "baseUrl": "../../..",
+    "paths": {
+      "*": ["./../../../*"]
+    },
         // baseUrl is deprecated and this TypeScript refuses it outright —
         // "error TS5101: Option 'baseUrl' is deprecated and will stop functioning
         // in TypeScript 7.0. Specify compilerOption '"ignoreDeprecations": "6.0"'

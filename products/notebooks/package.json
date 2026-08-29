@@ -1,18 +1,18 @@
 {
-    "name": "@hanzo/products-notebooks",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
-    },
-    "dependencies": {
-        "kea": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@types/react": "*",
-        "clsx": "*",
-        "fuse.js": "*",
-        "react": "*"
-    }
+  "name": "@hanzo/products-notebooks",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+  },
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@types/react": ">=19.2.18",
+    "clsx": ">=2",
+    "fuse.js": ">=7",
+    "react": ">=19.2.8"
+  }
 }

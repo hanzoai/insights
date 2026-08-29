@@ -1,37 +1,37 @@
 {
-    "name": "@hanzo/products-workflows",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
-    },
-    "dependencies": {
-        "@hanzo/quill-charts": "workspace:*",
-        "@hanzo/quill-components": "workspace:*",
-        "@hanzo/quill-primitives": "workspace:*",
-        "insights-js": "catalog:",
-        "kea": "catalog:",
-        "kea-forms": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "kea-subscriptions": "catalog:",
-        "papaparse": "^5.4.1",
-        "use-debounce": "catalog:",
-        "zod": "^4.0.0"
-    },
-    "devDependencies": {
-        "@storybook/react": "catalog:",
-        "@testing-library/react": "*",
-        "@types/papaparse": "*",
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@types/react": "*",
-        "@xyflow/react": "*",
-        "clsx": "*",
-        "elkjs": "*",
-        "fast-equals": "catalog:",
-        "fuse.js": "*",
-        "react": "*",
-        "rrule": "*"
-    }
+  "name": "@hanzo/products-workflows",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+  },
+  "dependencies": {
+    "@hanzo/quill-charts": "workspace:*",
+    "@hanzo/quill-components": "workspace:*",
+    "@hanzo/quill-primitives": "workspace:*",
+    "insights-js": "catalog:",
+    "kea": "catalog:",
+    "kea-forms": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:",
+    "kea-subscriptions": "catalog:",
+    "papaparse": "catalog:",
+    "use-debounce": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@storybook/react": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@types/papaparse": "catalog:",
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@types/react": ">=19.2.18",
+    "@xyflow/react": ">=12",
+    "clsx": ">=2",
+    "elkjs": ">=0",
+    "fast-equals": "catalog:",
+    "fuse.js": ">=7",
+    "react": ">=19.2.8",
+    "rrule": ">=2"
+  }
 }

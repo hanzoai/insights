@@ -1,47 +1,47 @@
 {
-    "name": "@hanzo/products-conversations",
-    "scripts": {
-        "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
-    },
-    "dependencies": {
-        "kea": "catalog:",
-        "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "kea-subscriptions": "catalog:",
-        "insights-js": "catalog:",
-        "ts-pattern": "catalog:"
-    },
-    "devDependencies": {
-        "@testing-library/jest-dom": "^5.17.0",
-        "@testing-library/react": "^14.3.1",
-        "@testing-library/user-event": "^14.6.1",
-        "jest": "^29.7.0",
-        "kea-test-utils": "catalog:"
-    },
-    "peerDependencies": {
-        "@hanzo/icons": "catalog:",
-        "@hanzo/elements": "*",
-        "@storybook/react": "catalog:",
-        "@testing-library/jest-dom": "*",
-        "@testing-library/react": "*",
-        "@testing-library/user-event": "*",
-        "@tiptap/core": "*",
-        "@tiptap/extension-code-block": "*",
-        "@tiptap/extension-code-block-lowlight": "*",
-        "@tiptap/extension-document": "*",
-        "@tiptap/extension-image": "*",
-        "@tiptap/extension-link": "*",
-        "@tiptap/extension-underline": "*",
-        "@tiptap/extensions": "*",
-        "@tiptap/pm": "*",
-        "@tiptap/react": "*",
-        "@tiptap/starter-kit": "*",
-        "@types/react": "*",
-        "@types/react-dom": "*",
-        "clsx": "*",
-        "jest": "*",
-        "lowlight": "*",
-        "react": "*",
-        "react-dom": "*"
-    }
+  "name": "@hanzo/products-conversations",
+  "scripts": {
+    "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
+  },
+  "dependencies": {
+    "kea": "catalog:",
+    "kea-loaders": "catalog:",
+    "kea-router": "catalog:",
+    "kea-subscriptions": "catalog:",
+    "insights-js": "catalog:",
+    "ts-pattern": "catalog:"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "jest": "catalog:",
+    "kea-test-utils": "catalog:"
+  },
+  "peerDependencies": {
+    "@hanzo/icons": "catalog:",
+    "@hanzo/elements": "*",
+    "@storybook/react": "catalog:",
+    "@testing-library/jest-dom": ">=7",
+    "@testing-library/react": ">=16",
+    "@testing-library/user-event": ">=14",
+    "@tiptap/core": ">=3",
+    "@tiptap/extension-code-block": ">=3",
+    "@tiptap/extension-code-block-lowlight": ">=3",
+    "@tiptap/extension-document": ">=3",
+    "@tiptap/extension-image": ">=3",
+    "@tiptap/extension-link": ">=3",
+    "@tiptap/extension-underline": ">=3",
+    "@tiptap/extensions": ">=3",
+    "@tiptap/pm": ">=3",
+    "@tiptap/react": ">=3",
+    "@tiptap/starter-kit": ">=3",
+    "@types/react": ">=19.2.18",
+    "@types/react-dom": ">=19.2.5",
+    "clsx": ">=2",
+    "jest": ">=30",
+    "lowlight": ">=3",
+    "react": ">=19.2.8",
+    "react-dom": ">=19.2.8"
+  }
 }
