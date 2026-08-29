@@ -14,8 +14,8 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
         content: (
             <>
                 <Markdown>
-                    Capture a structured log record with `Insights.logger`. Requires `com.insights:insights-android` 3.46.0
-                    or later. Records are batched and shipped to Insights's logs product.
+                    Capture a structured log record with `Insights.logger`. Requires `com.insights:insights-android`
+                    3.46.0 or later. Records are batched and shipped to Insights's logs product.
                 </Markdown>
                 <CodeBlock
                     blocks={[

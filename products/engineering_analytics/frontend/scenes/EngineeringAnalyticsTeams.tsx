@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { IconPeople } from '@hanzo/icons'
 import { Table, TableColumns, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconPeople } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { urls } from 'scenes/urls'

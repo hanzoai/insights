@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconCalendar } from '@hanzo/icons'
 import { Select } from '@hanzo/elements'
+import { IconCalendar } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

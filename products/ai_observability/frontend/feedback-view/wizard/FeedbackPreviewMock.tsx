@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import { renderSurveysPreview } from 'insights-js/dist/surveys-preview'
+import { useValues } from 'kea'
 import { useEffect, useMemo, useRef } from 'react'
 
 import { IconThumbsDown, IconThumbsDownFilled, IconThumbsUp, IconThumbsUpFilled } from '@hanzo/icons'

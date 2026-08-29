@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Fragment } from 'react'
 
-import { IconChevronDown, IconInfo } from '@hanzo/icons'
 import { Banner, SegmentedButton } from '@hanzo/elements'
+import { IconChevronDown, IconInfo } from '@hanzo/icons'
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,

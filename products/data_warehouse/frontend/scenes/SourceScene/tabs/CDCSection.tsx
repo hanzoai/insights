@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
+import { Button, Checkbox, Divider, Input, Modal, Skeleton, Switch, Tag } from '@hanzo/elements'
 import { IconCopy } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Divider,
-    Input,
-    Modal,
-    Skeleton,
-    Switch,
-    Tag,
-} from '@hanzo/elements'
 
 import api, { ApiConfig } from 'lib/api'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
@@ -364,9 +355,7 @@ function EnabledControls({ source }: { source: ExternalDataSource }): JSX.Elemen
                 {statusLoading && !status ? (
                     <Skeleton className="h-12" />
                 ) : statusError ? (
-                    <Banner type="warning">
-                        Couldn't read live status from your database: {statusError}
-                    </Banner>
+                    <Banner type="warning">Couldn't read live status from your database: {statusError}</Banner>
                 ) : status ? (
                     <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>
@@ -383,9 +372,7 @@ function EnabledControls({ source }: { source: ExternalDataSource }): JSX.Elemen
                         </div>
                         <div>
                             <div className="text-secondary text-xs">WAL lag</div>
-                            <Tag type={lagTagType}>
-                                {lagBytes == null ? 'Unknown' : humanizeBytes(lagBytes)}
-                            </Tag>
+                            <Tag type={lagTagType}>{lagBytes == null ? 'Unknown' : humanizeBytes(lagBytes)}</Tag>
                         </div>
                     </div>
                 ) : null}
@@ -629,8 +616,8 @@ function DisabledControls({ source }: { source: ExternalDataSource }): JSX.Eleme
                                     <div>
                                         <div>Insights-managed</div>
                                         <div className="text-xs text-secondary">
-                                            Insights creates and manages the replication slot and publication. Requires a
-                                            DB user with REPLICATION and table ownership.
+                                            Insights creates and manages the replication slot and publication. Requires
+                                            a DB user with REPLICATION and table ownership.
                                         </div>
                                     </div>
                                 ),
@@ -677,20 +664,10 @@ function DisabledControls({ source }: { source: ExternalDataSource }): JSX.Eleme
                 {autoDrop && mode === 'insights' && (
                     <div className="grid grid-cols-2 gap-4">
                         <Field.Pure label="WAL lag warning (MB)">
-                            <Input
-                                type="number"
-                                value={warnMb}
-                                onChange={(v) => setWarnMb(Number(v) || 0)}
-                                min={1}
-                            />
+                            <Input type="number" value={warnMb} onChange={(v) => setWarnMb(Number(v) || 0)} min={1} />
                         </Field.Pure>
                         <Field.Pure label="WAL lag critical (MB)">
-                            <Input
-                                type="number"
-                                value={critMb}
-                                onChange={(v) => setCritMb(Number(v) || 0)}
-                                min={1}
-                            />
+                            <Input type="number" value={critMb} onChange={(v) => setCritMb(Number(v) || 0)} min={1} />
                         </Field.Pure>
                     </div>
                 )}

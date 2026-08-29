@@ -4,12 +4,12 @@
 # them, so a caller placed there is a gate that cannot be scheduled.
 name: CI/CD
 on:
-  push:
-    branches: [main, master]
-    tags: ['v*']
-  pull_request:
-  workflow_dispatch:
+    push:
+        branches: [main, master]
+        tags: ['v*']
+    pull_request:
+    workflow_dispatch:
 jobs:
-  cicd:
-    uses: hanzoai/ci/.hanzo/workflows/build.yml@v1
-    secrets: inherit
+    cicd:
+        uses: hanzoai/ci/.hanzo/workflows/build.yml@v1
+        secrets: inherit

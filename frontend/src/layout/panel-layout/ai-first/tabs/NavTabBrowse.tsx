@@ -1,8 +1,9 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { Fragment } from 'react'
 
+import { Tooltip } from '@hanzo/elements'
 import {
     IconApps,
     IconCheck,
@@ -18,16 +19,15 @@ import {
     IconSearch,
     IconStar,
 } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/elements'
 
 import { commandLogic } from 'lib/components/Command/commandLogic'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { RenderKeybind } from 'lib/components/Shortcuts/ShortcutMenu'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Link } from 'lib/elements/Link'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { Collapsible } from 'lib/ui/Collapsible/Collapsible'

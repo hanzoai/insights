@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { RE2JS } from 're2js'
 import { useEffect } from 'react'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, InputSelect, SegmentedButton } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { FlagSelector } from 'lib/components/FlagSelector'
 import { ANY_VARIANT, variantOptions } from 'lib/components/IngestionControls/triggers/FlagTrigger/VariantSelector'

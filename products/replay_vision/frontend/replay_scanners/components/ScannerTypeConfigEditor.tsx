@@ -1,16 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
+import { Button, Card, Input, SegmentedButton, Switch, Tag, TextArea } from '@hanzo/elements'
 import { IconAI, IconPlus, IconX } from '@hanzo/icons'
-import {
-    Button,
-    Card,
-    Input,
-    SegmentedButton,
-    Switch,
-    Tag,
-    TextArea,
-} from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
@@ -129,12 +121,7 @@ function ClassifierTagSuggestions({ scannerId }: { scannerId: string }): JSX.Ele
                     <Button size="xsmall" type="secondary" onClick={() => acceptAllTagSuggestions()}>
                         Add all
                     </Button>
-                    <Button
-                        size="xsmall"
-                        icon={<IconX />}
-                        tooltip="Dismiss"
-                        onClick={() => dismissTagSuggestions()}
-                    />
+                    <Button size="xsmall" icon={<IconX />} tooltip="Dismiss" onClick={() => dismissTagSuggestions()} />
                 </div>
             </div>
             <div className="space-y-2">

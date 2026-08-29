@@ -28,11 +28,7 @@ export function NewProperty({ onSave }: NewPropertyProps): JSX.Element {
 
     return (
         <>
-            <Button
-                data-attr="add-prop-button"
-                onClick={() => setState({ ...state, creating: true })}
-                type="primary"
-            >
+            <Button data-attr="add-prop-button" onClick={() => setState({ ...state, creating: true })} type="primary">
                 New property
             </Button>
             <Modal

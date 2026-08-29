@@ -1,6 +1,5 @@
 import type { Replayer } from '@hanzo/insights-rrweb'
 import type { eventWithTime } from '@hanzo/insights-rrweb-types'
-
 import type { RecordingSegment } from '@hanzo/replay-shared'
 
 import type { HostBridge } from './host-bridge'

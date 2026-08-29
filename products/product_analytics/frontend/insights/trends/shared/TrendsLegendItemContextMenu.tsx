@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import type { ReactNode } from 'react'
 
 import { InsightLegendRowContextMenu } from 'lib/components/InsightLegend/InsightLegendRowContextMenu'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { IconExternal, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Skeleton, Tag, Link, Spinner } from '@hanzo/elements'
+import { IconExternal, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { urls } from 'scenes/urls'

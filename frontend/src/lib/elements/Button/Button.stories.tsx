@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import clsx from 'clsx'
 
-import { IconGear, IconInfo, IconPlus } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconGear, IconInfo, IconPlus } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { IconCalculate, IconLink } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Divider } from 'lib/elements/Divider'
+import { IconCalculate, IconLink } from 'lib/elements/icons'
 import { range } from 'lib/utils/arrays'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
@@ -162,8 +162,8 @@ export const Active: Story = {
         return (
             <div className="deprecated-space-y-2">
                 <p>
-                    Sometimes you may need to keep the Button in it's active state e.g. the hover state. This can
-                    be done by setting the <code>active</code> property
+                    Sometimes you may need to keep the Button in it's active state e.g. the hover state. This can be
+                    done by setting the <code>active</code> property
                 </p>
                 <div className="flex items-center gap-2">
                     <Button>I am not active</Button>

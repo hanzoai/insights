@@ -2,16 +2,8 @@ import './ConditionalFormattingTab.scss'
 
 import { useActions, useValues } from 'kea'
 
+import { Button, Collapse, ColorGlyph, ColorPicker, Input, Select, Tag } from '@hanzo/elements'
 import { IconPlusSmall, IconTrash } from '@hanzo/icons'
-import {
-    Button,
-    Collapse,
-    ColorGlyph,
-    ColorPicker,
-    Input,
-    Select,
-    Tag,
-} from '@hanzo/elements'
 
 import { ConditionalFormattingRule } from '~/queries/schema/schema-general'
 

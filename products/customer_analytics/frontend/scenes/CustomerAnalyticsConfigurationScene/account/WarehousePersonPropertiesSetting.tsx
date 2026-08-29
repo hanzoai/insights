@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPencil, IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
 import { Button, Table, TableColumns, Spinner, Tooltip } from '@hanzo/elements'
+import { IconPencil, IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TZLabel } from 'lib/components/TZLabel'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle, IconCompass, IconFlag, IconRefresh, IconSearch, IconSort } from '@hanzo/icons'
 import { Button, Checkbox, Input } from '@hanzo/elements'
+import { IconCheckCircle, IconCompass, IconFlag, IconRefresh, IconSearch, IconSort } from '@hanzo/icons'
 
 import { STATUS_LABELS } from 'scenes/inbox/components/badges/SignalReportStatusBadge'
 import { FilterItem, FilterPopover } from 'scenes/inbox/components/shell/filterControls'

@@ -2,8 +2,8 @@ import { useReactFlow } from '@xyflow/react'
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconCopy, IconDrag, IconEllipsis, IconTrash } from '@hanzo/icons'
 import { Input, TextArea, Tooltip } from '@hanzo/elements'
+import { IconCopy, IconDrag, IconEllipsis, IconTrash } from '@hanzo/icons'
 
 import { Badge } from 'lib/elements/Badge'
 import { Button } from 'lib/elements/Button'

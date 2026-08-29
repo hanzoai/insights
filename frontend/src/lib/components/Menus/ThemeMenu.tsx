@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 
 import { IconDay, IconLaptop, IconNight, IconPalette } from '@hanzo/icons'
 
-import { Tag } from 'lib/elements/Tag/Tag'
 import { Link } from 'lib/elements/Link/Link'
+import { Tag } from 'lib/elements/Tag/Tag'
 import { themeLogic } from 'lib/logic/themeLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'

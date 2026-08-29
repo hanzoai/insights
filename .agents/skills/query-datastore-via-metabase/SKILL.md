@@ -21,8 +21,8 @@ those and uses the same Metabase API surface.
 
 ## Environment
 
-| Region | Metabase URL                           |
-| ------ | -------------------------------------- |
+| Region | Metabase URL                            |
+| ------ | --------------------------------------- |
 | US     | `https://metabase.prod-us.insights.dev` |
 | EU     | `https://metabase.prod-eu.insights.dev` |
 
@@ -211,12 +211,12 @@ for row in d['data']['rows']:
 
 ### Error responses
 
-| Symptom                        | Cause                                  | Fix                                                              |
-| ------------------------------ | -------------------------------------- | ---------------------------------------------------------------- |
-| HTTP 302 to `/auth/...`        | Cookie expired or missing              | Tell user to run `insightscli metabase:login --region <region>`        |
-| HTTP 401                       | Cookie rejected by ALB                 | Same as 302                                                      |
+| Symptom                        | Cause                                 | Fix                                                              |
+| ------------------------------ | ------------------------------------- | ---------------------------------------------------------------- |
+| HTTP 302 to `/auth/...`        | Cookie expired or missing             | Tell user to run `insightscli metabase:login --region <region>`  |
+| HTTP 401                       | Cookie rejected by ALB                | Same as 302                                                      |
 | `"status": "failed"` + `error` | Datastore error (syntax, table, etc.) | Read `error`; fix SQL                                            |
-| Hangs / timeout                | Wide `query_log` scan                  | Narrow `event_time` range, add `team_id` filter, use `cluster()` |
+| Hangs / timeout                | Wide `query_log` scan                 | Narrow `event_time` range, add `team_id` filter, use `cluster()` |
 
 ## Investigation workflow
 

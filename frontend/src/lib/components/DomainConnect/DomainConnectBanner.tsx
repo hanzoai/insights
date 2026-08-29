@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { DomainConnectProviderName } from '~/queries/schema/schema-general'
 

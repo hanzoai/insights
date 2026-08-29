@@ -16,7 +16,8 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                     <CalloutBox type="info" icon="IconInfo" title="Full working examples">
                         <Markdown>
                             See the complete
-                            [Node.js](https://github.com/Insights/insights-js/tree/main/examples/example-ai-langchain) and
+                            [Node.js](https://github.com/Insights/insights-js/tree/main/examples/example-ai-langchain)
+                            and
                             [Python](https://github.com/Insights/insights-python/tree/master/examples/example-ai-langchain)
                             examples on GitHub.
                         </Markdown>

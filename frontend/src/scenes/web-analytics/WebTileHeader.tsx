@@ -1,8 +1,8 @@
-import { IconChevronDown, IconEllipsis, IconLineGraph } from '@hanzo/icons'
 import { Button, Menu, MenuItem, SelectOptionLeaf } from '@hanzo/elements'
+import { IconChevronDown, IconEllipsis, IconLineGraph } from '@hanzo/icons'
 
-import { useWindowSize } from 'lib/hooks/useWindowSize'
 import { IconOpenInNew, IconTableChart } from 'lib/elements/icons'
+import { useWindowSize } from 'lib/hooks/useWindowSize'
 
 import { TileId, TileVisualizationOption } from './common'
 import { LearnMorePopover, LearnMorePopoverProps } from './WebAnalyticsDashboard'

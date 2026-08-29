@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { createContext, useContext, useState } from 'react'
 
-import { IconGraph } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconGraph } from '@hanzo/icons'
 
 import {
     EXPERIMENT_MIN_EXPOSURES_FOR_RESULTS,
@@ -389,12 +389,7 @@ function ChartControls(): JSX.Element {
                     className="absolute bottom-2 left-2 flex justify-center bg-[var(--color-bg-table)] z-[101]"
                     // Chart is z-index 100, so we need to be above it
                 >
-                    <Button
-                        type="secondary"
-                        size="xsmall"
-                        icon={<IconGraph />}
-                        onClick={() => setIsModalOpen(true)}
-                    >
+                    <Button type="secondary" size="xsmall" icon={<IconGraph />} onClick={() => setIsModalOpen(true)}>
                         Details
                     </Button>
                 </div>

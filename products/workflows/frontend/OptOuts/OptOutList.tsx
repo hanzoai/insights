@@ -1,5 +1,6 @@
 import { useActions, useValues } from 'kea'
 
+import { Banner, Button, Input, Modal, Table, TableColumns } from '@hanzo/elements'
 import {
     IconChevronLeft,
     IconChevronRight,
@@ -9,7 +10,6 @@ import {
     IconRefresh,
     IconUpload,
 } from '@hanzo/icons'
-import { Banner, Button, Input, Modal, Table, TableColumns } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { More } from 'lib/elements/Button/More'
@@ -122,12 +122,7 @@ export function OptOutList({ category }: { category?: MessageCategory }): JSX.El
     return (
         <>
             <div className="flex justify-end gap-2 mb-2 mt-[-3rem]">
-                <Button
-                    icon={<IconPlus />}
-                    size="small"
-                    type="secondary"
-                    onClick={() => setShowAddOptOutModal(true)}
-                >
+                <Button icon={<IconPlus />} size="small" type="secondary" onClick={() => setShowAddOptOutModal(true)}>
                     Add opt-out
                 </Button>
                 <Button

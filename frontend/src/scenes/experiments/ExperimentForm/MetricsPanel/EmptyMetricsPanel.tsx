@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconPlus } from '@hanzo/icons'
 import { Banner } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 

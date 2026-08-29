@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { Button, SegmentedButton, Tag, Link, SpinnerOverlay } from '@hanzo/elements'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'

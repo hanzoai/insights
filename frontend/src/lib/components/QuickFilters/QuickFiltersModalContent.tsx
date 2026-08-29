@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Input, Table, TableColumn, Tooltip } from '@hanzo/elements'
+import { IconPlus, IconTrash } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'

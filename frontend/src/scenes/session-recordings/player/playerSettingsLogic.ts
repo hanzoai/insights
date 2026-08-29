@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, kea, listeners, path, reducers, selectors } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { AutoplayDirection, SessionRecordingSidebarStacking } from '~/types'
 

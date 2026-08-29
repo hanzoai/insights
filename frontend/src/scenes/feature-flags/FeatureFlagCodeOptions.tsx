@@ -1,14 +1,5 @@
 import { IconServer } from '@hanzo/icons'
-import {
-    IconCSharp,
-    IconFlutter,
-    IconGo,
-    IconJavascript,
-    IconPHP,
-    IconPython,
-    IconReact,
-    IconRuby,
-} from '@hanzo/icons'
+import { IconCSharp, IconFlutter, IconGo, IconJavascript, IconPHP, IconPython, IconReact, IconRuby } from '@hanzo/icons'
 
 import { IconAndroidOS, IconAppleIOS, IconNodeJS } from 'lib/elements/icons'
 

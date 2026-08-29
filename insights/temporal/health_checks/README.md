@@ -100,7 +100,7 @@ class HealthCheck:
 | Attribute                 | Type                    | Default                    | Description                                                                                                                       |
 | ------------------------- | ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `name`                    | `str`                   | required                   | Unique name used in Temporal workflow and schedule naming                                                                         |
-| `kind`                    | `str`                   | required                   | Issue kind written to the `insights_healthissue` table. Must be globally unique                                                    |
+| `kind`                    | `str`                   | required                   | Issue kind written to the `insights_healthissue` table. Must be globally unique                                                   |
 | `owner`                   | `JobOwners`             | required                   | Team that owns this check (used for alert routing)                                                                                |
 | `policy`                  | `HealthExecutionPolicy` | `DEFAULT_EXECUTION_POLICY` | Controls batch size and concurrency (see [Execution policies](#execution-policies))                                               |
 | `schedule`                | `str \| None`           | `None`                     | Cron expression (UTC). Omit for manual-only checks                                                                                |
@@ -146,9 +146,9 @@ On each check run, for every team in the batch:
 
 ## Execution policies
 
-| Preset                              | `batch_size` | `max_concurrent` | Use case                |
-| ----------------------------------- | ------------ | ---------------- | ----------------------- |
-| `DEFAULT_EXECUTION_POLICY`          | 1000         | 5                | Lightweight checks      |
+| Preset                             | `batch_size` | `max_concurrent` | Use case               |
+| ---------------------------------- | ------------ | ---------------- | ---------------------- |
+| `DEFAULT_EXECUTION_POLICY`         | 1000         | 5                | Lightweight checks     |
 | `DATASTORE_BATCH_EXECUTION_POLICY` | 250          | 1                | Datastore query checks |
 
 Teams are split into batches of `batch_size` IDs. Up to `max_concurrent` batches run concurrently, controlled by an `asyncio.Semaphore` in the Temporal workflow. Each batch activity has a retry policy (3 attempts, 30 s initial interval, exponential backoff up to 5 min).
@@ -220,7 +220,7 @@ rows = execute_datastore_health_team_query(
 | `team_ids`      | `list[int]`                 | —       | Team IDs to query. Returns `[]` immediately if empty                 |
 | `lookback_days` | `int \| None`               | `None`  | If set, available as `%(lookback_days)s` in SQL. Must be > 0         |
 | `params`        | `Mapping[str, Any] \| None` | `None`  | Extra query params. Cannot override `team_ids` or `lookback_days`    |
-| `settings`      | `Mapping[str, Any] \| None` | `None`  | Datastore settings overrides                                        |
+| `settings`      | `Mapping[str, Any] \| None` | `None`  | Datastore settings overrides                                         |
 
 Default Datastore settings: `max_execution_time=30`, `max_threads=2`.
 

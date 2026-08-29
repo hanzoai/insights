@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconWarning } from '@hanzo/icons'
 import { Modal, Link } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { experimentLogic } from '../experimentLogic'
 import { experimentMetricModalLogic } from './experimentMetricModalLogic'

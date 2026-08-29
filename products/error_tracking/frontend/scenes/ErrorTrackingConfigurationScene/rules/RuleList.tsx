@@ -4,8 +4,8 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-ki
 import { useActions, useValues } from 'kea'
 import { ReactNode, useEffect } from 'react'
 
-import { IconTrash, IconWarning } from '@hanzo/icons'
 import { Button, Card, Checkbox, Dialog, Divider, Spinner } from '@hanzo/elements'
+import { IconTrash, IconWarning } from '@hanzo/icons'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -88,12 +88,7 @@ export function RuleList({
                             <Button type="secondary" size="small" onClick={cancelReorderingRules}>
                                 Cancel
                             </Button>
-                            <Button
-                                type="primary"
-                                size="small"
-                                onClick={finishReorderingRules}
-                                loading={rulesLoading}
-                            >
+                            <Button type="primary" size="small" onClick={finishReorderingRules} loading={rulesLoading}>
                                 Finish reordering
                             </Button>
                         </>

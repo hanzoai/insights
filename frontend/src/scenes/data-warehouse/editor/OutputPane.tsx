@@ -6,6 +6,7 @@ import { useActions, useValues } from 'kea'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import DataGrid, { DataGridProps, RenderHeaderCellProps, SortColumn } from 'react-data-grid'
 
+import { Banner, Button, Divider, Menu, Modal, Table, Tooltip } from '@hanzo/elements'
 import {
     IconCode,
     IconColumns,
@@ -20,7 +21,6 @@ import {
     IconScreen,
     IconWarning,
 } from '@hanzo/icons'
-import { Banner, Button, Divider, Menu, Modal, Table, Tooltip } from '@hanzo/elements'
 
 import { ExportButton } from 'lib/components/ExportButton/ExportButton'
 import { JSONViewer } from 'lib/components/JSONViewer'
@@ -670,9 +670,7 @@ export function OutputPane({ tabId, showToolbar = true, biMode = false, onShareT
                     name: (
                         <>
                             {column}{' '}
-                            {type && (
-                                <span className="text-[10px] font-medium italic">{cleanDatastoreType(type)}</span>
-                            )}
+                            {type && <span className="text-[10px] font-medium italic">{cleanDatastoreType(type)}</span>}
                         </>
                     ),
                     resizable: true,
@@ -1017,11 +1015,7 @@ const QueryWarningsBanner = ({ warnings }: { warnings?: InsightsQLQueryResponse[
     return (
         <>
             {syncWarnings.length > 0 && (
-                <Banner
-                    type="warning"
-                    className="m-2 flex-shrink-0"
-                    data-attr="sql-editor-output-pane-sync-warnings"
-                >
+                <Banner type="warning" className="m-2 flex-shrink-0" data-attr="sql-editor-output-pane-sync-warnings">
                     Some warehouse sources used by this query are out of date — results may not reflect current data:
                     <ul className="list-disc pl-5">
                         {syncWarnings.map((warning, index) => (

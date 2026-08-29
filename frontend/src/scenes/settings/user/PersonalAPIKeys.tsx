@@ -2,7 +2,6 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
-import { IconInfo, IconPlus } from '@hanzo/icons'
 import {
     Banner,
     Dialog,
@@ -16,11 +15,12 @@ import {
     TextArea,
     Tooltip,
 } from '@hanzo/elements'
+import { IconInfo, IconPlus } from '@hanzo/icons'
 
 import { ScopeAccessRow } from 'lib/components/ScopeAccessRow/ScopeAccessRow'
-import { IconErrorOutline } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link'
 import { API_KEY_SCOPE_PRESETS, MAX_API_KEYS_PER_USER } from 'lib/scopes'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'

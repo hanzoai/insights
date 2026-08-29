@@ -2,8 +2,8 @@ import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path,
 import { loaders } from 'kea-loaders'
 
 import api from 'lib/api'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { toast } from 'lib/elements/Toast/Toast'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { projectLogic } from 'scenes/projectLogic'
 
 import { InsightsFunctionType, IntegrationType } from '~/types'

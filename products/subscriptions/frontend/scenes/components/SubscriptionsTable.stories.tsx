@@ -1,9 +1,9 @@
 import { Meta, StoryObj } from '@storybook/react'
 import { useState, type ComponentProps } from 'react'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 import type { PaginationManual } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import type { SubscriptionApi } from 'products/subscriptions/frontend/generated/api.schemas'
 import {
@@ -34,8 +34,7 @@ const MOCK_SUBSCRIPTIONS: SubscriptionApi[] = [
         title: 'This is a really long subscription name that does something important for the team every week',
         dashboard_export_insights: [],
         target_type: TargetTypeEnumApi.Email,
-        target_value:
-            'matt.p@hanzo.ai,matt.p2@hanzo.ai,matt.p3@hanzo.ai,matt.p4@hanzo.ai,matt.p5@hanzo.ai',
+        target_value: 'matt.p@hanzo.ai,matt.p2@hanzo.ai,matt.p3@hanzo.ai,matt.p4@hanzo.ai,matt.p5@hanzo.ai',
         frequency: RecurrenceIntervalEnumApi.Weekly,
         interval: 1,
         start_date: '2022-01-01T00:00:00Z',
@@ -223,9 +222,7 @@ function StoryShell(props: Omit<ComponentProps<typeof SubscriptionsTable>, 'rend
     return (
         <SubscriptionsTable
             {...props}
-            renderRowActions={() => (
-                <Button icon={<IconEllipsis />} size="small" aria-label="Subscription actions" />
-            )}
+            renderRowActions={() => <Button icon={<IconEllipsis />} size="small" aria-label="Subscription actions" />}
         />
     )
 }
@@ -248,9 +245,7 @@ function MultiPageStoryShell(): JSX.Element {
                 onBackward: page > 1 ? () => setPage((p) => Math.max(1, p - 1)) : undefined,
                 onForward: page < pageCount ? () => setPage((p) => Math.min(pageCount, p + 1)) : undefined,
             }}
-            renderRowActions={() => (
-                <Button icon={<IconEllipsis />} size="small" aria-label="Subscription actions" />
-            )}
+            renderRowActions={() => <Button icon={<IconEllipsis />} size="small" aria-label="Subscription actions" />}
         />
     )
 }

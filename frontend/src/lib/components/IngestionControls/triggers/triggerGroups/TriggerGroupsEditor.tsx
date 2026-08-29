@@ -1,16 +1,8 @@
 import { useValues, useActions } from 'kea'
 import { Form } from 'kea-forms'
 
+import { Banner, Button, Input, Label, Modal, Select, Snack } from '@hanzo/elements'
 import { IconChevronDown, IconFilter, IconPlus } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Input,
-    Label,
-    Modal,
-    Select,
-    Snack,
-} from '@hanzo/elements'
 
 import { FlagSelector } from 'lib/components/FlagSelector'
 import { EventTriggerSelect } from 'lib/components/IngestionControls/triggers/EventTrigger'

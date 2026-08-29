@@ -1,8 +1,8 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers } from 'kea'
 import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import { toast } from 'lib/elements/Toast/Toast'
 import { projectLogic } from 'scenes/projectLogic'

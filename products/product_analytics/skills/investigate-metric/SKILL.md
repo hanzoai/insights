@@ -19,8 +19,8 @@ change to explain.
 Targets Insights MCP v2. Typed query tools accept the query body directly — pass
 `kind`, `series`, `dateRange` as top-level fields, do not wrap in `InsightVizNode`.
 
-| Tool                             | Purpose                                          |
-| -------------------------------- | ------------------------------------------------ |
+| Tool                              | Purpose                                          |
+| --------------------------------- | ------------------------------------------------ |
 | `insights:query-trends`           | Trends (count over time)                         |
 | `insights:query-funnel`           | Funnels (multi-step conversion)                  |
 | `insights:query-retention`        | Retention (cohort return rates)                  |
@@ -28,7 +28,7 @@ Targets Insights MCP v2. Typed query tools accept the query body directly — pa
 | `insights:query-lifecycle`        | Lifecycle (new/returning/resurrecting/dormant)   |
 | `insights:query-paths`            | Paths (navigation flow)                          |
 | `insights:query-trends-actors`    | Users behind a trend bucket (trends source only) |
-| `insights:execute-sql`            | InsightsQL — when no typed tool fits                  |
+| `insights:execute-sql`            | InsightsQL — when no typed tool fits             |
 | `insights:read-data-schema`       | Discover events, properties, sample values       |
 | `insights:insight-get` / `-query` | Fetch a saved insight's metadata / data          |
 
@@ -67,7 +67,7 @@ Read `query.kind` from the source the user pointed at:
 | `StickinessQuery` | [stickiness-playbook.md](./references/stickiness-playbook.md) |
 | `LifecycleQuery`  | [lifecycle-playbook.md](./references/lifecycle-playbook.md)   |
 | `PathsQuery`      | [paths-playbook.md](./references/paths-playbook.md)           |
-| `InsightsQLQuery`      | route by what the SQL aggregates (see below)                  |
+| `InsightsQLQuery` | route by what the SQL aggregates (see below)                  |
 
 If `kind === "TrendsQuery"` and `trendsFilter.display === "BoxPlot"`, use
 [box-plot-playbook.md](./references/box-plot-playbook.md) — distribution metric, no

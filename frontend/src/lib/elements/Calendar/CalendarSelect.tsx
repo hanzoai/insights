@@ -4,17 +4,12 @@ import { useRef, useState } from 'react'
 import { IconX } from '@hanzo/icons'
 
 import { dayjs, dayjsNowInTimezone } from 'lib/dayjs'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Button, ButtonWithSideActionProps, SideAction } from 'lib/elements/Button'
-import {
-    GetTimeStateOpts,
-    Calendar,
-    CalendarProps,
-    timeDataAttr,
-} from 'lib/elements/Calendar/Calendar'
+import { GetTimeStateOpts, Calendar, CalendarProps, timeDataAttr } from 'lib/elements/Calendar/Calendar'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
-import { Switch } from '../Switch'
 import { Popover } from '../Popover'
+import { Switch } from '../Switch'
 
 export function getTimeElement(parent: HTMLElement | null, props: GetTimeStateOpts): HTMLDivElement | undefined | null {
     return parent?.querySelector(`[data-attr="${timeDataAttr(props)}"]`)
@@ -153,9 +148,7 @@ export function CalendarSelect({
         <div className="CalendarSelect" data-attr="lemon-calendar-select">
             <div className="flex justify-between border-b p-2 pb-4">
                 <h3 className="text-base mb-0">Select a date</h3>
-                {onClose && (
-                    <Button icon={<IconX />} size="small" onClick={onClose} aria-label="close" noPadding />
-                )}
+                {onClose && <Button icon={<IconX />} size="small" onClick={onClose} aria-label="close" noPadding />}
             </div>
             <Calendar
                 ref={calendarRef}
@@ -217,12 +210,7 @@ export function CalendarSelect({
                 )}
             >
                 {showTimeToggle && (
-                    <Switch
-                        label="Include time?"
-                        checked={granularity != 'day'}
-                        onChange={onToggleTime}
-                        bordered
-                    />
+                    <Switch label="Include time?" checked={granularity != 'day'} onChange={onToggleTime} bordered />
                 )}
                 <div className="flex deprecated-space-x-2">
                     {onClose && (

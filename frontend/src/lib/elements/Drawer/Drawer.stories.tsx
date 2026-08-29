@@ -137,8 +137,7 @@ export const WithCustomContent: Story = {
                     </Drawer.Header>
                     <Drawer.Content>
                         Using the <code>simple</code> prop, you can compose the drawer layout yourself with{' '}
-                        <code>Drawer.Header</code>, <code>Drawer.Content</code>, and{' '}
-                        <code>Drawer.Footer</code>.
+                        <code>Drawer.Header</code>, <code>Drawer.Content</code>, and <code>Drawer.Footer</code>.
                     </Drawer.Content>
                     <Drawer.Footer>
                         <Button type="secondary" onClick={() => setIsOpen(false)}>

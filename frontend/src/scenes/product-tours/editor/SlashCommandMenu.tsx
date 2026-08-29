@@ -3,8 +3,8 @@ import { Editor, Extension, ReactRenderer } from '@tiptap/react'
 import Suggestion from '@tiptap/suggestion'
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react'
 
-import { IconCode, IconImage, IconList, IconMinus, IconQuote, IconVideoCamera } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCode, IconImage, IconList, IconMinus, IconQuote, IconVideoCamera } from '@hanzo/icons'
 
 import { Popover } from 'lib/elements/Popover'
 

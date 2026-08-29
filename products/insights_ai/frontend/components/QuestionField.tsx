@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button, Checkbox, Input, Select, Switch } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { Slider } from 'lib/elements/Slider/Slider'
 

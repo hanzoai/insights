@@ -95,7 +95,7 @@ headline number, propose it to the semantic layer.
 | File                                                                                   | Read when                                                                         |
 | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | [`references/revenue-metric-definitions.md`](references/revenue-metric-definitions.md) | Precise definitions: MRR, ARR, gross, new/expansion/contraction/churn, ARPU, LTV. |
-| [`references/insights/`](references/insights/)                                           | InsightsQL view recipes on the managed views.                                          |
+| [`references/insights/`](references/insights/)                                         | InsightsQL view recipes on the managed views.                                     |
 | [`references/dbt/`](references/dbt/)                                                   | dbt staging + `fct_*`/`dim_*` marts + `schema.yml` tests.                         |
 
 ## Companions

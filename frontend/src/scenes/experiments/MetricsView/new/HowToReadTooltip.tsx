@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconTrending } from '@hanzo/icons'
 import { Divider, Tooltip } from '@hanzo/elements'
+import { IconTrending } from '@hanzo/icons'
 
 import { IconTrendingDown } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link'

@@ -4,9 +4,9 @@
     "description": "Cross-region OAuth proxy for Insights Cloud (oauth.hanzo.ai)",
     "keywords": [
         "auth",
+        "insights",
         "multi-region",
         "oauth",
-        "insights",
         "proxy"
     ],
     "license": "MIT",

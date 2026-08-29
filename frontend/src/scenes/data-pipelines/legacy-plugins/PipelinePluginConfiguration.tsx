@@ -2,7 +2,6 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import React, { useState } from 'react'
 
-import { IconLock, IconPencil } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -15,6 +14,7 @@ import {
     SpinnerOverlay,
     Tooltip,
 } from '@hanzo/elements'
+import { IconLock, IconPencil } from '@hanzo/icons'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { NotFound } from 'lib/components/NotFound'
@@ -116,12 +116,7 @@ export function PipelinePluginConfiguration({
             >
                 Clear changes
             </Button>
-            <Button
-                type="primary"
-                htmlType="submit"
-                onClick={submitConfiguration}
-                loading={isConfigurationSubmitting}
-            >
+            <Button type="primary" htmlType="submit" onClick={submitConfiguration} loading={isConfigurationSubmitting}>
                 {isNew ? 'Create' : 'Save'}
             </Button>
         </>

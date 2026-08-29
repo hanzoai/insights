@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, afterMount, beforeUnmount, kea, listeners, path, reducers, selectors } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, afterMount, beforeUnmount, kea, listeners, path, reducers, selectors } from 'kea'
 
 import { toast } from '@hanzo/elements'
 

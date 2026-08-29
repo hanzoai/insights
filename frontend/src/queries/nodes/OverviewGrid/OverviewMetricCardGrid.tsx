@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import type React from 'react'
 
-import { IconWarning } from '@hanzo/icons'
 import { Skeleton, Link } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 import { MetricCard, type MetricChange } from '@hanzo/quill-charts'
 
 import { PreAggregatedBadge } from 'lib/components/PreAggregatedBadge'

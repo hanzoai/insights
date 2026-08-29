@@ -5,9 +5,9 @@ import { Button, Table, Tag } from '@hanzo/elements'
 import type { TableColumns } from '@hanzo/elements'
 
 import { More } from 'lib/elements/Button/More'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { atColumn } from 'lib/elements/Table/columnUtils'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { urls } from 'scenes/urls'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
@@ -83,11 +83,7 @@ export function EndpointVersions(): JSX.Element {
             key: 'status',
             align: 'center',
             render: function RenderStatus(_, record) {
-                return record.is_active ? (
-                    <Tag type="success">Active</Tag>
-                ) : (
-                    <Tag type="danger">Inactive</Tag>
-                )
+                return record.is_active ? <Tag type="success">Active</Tag> : <Tag type="danger">Inactive</Tag>
             },
         },
         {

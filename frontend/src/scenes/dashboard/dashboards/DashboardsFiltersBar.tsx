@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { IconChevronDown, IconFolder, IconPin, IconPinFilled, IconShare, IconX } from '@hanzo/icons'
 import { Input, Popover } from '@hanzo/elements'
+import { IconChevronDown, IconFolder, IconPin, IconPinFilled, IconShare, IconX } from '@hanzo/icons'
 
 import { MemberSelectMultiplePopover } from 'lib/components/MemberSelectMultiplePopover'
 import { Button } from 'lib/elements/Button'

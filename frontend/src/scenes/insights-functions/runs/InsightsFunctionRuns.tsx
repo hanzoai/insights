@@ -4,7 +4,10 @@ import { batchExportDataLogic } from 'scenes/data-pipelines/batch-exports/batchE
 import { BatchExportLoadingSkeleton } from 'scenes/data-pipelines/batch-exports/BatchExportLoadingSkeleton'
 import { BatchExportRuns } from 'scenes/data-pipelines/batch-exports/BatchExportRuns'
 
-import { insightsFunctionBackfillsLogic, InsightsFunctionBackfillsLogicProps } from '../backfills/insightsFunctionBackfillsLogic'
+import {
+    insightsFunctionBackfillsLogic,
+    InsightsFunctionBackfillsLogicProps,
+} from '../backfills/insightsFunctionBackfillsLogic'
 
 export function InsightsFunctionRuns({ id }: InsightsFunctionBackfillsLogicProps): JSX.Element {
     const { configuration, isReady } = useValues(insightsFunctionBackfillsLogic({ id }))

@@ -1,5 +1,5 @@
-import { IconCalendar, IconOpenSidebar } from '@hanzo/icons'
 import { Button, Card, Tag, Link } from '@hanzo/elements'
+import { IconCalendar, IconOpenSidebar } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

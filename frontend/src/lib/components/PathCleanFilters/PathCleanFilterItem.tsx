@@ -3,8 +3,8 @@ import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { IconArrowCircleRight } from '@hanzo/icons'
 import { Snack, Tooltip } from '@hanzo/elements'
+import { IconArrowCircleRight } from '@hanzo/icons'
 
 import { isValidRegexp } from 'lib/utils/regexp'
 

@@ -3,19 +3,8 @@ import { Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 import { useEffect } from 'react'
 
+import { Banner, Button, Divider, SegmentedButton, Select, Tab, Tabs, Tag, Link, ProfilePicture } from '@hanzo/elements'
 import { IconArchive, IconDownload, IconPlusSmall } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Divider,
-    SegmentedButton,
-    Select,
-    Tab,
-    Tabs,
-    Tag,
-    Link,
-    ProfilePicture,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AccessDenied } from 'lib/components/AccessDenied'
@@ -589,11 +578,7 @@ function DatasetItems({ dataset }: { dataset: Dataset }): JSX.Element {
             title: 'Status',
             key: 'status',
             render: function renderStatus(_, item) {
-                return (
-                    <Tag type={item.archived ? 'muted' : 'success'}>
-                        {item.archived ? 'Archived' : 'Active'}
-                    </Tag>
-                )
+                return <Tag type={item.archived ? 'muted' : 'success'}>{item.archived ? 'Archived' : 'Active'}</Tag>
             },
         },
         createdAtColumn<DatasetItem>() as TableColumn<DatasetItem, keyof DatasetItem | undefined>,

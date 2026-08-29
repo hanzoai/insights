@@ -1,5 +1,5 @@
-import { IconClock, IconPerson, IconTarget } from '@hanzo/icons'
 import { Table, TableColumns, Tag, Tooltip } from '@hanzo/elements'
+import { IconClock, IconPerson, IconTarget } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 

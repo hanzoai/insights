@@ -2,8 +2,8 @@ import './index.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Banner, Link } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Tab, Tabs } from 'lib/elements/Tabs'
 import { Tooltip } from 'lib/elements/Tooltip'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { IconCode, IconCopy, IconFilter, IconRefresh, IconX } from '@hanzo/icons'
 import { Button, Select, SelectOptions, Switch } from '@hanzo/elements'
+import { IconCode, IconCopy, IconFilter, IconRefresh, IconX } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
@@ -186,11 +186,7 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
                     />
                 </div>
                 <div className="flex gap-2 items-center">
-                    <Switch
-                        checked={showArchivedResponses}
-                        onChange={setShowArchivedResponses}
-                        label="Show archived"
-                    />
+                    <Switch checked={showArchivedResponses} onChange={setShowArchivedResponses} label="Show archived" />
                     <Button
                         size="small"
                         type="secondary"

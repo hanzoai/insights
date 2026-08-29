@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronRight } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { AlertsRecommendationCard } from './AlertsRecommendationCard'
 import { LongRunningIssuesRecommendationCard } from './LongRunningIssuesRecommendationCard'

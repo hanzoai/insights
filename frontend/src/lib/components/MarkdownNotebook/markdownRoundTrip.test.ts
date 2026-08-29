@@ -708,8 +708,7 @@ describe('markdown round trip', () => {
         })
 
         it('does not parse a marker without following whitespace as a task', () => {
-            const list = parseMarkdownNotebook('- [x](https://hanzo.ai/docs) linked')
-                .nodes[0] as NotebookListBlockNode
+            const list = parseMarkdownNotebook('- [x](https://hanzo.ai/docs) linked').nodes[0] as NotebookListBlockNode
 
             expect(list.items[0].checked).toBeUndefined()
         })

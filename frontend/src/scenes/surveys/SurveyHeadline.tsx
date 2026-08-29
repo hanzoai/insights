@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRefresh, IconSparkles } from '@hanzo/icons'
 import { Button, Skeleton } from '@hanzo/elements'
+import { IconRefresh, IconSparkles } from '@hanzo/icons'
 
 import { AIConsentPopoverWrapper } from 'scenes/settings/organization/AIConsentPopoverWrapper'
 

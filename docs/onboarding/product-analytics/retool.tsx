@@ -55,8 +55,7 @@ export const getRetoolSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     </Markdown>
                     <CalloutBox type="fyi" title="Learn more">
                         <Markdown>
-                            See the [Retool integration docs](https://hanzo.ai/docs/libraries/retool) for more
-                            details.
+                            See the [Retool integration docs](https://hanzo.ai/docs/libraries/retool) for more details.
                         </Markdown>
                     </CalloutBox>
                 </>

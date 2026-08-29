@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { TableLoader } from 'lib/elements/Table/TableLoader'
 

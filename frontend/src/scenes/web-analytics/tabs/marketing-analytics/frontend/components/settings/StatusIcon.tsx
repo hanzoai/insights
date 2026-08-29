@@ -1,5 +1,5 @@
-import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 
 import { ExternalDataSchemaStatus } from '~/types'
 

@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useCallback, useMemo } from 'react'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Select, SpinnerOverlay } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { AnyScaleOptions, Sparkline } from 'lib/components/Sparkline'
 import { dayjs } from 'lib/dayjs'

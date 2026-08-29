@@ -1,7 +1,7 @@
 import './ToolbarLaunch.scss'
 
-import { IconFlag, IconFlask, IconPieChart, IconSearch } from '@hanzo/icons'
 import { Banner } from '@hanzo/elements'
+import { IconFlag, IconFlask, IconPieChart, IconSearch } from '@hanzo/icons'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'

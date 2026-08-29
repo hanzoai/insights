@@ -1,10 +1,10 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { BindLogic } from 'kea'
-import insights from 'insights-js'
 
-import { IconInsightFunnels, IconInsightRetention, IconInsightTrends } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
+import { IconInsightFunnels, IconInsightRetention, IconInsightTrends } from 'lib/elements/icons'
 import { Modal } from 'lib/elements/Modal'
 import { Popover } from 'lib/elements/Popover'
 import { addSavedInsightsModalLogic } from 'scenes/saved-insights/addSavedInsightsModalLogic'
@@ -114,11 +114,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
                                         </div>
                                     }
                                 >
-                                    <Button
-                                        type="secondary"
-                                        size="small"
-                                        onClick={() => toggleShowMoreInsightTypes()}
-                                    >
+                                    <Button type="secondary" size="small" onClick={() => toggleShowMoreInsightTypes()}>
                                         More
                                     </Button>
                                 </Popover>

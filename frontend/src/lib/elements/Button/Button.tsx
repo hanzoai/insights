@@ -138,207 +138,206 @@ export interface ButtonWithSideActionProps extends ButtonPropsBase {
 export type ButtonProps = ButtonWithoutSideActionProps | ButtonWithSideActionProps
 
 /** Styled button. */
-export const Button: React.FunctionComponent<ButtonProps & React.RefAttributes<HTMLButtonElement>> =
-    React.forwardRef(
-        (
-            {
-                children,
-                active = false,
-                className,
-                disabled,
-                disabledReason,
-                disabledReasonInteractive,
-                loading,
-                type = 'tertiary',
-                status = 'default',
-                icon,
-                sideIcon,
-                sideAction,
-                fullWidth,
-                center,
-                size,
-                tooltip,
-                tooltipPlacement,
-                tooltipArrowOffset,
-                htmlType = 'button',
-                noPadding,
-                to,
-                targetBlank,
-                hideExternalLinkIcon,
-                disableClientSideRouting,
-                onClick,
-                truncate = false,
-                buttonWrapper,
-                tooltipDocLink,
-                tooltipForceMount,
-                stopPropagation,
-                ...buttonProps
-            },
-            ref
-        ): JSX.Element => {
-            const [popoverVisibility, popoverPlacement] = useContext(PopoverReferenceContext) || [false, null]
-            const [, parentPopoverLevel] = useContext(PopoverOverlayContext)
-            const within3000PageHeader = useContext(WithinPageHeaderContext)
+export const Button: React.FunctionComponent<ButtonProps & React.RefAttributes<HTMLButtonElement>> = React.forwardRef(
+    (
+        {
+            children,
+            active = false,
+            className,
+            disabled,
+            disabledReason,
+            disabledReasonInteractive,
+            loading,
+            type = 'tertiary',
+            status = 'default',
+            icon,
+            sideIcon,
+            sideAction,
+            fullWidth,
+            center,
+            size,
+            tooltip,
+            tooltipPlacement,
+            tooltipArrowOffset,
+            htmlType = 'button',
+            noPadding,
+            to,
+            targetBlank,
+            hideExternalLinkIcon,
+            disableClientSideRouting,
+            onClick,
+            truncate = false,
+            buttonWrapper,
+            tooltipDocLink,
+            tooltipForceMount,
+            stopPropagation,
+            ...buttonProps
+        },
+        ref
+    ): JSX.Element => {
+        const [popoverVisibility, popoverPlacement] = useContext(PopoverReferenceContext) || [false, null]
+        const [, parentPopoverLevel] = useContext(PopoverOverlayContext)
+        const within3000PageHeader = useContext(WithinPageHeaderContext)
 
-            if (!active && popoverVisibility) {
-                active = true
-            }
-
-            const usingSideActionDivider = sideAction && (sideAction.divider ?? !fullWidth)
-            if (sideAction) {
-                // Bogus `sideIcon` div prevents overflow under the side button.
-                sideIcon = (
-                    <span
-                        className={clsx(
-                            'ButtonWithSideAction__spacer',
-                            usingSideActionDivider && 'ButtonWithSideAction__spacer--divider'
-                        )}
-                    />
-                )
-            } else if (popoverPlacement) {
-                if (!children) {
-                    if (icon === undefined) {
-                        icon = popoverPlacement.startsWith('right') ? <IconChevronRight /> : <IconChevronDown />
-                    }
-                } else if (sideIcon === undefined) {
-                    sideIcon = popoverPlacement.startsWith('right') ? <IconChevronRight /> : <IconChevronDown />
-                }
-            }
-            if (loading) {
-                icon = <Spinner textColored />
-                disabled = true // Cannot interact with a loading button
-            }
-            if (within3000PageHeader && parentPopoverLevel === -1) {
-                size = 'small' // Ensure that buttons in the page header are small (but NOT inside dropdowns!)
-            }
-
-            let tooltipContent: TooltipProps['title']
-            if (disabledReason) {
-                disabled = true // Support `disabledReason` while maintaining compatibility with `disabled`
-                if (tooltip) {
-                    tooltipContent = (
-                        <>
-                            {tooltip}
-                            <div className="mt-1 italic">{disabledReason}</div>
-                        </>
-                    )
-                } else {
-                    tooltipContent = <span className="italic">{disabledReason}</span>
-                }
-            } else {
-                tooltipContent = tooltip
-            }
-
-            const ButtonComponent = to ? Link : 'button'
-            const linkDependentProps = to
-                ? {
-                      disableClientSideRouting,
-                      target: targetBlank ? '_blank' : undefined,
-                      to: !disabled ? to : undefined,
-                  }
-                : { type: htmlType }
-
-            if (ButtonComponent === 'button' && !buttonProps['aria-label'] && typeof tooltip === 'string') {
-                buttonProps['aria-label'] = tooltip
-            }
-
-            let workingButton: JSX.Element = (
-                <ButtonComponent
-                    ref={ref as any}
-                    className={clsx(
-                        `Button Button--${type} Button--status-${status}`,
-                        loading && `Button--loading`,
-                        noPadding && `Button--no-padding`,
-                        size && `Button--${size}`,
-                        active && 'Button--active',
-                        fullWidth && 'Button--full-width',
-                        center && 'Button--centered',
-                        !children && 'Button--no-content',
-                        !!icon && `Button--has-icon`,
-                        !!sideIcon && `Button--has-side-icon`,
-                        truncate && 'Button--truncate',
-                        className
-                    )}
-                    onClick={(event) => {
-                        if (stopPropagation) {
-                            event.stopPropagation()
-                        }
-                        if (disabled) {
-                            event.preventDefault()
-                            return
-                        }
-                        onClick?.(event)
-                    }}
-                    // We are using the ARIA disabled instead of native HTML because of this:
-                    // https://css-tricks.com/making-disabled-buttons-more-inclusive/
-                    aria-disabled={!!disabled}
-                    {...linkDependentProps}
-                    {...buttonProps}
-                    data-attr-id={buttonProps['data-attr-id'] ?? buttonProps['data-attr']}
-                >
-                    <span className="Button__chrome">
-                        {icon ? <span className="Button__icon">{icon}</span> : null}
-                        {children ? <span className="Button__content">{children}</span> : null}
-                        {sideIcon ? (
-                            <span className="Button__icon">{sideIcon}</span>
-                        ) : targetBlank && !hideExternalLinkIcon && !icon ? (
-                            <IconExternal />
-                        ) : null}
-                    </span>
-                </ButtonComponent>
-            )
-
-            if (buttonWrapper) {
-                workingButton = buttonWrapper(workingButton)
-            }
-
-            if (tooltipContent || tooltipDocLink) {
-                workingButton = (
-                    <Tooltip
-                        title={tooltipContent}
-                        placement={tooltipPlacement}
-                        arrowOffset={tooltipArrowOffset}
-                        docLink={tooltipDocLink}
-                        visible={tooltipForceMount}
-                        interactive={disabledReasonInteractive}
-                        closeDelayMs={disabledReasonInteractive ? INTERACTIVE_CLOSE_DELAY_MS : undefined}
-                    >
-                        {workingButton}
-                    </Tooltip>
-                )
-            }
-
-            if (sideAction) {
-                const { dropdown: sideDropdown, divider: _, ...sideActionRest } = sideAction
-                const SideComponent = sideDropdown ? ButtonWithDropdown : Button
-
-                workingButton = (
-                    <div
-                        onMouseEnter={buttonProps.onMouseEnter}
-                        className={clsx(
-                            `ButtonWithSideAction ButtonWithSideAction--${type}`,
-                            fullWidth && 'ButtonWithSideAction--full-width'
-                        )}
-                    >
-                        {workingButton}
-                        <div className="ButtonWithSideAction__side-button">
-                            <SideComponent
-                                type={type}
-                                size={size}
-                                status={status}
-                                dropdown={sideDropdown as ButtonDropdown}
-                                noPadding
-                                active={active}
-                                {...sideActionRest}
-                            />
-                        </div>
-                    </div>
-                )
-            }
-
-            return workingButton
+        if (!active && popoverVisibility) {
+            active = true
         }
-    )
+
+        const usingSideActionDivider = sideAction && (sideAction.divider ?? !fullWidth)
+        if (sideAction) {
+            // Bogus `sideIcon` div prevents overflow under the side button.
+            sideIcon = (
+                <span
+                    className={clsx(
+                        'ButtonWithSideAction__spacer',
+                        usingSideActionDivider && 'ButtonWithSideAction__spacer--divider'
+                    )}
+                />
+            )
+        } else if (popoverPlacement) {
+            if (!children) {
+                if (icon === undefined) {
+                    icon = popoverPlacement.startsWith('right') ? <IconChevronRight /> : <IconChevronDown />
+                }
+            } else if (sideIcon === undefined) {
+                sideIcon = popoverPlacement.startsWith('right') ? <IconChevronRight /> : <IconChevronDown />
+            }
+        }
+        if (loading) {
+            icon = <Spinner textColored />
+            disabled = true // Cannot interact with a loading button
+        }
+        if (within3000PageHeader && parentPopoverLevel === -1) {
+            size = 'small' // Ensure that buttons in the page header are small (but NOT inside dropdowns!)
+        }
+
+        let tooltipContent: TooltipProps['title']
+        if (disabledReason) {
+            disabled = true // Support `disabledReason` while maintaining compatibility with `disabled`
+            if (tooltip) {
+                tooltipContent = (
+                    <>
+                        {tooltip}
+                        <div className="mt-1 italic">{disabledReason}</div>
+                    </>
+                )
+            } else {
+                tooltipContent = <span className="italic">{disabledReason}</span>
+            }
+        } else {
+            tooltipContent = tooltip
+        }
+
+        const ButtonComponent = to ? Link : 'button'
+        const linkDependentProps = to
+            ? {
+                  disableClientSideRouting,
+                  target: targetBlank ? '_blank' : undefined,
+                  to: !disabled ? to : undefined,
+              }
+            : { type: htmlType }
+
+        if (ButtonComponent === 'button' && !buttonProps['aria-label'] && typeof tooltip === 'string') {
+            buttonProps['aria-label'] = tooltip
+        }
+
+        let workingButton: JSX.Element = (
+            <ButtonComponent
+                ref={ref as any}
+                className={clsx(
+                    `Button Button--${type} Button--status-${status}`,
+                    loading && `Button--loading`,
+                    noPadding && `Button--no-padding`,
+                    size && `Button--${size}`,
+                    active && 'Button--active',
+                    fullWidth && 'Button--full-width',
+                    center && 'Button--centered',
+                    !children && 'Button--no-content',
+                    !!icon && `Button--has-icon`,
+                    !!sideIcon && `Button--has-side-icon`,
+                    truncate && 'Button--truncate',
+                    className
+                )}
+                onClick={(event) => {
+                    if (stopPropagation) {
+                        event.stopPropagation()
+                    }
+                    if (disabled) {
+                        event.preventDefault()
+                        return
+                    }
+                    onClick?.(event)
+                }}
+                // We are using the ARIA disabled instead of native HTML because of this:
+                // https://css-tricks.com/making-disabled-buttons-more-inclusive/
+                aria-disabled={!!disabled}
+                {...linkDependentProps}
+                {...buttonProps}
+                data-attr-id={buttonProps['data-attr-id'] ?? buttonProps['data-attr']}
+            >
+                <span className="Button__chrome">
+                    {icon ? <span className="Button__icon">{icon}</span> : null}
+                    {children ? <span className="Button__content">{children}</span> : null}
+                    {sideIcon ? (
+                        <span className="Button__icon">{sideIcon}</span>
+                    ) : targetBlank && !hideExternalLinkIcon && !icon ? (
+                        <IconExternal />
+                    ) : null}
+                </span>
+            </ButtonComponent>
+        )
+
+        if (buttonWrapper) {
+            workingButton = buttonWrapper(workingButton)
+        }
+
+        if (tooltipContent || tooltipDocLink) {
+            workingButton = (
+                <Tooltip
+                    title={tooltipContent}
+                    placement={tooltipPlacement}
+                    arrowOffset={tooltipArrowOffset}
+                    docLink={tooltipDocLink}
+                    visible={tooltipForceMount}
+                    interactive={disabledReasonInteractive}
+                    closeDelayMs={disabledReasonInteractive ? INTERACTIVE_CLOSE_DELAY_MS : undefined}
+                >
+                    {workingButton}
+                </Tooltip>
+            )
+        }
+
+        if (sideAction) {
+            const { dropdown: sideDropdown, divider: _, ...sideActionRest } = sideAction
+            const SideComponent = sideDropdown ? ButtonWithDropdown : Button
+
+            workingButton = (
+                <div
+                    onMouseEnter={buttonProps.onMouseEnter}
+                    className={clsx(
+                        `ButtonWithSideAction ButtonWithSideAction--${type}`,
+                        fullWidth && 'ButtonWithSideAction--full-width'
+                    )}
+                >
+                    {workingButton}
+                    <div className="ButtonWithSideAction__side-button">
+                        <SideComponent
+                            type={type}
+                            size={size}
+                            status={status}
+                            dropdown={sideDropdown as ButtonDropdown}
+                            noPadding
+                            active={active}
+                            {...sideActionRest}
+                        />
+                    </div>
+                </div>
+            )
+        }
+
+        return workingButton
+    }
+)
 Button.displayName = 'Button'
 
 export const WithinPageHeaderContext = React.createContext<boolean>(false)

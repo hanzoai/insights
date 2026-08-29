@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconBookmark, IconFilter, IconPlusSmall, IconShare, IconTrash } from '@hanzo/icons'
 import { Button, Input, Modal, Table, TableColumn, toast } from '@hanzo/elements'
+import { IconBookmark, IconFilter, IconPlusSmall, IconShare, IconTrash } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Tooltip } from 'lib/elements/Tooltip'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCheckCircle } from '@hanzo/icons'
 import { Banner, Tabs, Tag } from '@hanzo/elements'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { EXPERIMENT_DEFAULT_DURATION } from 'lib/constants'
@@ -139,9 +139,9 @@ export function LegacySharedTrendsMetricForm(): JSX.Element {
                                         </div>
                                         <div className="text-secondary text-sm leading-relaxed">
                                             Uses the number of unique users who trigger the{' '}
-                                            <Tag>$feature_flag_called</Tag> event as your exposure count. This
-                                            is the recommended setting for most experiments, as it accurately tracks
-                                            variant exposure.
+                                            <Tag>$feature_flag_called</Tag> event as your exposure count. This is the
+                                            recommended setting for most experiments, as it accurately tracks variant
+                                            exposure.
                                         </div>
                                     </div>
                                     <div

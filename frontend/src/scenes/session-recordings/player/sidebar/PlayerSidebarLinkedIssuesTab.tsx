@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { ICONS } from 'lib/integrations/utils'

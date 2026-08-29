@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
+import { Button, Input, Menu, MenuItem, MenuItems, Modal, SegmentedButton, Tooltip } from '@hanzo/elements'
 import { IconChevronDown, IconGlobe, IconPencil, IconPlus, IconUser } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Menu,
-    MenuItem,
-    MenuItems,
-    Modal,
-    SegmentedButton,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 

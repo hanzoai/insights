@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
+import { Banner, Dialog, SegmentedButton, SegmentedButtonOption, Select, Switch, Link, Tooltip } from '@hanzo/elements'
 import { IconCalendar, IconCheck, IconClock, IconHourglass, IconInfinity, IconInfo } from '@hanzo/icons'
-import {
-    Banner,
-    Dialog,
-    SegmentedButton,
-    SegmentedButtonOption,
-    Select,
-    Switch,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 // import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
@@ -120,10 +111,7 @@ function PayloadWarning(): JSX.Element {
             <p>
                 If they could contain sensitive data, you should provide a function to mask the data when you initialise
                 Insights.{' '}
-                <Link
-                    to="https://hanzo.ai/docs/session-replay/network-recording#sensitive-information"
-                    target="blank"
-                >
+                <Link to="https://hanzo.ai/docs/session-replay/network-recording#sensitive-information" target="blank">
                     Learn how to mask header and body values in our docs
                 </Link>
             </p>

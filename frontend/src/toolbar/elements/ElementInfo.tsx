@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { ElementClickStats } from 'lib/components/heatmaps/ElementClickStats'
 
@@ -73,12 +73,7 @@ export function ElementInfo(): JSX.Element | null {
                         Select element
                     </Button>
                 ) : (
-                    <Button
-                        size="small"
-                        type="secondary"
-                        onClick={() => createAction(element)}
-                        icon={<IconPlus />}
-                    >
+                    <Button size="small" type="secondary" onClick={() => createAction(element)} icon={<IconPlus />}>
                         Create a new action
                     </Button>
                 )}

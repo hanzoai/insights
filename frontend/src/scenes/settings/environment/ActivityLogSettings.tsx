@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Button, Switch, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'

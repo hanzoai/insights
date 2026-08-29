@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconX } from '@hanzo/icons'
 import { Button, Input, InputSelect, SegmentedButton, Link } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -10,8 +10,8 @@ import { OperandTag } from 'lib/components/PropertyFilters/components/OperandTag
 import { DEFAULT_TAXONOMIC_GROUP_TYPES } from 'lib/components/PropertyFilters/components/TaxonomicPropertyFilter'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { URL_MATCHING_HINTS } from 'lib/components/UrlMatchingHints'
-import { IconOpenInApp } from 'lib/elements/icons'
 import { Dialog } from 'lib/elements/Dialog'
+import { IconOpenInApp } from 'lib/elements/icons'
 import { Label } from 'lib/elements/Label/Label'
 
 import { groupsModel } from '~/models/groupsModel'

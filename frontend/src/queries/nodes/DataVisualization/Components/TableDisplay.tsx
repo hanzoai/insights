@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGraph, IconLifecycle, IconPieChart, IconTrends } from '@hanzo/icons'
 import { Select, SelectOptions, SelectProps } from '@hanzo/elements'
+import { IconGraph, IconLifecycle, IconPieChart, IconTrends } from '@hanzo/icons'
 
 import { Icon123, IconAreaChart, IconHeatmap, IconTableChart } from 'lib/elements/icons'
 

@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
+import { Badge, Banner, Button, Dialog, Input, Modal, SegmentedButton, Switch } from '@hanzo/elements'
 import { IconPlus, IconTrash } from '@hanzo/icons'
-import {
-    Badge,
-    Banner,
-    Button,
-    Dialog,
-    Input,
-    Modal,
-    SegmentedButton,
-    Switch,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

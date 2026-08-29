@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

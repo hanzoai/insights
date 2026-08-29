@@ -1,7 +1,7 @@
 import { Group } from 'kea-forms'
 
-import { IconInfo } from '@hanzo/icons'
 import { Banner, Select, Tag, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { alphabet } from 'lib/utils/strings'
@@ -326,8 +326,13 @@ export function InsightsQLDefinitionFields({
             )}
             {showInlinePreview ? (
                 <>
-                    <InsightsQLAlertPreviewBanner preview={insightsqlPreview} conditionType={alertForm.condition?.type} />
-                    {insightsqlPreview?.status === 'ok' && <InsightsQLAlertPreviewRowsTable preview={insightsqlPreview} />}
+                    <InsightsQLAlertPreviewBanner
+                        preview={insightsqlPreview}
+                        conditionType={alertForm.condition?.type}
+                    />
+                    {insightsqlPreview?.status === 'ok' && (
+                        <InsightsQLAlertPreviewRowsTable preview={insightsqlPreview} />
+                    )}
                 </>
             ) : null}
         </>

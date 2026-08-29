@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Fragment } from 'react'
 
-import { IconCheck, IconExternal, IconMinus, IconSparkles, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Table, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconExternal, IconMinus, IconSparkles, IconWarning, IconX } from '@hanzo/icons'
 
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 

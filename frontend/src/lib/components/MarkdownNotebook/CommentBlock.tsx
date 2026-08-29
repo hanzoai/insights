@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { KeyboardEvent, useState } from 'react'
 
-import { IconComment } from '@hanzo/icons'
 import { TextArea } from '@hanzo/elements'
+import { IconComment } from '@hanzo/icons'
 
 import { Dropdown } from 'lib/elements/Dropdown'
 

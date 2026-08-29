@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRefresh, IconRevert, IconX } from '@hanzo/icons'
 import { Banner, Dialog, Table, Link, Spinner } from '@hanzo/elements'
+import { IconRefresh, IconRevert, IconX } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Button } from 'lib/elements/Button'

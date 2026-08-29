@@ -14,8 +14,8 @@ The export is started and monitored through MCP, but the final file download use
 
 ## Available MCP tools
 
-| Tool                                           | Purpose                                                  |
-| ---------------------------------------------- | -------------------------------------------------------- |
+| Tool                                            | Purpose                                                  |
+| ----------------------------------------------- | -------------------------------------------------------- |
 | `insights:file-download-batch-exports-create`   | Start an on-demand export and return the run ID          |
 | `insights:file-download-batch-exports-retrieve` | Poll the run status and return file IDs after completion |
 

@@ -3,10 +3,10 @@ import { BindLogic, BuiltLogic, LogicWrapper, useValues } from 'kea'
 import type { IDisposable } from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Button } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
 import { Tabs } from 'lib/elements/Tabs'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 

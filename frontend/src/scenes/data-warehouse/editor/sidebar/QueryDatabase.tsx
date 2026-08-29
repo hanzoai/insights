@@ -1,9 +1,10 @@
 import { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
+import insights from 'insights-js'
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { useEffect, useMemo, useRef } from 'react'
 
+import { Dialog } from '@hanzo/elements'
 import {
     IconBrackets,
     IconCalculator,
@@ -17,15 +18,14 @@ import {
     IconExternal,
     IconPlusSmall,
 } from '@hanzo/icons'
-import { Dialog } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconTextSize } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
+import { IconTextSize } from 'lib/elements/icons'
 import { Input } from 'lib/elements/Input'
+import { Link } from 'lib/elements/Link'
 import { Tree, TreeRef, TreeDataItem } from 'lib/elements/Tree/Tree'
 import { TreeNodeDisplayIcon } from 'lib/elements/Tree/TreeUtils'
-import { Link } from 'lib/elements/Link'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenuGroup,

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { ReactNode } from 'react'
 
-import { IconRefresh, IconX } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconRefresh, IconX } from '@hanzo/icons'
 
 import { recommendationsTabLogic } from './recommendationsTabLogic'
 
@@ -57,11 +57,7 @@ export function RecommendationCard({
                         tooltip="Refresh this recommendation"
                     />
                     {dismissed ? (
-                        <Button
-                            size="xsmall"
-                            type="tertiary"
-                            onClick={() => restoreRecommendation(recommendationId)}
-                        >
+                        <Button size="xsmall" type="tertiary" onClick={() => restoreRecommendation(recommendationId)}>
                             Restore
                         </Button>
                     ) : (

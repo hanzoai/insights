@@ -1103,7 +1103,9 @@ export const AlertsSimulateCreateBody = /* @__PURE__ */ zod.object({
                             .describe(
                                 'Column whose value labels the evaluated row(s) in breach messages: every row in `any_row` mode, or the single evaluated row in `last_row`\/`first_row`. When unset, the first non-evaluated column is used, falling back to the row number (any_row) or the value column name (last_row\/first_row).'
                             ),
-                        type: zod.enum(['InsightsQLAlertConfig']).default(alertsSimulateCreateBodyConfigOneTwoTypeDefault),
+                        type: zod
+                            .enum(['InsightsQLAlertConfig'])
+                            .default(alertsSimulateCreateBodyConfigOneTwoTypeDefault),
                     }),
                     zod.object({
                         check_ongoing_interval: zod

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCode, IconExternal } from '@hanzo/icons'
 import { Button, Dropdown, Input, Select, Link } from '@hanzo/elements'
+import { IconCode, IconExternal } from '@hanzo/icons'
 
 import {
     CyclotronJobTemplateOption,
@@ -124,11 +124,7 @@ export function CyclotronJobTemplateSuggestionsButton({
             overlay={<CyclotronJobTemplateSuggestions {...props} onOptionSelect={_onOptionSelect} />}
             overflowHidden
         >
-            <Button
-                size="small"
-                icon={<IconCode />}
-                tooltip="Supports templating - click to see available options"
-            />
+            <Button size="small" icon={<IconCode />} tooltip="Supports templating - click to see available options" />
         </Dropdown>
     )
 }

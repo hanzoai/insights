@@ -1,9 +1,9 @@
-import { useActions, useMountedLogic, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useMountedLogic, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconFlask, IconGraph, IconMessage, IconPeople, IconRocket, IconToggle } from '@hanzo/icons'
 import { toast } from '@hanzo/elements'
+import { IconFlask, IconGraph, IconMessage, IconPeople, IconRocket, IconToggle } from '@hanzo/icons'
 
 import api from 'lib/api'
 import {

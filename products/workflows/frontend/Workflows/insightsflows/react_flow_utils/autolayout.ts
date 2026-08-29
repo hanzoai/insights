@@ -27,7 +27,10 @@ const getElkPortSide = (position: Position): string => {
     }
 }
 
-export const getFormattedNodes = async (nodes: InsightsFlowActionNode[], edges: Edge[]): Promise<InsightsFlowActionNode[]> => {
+export const getFormattedNodes = async (
+    nodes: InsightsFlowActionNode[],
+    edges: Edge[]
+): Promise<InsightsFlowActionNode[]> => {
     const elkOptions = {
         'elk.algorithm': 'layered',
         'elk.layered.spacing.nodeNodeBetweenLayers': `${NODE_LAYER_GAP}`,

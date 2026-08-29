@@ -3,8 +3,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import React, { useMemo } from 'react'
 
-import { IconCollapse, IconPlayFilled, IconX } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconCollapse, IconPlayFilled, IconX } from '@hanzo/icons'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

@@ -60,9 +60,9 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
                 <>
                     <Markdown>
                         Initialize Insights with your project token and host from [your project
-                        settings](https://app.hanzo.ai/settings/project). Then call `instrument()` to register
-                        Insights tracing with the OpenAI Agents SDK. This automatically captures all agent traces, spans,
-                        and LLM generations.
+                        settings](https://app.hanzo.ai/settings/project). Then call `instrument()` to register Insights
+                        tracing with the OpenAI Agents SDK. This automatically captures all agent traces, spans, and LLM
+                        generations.
                     </Markdown>
 
                     <CodeBlock

@@ -1223,3 +1223,11 @@ environment:
         bin_script: theme
         description: 'Assert the Hanzo design tokens survive a rebase onto upstream'
         hidden: true
+    prune:static:
+        bin_script: prune-static
+        description: 'TODO: add description for prune-static'
+        hidden: true
+    publish:static:
+        bin_script: publish-static
+        description: 'TODO: add description for publish-static'
+        hidden: true

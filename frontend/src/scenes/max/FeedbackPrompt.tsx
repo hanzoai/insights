@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconDocument } from '@hanzo/icons'
 import { Button, Input, Modal, toast } from '@hanzo/elements'
+import { IconDocument } from '@hanzo/icons'
 
 import { SupportForm } from 'lib/components/Support/SupportForm'
 import { supportLogic } from 'lib/components/Support/supportLogic'

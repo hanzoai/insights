@@ -47,13 +47,7 @@ export function ColorButton({
     const effectiveTooltip = tooltip ?? derivedTooltip
 
     return (
-        <Button
-            type={type}
-            size={size}
-            className={cn('ColorButton', className)}
-            tooltip={effectiveTooltip}
-            {...rest}
-        >
+        <Button type={type} size={size} className={cn('ColorButton', className)} tooltip={effectiveTooltip} {...rest}>
             {colorToken ? (
                 <ColorGlyph colorToken={colorToken} size={size} themeId={themeId} />
             ) : (

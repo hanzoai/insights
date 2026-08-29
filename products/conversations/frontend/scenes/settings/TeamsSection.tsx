@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
+import { Banner, Button, Card, Divider, Select, Tag, Link, Tooltip } from '@hanzo/elements'
 import { IconTrash } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Card,
-    Divider,
-    Select,
-    Tag,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
@@ -168,9 +159,7 @@ function AddTeamsChannelRow({ adminRestrictionReason }: AddTeamsChannelRowProps)
                 </Button>
             </div>
 
-            {selectedTeamId && isInstalling && (
-                <Banner type="info">Installing SupportHog in the Teams group…</Banner>
-            )}
+            {selectedTeamId && isInstalling && <Banner type="info">Installing SupportHog in the Teams group…</Banner>}
 
             {selectedTeamId && needsOrgCatalog && (
                 <Banner type="warning" className="flex flex-col gap-2">

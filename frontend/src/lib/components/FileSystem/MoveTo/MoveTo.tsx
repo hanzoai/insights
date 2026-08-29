@@ -27,8 +27,7 @@ export function MoveToModal(): JSX.Element {
             title="Select a folder to move to"
             description={
                 <>
-                    You are moving {pluralize(movingItems.length, 'item')} to{' '}
-                    <Snack>{destinationFolder}</Snack>
+                    You are moving {pluralize(movingItems.length, 'item')} to <Snack>{destinationFolder}</Snack>
                 </>
             }
             // This is a bit of a hack. Without it, the flow "insight" -> "add to dashboard button" ->

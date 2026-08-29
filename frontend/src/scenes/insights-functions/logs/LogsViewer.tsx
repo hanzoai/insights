@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
+import { Button, Input, Select, Table, TableColumn, TableProps, Tag, TagProps, Link } from '@hanzo/elements'
 import { IconCalendar, IconEye, IconList, IconRefresh, IconSearch, IconTableOfContents } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Select,
-    Table,
-    TableColumn,
-    TableProps,
-    Tag,
-    TagProps,
-    Link,
-} from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

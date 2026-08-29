@@ -1,16 +1,8 @@
-import { BindLogic, useActions, useValues } from 'kea'
 import { SurveyQuestionType } from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import {
-    Banner,
-    Button,
-    Input,
-    Label,
-    Modal,
-    Switch,
-    TextArea,
-} from '@hanzo/elements'
+import { Banner, Button, Input, Label, Modal, Switch, TextArea } from '@hanzo/elements'
 
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { getExperimentVariants } from 'scenes/experiments/utils'

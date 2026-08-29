@@ -1,8 +1,8 @@
 import { deepEqual as equal } from 'fast-equals'
 import { ReactNode } from 'react'
 
-import { IconWarning } from '@hanzo/icons'
 import { ButtonProps } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { DataColorTheme, DataColorToken } from 'lib/colors'

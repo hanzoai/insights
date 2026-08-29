@@ -3,8 +3,8 @@ import './TileFiltersOverride.scss'
 
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconCalendar, IconGear } from '@hanzo/icons'
 import { Button, Divider, SegmentedButton, Select, Switch } from '@hanzo/elements'
+import { IconCalendar, IconGear } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBookmark, IconX } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
+import { IconBookmark, IconX } from '@hanzo/icons'
 
 import { supportTicketsSceneLogic } from '../../scenes/tickets/supportTicketsSceneLogic'
 import { SavedViewsModal } from './SavedViewsModal'

@@ -9,16 +9,16 @@ prod-us, golden `snap-085a84dd47cd` (8 vCPU / 16 GiB / 100 GiB mirrored).
 Ground-truth per-phase wall time (in-box `date` markers, so poll granularity
 doesn't distort it):
 
-| phase                | cold     | what it does                                                                                     |
-| -------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| restore (VM resume)  | 38s      | server blocks until the box is `running`                                                         |
-| ssh / exec ready     | 36s      | sshd/hogpanion start accepting after resume                                                      |
-| `start-docker`       | **75s**  | `systemctl start docker`; containerd cold-reads its content store                                |
-| `up-deps`            | 36s      | recreate 6 dep containers (the bake `down`s them), wait pg healthy                               |
-| `migrate` (pg)       | **126s** | `run --rm web manage.py migrate` — a **no-op** on the golden (`No planned migration operations`) |
+| phase               | cold     | what it does                                                                                     |
+| ------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| restore (VM resume) | 38s      | server blocks until the box is `running`                                                         |
+| ssh / exec ready    | 36s      | sshd/hogpanion start accepting after resume                                                      |
+| `start-docker`      | **75s**  | `systemctl start docker`; containerd cold-reads its content store                                |
+| `up-deps`           | 36s      | recreate 6 dep containers (the bake `down`s them), wait pg healthy                               |
+| `migrate` (pg)      | **126s** | `run --rm web manage.py migrate` — a **no-op** on the golden (`No planned migration operations`) |
 | `migrate_datastore` | **147s** | same, 281 CH migrations, all no-ops                                                              |
-| `up-web`             | 2s       | create the web container                                                                         |
-| web `/_health`       | **117s** | Nginx Unit + workers import `insights.wsgi`, then serve                                           |
+| `up-web`            | 2s       | create the web container                                                                         |
+| web `/_health`      | **117s** | Nginx Unit + workers import `insights.wsgi`, then serve                                          |
 
 ## Root cause: cold page-faulting through S3-backed chunkfs — not Django CPU
 

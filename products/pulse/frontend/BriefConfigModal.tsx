@@ -24,10 +24,7 @@ export function BriefConfigModal(): JSX.Element {
             title={editingConfig ? `Edit "${editingConfig.name}"` : 'New brief config'}
             footer={
                 <>
-                    <Button
-                        onClick={closeConfigModal}
-                        disabledReason={isConfigFormSubmitting ? 'Saving…' : undefined}
-                    >
+                    <Button onClick={closeConfigModal} disabledReason={isConfigFormSubmitting ? 'Saving…' : undefined}>
                         Cancel
                     </Button>
                     <Button type="primary" loading={isConfigFormSubmitting} onClick={submitConfigForm}>

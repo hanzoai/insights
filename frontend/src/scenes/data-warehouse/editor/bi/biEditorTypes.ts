@@ -1,5 +1,9 @@
 import { DataVisualizationNode, DatabaseSerializedFieldType, NodeKind } from '~/queries/schema/schema-general'
-import { escapeDottedInsightsQLIdentifier, escapeInsightsQLString, escapePropertyAsInsightsQLIdentifier } from '~/queries/utils'
+import {
+    escapeDottedInsightsQLIdentifier,
+    escapeInsightsQLString,
+    escapePropertyAsInsightsQLIdentifier,
+} from '~/queries/utils'
 import { ChartDisplayType } from '~/types'
 
 export enum BIEditorView {

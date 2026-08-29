@@ -16,6 +16,16 @@ import submitFeedback from './feedback/submit'
 import { GENERATED_TOOL_MAP } from './generated'
 // Insights
 import queryInsight from './insights/query'
+// Insights AI tools
+import {
+    EXECUTE_SQL_TOOL_NAME,
+    executeSql,
+    externalDataSourcesDbSchema,
+    externalDataSourcesJobs,
+    externalDataSourcesPreview,
+    externalDataSyncLogs,
+    readDataSchema,
+} from './insightsAiTools'
 // Links (utility — builds canonical app URLs from the frontend's route table)
 import generateAppUrl from './links/generate-app-url'
 import loopsReview from './loops/loopsReview'
@@ -28,16 +38,6 @@ import notebookUpdateCell from './notebooks/updateCell'
 // Organizations
 import getOrganizations from './organizations/getOrganizations'
 import setActiveOrganization from './organizations/setActive'
-// Insights AI tools
-import {
-    EXECUTE_SQL_TOOL_NAME,
-    executeSql,
-    externalDataSourcesDbSchema,
-    externalDataSourcesJobs,
-    externalDataSourcesPreview,
-    externalDataSyncLogs,
-    readDataSchema,
-} from './insightsAiTools'
 // Projects
 import getProjects from './projects/getProjects'
 import setActiveProject from './projects/setActive'

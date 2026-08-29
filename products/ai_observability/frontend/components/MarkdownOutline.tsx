@@ -1,8 +1,8 @@
 import { router } from 'kea-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { IconChevronRight } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { slugifyHeading } from 'lib/elements/Markdown'
 

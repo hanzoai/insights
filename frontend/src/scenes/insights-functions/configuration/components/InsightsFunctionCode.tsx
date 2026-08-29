@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Banner, Button, Dropdown, Link } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
@@ -113,10 +113,11 @@ export function InsightsFunctionCode(): JSX.Element {
                             )}
                             {type === 'source_webhook' && (
                                 <Banner type="info" className="mt-2">
-                                    <b>HTTP requests:</b> Webhook sources can call <code>insightsCapture</code> to ingest
-                                    events to Insights. You can also do HTTP calls with <code>fetch</code>. In this case
-                                    however, the request will be queued to a background task, a <code>201 Created</code>{' '}
-                                    response will be returned and the event will be ingested asynchronously.
+                                    <b>HTTP requests:</b> Webhook sources can call <code>insightsCapture</code> to
+                                    ingest events to Insights. You can also do HTTP calls with <code>fetch</code>. In
+                                    this case however, the request will be queued to a background task, a{' '}
+                                    <code>201 Created</code> response will be returned and the event will be ingested
+                                    asynchronously.
                                 </Banner>
                             )}
                             <CodeEditorResizeable

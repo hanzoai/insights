@@ -1,5 +1,5 @@
-import { BindLogic, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { CampaignPayload, AdvertisementCard } from './navPanelAdShared'

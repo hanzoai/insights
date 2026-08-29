@@ -1,7 +1,7 @@
 import { MOCK_DEFAULT_ORGANIZATION } from 'lib/api.mock'
 
-import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
+import { expectLogic } from 'kea-test-utils'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

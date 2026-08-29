@@ -74,7 +74,7 @@ aggregate the max step reached into conversion rates. Recipes:
 | File                                                                                         | Read when                                                                       |
 | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | [`references/conversion-metric-definitions.md`](references/conversion-metric-definitions.md) | Precise definitions: overall vs relative, window, time-to-convert, attribution. |
-| [`references/insights/`](references/insights/)                                                 | InsightsQL `windowFunnel` view recipes.                                              |
+| [`references/insights/`](references/insights/)                                               | InsightsQL `windowFunnel` view recipes.                                         |
 | [`references/dbt/`](references/dbt/)                                                         | dbt staging + `fct_conversion` mart + tests.                                    |
 
 ## Companions

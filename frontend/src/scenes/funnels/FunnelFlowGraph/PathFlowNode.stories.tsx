@@ -29,11 +29,7 @@ function StagedPathNode({ data, id }: { data: PathFlowNodeData; id: string }): J
             data={data}
             className="flex items-center rounded border border-success bg-success-highlight px-2 text-xs"
         >
-            <More
-                size="xsmall"
-                className="ml-1 shrink-0"
-                overlay={<Button fullWidth>Make optional</Button>}
-            />
+            <More size="xsmall" className="ml-1 shrink-0" overlay={<Button fullWidth>Make optional</Button>} />
             <Button
                 size="xsmall"
                 icon={<IconX />}
@@ -52,11 +48,7 @@ function StagedOptionalPathNode({ data, id }: { data: PathFlowNodeData; id: stri
             data={data}
             className="flex items-center rounded border border-dashed border-success bg-success-highlight px-2 text-xs"
         >
-            <More
-                size="xsmall"
-                className="ml-1 shrink-0"
-                overlay={<Button fullWidth>Make required</Button>}
-            />
+            <More size="xsmall" className="ml-1 shrink-0" overlay={<Button fullWidth>Make required</Button>} />
             <Button
                 size="xsmall"
                 icon={<IconX />}

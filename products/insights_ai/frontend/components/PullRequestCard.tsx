@@ -1,7 +1,7 @@
 import { memo } from 'react'
 
-import { IconCheckCircle, IconExternal, IconPullRequest } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCheckCircle, IconExternal, IconPullRequest } from '@hanzo/icons'
 
 /**
  * Post-turn "Pull request opened" card for a sandbox coding run — the web port of Insights Desktop's

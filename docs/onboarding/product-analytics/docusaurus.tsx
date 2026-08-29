@@ -59,8 +59,8 @@ export const getDocusaurusSteps = (ctx: OnboardingComponentsContext): StepDefini
                     />
                     <CalloutBox type="fyi" title="More options">
                         <Markdown>
-                            See the [Docusaurus integration docs](https://hanzo.ai/docs/libraries/docusaurus) for
-                            more configuration options.
+                            See the [Docusaurus integration docs](https://hanzo.ai/docs/libraries/docusaurus) for more
+                            configuration options.
                         </Markdown>
                     </CalloutBox>
                 </>

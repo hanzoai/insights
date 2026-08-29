@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconCommit } from '@hanzo/icons'
 import { Tag, Popover } from '@hanzo/elements'
+import { IconCommit } from '@hanzo/icons'
 
 import { ErrorTrackingRelease } from 'lib/components/Errors/types'
 

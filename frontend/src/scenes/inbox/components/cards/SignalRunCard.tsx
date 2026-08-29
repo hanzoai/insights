@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconCompass, IconSignal } from '@hanzo/icons'
 import { Tag, Link } from '@hanzo/elements'
+import { IconCompass, IconSignal } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { urls } from 'scenes/urls'

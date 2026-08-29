@@ -27,9 +27,9 @@ Connecting Insights to Stripe requires **two** OAuth exchanges in sequence:
 
 The three secrets stored in Stripe are:
 
-| Secret name             | Value                 |
-| ----------------------- | --------------------- |
-| `insights_region`        | `us` or `eu`          |
+| Secret name              | Value                  |
+| ------------------------ | ---------------------- |
+| `insights_region`        | `us` or `eu`           |
 | `insights_access_token`  | Insights OAuth token   |
 | `insights_refresh_token` | Insights OAuth refresh |
 
@@ -66,8 +66,8 @@ This viewport is part of Stripe's **alpha**-stage Full Page Apps feature and is 
 
 Real data paths require two things in Stripe's Secret Store:
 
-| Secret name          | Value                                         |
-| -------------------- | --------------------------------------------- |
+| Secret name           | Value                                          |
+| --------------------- | ---------------------------------------------- |
 | `insights_project_id` | Numeric Insights project ID used for API calls |
 
 …in addition to the OAuth credentials above. The Insights backend writes `insights_project_id`
@@ -205,5 +205,5 @@ This creates a `package-lock.json` (required by Stripe) and uploads the app.
 | ----------------------------------- | ------------------------------------------------------------------------- |
 | `STRIPE_APP_CLIENT_ID`              | Stripe App OAuth client ID (from Stripe Apps dashboard)                   |
 | `STRIPE_APP_SECRET_KEY`             | Stripe API secret key for token exchange                                  |
-| `STRIPE_INSIGHTS_OAUTH_CLIENT_ID`    | Client ID of the Insights OAuthApplication used by the Stripe App          |
+| `STRIPE_INSIGHTS_OAUTH_CLIENT_ID`   | Client ID of the Insights OAuthApplication used by the Stripe App         |
 | `STRIPE_APP_OVERRIDE_AUTHORIZE_URL` | Channel link authorize URL (required for non-published app installations) |

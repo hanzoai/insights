@@ -6,16 +6,6 @@ import { useActions, useValues } from 'kea'
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
-    IconBrackets,
-    IconGear,
-    IconLock,
-    IconPlus,
-    IconToggleOff,
-    IconTrash,
-    IconWarning,
-    IconX,
-} from '@hanzo/icons'
-import {
     Button,
     Checkbox,
     Collapse,
@@ -28,6 +18,7 @@ import {
     TextArea,
     Tooltip,
 } from '@hanzo/elements'
+import { IconBrackets, IconGear, IconLock, IconPlus, IconToggleOff, IconTrash, IconWarning, IconX } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { Markdown } from 'lib/elements/Markdown/Markdown'
@@ -1000,12 +991,7 @@ function CyclotronJobInputWithSchema({
                             <div className="flex-1" />
 
                             {showSource && (
-                                <Button
-                                    size="small"
-                                    noPadding
-                                    icon={<IconGear />}
-                                    onClick={() => setEditing(true)}
-                                />
+                                <Button size="small" noPadding icon={<IconGear />} onClick={() => setEditing(true)} />
                             )}
                         </div>
                         {value?.secret ? (

@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, afterMount, kea, listeners, path } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'

@@ -1,6 +1,6 @@
-import { IconAI, IconDashboard, IconGraph } from '@hanzo/icons'
 import { Table, TableColumn, TableColumns, Tag, Link, Tooltip } from '@hanzo/elements'
 import type { PaginationManual, Sorting } from '@hanzo/elements'
+import { IconAI, IconDashboard, IconGraph } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { atColumn, createdByColumn } from 'lib/elements/Table/columnUtils'

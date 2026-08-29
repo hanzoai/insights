@@ -1,16 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
+import { Banner, Button, Checkbox, InputSelect, Modal, Select, Tag } from '@hanzo/elements'
 import { IconCheck, IconCopy, IconWarning, IconX } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Checkbox,
-    InputSelect,
-    Modal,
-    Select,
-    Tag,
-} from '@hanzo/elements'
 
 import { pluralize } from 'lib/utils/strings'
 import { organizationLogic } from 'scenes/organizationLogic'

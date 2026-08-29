@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconLlmAnalytics, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconLlmAnalytics, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
 
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
 import { getSurveyResponse, isScaleTwoRating } from 'scenes/surveys/utils'

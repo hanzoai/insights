@@ -2,8 +2,8 @@ import './ScannerSummary.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Markdown } from 'lib/elements/Markdown'
@@ -230,12 +230,7 @@ export function ScannerDigestCard({
                 </Markdown>
             </div>
             <div className="flex flex-wrap items-center gap-2 border-t pt-2">
-                <Button
-                    size="xsmall"
-                    type="tertiary"
-                    onClick={toggleExpanded}
-                    data-attr="vision-scanner-digest-expand"
-                >
+                <Button size="xsmall" type="tertiary" onClick={toggleExpanded} data-attr="vision-scanner-digest-expand">
                     {expanded ? 'Show less' : 'Show more'}
                 </Button>
                 <div className="flex-1" />

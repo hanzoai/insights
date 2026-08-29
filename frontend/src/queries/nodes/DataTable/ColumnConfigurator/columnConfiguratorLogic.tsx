@@ -282,7 +282,9 @@ export const columnConfiguratorLogic = kea<columnConfiguratorLogicType>([
                 }
             } else {
                 // Team-wide default columns
-                teamLogic.actions.updateCurrentTeam({ live_events_columns: [INSIGHTSQL_COLUMNS_KEY, ...values.columns] })
+                teamLogic.actions.updateCurrentTeam({
+                    live_events_columns: [INSIGHTSQL_COLUMNS_KEY, ...values.columns],
+                })
             }
 
             // Always update the columns in the query

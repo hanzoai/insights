@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { Fragment } from 'react'
 import { toast } from 'react-toastify'
 
-import { IconInfo, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Input, Select } from '@hanzo/elements'
+import { IconInfo, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { DataWarehousePopoverField, TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Tooltip } from 'lib/elements/Tooltip'

@@ -1285,9 +1285,7 @@ export const mcpGatewayLogic = kea<mcpGatewayLogicType>([
                         ? values.servers.map((candidate) => (candidate.id === server.id ? server : candidate))
                         : [...values.servers, server]
                 )
-                toast[enabled ? 'success' : 'info'](
-                    `${server.name} ${enabled ? 'enabled for the team' : 'disabled'}`
-                )
+                toast[enabled ? 'success' : 'info'](`${server.name} ${enabled ? 'enabled for the team' : 'disabled'}`)
             } catch (error: unknown) {
                 toast.error(
                     errorDetail(error) ??
@@ -1491,9 +1489,7 @@ export const mcpGatewayLogic = kea<mcpGatewayLogicType>([
                         : `${account?.name ?? 'Agent'} can no longer access ${server?.name ?? 'server'}`
                 )
             } catch (error: unknown) {
-                toast.error(
-                    errorDetail(error) ?? `Could not update server access for ${account?.name ?? 'this agent'}`
-                )
+                toast.error(errorDetail(error) ?? `Could not update server access for ${account?.name ?? 'this agent'}`)
             } finally {
                 actions.setAgentServerAccessComplete(accountId, serverId)
             }

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Field, Form, Group } from 'kea-forms'
 
-import { IconPencil, IconPlus, IconSearch, IconTrash } from '@hanzo/icons'
 import { Divider, Tag } from '@hanzo/elements'
+import { IconPencil, IconPlus, IconSearch, IconTrash } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input'

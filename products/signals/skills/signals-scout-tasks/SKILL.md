@@ -112,9 +112,9 @@ If tasks exist but nothing changed — no failure cluster past your `pattern:tas
 Both read the same tables and ask different questions.
 **Lens A runs every time; lens B is gated.**
 
-| Lens                    | Cadence                                        | Origins                                                      | Unit     | Question                        |
-| ----------------------- | ---------------------------------------------- | ------------------------------------------------------------ | -------- | ------------------------------- |
-| **A — delivery health** | every run                                      | non-internal, all except `signals_scout`                     | the run  | does agent work actually land?  |
+| Lens                    | Cadence                                        | Origins                                                       | Unit     | Question                        |
+| ----------------------- | ---------------------------------------------- | ------------------------------------------------------------- | -------- | ------------------------------- |
+| **A — delivery health** | every run                                      | non-internal, all except `signals_scout`                      | the run  | does agent work actually land?  |
 | **B — demand**          | when `pattern:tasks:last-demand-pass` > 7d old | human only: `user_created`, `slack`, `insights_ai`, `hogdesk` | the task | what do people keep asking for? |
 
 `onboarding` is deliberately absent: those tasks are generated server-side with a fixed title and a templated prompt, and only _attributed_ to the user who onboarded.

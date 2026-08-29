@@ -209,10 +209,10 @@ export function exportTableData(tableData: string[][], format: ExporterFormat): 
     }
 }
 
-function convertDatastoreDayToStandard(clickHouseDay: number): number {
+function convertDatastoreDayToStandard(datastoreDay: number): number {
     // Datastore toDayOfWeek: 1=Mon, 2=Tue, ..., 7=Sun
     // Standard array indices: 0=Sun, 1=Mon, ..., 6=Sat
-    return clickHouseDay % 7
+    return datastoreDay % 7
 }
 
 class CalendarHeatmapAdapter implements ExportAdapter {

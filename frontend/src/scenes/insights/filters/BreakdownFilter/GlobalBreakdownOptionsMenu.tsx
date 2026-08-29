@@ -2,8 +2,8 @@ import './BreakdownTagMenu.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Input, Label, Switch } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 import { insightLogic } from 'scenes/insights/insightLogic'

@@ -1,10 +1,11 @@
 import './Toolbar.scss'
 
 import clsx from 'clsx'
-import { useActions, useValues } from 'kea'
 import { Insights } from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 
+import { Badge, Spinner } from '@hanzo/elements'
 import {
     IconApp,
     IconBolt,
@@ -28,12 +29,11 @@ import {
     IconWarning,
     IconX,
 } from '@hanzo/icons'
-import { Badge, Spinner } from '@hanzo/elements'
 
-import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { IconMenu } from 'lib/elements/icons'
-import { Menu, MenuItem, MenuItems } from 'lib/elements/Menu'
 import { Link } from 'lib/elements/Link'
+import { Menu, MenuItem, MenuItems } from 'lib/elements/Menu'
+import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 import { retryImport } from 'lib/utils/retryImport'
 
@@ -120,11 +120,7 @@ function EnabledStatusItem({ label, value }: { label: string; value: boolean }):
     )
 }
 
-function insightsDebugInfoMenuItem(
-    insights: Insights | null,
-    loadingSurveys: boolean,
-    surveysCount: number
-): MenuItem {
+function insightsDebugInfoMenuItem(insights: Insights | null, loadingSurveys: boolean, surveysCount: number): MenuItem {
     const isAutocaptureEnabled = insights?.autocapture?.isEnabled
 
     return {
@@ -258,19 +254,8 @@ function piiMaskingMenuItem(
 }
 
 function MoreMenu(): JSX.Element {
-    const {
-        theme,
-        insights,
-        piiMaskingEnabled,
-        piiMaskingColor,
-        piiWarning,
-    } = useValues(toolbarLogic)
-    const {
-        toggleTheme,
-        togglePiiMasking,
-        setPiiMaskingColor,
-        startGracefulExit,
-    } = useActions(toolbarLogic)
+    const { theme, insights, piiMaskingEnabled, piiMaskingColor, piiWarning } = useValues(toolbarLogic)
+    const { toggleTheme, togglePiiMasking, setPiiMaskingColor, startGracefulExit } = useActions(toolbarLogic)
     const { isAuthenticated } = useValues(toolbarConfigLogic)
     const { logout } = useActions(toolbarConfigLogic)
     const { isTakingScreenshot } = useValues(screenshotUploadLogic)
@@ -422,8 +407,7 @@ export function ToolbarInfoMenu(): JSX.Element | null {
 
 export function Toolbar(): JSX.Element | null {
     const ref = useRef<HTMLDivElement | null>(null)
-    const { minimized, position, isDragging, isEmbeddedInApp, isExiting, isLoading } =
-        useValues(toolbarLogic)
+    const { minimized, position, isDragging, isEmbeddedInApp, isExiting, isLoading } = useValues(toolbarLogic)
     const { setVisibleMenu, toggleMinimized, onMouseOrTouchDown, setElement, setIsBlurred, completeGracefulExit } =
         useActions(toolbarLogic)
     const { isAuthenticated, userIntent, authStatus, uiHostConfigModalVisible, authConfirmModalVisible } =

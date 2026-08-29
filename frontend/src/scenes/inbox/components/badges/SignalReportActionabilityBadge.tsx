@@ -1,5 +1,5 @@
-import { IconQuestion } from '@hanzo/icons'
 import { Tag, TagType, Tooltip } from '@hanzo/elements'
+import { IconQuestion } from '@hanzo/icons'
 
 import { SignalReportActionability } from '../../types'
 

@@ -1,6 +1,7 @@
 import { useValues } from 'kea'
 import { useCallback, useEffect, useState } from 'react'
 
+import { Button, Skeleton } from '@hanzo/elements'
 import {
     IconChevronDown,
     IconRefresh,
@@ -10,7 +11,6 @@ import {
     IconThumbsUp,
     IconThumbsUpFilled,
 } from '@hanzo/icons'
-import { Button, Skeleton } from '@hanzo/elements'
 import { useThumbSurvey } from '@hanzo/react/surveys'
 
 import api from 'lib/api'

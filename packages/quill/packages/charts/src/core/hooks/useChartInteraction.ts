@@ -204,8 +204,7 @@ export function useChartInteraction<Meta = unknown>({
     // Bind the committed scales into the 2D-brush callback so chart-type adapters can map the
     // y pixel range onto their own bands (the core has no y-band concept).
     const onAreaSelectWithScales = useMemo(
-        () =>
-            onAreaSelect && scales ? (data: AreaSelectData): void => onAreaSelect(data, scales) : undefined,
+        () => (onAreaSelect && scales ? (data: AreaSelectData): void => onAreaSelect(data, scales) : undefined),
         [onAreaSelect, scales]
     )
 

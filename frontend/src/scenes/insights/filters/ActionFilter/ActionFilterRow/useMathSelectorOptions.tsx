@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconWarning } from '@hanzo/icons'
 import { Select, SelectOption, SelectOptions } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { GroupIntroductionFooter } from 'scenes/groups/GroupsIntroduction'

@@ -2,17 +2,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { Fragment, ReactNode } from 'react'
 
+import { Button, Input, Skeleton, Table, TableColumns, Tag, Link, Tooltip } from '@hanzo/elements'
 import { IconExternal, IconPullRequest } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Skeleton,
-    Table,
-    TableColumns,
-    Tag,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'
@@ -702,13 +693,7 @@ export function PullRequestDetailScene(): JSX.Element {
                 resourceType={{ type: 'health' }}
                 actions={
                     githubUrl ? (
-                        <Button
-                            type="secondary"
-                            size="small"
-                            to={githubUrl}
-                            targetBlank
-                            sideIcon={<IconExternal />}
-                        >
+                        <Button type="secondary" size="small" to={githubUrl} targetBlank sideIcon={<IconExternal />}>
                             View on GitHub
                         </Button>
                     ) : undefined

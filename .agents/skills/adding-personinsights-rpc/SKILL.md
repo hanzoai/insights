@@ -18,8 +18,8 @@ proto definition, code generation, Rust implementation, and client updates.
 Personhog serves person, distinct ID, group, group type mapping, cohort membership, and feature flag hash key override data.
 If the data being accessed doesn't live in one of these tables, this RPC doesn't belong in personinsights:
 
-| Table                                | Data category | Routing                                                      |
-| ------------------------------------ | ------------- | ------------------------------------------------------------ |
+| Table                                 | Data category | Routing                                                      |
+| ------------------------------------- | ------------- | ------------------------------------------------------------ |
 | `insights_person`                     | PersonData    | Reads: replica (eventual) or leader (strong). Writes: leader |
 | `insights_persondistinctid`           | PersonData    | Same as person                                               |
 | `insights_group`                      | NonPersonData | All ops: replica                                             |

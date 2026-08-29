@@ -4,6 +4,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
+import { Tooltip } from '@hanzo/elements'
 import {
     IconBrackets,
     IconCollapse,
@@ -13,7 +14,6 @@ import {
     IconSparkles,
     IconWrench,
 } from '@hanzo/icons'
-import { Tooltip } from '@hanzo/elements'
 
 import { ProductSetupButton } from 'lib/components/ProductSetup'
 import { RenderKeybind } from 'lib/components/Shortcuts/ShortcutMenu'

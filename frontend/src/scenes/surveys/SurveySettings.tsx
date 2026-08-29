@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 import { useState } from 'react'
 
-import { IconGear } from '@hanzo/icons'
 import { Banner, Button, Switch, Link } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

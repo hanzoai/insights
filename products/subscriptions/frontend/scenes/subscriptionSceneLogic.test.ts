@@ -1,8 +1,8 @@
 import { MOCK_TEAM_ID } from 'lib/api.mock'
 
+import insights from 'insights-js'
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'

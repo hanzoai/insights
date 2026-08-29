@@ -96,7 +96,7 @@ If `Failed` schemas span _many_ sources in the same window, suspect a platform/w
 | Armed schema `Completed` but `last_synced_at` ≫ `sync_frequency`   | **Silent staleness** — green status hiding a growing gap; the scout's edge     |
 | `sync_type: webhook` schema `Completed`, data hours behind         | Bulk fallback green while the push channel is dead — check webhook-info        |
 | `row_count` / records collapsing across runs while source healthy  | Row-volume cliff — a filter/incremental-cursor change dropped most rows        |
-| Materialized view `status: Failed`                                 | View's own InsightsQL/data problem — surface, route to view diagnosis               |
+| Materialized view `status: Failed`                                 | View's own InsightsQL/data problem — surface, route to view diagnosis          |
 | `status` Billing limits / BillingLimitReached / BillingLimitTooLow | Quota issue, not technical — route to billing, P3 at most                      |
 | `should_sync: false`, or draft source never configured             | Operator choice — baseline, skip                                               |
 | Recurring multi-user slow queries on one table / query shape       | Modeling gap — optimization-lane materialization candidate, P3 suggestion      |

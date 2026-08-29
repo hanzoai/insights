@@ -591,27 +591,27 @@ export class CdpHogflowSubscriptionMatcherConsumer<
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
                     // A job can be parked by distinct_id or person_id, so an event needs at least
                     // one of them to match anything. Drop only events that carry neither.
-                    if (!clickHouseEvent.person_id && !clickHouseEvent.distinct_id) {
+                    if (!datastoreEvent.person_id && !datastoreEvent.distinct_id) {
                         counterHogflowMatcherEventSkipped.labels({ reason: 'no_identifiers' }).inc()
                         return
                     }
                     // The vast majority of events belong to teams with no wait_until_condition
                     // step and no event conversion goal. Bail on those via the in-memory hogflow
                     // cache before paying for getTeam + full globals conversion.
-                    const teamFlows = await this.flowManager.getFlowsForTeam(clickHouseEvent.team_id)
+                    const teamFlows = await this.flowManager.getFlowsForTeam(datastoreEvent.team_id)
                     if (!teamFlows.some(hasWaitUntilOrConversion)) {
                         counterHogflowMatcherEventSkipped.labels({ reason: 'no_actionable_flow' }).inc()
                         return
                     }
-                    const team = await this.deps.teamManager.getTeam(clickHouseEvent.team_id)
+                    const team = await this.deps.teamManager.getTeam(datastoreEvent.team_id)
                     if (!team) {
                         counterHogflowMatcherEventSkipped.labels({ reason: 'no_team' }).inc()
                         return
                     }
-                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.config.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.config.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()

@@ -5,7 +5,9 @@ import { getCliTools } from '@/cli/tools'
 
 describe('CLI agent help', () => {
     it('rewrites exec invocations to CLI syntax', () => {
-        expect(toCliSyntax('insights:exec({ "command": "search dashboard" })')).toBe('insights-cli api search dashboard')
+        expect(toCliSyntax('insights:exec({ "command": "search dashboard" })')).toBe(
+            'insights-cli api search dashboard'
+        )
         expect(toCliSyntax('insights:exec({ "command": "tools" })')).toBe('insights-cli api tools')
     })
 

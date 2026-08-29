@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { IconChevronDown, IconChevronRight, IconExternal, IconTerminal } from '@hanzo/icons'
 import { Skeleton, Link } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight, IconExternal, IconTerminal } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

@@ -21,8 +21,8 @@ import {
     useState,
 } from 'react'
 
-import { IconCode, IconComment, IconDrag } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCode, IconComment, IconDrag } from '@hanzo/icons'
 
 import { Spinner } from 'lib/elements/Spinner'
 import { downloadFile } from 'lib/utils/dom'

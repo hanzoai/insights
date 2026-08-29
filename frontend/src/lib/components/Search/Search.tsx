@@ -16,15 +16,15 @@ import {
     useState,
 } from 'react'
 
-import { IconDay, IconNight, IconSearch, IconSparkles, IconX } from '@hanzo/icons'
 import { Tag, Link, Spinner } from '@hanzo/elements'
+import { IconDay, IconNight, IconSearch, IconSparkles, IconX } from '@hanzo/icons'
 
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { filterSearchItems } from 'lib/components/Search/utils'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { TreeDataItem } from 'lib/elements/Tree/Tree'
-import { themeLogic } from 'lib/logic/themeLogic'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import insights from 'lib/insights-typed'
+import { themeLogic } from 'lib/logic/themeLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuTrigger } from 'lib/ui/ContextMenu/ContextMenu'
 import { Label } from 'lib/ui/Label/Label'

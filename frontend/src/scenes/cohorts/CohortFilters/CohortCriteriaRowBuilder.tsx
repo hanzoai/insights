@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { useActions } from 'kea'
 import { Field as KeaField } from 'kea-forms'
 
-import { IconCopy, IconTrash } from '@hanzo/icons'
 import { Divider } from '@hanzo/elements'
+import { IconCopy, IconTrash } from '@hanzo/icons'
 
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'

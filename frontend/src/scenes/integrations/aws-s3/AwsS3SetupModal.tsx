@@ -117,8 +117,8 @@ export const AwsS3SetupModal = (props: AwsS3SetupModalLogicProps): JSX.Element =
                 ) : (
                     <>
                         <Banner type="warning">
-                            Access keys are long-lived credentials stored by Insights (encrypted). Prefer letting Insights
-                            assume an IAM role to avoid creating and storing long-lived credentials.
+                            Access keys are long-lived credentials stored by Insights (encrypted). Prefer letting
+                            Insights assume an IAM role to avoid creating and storing long-lived credentials.
                         </Banner>
                         <Field name="awsAccessKeyId" label="AWS Access Key ID">
                             <Input placeholder="e.g. AKIAIOSFODNN7EXAMPLE" autoComplete="off" />

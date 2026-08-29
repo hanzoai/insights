@@ -49,10 +49,7 @@ export function FilterPill<T extends string>({
                         )}
                         {filteredOptions.map((opt) => (
                             <Button key={opt.value} fullWidth onClick={() => toggle(opt.value)}>
-                                <Checkbox
-                                    checked={value.includes(opt.value)}
-                                    className="pointer-events-none mr-2"
-                                />
+                                <Checkbox checked={value.includes(opt.value)} className="pointer-events-none mr-2" />
                                 {opt.label}
                             </Button>
                         ))}

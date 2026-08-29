@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { RunSurface } from 'products/insights_ai/frontend/api/runSurface'
 

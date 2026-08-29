@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSearch } from '@hanzo/icons'
 import { Skeleton } from '@hanzo/elements'
+import { IconSearch } from '@hanzo/icons'
 import {
     Badge,
     Button,

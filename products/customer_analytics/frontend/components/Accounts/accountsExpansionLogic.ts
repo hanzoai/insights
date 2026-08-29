@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, kea, listeners, path, reducers, selectors } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, kea, listeners, path, reducers, selectors } from 'kea'
 
 import { AccountsEvents } from './constants'
 

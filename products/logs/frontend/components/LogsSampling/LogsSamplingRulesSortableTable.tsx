@@ -20,8 +20,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconInfo, IconPlus } from '@hanzo/icons'
 import { Button, Switch } from '@hanzo/elements'
+import { IconInfo, IconPlus } from '@hanzo/icons'
 
 import { SortableDragIcon } from 'lib/elements/icons'
 import { Tooltip } from 'lib/elements/Tooltip/Tooltip'

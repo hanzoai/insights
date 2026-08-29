@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconArchive, IconCode, IconGlobe, IconLaptop, IconPin } from '@hanzo/icons'
 import { Divider, Tag, Link } from '@hanzo/elements'
+import { IconArchive, IconCode, IconGlobe, IconLaptop, IconPin } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton, { ViewRecordingButtonVariant } from 'lib/components/ViewRecordingButton/ViewRecordingButton'

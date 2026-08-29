@@ -1,5 +1,5 @@
-import { IconEye, IconNotebook, IconPulse, IconTarget } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconEye, IconNotebook, IconPulse, IconTarget } from '@hanzo/icons'
 
 import { SCANNER_TYPE_TAG_TYPE, ScannerType, scannerTypeLabel } from '../replay_scanners/types'
 

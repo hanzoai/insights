@@ -41,11 +41,11 @@ dominate raw counts; weigh by OOMs and cluster-hours as usual.
 
 There is **no single boolean "written by AI" column.** Identify it from `lc_product` + `lc_feature`:
 
-| Signal                                       | Means                                                                                                              |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Signal                                       | Means                                                                                                               |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `lc_product = 'max_ai'`                      | Insights's Max assistant and its tools (tagged via `tags_context(product=Product.MAX_AI)` throughout `ee/hogai/**`) |
 | `lc_product = 'mcp'` or `lc_feature = 'mcp'` | Queries issued by external AI agents through the Insights MCP server                                                |
-| `lc_feature = 'insights_ai'`                  | The AI feature tag (also exists; less common in practice)                                                          |
+| `lc_feature = 'insights_ai'`                 | The AI feature tag (also exists; less common in practice)                                                           |
 
 Filter: `lc_product IN ('max_ai','mcp') OR lc_feature IN ('mcp','insights_ai')`.
 

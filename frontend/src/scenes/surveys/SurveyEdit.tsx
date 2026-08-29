@@ -6,7 +6,6 @@ import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconGitBranch, IconInfo, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
 import {
     Button,
     CalendarSelect,
@@ -21,6 +20,7 @@ import {
     Link,
     Popover,
 } from '@hanzo/elements'
+import { IconGitBranch, IconInfo, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { FlagSelector } from 'lib/components/FlagSelector'

@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, events, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { userLogic } from 'scenes/userLogic'

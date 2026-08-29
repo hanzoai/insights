@@ -367,15 +367,15 @@ export function castTimestampToDatastoreFormat(
 }
 
 // Used only when parsing datastore timestamps
-export function clickHouseTimestampToDateTime(timestamp: DatastoreTimestamp): DateTime {
+export function datastoreTimestampToDateTime(timestamp: DatastoreTimestamp): DateTime {
     return DateTime.fromFormat(timestamp, DATETIME_FORMAT_DATASTORE, { zone: 'UTC' })
 }
 
-export function clickHouseTimestampToISO(timestamp: DatastoreTimestamp): ISOTimestamp {
-    return clickHouseTimestampToDateTime(timestamp).toISO() as ISOTimestamp
+export function datastoreTimestampToISO(timestamp: DatastoreTimestamp): ISOTimestamp {
+    return datastoreTimestampToDateTime(timestamp).toISO() as ISOTimestamp
 }
 
-export function clickHouseTimestampSecondPrecisionToISO(timestamp: DatastoreTimestamp): ISOTimestamp {
+export function datastoreTimestampSecondPrecisionToISO(timestamp: DatastoreTimestamp): ISOTimestamp {
     return DateTime.fromFormat(timestamp, DATETIME_FORMAT_DATASTORE_SECOND_PRECISION, {
         zone: 'UTC',
     }).toISO() as ISOTimestamp

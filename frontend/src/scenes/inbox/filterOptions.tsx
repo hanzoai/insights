@@ -1,5 +1,6 @@
 import { JSX } from 'react'
 
+import { TagType } from '@hanzo/elements'
 import {
     IconBrain,
     IconBug,
@@ -18,7 +19,6 @@ import {
     IconStack,
     IconSupport,
 } from '@hanzo/icons'
-import { TagType } from '@hanzo/elements'
 
 import type { InboxSortDirection, InboxSortField } from './logics/inboxFiltersLogic'
 import { SignalReportPriority } from './types'

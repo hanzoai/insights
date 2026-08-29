@@ -516,8 +516,8 @@ export const GenerationEvent = (): JSX.Element => {
                                     <em>(Optional)</em> Number of tokens written to cache (Anthropic-specific)
                                     <br />
                                     When both TTL-specific counts are present, Insights uses them instead of this
-                                    aggregate. The aggregate should equal their sum; if either count is missing, Insights
-                                    uses the aggregate.
+                                    aggregate. The aggregate should equal their sum; if either count is missing,
+                                    Insights uses the aggregate.
                                 </p>
                             </td>
                         </tr>

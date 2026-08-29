@@ -88,17 +88,11 @@ describe('EmptyStates', () => {
         it.each([
             ['links a Insights docs URL', 'see https://hanzo.ai/docs/x for help', ['https://hanzo.ai/docs/x']],
             ['links a Insights subdomain URL', 'visit https://eu.hanzo.ai/foo now', ['https://eu.hanzo.ai/foo']],
-            [
-                'strips trailing punctuation from the href',
-                'read https://hanzo.ai/docs/x.',
-                ['https://hanzo.ai/docs/x'],
-            ],
+            ['strips trailing punctuation from the href', 'read https://hanzo.ai/docs/x.', ['https://hanzo.ai/docs/x']],
             [
                 'links the production memory-limit docs URL including its fragment',
                 'see our docs for more ways to speed it up: https://hanzo.ai/docs/product-analytics/troubleshooting#how-do-i-speed-up-my-insights-and-queries',
-                [
-                    'https://hanzo.ai/docs/product-analytics/troubleshooting#how-do-i-speed-up-my-insights-and-queries',
-                ],
+                ['https://hanzo.ai/docs/product-analytics/troubleshooting#how-do-i-speed-up-my-insights-and-queries'],
             ],
             ['leaves an external URL as plain text', 'go to https://evil.example.com/phish', []],
             ['leaves a lookalike host as plain text', 'open https://hanzo.ai.evil.com/x here', []],

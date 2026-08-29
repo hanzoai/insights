@@ -2,16 +2,16 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo } from 'react'
 
-import { IconBuilding, IconChevronDown, IconGlobe, IconPeople, IconThumbsUpFilled } from '@hanzo/icons'
 import { Button, Dialog, Divider, Input, Menu, Tag } from '@hanzo/elements'
+import { IconBuilding, IconChevronDown, IconGlobe, IconPeople, IconThumbsUpFilled } from '@hanzo/icons'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { More } from 'lib/elements/Button/More'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Snack } from 'lib/elements/Snack/Snack'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import type { Sorting } from 'lib/elements/Table'
 import { atColumn } from 'lib/elements/Table/columnUtils'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -172,7 +172,9 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
             fullWidth
             data-attr="dashboard-template-toggle-organization-visibility"
         >
-            {record.scope === 'organization' ? 'Make visible to this project only' : 'Make visible to whole organization'}
+            {record.scope === 'organization'
+                ? 'Make visible to this project only'
+                : 'Make visible to whole organization'}
         </Button>
     )
 
@@ -391,11 +393,7 @@ export const DashboardTemplatesTable = (): JSX.Element | null => {
                                           )
                                         : null}
                                     <Divider />
-                                    <Button
-                                        onClick={() => confirmDeleteTemplate(record)}
-                                        fullWidth
-                                        status="danger"
-                                    >
+                                    <Button onClick={() => confirmDeleteTemplate(record)} fullWidth status="danger">
                                         Delete
                                     </Button>
                                 </>

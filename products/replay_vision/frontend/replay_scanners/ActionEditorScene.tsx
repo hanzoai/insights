@@ -7,12 +7,12 @@ import { Button, Input, InputSelect, SegmentedButton, Select, Link } from '@hanz
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { Field } from 'lib/elements/Field'
 import { SearchableSelect } from 'lib/elements/Select/SearchableSelect'
-import { TextArea } from 'lib/elements/TextArea/TextArea'
 import { Spinner, SpinnerOverlay } from 'lib/elements/Spinner'
+import { TextArea } from 'lib/elements/TextArea/TextArea'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
+import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { timeZoneLabel } from 'lib/utils/timezones'
 import { appLogic } from 'scenes/appLogic'
@@ -707,10 +707,7 @@ export function ActionEditorSceneComponent(): JSX.Element {
                     >
                         <div className="bg-bg-light border rounded-lg shadow-sm p-4 sm:p-6 flex flex-col gap-4">
                             <Field name="name" label="Name">
-                                <Input
-                                    placeholder={isAlert ? 'Rage click alert' : 'Daily checkout digest'}
-                                    autoFocus
-                                />
+                                <Input placeholder={isAlert ? 'Rage click alert' : 'Daily checkout digest'} autoFocus />
                             </Field>
 
                             {!isAlert && (

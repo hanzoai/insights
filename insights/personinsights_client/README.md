@@ -18,8 +18,8 @@ personinsights is the sole read path — there is no ORM fallback.
 The following tables are managed by personinsights.
 Do not query them directly — use the routed helpers or client RPCs.
 
-| Table                                | Django model                 | Description                        |
-| ------------------------------------ | ---------------------------- | ---------------------------------- |
+| Table                                 | Django model                 | Description                        |
+| ------------------------------------- | ---------------------------- | ---------------------------------- |
 | `insights_person`                     | `Person`                     | Core person records                |
 | `insights_persondistinctid`           | `PersonDistinctId`           | Distinct ID → person mappings      |
 | `insights_cohortpeople`               | `CohortPeople`               | Static cohort membership           |

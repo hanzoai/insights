@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconFlask } from '@hanzo/icons'
 import { Banner, Divider, Skeleton } from '@hanzo/elements'
+import { IconFlask } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { dayjs } from 'lib/dayjs'

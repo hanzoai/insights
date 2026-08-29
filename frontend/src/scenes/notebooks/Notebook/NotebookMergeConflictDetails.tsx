@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { MarkdownTextDiff } from 'lib/components/MarkdownNotebook'
 import type { NotebookCollaborationConflict } from 'lib/components/MarkdownNotebook'

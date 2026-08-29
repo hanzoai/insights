@@ -1,5 +1,5 @@
-import { IconX } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { Logo } from 'lib/brand'
 

@@ -6,10 +6,10 @@ import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { Button } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input'
 import { Modal } from 'lib/elements/Modal'
+import { PaginationManual } from 'lib/elements/PaginationControl'
 import { SegmentedButton } from 'lib/elements/SegmentedButton'
 import { Table, TableColumns } from 'lib/elements/Table'
 import { Tag, TagType } from 'lib/elements/Tag/Tag'
-import { PaginationManual } from 'lib/elements/PaginationControl'
 
 import { SCIMRequestLogType } from '~/types'
 
@@ -82,9 +82,7 @@ export function ScimLogsModal(): JSX.Element {
         {
             key: 'response_status',
             title: 'Status',
-            render: (_, { response_status }) => (
-                <Tag type={statusTagType(response_status)}>{response_status}</Tag>
-            ),
+            render: (_, { response_status }) => <Tag type={statusTagType(response_status)}>{response_status}</Tag>,
         },
         {
             key: 'identity_provider',

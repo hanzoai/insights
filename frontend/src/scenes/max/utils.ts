@@ -1,5 +1,5 @@
-import type { BuiltLogic } from 'kea'
 import insights from 'insights-js'
+import type { BuiltLogic } from 'kea'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'

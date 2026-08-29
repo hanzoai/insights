@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { IconPlus, IconRefresh } from '@hanzo/icons'
 import { Button, Link, Spinner, Tooltip } from '@hanzo/elements'
+import { IconPlus, IconRefresh } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Slider } from 'lib/elements/Slider'

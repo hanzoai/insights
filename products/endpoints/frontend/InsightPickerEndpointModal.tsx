@@ -3,8 +3,8 @@ import { BindLogic } from 'kea'
 
 import { IconEndpoints, IconPlus } from '@hanzo/icons'
 
-import { IconInsightRetention, IconInsightTrends } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconInsightRetention, IconInsightTrends } from 'lib/elements/icons'
 import { Modal } from 'lib/elements/Modal'
 import { Popover } from 'lib/elements/Popover'
 import { addSavedInsightsModalLogic } from 'scenes/saved-insights/addSavedInsightsModalLogic'
@@ -67,12 +67,7 @@ export function InsightPickerEndpointModal(): JSX.Element {
     return (
         <>
             <BindLogic logic={addSavedInsightsModalLogic} props={{}}>
-                <Modal
-                    title="New insight-based endpoint"
-                    onClose={closeModal}
-                    isOpen={isOpen}
-                    width="min(80vw, 64rem)"
-                >
+                <Modal title="New insight-based endpoint" onClose={closeModal} isOpen={isOpen} width="min(80vw, 64rem)">
                     <div className="space-y-4">
                         <div className="flex flex-wrap items-center gap-3 p-4 bg-surface-secondary rounded-lg">
                             <IconPlus className="text-2xl text-secondary shrink-0" />

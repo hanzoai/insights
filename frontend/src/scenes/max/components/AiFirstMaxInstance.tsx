@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconOpenSidebar, IconShare } from '@hanzo/icons'
 import { Banner } from '@hanzo/elements'
+import { IconOpenSidebar, IconShare } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

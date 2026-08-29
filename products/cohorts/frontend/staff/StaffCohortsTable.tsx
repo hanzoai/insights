@@ -60,9 +60,7 @@ export function StaffCohortsTable({
                     {cohort.deleted && <Tag type="danger">Deleted</Tag>}
                     {cohort.is_static && <Tag type="muted">Static</Tag>}
                     {cohort.is_calculating && <Tag type="completion">Calculating</Tag>}
-                    {!cohort.deleted && !cohort.is_static && !cohort.is_calculating && (
-                        <Tag type="success">Idle</Tag>
-                    )}
+                    {!cohort.deleted && !cohort.is_static && !cohort.is_calculating && <Tag type="success">Idle</Tag>}
                 </span>
             ),
         },

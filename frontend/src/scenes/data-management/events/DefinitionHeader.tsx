@@ -16,8 +16,8 @@ import {
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { IconEyeHidden, IconSelectAll } from 'lib/elements/icons'
-import { TableLink } from 'lib/elements/Table/TableLink'
 import { LinkProps } from 'lib/elements/Link'
+import { TableLink } from 'lib/elements/Table/TableLink'
 import { Tooltip } from 'lib/elements/Tooltip'
 
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'

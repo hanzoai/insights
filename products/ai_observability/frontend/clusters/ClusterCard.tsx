@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Button, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { getSeriesColor } from 'lib/colors'
 import { urls } from 'scenes/urls'

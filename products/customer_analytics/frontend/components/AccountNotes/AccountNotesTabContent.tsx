@@ -1,14 +1,14 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconChevronDown, IconX } from '@hanzo/icons'
 import { Button, Checkbox, Dropdown, Input, Skeleton, ProfilePicture } from '@hanzo/elements'
+import { IconChevronDown, IconX } from '@hanzo/icons'
 
 import { MemberSelectMultiple } from 'lib/components/MemberSelectMultiple'
+import { Link } from 'lib/elements/Link'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { atColumn } from 'lib/elements/Table/columnUtils'
-import { Link } from 'lib/elements/Link'
 import { fullName } from 'lib/utils/strings'
 import { notebookPanelLogic } from 'scenes/notebooks/NotebookPanel/notebookPanelLogic'
 import { urls } from 'scenes/urls'

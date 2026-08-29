@@ -1,6 +1,5 @@
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis, IconExternal, IconShieldLock } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -17,6 +16,7 @@ import {
     Link,
     Tooltip,
 } from '@hanzo/elements'
+import { IconEllipsis, IconExternal, IconShieldLock } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { cn } from 'lib/utils/css-classes'

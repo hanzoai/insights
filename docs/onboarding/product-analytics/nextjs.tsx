@@ -171,7 +171,8 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                             </Tab.Panel>
                             <Tab.Panel>
                                 <Markdown>
-                                    For the Pages router, integrate Insights at the root of your app in `pages/_app.tsx`:
+                                    For the Pages router, integrate Insights at the root of your app in
+                                    `pages/_app.tsx`:
                                 </Markdown>
                                 <CodeBlock
                                     blocks={[
@@ -214,8 +215,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                     <CalloutBox type="fyi" title="Defaults option">
                         <Markdown>
                             The `defaults` option automatically configures Insights with recommended settings for new
-                            projects. See [SDK defaults](https://hanzo.ai/docs/libraries/js#sdk-defaults) for
-                            details.
+                            projects. See [SDK defaults](https://hanzo.ai/docs/libraries/js#sdk-defaults) for details.
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -234,8 +234,8 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                         <Tab.Panels>
                             <Tab.Panel>
                                 <Markdown>
-                                    Once initialized in `instrumentation-client.ts`, import `insights` from `insights-js`
-                                    anywhere and call the methods you need:
+                                    Once initialized in `instrumentation-client.ts`, import `insights` from
+                                    `insights-js` anywhere and call the methods you need:
                                 </Markdown>
                                 <CodeBlock
                                     blocks={[
@@ -435,8 +435,8 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
 
                     <CalloutBox type="fyi" title="Important">
                         <Markdown>
-                            Always call `await insights.shutdown()` when you're done with the client to ensure all events
-                            are flushed before the request completes. For better performance, consider creating a
+                            Always call `await insights.shutdown()` when you're done with the client to ensure all
+                            events are flushed before the request completes. For better performance, consider creating a
                             singleton Insights instance that you reuse across requests.
                         </Markdown>
                     </CalloutBox>

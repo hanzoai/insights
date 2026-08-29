@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconX } from '@hanzo/icons'
 import { Button, SegmentedButton, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconX } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { FlagSelector } from 'lib/components/FlagSelector'

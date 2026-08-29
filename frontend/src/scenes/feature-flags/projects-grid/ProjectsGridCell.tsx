@@ -1,5 +1,5 @@
-import { IconLock } from '@hanzo/icons'
 import { Skeleton, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconLock } from '@hanzo/icons'
 
 import { OrganizationFeatureFlag } from '~/types'
 
@@ -34,12 +34,7 @@ export function ProjectsGridCell({
     if (state.kind === 'no-access') {
         return (
             <Tooltip title="You don't have access to feature flags in this project.">
-                <Tag
-                    type="default"
-                    icon={<IconLock />}
-                    className="uppercase"
-                    data-attr="projects-grid-cell-no-access"
-                >
+                <Tag type="default" icon={<IconLock />} className="uppercase" data-attr="projects-grid-cell-no-access">
                     No access
                 </Tag>
             </Tooltip>

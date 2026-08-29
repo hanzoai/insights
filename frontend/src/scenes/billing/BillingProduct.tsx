@@ -2,16 +2,16 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
+import { Button, Tag, Link } from '@hanzo/elements'
 import { IconChevronDown, IconDocument, IconInfo } from '@hanzo/icons'
 import { IconChevronRight } from '@hanzo/icons'
-import { Button, Tag, Link } from '@hanzo/elements'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { FeatureFlagKey, UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
-import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { Banner } from 'lib/elements/Banner'
 import { More } from 'lib/elements/Button/More'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { humanFriendlyCurrency } from 'lib/utils/numbers'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
@@ -146,9 +146,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                             <div>
                                 <h3 className="font-bold mb-0 flex items-center gap-x-2">
                                     {displayProductName}{' '}
-                                    {isTemporaryFreeProduct && (
-                                        <Tag type="highlight">included with your plan</Tag>
-                                    )}
+                                    {isTemporaryFreeProduct && <Tag type="highlight">included with your plan</Tag>}
                                     {product.type === 'realtime_destinations' && (
                                         <Tooltip
                                             title={`Data pipelines have moved to new usage-based pricing on ${REALTIME_DESTINATIONS_BILLING_START_DATE}.`}

@@ -1,10 +1,10 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import api, { ApiError } from 'lib/api'
 import { tryShowMCPHint } from 'lib/components/MCPHint/mcpHintLogic'
@@ -47,8 +47,8 @@ import { alertLogic } from './alertLogic'
 import { alertNotificationLogic } from './alertNotificationLogic'
 import { getDefaultAnomalyDetectorConfig } from './detectorConfigDefaults'
 import { deriveFunnelAlertPreview, FunnelAlertPreview } from './funnelAlertPreview'
-import { columnIsNumeric, deriveInsightsQLAlertPreview, InsightsQLAlertPreview } from './insightsqlAlertPreview'
 import { insightAlertsLogic } from './insightAlertsLogic'
+import { columnIsNumeric, deriveInsightsQLAlertPreview, InsightsQLAlertPreview } from './insightsqlAlertPreview'
 
 export { THRESHOLD_BOUNDS_FORM_ERROR, thresholdAlertHasBounds } from './alertFormSchema'
 
@@ -413,7 +413,10 @@ export interface alertFormLogicMeta {
             arg4: InsightThresholdType
         ) => FunnelAlertPreview | null
         insightsqlResultColumns: (insightData: Record<string, any>) => string[] | null
-        insightsqlNumericColumns: (insightData: Record<string, any>, insightsqlResultColumns: string[] | null) => string[] | null
+        insightsqlNumericColumns: (
+            insightData: Record<string, any>,
+            insightsqlResultColumns: string[] | null
+        ) => string[] | null
         insightsqlSuggestedColumn: (
             insightsqlResultColumns: string[] | null,
             insightsqlNumericColumns: string[] | null
@@ -717,7 +720,9 @@ export const alertFormLogic = kea<alertFormLogicType>([
                 config: AlertConfig | null | undefined,
                 bounds: InsightsThresholdBounds | null | undefined
             ): InsightsQLAlertPreview | null =>
-                props.insightAlertKind === 'insightsql' ? deriveInsightsQLAlertPreview(insightData, config, bounds) : null,
+                props.insightAlertKind === 'insightsql'
+                    ? deriveInsightsQLAlertPreview(insightData, config, bounds)
+                    : null,
         ],
         /** The conversion rate(s) a funnel alert would evaluate right now, with breach status; null until the result loads. */
         funnelAlertPreview: [
@@ -986,7 +991,9 @@ export const alertFormLogic = kea<alertFormLogicType>([
             : {
                   // Materialize the suggested picks into the form, so the pickers show the actual
                   // choice and the saved config is explicit.
-                  insightsqlConfigPrefill: (patch: Partial<Pick<InsightsQLAlertConfig, 'column' | 'label_column'>> | null) => {
+                  insightsqlConfigPrefill: (
+                      patch: Partial<Pick<InsightsQLAlertConfig, 'column' | 'label_column'>> | null
+                  ) => {
                       const config = values.alertForm?.config
                       if (patch != null && isInsightsQLAlertConfig(config)) {
                           actions.setAlertFormValue('config', { ...config, ...patch })

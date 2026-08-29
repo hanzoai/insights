@@ -1,9 +1,10 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, events, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 import React from 'react'
 
+import { Spinner, toast } from '@hanzo/elements'
 import {
     IconChat,
     IconCursorClick,
@@ -28,7 +29,6 @@ import {
     IconToggle,
     IconWarning,
 } from '@hanzo/icons'
-import { Spinner, toast } from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'

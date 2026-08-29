@@ -4,9 +4,9 @@ import { useMemo, useState } from 'react'
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
 import { Input } from 'lib/elements/Input'
+import { Link } from 'lib/elements/Link'
 import { Modal } from 'lib/elements/Modal'
 import { Table } from 'lib/elements/Table'
-import { Link } from 'lib/elements/Link'
 import { slugify } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'
 
@@ -62,12 +62,7 @@ export function MetricFromInsightModal({ insightShortId, insightName }: MetricFr
     }
 
     return (
-        <Modal
-            isOpen={metricFromInsightModalOpen}
-            onClose={handleClose}
-            width={560}
-            title="Create metric from insight"
-        >
+        <Modal isOpen={metricFromInsightModalOpen} onClose={handleClose} width={560} title="Create metric from insight">
             <Modal.Content>
                 <div className="flex flex-col gap-4">
                     {metricsFromThisInsight.length > 0 && (
@@ -97,12 +92,7 @@ export function MetricFromInsightModal({ insightShortId, insightName }: MetricFr
                         error={effectiveName ? nameError : undefined}
                         info="A unique identifier for the metric, like monthly_active_users."
                     >
-                        <Input
-                            value={effectiveName}
-                            onChange={setName}
-                            placeholder="monthly_active_users"
-                            autoFocus
-                        />
+                        <Input value={effectiveName} onChange={setName} placeholder="monthly_active_users" autoFocus />
                     </Field.Pure>
 
                     <Field.Pure label="Display name">

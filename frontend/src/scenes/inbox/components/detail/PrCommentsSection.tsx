@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconComment, IconExternal } from '@hanzo/icons'
 import { Skeleton, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconComment, IconExternal } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Markdown } from 'lib/elements/Markdown'

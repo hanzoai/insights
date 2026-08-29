@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
+import { Banner, Button, Dialog, Divider, Input, Label, Modal, Table, TableColumns } from '@hanzo/elements'
 import { IconPencil, IconTrash } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Dialog,
-    Divider,
-    Input,
-    Label,
-    Modal,
-    Table,
-    TableColumns,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { Slider } from 'lib/elements/Slider'

@@ -3,8 +3,8 @@ import './AggregationColumn.scss'
 import { useActions, useValues } from 'kea'
 import { ReactNode } from 'react'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Menu, MenuItem } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { average, median } from 'lib/utils/numbers'

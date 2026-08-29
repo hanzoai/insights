@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCloud, IconTerminal } from '@hanzo/icons'
 import { SegmentedButton } from '@hanzo/elements'
+import { IconCloud, IconTerminal } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 

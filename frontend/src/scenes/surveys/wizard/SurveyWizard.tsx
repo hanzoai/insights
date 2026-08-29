@@ -1,11 +1,11 @@
 import clsx from 'clsx'
+import { getNextSurveyStep } from 'insights-js/dist/surveys-preview'
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import { getNextSurveyStep } from 'insights-js/dist/surveys-preview'
 import { useEffect, useState } from 'react'
 
-import { IconArrowLeft, IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { Button, Dialog } from '@hanzo/elements'
+import { IconArrowLeft, IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 
 import { EditableField } from 'lib/components/EditableField/EditableField'
 import { FEATURE_FLAGS } from 'lib/constants'

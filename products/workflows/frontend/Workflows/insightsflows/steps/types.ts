@@ -333,23 +333,33 @@ export const isOptOutEligibleAction = (
     return ['function_email', 'function_sms', 'function_push'].includes(action.type)
 }
 
-export const isEmailAction = (action: InsightsFlowAction): action is Extract<InsightsFlowAction, { type: 'function_email' }> => {
+export const isEmailAction = (
+    action: InsightsFlowAction
+): action is Extract<InsightsFlowAction, { type: 'function_email' }> => {
     return ['function_email'].includes(action.type)
 }
 
-export const isPushAction = (action: InsightsFlowAction): action is Extract<InsightsFlowAction, { type: 'function_push' }> => {
+export const isPushAction = (
+    action: InsightsFlowAction
+): action is Extract<InsightsFlowAction, { type: 'function_push' }> => {
     return ['function_push'].includes(action.type)
 }
 
 export const isFunctionAction = (
     action: InsightsFlowAction
-): action is Extract<InsightsFlowAction, { type: 'function' | 'function_sms' | 'function_email' | 'function_push' }> => {
+): action is Extract<
+    InsightsFlowAction,
+    { type: 'function' | 'function_sms' | 'function_email' | 'function_push' }
+> => {
     return ['function', 'function_sms', 'function_email', 'function_push'].includes(action.type)
 }
 
 export const isTriggerFunction = (
     action: InsightsFlowAction
-): action is Extract<InsightsFlowAction, { type: 'trigger'; config: { type: 'webhook' | 'tracking_pixel' | 'manual' } }> => {
+): action is Extract<
+    InsightsFlowAction,
+    { type: 'trigger'; config: { type: 'webhook' | 'tracking_pixel' | 'manual' } }
+> => {
     if (action.type !== 'trigger') {
         return false
     }

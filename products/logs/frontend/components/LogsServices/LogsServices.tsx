@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconShare } from '@hanzo/icons'
 import { Banner, Button, Select, Table, Tag, Tooltip, toast } from '@hanzo/elements'
 import type { TableColumns } from '@hanzo/elements'
+import { IconShare } from '@hanzo/icons'
 
 import { Sparkline } from 'lib/components/Sparkline'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

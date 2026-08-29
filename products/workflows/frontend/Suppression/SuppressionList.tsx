@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronLeft, IconChevronRight, IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
 import { Button, Input, Modal, Table, TableColumns, Tag } from '@hanzo/elements'
+import { IconChevronLeft, IconChevronRight, IconPlus, IconRefresh, IconTrash } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { More } from 'lib/elements/Button/More'

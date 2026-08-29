@@ -1,4 +1,5 @@
 import { deepEqual as equal } from 'fast-equals'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -15,7 +16,6 @@ import {
 } from 'kea'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { ViewportResolution } from '@hanzo/replay-shared'
 

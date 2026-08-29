@@ -1,8 +1,8 @@
 import { decode } from 'he'
 import { useValues } from 'kea'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button, Skeleton, Table, Tag } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { IconKey } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

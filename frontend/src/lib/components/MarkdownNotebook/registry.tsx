@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { Button, Input, TextArea } from '@hanzo/elements'
 import {
     IconCode,
     IconComment,
@@ -14,7 +15,6 @@ import {
     IconRewindPlay,
     IconUpload,
 } from '@hanzo/icons'
-import { Button, Input, TextArea } from '@hanzo/elements'
 
 import { wasNotebookNodeJustInserted } from './freshlyInserted'
 import {

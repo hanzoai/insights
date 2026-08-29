@@ -3,8 +3,8 @@ import { EditorContent, Extensions } from '@tiptap/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 
-import { IconArrowLeft, IconArrowRight } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
+import { IconArrowLeft, IconArrowRight } from '@hanzo/icons'
 
 import 'lib/components/MarkdownEditor/shared/RichMarkdownEditor.scss'
 import { MarkdownEditorCharacterCountFooter } from 'lib/components/MarkdownEditor/shared/MarkdownEditorCharacterCountFooter'

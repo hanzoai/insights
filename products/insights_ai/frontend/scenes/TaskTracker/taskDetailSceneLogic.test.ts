@@ -92,7 +92,9 @@ describe('taskDetailSceneLogic', () => {
         // streamViaProxyEnabled is now purely flag-driven, so preflight no longer affects it. The
         // default test fixture has is_debug: true; pin it to false to keep the app context minimal
         // and unsurprising for these tests.
-        window.INSIGHTS_APP_CONTEXT = { preflight: { is_debug: false } } as unknown as typeof window.INSIGHTS_APP_CONTEXT
+        window.INSIGHTS_APP_CONTEXT = {
+            preflight: { is_debug: false },
+        } as unknown as typeof window.INSIGHTS_APP_CONTEXT
         initKeaTests()
         global.fetch = createFetchMock()
     })

@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, key, listeners, path, props, reducers } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import { quickFiltersLogic } from 'lib/components/QuickFilters'
 

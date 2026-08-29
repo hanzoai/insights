@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, connect, kea, listeners, path } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, connect, kea, listeners, path } from 'kea'
 
 import { isLogEntryPropertyFilter, isValidPropertyFilter } from 'lib/components/PropertyFilters/utils'
 import { isActionFilter, isEventFilter } from 'lib/components/UniversalFilters/utils'

@@ -1,6 +1,6 @@
 import { expectLogic } from 'kea-test-utils'
-import { EventType, IncrementalSource, NodeType, mutationData } from '@hanzo/insights-rrweb-types'
 
+import { EventType, IncrementalSource, NodeType, mutationData } from '@hanzo/insights-rrweb-types'
 import { chunkMutationSnapshot, MUTATION_CHUNK_SIZE } from '@hanzo/replay-shared'
 
 import { ApiError, RecordingDeletedError } from 'lib/api'

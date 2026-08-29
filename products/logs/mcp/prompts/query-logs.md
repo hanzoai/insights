@@ -218,7 +218,7 @@ Each returned log row carries three overlapping severity fields. Read and report
 | ----------------- | --------------------------------------------------------------- | --------------------------------------------------------------------- |
 | `severity_text`   | Canonical severity string. **Prefer this.**                     | Filtering (`severityLevels`), grouping, and anything you show a user. |
 | `severity_number` | OpenTelemetry numeric severity (1–24). Redundant with the text. | Sorting by exact severity, or interop with OTel tooling.              |
-| `level`           | Datastore alias for `severity_text`. Redundant.                | Ignore — prefer `severity_text`.                                      |
+| `level`           | Datastore alias for `severity_text`. Redundant.                 | Ignore — prefer `severity_text`.                                      |
 
 `severity_number` maps to the `severityLevels` buckets by OTel range. Use this when you only have a number and need the bucket, or vice-versa:
 

@@ -3,17 +3,6 @@ import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
 import {
-    IconBolt,
-    IconButton,
-    IconClock,
-    IconInfo,
-    IconLeave,
-    IconPeople,
-    IconTarget,
-    IconWarning,
-    IconWebhooks,
-} from '@hanzo/icons'
-import {
     Banner,
     Button,
     Checkbox,
@@ -28,14 +17,25 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import {
+    IconBolt,
+    IconButton,
+    IconClock,
+    IconInfo,
+    IconLeave,
+    IconPeople,
+    IconTarget,
+    IconWarning,
+    IconWebhooks,
+} from '@hanzo/icons'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { MemberSelectMultiple } from 'lib/components/MemberSelectMultiple'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconAdsClick } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
+import { IconAdsClick } from 'lib/elements/icons'
 import { Radio } from 'lib/elements/Radio'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { publicWebhooksHostOrigin } from 'lib/utils/apiHost'

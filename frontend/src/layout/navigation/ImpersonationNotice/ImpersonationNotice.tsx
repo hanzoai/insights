@@ -3,13 +3,13 @@ import './ImpersonationNotice.scss'
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconChevronDown, IconCollapse, IconRefresh, IconWarning } from '@hanzo/icons'
 import { Button, Checkbox, Menu, Tag, Tooltip } from '@hanzo/elements'
+import { IconChevronDown, IconCollapse, IconRefresh, IconWarning } from '@hanzo/icons'
 
 import { DraggableWithSnapZones, DraggableWithSnapZonesRef } from 'lib/components/DraggableWithSnapZones'
 import { dayjs } from 'lib/dayjs'
-import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { IconDragHandle } from 'lib/elements/icons'
+import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { cn } from 'lib/utils/css-classes'
 import { membershipLevelToName } from 'lib/utils/permissioning'
 import { capitalizeFirstLetter, fullName } from 'lib/utils/strings'
@@ -43,9 +43,7 @@ function ChangeUserMenuItemLabel({
                 </span>
                 <span className="text-xs text-muted">{member.user.email}</span>
             </span>
-            <Tag>
-                {capitalizeFirstLetter(membershipLevelToName.get(member.level) ?? `unknown (${member.level})`)}
-            </Tag>
+            <Tag>{capitalizeFirstLetter(membershipLevelToName.get(member.level) ?? `unknown (${member.level})`)}</Tag>
         </span>
     )
 }
@@ -207,10 +205,7 @@ function ImpersonationNoticeContent(): JSX.Element {
         <>
             <p className="ImpersonationNotice__message">
                 Signed in as{' '}
-                <Menu
-                    items={changeUserItems}
-                    onVisibilityChange={(visible) => visible && ensureAllMembersLoaded()}
-                >
+                <Menu items={changeUserItems} onVisibilityChange={(visible) => visible && ensureAllMembersLoaded()}>
                     <Button
                         size="xsmall"
                         sideIcon={<IconChevronDown />}

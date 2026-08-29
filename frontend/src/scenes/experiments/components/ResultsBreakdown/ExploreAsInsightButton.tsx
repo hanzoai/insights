@@ -1,5 +1,5 @@
-import { IconAreaChart } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconAreaChart } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
 import type { ResultBreakdownRenderProps } from './types'

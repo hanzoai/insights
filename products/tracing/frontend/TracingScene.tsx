@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { Banner, Button, Modal, Link } from '@hanzo/elements'
 

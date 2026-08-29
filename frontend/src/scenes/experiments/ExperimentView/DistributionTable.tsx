@@ -1,23 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
+import { Banner, Button, Dialog, Modal, Switch, Table, TableColumns, Tag, Link } from '@hanzo/elements'
 import { IconFlag, IconLock } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Dialog,
-    Modal,
-    Switch,
-    Table,
-    TableColumns,
-    Tag,
-    Link,
-} from '@hanzo/elements'
 
 import { AuthorizedUrlList } from '~/lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from '~/lib/components/AuthorizedUrlList/authorizedUrlListLogic'
-import { useFeatureFlag } from '~/lib/hooks/useFeatureFlag'
 import { IconOpenInApp } from '~/lib/elements/icons'
+import { useFeatureFlag } from '~/lib/hooks/useFeatureFlag'
 import {
     useVariantDistributionValidation,
     VariantDistributionEditor,

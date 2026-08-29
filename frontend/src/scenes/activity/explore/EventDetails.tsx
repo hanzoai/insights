@@ -9,8 +9,8 @@ import { SurveyResponseDisplay } from 'lib/components/SurveyResponseDisplay/Surv
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
-import { TableProps } from 'lib/elements/Table'
 import { Link } from 'lib/elements/Link'
+import { TableProps } from 'lib/elements/Table'
 import { ReplayCaptureDiagnosticsModalButton } from 'scenes/session-recordings/components/ReplayCaptureDiagnosticsModalButton'
 import { hasReplayDiagnosticSignals } from 'scenes/session-recordings/utils/replayCaptureDiagnostics'
 import { urls } from 'scenes/urls'
@@ -147,9 +147,7 @@ export function EventDetails({ event, tableProps }: EventDetailsProps): JSX.Elem
                                 <p>
                                     Person properties sent with this event. Will replace any property value that may
                                     have been set on this person profile before now.{' '}
-                                    <Link to="https://hanzo.ai/docs/getting-started/person-properties">
-                                        Learn more
-                                    </Link>
+                                    <Link to="https://hanzo.ai/docs/getting-started/person-properties">Learn more</Link>
                                 </p>
                                 <PropertiesTable
                                     type={PropertyDefinitionType.Event}
@@ -167,9 +165,7 @@ export function EventDetails({ event, tableProps }: EventDetailsProps): JSX.Elem
                                 <p>
                                     "Set once" person properties sent with this event. Will replace any property value
                                     that has never been set on this person profile before now.{' '}
-                                    <Link to="https://hanzo.ai/docs/getting-started/person-properties">
-                                        Learn more
-                                    </Link>
+                                    <Link to="https://hanzo.ai/docs/getting-started/person-properties">Learn more</Link>
                                 </p>
                                 <PropertiesTable
                                     type={PropertyDefinitionType.Event}

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBalance, IconDownload, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Banner, Button, Dialog, Table, Tag, Link } from '@hanzo/elements'
+import { IconBalance, IconDownload, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Menu, MenuItems } from 'lib/elements/Menu'
@@ -61,7 +61,8 @@ function buildNewMenuItems(existingTypes: Set<LegalDocumentType>): MenuItems {
                             </span>
                         </div>
                     ),
-                    disabledReason: 'MSAs are negotiated by sales. Contact your TAM or Insights support to sign an MSA.',
+                    disabledReason:
+                        'MSAs are negotiated by sales. Contact your TAM or Insights support to sign an MSA.',
                     'data-attr': 'new-legal-document-menu-msa',
                 },
             ],

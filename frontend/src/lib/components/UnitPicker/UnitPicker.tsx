@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { Button, ButtonWithDropdown } from 'lib/elements/Button'
 import { Divider } from 'lib/elements/Divider'
+import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import {
     AggregationAxisFormat,

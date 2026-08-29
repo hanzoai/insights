@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconCheckCircle, IconChevronDown, IconGithub, IconPullRequest } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
+import { IconCheckCircle, IconChevronDown, IconGithub, IconPullRequest } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { GitHubRepositoryPicker } from 'lib/integrations/GitHubIntegrationHelpers'

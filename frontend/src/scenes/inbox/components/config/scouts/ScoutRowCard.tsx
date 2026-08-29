@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions } from 'kea'
 import { useState } from 'react'
 
-import { IconArrowUpRight, IconGear } from '@hanzo/icons'
 import { Button, Link, Tooltip } from '@hanzo/elements'
+import { IconArrowUpRight, IconGear } from '@hanzo/icons'
 
 import { pluralize } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'

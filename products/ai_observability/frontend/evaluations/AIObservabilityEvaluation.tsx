@@ -3,20 +3,8 @@ import { Field, Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 import { useRef } from 'react'
 
+import { Banner, Button, Input, Select, Skeleton, Switch, Tabs, Tag, TextArea, Link, Tooltip } from '@hanzo/elements'
 import { IconArrowLeft, IconInfo, IconPlay, IconTrends, IconWarning } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Input,
-    Select,
-    Skeleton,
-    Switch,
-    Tabs,
-    Tag,
-    TextArea,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DurationPicker } from 'lib/components/DurationPicker/DurationPicker'

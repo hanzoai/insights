@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { ReactNode } from 'react'
 
-import { Markdown } from '../Markdown'
 import { Link, LinkProps } from '../Link'
+import { Markdown } from '../Markdown'
 
 interface TableLinkContentProps {
     title: JSX.Element | string

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconList } from '@hanzo/icons'
 import { Button, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconList } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { IconAreaChart } from 'lib/elements/icons'

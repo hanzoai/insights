@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { IconFilter } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 import { SceneStickyBar } from '~/layout/scenes/components/SceneStickyBar'
 

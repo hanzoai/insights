@@ -3,10 +3,10 @@ import { router } from 'kea-router'
 
 import { IconPeople } from '@hanzo/icons'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { Button } from 'lib/elements/Button'
 import { Link } from 'lib/elements/Link'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
+import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { GroupsIntroduction } from 'scenes/groups/GroupsIntroduction'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'

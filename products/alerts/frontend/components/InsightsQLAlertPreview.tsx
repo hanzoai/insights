@@ -15,7 +15,13 @@ import {
 
 const PREVIEW_TABLE_MAX_ROWS = 10
 
-function InsightsQLPreviewStatus({ wouldFire, children }: { wouldFire: boolean | null; children: ReactNode }): JSX.Element {
+function InsightsQLPreviewStatus({
+    wouldFire,
+    children,
+}: {
+    wouldFire: boolean | null
+    children: ReactNode
+}): JSX.Element {
     return (
         <div className="rounded border border-border bg-bg-light p-3 text-sm">
             {wouldFire !== null ? (

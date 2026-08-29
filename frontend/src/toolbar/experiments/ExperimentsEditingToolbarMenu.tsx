@@ -66,12 +66,7 @@ export const ExperimentsEditingToolbarMenu = (): JSX.Element => {
                             <div className="flex items-center justify-between mb-2">
                                 <Label>Variants</Label>
                                 {addVariantAvailable && (
-                                    <Button
-                                        type="secondary"
-                                        size="xsmall"
-                                        icon={<IconPlus />}
-                                        onClick={addNewVariant}
-                                    >
+                                    <Button type="secondary" size="xsmall" icon={<IconPlus />} onClick={addNewVariant}>
                                         Add variant
                                     </Button>
                                 )}

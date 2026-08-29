@@ -1,9 +1,9 @@
+import insights from 'insights-js'
 import { useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
-import insights from 'insights-js'
 
-import { IconCheck, IconMinus, IconX } from '@hanzo/icons'
 import { Link, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconMinus, IconX } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

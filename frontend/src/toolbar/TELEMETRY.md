@@ -9,15 +9,15 @@ unless noted otherwise. Events go to Insights's internal project (prod) or `loca
 
 Fired once when the toolbar finishes initialization.
 
-| Property                   | Type                                   | Description                                                                    |
-| -------------------------- | -------------------------------------- | ------------------------------------------------------------------------------ |
-| `is_authenticated`         | `boolean`                              | Whether the user had valid tokens at load time                                 |
+| Property                   | Type                                   | Description                                                                     |
+| -------------------------- | -------------------------------------- | ------------------------------------------------------------------------------- |
+| `is_authenticated`         | `boolean`                              | Whether the user had valid tokens at load time                                  |
 | `source`                   | `'url' \| 'localstorage' \| 'unknown'` | Whether the toolbar was launched from Insights or auto-loaded from localStorage |
 | `ui_host`                  | `string`                               | Resolved Insights UI host                                                       |
-| `api_host`                 | `string`                               | Resolved API host                                                              |
-| `ui_host_explicit`         | `boolean`                              | Whether `uiHost` was explicitly provided in toolbar params                     |
-| `ui_host_matches_api_host` | `boolean`                              | Whether UI and API hosts are the same                                          |
-| `load_duration_ms`         | `number \| undefined`                  | Time from `ph_load_toolbar` call to initialization complete                    |
+| `api_host`                 | `string`                               | Resolved API host                                                               |
+| `ui_host_explicit`         | `boolean`                              | Whether `uiHost` was explicitly provided in toolbar params                      |
+| `ui_host_matches_api_host` | `boolean`                              | Whether UI and API hosts are the same                                           |
+| `load_duration_ms`         | `number \| undefined`                  | Time from `ph_load_toolbar` call to initialization complete                     |
 
 **File:** `toolbarConfigLogic.ts`
 
@@ -103,13 +103,13 @@ Fired when the UI host configuration modal is shown (auth error state).
 
 Fired after every `toolbarFetch` call. Covers all toolbar API endpoints.
 
-| Property          | Type      | Description                                        |
-| ----------------- | --------- | -------------------------------------------------- |
-| `method`          | `string`  | HTTP method (`GET`, `POST`, `PATCH`, `DELETE`)     |
+| Property          | Type      | Description                                       |
+| ----------------- | --------- | ------------------------------------------------- |
+| `method`          | `string`  | HTTP method (`GET`, `POST`, `PATCH`, `DELETE`)    |
 | `pathname`        | `string`  | API path (e.g., `/v1/projects/@current/actions/`) |
-| `status`          | `number`  | HTTP response status code                          |
-| `duration_ms`     | `number`  | Total time including any token retry               |
-| `did_token_retry` | `boolean` | Whether a 401 triggered a token refresh + retry    |
+| `status`          | `number`  | HTTP response status code                         |
+| `duration_ms`     | `number`  | Total time including any token retry              |
+| `did_token_retry` | `boolean` | Whether a 401 triggered a token refresh + retry   |
 
 **File:** `toolbarConfigLogic.ts`
 

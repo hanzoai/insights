@@ -256,9 +256,9 @@ describe('applyNestedExclusions', () => {
 
         expect(() => applyNestedExclusions(spec, new Map([['things_create', ['nonexistent.*.field']]]))).not.toThrow()
 
-        expect(
-            spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema.properties
-        ).toHaveProperty('name')
+        expect(spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema.properties).toHaveProperty(
+            'name'
+        )
     })
 
     it('is a no-op for nonexistent operationId', () => {
@@ -297,9 +297,9 @@ describe('applyNestedExclusions', () => {
         }
 
         applyNestedExclusions(spec, new Map())
-        expect(
-            spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema.properties
-        ).toHaveProperty('name')
+        expect(spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema.properties).toHaveProperty(
+            'name'
+        )
     })
 
     it('does not mutate shared component schemas across operations', () => {

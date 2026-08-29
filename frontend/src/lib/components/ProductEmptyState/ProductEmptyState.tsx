@@ -1,5 +1,5 @@
-import { useActions } from 'kea'
 import insights from 'insights-js'
+import { useActions } from 'kea'
 
 import { IconBook, IconGear } from '@hanzo/icons'
 
@@ -129,12 +129,7 @@ export function ProductEmptyState({ config, mode }: ProductEmptyStateProps): JSX
                             Read the docs
                         </Button>
                     ) : null}
-                    <Button
-                        size="xsmall"
-                        type="tertiary"
-                        onClick={skipEmptyState}
-                        data-attr="product-empty-state-skip"
-                    >
+                    <Button size="xsmall" type="tertiary" onClick={skipEmptyState} data-attr="product-empty-state-skip">
                         Skip for now
                     </Button>
                 </div>

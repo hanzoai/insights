@@ -25,15 +25,15 @@ These are the tools that change state. Treat this as a map, not a spec: the tool
 current set and each tool's exact inputs by inspecting the tool itself (`insights:exec info <tool>` /
 `insights:exec schema <tool>`) rather than trusting an enumerated list here.
 
-| Tool                                            | Purpose                                                                                                                                                     |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `insights:view-create`                           | Create (or upsert) a view from InsightsQL. Same `name` → updates the existing view.                                                                              |
-| `insights:view-update`                           | Change name / query / description / sync frequency. Editing the query re-infers columns and needs the current `edited_history_id` (optimistic concurrency). |
-| `insights:view-materialize`                      | Turn a virtual view into a materialized table + a sync schedule. Rate-limited.                                                                              |
+| Tool                                              | Purpose                                                                                                                                                     |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `insights:view-create`                            | Create (or upsert) a view from InsightsQL. Same `name` → updates the existing view.                                                                         |
+| `insights:view-update`                            | Change name / query / description / sync frequency. Editing the query re-infers columns and needs the current `edited_history_id` (optimistic concurrency). |
+| `insights:view-materialize`                       | Turn a virtual view into a materialized table + a sync schedule. Rate-limited.                                                                              |
 | `insights:view-run` / `insights:view-run-history` | Trigger a materialization refresh now (must already be materialized) / read recent run statuses to debug failures.                                          |
-| `insights:view-unmaterialize`                    | Drop the physical table + schedule; keep the view definition as virtual.                                                                                    |
-| `insights:view-delete`                           | Soft-delete a view. Refused if other views depend on it, or if it's owned by a managed viewset (e.g. `revenue_analytics_*`).                                |
-| `insights:saved-query-column-annotations-*`      | Attach human/agent-readable descriptions to the view and its columns (discoverability).                                                                     |
+| `insights:view-unmaterialize`                     | Drop the physical table + schedule; keep the view definition as virtual.                                                                                    |
+| `insights:view-delete`                            | Soft-delete a view. Refused if other views depend on it, or if it's owned by a managed viewset (e.g. `revenue_analytics_*`).                                |
+| `insights:saved-query-column-annotations-*`       | Attach human/agent-readable descriptions to the view and its columns (discoverability).                                                                     |
 
 ## The workflow
 

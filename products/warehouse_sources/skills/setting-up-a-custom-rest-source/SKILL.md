@@ -72,14 +72,14 @@ validation.
 
 ## Available tools
 
-| Tool                                     | Purpose                                                                                                                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tool                                     | Purpose                                                                                                                                                                   |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `external-data-sources-wizard`           | List every native source type Insights supports. Run this **first** (Step 0) to check whether the target API already has a built-in connector before drafting a manifest. |
-| `external-data-sources-db-schema`        | Validate the manifest + credential and list the resources (tables) it exposes, with detected primary keys and incremental cursors. This is the validate-and-list step.   |
-| `external-data-sources-preview-resource` | Read a small live sample of rows for one resource — verify `data_selector` / `primary_key` / `cursor_path` against real data before creating anything.                   |
-| `data-warehouse-source-setup`            | Create the source. Enables **all** manifest resources with sync defaults in one call.                                                                                    |
-| `external-data-sources-create`           | Advanced create — lets the user hand-pick which resources sync via a `schemas` array.                                                                                    |
-| `external-data-schemas-list`             | After creation, watch per-table sync status.                                                                                                                             |
+| `external-data-sources-db-schema`        | Validate the manifest + credential and list the resources (tables) it exposes, with detected primary keys and incremental cursors. This is the validate-and-list step.    |
+| `external-data-sources-preview-resource` | Read a small live sample of rows for one resource — verify `data_selector` / `primary_key` / `cursor_path` against real data before creating anything.                    |
+| `data-warehouse-source-setup`            | Create the source. Enables **all** manifest resources with sync defaults in one call.                                                                                     |
+| `external-data-sources-create`           | Advanced create — lets the user hand-pick which resources sync via a `schemas` array.                                                                                     |
+| `external-data-schemas-list`             | After creation, watch per-table sync status.                                                                                                                              |
 
 ## Workflow
 

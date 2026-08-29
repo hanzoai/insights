@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { memo, useCallback, useMemo, useRef, useState } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Dropdown, Input, SegmentedButton, Select } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { InfiniteSelectResults } from 'lib/components/TaxonomicFilter/InfiniteSelectResults'
 import { TaxonomicFilterSearchInput } from 'lib/components/TaxonomicFilter/TaxonomicFilter'

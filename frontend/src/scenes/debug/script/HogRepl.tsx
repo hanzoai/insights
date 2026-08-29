@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { printHogStringOutput } from '@hanzo/scriptvm'
 import { Button, Table, Tabs } from '@hanzo/elements'
+import { printHogStringOutput } from '@hanzo/scriptvm'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'

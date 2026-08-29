@@ -17,7 +17,13 @@ import { isInsightsQLQuery, isSessionAttributionExplorerQuery, isSessionsQuery }
 import { AnyPropertyFilter } from '~/types'
 
 interface EventPropertyFiltersProps<
-    Q extends EventsNode | EventsQuery | InsightsQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
+    Q extends
+        | EventsNode
+        | EventsQuery
+        | InsightsQLQuery
+        | SessionAttributionExplorerQuery
+        | SessionsQuery
+        | TracesQuery,
 > {
     query: Q
     setQuery?: (query: Q) => void
@@ -26,7 +32,13 @@ interface EventPropertyFiltersProps<
 
 let uniqueNode = 0
 export function EventPropertyFilters<
-    Q extends EventsNode | EventsQuery | InsightsQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
+    Q extends
+        | EventsNode
+        | EventsQuery
+        | InsightsQLQuery
+        | SessionAttributionExplorerQuery
+        | SessionsQuery
+        | TracesQuery,
 >({ query, setQuery, taxonomicGroupTypes }: EventPropertyFiltersProps<Q>): JSX.Element {
     const [id] = useState(() => uniqueNode++)
     const properties =

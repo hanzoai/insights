@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconDatabase, IconPlug, IconServer } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconDatabase, IconPlug, IconServer } from '@hanzo/icons'
 
 import type { DataHealthIssue } from './pipelineHealthLogic'
 import { pipelineStatusSceneLogic } from './pipelineStatusSceneLogic'

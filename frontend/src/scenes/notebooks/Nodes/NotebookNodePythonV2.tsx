@@ -3,8 +3,8 @@ import { useEffect, useMemo, useRef } from 'react'
 
 import { IconCornerDownRight, IconPlayFilled } from '@hanzo/icons'
 
-import { IconCancel } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconCancel } from 'lib/elements/icons'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import type { NotebookNodeRunTerminalStatus } from 'scenes/notebooks/Notebook/notebookNodeStalenessLogic'

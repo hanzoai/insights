@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCheckCircle } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { CommandBlock } from 'lib/components/CommandBlock/CommandBlock'
 import { useWizardCommand } from 'scenes/onboarding/shared/useWizardCommand'

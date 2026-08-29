@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import { toast } from 'lib/elements/Toast/Toast'
 import { teamLogic } from 'scenes/teamLogic'

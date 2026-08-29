@@ -5,8 +5,8 @@ import { ReactNode } from 'react'
 
 import { Link } from '@hanzo/elements'
 
-import { Progress } from 'lib/elements/Progress'
 import { Lettermark } from 'lib/elements/Lettermark'
+import { Progress } from 'lib/elements/Progress'
 import { cn } from 'lib/utils/css-classes'
 
 export function ShareRow({

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload } from '@hanzo/icons'
 import { Button, Dialog, Input, Menu } from '@hanzo/elements'
+import { IconDownload } from '@hanzo/icons'
 
 import { TriggerExportProps } from 'lib/components/ExportButton/exporter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'

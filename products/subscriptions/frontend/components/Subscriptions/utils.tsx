@@ -1,7 +1,7 @@
 import { RRule } from 'rrule'
 
-import { IconLetter } from '@hanzo/icons'
 import { SelectOption, SelectOptionLeaf, SelectOptions } from '@hanzo/elements'
+import { IconLetter } from '@hanzo/icons'
 
 import { IconSlack } from 'lib/elements/icons'
 import { range } from 'lib/utils/arrays'

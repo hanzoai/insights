@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button, Checkbox, Input } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { Dropdown } from 'lib/elements/Dropdown'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -75,13 +75,7 @@ export function ProjectsGridPicker(): JSX.Element {
                     {pickedTeamIds.length > 0 && (
                         <>
                             <div className="border-t border-border -mx-2" />
-                            <Button
-                                size="small"
-                                type="tertiary"
-                                onClick={() => resetPickedTeamIds()}
-                                center
-                                fullWidth
-                            >
+                            <Button size="small" type="tertiary" onClick={() => resetPickedTeamIds()} center fullWidth>
                                 Reset
                             </Button>
                         </>

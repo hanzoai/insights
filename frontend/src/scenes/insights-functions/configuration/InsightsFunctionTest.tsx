@@ -4,18 +4,8 @@ import { Form } from 'kea-forms'
 import { MarkerSeverity, editor as monacoEditor } from 'monaco-editor'
 import { useRef } from 'react'
 
+import { Banner, Button, Divider, Label, SegmentedButton, Switch, Table, Spinner, Tooltip } from '@hanzo/elements'
 import { IconInfo, IconX } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Divider,
-    Label,
-    SegmentedButton,
-    Switch,
-    Table,
-    Spinner,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { More } from 'lib/elements/Button/More'
@@ -153,8 +143,9 @@ export const InsightsFunctionTestEditor = ({
 }
 
 export function InsightsFunctionTest(): JSX.Element {
-    const { logicProps, canLoadSampleGlobals, insightsFunction, template, configuration } =
-        useValues(insightsFunctionConfigurationLogic)
+    const { logicProps, canLoadSampleGlobals, insightsFunction, template, configuration } = useValues(
+        insightsFunctionConfigurationLogic
+    )
     const isDataWarehouse = configuration?.filters?.source === 'data-warehouse-table'
     const {
         isTestInvocationSubmitting,

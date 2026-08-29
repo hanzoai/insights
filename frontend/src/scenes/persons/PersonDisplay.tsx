@@ -5,8 +5,8 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 import React, { useMemo, useState } from 'react'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Link } from 'lib/elements/Link'

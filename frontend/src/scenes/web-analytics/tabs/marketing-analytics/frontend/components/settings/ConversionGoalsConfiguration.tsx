@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconCheck, IconPencil, IconPlusSmall, IconTrash, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconCheck, IconPencil, IconPlusSmall, IconTrash, IconWarning, IconX } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'
@@ -146,10 +146,7 @@ export function ConversionGoalsConfiguration({
                             Add conversion goal
                         </Button>
 
-                        <Button
-                            onClick={() => setFormState(createEmptyFormState())}
-                            disabledReason={restrictedReason}
-                        >
+                        <Button onClick={() => setFormState(createEmptyFormState())} disabledReason={restrictedReason}>
                             Clear
                         </Button>
                     </div>

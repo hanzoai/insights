@@ -1,11 +1,11 @@
 import '../../DataTable/DataTable.scss'
 
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
-import { IconPin, IconPinFilled } from '@hanzo/icons'
 import { Banner, Table as TablePrimitive, TableColumn, Tooltip } from '@hanzo/elements'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { execHog } from 'lib/script'
@@ -171,168 +171,166 @@ export const Table = (props: TableProps): JSX.Element => {
 
     const sourceTabularColumnsByName = new Map(sourceTabularColumns.map((column) => [column.column.name, column]))
 
-    const tableColumns: TableColumn<TableDataCell<any>[], any>[] = tabularColumns.map(
-        ({ column, settings }, index) => {
-            const { title, ...columnMeta } = renderColumnMeta(column.name, props.query, props.context)
-            const columnTitle = settings?.display?.label || title || column.name
-            const formattedTitle = typeof columnTitle === 'string' ? formatColumnTitle(columnTitle) : columnTitle
-            const fullColumnTitle = typeof columnTitle === 'string' ? columnTitle : undefined
+    const tableColumns: TableColumn<TableDataCell<any>[], any>[] = tabularColumns.map(({ column, settings }, index) => {
+        const { title, ...columnMeta } = renderColumnMeta(column.name, props.query, props.context)
+        const columnTitle = settings?.display?.label || title || column.name
+        const formattedTitle = typeof columnTitle === 'string' ? formatColumnTitle(columnTitle) : columnTitle
+        const fullColumnTitle = typeof columnTitle === 'string' ? columnTitle : undefined
 
-            const computeConditionalFormattingBackground = (data: TableDataCell<any>[]): string | undefined => {
+        const computeConditionalFormattingBackground = (data: TableDataCell<any>[]): string | undefined => {
+            const cell = data[index]
+
+            if (cell.isTransposedHeader) {
+                return undefined
+            }
+
+            const sourceColumnName = cell.sourceColumnName ?? column.name
+            const sourceColumnType = sourceTabularColumnsByName.get(sourceColumnName)?.column.type.name ?? cell.type
+            const conditionalFormattingMatches = conditionalFormattingRules
+                .filter((n) => n.columnName === sourceColumnName)
+                .filter((n) => {
+                    const isValidHog = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
+                    if (!isValidHog) {
+                        insights.captureException(new Error('Invalid script bytecode for conditional formatting'), {
+                            formatRule: n,
+                        })
+                    }
+
+                    return isValidHog
+                })
+                .map((n) => ({
+                    rule: n,
+                    result: execHog(n.bytecode, {
+                        globals: {
+                            value: cell.value,
+                            input: convertTableValue(n.input, sourceColumnType),
+                        },
+                        functions: {},
+                        maxAsyncSteps: 0,
+                    }).result,
+                }))
+                .find((n) => Boolean(n.result))
+
+            if (!conditionalFormattingMatches) {
+                return undefined
+            }
+
+            const ruleColor = conditionalFormattingMatches.rule.color
+            const colorMode = conditionalFormattingMatches.rule.colorMode ?? 'light'
+
+            // If the color mode matches the current theme, use the color as it was saved
+            if ((colorMode === 'dark' && isDarkModeOn) || (colorMode === 'light' && !isDarkModeOn)) {
+                return ruleColor
+            }
+
+            // If the color mode is dark, but we're in light mode - then lighten the color
+            if (colorMode === 'dark' && !isDarkModeOn) {
+                return lightenDarkenColor(ruleColor, 30)
+            }
+
+            // If the color mode is light, but we're in dark mode - then darken the color
+            return lightenDarkenColor(ruleColor, -30)
+        }
+
+        // The `style` and `className` cell callbacks are invoked independently for the same cell,
+        // so memoize per row record to run the ScriptVM rules (and any captureException) only once.
+        // The cache lives in this per-render closure, so it can't go stale across theme/rule changes.
+        const backgroundByRecord = new WeakMap<TableDataCell<any>[], string | undefined>()
+        const resolveConditionalFormattingBackground = (data: TableDataCell<any>[]): string | undefined => {
+            if (backgroundByRecord.has(data)) {
+                return backgroundByRecord.get(data)
+            }
+            const backgroundColor = computeConditionalFormattingBackground(data)
+            backgroundByRecord.set(data, backgroundColor)
+            return backgroundColor
+        }
+
+        return {
+            ...columnMeta,
+            key: column.name,
+            // Sorting reorders rows, which doesn't make sense once the table is transposed
+            // (rows become the original columns), so only offer it in the normal orientation.
+            sorter: isTransposed ? undefined : (a, b) => compareTableCells(a[index], b[index]),
+            title: (
+                <ColumnHeaderTitle formattedTitle={formattedTitle} fullTitle={fullColumnTitle}>
+                    {isPinningEnabled && (
+                        <Tooltip title={isColumnPinned(column.name) ? 'Unpin column' : 'Pin column'}>
+                            <span
+                                className="inline-flex items-center justify-center cursor-pointer p-1 -m-1"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    toggleColumnPin(column.name)
+                                }}
+                            >
+                                {isColumnPinned(column.name) ? (
+                                    <IconPinFilled className="text-sm" />
+                                ) : (
+                                    <IconPin className="text-sm" />
+                                )}
+                            </span>
+                        </Tooltip>
+                    )}
+                </ColumnHeaderTitle>
+            ),
+            render: (_, data, recordIndex: number, rowCount: number) => {
                 const cell = data[index]
 
                 if (cell.isTransposedHeader) {
-                    return undefined
-                }
-
-                const sourceColumnName = cell.sourceColumnName ?? column.name
-                const sourceColumnType = sourceTabularColumnsByName.get(sourceColumnName)?.column.type.name ?? cell.type
-                const conditionalFormattingMatches = conditionalFormattingRules
-                    .filter((n) => n.columnName === sourceColumnName)
-                    .filter((n) => {
-                        const isValidHog = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
-                        if (!isValidHog) {
-                            insights.captureException(new Error('Invalid script bytecode for conditional formatting'), {
-                                formatRule: n,
-                            })
-                        }
-
-                        return isValidHog
-                    })
-                    .map((n) => ({
-                        rule: n,
-                        result: execHog(n.bytecode, {
-                            globals: {
-                                value: cell.value,
-                                input: convertTableValue(n.input, sourceColumnType),
-                            },
-                            functions: {},
-                            maxAsyncSteps: 0,
-                        }).result,
-                    }))
-                    .find((n) => Boolean(n.result))
-
-                if (!conditionalFormattingMatches) {
-                    return undefined
-                }
-
-                const ruleColor = conditionalFormattingMatches.rule.color
-                const colorMode = conditionalFormattingMatches.rule.colorMode ?? 'light'
-
-                // If the color mode matches the current theme, use the color as it was saved
-                if ((colorMode === 'dark' && isDarkModeOn) || (colorMode === 'light' && !isDarkModeOn)) {
-                    return ruleColor
-                }
-
-                // If the color mode is dark, but we're in light mode - then lighten the color
-                if (colorMode === 'dark' && !isDarkModeOn) {
-                    return lightenDarkenColor(ruleColor, 30)
-                }
-
-                // If the color mode is light, but we're in dark mode - then darken the color
-                return lightenDarkenColor(ruleColor, -30)
-            }
-
-            // The `style` and `className` cell callbacks are invoked independently for the same cell,
-            // so memoize per row record to run the ScriptVM rules (and any captureException) only once.
-            // The cache lives in this per-render closure, so it can't go stale across theme/rule changes.
-            const backgroundByRecord = new WeakMap<TableDataCell<any>[], string | undefined>()
-            const resolveConditionalFormattingBackground = (data: TableDataCell<any>[]): string | undefined => {
-                if (backgroundByRecord.has(data)) {
-                    return backgroundByRecord.get(data)
-                }
-                const backgroundColor = computeConditionalFormattingBackground(data)
-                backgroundByRecord.set(data, backgroundColor)
-                return backgroundColor
-            }
-
-            return {
-                ...columnMeta,
-                key: column.name,
-                // Sorting reorders rows, which doesn't make sense once the table is transposed
-                // (rows become the original columns), so only offer it in the normal orientation.
-                sorter: isTransposed ? undefined : (a, b) => compareTableCells(a[index], b[index]),
-                title: (
-                    <ColumnHeaderTitle formattedTitle={formattedTitle} fullTitle={fullColumnTitle}>
-                        {isPinningEnabled && (
-                            <Tooltip title={isColumnPinned(column.name) ? 'Unpin column' : 'Pin column'}>
-                                <span
-                                    className="inline-flex items-center justify-center cursor-pointer p-1 -m-1"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        toggleColumnPin(column.name)
-                                    }}
-                                >
-                                    {isColumnPinned(column.name) ? (
-                                        <IconPinFilled className="text-sm" />
-                                    ) : (
-                                        <IconPin className="text-sm" />
-                                    )}
-                                </span>
-                            </Tooltip>
-                        )}
-                    </ColumnHeaderTitle>
-                ),
-                render: (_, data, recordIndex: number, rowCount: number) => {
-                    const cell = data[index]
-
-                    if (cell.isTransposedHeader) {
-                        const sourceColumnTitle = cell.sourceColumnName
-                            ? getDisplayedColumnTitle(
-                                  cell.sourceColumnName,
-                                  sourceTabularColumnsByName.get(cell.sourceColumnName)?.settings?.display?.label,
-                                  props.query,
-                                  props.context
-                              )
-                            : cell.formattedValue
-                        const renderedSourceColumnTitle =
-                            typeof sourceColumnTitle === 'string'
-                                ? formatColumnTitle(sourceColumnTitle)
-                                : React.isValidElement(sourceColumnTitle) ||
-                                    sourceColumnTitle == null ||
-                                    typeof sourceColumnTitle === 'number'
-                                  ? sourceColumnTitle
-                                  : String(sourceColumnTitle)
-
-                        return (
-                            <div
-                                className="truncate"
-                                title={typeof sourceColumnTitle === 'string' ? sourceColumnTitle : undefined}
-                            >
-                                {renderedSourceColumnTitle}
-                            </div>
-                        )
-                    }
+                    const sourceColumnTitle = cell.sourceColumnName
+                        ? getDisplayedColumnTitle(
+                              cell.sourceColumnName,
+                              sourceTabularColumnsByName.get(cell.sourceColumnName)?.settings?.display?.label,
+                              props.query,
+                              props.context
+                          )
+                        : cell.formattedValue
+                    const renderedSourceColumnTitle =
+                        typeof sourceColumnTitle === 'string'
+                            ? formatColumnTitle(sourceColumnTitle)
+                            : React.isValidElement(sourceColumnTitle) ||
+                                sourceColumnTitle == null ||
+                                typeof sourceColumnTitle === 'number'
+                              ? sourceColumnTitle
+                              : String(sourceColumnTitle)
 
                     return (
-                        <div className="truncate" title={getCellTitle(cell)}>
-                            {renderColumn(
-                                cell.sourceColumnName ?? column.name,
-                                cell.formattedValue,
-                                data,
-                                recordIndex,
-                                rowCount,
-                                {
-                                    kind: NodeKind.DataTableNode,
-                                    source: props.query.source,
-                                }
-                            )}
+                        <div
+                            className="truncate"
+                            title={typeof sourceColumnTitle === 'string' ? sourceColumnTitle : undefined}
+                        >
+                            {renderedSourceColumnTitle}
                         </div>
                     )
-                },
-                style: (_, data) => {
-                    const backgroundColor = resolveConditionalFormattingBackground(data)
-                    return backgroundColor ? { backgroundColor } : undefined
-                },
-                className: (_, data) => {
-                    const backgroundColor = resolveConditionalFormattingBackground(data)
-                    // Pin the text color to the cell background rather than inheriting the theme's text
-                    // color, which is near-white in dark mode and unreadable on light backgrounds
-                    return backgroundColor ? getContrastingTextClass(backgroundColor) : ''
-                },
-            }
+                }
+
+                return (
+                    <div className="truncate" title={getCellTitle(cell)}>
+                        {renderColumn(
+                            cell.sourceColumnName ?? column.name,
+                            cell.formattedValue,
+                            data,
+                            recordIndex,
+                            rowCount,
+                            {
+                                kind: NodeKind.DataTableNode,
+                                source: props.query.source,
+                            }
+                        )}
+                    </div>
+                )
+            },
+            style: (_, data) => {
+                const backgroundColor = resolveConditionalFormattingBackground(data)
+                return backgroundColor ? { backgroundColor } : undefined
+            },
+            className: (_, data) => {
+                const backgroundColor = resolveConditionalFormattingBackground(data)
+                // Pin the text color to the cell background rather than inheriting the theme's text
+                // color, which is near-white in dark mode and unreadable on light backgrounds
+                return backgroundColor ? getContrastingTextClass(backgroundColor) : ''
+            },
         }
-    )
+    })
 
     return (
         <>

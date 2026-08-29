@@ -75,9 +75,7 @@ export function AIObservabilityDatasetsScene(): JSX.Element {
             key: 'status',
             render: function renderStatus(_, dataset) {
                 return (
-                    <Tag type={dataset.archived ? 'muted' : 'success'}>
-                        {dataset.archived ? 'Archived' : 'Active'}
-                    </Tag>
+                    <Tag type={dataset.archived ? 'muted' : 'success'}>{dataset.archived ? 'Archived' : 'Active'}</Tag>
                 )
             },
         },

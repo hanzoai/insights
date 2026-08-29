@@ -46,7 +46,7 @@ Token meanings:
 | `duration_ms` | integer                                                      | Wall-clock execution time                                      |
 | `rows`        | integer                                                      | Number of result rows returned                                 |
 | `version`     | integer                                                      | Which endpoint version ran                                     |
-| `error`       | e.g. `ResolutionError`, `ScriptVMException`                     | Error class / InsightsQL code name (failures only)                  |
+| `error`       | e.g. `ResolutionError`, `ScriptVMException`                  | Error class / InsightsQL code name (failures only)             |
 
 Each run gets a distinct `instance_id`, so logs group one-per-execution in the viewer.
 

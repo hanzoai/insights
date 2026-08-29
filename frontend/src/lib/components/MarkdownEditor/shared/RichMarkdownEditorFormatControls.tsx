@@ -1,13 +1,13 @@
 import { Editor } from '@tiptap/core'
 import { useState } from 'react'
 
-import { IconCode, IconList, IconMinus, IconPalette } from '@hanzo/icons'
 import { Button, Divider, Input, Menu } from '@hanzo/elements'
+import { IconCode, IconList, IconMinus, IconPalette } from '@hanzo/icons'
 
 import { WordArtModal } from 'lib/components/Cards/TextCard/WordArt/WordArtModal'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { IconBold, IconItalic, IconLink, IconTextSize } from 'lib/elements/icons'
 import { Popover } from 'lib/elements/Popover'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 
 function getHeadingTriggerContent(editor: Editor | null): JSX.Element | string {
     if (editor?.isActive('heading', { level: 1 })) {

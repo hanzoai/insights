@@ -1,8 +1,8 @@
 import insights from 'insights-js'
 import { useRef, useState } from 'react'
 
-import { IconChevronLeft } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconChevronLeft } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 

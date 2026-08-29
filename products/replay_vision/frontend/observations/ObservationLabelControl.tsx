@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconThumbsDown, IconThumbsDownFilled, IconThumbsUp, IconThumbsUpFilled } from '@hanzo/icons'
 import { Button, TextArea, Tooltip } from '@hanzo/elements'
+import { IconThumbsDown, IconThumbsDownFilled, IconThumbsUp, IconThumbsUpFilled } from '@hanzo/icons'
 
 import { AccessControlLevel } from '~/types'
 

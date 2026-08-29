@@ -19,7 +19,7 @@ Two token types, each a single capability for a single run. Neither carries user
 
 |           | Client (browser)                                              | Sandbox                                                       |
 | --------- | ------------------------------------------------------------- | ------------------------------------------------------------- |
-| `aud`     | `insights:stream_read`                                         | `insights:sandbox_event_ingest`                                |
+| `aud`     | `insights:stream_read`                                        | `insights:sandbox_event_ingest`                               |
 | Leg       | `GET /v1/runs/:run/stream`                                    | `POST /v1/runs/:run/ingest`                                   |
 | Minted by | `create_stream_read_token` (after Django authorizes the user) | `create_sandbox_event_ingest_token` (at sandbox provisioning) |
 | Grants    | read this run's stream                                        | append events to this run's stream                            |

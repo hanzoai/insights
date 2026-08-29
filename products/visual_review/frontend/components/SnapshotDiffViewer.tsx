@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconGithub } from '@hanzo/icons'
 import { Button, Skeleton, Tag, Link } from '@hanzo/elements'
+import { IconGithub } from '@hanzo/icons'
 
 import { VisualImageDiffViewer, type VisualDiffResult } from 'lib/components/VisualImageDiffViewer'
 import { Dialog } from 'lib/elements/Dialog'

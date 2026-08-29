@@ -1,5 +1,5 @@
-import { IconFilter } from '@hanzo/icons'
 import { Menu } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { capitalizeFirstLetter } from 'lib/utils/strings'

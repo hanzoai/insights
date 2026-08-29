@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { useActions } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'

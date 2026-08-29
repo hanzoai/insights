@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBell, IconCheck, IconEllipsis, IconRefresh, IconSparkles, IconSupport } from '@hanzo/icons'
 import { Banner, Button, Menu } from '@hanzo/elements'
+import { IconBell, IconCheck, IconEllipsis, IconRefresh, IconSparkles, IconSupport } from '@hanzo/icons'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { FEATURE_FLAGS } from 'lib/constants'

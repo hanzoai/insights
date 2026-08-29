@@ -42,14 +42,7 @@ describe('Table', () => {
         [false, ['alpha', 'beta', 'gamma']],
     ])('useURLForSorting=%s reads the order search param only when enabled', (useURLForSorting, expectedOrder) => {
         router.actions.push(router.values.location.pathname, { order: '-value' })
-        render(
-            <Table
-                rowKey="id"
-                dataSource={DATA}
-                columns={COLUMNS}
-                useURLForSorting={useURLForSorting as boolean}
-            />
-        )
+        render(<Table rowKey="id" dataSource={DATA} columns={COLUMNS} useURLForSorting={useURLForSorting as boolean} />)
         expect(renderedOrder()).toEqual(expectedOrder)
     })
 

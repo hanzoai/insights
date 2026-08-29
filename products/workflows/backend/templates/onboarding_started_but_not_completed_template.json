@@ -37,9 +37,7 @@
                         {
                             "key": "email",
                             "type": "person",
-                            "value": [
-                                "sara@hanzo.ai"
-                            ],
+                            "value": ["sara@hanzo.ai"],
                             "operator": "exact"
                         }
                     ]
@@ -91,16 +89,7 @@
         "ttl": null,
         "threshold": null,
         "hash": "{person.id}",
-        "bytecode": [
-            "_H",
-            1,
-            32,
-            "id",
-            32,
-            "person",
-            1,
-            2
-        ]
+        "bytecode": ["_H", 1, 32, "id", 32, "person", 1, 2]
     },
     "conversion": {
         "filters": [],
@@ -186,9 +175,7 @@
                                 {
                                     "key": "email",
                                     "type": "person",
-                                    "value": [
-                                        "sara@hanzo.ai"
-                                    ],
+                                    "value": ["sara@hanzo.ai"],
                                     "operator": "exact"
                                 }
                             ]
@@ -252,11 +239,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -292,9 +275,7 @@
                                     "rows": [
                                         {
                                             "id": "IVusdnqord",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -318,10 +299,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -470,11 +448,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -510,9 +484,7 @@
                                     "rows": [
                                         {
                                             "id": "uCai3F2rTd",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -536,10 +508,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -645,9 +614,7 @@
                                         },
                                         {
                                             "id": "LfBCvdKXzT",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_2",

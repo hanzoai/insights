@@ -491,29 +491,28 @@ export function OperatorSelect({
     startVisible,
 }: OperatorSelectProps): JSX.Element {
     const hasSemver = operators.some(isOperatorSemver)
-    const options: SelectSection<PropertyOperator>[] | { label: JSX.Element; value: PropertyOperator }[] =
-        hasSemver
-            ? [
-                  ...(operators.some((op) => !isOperatorSemver(op))
-                      ? [{ options: operators.filter((op) => !isOperatorSemver(op)).map(toOption) }]
-                      : []),
-                  {
-                      title: 'Semver operators',
-                      footer: (
-                          <div className="mx-2 my-1">
-                              <Link
-                                  to="https://hanzo.ai/docs/data/property-filters#semver-operators"
-                                  target="_blank"
-                                  className="text-xs"
-                              >
-                                  Learn more
-                              </Link>
-                          </div>
-                      ),
-                      options: operators.filter(isOperatorSemver).map(toOption),
-                  },
-              ]
-            : operators.map(toOption)
+    const options: SelectSection<PropertyOperator>[] | { label: JSX.Element; value: PropertyOperator }[] = hasSemver
+        ? [
+              ...(operators.some((op) => !isOperatorSemver(op))
+                  ? [{ options: operators.filter((op) => !isOperatorSemver(op)).map(toOption) }]
+                  : []),
+              {
+                  title: 'Semver operators',
+                  footer: (
+                      <div className="mx-2 my-1">
+                          <Link
+                              to="https://hanzo.ai/docs/data/property-filters#semver-operators"
+                              target="_blank"
+                              className="text-xs"
+                          >
+                              Learn more
+                          </Link>
+                      </div>
+                  ),
+                  options: operators.filter(isOperatorSemver).map(toOption),
+              },
+          ]
+        : operators.map(toOption)
 
     return (
         <Select

@@ -1,5 +1,5 @@
-import { IconCopy, IconInfo } from '@hanzo/icons'
 import { Button, Input, Select } from '@hanzo/elements'
+import { IconCopy, IconInfo } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { Tooltip } from 'lib/elements/Tooltip'

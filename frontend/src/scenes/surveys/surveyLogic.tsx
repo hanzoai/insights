@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -16,7 +17,6 @@ import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

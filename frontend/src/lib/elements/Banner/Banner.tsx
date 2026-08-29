@@ -59,14 +59,7 @@ export function Banner({
     }
 
     return (
-        <div
-            className={clsx(
-                'Banner @container',
-                `Banner--${type}`,
-                className,
-                square && 'Banner--square'
-            )}
-        >
+        <div className={clsx('Banner @container', `Banner--${type}`, className, square && 'Banner--square')}>
             <div className="flex items-center gap-2 grow @md:!px-1">
                 {!hideIcon &&
                     (icon ? (
@@ -74,17 +67,13 @@ export function Banner({
                     ) : type === 'warning' || type === 'error' ? (
                         <IconWarning className={clsx('Banner__icon', hideIcon !== false && 'hidden @md:!block')} />
                     ) : type === 'ai' ? (
-                        <IconSparkles
-                            className={clsx('Banner__icon', hideIcon !== false && 'hidden @md:!block')}
-                        />
+                        <IconSparkles className={clsx('Banner__icon', hideIcon !== false && 'hidden @md:!block')} />
                     ) : (
                         <IconInfo className={clsx('Banner__icon', hideIcon !== false && 'hidden @md:!block')} />
                     ))}
                 <div className="grow overflow-hidden">{children}</div>
                 {action && <Button className="!hidden @md:!flex" type="secondary" {...action} />}
-                {showCloseButton && (
-                    <Button size="xsmall" icon={<IconX />} onClick={_onClose} aria-label="close" />
-                )}
+                {showCloseButton && <Button size="xsmall" icon={<IconX />} onClick={_onClose} aria-label="close" />}
             </div>
             {action && <Button className="@md:!hidden" type="secondary" fullWidth {...action} />}
         </div>

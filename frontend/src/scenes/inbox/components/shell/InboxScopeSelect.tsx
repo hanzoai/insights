@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconAsterisk, IconCheck, IconChevronDown } from '@hanzo/icons'
 import { Input, SegmentedButton, Spinner } from '@hanzo/elements'
+import { IconAsterisk, IconCheck, IconChevronDown } from '@hanzo/icons'
 
 import { Popover } from 'lib/elements/Popover'
 import { ProfilePicture } from 'lib/elements/ProfilePicture/ProfilePicture'

@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconArrowRight, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import { Dialog } from '@hanzo/elements'
+import { IconArrowRight, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { moveToLogic } from 'lib/components/FileSystem/MoveTo/moveToLogic'
 import { Field } from 'lib/elements/Field'

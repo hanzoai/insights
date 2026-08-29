@@ -2,8 +2,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
-import { IconOpenSidebar } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconOpenSidebar } from '@hanzo/icons'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { NotFound } from 'lib/components/NotFound'
@@ -107,8 +107,8 @@ export function NotebookScene(): JSX.Element {
                 </h2>
 
                 <p>
-                    You can navigate around Insights and <b>drag and drop</b> thing into it. Or you can close the sidebar
-                    and it will be full screen here instead.
+                    You can navigate around Insights and <b>drag and drop</b> thing into it. Or you can close the
+                    sidebar and it will be full screen here instead.
                 </p>
 
                 <Button type="secondary" onClick={() => closeSidePanel()}>

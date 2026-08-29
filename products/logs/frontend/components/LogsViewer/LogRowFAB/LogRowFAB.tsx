@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBrackets, IconChevronLeft, IconChevronRight, IconExpand45, IconPin, IconPinFilled } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconBrackets, IconChevronLeft, IconChevronRight, IconExpand45, IconPin, IconPinFilled } from '@hanzo/icons'
 
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { IconLink } from 'lib/elements/icons'

@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
+import { Button, Dialog, Input, Label, Menu, Modal, Select, Table, TableColumns } from '@hanzo/elements'
 import { IconEllipsis, IconPlusSmall } from '@hanzo/icons'
-import {
-    Button,
-    Dialog,
-    Input,
-    Label,
-    Menu,
-    Modal,
-    Select,
-    Table,
-    TableColumns,
-} from '@hanzo/elements'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -20,9 +10,9 @@ import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicStringPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { TeamMembershipLevel } from 'lib/constants'
+import { Field } from 'lib/elements/Field'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
-import { Field } from 'lib/elements/Field'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
@@ -276,7 +266,11 @@ function UsageMetricsForm(): JSX.Element {
                                         propertiesTaxonomicGroupTypes={taxonomicGroupTypes}
                                         propertyFiltersPopover
                                         dataWarehousePopoverFields={[
-                                            { key: 'timestamp_field', label: 'Timestamp column', allowInsightsQL: true },
+                                            {
+                                                key: 'timestamp_field',
+                                                label: 'Timestamp column',
+                                                allowInsightsQL: true,
+                                            },
                                             { key: 'key_field', label: 'Group key column' },
                                         ]}
                                         addFilterDefaultOptions={{

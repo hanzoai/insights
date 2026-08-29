@@ -77,9 +77,9 @@ Use this **hardcoded** URL for day-to-day local queries (matches typical Docker 
 | -------- | ----------- |
 | Host     | `localhost` |
 | Port     | `5432`      |
-| User     | `insights`   |
-| Password | `insights`   |
-| Database | `insights`   |
+| User     | `insights`  |
+| Password | `insights`  |
+| Database | `insights`  |
 | SSL      | off         |
 
 ```bash

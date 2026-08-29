@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
-import { IconExternal, IconLogomark } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconExternal, IconLogomark } from '@hanzo/icons'
 
-import { useInterval } from 'lib/hooks/useInterval'
 import { IconSlack } from 'lib/elements/icons'
+import { useInterval } from 'lib/hooks/useInterval'
 import { cn } from 'lib/utils/css-classes'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 

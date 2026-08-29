@@ -10,8 +10,8 @@ import { IconX } from '@hanzo/icons'
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
-import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { Button } from 'lib/elements/Button'
+import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 
 import { Tooltip } from '../Tooltip'
 

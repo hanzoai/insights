@@ -27,15 +27,15 @@ don't re-clone every session. First time on a machine, run `python3 scripts/repo
 to auto-discover existing checkouts; thereafter `python3 scripts/repos.py ensure <repo>`
 prints the path (and `--clone` clones if missing).
 
-| Concern              | Repo                                                                        | Where to look                                                            |
-| -------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Product UI + backend | this monorepo (Insights/insights)                                             | UI: `frontend/src/scenes/surveys/`, backend: `products/surveys/backend/` |
+| Concern              | Repo                                                                            | Where to look                                                            |
+| -------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Product UI + backend | this monorepo (Insights/insights)                                               | UI: `frontend/src/scenes/surveys/`, backend: `products/surveys/backend/` |
 | Web SDK              | [Insights/insights-js](https://github.com/Insights/insights-js)                 | `packages/browser/`                                                      |
 | React Native SDK     | [Insights/insights-js](https://github.com/Insights/insights-js) (same monorepo) | `packages/react-native/`                                                 |
 | iOS SDK              | [Insights/insights-ios](https://github.com/Insights/insights-ios)               | survey rendering + eligibility                                           |
 | Android SDK          | [Insights/insights-android](https://github.com/Insights/insights-android)       | eligibility (delegate-based UI)                                          |
 | Flutter SDK          | [Insights/insights-flutter](https://github.com/Insights/insights-flutter)       | Dart rendering; native iOS/Android handles eligibility                   |
-| Public docs          | [Insights/hanzo.ai](https://github.com/Insights/hanzo.ai)               | `contents/docs/surveys/`                                                 |
+| Public docs          | [Insights/hanzo.ai](https://github.com/Insights/hanzo.ai)                       | `contents/docs/surveys/`                                                 |
 
 Always check the local checkout is present and on a sane branch before quoting code; line
 numbers drift, so grep for the symbol rather than trusting a remembered line number.
@@ -47,7 +47,7 @@ Confirm the survey's `lib` / the customer's platform before anything else, then 
 this table. Verified against the SDK source — re-verify if it's been months, the gaps
 get filled over time.
 
-| Feature                         | Web (insights-js)                | iOS                                       | Android                            | Flutter                            | React Native                            |
+| Feature                         | Web (insights-js)               | iOS                                       | Android                            | Flutter                            | React Native                            |
 | ------------------------------- | ------------------------------- | ----------------------------------------- | ---------------------------------- | ---------------------------------- | --------------------------------------- |
 | Rendering                       | DOM + shadow root               | Native SwiftUI (`SurveysWindow`)          | **No built-in UI** — delegate only | Dart widgets (`SurveyBottomSheet`) | RN components (`SurveyModal`)           |
 | Event-based triggers            | yes (since 1.137.0, 2024-06-05) | yes                                       | yes                                | yes (native side)                  | yes                                     |

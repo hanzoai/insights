@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconPencil, IconTrash } from '@hanzo/icons'
 import { Dialog } from '@hanzo/elements'
+import { IconPencil, IconTrash } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Tag } from 'lib/elements/Tag'

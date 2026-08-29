@@ -4,21 +4,12 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ReactNode, useRef, useState } from 'react'
 
+import { Badge, Banner, Button, Collapse, Skeleton, Link, Spinner, Tooltip } from '@hanzo/elements'
 import { IconSidebarClose } from '@hanzo/icons'
-import {
-    Badge,
-    Banner,
-    Button,
-    Collapse,
-    Skeleton,
-    Link,
-    Spinner,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
-import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { TableLoader } from 'lib/elements/Table/TableLoader'
+import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { range } from 'lib/utils/arrays'
 import { pluralize } from 'lib/utils/strings'
 import { DraggableToNotebook } from 'scenes/notebooks/AddToNotebook/DraggableToNotebook'

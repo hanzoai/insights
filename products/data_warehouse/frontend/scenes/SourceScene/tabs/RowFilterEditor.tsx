@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Input, Select } from '@hanzo/elements'
+import { IconPlus, IconTrash } from '@hanzo/icons'
 
 import { RowFilter, RowFilterOperator } from '~/types'
 

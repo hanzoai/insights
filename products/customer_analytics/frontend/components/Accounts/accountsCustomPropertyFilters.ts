@@ -144,7 +144,9 @@ export function customPropertyFilterToExpression(
         case PropertyOperator.NotIContains: {
             // Several values match "contains any of them" (so the negation is "contains none"),
             // mirroring insights/insightsql/property.py's multi-value search semantics.
-            const anyMatch = values.map((value) => `${column} ILIKE ${escapeInsightsQLString(`%${value}%`)}`).join(' OR ')
+            const anyMatch = values
+                .map((value) => `${column} ILIKE ${escapeInsightsQLString(`%${value}%`)}`)
+                .join(' OR ')
             if (operator === PropertyOperator.NotIContains) {
                 return includeUnset(`NOT (${anyMatch})`)
             }
@@ -152,7 +154,9 @@ export function customPropertyFilterToExpression(
         }
         case PropertyOperator.Regex:
         case PropertyOperator.NotRegex: {
-            const anyMatch = values.map((value) => `match(${column}, ${escapeInsightsQLString(String(value))})`).join(' OR ')
+            const anyMatch = values
+                .map((value) => `match(${column}, ${escapeInsightsQLString(String(value))})`)
+                .join(' OR ')
             if (operator === PropertyOperator.NotRegex) {
                 return includeUnset(`NOT (${anyMatch})`)
             }

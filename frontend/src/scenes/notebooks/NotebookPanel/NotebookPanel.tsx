@@ -2,8 +2,8 @@ import './NotebookPanel.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconExpand45 } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconExpand45 } from '@hanzo/icons'
 
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
 import { cn } from 'lib/utils/css-classes'

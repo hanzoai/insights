@@ -19,8 +19,8 @@ individual traces, also use `exploring-llm-traces`.
 
 ## Tools
 
-| Tool                            | Purpose                                                            |
-| ------------------------------- | ------------------------------------------------------------------ |
+| Tool                             | Purpose                                                            |
+| -------------------------------- | ------------------------------------------------------------------ |
 | `insights:execute-sql`           | Rank users and compare their metrics against the project baseline  |
 | `insights:query-llm-traces-list` | Find high-cost traces for a specific user                          |
 | `insights:query-llm-trace`       | Read representative traces to explain what actually happened       |

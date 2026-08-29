@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArrowRight, IconChevronDown, IconCursor } from '@hanzo/icons'
 import { Banner, Button, Card, Label, Select } from '@hanzo/elements'
+import { IconArrowRight, IconChevronDown, IconCursor } from '@hanzo/icons'
 
 import { Logomark } from 'lib/brand'
 import { getFeatureFlagPayload } from 'lib/logic/featureFlagLogic'

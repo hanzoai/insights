@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
+import { Button, Checkbox, Collapse, Input, InputSelect, SegmentedButton, Select, Tooltip } from '@hanzo/elements'
 import { IconInfo, IconPlus, IconX } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Collapse,
-    Input,
-    InputSelect,
-    SegmentedButton,
-    Select,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

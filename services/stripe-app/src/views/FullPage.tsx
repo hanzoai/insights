@@ -10,9 +10,9 @@ import EventsTab from '../fullPage/EventsTab'
 import ExperimentsTab from '../fullPage/ExperimentsTab'
 import FeatureFlagsTab from '../fullPage/FeatureFlagsTab'
 import OverviewTab from '../fullPage/OverviewTab'
-import { logger } from '../logger'
 import { getBaseUrlForRegion, loadCredentials } from '../insights/auth'
 import { InsightsClient } from '../insights/client'
+import { logger } from '../logger'
 
 const stripe = new Stripe(STRIPE_API_KEY, { httpClient: createHttpClient() })
 

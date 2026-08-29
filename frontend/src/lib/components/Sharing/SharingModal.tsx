@@ -1,28 +1,20 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { ReactNode, useEffect, useState } from 'react'
 
+import { Banner, Button, Divider, Modal, Select, Skeleton, Switch } from '@hanzo/elements'
 import { IconCollapse, IconExpand, IconInfo, IconLock } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Divider,
-    Modal,
-    Select,
-    Skeleton,
-    Switch,
-} from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { TEMPLATE_LINK_HEADING, TEMPLATE_LINK_PII_WARNING } from 'lib/components/Sharing/templateLinkMessages'
 import { TemplateLinkSection } from 'lib/components/Sharing/TemplateLinkSection'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconLink } from 'lib/elements/icons'
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
+import { IconLink } from 'lib/elements/icons'
 import { Label } from 'lib/elements/Label/Label'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
@@ -429,9 +421,7 @@ export function SharingModalContent({
                                                         >
                                                             {({ value, onChange }) => (
                                                                 <>
-                                                                    <Label htmlFor="sharing-theme-select">
-                                                                        Theme
-                                                                    </Label>
+                                                                    <Label htmlFor="sharing-theme-select">Theme</Label>
                                                                     <Select
                                                                         id="sharing-theme-select"
                                                                         value={value ?? 'system'}

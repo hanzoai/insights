@@ -12,11 +12,7 @@ export function ExperimentStatItem({ label, value, loading, chart }: ExperimentS
         <div className="flex flex-col gap-0.5">
             <span className="text-xs text-muted">{label}</span>
             <div className="flex items-center gap-1.5">
-                {loading ? (
-                    <Skeleton className="w-12 h-4" />
-                ) : (
-                    <span className="font-semibold text-sm">{value}</span>
-                )}
+                {loading ? <Skeleton className="w-12 h-4" /> : <span className="font-semibold text-sm">{value}</span>}
                 {chart}
             </div>
         </div>

@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCollapse, IconExpand, IconSort } from '@hanzo/icons'
 import { Button, Card } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconSort } from '@hanzo/icons'
 
 import { RecordingEventType, SessionEventType } from '~/types'
 

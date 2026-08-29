@@ -1,8 +1,8 @@
 import { deepEqual as equal } from 'fast-equals'
 import { useActions, useValues } from 'kea'
 
-import { IconFilter } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 import { sessionRecordingsPlaylistLogic } from '../playlist/sessionRecordingsPlaylistLogic'
 import { sessionRecordingSavedFiltersLogic } from './sessionRecordingSavedFiltersLogic'

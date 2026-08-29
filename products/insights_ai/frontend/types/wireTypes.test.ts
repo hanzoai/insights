@@ -82,7 +82,9 @@ const NOTIFICATION_PARAMS_BY_METHOD: { [M in keyof InsightsNotificationParamsByM
         { sessionId: 'sess_a1b2c3', status: 'compacting' },
         { sessionId: 'sess_a1b2c3', status: 'compacting', isComplete: true },
     ],
-    '_insights/compact_boundary': [{ sessionId: 'sess_a1b2c3', trigger: 'auto', preTokens: 168000, contextSize: 54000 }],
+    '_insights/compact_boundary': [
+        { sessionId: 'sess_a1b2c3', trigger: 'auto', preTokens: 168000, contextSize: 54000 },
+    ],
     '_insights/task_notification': [
         {
             sessionId: 'sess_a1b2c3',
@@ -127,7 +129,9 @@ const NOTIFICATION_PARAMS_BY_METHOD: { [M in keyof InsightsNotificationParamsByM
     '_insights/turn_complete': [{ sessionId: 'sess_a1b2c3', stopReason: 'end_turn' }],
 }
 
-const KNOWN_INSIGHTS_METHODS = Object.keys(NOTIFICATION_PARAMS_BY_METHOD) as (keyof InsightsNotificationParamsByMethod)[]
+const KNOWN_INSIGHTS_METHODS = Object.keys(
+    NOTIFICATION_PARAMS_BY_METHOD
+) as (keyof InsightsNotificationParamsByMethod)[]
 
 const SESSION_UPDATE_CASES: { kind: string; update: Record<string, unknown> }[] = [
     {

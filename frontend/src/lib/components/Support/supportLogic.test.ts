@@ -1,5 +1,5 @@
-import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
+import { expectLogic } from 'kea-test-utils'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -119,7 +119,9 @@ describe('supportLogic', () => {
         const zendeskCalls = (): unknown[][] => fetchMock.mock.calls.filter(([url]) => url === ZENDESK_URL)
 
         const aiTicketCaptures = (): unknown[][] =>
-            (insights.capture as jest.Mock).mock.calls.filter(([event]) => event === 'insights_ai_support_ticket_created')
+            (insights.capture as jest.Mock).mock.calls.filter(
+                ([event]) => event === 'insights_ai_support_ticket_created'
+            )
 
         const enableConversationsFlag = (): void => {
             featureFlagLogic.actions.setFeatureFlags([], { [FEATURE_FLAGS.PRODUCT_SUPPORT_SIDE_PANEL]: true })

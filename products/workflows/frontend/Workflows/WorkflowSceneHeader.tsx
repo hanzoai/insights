@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconArchive, IconCopy, IconScreen } from '@hanzo/icons'
 import { Button, Divider } from '@hanzo/elements'
+import { IconArchive, IconCopy, IconScreen } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'

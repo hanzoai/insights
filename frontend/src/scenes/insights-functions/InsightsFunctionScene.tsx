@@ -20,12 +20,12 @@ import { Divider } from '@hanzo/elements'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Tab, Tabs } from 'lib/elements/Tabs'
 import { Tag } from 'lib/elements/Tag/Tag'
+import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { DataPipelinesNewSceneKind } from 'scenes/data-pipelines/DataPipelinesNewScene'
@@ -54,13 +54,20 @@ import {
     InsightsFunctionConfigurationSaveButton,
 } from './configuration/components/InsightsFunctionConfigurationButtons'
 import { InsightsFunctionIconEditable } from './configuration/InsightsFunctionIcon'
-import { humanizeInsightsFunctionType } from './script-function-utils'
 import { HogInvocations } from './invocations/HogInvocations'
 import { InsightsFunctionMetrics } from './metrics/InsightsFunctionMetrics'
 import { InsightsFunctionSkeleton } from './misc/InsightsFunctionSkeleton'
 import { InsightsFunctionRuns } from './runs/InsightsFunctionRuns'
+import { humanizeInsightsFunctionType } from './script-function-utils'
 
-const INSIGHTS_FUNCTION_SCENE_TABS = ['configuration', 'metrics', 'runs', 'invocations', 'backfills', 'history'] as const
+const INSIGHTS_FUNCTION_SCENE_TABS = [
+    'configuration',
+    'metrics',
+    'runs',
+    'invocations',
+    'backfills',
+    'history',
+] as const
 export type InsightsFunctionSceneTab = (typeof INSIGHTS_FUNCTION_SCENE_TABS)[number]
 
 const InsightsFunctionSceneMapping: Partial<

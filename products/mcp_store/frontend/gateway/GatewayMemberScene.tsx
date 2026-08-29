@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button, Divider, Switch, Tag, ProfilePicture, Spinner } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { SceneExport } from 'scenes/sceneTypes'

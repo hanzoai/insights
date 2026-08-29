@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCopy, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
 import { Button, Input, Modal } from '@hanzo/elements'
+import { IconCopy, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
 
 import { Dialog } from 'lib/elements/Dialog'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

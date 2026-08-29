@@ -2,6 +2,7 @@ import { useActions, useAsyncActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
+import { Dialog } from '@hanzo/elements'
 import {
     IconArchive,
     IconCopy,
@@ -14,7 +15,6 @@ import {
     IconTrash,
     IconUnlock,
 } from '@hanzo/icons'
-import { Dialog } from '@hanzo/elements'
 
 import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'

@@ -119,8 +119,8 @@ function RNSetupSurveysProvider(): JSX.Element {
 </InsightsProvider>`}
             </CodeSnippet>
             <p>
-                If you're not using the InsightsProvider, add InsightsSurveyProvider to your app anywhere inside your app
-                root component.
+                If you're not using the InsightsProvider, add InsightsSurveyProvider to your app anywhere inside your
+                app root component.
             </p>
             <CodeSnippet language={Language.JSX}>
                 {`<YourAppRoot>

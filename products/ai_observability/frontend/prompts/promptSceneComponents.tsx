@@ -2,17 +2,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { Suspense, useRef } from 'react'
 
+import { Banner, Button, Modal, Select, Tabs, Tag, TextArea, Link } from '@hanzo/elements'
 import { IconColumns, IconMarkdown, IconMarkdownFilled, IconPlusSmall } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Modal,
-    Select,
-    Tabs,
-    Tag,
-    TextArea,
-    Link,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
@@ -21,10 +12,10 @@ import { dayjs } from 'lib/dayjs'
 import { Field } from 'lib/elements/Field'
 import { Input } from 'lib/elements/Input'
 import { Markdown } from 'lib/elements/Markdown'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Table, TableColumns } from 'lib/elements/Table'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { lazyWithRetry } from 'lib/utils/retryImport'

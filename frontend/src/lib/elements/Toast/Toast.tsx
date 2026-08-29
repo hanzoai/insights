@@ -7,21 +7,13 @@ import { getIncidentStatus, STATUS_PAGE_BASE } from 'lib/components/HelpMenu/inc
 import { isChristmas } from 'lib/holidays'
 import { hashCodeForString } from 'lib/utils/strings'
 
-import { IconErrorOutline, IconGift } from '../icons'
 import { Button } from '../Button'
+import { IconErrorOutline, IconGift } from '../icons'
 import { Link } from '../Link'
 import { Spinner } from '../Spinner'
 
 export function ToastCloseButton({ closeToast }: { closeToast?: () => void }): JSX.Element {
-    return (
-        <Button
-            type="tertiary"
-            size="small"
-            icon={<IconX />}
-            onClick={closeToast}
-            data-attr="toast-close-button"
-        />
-    )
+    return <Button type="tertiary" size="small" icon={<IconX />} onClick={closeToast} data-attr="toast-close-button" />
 }
 
 interface ToastButton {

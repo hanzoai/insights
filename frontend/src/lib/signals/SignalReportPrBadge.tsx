@@ -1,5 +1,5 @@
-import { IconPullRequest, type IconProps } from '@hanzo/icons'
 import { Link, Tooltip } from '@hanzo/elements'
+import { IconPullRequest, type IconProps } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 

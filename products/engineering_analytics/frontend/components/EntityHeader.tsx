@@ -2,8 +2,8 @@
 
 import { ReactNode } from 'react'
 
-import { IconBox } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconBox } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 

@@ -1,19 +1,11 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import {
-    Button,
-    Input,
-    InputSelect,
-    Modal,
-    Switch,
-    Table,
-    Tag,
-} from '@hanzo/elements'
+import { Button, Input, InputSelect, Modal, Switch, Table, Tag } from '@hanzo/elements'
 
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { More } from 'lib/elements/Button/More'
 import { Field } from 'lib/elements/Field'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 
 import { LogsMetricRuleApi } from 'products/logs/frontend/generated/api.schemas'
 import { LogsFeatureFlagKeys } from 'products/logs/frontend/logsFeatureFlagKeys'
@@ -201,9 +193,7 @@ function LogsMetricRuleForm({ rule }: { rule: LogsMetricRuleApi | null }): JSX.E
                     )}
                 </Field>
                 <Field name="enabled">
-                    {({ value, onChange }) => (
-                        <Switch checked={value} onChange={onChange} label="Enabled" bordered />
-                    )}
+                    {({ value, onChange }) => <Switch checked={value} onChange={onChange} label="Enabled" bordered />}
                 </Field>
                 <div className="flex justify-end gap-2">
                     <Button type="secondary" onClick={closeRuleModal}>

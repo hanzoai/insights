@@ -1,8 +1,8 @@
 import { api } from 'lib/api.mock'
 
+import insights from 'insights-js'
 import { router } from 'kea-router'
 import { expectLogic, partial } from 'kea-test-utils'
-import insights from 'insights-js'
 import { v4 as uuidv4 } from 'uuid'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

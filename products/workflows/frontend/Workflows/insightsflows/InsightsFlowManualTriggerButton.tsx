@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 
+import { Button, Input, Popover } from '@hanzo/elements'
 import { IconPlayFilled } from '@hanzo/icons'
 import { IconChevronDown } from '@hanzo/icons'
-import { Button, Input, Popover } from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 import { humanFriendlyNumber } from 'lib/utils/numbers'

@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { memo, useMemo, useState } from 'react'
 
-import { IconArrowRight, IconChevronDown, IconExternal } from '@hanzo/icons'
 import { Button, Skeleton, Link } from '@hanzo/elements'
+import { IconArrowRight, IconChevronDown, IconExternal } from '@hanzo/icons'
 
 import { Markdown } from 'lib/elements/Markdown'
 import { pluralize } from 'lib/utils/strings'
@@ -139,8 +139,8 @@ const ScoutRunRow = memo(function ScoutRunRow({
                         </Markdown>
                     ) : status === 'failed' ? (
                         <span className="text-sm italic text-muted">
-                            No summary — the run ended before writing its close-out. The task run in Insights is the only
-                            diagnostic.
+                            No summary — the run ended before writing its close-out. The task run in Insights is the
+                            only diagnostic.
                         </span>
                     ) : null}
 

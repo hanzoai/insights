@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCheck, IconWarning } from '@hanzo/icons'
 import { Skeleton, Link } from '@hanzo/elements'
+import { IconCheck, IconWarning } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

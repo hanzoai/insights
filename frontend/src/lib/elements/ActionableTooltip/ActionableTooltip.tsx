@@ -2,8 +2,8 @@ import './ActionableTooltip.scss'
 
 import { Placement } from '@floating-ui/react'
 
-import { IconChevronLeft, IconChevronRight, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconChevronLeft, IconChevronRight, IconX } from '@hanzo/icons'
 
 import { IconOpenInNew } from 'lib/elements/icons'
 import { Popover } from 'lib/elements/Popover/Popover'
@@ -115,13 +115,7 @@ export const ActionableTooltip = ({
                             <div className="ActionableTooltip__action-buttons">
                                 {actionButtons.map((button, index) => {
                                     return (
-                                        <Button
-                                            key={index}
-                                            type="primary"
-                                            onClick={button.action}
-                                            fullWidth
-                                            center
-                                        >
+                                        <Button key={index} type="primary" onClick={button.action} fullWidth center>
                                             {button.label}
                                         </Button>
                                     )

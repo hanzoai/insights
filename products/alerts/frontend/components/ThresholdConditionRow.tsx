@@ -27,7 +27,10 @@ export interface ThresholdConditionRowProps {
 
 /** Relative conditions (increase/decrease by) need a time series, so they're disabled for non-time-series
  *  trends and for InsightsQL any-row mode. Mirrors the gating in AlertDefinitionSection. */
-function relativeConditionDisabledReason(isNonTimeSeriesDisplay: boolean, isAnyRowInsightsQL: boolean): string | undefined {
+function relativeConditionDisabledReason(
+    isNonTimeSeriesDisplay: boolean,
+    isAnyRowInsightsQL: boolean
+): string | undefined {
     if (isNonTimeSeriesDisplay) {
         return 'This condition is only supported for time series trends'
     }
@@ -64,7 +67,9 @@ export function ThresholdConditionRow({
 }: ThresholdConditionRowProps): JSX.Element {
     const isFunnelAlert = isFunnelsAlertConfig(alertForm.config)
     const isAnyRowInsightsQL =
-        !!alertForm.config && alertForm.config.type === 'InsightsQLAlertConfig' && alertForm.config.evaluation === 'any_row'
+        !!alertForm.config &&
+        alertForm.config.type === 'InsightsQLAlertConfig' &&
+        alertForm.config.evaluation === 'any_row'
     const disabledReason = relativeConditionDisabledReason(isNonTimeSeriesDisplay, isAnyRowInsightsQL)
     const isRelative = alertForm.condition?.type !== AlertConditionType.ABSOLUTE_VALUE
 

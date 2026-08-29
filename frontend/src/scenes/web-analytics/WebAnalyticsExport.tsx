@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { shareNudgeLogic } from 'scenes/web-analytics/shareNudgeLogic'
 

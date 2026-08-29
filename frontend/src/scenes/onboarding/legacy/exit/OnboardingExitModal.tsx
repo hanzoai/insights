@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Button, Input, TextArea } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { MailHog } from 'lib/components/mascots'
 import { Modal } from 'lib/elements/Modal'

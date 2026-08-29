@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -14,10 +15,9 @@ import {
 } from 'kea'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
-import { IconPlus } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { TreeSelectMode, TreeDataItem } from 'lib/elements/Tree/Tree'

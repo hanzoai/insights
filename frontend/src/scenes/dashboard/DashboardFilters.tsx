@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

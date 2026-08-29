@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck } from '@hanzo/icons'
 import { Banner, Button, Input, Modal, SegmentedButton } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
 
 import { Slider } from 'lib/elements/Slider'
 import { Label } from 'lib/ui/Label/Label'

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

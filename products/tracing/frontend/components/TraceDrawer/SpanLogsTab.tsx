@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button, SegmentedButton } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 

@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconSparkles, IconWarning } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconSparkles, IconWarning } from '@hanzo/icons'
 
 import { Button, ButtonProps } from 'lib/elements/Button'
 

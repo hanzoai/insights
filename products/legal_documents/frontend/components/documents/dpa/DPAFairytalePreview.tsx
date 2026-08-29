@@ -56,9 +56,10 @@ export function DPAFairytalePreview(): JSX.Element {
                 className="legal-document-preview__fairytale-float-right"
             />
             <p>
-                {Company}, a noble Data Controller, entrusted its treasures to the Insights wizards. The wizards promised
-                to safeguard the treasures by using their enchanted tools and secret spells to process and analyze the
-                data. They vowed never to use the treasures for evil and always to follow {Company}'s wise instructions.
+                {Company}, a noble Data Controller, entrusted its treasures to the Insights wizards. The wizards
+                promised to safeguard the treasures by using their enchanted tools and secret spells to process and
+                analyze the data. They vowed never to use the treasures for evil and always to follow {Company}'s wise
+                instructions.
             </p>
 
             <img
@@ -85,8 +86,8 @@ export function DPAFairytalePreview(): JSX.Element {
                 className="legal-document-preview__fairytale-float-right"
             />
             <p>
-                {Company} and Insights celebrated their alliance with a grand feast in the grand hall, signing their pact
-                with quill and enchanted ink. They agreed that their magical contract would be overseen by the wise
+                {Company} and Insights celebrated their alliance with a grand feast in the grand hall, signing their
+                pact with quill and enchanted ink. They agreed that their magical contract would be overseen by the wise
                 elders of the land — judges from the jurisdiction of England and Wales.
             </p>
 

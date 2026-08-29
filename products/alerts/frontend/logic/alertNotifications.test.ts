@@ -111,7 +111,11 @@ describe('alertUtils', () => {
         ])(
             'builds correct payload for $name',
             ({ notification, alertName, expectedName, expectedTemplateId, expectedInputKeys }) => {
-                const result = buildInsightsFunctionPayload('alert-456', alertName, notification as PendingAlertNotification)
+                const result = buildInsightsFunctionPayload(
+                    'alert-456',
+                    alertName,
+                    notification as PendingAlertNotification
+                )
 
                 expect(result.name).toBe(expectedName)
                 expect(result.template_id).toBe(expectedTemplateId)

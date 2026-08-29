@@ -1,14 +1,9 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useCallback, useMemo, type ErrorInfo } from 'react'
 
 import { TimeSeriesLineChart } from '@hanzo/quill-charts'
-import type {
-    ChartLegendConfig,
-    PointClickData,
-    TimeSeriesLineChartConfig,
-    TooltipContext,
-} from '@hanzo/quill-charts'
+import type { ChartLegendConfig, PointClickData, TimeSeriesLineChartConfig, TooltipContext } from '@hanzo/quill-charts'
 
 import { useChartConfig, useChartTheme, useDateRangeZoom } from 'lib/charts/hooks'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'

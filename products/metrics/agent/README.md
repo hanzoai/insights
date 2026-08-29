@@ -21,20 +21,20 @@ EU cloud: set `INSIGHTS_HOST=https://eu.i.hanzo.ai`.
 
 ## Environment variables
 
-| Variable              | Required | Default                    | Meaning                                                                 |
-| --------------------- | -------- | -------------------------- | ----------------------------------------------------------------------- |
-| `INSIGHTS_API_KEY`     | yes      | —                          | Project API key, sent as `Authorization: Bearer`                        |
-| `INSIGHTS_HOST`        | no       | `https://us.i.hanzo.ai` | Insights ingestion origin                                                |
-| `SCRAPE_TARGETS`      | yes\*    | —                          | Comma-separated `host:port` list to scrape                              |
-| `SCRAPE_INTERVAL`     | no       | `15s`                      | Scrape interval                                                         |
-| `SCRAPE_METRICS_PATH` | no       | `/metrics`                 | Metrics path on the targets                                             |
-| `SCRAPE_JOB_NAME`     | no       | `insights-metrics-agent`    | Prometheus job name; becomes `service_name` on every metric in Insights  |
-| `INSIGHTS_DEBUG`       | no       | unset                      | `1`/`true`: also log exported batches to the container's stdout         |
-| `INSIGHTS_INGEST_PATH` | no       | `/i/v1/metrics`            | Advanced: override the ingest route (used by tests)                     |
-| `SHARD_COUNT`         | no       | `1`                        | Size of an agent fleet; above 1 each instance scrapes only its share    |
-| `SHARD_INDEX`         | no       | from hostname ordinal      | This instance's index in `0..SHARD_COUNT-1` (see Scaling out)           |
-| `PERSIST_QUEUE`       | no       | unset                      | `1`/`true`: buffer undelivered batches to disk so restarts lose nothing |
-| `QUEUE_DIR`           | no       | `/var/lib/insights-agent`   | Where the persistent queue is stored                                    |
+| Variable               | Required | Default                   | Meaning                                                                 |
+| ---------------------- | -------- | ------------------------- | ----------------------------------------------------------------------- |
+| `INSIGHTS_API_KEY`     | yes      | —                         | Project API key, sent as `Authorization: Bearer`                        |
+| `INSIGHTS_HOST`        | no       | `https://us.i.hanzo.ai`   | Insights ingestion origin                                               |
+| `SCRAPE_TARGETS`       | yes\*    | —                         | Comma-separated `host:port` list to scrape                              |
+| `SCRAPE_INTERVAL`      | no       | `15s`                     | Scrape interval                                                         |
+| `SCRAPE_METRICS_PATH`  | no       | `/metrics`                | Metrics path on the targets                                             |
+| `SCRAPE_JOB_NAME`      | no       | `insights-metrics-agent`  | Prometheus job name; becomes `service_name` on every metric in Insights |
+| `INSIGHTS_DEBUG`       | no       | unset                     | `1`/`true`: also log exported batches to the container's stdout         |
+| `INSIGHTS_INGEST_PATH` | no       | `/i/v1/metrics`           | Advanced: override the ingest route (used by tests)                     |
+| `SHARD_COUNT`          | no       | `1`                       | Size of an agent fleet; above 1 each instance scrapes only its share    |
+| `SHARD_INDEX`          | no       | from hostname ordinal     | This instance's index in `0..SHARD_COUNT-1` (see Scaling out)           |
+| `PERSIST_QUEUE`        | no       | unset                     | `1`/`true`: buffer undelivered batches to disk so restarts lose nothing |
+| `QUEUE_DIR`            | no       | `/var/lib/insights-agent` | Where the persistent queue is stored                                    |
 
 \* not required when you mount your own scrape configs, see below.
 

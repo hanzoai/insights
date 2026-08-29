@@ -43,10 +43,7 @@ export function AttachedFeedbackPills({ events }: AttachedFeedbackPillsProps): J
                     overlay={<div className="flex flex-col gap-1 p-1">{overflow.map(renderTag)}</div>}
                     placement="bottom"
                 >
-                    <Tag
-                        className="bg-surface-primary cursor-pointer"
-                        onClick={() => setOverflowOpen(!overflowOpen)}
-                    >
+                    <Tag className="bg-surface-primary cursor-pointer" onClick={() => setOverflowOpen(!overflowOpen)}>
                         {`+${overflow.length} more`}
                     </Tag>
                 </Popover>

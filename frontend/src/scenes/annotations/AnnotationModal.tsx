@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconX } from '@hanzo/icons'
 import { Button, Modal, ModalProps, Select, SelectOptions, Link } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { DatePicker } from 'lib/components/DatePicker/DatePicker'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'

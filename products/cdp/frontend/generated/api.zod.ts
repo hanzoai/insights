@@ -108,7 +108,10 @@ export const InsightsFunctionsCreateBody = /* @__PURE__ */ zod.object({
             zod.string(),
             zod.object({
                 value: zod.unknown().optional(),
-                templating: zod.enum(['script', 'liquid']).optional().describe('\* `script` - script\n\* `liquid` - liquid'),
+                templating: zod
+                    .enum(['script', 'liquid'])
+                    .optional()
+                    .describe('\* `script` - script\n\* `liquid` - liquid'),
                 bytecode: zod.array(zod.unknown()),
                 order: zod.number(),
                 transpiled: zod.unknown(),
@@ -365,7 +368,10 @@ export const InsightsFunctionsUpdateBody = /* @__PURE__ */ zod.object({
             zod.string(),
             zod.object({
                 value: zod.unknown().optional(),
-                templating: zod.enum(['script', 'liquid']).optional().describe('\* `script` - script\n\* `liquid` - liquid'),
+                templating: zod
+                    .enum(['script', 'liquid'])
+                    .optional()
+                    .describe('\* `script` - script\n\* `liquid` - liquid'),
                 bytecode: zod.array(zod.unknown()),
                 order: zod.number(),
                 transpiled: zod.unknown(),
@@ -564,7 +570,11 @@ export const InsightsFunctionsPartialUpdateBody = /* @__PURE__ */ zod.object({
         .describe(
             'Function type: destination, site_destination, internal_destination, source_webhook, warehouse_source_webhook, site_app, transformation, or transformation_log.\n\n\* `destination` - Destination\n\* `site_destination` - Site Destination\n\* `internal_destination` - Internal Destination\n\* `source_webhook` - Source Webhook\n\* `warehouse_source_webhook` - Warehouse Source Webhook\n\* `site_app` - Site App\n\* `transformation` - Transformation\n\* `transformation_log` - Transformation Log'
         ),
-    name: zod.string().max(insightsFunctionsPartialUpdateBodyNameMax).nullish().describe('Display name for the function.'),
+    name: zod
+        .string()
+        .max(insightsFunctionsPartialUpdateBodyNameMax)
+        .nullish()
+        .describe('Display name for the function.'),
     description: zod.string().optional().describe('Human-readable description of what this function does.'),
     enabled: zod.boolean().optional().describe('Whether the function is active and processing events.'),
     deleted: zod.boolean().optional().describe('Soft-delete flag. Set to true to archive the function.'),
@@ -622,7 +632,10 @@ export const InsightsFunctionsPartialUpdateBody = /* @__PURE__ */ zod.object({
             zod.string(),
             zod.object({
                 value: zod.unknown().optional(),
-                templating: zod.enum(['script', 'liquid']).optional().describe('\* `script` - script\n\* `liquid` - liquid'),
+                templating: zod
+                    .enum(['script', 'liquid'])
+                    .optional()
+                    .describe('\* `script` - script\n\* `liquid` - liquid'),
                 bytecode: zod.array(zod.unknown()),
                 order: zod.number(),
                 transpiled: zod.unknown(),
@@ -863,7 +876,9 @@ export const InsightsFunctionsEnableBackfillsCreateBody = /* @__PURE__ */ zod.ob
                 label: zod.string().optional(),
                 choices: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                 searchable: zod.boolean().optional(),
-                required: zod.boolean().default(insightsFunctionsEnableBackfillsCreateBodyInputsSchemaItemRequiredDefault),
+                required: zod
+                    .boolean()
+                    .default(insightsFunctionsEnableBackfillsCreateBodyInputsSchemaItemRequiredDefault),
                 default: zod.unknown().optional(),
                 secret: zod.boolean().default(insightsFunctionsEnableBackfillsCreateBodyInputsSchemaItemSecretDefault),
                 hidden: zod.boolean().default(insightsFunctionsEnableBackfillsCreateBodyInputsSchemaItemHiddenDefault),
@@ -883,7 +898,10 @@ export const InsightsFunctionsEnableBackfillsCreateBody = /* @__PURE__ */ zod.ob
             zod.string(),
             zod.object({
                 value: zod.unknown().optional(),
-                templating: zod.enum(['script', 'liquid']).optional().describe('\* `script` - script\n\* `liquid` - liquid'),
+                templating: zod
+                    .enum(['script', 'liquid'])
+                    .optional()
+                    .describe('\* `script` - script\n\* `liquid` - liquid'),
                 bytecode: zod.array(zod.unknown()),
                 order: zod.number(),
                 transpiled: zod.unknown(),
@@ -1198,14 +1216,20 @@ export const InsightsFunctionsInvocationsCreateBody = /* @__PURE__ */ zod.object
                         searchable: zod.boolean().optional(),
                         required: zod
                             .boolean()
-                            .default(insightsFunctionsInvocationsCreateBodyConfigurationOneInputsSchemaItemRequiredDefault),
+                            .default(
+                                insightsFunctionsInvocationsCreateBodyConfigurationOneInputsSchemaItemRequiredDefault
+                            ),
                         default: zod.unknown().optional(),
                         secret: zod
                             .boolean()
-                            .default(insightsFunctionsInvocationsCreateBodyConfigurationOneInputsSchemaItemSecretDefault),
+                            .default(
+                                insightsFunctionsInvocationsCreateBodyConfigurationOneInputsSchemaItemSecretDefault
+                            ),
                         hidden: zod
                             .boolean()
-                            .default(insightsFunctionsInvocationsCreateBodyConfigurationOneInputsSchemaItemHiddenDefault),
+                            .default(
+                                insightsFunctionsInvocationsCreateBodyConfigurationOneInputsSchemaItemHiddenDefault
+                            ),
                         description: zod.string().optional(),
                         integration: zod.string().optional(),
                         integration_key: zod.string().optional(),

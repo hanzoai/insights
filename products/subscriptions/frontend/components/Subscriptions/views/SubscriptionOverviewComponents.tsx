@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
 
-import { IconAI, IconEllipsis, IconGraph, IconLetter, IconPause, IconPlay, IconTrash } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconAI, IconEllipsis, IconGraph, IconLetter, IconPause, IconPlay, IconTrash } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { IconSlack } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { Card } from 'lib/elements/Card'
+import { IconSlack } from 'lib/elements/icons'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Spinner } from 'lib/elements/Spinner'
 import { capitalizeFirstLetter, pluralize } from 'lib/utils/strings'
@@ -125,12 +125,7 @@ export function AIPromptReportsLink(): JSX.Element {
                         Write a prompt once and get scheduled answers about your project in Slack or email.
                     </div>
                 </div>
-                <Button
-                    type="tertiary"
-                    size="xsmall"
-                    to={`${urls.subscriptions()}?tab=ai_prompt`}
-                    className="shrink-0"
-                >
+                <Button type="tertiary" size="xsmall" to={`${urls.subscriptions()}?tab=ai_prompt`} className="shrink-0">
                     Explore AI prompt reports
                 </Button>
             </div>

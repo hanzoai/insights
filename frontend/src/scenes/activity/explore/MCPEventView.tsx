@@ -1,7 +1,7 @@
 import { ReactNode, useMemo, useState } from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Table, TableColumns, Tag, Tooltip } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { JSONViewer } from 'lib/components/JSONViewer'

@@ -570,9 +570,7 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                             actions.setNextRefreshAvailableAt(Date.now() + retryAfterSeconds * 1000)
                         }
                         if (isManual) {
-                            toast.warning(
-                                `Refresh available again ${error.formattedRetryAfter ?? 'in a few minutes'}`
-                            )
+                            toast.warning(`Refresh available again ${error.formattedRetryAfter ?? 'in a few minutes'}`)
                         }
                     } else if (isManual) {
                         toast.error('Failed to refresh health checks')

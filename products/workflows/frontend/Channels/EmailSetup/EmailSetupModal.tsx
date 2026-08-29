@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
+import { Button, Input, Modal, Select, Skeleton, Spinner, Tooltip, toast } from '@hanzo/elements'
 import { IconCheckCircle, IconCopy, IconQuestion, IconRefresh, IconWarning } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Modal,
-    Select,
-    Skeleton,
-    Spinner,
-    Tooltip,
-    toast,
-} from '@hanzo/elements'
 
 import { DomainConnectBanner } from 'lib/components/DomainConnect'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'

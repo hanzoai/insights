@@ -47,8 +47,8 @@ When a feature flag request is processed, the Rust service increments Redis coun
 
 The service stores counts in Redis hashes using time-bucketed fields:
 
-| Request Type     | Team Key                                      | SDK Key                                                      |
-| ---------------- | --------------------------------------------- | ------------------------------------------------------------ |
+| Request Type     | Team Key                                       | SDK Key                                                       |
+| ---------------- | ---------------------------------------------- | ------------------------------------------------------------- |
 | `/decide`        | `insights:decide_requests:{team_id}`           | `insights:decide_requests:sdk:{team_id}:{sdk_name}`           |
 | Local evaluation | `insights:local_evaluation_requests:{team_id}` | `insights:local_evaluation_requests:sdk:{team_id}:{sdk_name}` |
 
@@ -99,8 +99,8 @@ The Rust endpoint checks `FeatureFlagsLimiter.is_limited(token)` before the ETag
 
 The service extracts the SDK type from the request's user-agent header and increments a separate SDK-specific counter. Supported SDKs:
 
-| SDK Name               | Description             |
-| ---------------------- | ----------------------- |
+| SDK Name                | Description             |
+| ----------------------- | ----------------------- |
 | `insights-js`           | Web browsers            |
 | `insights-node`         | Server-side Node.js     |
 | `insights-python`       | Python SDK              |
@@ -114,7 +114,7 @@ The service extracts the SDK type from the request's user-agent header and incre
 | `insights-ios`          | iOS SDK                 |
 | `insights-react-native` | React Native SDK        |
 | `insights-flutter`      | Flutter SDK             |
-| `other`                | Unknown or unrecognized |
+| `other`                 | Unknown or unrecognized |
 
 ### Redis pipelining
 

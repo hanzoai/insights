@@ -1,5 +1,5 @@
-import { IconFilter, IconTrash, IconPencil } from '@hanzo/icons'
 import { Button, Tag, Snack, Tooltip } from '@hanzo/elements'
+import { IconFilter, IconTrash, IconPencil } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

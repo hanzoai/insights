@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { getFeatureFlagPayload } from 'lib/logic/featureFlagLogic'

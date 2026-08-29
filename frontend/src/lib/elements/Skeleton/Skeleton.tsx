@@ -1,7 +1,7 @@
 import './Skeleton.scss'
 
-import { useCancelAnimationsOnUnmount } from 'lib/hooks/useCancelAnimationsOnUnmount'
 import { ButtonProps } from 'lib/elements/Button'
+import { useCancelAnimationsOnUnmount } from 'lib/hooks/useCancelAnimationsOnUnmount'
 import { range } from 'lib/utils/arrays'
 import { cn } from 'lib/utils/css-classes'
 
@@ -19,16 +19,10 @@ export interface SkeletonProps {
 // `Skeleton` would mean the same JSX is reused across N repeats, all
 // sharing one ref — only the last-mounted skeleton would have its animations
 // cancelled, silently disabling the leak fix for the repeat case.
-function SkeletonItem({
-    className,
-    active = true,
-}: Pick<SkeletonProps, 'className' | 'active'>): JSX.Element {
+function SkeletonItem({ className, active = true }: Pick<SkeletonProps, 'className' | 'active'>): JSX.Element {
     const ref = useCancelAnimationsOnUnmount<HTMLDivElement>()
     return (
-        <div
-            ref={ref}
-            className={cn('Skeleton rounded', !active && 'Skeleton--static', className || 'h-4 w-full')}
-        >
+        <div ref={ref} className={cn('Skeleton rounded', !active && 'Skeleton--static', className || 'h-4 w-full')}>
             {/* The span is for accessibility, but also because @storybook/test-runner smoke tests require content */}
             <span>Loading…</span>
         </div>

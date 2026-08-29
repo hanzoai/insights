@@ -1,7 +1,7 @@
 import { match } from 'ts-pattern'
 
-import { IconCheck, IconCircleDashed } from '@hanzo/icons'
 import { Banner, Link } from '@hanzo/elements'
+import { IconCheck, IconCircleDashed } from '@hanzo/icons'
 
 import { pluralize } from 'lib/utils/strings'
 

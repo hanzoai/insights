@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Banner, Button, Input, Select, Skeleton } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { pluralize } from 'lib/utils/strings'

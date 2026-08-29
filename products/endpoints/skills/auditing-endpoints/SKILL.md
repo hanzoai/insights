@@ -32,11 +32,11 @@ from `endpoint-versions` — each version carries its own `last_executed_at`.
 
 | Tool                              | What it's for                                                                                                                                                                                                                          |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `execute-sql` (InsightsQL)             | **Primary read path.** Query `system.data_modeling_endpoints` for metadata (name, is_active, current_version, derived_from_insight, last_executed_at) and `query_log` for endpoint-level usage (call counts, recency, duration, bytes) |
+| `execute-sql` (InsightsQL)        | **Primary read path.** Query `system.data_modeling_endpoints` for metadata (name, is_active, current_version, derived_from_insight, last_executed_at) and `query_log` for endpoint-level usage (call counts, recency, duration, bytes) |
 | `endpoint-materialization-status` | Per endpoint: is materialisation eligible, current status, last run, last error (not in the system tables — use this tool)                                                                                                             |
 | `endpoint-versions`               | All versions for one endpoint, latest first, with each version's query, materialisation state, and `last_executed_at`                                                                                                                  |
 | `endpoint-update`                 | Write path — disable (`is_active: false`) or unmaterialise (`is_materialized: false`) after the user confirms                                                                                                                          |
-| `agent-feedback`                  | Tell the Insights team what's missing or confusing in this flow so the product and skill improve                                                                                                                                        |
+| `agent-feedback`                  | Tell the Insights team what's missing or confusing in this flow so the product and skill improve                                                                                                                                       |
 
 Prefer reading from the system tables over the `endpoints-get-all` / `endpoint-get` tools — one
 SQL query returns the whole inventory and lets you join metadata to usage in `query_log`.

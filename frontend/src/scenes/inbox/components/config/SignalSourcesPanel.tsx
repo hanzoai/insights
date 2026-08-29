@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { SessionAnalysisSetup } from '../../SessionAnalysisSetup'
 import { signalSourcesLogic } from '../../signalSourcesLogic'

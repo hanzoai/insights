@@ -1,8 +1,8 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { IconArrowRight, IconCheck, IconLock } from '@hanzo/icons'
 import { Button, Popover, PopoverProps, Tooltip } from '@hanzo/elements'
+import { IconArrowRight, IconCheck, IconLock } from '@hanzo/icons'
 
 import { organizationLogic } from 'scenes/organizationLogic'
 

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Checkbox, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 

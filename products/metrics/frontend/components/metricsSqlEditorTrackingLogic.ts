@@ -1,5 +1,5 @@
-import { MakeLogicType, connect, kea, key, listeners, path, props } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, connect, kea, key, listeners, path, props } from 'kea'
 
 import { SaveAsMenuItem } from 'scenes/data-warehouse/editor/editorSceneLogic'
 import { sqlEditorLogic } from 'scenes/data-warehouse/editor/sqlEditorLogic'

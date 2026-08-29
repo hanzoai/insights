@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import React from 'react'
 
-import { IconX } from '@hanzo/icons'
 import { Button, PopoverReferenceContext, Tooltip } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { midEllipsis } from 'lib/utils/strings'

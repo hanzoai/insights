@@ -1,16 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { Button, Input, Select, Switch, Tag, TextArea, Link, toast } from '@hanzo/elements'
 import { IconEndpoints } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Select,
-    Switch,
-    Tag,
-    TextArea,
-    Link,
-    toast,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { Field } from 'lib/elements/Field'

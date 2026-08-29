@@ -4,8 +4,8 @@ import { useDebouncedCallback } from 'use-debounce'
 import { Button, Input, Link } from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
-import { TextArea } from 'lib/elements/TextArea'
 import { Spinner } from 'lib/elements/Spinner'
+import { TextArea } from 'lib/elements/TextArea'
 import { slugifyFeatureFlagKey } from 'scenes/feature-flags/featureFlagLogic'
 
 import type { FeatureFlagType } from '~/types'

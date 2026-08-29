@@ -26,14 +26,14 @@ are trying to land thresholds that fire 0–3 times per week on real production 
 
 ## Tools
 
-| Tool                                                                  | Job                                                                           | Where it fits      |
-| --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------ |
-| `insights:logs-services`                                               | Top-25 services in window with log_count, error_count, error_rate, sparkline. | Step 1 — triage.   |
+| Tool                                                                    | Job                                                                           | Where it fits      |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------ |
+| `insights:logs-services`                                                | Top-25 services in window with log_count, error_count, error_rate, sparkline. | Step 1 — triage.   |
 | `insights:logs-attributes-list` / `insights:logs-attribute-values-list` | Discover keys/values for narrower filters.                                    | Step 2, optional.  |
-| `insights:logs-count-ranges`                                           | Adaptive time-bucketed counts for a filter.                                   | Step 3 — baseline. |
-| `insights:logs-alerts-simulate-create`                                 | Replay a draft config against `-7d` history with full state machine.          | Step 4 — validate. |
-| `insights:logs-alerts-create`                                          | Persist the alert.                                                            | Step 5 — ship.     |
-| `insights:logs-alerts-destinations-create`                             | Wire the alert to Slack, webhook, or Microsoft Teams.                         | Step 5: ship.      |
+| `insights:logs-count-ranges`                                            | Adaptive time-bucketed counts for a filter.                                   | Step 3 — baseline. |
+| `insights:logs-alerts-simulate-create`                                  | Replay a draft config against `-7d` history with full state machine.          | Step 4 — validate. |
+| `insights:logs-alerts-create`                                           | Persist the alert.                                                            | Step 5 — ship.     |
+| `insights:logs-alerts-destinations-create`                              | Wire the alert to Slack, webhook, or Microsoft Teams.                         | Step 5: ship.      |
 
 Do **not** call `insights:query-logs` during authoring. You need distributions, not rows. Reserve `insights:query-logs` for
 the very end if the user asks "show me a sample of what would have fired" — `limit: 10` is plenty.

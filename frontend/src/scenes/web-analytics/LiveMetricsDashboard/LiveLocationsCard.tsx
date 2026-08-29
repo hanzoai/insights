@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconGlobe } from '@hanzo/icons'
 import { Tabs } from '@hanzo/elements'
+import { IconGlobe } from '@hanzo/icons'
 
 import { COUNTRY_CODE_TO_LONG_NAME, countryCodeToFlag } from 'lib/utils/country'
 

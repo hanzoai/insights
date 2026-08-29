@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, connect, kea, key, listeners, path, props } from 'kea'
 import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

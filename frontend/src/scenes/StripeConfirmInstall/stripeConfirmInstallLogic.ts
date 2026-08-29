@@ -2,8 +2,8 @@ import { MakeLogicType, actions, connect, kea, listeners, path, reducers, select
 import { router, urlToAction } from 'kea-router'
 
 import api, { ApiError } from 'lib/api'
-import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { toast } from 'lib/elements/Toast/Toast'
+import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { urls } from 'scenes/urls'
 
 import { IntegrationKind } from '~/types'

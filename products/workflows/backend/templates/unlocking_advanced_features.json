@@ -30,17 +30,7 @@
             ],
             "source": "events",
             "actions": [],
-            "bytecode": [
-                "_H",
-                1,
-                32,
-                "$pageview",
-                32,
-                "event",
-                1,
-                1,
-                11
-            ],
+            "bytecode": ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11],
             "filter_test_accounts": false
         }
     },
@@ -103,17 +93,7 @@
                     ],
                     "source": "events",
                     "actions": [],
-                    "bytecode": [
-                        "_H",
-                        1,
-                        32,
-                        "$pageview",
-                        32,
-                        "event",
-                        1,
-                        1,
-                        11
-                    ],
+                    "bytecode": ["_H", 1, 32, "$pageview", 32, "event", 1, 1, 11],
                     "filter_test_accounts": false
                 }
             },
@@ -134,9 +114,7 @@
                         "filters": {
                             "source": "events",
                             "bytecode": [],
-                            "properties": [
-                                {}
-                            ]
+                            "properties": [{}]
                         }
                     }
                 ]
@@ -157,16 +135,7 @@
                     "distinct_id": {
                         "order": 0,
                         "value": "{event.distinct_id}",
-                        "bytecode": [
-                            "_H",
-                            1,
-                            32,
-                            "distinct_id",
-                            32,
-                            "event",
-                            1,
-                            2
-                        ],
+                        "bytecode": ["_H", 1, 32, "distinct_id", 32, "event", 1, 2],
                         "templating": "script"
                     },
                     "set_properties": {
@@ -175,12 +144,7 @@
                             "advanced_feature_unlocked": "true"
                         },
                         "bytecode": {
-                            "advanced_feature_unlocked": [
-                                "_H",
-                                1,
-                                32,
-                                "true"
-                            ]
+                            "advanced_feature_unlocked": ["_H", 1, 32, "true"]
                         },
                         "templating": "script"
                     },
@@ -224,9 +188,7 @@
                                     "rows": [
                                         {
                                             "id": "-sL7LJ6rhD",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "values": {
                                                 "_meta": {
                                                     "htmlID": "u_row_1",
@@ -250,10 +212,7 @@
                                                     "repeat": "no-repeat",
                                                     "position": "center",
                                                     "fullWidth": true,
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "displayCondition": null,
                                                 "columnsBackgroundColor": ""
@@ -729,14 +688,8 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": [
-        "function",
-        "function_email"
-    ],
+    "billable_action_types": ["function", "function_email"],
     "image_url": null,
-    "tags": [
-        "messaging",
-        "properties"
-    ],
+    "tags": ["messaging", "properties"],
     "scope": "global"
 }

@@ -6,12 +6,12 @@
     },
     "dependencies": {
         "@hanzo/quill-charts": "workspace:*",
+        "insights-js": "catalog:",
         "kea": "catalog:",
         "kea-forms": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "kea-subscriptions": "catalog:",
-        "insights-js": "catalog:"
+        "kea-subscriptions": "catalog:"
     },
     "devDependencies": {
         "kea-test-utils": "catalog:"

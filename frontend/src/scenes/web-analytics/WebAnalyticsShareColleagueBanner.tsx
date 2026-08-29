@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
 import { Banner } from 'lib/elements/Banner'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

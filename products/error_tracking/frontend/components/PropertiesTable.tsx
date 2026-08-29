@@ -1,5 +1,5 @@
-import { IconCopy, IconFilter, IconInfo } from '@hanzo/icons'
 import { Button, Table, Link, Tooltip } from '@hanzo/elements'
+import { IconCopy, IconFilter, IconInfo } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 

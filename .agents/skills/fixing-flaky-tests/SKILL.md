@@ -135,7 +135,7 @@ Match the symptom to a cause class; never patch the symptom.
 | Passes alone, fails with neighbors (or vice versa)     | Shared state: module cache, DB rows, global config, ordering |
 | Fails near midnight/UTC boundaries, or on slow runners | Real clock usage — missing `freeze_time` / fake timers       |
 | Assertion on list order or generated IDs               | Nondeterministic ordering/IDs asserted as deterministic      |
-| Query can't see just-written data                      | Eventual consistency (Datastore), missing flush/commit      |
+| Query can't see just-written data                      | Eventual consistency (Datastore), missing flush/commit       |
 | Only fails under `--maxWorkers=2` / contention         | Race condition surfaced by scheduling, too-tight timeout     |
 
 ### When the cause isn't obvious, bisect

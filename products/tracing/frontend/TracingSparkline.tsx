@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, SegmentedButton, SpinnerOverlay } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 import type { HeatmapBrushData } from '@hanzo/quill-charts'
 
 import { AnyScaleOptions, Sparkline } from 'lib/components/Sparkline'

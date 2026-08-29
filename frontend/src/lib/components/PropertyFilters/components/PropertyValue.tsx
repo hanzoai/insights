@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconRefresh } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 import {
     AssigneeIconDisplay,
     AssigneeLabelDisplay,

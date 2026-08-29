@@ -6,8 +6,8 @@ import { ChangeEvent, RefObject, createRef, useEffect, useState } from 'react'
 import { IconUpload } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
-import { Tag } from 'lib/elements/Tag/Tag'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tag } from 'lib/elements/Tag/Tag'
 
 export interface FileInputProps extends Pick<HTMLInputElement, 'multiple' | 'accept'> {
     value?: File[]

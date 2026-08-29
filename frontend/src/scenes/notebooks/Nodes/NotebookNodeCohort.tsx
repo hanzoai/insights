@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { IconPeople, IconPerson, IconTrends } from '@hanzo/icons'
 import { Divider, Tag } from '@hanzo/elements'
+import { IconPeople, IconPerson, IconTrends } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { Skeleton } from 'lib/elements/Skeleton'

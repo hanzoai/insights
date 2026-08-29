@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, Label, Link } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

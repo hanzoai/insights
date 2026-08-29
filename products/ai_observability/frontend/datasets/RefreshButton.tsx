@@ -1,5 +1,5 @@
-import { IconRefresh } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { Spinner } from 'lib/elements/Spinner'
 

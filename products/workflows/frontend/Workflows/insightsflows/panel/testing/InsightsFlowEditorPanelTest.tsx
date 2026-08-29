@@ -2,7 +2,6 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
-import { IconInfo, IconPlayFilled, IconRedo, IconTestTube } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -15,6 +14,7 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import { IconInfo, IconPlayFilled, IconRedo, IconTestTube } from '@hanzo/icons'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

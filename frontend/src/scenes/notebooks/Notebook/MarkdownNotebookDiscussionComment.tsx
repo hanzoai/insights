@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { KeyboardEvent, useEffect, useRef, useState } from 'react'
 
-import { IconSend, IconTrash } from '@hanzo/icons'
 import { Button, ProfilePicture } from '@hanzo/elements'
+import { IconSend, IconTrash } from '@hanzo/icons'
 
 import { wasNotebookNodeJustInserted } from 'lib/components/MarkdownNotebook/freshlyInserted'
 import {

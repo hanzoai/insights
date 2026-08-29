@@ -110,11 +110,7 @@ export function ResourceTransfer(props: ResourceTransferLogicProps): JSX.Element
                                     </div>
                                 )}
                                 <div className="flex justify-end">
-                                    <Button
-                                        type="primary"
-                                        onClick={submitTransfer}
-                                        loading={transferResultLoading}
-                                    >
+                                    <Button type="primary" onClick={submitTransfer} loading={transferResultLoading}>
                                         Copy
                                     </Button>
                                 </div>

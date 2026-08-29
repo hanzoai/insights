@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { router } from 'kea-router'
 
-import { IconGraph, IconServer } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconGraph, IconServer } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { urls } from 'scenes/urls'

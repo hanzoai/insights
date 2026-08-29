@@ -92,10 +92,7 @@ export function PushIdentityVerificationField({ mode }: { mode: PushIdentityVeri
                     label="Public key"
                     info="Paste the EC (P-256) public key that pairs with your backend's signing key. Your backend signs each identity token (ES256) with the private key; Insights verifies it with this public key, which never leaves your control. Leave blank to instead verify with your project's Feature flags secure API key (HS256)."
                 >
-                    <TextArea
-                        placeholder={'-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----'}
-                        minRows={4}
-                    />
+                    <TextArea placeholder={'-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----'} minRows={4} />
                 </Field>
             )}
         </>

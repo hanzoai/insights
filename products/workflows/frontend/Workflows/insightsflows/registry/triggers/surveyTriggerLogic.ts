@@ -94,7 +94,16 @@ export type surveyTriggerLogicType = MakeLogicType<
 >
 
 export const surveyTriggerLogic = kea<surveyTriggerLogicType>([
-    path(['products', 'workflows', 'frontend', 'Workflows', 'insightsflows', 'registry', 'triggers', 'surveyTriggerLogic']),
+    path([
+        'products',
+        'workflows',
+        'frontend',
+        'Workflows',
+        'insightsflows',
+        'registry',
+        'triggers',
+        'surveyTriggerLogic',
+    ]),
     actions({
         setSearchTerm: (searchTerm: string) => ({ searchTerm }),
     }),

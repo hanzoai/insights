@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo } from 'react'
 
-import { IconBadge, IconEye, IconHide, IconInfo } from '@hanzo/icons'
 import { Tag, TagType, Spinner, Tooltip } from '@hanzo/elements'
+import { IconBadge, IconEye, IconHide, IconInfo } from '@hanzo/icons'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { ImageCarousel } from 'lib/components/ImageCarousel/ImageCarousel'

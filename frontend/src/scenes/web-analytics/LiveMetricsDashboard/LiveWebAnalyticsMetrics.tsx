@@ -12,8 +12,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 
-import { IconDrag, IconFilter, IconGlobe, IconPencil, IconX } from '@hanzo/icons'
 import { Banner, Button, Divider, Popover } from '@hanzo/elements'
+import { IconDrag, IconFilter, IconGlobe, IconPencil, IconX } from '@hanzo/icons'
 
 import { FilterBar } from 'lib/components/FilterBar'
 import { liveUserCountLogic } from 'lib/components/LiveUserCount/liveUserCountLogic'
@@ -21,8 +21,8 @@ import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { isWebAnalyticsPropertyFilter } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { IconWithCount } from 'lib/elements/icons/icons'
+import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { COUNTRY_CODE_TO_LONG_NAME, countryCodeToFlag } from 'lib/utils/country'
 import { LiveEventsFeed, LiveEventsFeedColumn } from 'scenes/activity/live/LiveEventsFeed'
@@ -162,12 +162,7 @@ const LiveDashboardFilterRow = ({
                             </Button>
                         </>
                     ) : (
-                        <Button
-                            type="secondary"
-                            size="small"
-                            icon={<IconPencil />}
-                            onClick={() => setEditing(true)}
-                        >
+                        <Button type="secondary" size="small" icon={<IconPencil />} onClick={() => setEditing(true)}>
                             Edit layout
                         </Button>
                     )}

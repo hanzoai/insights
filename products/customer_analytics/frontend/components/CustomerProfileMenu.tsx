@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Menu, MenuSection, Switch } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { customerProfileLogic } from '../customerProfileLogic'
 

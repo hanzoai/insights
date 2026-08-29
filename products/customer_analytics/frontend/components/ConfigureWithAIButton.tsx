@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Button, ButtonProps } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { useOpenAi } from 'scenes/max/useOpenAi'

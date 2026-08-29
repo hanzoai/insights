@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
-import { SupermanHog } from 'lib/components/mascots'
 import { useConfetti } from 'lib/components/Confetti/Confetti'
+import { SupermanHog } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'

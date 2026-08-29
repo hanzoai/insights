@@ -72,9 +72,9 @@ pub struct Holdout {
 
 | Component         | Path                                            |
 | ----------------- | ----------------------------------------------- |
-| Model             | `insights/models/experiment.py`                  |
-| Serializer        | `ee/datastore/views/experiment_holdouts.py`    |
+| Model             | `insights/models/experiment.py`                 |
+| Serializer        | `ee/datastore/views/experiment_holdouts.py`     |
 | Rust evaluation   | `rust/feature-flags/src/flags/flag_matching.rs` |
 | Rust type         | `rust/feature-flags/src/flags/flag_models.rs`   |
-| Python evaluation | `insights/models/feature_flag/flag_matching.py`  |
+| Python evaluation | `insights/models/feature_flag/flag_matching.py` |
 | Frontend types    | `frontend/src/types.ts`                         |

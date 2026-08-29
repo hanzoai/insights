@@ -15,12 +15,10 @@ export function ExperimentMetricConversionWindowFilter({
     metric: ExperimentMetric
     handleSetMetric: (newMetric: ExperimentMetric) => void
 }): JSX.Element {
-    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map(
-        (unit) => ({
-            label: capitalizeFirstLetter(pluralize(metric.conversion_window ?? 72, unit, `${unit}s`, false)),
-            value: unit as FunnelConversionWindowTimeUnit,
-        })
-    )
+    const options: SelectOption<FunnelConversionWindowTimeUnit>[] = Object.keys(TIME_INTERVAL_BOUNDS).map((unit) => ({
+        label: capitalizeFirstLetter(pluralize(metric.conversion_window ?? 72, unit, `${unit}s`, false)),
+        value: unit as FunnelConversionWindowTimeUnit,
+    }))
     const intervalBounds = TIME_INTERVAL_BOUNDS[metric.conversion_window_unit ?? FunnelConversionWindowTimeUnit.Day]
 
     return (

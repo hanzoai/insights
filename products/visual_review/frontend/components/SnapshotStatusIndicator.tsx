@@ -1,5 +1,5 @@
-import { IconCheck } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
 
 interface SnapshotStatusIndicatorProps {
     result: string

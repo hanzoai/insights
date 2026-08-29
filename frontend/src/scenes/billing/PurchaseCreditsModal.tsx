@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCheckCircle } from '@hanzo/icons'
 import { Button, Divider, Input, Modal, Table, Link } from '@hanzo/elements'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { Field } from 'lib/elements/Field'

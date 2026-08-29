@@ -5,9 +5,9 @@ import { Tag, Tabs, Tooltip } from '@hanzo/elements'
 import { HumanizedActivityLogItem, humanizeActivity, humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import MonacoDiffEditor from 'lib/components/MonacoDiffEditor'
 import { TZLabel } from 'lib/components/TZLabel'
-import { Table, TableColumns } from 'lib/elements/Table'
 import { PaginationManual } from 'lib/elements/PaginationControl'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Table, TableColumns } from 'lib/elements/Table'
 
 export interface AuditLogTableProps {
     logItems: HumanizedActivityLogItem[]

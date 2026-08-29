@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, Dropdown } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

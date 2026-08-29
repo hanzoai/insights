@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconLetter } from '@hanzo/icons'
 import { Modal, Link } from '@hanzo/elements'
+import { IconLetter } from '@hanzo/icons'
 
 import { InsightsFlow } from './insightsflows/types'
 import { getMessageAssetContentUrl } from './messageAssetsApi'

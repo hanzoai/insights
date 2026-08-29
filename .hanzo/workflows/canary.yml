@@ -26,55 +26,55 @@
 name: canary
 
 on:
-  push:
-    # Scoped to the convergence namespace, so this can never fire on main, and
-    # deploy.yml (branches: [main]) can never fire on a convergence branch.
-    # Neither workflow needs to know about the other.
-    branches: ['converge/**']
-  workflow_dispatch:
+    push:
+        # Scoped to the convergence namespace, so this can never fire on main, and
+        # deploy.yml (branches: [main]) can never fire on a convergence branch.
+        # Neither workflow needs to know about the other.
+        branches: ['converge/**']
+    workflow_dispatch:
 
 # NOT insights-release. That group serializes production releases because the
 # immutability guard there is check-then-act; a canary has no such guard to
 # protect and holding the release lock for 30-60 minutes would stall a real
 # release behind an experiment.
 concurrency:
-  group: insights-canary-${{ github.ref }}
-  cancel-in-progress: false
+    group: insights-canary-${{ github.ref }}
+    cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: hanzo-build-linux-amd64
-    steps:
-      - uses: actions/checkout@v4
+    build:
+        runs-on: hanzo-build-linux-amd64
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+            - name: Log in to GHCR
+              run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
-      # No "is this tag free" probe. The tag is derived from the commit, so a
-      # rebuild of the same ref replaces an image built from identical source —
-      # and nothing pins a canary, so the "two digests behind one name" hazard
-      # deploy.yml guards against has nothing to bite here.
-      - name: Build + push
-        env:
-          # The credential the build reads our own packages with. FORGE_TOKEN is the
-          # provisioned one; where nothing more specific is set, the runner's own job
-          # token is what that credential is.
-          FORGE_TOKEN: ${{ secrets.FORGE_TOKEN }}
-          RUNNER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          VERSION="canary-$(echo "${GITHUB_SHA}" | cut -c1-11)"
-          IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
+            # No "is this tag free" probe. The tag is derived from the commit, so a
+            # rebuild of the same ref replaces an image built from identical source —
+            # and nothing pins a canary, so the "two digests behind one name" hazard
+            # deploy.yml guards against has nothing to bite here.
+            - name: Build + push
+              env:
+                  # The credential the build reads our own packages with. FORGE_TOKEN is the
+                  # provisioned one; where nothing more specific is set, the runner's own job
+                  # token is what that credential is.
+                  FORGE_TOKEN: ${{ secrets.FORGE_TOKEN }}
+                  RUNNER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  VERSION="canary-$(echo "${GITHUB_SHA}" | cut -c1-11)"
+                  IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
 
-          export FORGE_TOKEN="${FORGE_TOKEN:-$RUNNER_TOKEN}"
-          ./bin/check-forge-credential
+                  export FORGE_TOKEN="${FORGE_TOKEN:-$RUNNER_TOKEN}"
+                  ./bin/check-forge-credential
 
-          DOCKER_BUILDKIT=1 docker build -f Dockerfile \
-            --secret id=FORGE_TOKEN,env=FORGE_TOKEN \
-            --build-arg COMMIT_HASH="${GITHUB_SHA}" \
-            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
-            --label "org.opencontainers.image.version=${VERSION}" \
-            --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
-            -t "$IMAGE" .
-          docker push "$IMAGE"
-          echo "built $IMAGE (revision ${GITHUB_SHA}) — NOT pinned, NOT shipped"
+                  DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+                    --secret id=FORGE_TOKEN,env=FORGE_TOKEN \
+                    --build-arg COMMIT_HASH="${GITHUB_SHA}" \
+                    --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+                    --label "org.opencontainers.image.version=${VERSION}" \
+                    --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
+                    -t "$IMAGE" .
+                  docker push "$IMAGE"
+                  echo "built $IMAGE (revision ${GITHUB_SHA}) — NOT pinned, NOT shipped"

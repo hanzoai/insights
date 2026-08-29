@@ -18,21 +18,21 @@ export function BAAPreview(): JSX.Element {
             <p>
                 This Business Associate Amendment (this "<strong>BAA</strong>"), effective as of the date electronically
                 agreed and accepted by you (the "<strong>BAA Effective Date</strong>"), is entered into by and between
-                Insights Inc ("<strong>Insights</strong>", "<strong>we</strong>", or "<strong>us</strong>") and the party
-                that electronically accepts or otherwise agrees or opts-in to this BAA ("<strong>Customer</strong>", or
-                "<strong>you</strong>").
+                Insights Inc ("<strong>Insights</strong>", "<strong>we</strong>", or "<strong>us</strong>") and the
+                party that electronically accepts or otherwise agrees or opts-in to this BAA ("<strong>Customer</strong>
+                ", or "<strong>you</strong>").
             </p>
             <p>
                 You have entered into one or more agreements with us (each, as amended from time to time, an "
                 <strong>Agreement</strong>") governing the provision of our real-time error tracking, crash reporting,
-                and visibility service more fully described at www.hanzo.ai (the "<strong>Service</strong>"). This
-                BAA will amend the terms of the Agreement to reflect the parties' rights and responsibilities with
-                respect to the processing and security of your Protected Health Information (defined below) under the
-                Agreement; provided, however, that this BAA, and any obligations relating to compliance with HIPAA
-                hereunder, do not apply with respect to any Services (or features or functionality thereof) that Insights
-                designates as not subject to this BAA, as indicated in the applicable service interface, guidance,
-                documentation, ordering materials, or otherwise, even if such Services involve the processing of PHI. If
-                you are accepting this BAA in your capacity as an employee, consultant or agent of Customer (
+                and visibility service more fully described at www.hanzo.ai (the "<strong>Service</strong>"). This BAA
+                will amend the terms of the Agreement to reflect the parties' rights and responsibilities with respect
+                to the processing and security of your Protected Health Information (defined below) under the Agreement;
+                provided, however, that this BAA, and any obligations relating to compliance with HIPAA hereunder, do
+                not apply with respect to any Services (or features or functionality thereof) that Insights designates
+                as not subject to this BAA, as indicated in the applicable service interface, guidance, documentation,
+                ordering materials, or otherwise, even if such Services involve the processing of PHI. If you are
+                accepting this BAA in your capacity as an employee, consultant or agent of Customer (
                 {CompanyPlaceholder}), you represent that you are an employee, consultant or agent of Customer, and that
                 you have the authority to bind Customer to this BAA.
             </p>
@@ -116,13 +116,13 @@ export function BAAPreview(): JSX.Element {
             </p>
             <p>
                 (b) Insights may use the information received from Customer if necessary for (i) the proper management
-                and administration of Insights; or (ii) to carry out the legal responsibilities of Insights. Insights may
-                disclose PHI for its proper management and administration provided that: (1) disclosures are required by
-                law; or (2) Insights obtains reasonable assurances from the person or entity to whom the information is
-                disclosed that it will remain confidential and used or further disclosed only as required by law or for
-                the purpose for which it was disclosed to the person or entity, and the person or entity notifies
-                Insights of any instances of which it is aware in which the confidentiality of the information has been
-                breached.
+                and administration of Insights; or (ii) to carry out the legal responsibilities of Insights. Insights
+                may disclose PHI for its proper management and administration provided that: (1) disclosures are
+                required by law; or (2) Insights obtains reasonable assurances from the person or entity to whom the
+                information is disclosed that it will remain confidential and used or further disclosed only as required
+                by law or for the purpose for which it was disclosed to the person or entity, and the person or entity
+                notifies Insights of any instances of which it is aware in which the confidentiality of the information
+                has been breached.
             </p>
             <p>
                 (c) Insights will report to Customer any use or disclosure of PHI not provided for by this BAA of which
@@ -169,8 +169,8 @@ export function BAAPreview(): JSX.Element {
                 for the purpose of determining Customer's compliance with HIPAA.
             </p>
             <p>
-                (i) To the extent that Insights carries out Customer's obligations under HIPAA regulations, Insights will
-                comply with the requirements of this Section 3 that apply to Customer in the performance of such
+                (i) To the extent that Insights carries out Customer's obligations under HIPAA regulations, Insights
+                will comply with the requirements of this Section 3 that apply to Customer in the performance of such
                 obligations.
             </p>
             <p>
@@ -228,8 +228,8 @@ export function BAAPreview(): JSX.Element {
             <p>
                 Upon termination of this BAA, unless otherwise directed by Customer, Insights will return or destroy all
                 PHI received from, created by, or received on behalf of, Customer and will not retain copies of any such
-                PHI; provided that in the event Insights deems return or destruction of such PHI unfeasible, the terms of
-                this BAA will survive termination and, for as long as Insights retains that PHI, Insights will use or
+                PHI; provided that in the event Insights deems return or destruction of such PHI unfeasible, the terms
+                of this BAA will survive termination and, for as long as Insights retains that PHI, Insights will use or
                 disclose it solely as permitted by law.
             </p>
 

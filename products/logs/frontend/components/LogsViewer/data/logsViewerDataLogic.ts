@@ -1,5 +1,6 @@
 import colors from 'ansi-colors'
 import { deepEqual as equal } from 'fast-equals'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -16,7 +17,6 @@ import {
 } from 'kea'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

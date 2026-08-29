@@ -16,8 +16,8 @@ Insights captures distributed traces from OpenTelemetry. Each trace is a tree of
 
 ## Available tools
 
-| Tool                                   | Purpose                                           |
-| -------------------------------------- | ------------------------------------------------- |
+| Tool                                    | Purpose                                           |
+| --------------------------------------- | ------------------------------------------------- |
 | `insights:query-apm-spans`              | Search and filter spans (compact list view)       |
 | `insights:apm-trace-get`                | Get the full span list for one hex `trace_id`     |
 | `insights:apm-spans-aggregate`          | Per-operation aggregates (count, p50/p95, errors) |

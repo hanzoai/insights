@@ -1,5 +1,6 @@
 import { type ComponentType, useState } from 'react'
 
+import { Card, Tag, type TagType, Link, ProfilePicture } from '@hanzo/elements'
 import {
     IconActivity,
     IconArchive,
@@ -18,7 +19,6 @@ import {
     IconVideoCamera,
     IconExternal,
 } from '@hanzo/icons'
-import { Card, Tag, type TagType, Link, ProfilePicture } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { TZLabel } from 'lib/components/TZLabel'

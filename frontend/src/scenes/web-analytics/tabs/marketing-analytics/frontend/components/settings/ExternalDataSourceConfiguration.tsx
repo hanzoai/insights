@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear, IconPencil, IconTrash } from '@hanzo/icons'
 import { Banner, Button, Tag, Link } from '@hanzo/elements'
+import { IconGear, IconPencil, IconTrash } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

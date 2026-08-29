@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Dispatch, SetStateAction, useState } from 'react'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Button, Input, Modal, Select } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'

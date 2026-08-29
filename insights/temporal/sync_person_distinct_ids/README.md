@@ -59,7 +59,7 @@ class SyncPersonDistinctIdsWorkflowResult:
 
 | Activity                       | Purpose                                                      | Database    |
 | ------------------------------ | ------------------------------------------------------------ | ----------- |
-| `find_orphaned_persons`        | Query CH for all persons without distinct IDs (single query) | Datastore  |
+| `find_orphaned_persons`        | Query CH for all persons without distinct IDs (single query) | Datastore   |
 | `lookup_pg_distinct_ids`       | Find distinct IDs for person UUIDs                           | PostgreSQL  |
 | `sync_distinct_ids_to_ch`      | Write missing distinct IDs via Kafka                         | Kafka -> CH |
 | `mark_ch_only_orphans_deleted` | Set is_deleted=1 for persons without PG data                 | Kafka -> CH |

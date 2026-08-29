@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle } from '@hanzo/icons'
 import { Button, Card, Collapse } from '@hanzo/elements'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { userLogic } from 'scenes/userLogic'
 

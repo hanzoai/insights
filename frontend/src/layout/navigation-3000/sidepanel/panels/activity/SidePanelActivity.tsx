@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconList, IconNotification } from '@hanzo/icons'
 import { Button, Skeleton, Tabs, Link, Spinner } from '@hanzo/elements'
+import { IconList, IconNotification } from '@hanzo/icons'
 
 import { ActivityLogRow } from 'lib/components/ActivityLog/ActivityLog'
 import { ActivityLogSubscribeMenu } from 'lib/components/ActivityLog/ActivityLogSubscribeMenu'

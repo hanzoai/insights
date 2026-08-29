@@ -3,8 +3,8 @@ import './KioskSetup.scss'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlay } from '@hanzo/icons'
 import { Button, Input, Select } from '@hanzo/elements'
+import { IconPlay } from '@hanzo/icons'
 
 import { sessionRecordingsKioskLogic } from './sessionRecordingsKioskLogic'
 

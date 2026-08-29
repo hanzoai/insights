@@ -1,5 +1,5 @@
-import { IconX } from '@hanzo/icons'
 import { Button, Collapse, Tag, Spinner, Tooltip } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Link } from 'lib/elements/Link'

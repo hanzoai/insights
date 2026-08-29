@@ -48,9 +48,7 @@ test.describe('CRUD Survey', () => {
         )
 
         await expect(
-            page
-                .locator('.Field', { has: page.locator('.Label', { hasText: 'Upper bound label' }) })
-                .locator('input')
+            page.locator('.Field', { has: page.locator('.Label', { hasText: 'Upper bound label' }) }).locator('input')
         ).toHaveValue('Very likely')
 
         await page.locator('[id="scenes.surveys.surveyLogic.new.survey.questions.0.scale"]').click()

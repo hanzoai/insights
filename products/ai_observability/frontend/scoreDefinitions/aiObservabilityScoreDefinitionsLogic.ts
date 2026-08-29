@@ -7,8 +7,8 @@ import { objectsEqual } from 'lib/utils/objects'
 import { pluralize } from 'lib/utils/strings'
 
 import { ApiConfig } from '~/lib/api'
-import { toast } from '~/lib/elements/Toast/Toast'
 import { PaginationManual } from '~/lib/elements/PaginationControl'
+import { toast } from '~/lib/elements/Toast/Toast'
 import { trackedActionToUrl } from '~/lib/logic/scenes/trackedActionToUrl'
 import { urls } from '~/scenes/urls'
 

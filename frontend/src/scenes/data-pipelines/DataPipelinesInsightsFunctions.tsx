@@ -2,10 +2,10 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { humanizeInsightsFunctionType } from 'scenes/insights-functions/script-function-utils'
 import { InsightsFunctionList } from 'scenes/insights-functions/list/InsightsFunctionsList'
 import { insightsFunctionsListLogic } from 'scenes/insights-functions/list/insightsFunctionsListLogic'
 import { InsightsFunctionTemplateList } from 'scenes/insights-functions/list/InsightsFunctionTemplateList'
+import { humanizeInsightsFunctionType } from 'scenes/insights-functions/script-function-utils'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
@@ -52,8 +52,11 @@ export function DataPipelinesInsightsFunctions({
 
     const { insightsFunctionPluginsDestinations, insightsFunctionBatchExports, insightsFunctionPluginsSiteApps } =
         useValues(nonInsightsFunctionsLogic)
-    const { loadInsightsFunctionPluginsDestinations, loadInsightsFunctionBatchExports, loadInsightsFunctionPluginsSiteApps } =
-        useActions(nonInsightsFunctionsLogic)
+    const {
+        loadInsightsFunctionPluginsDestinations,
+        loadInsightsFunctionBatchExports,
+        loadInsightsFunctionPluginsSiteApps,
+    } = useActions(nonInsightsFunctionsLogic)
 
     const { insightsFunctionTemplatesBatchExports } = useValues(nonInsightsFunctionTemplatesLogic)
 

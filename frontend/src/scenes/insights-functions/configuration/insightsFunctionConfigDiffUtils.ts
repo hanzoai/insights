@@ -111,7 +111,9 @@ function redactMappingSecrets(value: unknown): unknown {
             inputs?: Record<string, CyclotronJobInputType>
             inputs_schema?: CyclotronJobInputSchemaType[]
         }
-        return inputs ? { ...mapping, inputs: redactSecretInsightsFunctionInputs(inputs, inputs_schema ?? []) } : mapping
+        return inputs
+            ? { ...mapping, inputs: redactSecretInsightsFunctionInputs(inputs, inputs_schema ?? []) }
+            : mapping
     })
 }
 

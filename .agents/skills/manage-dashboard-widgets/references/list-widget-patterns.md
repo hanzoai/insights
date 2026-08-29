@@ -10,14 +10,14 @@ Shipped reference: `error_tracking_list`, `session_replay_list`.
 
 **`widgetFilters`** on config (persisted property filter selections). Edit modal = test accounts + limit + sort. Tile bar = date + type pickers + property filters.
 
-| Layer               | Path                                                                                                                 |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Zod (generated)     | `widget-configs.zod.ts` (config + form schemas, types — import directly)                                             |
-| Zod (form/modal)    | `*WidgetConfigValidation.ts` (`.pick()` on config schema), `widgetConfigShared.ts` (UI labels only)                  |
-| FE helpers          | `widgetFilters.ts`                                                                                                   |
+| Layer                    | Path                                                                                                                 |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Zod (generated)          | `widget-configs.zod.ts` (config + form schemas, types — import directly)                                             |
+| Zod (form/modal)         | `*WidgetConfigValidation.ts` (`.pick()` on config schema), `widgetConfigShared.ts` (UI labels only)                  |
+| FE helpers               | `widgetFilters.ts`                                                                                                   |
 | BE validate + InsightsQL | `backend/widgets/widget_filters.py` — generic `validate_widget_filters` + `build_*_from_widget_filters`              |
-| Tile bar            | `*WidgetTileFilters.tsx`, `widgetTileFiltersHooks.ts` (`useWidgetTileConfigPersist`), `WidgetPropertyFiltersSection` |
-| Tile bar mount      | `DashboardWidgetItem` — registry `TileFilters` only when `hasProductAccess && showTileFilters`                       |
+| Tile bar                 | `*WidgetTileFilters.tsx`, `widgetTileFiltersHooks.ts` (`useWidgetTileConfigPersist`), `WidgetPropertyFiltersSection` |
+| Tile bar mount           | `DashboardWidgetItem` — registry `TileFilters` only when `hasProductAccess && showTileFilters`                       |
 
 `canEditDashboard` gates edit vs read-only bar (`DASHBOARD_WIDGET_TILE_FILTERS_READONLY_REASON` in `constants.ts`). RBAC denial hides the bar entirely (body shows locked state). Not coupled to the dashboard quick-filter bar.
 

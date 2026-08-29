@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import type { BuiltLogic } from 'kea'
-import insights from 'insights-js'
 import type { ReactNode } from 'react'
 
 import { IconDashboard, IconGraph, IconNotebook } from '@hanzo/icons'

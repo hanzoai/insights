@@ -2,6 +2,7 @@ import { useActions, useAsyncActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
+import { Button, Dialog, Divider, Switch, Link, Tooltip } from '@hanzo/elements'
 import {
     IconArchive,
     IconCopy,
@@ -15,7 +16,6 @@ import {
     IconTrash,
     IconUnlock,
 } from '@hanzo/icons'
-import { Button, Dialog, Divider, Switch, Link, Tooltip } from '@hanzo/elements'
 
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'

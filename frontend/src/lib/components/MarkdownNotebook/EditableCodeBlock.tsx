@@ -1,7 +1,7 @@
 import { FormEvent, KeyboardEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 

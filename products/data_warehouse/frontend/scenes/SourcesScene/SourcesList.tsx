@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -66,7 +66,10 @@ export function SourcesList({ action }: { action: JSX.Element }): JSX.Element {
                             </Button>
                         }
                     >
-                        <InsightsFunctionList logicKey="data-pipelines-insights-functions-source-webhook" type="source_webhook" />
+                        <InsightsFunctionList
+                            logicKey="data-pipelines-insights-functions-source-webhook"
+                            type="source_webhook"
+                        />
                     </SceneSection>
                     <SceneDivider />
                 </>

@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -17,7 +18,6 @@ import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 import { v4 as uuidv4 } from 'uuid'
 
 import api from 'lib/api'
@@ -25,8 +25,8 @@ import { ApiError } from 'lib/api-error'
 import { tryShowMCPHint } from 'lib/components/MCPHint/mcpHintLogic'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { ENTITY_MATCH_TYPE } from 'lib/constants'
-import { scrollToFormError } from 'lib/forms/scrollToFormError'
 import { toast } from 'lib/elements/Toast/Toast'
+import { scrollToFormError } from 'lib/forms/scrollToFormError'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'
 import { objectsEqual } from 'lib/utils/objects'
@@ -1005,18 +1005,15 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                             const cohortFormData = createCohortFormData(data)
                             cohort = await api.cohorts.create(cohortFormData as Partial<CohortType>)
                         }
-                        toast.success(
-                            'Cohort duplicated. Please wait up to a few minutes for it to be calculated',
-                            {
-                                toastId: `cohort-duplicated-${cohort.id}`,
-                                button: {
-                                    label: 'View cohort',
-                                    action: () => {
-                                        router.actions.push(urls.cohort(cohort.id))
-                                    },
+                        toast.success('Cohort duplicated. Please wait up to a few minutes for it to be calculated', {
+                            toastId: `cohort-duplicated-${cohort.id}`,
+                            button: {
+                                label: 'View cohort',
+                                action: () => {
+                                    router.actions.push(urls.cohort(cohort.id))
                                 },
-                            }
-                        )
+                            },
+                        })
                         return cohort
                     } catch (error: any) {
                         toast.error(error.detail || 'Failed to duplicate cohort')

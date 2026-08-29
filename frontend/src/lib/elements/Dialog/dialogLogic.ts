@@ -70,12 +70,7 @@ export interface dialogLogicMeta {
     key: string
 }
 
-export type dialogLogicType = MakeLogicType<
-    dialogLogicValues,
-    dialogLogicActions,
-    DialogFormPropsType,
-    dialogLogicMeta
->
+export type dialogLogicType = MakeLogicType<dialogLogicValues, dialogLogicActions, DialogFormPropsType, dialogLogicMeta>
 
 export const dialogLogic = kea<dialogLogicType>([
     props({} as DialogFormPropsType),

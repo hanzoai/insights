@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconLock } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconLock } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

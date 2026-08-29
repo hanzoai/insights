@@ -6,8 +6,8 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { useEffect } from 'react'
 import React from 'react'
 
-import { IconTrending } from '@hanzo/icons'
 import { Row, Link } from '@hanzo/elements'
+import { IconTrending } from '@hanzo/icons'
 
 import { IconFlare, IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { percentage } from 'lib/utils/numbers'

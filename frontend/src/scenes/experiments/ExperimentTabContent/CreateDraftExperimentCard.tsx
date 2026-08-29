@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFlask } from '@hanzo/icons'
 import { Button, Input, TextArea } from '@hanzo/elements'
+import { IconFlask } from '@hanzo/icons'
 
 import type { FeatureFlagType } from '~/types'
 

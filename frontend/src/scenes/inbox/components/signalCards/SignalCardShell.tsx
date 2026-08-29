@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Card } from 'lib/elements/Card'

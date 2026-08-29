@@ -1,17 +1,6 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import {
-    Banner,
-    Button,
-    Input,
-    Modal,
-    Select,
-    Table,
-    TableColumn,
-    TableColumns,
-    Tag,
-    TextArea,
-} from '@hanzo/elements'
+import { Banner, Button, Input, Modal, Select, Table, TableColumn, TableColumns, Tag, TextArea } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { More } from 'lib/elements/Button/More'
@@ -114,11 +103,7 @@ export function AIObservabilityScoreDefinitions(): JSX.Element {
             dataIndex: 'archived',
             key: 'archived',
             render: function renderArchived(archived) {
-                return archived ? (
-                    <Tag type="muted">Archived</Tag>
-                ) : (
-                    <Tag type="success">Active</Tag>
-                )
+                return archived ? <Tag type="muted">Archived</Tag> : <Tag type="success">Active</Tag>
             },
         },
         updatedAtColumn<ScoreDefinition>() as TableColumn<ScoreDefinition, keyof ScoreDefinition | undefined>,

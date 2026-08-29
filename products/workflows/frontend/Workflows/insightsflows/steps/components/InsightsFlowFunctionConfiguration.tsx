@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconCheck } from '@hanzo/icons'
 import { Banner, Button, Collapse, Link, Spinner } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
 import { templateToConfiguration } from 'scenes/insights-functions/configuration/insightsFunctionConfigurationLogic'

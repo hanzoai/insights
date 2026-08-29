@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button, Select, Table, TableColumns, Tag, ProfilePicture } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -58,11 +58,7 @@ export function AccountRelationshipsExpansion({ accountId }: { accountId: string
             key: 'ended_at',
             width: 140,
             render: (_, relationship) =>
-                relationship.ended_at ? (
-                    <TZLabel time={relationship.ended_at} />
-                ) : (
-                    <Tag type="success">Current</Tag>
-                ),
+                relationship.ended_at ? <TZLabel time={relationship.ended_at} /> : <Tag type="success">Current</Tag>,
         },
         {
             key: 'actions',

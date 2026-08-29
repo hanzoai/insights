@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconPlus } from '@hanzo/icons'
 import { Banner, Button, Table, TableColumn, Link } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'

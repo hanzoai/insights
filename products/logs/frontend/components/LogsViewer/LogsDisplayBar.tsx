@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Fragment } from 'react'
 
-import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { Button, SegmentedButton, Select, Switch } from '@hanzo/elements'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicStringPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
@@ -72,12 +72,7 @@ export const LogsDisplayBar = ({
                     </Button>
                 )}
                 {viewModeOptions.length > 1 && (
-                    <SegmentedButton
-                        size="small"
-                        value={viewMode}
-                        onChange={setViewMode}
-                        options={viewModeOptions}
-                    />
+                    <SegmentedButton size="small" value={viewMode} onChange={setViewMode} options={viewModeOptions} />
                 )}
                 {inGroupByMode && <GroupByDimensionPickers />}
                 {inPatternsMode ? (

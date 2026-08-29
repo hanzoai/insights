@@ -23,9 +23,7 @@ export function NuxtSourceMapsInstructions(): JSX.Element {
             <h3>Install the Insights Nuxt module</h3>
             <p>Install the Insights Nuxt module using your package manager:</p>
             <CodeSnippet language={Language.Bash}>
-                {['npm install @hanzo/nuxt', '# OR', 'yarn add @hanzo/nuxt', '# OR', 'pnpm add @hanzo/nuxt'].join(
-                    '\n'
-                )}
+                {['npm install @hanzo/nuxt', '# OR', 'yarn add @hanzo/nuxt', '# OR', 'pnpm add @hanzo/nuxt'].join('\n')}
             </CodeSnippet>
 
             <h3>Add Insights config to your Nuxt app</h3>
@@ -42,8 +40,8 @@ export function NuxtSourceMapsInstructions(): JSX.Element {
 
             <h3>Build your project for production</h3>
             <p>
-                Build your project for production. The Insights module will automatically generate and upload source maps
-                to Insights during the build process.
+                Build your project for production. The Insights module will automatically generate and upload source
+                maps to Insights during the build process.
             </p>
 
             <VerifySourceMaps />

@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import React from 'react'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import {
     ConversationDisplayOption,

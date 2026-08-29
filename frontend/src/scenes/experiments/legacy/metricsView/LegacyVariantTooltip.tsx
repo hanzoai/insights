@@ -49,10 +49,7 @@ export function LegacyVariantTooltip({
                     <span className="text-secondary font-semibold mb-1">Win probability:</span>
                     {result?.probability?.[tooltipData.variant] !== undefined ? (
                         <span className="flex items-center justify-between flex-1 pl-6">
-                            <Progress
-                                className="w-3/4 mr-4"
-                                percent={result.probability[tooltipData.variant] * 100}
-                            />
+                            <Progress className="w-3/4 mr-4" percent={result.probability[tooltipData.variant] * 100} />
                             <span className="font-semibold">
                                 {(result.probability[tooltipData.variant] * 100).toFixed(2)}%
                             </span>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCheck, IconPencil, IconTrash, IconX } from '@hanzo/icons'
 import { Button, TextArea } from '@hanzo/elements'
+import { IconCheck, IconPencil, IconTrash, IconX } from '@hanzo/icons'
 
 import type { QueuedMessage } from '../logics/runInteractionLogic'
 

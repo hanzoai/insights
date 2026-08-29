@@ -350,13 +350,7 @@ export const Settings = ({
                 >
                     Edit the insight
                 </Button>
-                <Button
-                    center={true}
-                    fullWidth
-                    type="secondary"
-                    className="flex flex-1"
-                    onClick={detachSavedInsight}
-                >
+                <Button center={true} fullWidth type="secondary" className="flex flex-1" onClick={detachSavedInsight}>
                     Detach from insight
                 </Button>
             </div>

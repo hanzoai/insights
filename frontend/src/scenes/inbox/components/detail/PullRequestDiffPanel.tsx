@@ -2,8 +2,8 @@ import { type DiffLineAnnotation } from '@pierre/diffs'
 import { useActions, useValues } from 'kea'
 import { useCallback, useMemo, useState } from 'react'
 
-import { IconChat, IconGitBranch } from '@hanzo/icons'
 import { SegmentedButton, Skeleton, Tag, Tooltip } from '@hanzo/elements'
+import { IconChat, IconGitBranch } from '@hanzo/icons'
 
 import { DraftThread, inboxReportDetailLogic, ReviewThread, threadKey } from '../../logics/inboxReportDetailLogic'
 import { SignalReport } from '../../types'

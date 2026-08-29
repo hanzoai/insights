@@ -46,13 +46,7 @@ export function AddonTrialModal({ product, isOpen, onClose }: AddonTrialModalPro
                     </p>
                 </div>
                 <div className="flex justify-between mt-2 items-start">
-                    <Button
-                        type="secondary"
-                        size="medium"
-                        className="mt-2 mb-2"
-                        to={comparePlansUrl}
-                        onClick={onClose}
-                    >
+                    <Button type="secondary" size="medium" className="mt-2 mb-2" to={comparePlansUrl} onClick={onClose}>
                         Compare plans
                     </Button>
                     <BillingProductAddonActions addon={product} buttonSize="medium" ctaTextOverride="Confirm" />

@@ -4,21 +4,17 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useMemo, useRef } from 'react'
 
-import { IconChevronRight, IconEllipsis, IconEye, IconPencil, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Menu, Tag, ProfilePicture, Tooltip } from '@hanzo/elements'
+import { IconChevronRight, IconEllipsis, IconEye, IconPencil, IconTrash } from '@hanzo/icons'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { TZLabel } from 'lib/components/TZLabel'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Divider } from 'lib/elements/Divider'
 import { Markdown } from 'lib/elements/Markdown'
-import {
-    DEFAULT_EXTENSIONS,
-    RichContentEditor,
-    serializationOptions,
-} from 'lib/elements/RichContent/RichContentEditor'
+import { DEFAULT_EXTENSIONS, RichContentEditor, serializationOptions } from 'lib/elements/RichContent/RichContentEditor'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { colonDelimitedDuration } from 'lib/utils/durations'
 import { pluralize } from 'lib/utils/strings'
 

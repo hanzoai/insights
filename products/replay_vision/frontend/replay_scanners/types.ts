@@ -23,10 +23,7 @@ export const SCANNER_TYPE_TAG_TYPE: Record<ScannerType, TagType> = {
     summarizer: 'success',
 }
 
-export const OBSERVATION_TRIGGER_TAG: Record<
-    ReplayObservationApi['triggered_by'],
-    { label: string; type: TagType }
-> = {
+export const OBSERVATION_TRIGGER_TAG: Record<ReplayObservationApi['triggered_by'], { label: string; type: TagType }> = {
     schedule: { label: 'Schedule', type: 'default' },
     on_demand: { label: 'On demand', type: 'highlight' },
     retry: { label: 'Retry', type: 'completion' },
@@ -132,7 +129,8 @@ const FAILURE_KINDS: Record<FailureKind, FailureKindInfo> = {
     },
     infra_transient: {
         label: 'Insights timed out',
-        description: 'A Insights service took too long while preparing this recording. Retry the scan in a few minutes.',
+        description:
+            'A Insights service took too long while preparing this recording. Retry the scan in a few minutes.',
         retryWorthwhile: true,
     },
     internal_error: {

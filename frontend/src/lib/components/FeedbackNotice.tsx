@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBug } from '@hanzo/icons'
 import { Banner } from '@hanzo/elements'
+import { IconBug } from '@hanzo/icons'
 
-import { IconFeedback } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconFeedback } from 'lib/elements/icons'
 import { preflightLogic } from 'lib/logic/preflightLogic'
 
 import { supportLogic } from './Support/supportLogic'

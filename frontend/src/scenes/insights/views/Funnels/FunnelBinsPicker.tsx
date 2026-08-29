@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGraph } from '@hanzo/icons'
 import { Button, Dropdown, Input } from '@hanzo/elements'
+import { IconGraph } from '@hanzo/icons'
 
 import { BIN_COUNT_AUTO } from 'lib/constants'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'

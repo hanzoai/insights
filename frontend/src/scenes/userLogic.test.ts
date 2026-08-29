@@ -1,7 +1,7 @@
 import { MOCK_DEFAULT_USER } from 'lib/api.mock'
 
-import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
+import { expectLogic } from 'kea-test-utils'
 
 import api from 'lib/api'
 

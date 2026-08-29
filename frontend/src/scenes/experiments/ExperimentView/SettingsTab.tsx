@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPencil } from '@hanzo/icons'
 import { Button, Checkbox, Select, Tag, Link } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
 import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
 import { experimentsConfigLogic } from 'scenes/settings/environment/experimentsConfigLogic'
@@ -67,9 +67,7 @@ export function SettingsTab(): JSX.Element {
             <div>
                 <h2 className="font-semibold text-lg">CUPED</h2>
                 <div className="flex items-center gap-2">
-                    <Tag type={cupedEnabled ? 'success' : 'default'}>
-                        {cupedEnabled ? 'Enabled' : 'Disabled'}
-                    </Tag>
+                    <Tag type={cupedEnabled ? 'success' : 'default'}>{cupedEnabled ? 'Enabled' : 'Disabled'}</Tag>
                     {cupedEnabled && <span>{cupedLookbackDays}-day lookback</span>}
                     <Button type="secondary" size="xsmall" icon={<IconPencil />} onClick={openCupedModal} />
                 </div>

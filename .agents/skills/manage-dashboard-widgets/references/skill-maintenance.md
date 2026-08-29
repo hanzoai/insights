@@ -40,15 +40,15 @@ Load `/manage-dashboard-widgets` and complete the maintenance checklist below wh
 | `products/dashboards/frontend/bin/generate-widget-config-zod.mjs`          | Orval `generateReusableSchemas` → `widget-config-schemas/*.zod.ts` + `widget-configs.zod.ts`   |
 | `products/dashboards/backend/api/test/test_widget_config_schema_parity.py` | Catalog `config_schema` ↔ Pydantic parity                                                      |
 | `products/dashboards/frontend/widgets/widgetConfigSchemaParity.test.ts`    | FE Zod keys ↔ `widget-config-property-keys.json`                                               |
-| `insights/openapi/enum_collisions.py`                                       | Shared enum collision logic for `find_enum_collisions` + CI                                    |
+| `insights/openapi/enum_collisions.py`                                      | Shared enum collision logic for `find_enum_collisions` + CI                                    |
 | `products/dashboards/backend/api/dashboard.py`                             | `run_widgets`, batch add, sharing serializers (generic only)                                   |
 | `products/dashboards/backend/widget_query_throttle.py`                     | Per-team burst/sustained caps on `run_widgets`                                                 |
 | `products/dashboards/backend/widget_access.py`                             | RBAC denial copy                                                                               |
 | `products/dashboards/frontend/widgets/**`                                  | Component, edit modal, registry, previews                                                      |
 | `products/dashboards/frontend/widget_types/**`                             | Catalog, `widgetConfigShared.ts` UI labels, availability                                       |
 | `products/dashboards/frontend/generated/widget-config-*.ts`                | Regen only — do not hand-edit; update architecture/checklist if codegen outputs change         |
-| `products/dashboards/frontend/generated/widget-config-schemas/**`          | Orval reusable per-component Zod — regen via `insightscli build:widget-types`                        |
-| `insights/settings/web.py` (`ENUM_NAME_OVERRIDES`)                          | New per-type `widget_type` OpenAPI enum collision overrides                                    |
+| `products/dashboards/frontend/generated/widget-config-schemas/**`          | Orval reusable per-component Zod — regen via `insightscli build:widget-types`                  |
+| `insights/settings/web.py` (`ENUM_NAME_OVERRIDES`)                         | New per-type `widget_type` OpenAPI enum collision overrides                                    |
 | `products/dashboards/frontend/components/WidgetCard/**`                    | Shared tile chrome, placeholders, overview fixtures                                            |
 | `products/dashboards/frontend/components/DashboardWidgetItem/**`           | Tile glue, public placement, `TileFilters` mount                                               |
 | `products/dashboards/frontend/widgets/constants.ts`                        | List footer, fetch errors, tile refresh debounce ms                                            |
@@ -58,7 +58,7 @@ Load `/manage-dashboard-widgets` and complete the maintenance checklist below wh
 | `frontend/src/scenes/dashboard/DashboardItems.tsx`                         | `showEditingControls`, `isDashboardEditMode`, tile filter mount                                |
 | `products/dashboards/mcp/tools.yaml`                                       | Widget MCP tools                                                                               |
 | `frontend/src/scenes/dashboard/tileLayouts.ts`                             | Layout algorithm (only if behavior/docs change)                                                |
-| `insights/api/test/test_sharing.py`                                         | Shared dashboard widget payload expectations                                                   |
+| `insights/api/test/test_sharing.py`                                        | Shared dashboard widget payload expectations                                                   |
 | `tach.toml` (`products.dashboards` `depends_on`)                           | New product import boundary                                                                    |
 
 Platform-only refactors with **no** behavior or agent-facing surface change may skip narrative updates — still run Verify tests.

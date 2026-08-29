@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, kea, listeners, path, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

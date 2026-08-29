@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle, IconRefresh, IconWarning } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCheckCircle, IconRefresh, IconWarning } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 

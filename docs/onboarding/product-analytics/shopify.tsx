@@ -52,8 +52,8 @@ export const getShopifySteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'recommended',
             content: (
                 <Markdown>
-                    Insights will now capture pageviews, clicks, and other events on your Shopify store. See the [Shopify
-                    integration docs](https://hanzo.ai/docs/libraries/shopify) for tracking checkout events and
+                    Insights will now capture pageviews, clicks, and other events on your Shopify store. See the
+                    [Shopify integration docs](https://hanzo.ai/docs/libraries/shopify) for tracking checkout events and
                     revenue.
                 </Markdown>
             ),

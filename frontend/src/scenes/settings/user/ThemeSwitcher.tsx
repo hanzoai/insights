@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconDay, IconLaptop, IconNight, IconPalette } from '@hanzo/icons'
 import { Select, SelectOptions, SelectProps } from '@hanzo/elements'
+import { IconDay, IconLaptop, IconNight, IconPalette } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'

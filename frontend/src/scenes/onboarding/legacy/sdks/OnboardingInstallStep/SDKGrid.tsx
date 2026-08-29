@@ -1,5 +1,5 @@
-import { IconCopy } from '@hanzo/icons'
 import { Button, Card, Input, Tabs } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { InviteMembersButton } from 'lib/components/Account/InviteMembersButton'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

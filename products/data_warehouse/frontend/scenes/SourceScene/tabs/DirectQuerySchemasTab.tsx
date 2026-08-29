@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useState } from 'react'
 
+import { Button, Checkbox, Collapse, Input, Skeleton, Switch, Link, Tooltip } from '@hanzo/elements'
 import { IconInfo } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Collapse,
-    Input,
-    Skeleton,
-    Switch,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { groupBy } from 'lib/utils/arrays'
 import { newInternalTab } from 'lib/utils/newInternalTab'

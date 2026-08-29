@@ -2,13 +2,13 @@ import type { Editor } from '@tiptap/core'
 import { useActions, useValues } from 'kea'
 import type { RefObject } from 'react'
 
-import { IconImage, IconMarkdownFilled } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconImage, IconMarkdownFilled } from '@hanzo/icons'
 
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
 import { FileInput } from 'lib/elements/FileInput'
-import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
 import { Spinner } from 'lib/elements/Spinner'
+import { emojiUsageLogic } from 'lib/elements/TextArea/emojiUsageLogic'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { preflightLogic } from 'lib/logic/preflightLogic'
 

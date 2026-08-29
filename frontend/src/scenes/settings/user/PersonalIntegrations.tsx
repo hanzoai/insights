@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGithub, IconPlus, IconTrash } from '@hanzo/icons'
 import { Banner, Button, Dialog, Skeleton } from '@hanzo/elements'
+import { IconGithub, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
+import { IconSlack } from 'lib/elements/icons'
 import { GitHubRepoSummary } from 'lib/integrations/GitHubRepoSummary'
 import { userGithubIntegrationLogic } from 'lib/integrations/userGithubIntegrationLogic'
-import { IconSlack } from 'lib/elements/icons'
 
 import {
     LinkableSlackWorkspace,
@@ -107,8 +107,8 @@ function SlackLinkRow({ integration }: { integration: PersonalSlackIntegration }
             title: `Unlink ${integration.slack_team_name || 'this Slack workspace'}?`,
             description: (
                 <p>
-                    Insights will go back to matching you by email. If your Slack email doesn't match any Insights account
-                    in the organization, mentions won't route to you until you link again.
+                    Insights will go back to matching you by email. If your Slack email doesn't match any Insights
+                    account in the organization, mentions won't route to you until you link again.
                 </p>
             ),
             primaryButton: {

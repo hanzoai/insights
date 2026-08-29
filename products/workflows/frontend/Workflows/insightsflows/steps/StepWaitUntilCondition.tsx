@@ -1,8 +1,8 @@
 import { Node } from '@xyflow/react'
 import { useActions } from 'kea'
 
-import { IconCursor, IconPerson } from '@hanzo/icons'
 import { Divider, Label } from '@hanzo/elements'
+import { IconCursor, IconPerson } from '@hanzo/icons'
 
 import { Input } from 'lib/elements/Input'
 

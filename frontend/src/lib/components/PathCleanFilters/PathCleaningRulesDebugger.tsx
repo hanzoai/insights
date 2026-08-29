@@ -1,5 +1,5 @@
-import { IconChevronRight } from '@hanzo/icons'
 import { Collapse } from '@hanzo/elements'
+import { IconChevronRight } from '@hanzo/icons'
 
 import { isValidRegexp } from 'lib/utils/regexp'
 

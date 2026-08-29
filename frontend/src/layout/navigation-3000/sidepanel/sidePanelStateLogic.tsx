@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, kea, listeners, path, reducers } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { windowValues } from 'kea-window-values'
-import insights from 'insights-js'
 
 import { SidePanelTab } from '~/types'
 

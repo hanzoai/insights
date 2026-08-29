@@ -87,9 +87,9 @@ export function ExposureCriteriaModal({ onSave }: ExposureCriteriaModalProps): J
                     title="Custom"
                     description={
                         <>
-                            If you can't rely on the <Tag>{resolvedExposureEvent}</Tag> event, you can select
-                            a custom event to signal that users reached the part of your app where the experiment runs.
-                            You can also filter out users you would like to exclude from the analysis.
+                            If you can't rely on the <Tag>{resolvedExposureEvent}</Tag> event, you can select a custom
+                            event to signal that users reached the part of your app where the experiment runs. You can
+                            also filter out users you would like to exclude from the analysis.
                         </>
                     }
                     selected={!!exposureCriteria?.exposure_config}

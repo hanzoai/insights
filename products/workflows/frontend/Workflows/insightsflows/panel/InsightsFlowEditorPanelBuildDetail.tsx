@@ -1,18 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
+import { Badge, Banner, Button, Collapse, Divider, Input, Label, Select, Switch } from '@hanzo/elements'
 import { IconExternal, IconPlay, IconPlus, IconX } from '@hanzo/icons'
-import {
-    Badge,
-    Banner,
-    Button,
-    Collapse,
-    Divider,
-    Input,
-    Label,
-    Select,
-    Switch,
-} from '@hanzo/elements'
 
 import { EditableField } from 'lib/components/EditableField/EditableField'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
@@ -393,10 +383,7 @@ export function InsightsFlowEditorPanelBuildDetail(): JSX.Element | null {
                                                               ? 'Legacy skip conditions'
                                                               : 'Conditions'}
                                                       </span>
-                                                      <Badge.Number
-                                                          count={numberOfActionFilters}
-                                                          showZero={false}
-                                                      />
+                                                      <Badge.Number count={numberOfActionFilters} showZero={false} />
                                                   </>
                                               ),
                                               content: (

@@ -12,11 +12,7 @@ const CALENDARS_IF_NO_WINDOW = 2
 
 type RangeState = [dayjs.Dayjs | null, dayjs.Dayjs | null, 'start' | 'end']
 
-export function CalendarRangeInline({
-    value,
-    onChange,
-    months,
-}: Omit<CalendarRangeProps, 'onClose'>): JSX.Element {
+export function CalendarRangeInline({ value, onChange, months }: Omit<CalendarRangeProps, 'onClose'>): JSX.Element {
     // Keep a sanitised and cached copy of the selected range
     const [[rangeStart, rangeEnd, lastChanged], _setRange] = useState<RangeState>([
         value?.[0] ?? null,

@@ -1,8 +1,8 @@
-import { useActions } from 'kea'
 import insights from 'insights-js'
+import { useActions } from 'kea'
 
-import { IconMagicWand } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconMagicWand } from '@hanzo/icons'
 
 import { RecommendationCard } from './RecommendationCard'
 import { SourceMapsFixModal } from './SourceMapsFixModal'

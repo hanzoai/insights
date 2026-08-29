@@ -1,8 +1,8 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Table, TableColumns, Tag, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
@@ -104,8 +104,8 @@ export function LegacySummaryTable({
                         title={
                             <div>
                                 The number of users who were exposed to this variant. By default, this is measured by
-                                the count of <Tag type="option">$feature_flag_called</Tag> events per unique
-                                user. Check your metric settings to confirm how this is measured.
+                                the count of <Tag type="option">$feature_flag_called</Tag> events per unique user. Check
+                                your metric settings to confirm how this is measured.
                             </div>
                         }
                     >
@@ -353,11 +353,7 @@ export function LegacySummaryTable({
 
     return (
         <div className="mb-4" data-attr="experiment-results">
-            <Table
-                loading={false}
-                columns={columns}
-                dataSource={tabularExperimentResults(displayOrder, isSecondary)}
-            />
+            <Table loading={false} columns={columns} dataSource={tabularExperimentResults(displayOrder, isSecondary)} />
         </div>
     )
 }

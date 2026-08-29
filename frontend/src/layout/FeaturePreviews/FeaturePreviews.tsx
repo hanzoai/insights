@@ -1,14 +1,14 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 import { useEffect, useLayoutEffect, useState } from 'react'
 
-import { IconBell, IconCheck } from '@hanzo/icons'
 import { Banner, Button, Input, Switch, TextArea, Link } from '@hanzo/elements'
+import { IconBell, IconCheck } from '@hanzo/icons'
 
 import { BasicCard } from 'lib/components/Cards/BasicCard'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useAnchor } from 'lib/hooks/useAnchor'
 import { IconLink } from 'lib/elements/icons'
 import { SpinnerOverlay } from 'lib/elements/Spinner'
+import { useAnchor } from 'lib/hooks/useAnchor'
 import { Label } from 'lib/ui/Label/Label'
 import { userLogic } from 'scenes/userLogic'
 
@@ -237,11 +237,7 @@ function ConceptPreview({ feature }: { feature: EnrichedEarlyAccessFeature }): J
             title={
                 <div className="flex items-center gap-1">
                     <h4 className="font-bold mb-0">{name}</h4>
-                    <Button
-                        icon={<IconLink />}
-                        size="xsmall"
-                        onClick={() => copyExternalFeaturePreviewLink(flagKey)}
-                    />
+                    <Button icon={<IconLink />} size="xsmall" onClick={() => copyExternalFeaturePreviewLink(flagKey)} />
                 </div>
             }
             description={
@@ -299,11 +295,7 @@ function FeaturePreview({ feature, warning }: FeaturePreviewProps): JSX.Element 
                         />
                         <h4 className="font-bold mb-0">{name}</h4>
                     </Label>
-                    <Button
-                        icon={<IconLink />}
-                        size="xsmall"
-                        onClick={() => copyExternalFeaturePreviewLink(flagKey)}
-                    />
+                    <Button icon={<IconLink />} size="xsmall" onClick={() => copyExternalFeaturePreviewLink(flagKey)} />
                 </div>
             }
             description={

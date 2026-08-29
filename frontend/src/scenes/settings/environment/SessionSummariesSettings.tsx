@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect, useState } from 'react'
 
-import { IconPencil, IconPlus, IconX } from '@hanzo/icons'
 import { Button, Input, Skeleton, TextArea, Tooltip } from '@hanzo/elements'
+import { IconPencil, IconPlus, IconX } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

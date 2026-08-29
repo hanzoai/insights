@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { AnyPropertyFilter, PropertyFilterType, PropertyOperator } from '~/types'
 

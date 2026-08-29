@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconClock } from '@hanzo/icons'
 import { Skeleton, Table, TableColumns } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'

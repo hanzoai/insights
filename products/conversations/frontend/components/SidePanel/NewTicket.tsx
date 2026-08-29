@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { MessageInput } from '../Chat/MessageInput'
 import { sidepanelTicketsLogic } from './sidepanelTicketsLogic'

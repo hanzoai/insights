@@ -156,10 +156,7 @@ describe('webAnalyticsAchievementsLogic', () => {
             .toMatchValues({ uncelebratedPending: [] })
 
         expect(toast.success).toHaveBeenCalledTimes(1)
-        expect(toast.success).toHaveBeenCalledWith(
-            "You've unlocked 2 web analytics achievements",
-            expect.anything()
-        )
+        expect(toast.success).toHaveBeenCalledWith("You've unlocked 2 web analytics achievements", expect.anything())
         expect(acks).toHaveLength(2)
         expect(acks).toEqual(
             expect.arrayContaining([

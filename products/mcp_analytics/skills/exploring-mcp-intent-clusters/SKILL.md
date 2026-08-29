@@ -30,8 +30,8 @@ two typed tools backed by a stored snapshot.
 
 ## Tools
 
-| Tool                                              | Purpose                                           |
-| ------------------------------------------------- | ------------------------------------------------- |
+| Tool                                               | Purpose                                           |
+| -------------------------------------------------- | ------------------------------------------------- |
 | `insights:mcp-analytics-intent-clusters-retrieve`  | Fetch the latest cluster snapshot for the project |
 | `insights:mcp-analytics-intent-clusters-recompute` | Trigger an async recompute of the snapshot        |
 

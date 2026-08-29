@@ -11,13 +11,13 @@ LLM/AI events (`$ai_generation`, `$ai_span`, `$ai_trace`, `$ai_embedding`, `$ai_
 `events` keeps the lightweight metadata — token counts, costs, model, provider, `$ai_trace_id`, latency, error flags (also mirrored as native columns on `insights.ai_events`, where the `$ai_`-prefixed property maps to the un-prefixed column, e.g. `$ai_model` → `model`). The heavy properties live only on `insights.ai_events`:
 
 | Heavy content  | `events` property    | `insights.ai_events` column |
-| -------------- | -------------------- | -------------------------- |
-| Input messages | `$ai_input`          | `input`                    |
-| Output         | `$ai_output`         | `output`                   |
-| Output choices | `$ai_output_choices` | `output_choices`           |
-| Input state    | `$ai_input_state`    | `input_state`              |
-| Output state   | `$ai_output_state`   | `output_state`             |
-| Tools          | `$ai_tools`          | `tools`                    |
+| -------------- | -------------------- | --------------------------- |
+| Input messages | `$ai_input`          | `input`                     |
+| Output         | `$ai_output`         | `output`                    |
+| Output choices | `$ai_output_choices` | `output_choices`            |
+| Input state    | `$ai_input_state`    | `input_state`               |
+| Output state   | `$ai_output_state`   | `output_state`              |
+| Tools          | `$ai_tools`          | `tools`                     |
 
 Nothing restricts which heavy columns an event can carry, but the typical shape is: `$ai_generation` carries `input` / `output_choices` / `tools` (embeddings carry `input`); `$ai_span` and `$ai_trace` carry `input_state` / `output_state`. The full native column list is in `insights/insightsql/database/schema/ai_events.py`.
 

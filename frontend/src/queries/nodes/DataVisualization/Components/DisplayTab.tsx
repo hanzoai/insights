@@ -1,16 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { Badge, Button, Collapse, Input, Label, SegmentedButton, Select, Switch } from '@hanzo/elements'
 import { IconPlusSmall } from '@hanzo/icons'
-import {
-    Badge,
-    Button,
-    Collapse,
-    Input,
-    Label,
-    SegmentedButton,
-    Select,
-    Switch,
-} from '@hanzo/elements'
 
 import { GoalLinesList } from 'lib/components/GoalLinesList'
 
@@ -297,12 +288,7 @@ export const DisplayTab = (): JSX.Element => {
                                           removeGoalLine={removeGoalLine}
                                           updateGoalLine={updateGoalLine}
                                       />
-                                      <Button
-                                          className="mt-1"
-                                          onClick={addGoalLine}
-                                          icon={<IconPlusSmall />}
-                                          fullWidth
-                                      >
+                                      <Button className="mt-1" onClick={addGoalLine} icon={<IconPlusSmall />} fullWidth>
                                           Add goal line
                                       </Button>
                                   </>

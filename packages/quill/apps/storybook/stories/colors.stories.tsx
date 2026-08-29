@@ -64,8 +64,8 @@ export const AllColors: Story = {
         return (
             <div className="space-y-6">
                 <p className="text-sm text-muted-foreground">
-                    Semantic color tokens from <code className="text-xs">@hanzo/quill-tokens</code>. Toggle the theme
-                    in the toolbar to see dark mode values.
+                    Semantic color tokens from <code className="text-xs">@hanzo/quill-tokens</code>. Toggle the theme in
+                    the toolbar to see dark mode values.
                 </p>
                 <div>
                     <ColorSwatch

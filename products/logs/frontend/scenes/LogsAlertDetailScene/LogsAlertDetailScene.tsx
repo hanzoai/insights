@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconChevronDown, IconTestTube } from '@hanzo/icons'
 import { Banner, Button, Card, Dialog, Modal, Tabs } from '@hanzo/elements'
+import { IconChevronDown, IconTestTube } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { More } from 'lib/elements/Button/More'

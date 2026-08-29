@@ -1,24 +1,18 @@
+import insights from 'insights-js'
 import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
 import { IconCheckbox, IconChevronRight, IconEllipsis, IconFolderPlus, IconPlusSmall, IconStar } from '@hanzo/icons'
 
 import { itemSelectModalLogic } from 'lib/components/FileSystem/ItemSelectModal/itemSelectModalLogic'
 import { dayjs } from 'lib/dayjs'
+import { ProfilePicture } from 'lib/elements/ProfilePicture/ProfilePicture'
+import { Tag } from 'lib/elements/Tag'
+import { Tree, TreeRef, TreeSelectMode, TreeSize, TreeDataItem } from 'lib/elements/Tree/Tree'
+import { TreeNodeDisplayIcon } from 'lib/elements/Tree/TreeUtils'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useLocalStorage } from 'lib/hooks/useLocalStorage'
-import { Tag } from 'lib/elements/Tag'
-import {
-    Tree,
-    TreeRef,
-    TreeSelectMode,
-    TreeSize,
-    TreeDataItem,
-} from 'lib/elements/Tree/Tree'
-import { TreeNodeDisplayIcon } from 'lib/elements/Tree/TreeUtils'
-import { ProfilePicture } from 'lib/elements/ProfilePicture/ProfilePicture'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { ContextMenuGroup, ContextMenuItem } from 'lib/ui/ContextMenu/ContextMenu'
 import { DropdownMenuGroup } from 'lib/ui/DropdownMenu/DropdownMenu'

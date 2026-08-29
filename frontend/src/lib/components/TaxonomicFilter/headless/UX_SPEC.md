@@ -55,7 +55,7 @@ the trigger's ref).
 | **Pinned**                  | Same as Recent, but for the Pinned category. Doesn't show chips, Show header with name, with back button to dropdownmenu .                                                                         |
 | ─ separator ─               |                                                                                                                                                                                                    |
 | **Data warehouse tables ▶** | Submenu (chevron). Hover/click opens it. Show header with name, with back button to dropdownmenu                                                                                                   |
-| **InsightsQL expression**        | Closes menu, opens InsightsQL editor _directly_ (skips the combobox). On save, commits the expression as the selection. Show header with name, with back button to dropdownmenu                         |
+| **InsightsQL expression**   | Closes menu, opens InsightsQL editor _directly_ (skips the combobox). On save, commits the expression as the selection. Show header with name, with back button to dropdownmenu                    |
 
 ### Conditional rendering
 

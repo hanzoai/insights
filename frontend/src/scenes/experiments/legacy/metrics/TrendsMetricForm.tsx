@@ -160,9 +160,9 @@ export function TrendsMetricForm({ isSecondary = false }: { isSecondary?: boolea
                                         description={
                                             <>
                                                 Uses the number of unique users who trigger the{' '}
-                                                <Tag>$feature_flag_called</Tag> event as your exposure count.
-                                                This is the recommended setting for most experiments, as it accurately
-                                                tracks variant exposure.
+                                                <Tag>$feature_flag_called</Tag> event as your exposure count. This is
+                                                the recommended setting for most experiments, as it accurately tracks
+                                                variant exposure.
                                             </>
                                         }
                                         selected={!currentMetric.exposure_query}

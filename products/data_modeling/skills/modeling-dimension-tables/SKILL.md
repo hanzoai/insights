@@ -68,7 +68,7 @@ in **dbt** (which has no equivalent), or if you need a rate provider Insights do
 | File                                                                 | Read when                                                   |
 | -------------------------------------------------------------------- | ----------------------------------------------------------- |
 | [`references/dimension-catalog.md`](references/dimension-catalog.md) | Common dimensions, how to source each, and the natural key. |
-| [`references/insights/`](references/insights/)                         | InsightsQL aliased-dimension view recipes.                       |
+| [`references/insights/`](references/insights/)                       | InsightsQL aliased-dimension view recipes.                  |
 | [`references/dbt/`](references/dbt/)                                 | dbt `dim_date` / `dim_country` + `schema.yml` tests.        |
 
 ## Companions

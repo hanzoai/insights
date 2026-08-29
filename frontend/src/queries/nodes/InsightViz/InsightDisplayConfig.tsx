@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { ReactNode } from 'react'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { ChartFilter } from 'lib/components/ChartFilter'
 import { CompareFilter } from 'lib/components/CompareFilter/CompareFilter'

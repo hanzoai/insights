@@ -2,8 +2,8 @@ import annotationPlugin from 'chartjs-plugin-annotation'
 import clsx from 'clsx'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import { IconWarning } from '@hanzo/icons'
 import { Popover } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 import { DefaultTooltip, Sparkline as QuillSparklineChart, useChartTheme } from '@hanzo/quill-charts'
 import type { Series, TooltipContext } from '@hanzo/quill-charts'
 

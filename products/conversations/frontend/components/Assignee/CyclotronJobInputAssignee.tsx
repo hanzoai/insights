@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Dropdown } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import type { CustomInputRendererProps } from 'lib/components/CyclotronJob/customInputRenderers'
 

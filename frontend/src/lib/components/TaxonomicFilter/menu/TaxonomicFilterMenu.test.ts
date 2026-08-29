@@ -44,11 +44,23 @@ describe('resolveInitialMenuState', () => {
 
     it.each<[string, boolean, 'menu' | 'combobox' | undefined, MenuFilterEntry | null, MenuFilterState]>([
         ['closed when not defaultOpen', false, undefined, null, { kind: 'closed' }],
-        ['not defaultOpen ignores defaultOpenState and selection', false, 'combobox', insightsqlEntry, { kind: 'closed' }],
+        [
+            'not defaultOpen ignores defaultOpenState and selection',
+            false,
+            'combobox',
+            insightsqlEntry,
+            { kind: 'closed' },
+        ],
         ['defaultOpenState combobox -> combobox all', true, 'combobox', null, { kind: 'combobox', drillTo: 'all' }],
         ['defaultOpenState menu -> menu', true, 'menu', null, { kind: 'menu' }],
         ['no defaultOpenState falls back to selection (none -> menu)', true, undefined, null, { kind: 'menu' }],
-        ['no defaultOpenState falls back to selection (insightsql)', true, undefined, insightsqlEntry, { kind: 'insightsql-edit' }],
+        [
+            'no defaultOpenState falls back to selection (insightsql)',
+            true,
+            undefined,
+            insightsqlEntry,
+            { kind: 'insightsql-edit' },
+        ],
     ])('%s', (_label, defaultOpen, defaultOpenState, selected, expected) => {
         expect(resolveInitialMenuState(defaultOpen, defaultOpenState, selected)).toEqual(expected)
     })

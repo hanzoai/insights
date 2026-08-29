@@ -1281,8 +1281,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                             ),
                         getName: (option) => option.name,
                         getValue: (option) => option.value,
-                        valuesEndpoint: (key) =>
-                            `v1/environments/${projectId}/error_tracking/issues/values?key=` + key,
+                        valuesEndpoint: (key) => `v1/environments/${projectId}/error_tracking/issues/values?key=` + key,
                         getPopoverHeader: () => 'Issues',
                     },
                     {

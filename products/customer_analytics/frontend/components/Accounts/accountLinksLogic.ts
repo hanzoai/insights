@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { combineUrl, router } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from 'lib/elements/Toast/Toast'
 import { removeProjectIdIfPresent } from 'lib/utils/kea-router'

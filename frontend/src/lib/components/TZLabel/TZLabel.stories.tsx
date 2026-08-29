@@ -3,8 +3,8 @@ import { useState } from 'react'
 
 import { TZLabel, TZLabelProps } from 'lib/components/TZLabel/index'
 import { now } from 'lib/dayjs'
-import { useDelayedOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Divider } from 'lib/elements/Divider'
+import { useDelayedOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
 import { mswDecorator } from '~/mocks/browser'
 

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
-import { IconChevronLeft } from '@hanzo/icons'
 import { Checkbox, Input, Skeleton } from '@hanzo/elements'
+import { IconChevronLeft } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Field } from 'lib/elements/Field'
@@ -164,12 +164,7 @@ export function AlertEditorFormDetails({
                 </Field>
                 {enabled ? (
                     <Field name="enabled">
-                        <Checkbox
-                            checked={enabled.checked}
-                            data-attr={enabled.dataAttr}
-                            fullWidth
-                            label="Enabled"
-                        />
+                        <Checkbox checked={enabled.checked} data-attr={enabled.dataAttr} fullWidth label="Enabled" />
                     </Field>
                 ) : null}
             </div>

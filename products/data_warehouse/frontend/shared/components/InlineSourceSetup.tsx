@@ -2,8 +2,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
-import { IconDatabase, IconPlus } from '@hanzo/icons'
 import { Button, Card, Input, Skeleton } from '@hanzo/elements'
+import { IconDatabase, IconPlus } from '@hanzo/icons'
 
 import { ExternalDataSourceType, SourceConfig } from '~/queries/schema/schema-general'
 

@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { forwardRef } from 'react'
 
-import { IconTarget } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconTarget } from '@hanzo/icons'
 
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { useShortcut } from 'lib/components/Shortcuts/useShortcut'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Badge } from 'lib/elements/Badge'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { organizationLogic } from 'scenes/organizationLogic'
 
 import { globalSetupLogic } from './globalSetupLogic'

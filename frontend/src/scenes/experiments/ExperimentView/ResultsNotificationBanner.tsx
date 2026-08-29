@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconClock } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 

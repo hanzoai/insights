@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Label, SegmentedButton, SegmentedButtonOption, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

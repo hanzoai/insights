@@ -179,10 +179,7 @@ describe('maxLogic', () => {
             get: {
                 ...maxMocks.get,
                 '/v1/environments/:team_id/conversations/': { results: [] },
-                [`/v1/environments/:team_id/conversations/${mockConversationId}`]: () => [
-                    404,
-                    { detail: 'Not found' },
-                ],
+                [`/v1/environments/:team_id/conversations/${mockConversationId}`]: () => [404, { detail: 'Not found' }],
             },
         })
 

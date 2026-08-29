@@ -5,9 +5,9 @@ import { IconDownload } from '@hanzo/icons'
 import { CodeSnippet, Language } from '~/lib/components/CodeSnippet/CodeSnippet'
 import { Banner } from '~/lib/elements/Banner'
 import { Button } from '~/lib/elements/Button'
+import { Link } from '~/lib/elements/Link'
 import { Modal } from '~/lib/elements/Modal'
 import { Skeleton } from '~/lib/elements/Skeleton'
-import { Link } from '~/lib/elements/Link'
 
 import {
     TerraformExportResource,

@@ -98,13 +98,13 @@
      * while hovered/highlighted — those states own the hover fill.
      */
     :is(
-            [data-slot='dropdown-menu-checkbox-item'],
-            [data-slot='dropdown-menu-radio-item'],
-            [data-slot='context-menu-checkbox-item'],
-            [data-slot='context-menu-radio-item'],
-            [data-slot='menubar-checkbox-item'],
-            [data-slot='menubar-radio-item']
-        ):is([aria-checked='true'], [data-checked]):not(:hover, [data-highlighted]) {
+        [data-slot='dropdown-menu-checkbox-item'],
+        [data-slot='dropdown-menu-radio-item'],
+        [data-slot='context-menu-checkbox-item'],
+        [data-slot='context-menu-radio-item'],
+        [data-slot='menubar-checkbox-item'],
+        [data-slot='menubar-radio-item']
+    ):is([aria-checked='true'], [data-checked]):not(:hover, [data-highlighted]) {
         background-color: var(--fill-selected);
     }
 
@@ -114,11 +114,11 @@
      * effect reads even when Base UI wraps items in a group/list container.
      */
     :is(
-            [data-slot='dropdown-menu-checkbox-item'],
-            [data-slot='dropdown-menu-radio-item'],
-            [data-slot='context-menu-checkbox-item'],
-            [data-slot='context-menu-radio-item']
-        ):is([aria-checked='true'], [data-checked]):has(+ :is([aria-checked='true'], [data-checked])) {
+        [data-slot='dropdown-menu-checkbox-item'],
+        [data-slot='dropdown-menu-radio-item'],
+        [data-slot='context-menu-checkbox-item'],
+        [data-slot='context-menu-radio-item']
+    ):is([aria-checked='true'], [data-checked]):has(+ :is([aria-checked='true'], [data-checked])) {
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
     }

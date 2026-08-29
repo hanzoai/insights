@@ -6,9 +6,9 @@ import { useEffect, useLayoutEffect } from 'react'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
+import { Banner } from 'lib/elements/Banner'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { Banner } from 'lib/elements/Banner'
 import { NotebookLogicProps, notebookLogic } from 'scenes/notebooks/Notebook/notebookLogic'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'

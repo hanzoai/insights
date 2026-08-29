@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { IconCursorClick, IconMegaphone } from '@hanzo/icons'
 import { Button, Input, Label, Modal } from '@hanzo/elements'
+import { IconCursorClick, IconMegaphone } from '@hanzo/icons'
 
 import { EffectiveProductTourType } from '~/types'
 

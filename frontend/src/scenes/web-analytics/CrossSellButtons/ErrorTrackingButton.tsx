@@ -1,5 +1,5 @@
-import { IconWarning } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'
 import { urls } from 'scenes/urls'

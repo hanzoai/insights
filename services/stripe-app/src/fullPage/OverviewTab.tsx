@@ -12,9 +12,9 @@ import { BarChart, LineChart } from '@stripe/ui-extension-sdk/ui/next'
 import { useEffect, useState } from 'react'
 
 import { DEFAULT_TIMEFRAME, getTimeframe } from '../constants'
-import { logger } from '../logger'
 import { InsightsClient } from '../insights/client'
 import type { FunnelStepResult, InsightsFeatureFlag, WebOverviewItem } from '../insights/types'
+import { logger } from '../logger'
 import ExternalLink from './components/ExternalLink'
 import MetricRow from './components/MetricRow'
 import PromoBanner, {

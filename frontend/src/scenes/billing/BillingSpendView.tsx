@@ -2,9 +2,9 @@ import './BillingUsage.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@hanzo/icons'
 import { Button, Checkbox } from '@hanzo/elements'
 import { Select } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'

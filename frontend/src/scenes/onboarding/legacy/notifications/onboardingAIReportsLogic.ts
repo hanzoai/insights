@@ -135,9 +135,7 @@ export const onboardingAIReportsLogic = kea<onboardingAIReportsLogicType>([
                         )
                         return created.id
                     } catch {
-                        toast.error(
-                            'Could not set up the report. You can add it later from Notifications & alerts.'
-                        )
+                        toast.error('Could not set up the report. You can add it later from Notifications & alerts.')
                         return values.createdSubscriptionId
                     }
                 },

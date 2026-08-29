@@ -75,9 +75,9 @@ through the user's own backend, which holds the key.
 
 | Field       | Notes                                                                                                                                                                     |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `variables` | Keyed by `code_name` for InsightsQL endpoints; for insight endpoints with breakdowns, key is the **breakdown property name**                                                   |
+| `variables` | Keyed by `code_name` for InsightsQL endpoints; for insight endpoints with breakdowns, key is the **breakdown property name**                                              |
 | `limit`     | Max rows returned.                                                                                                                                                        |
-| `offset`    | Skip rows. Only InsightsQL endpoints                                                                                                                                           |
+| `offset`    | Skip rows. Only InsightsQL endpoints                                                                                                                                      |
 | `refresh`   | `"cache"` (return cached results if fresh enough), `"force"` (always recalculate), `"direct"` (bypass materialisation, materialised endpoints only). Default is `"cache"` |
 
 Call `endpoint-get` to see the exact variable shape. The response includes the query definition
@@ -162,7 +162,7 @@ change.)
 | 403    | Key lacks `endpoint:read` scope, or endpoint is in another project             | Adjust key scopes                                                                |
 | 404    | Endpoint name typo, or endpoint not active                                     | Confirm name; check `is_active`                                                  |
 | 429    | Rate limited — limits are per team, not per endpoint (see note below)          | Exponential backoff; cache responses client-side if possible                     |
-| 5xx    | Query execution failure (Datastore error, timeout, etc.)                      | Retry with backoff. If persistent, hand off to `diagnosing-endpoint-performance` |
+| 5xx    | Query execution failure (Datastore error, timeout, etc.)                       | Retry with backoff. If persistent, hand off to `diagnosing-endpoint-performance` |
 
 ## Workflow
 

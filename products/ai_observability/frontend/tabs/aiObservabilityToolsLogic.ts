@@ -217,7 +217,8 @@ export const aiObservabilityToolsLogic = kea<aiObservabilityToolsLogicType>([
                     ],
                     pathsFilter: {
                         includeEventTypes: [PathType.InsightsQL],
-                        pathsInsightsQLExpression: "arrayJoin(splitByChar(',', ifNull(properties.$ai_tools_called, '')))",
+                        pathsInsightsQLExpression:
+                            "arrayJoin(splitByChar(',', ifNull(properties.$ai_tools_called, '')))",
                         startPoint: toolName,
                         stepLimit: 5,
                         edgeLimit: 50,

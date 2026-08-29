@@ -112,12 +112,7 @@ export function DashboardWidgetPlacementMenu({
     }
 
     return (
-        <Menu
-            items={items}
-            placement="right-start"
-            fallbackPlacements={['left-start']}
-            closeParentPopoverOnClickInside
-        >
+        <Menu items={items} placement="right-start" fallbackPlacements={['left-start']} closeParentPopoverOnClickInside>
             <Button fullWidth>{label}</Button>
         </Menu>
     )

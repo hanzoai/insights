@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBug, IconQuestion } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconBug, IconQuestion } from '@hanzo/icons'
 
 import { SupportTicketKind, SupportTicketTargetArea, supportLogic } from 'lib/components/Support/supportLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'

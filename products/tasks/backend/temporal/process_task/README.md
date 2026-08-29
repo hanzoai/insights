@@ -98,13 +98,13 @@ Inside the sandbox, `npx agent-server` starts an HTTP server on the configured p
 
 Environment variables consumed inside the sandbox:
 
-| Variable                   | Purpose                                              |
-| -------------------------- | ---------------------------------------------------- |
-| `GITHUB_TOKEN`             | GitHub installation access token for repo operations |
-| `INSIGHTS_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API          |
-| `INSIGHTS_API_URL`          | Insights instance URL                                 |
+| Variable                    | Purpose                                              |
+| --------------------------- | ---------------------------------------------------- |
+| `GITHUB_TOKEN`              | GitHub installation access token for repo operations |
+| `INSIGHTS_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API         |
+| `INSIGHTS_API_URL`          | Insights instance URL                                |
 | `INSIGHTS_PROJECT_ID`       | Team ID for API scoping                              |
-| `JWT_PUBLIC_KEY`           | Public key for verifying sandbox connection tokens   |
+| `JWT_PUBLIC_KEY`            | Public key for verifying sandbox connection tokens   |
 
 ## End-to-end flow
 
@@ -145,9 +145,9 @@ Per-team configuration for sandbox execution: network access level (trusted/full
 | --------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Feature flag    | `tasks` — checked in `client.py` before starting workflow                                                         |
 | Array OAuth app | Region-specific client IDs (US/EU/DEV) in `backend/temporal/oauth.py`. Creates scoped OAuth tokens with 6h expiry |
-| Sandbox JWT     | RS256 tokens from `backend/services/connection_token.py`. 24h expiry, audience `insights:sandbox_connection`       |
+| Sandbox JWT     | RS256 tokens from `backend/services/connection_token.py`. 24h expiry, audience `insights:sandbox_connection`      |
 | GitHub App      | Installation access tokens via the team's GitHub integration                                                      |
-| API permissions | `InsightsFeatureFlagPermission` + `APIScopePermission` on all endpoints                                            |
+| API permissions | `InsightsFeatureFlagPermission` + `APIScopePermission` on all endpoints                                           |
 
 ## Sandbox providers
 
@@ -158,7 +158,7 @@ Per-team configuration for sandbox execution: network access level (trusted/full
 | Host port         | Dynamically assigned                                           | N/A (cloud-routed)                                                    |
 | Isolation         | Standard Docker container                                      | gVisor kernel-level sandboxing                                        |
 | Auth              | No token needed                                                | Modal connect token                                                   |
-| Image source      | Local Dockerfile build                                         | `ghcr.io/insights/insights-sandbox-base`                                |
+| Image source      | Local Dockerfile build                                         | `ghcr.io/insights/insights-sandbox-base`                              |
 | Snapshots         | Docker commit/tag                                              | Modal `snapshot_filesystem()`                                         |
 | URL rewriting     | Auto (`localhost` → `host.docker.internal`, `:8010` → `:8000`) | None (uses `SANDBOX_API_URL` or ngrok)                                |
 | `SANDBOX_API_URL` | Not needed (auto-transform handles it)                         | Only for local dev with Modal (ngrok URL); production uses `SITE_URL` |
@@ -228,4 +228,4 @@ Set `SANDBOX_API_URL` to the ngrok URL. `SITE_URL` stays as `http://localhost:80
 | `scripts/run_agent_in_docker.py`            | Local test script                                             |
 | `frontend/components/TaskDetailPage.tsx`    | Task detail UI                                                |
 | `frontend/components/TaskSessionView.tsx`   | Live log streaming UI                                         |
-| `insights/settings/temporal.py`              | Temporal and sandbox settings                                 |
+| `insights/settings/temporal.py`             | Temporal and sandbox settings                                 |

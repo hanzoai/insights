@@ -708,7 +708,9 @@ const experimentList = (): ToolBase<
                 {
                     ...filtered,
                     results: await Promise.all(
-                        (filtered.results ?? []).map((item) => withInsightsUrl(context, item, `/experiments/${item.id}`))
+                        (filtered.results ?? []).map((item) =>
+                            withInsightsUrl(context, item, `/experiments/${item.id}`)
+                        )
                     ),
                 },
                 '/experiments'

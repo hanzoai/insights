@@ -1,15 +1,15 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
 import { IconBolt, IconPerson } from '@hanzo/icons'
 
 import { LiveUserCount } from 'lib/components/LiveUserCount'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconLink } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
-import { Switch } from 'lib/elements/Switch'
+import { IconLink } from 'lib/elements/icons'
 import { Popover } from 'lib/elements/Popover'
+import { Switch } from 'lib/elements/Switch'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { teamLogic } from 'scenes/teamLogic'

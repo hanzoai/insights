@@ -4,6 +4,7 @@ import { FunctionComponent, isValidElement, memo, useEffect, useRef } from 'reac
 import { useDebouncedCallback } from 'use-debounce'
 import useResizeObserver from 'use-resize-observer'
 
+import { Button, Divider } from '@hanzo/elements'
 import {
     BaseIcon,
     IconBolt,
@@ -22,11 +23,10 @@ import {
     IconTarget,
     IconTerminal,
 } from '@hanzo/icons'
-import { Button, Divider } from '@hanzo/elements'
 
 import { Dayjs } from 'lib/dayjs'
-import useIsHovering from 'lib/hooks/useIsHovering'
 import { Tooltip } from 'lib/elements/Tooltip'
+import useIsHovering from 'lib/hooks/useIsHovering'
 import { ceilMsToClosestSecond } from 'lib/utils/durations'
 import { objectsEqual } from 'lib/utils/objects'
 import { ItemTimeDisplay } from 'scenes/session-recordings/components/ItemTimeDisplay'

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconGear } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { Link } from 'lib/elements/Link'
 import { ButtonGroupPrimitive, ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

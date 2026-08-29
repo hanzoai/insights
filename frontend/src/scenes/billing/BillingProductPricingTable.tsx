@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconArrowRightDown, IconInfo } from '@hanzo/icons'
 import { Banner, Table, TableColumns, Tooltip } from '@hanzo/elements'
+import { IconArrowRightDown, IconInfo } from '@hanzo/icons'
 
 import {
     BillingProductV2AddonType,

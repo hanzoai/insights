@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { IconChevronDown, IconPeople } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
-import { Skeleton } from 'lib/elements/Skeleton'
 import { ProfileBubbles } from 'lib/elements/ProfilePicture'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { userLogic } from 'scenes/userLogic'
 
 import { SessionRecordingType } from '~/types'

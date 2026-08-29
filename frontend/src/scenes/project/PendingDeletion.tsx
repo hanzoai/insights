@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Card } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { newAccountMenuLogic } from 'lib/components/Account/newAccountMenuLogic'
 import { OrgSwitcher } from 'lib/components/Account/OrgSwitcher'

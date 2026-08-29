@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useState } from 'react'
 
 import { Collapse, Table, TableColumns, Tabs } from '@hanzo/elements'

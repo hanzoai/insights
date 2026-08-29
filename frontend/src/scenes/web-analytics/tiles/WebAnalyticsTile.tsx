@@ -2,18 +2,18 @@ import clsx from 'clsx'
 import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useCallback, useMemo } from 'react'
 
-import { IconChevronDown, IconExternal, IconTrending, IconUndo, IconWarning } from '@hanzo/icons'
 import { SegmentedButton, Select, Link, Tooltip } from '@hanzo/elements'
+import { IconChevronDown, IconExternal, IconTrending, IconUndo, IconWarning } from '@hanzo/icons'
 
 import { getColorVar } from 'lib/colors'
-import { StarHog } from 'lib/components/mascots'
 import { IntervalFilterStandalone } from 'lib/components/IntervalFilter'
+import { StarHog } from 'lib/components/mascots'
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { PropertyIcon } from 'lib/components/PropertyIcon/PropertyIcon'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { IconOpenInNew, IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconOpenInNew, IconTrendingDown, IconTrendingFlat } from 'lib/elements/icons'
 import { Switch } from 'lib/elements/Switch'
 import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -1410,7 +1410,13 @@ interface InsightsQLTableTileProps {
 // `InsightsQLTableTile` is reused for any InsightsQLQuery DataTableNode and shouldn't depend on bot state.
 const BOT_INSIGHTSQL_TILES = new Set<TileId>([TileId.BOT_CRAWLERS, TileId.BOT_PATHS])
 
-const BotInsightsQLTableTile = ({ uniqueKey, attachTo, query, insightProps, tileId }: InsightsQLTableTileProps): JSX.Element => {
+const BotInsightsQLTableTile = ({
+    uniqueKey,
+    attachTo,
+    query,
+    insightProps,
+    tileId,
+}: InsightsQLTableTileProps): JSX.Element => {
     const { setBotAnalyticsFilters } = useActions(botAnalyticsLogic)
     const { rawBotAnalyticsFilters } = useValues(botAnalyticsLogic)
 

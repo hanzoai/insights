@@ -1,9 +1,9 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { ReactNode, useState } from 'react'
 
-import { IconSparkles, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconSparkles, IconX } from '@hanzo/icons'
 
 import { CommandBlock } from 'lib/components/CommandBlock/CommandBlock'
 import { AgentBadgeRotator } from 'lib/components/MCPHint/AgentBadgeRotator'

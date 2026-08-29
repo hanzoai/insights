@@ -256,9 +256,7 @@ export function TranscriptBubbleStream({
                         type={item.message.role === 'user' ? 'human' : 'ai'}
                         wrapperClassName="max-w-[75%]"
                     >
-                        {item.text && (
-                            <Markdown className="whitespace-pre-wrap break-words">{item.text}</Markdown>
-                        )}
+                        {item.text && <Markdown className="whitespace-pre-wrap break-words">{item.text}</Markdown>}
                         {item.nonText && <div className="italic text-muted text-xs mt-1">(has attachments)</div>}
                     </MessageTemplate>
                 ) : (

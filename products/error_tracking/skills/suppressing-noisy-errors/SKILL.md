@@ -45,8 +45,8 @@ Suppression is **not** the right tool when:
 
 ## Available tools
 
-| Tool                                              | Purpose                                                                                              |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Tool                                               | Purpose                                                                                              |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `insights:query-error-tracking-issues-list`        | Find suppression candidates by volume and impact; dry-run a candidate filter via `filterGroup`       |
 | `insights:query-error-tracking-issue-events`       | Inspect sampled `$exception` events to confirm the pattern                                           |
 | `insights:execute-sql`                             | Fallback dry-run for filters that need OR groups or operators outside the `filterGroup` allowed list |

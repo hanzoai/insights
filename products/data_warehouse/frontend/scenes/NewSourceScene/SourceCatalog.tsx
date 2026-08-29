@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { memo } from 'react'
 
-import { IconMegaphone, IconPlusSmall } from '@hanzo/icons'
 import { Button, Input, Modal, Tag, TextArea, Link } from '@hanzo/elements'
+import { IconMegaphone, IconPlusSmall } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'

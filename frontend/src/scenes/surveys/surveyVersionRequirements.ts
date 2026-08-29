@@ -301,7 +301,9 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'insights-android': '3.35.0',
             insights_flutter: '5.18.0',
         },
-        unsupportedSdks: [{ sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/3192' }],
+        unsupportedSdks: [
+            { sdk: 'insights-react-native', issue: 'https://github.com/Insights/insights-js/issues/3192' },
+        ],
         check: (s) => (s.conditions?.seenSurveyWaitPeriodInDays ?? 0) > 0,
     },
     {

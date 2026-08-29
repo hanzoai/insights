@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 

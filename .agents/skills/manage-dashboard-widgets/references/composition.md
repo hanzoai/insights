@@ -174,7 +174,7 @@ When the FE catalog lacks a `widget_type` (partial deploy, unrebased stack):
 | `editWidgetModalBuilders.ts`                               | Shared kea actions; `buildWidgetTileMetadataPatch` — spread actions only, inline reducers per logic |
 | `edit*WidgetModalLogic.ts`                                 | Validate + save listener                                                                            |
 | `widgetConfigValidation.ts` + `*WidgetConfigValidation.ts` | Zod; registry **`parseConfigApiError`**                                                             |
-| `widgetFilters.ts`                                         | `widgetFilters` persist/InsightsQL; edit setups; tile persist/restore hooks                              |
+| `widgetFilters.ts`                                         | `widgetFilters` persist/InsightsQL; edit setups; tile persist/restore hooks                         |
 | `widgetFiltersUi.tsx`                                      | Filter chips (edit flow)                                                                            |
 | `widgetTileFiltersReadOnly.tsx`                            | `WidgetTileFiltersBar` + read-only labels                                                           |
 | `*WidgetTileFilters.tsx`                                   | Registry **`TileFilters`** — always-visible bar                                                     |

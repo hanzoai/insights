@@ -3,6 +3,7 @@ import './InsightDetails.scss'
 import { useValues } from 'kea'
 import React from 'react'
 
+import { Lettermark, LettermarkColor, Tooltip } from '@hanzo/elements'
 import {
     IconCalculator,
     IconCalendar,
@@ -15,17 +16,16 @@ import {
     IconUser,
     IconWarning,
 } from '@hanzo/icons'
-import { Lettermark, LettermarkColor, Tooltip } from '@hanzo/elements'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { convertPropertiesToPropertyGroup } from 'lib/components/PropertyFilters/utils'
 import { SeriesLetter } from 'lib/components/SeriesGlyph'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
-import { IconCalculate } from 'lib/elements/icons'
 import { Divider } from 'lib/elements/Divider'
-import { Tag } from 'lib/elements/Tag/Tag'
+import { IconCalculate } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { Tag } from 'lib/elements/Tag/Tag'
 import { dateFilterToText } from 'lib/utils/dateFilters'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { BreakdownTag } from 'scenes/insights/filters/BreakdownFilter/BreakdownTag'

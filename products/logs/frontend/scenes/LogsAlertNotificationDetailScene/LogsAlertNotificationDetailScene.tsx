@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconExternal, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Skeleton, Switch, Tag } from '@hanzo/elements'
+import { IconExternal, IconTrash } from '@hanzo/icons'
 
 import { slackIntegrationLogic } from 'lib/integrations/slackIntegrationLogic'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -158,8 +158,8 @@ export function LogsAlertNotificationDetailScene(): JSX.Element {
             />
             <div className="flex flex-col gap-4 p-4 max-w-3xl">
                 <p className="text-sm text-muted m-0">
-                    These script functions only run for this alert. Open one to edit the message body, headers, filters, or
-                    destination details for the matching lifecycle event.
+                    These script functions only run for this alert. Open one to edit the message body, headers, filters,
+                    or destination details for the matching lifecycle event.
                 </p>
 
                 {loading ? (
@@ -199,7 +199,9 @@ export function LogsAlertNotificationDetailScene(): JSX.Element {
                                             type="secondary"
                                             icon={<IconExternal />}
                                             to={
-                                                fn ? `${urls.insightsFunction(fn.id)}?returnTo=${editorReturnTo}` : undefined
+                                                fn
+                                                    ? `${urls.insightsFunction(fn.id)}?returnTo=${editorReturnTo}`
+                                                    : undefined
                                             }
                                             tooltip={fn ? 'Open script function editor' : undefined}
                                             disabledReason={fn ? undefined : 'No script function for this event kind'}

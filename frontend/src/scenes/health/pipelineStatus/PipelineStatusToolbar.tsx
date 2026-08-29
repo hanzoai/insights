@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconEllipsis } from '@hanzo/icons'
 import { Button, Input, Menu, SegmentedButton } from '@hanzo/elements'
+import { IconCheck, IconEllipsis } from '@hanzo/icons'
 
 import { pipelineStatusSceneLogic } from './pipelineStatusSceneLogic'
 import type { IssueTypeFilter } from './pipelineStatusSceneLogic'

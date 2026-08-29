@@ -1,5 +1,5 @@
-import { IconWarning } from '@hanzo/icons'
 import { Collapse, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { stripMarkdown } from 'lib/utils/markdown'

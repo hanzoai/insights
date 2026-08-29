@@ -2,15 +2,7 @@ import { useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import {
-    Button,
-    Banner,
-    InputSelect,
-    SegmentedButton,
-    Select,
-    Switch,
-    SpinnerOverlay,
-} from '@hanzo/elements'
+import { Button, Banner, InputSelect, SegmentedButton, Select, Switch, SpinnerOverlay } from '@hanzo/elements'
 
 import { AddToDashboardModal } from 'lib/components/AddToDashboard/AddToDashboardModal'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

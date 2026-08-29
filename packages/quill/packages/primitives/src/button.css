@@ -108,8 +108,8 @@
 
     /* Consecutive selected items collapse corners for a seamless stack */
     .quill-button--variant-default:is([aria-selected='true'], [aria-checked='true']):has(
-            + :is([aria-selected='true'], [aria-checked='true'])
-        ) {
+        + :is([aria-selected='true'], [aria-checked='true'])
+    ) {
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
     }

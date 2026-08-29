@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

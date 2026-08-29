@@ -1,6 +1,6 @@
-import { IconInfo } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
 import { Select } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { FUNNEL_STEP_COUNT_LIMIT } from '~/scenes/insights/EditorFilters/FunnelsQuerySteps'
 import { BreakdownAttributionType, StepOrderValue } from '~/types'

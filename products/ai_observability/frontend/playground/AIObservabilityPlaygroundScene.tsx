@@ -1,19 +1,7 @@
-import { BindLogic, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 import React from 'react'
 
-import {
-    IconChevronRight,
-    IconGear,
-    IconPencil,
-    IconPlay,
-    IconPlus,
-    IconRevert,
-    IconStack,
-    IconTrash,
-    IconWrench,
-    IconCopy,
-} from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -29,6 +17,18 @@ import {
     Link,
     Divider,
 } from '@hanzo/elements'
+import {
+    IconChevronRight,
+    IconGear,
+    IconPencil,
+    IconPlay,
+    IconPlus,
+    IconRevert,
+    IconStack,
+    IconTrash,
+    IconWrench,
+    IconCopy,
+} from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'

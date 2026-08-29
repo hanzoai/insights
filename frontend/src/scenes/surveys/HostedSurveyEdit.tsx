@@ -7,22 +7,12 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
+import { Button, Checkbox, Collapse, Dialog, Dropdown, Input, Switch, Link, Tooltip } from '@hanzo/elements'
 import { IconChevronDown, IconExternal, IconGitBranch, IconTrash, IconWarning } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Collapse,
-    Dialog,
-    Dropdown,
-    Input,
-    Switch,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { SortableDragIcon } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
+import { SortableDragIcon } from 'lib/elements/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { Customization } from 'scenes/surveys/survey-appearance/SurveyCustomization'
 import { SurveyTranslationFields } from 'scenes/surveys/SurveyTranslationFields'

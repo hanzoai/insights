@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
-import { IconCalendar, IconClock } from '@hanzo/icons'
 import { Tag, Link } from '@hanzo/elements'
+import { IconCalendar, IconClock } from '@hanzo/icons'
 
 import { AlertState } from '~/queries/schema/schema-general'
 

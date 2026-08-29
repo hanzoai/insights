@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconSort, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconSort, IconX } from '@hanzo/icons'
 
 import { webAnalyticsLogic } from 'scenes/web-analytics/webAnalyticsLogic'
 

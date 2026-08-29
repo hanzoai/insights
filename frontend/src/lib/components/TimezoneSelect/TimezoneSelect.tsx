@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconGlobe, IconHome, IconLaptop } from '@hanzo/icons'
 import { Select, SelectOptionLeaf, SelectSection } from '@hanzo/elements'
+import { IconGlobe, IconHome, IconLaptop } from '@hanzo/icons'
 
 import { shortTimeZone } from 'lib/utils/timezones'
 import { teamLogic } from 'scenes/teamLogic'
@@ -76,12 +76,6 @@ export function TimezoneSelect({
             : baseOptions
 
     return (
-        <Select<string>
-            value={value}
-            onChange={onChange}
-            options={options}
-            size={size}
-            data-attr="timezone-select"
-        />
+        <Select<string> value={value} onChange={onChange} options={options} size={size} data-attr="timezone-select" />
     )
 }

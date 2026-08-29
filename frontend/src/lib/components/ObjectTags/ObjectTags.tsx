@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ComponentProps, CSSProperties, useId } from 'react'
 
-import { IconPencil, IconPlus } from '@hanzo/icons'
 import { InputSelect, Tag, TagType } from '@hanzo/elements'
+import { IconPencil, IconPlus } from '@hanzo/icons'
 
 import { objectTagsLogic } from 'lib/components/ObjectTags/objectTagsLogic'
 import { colorForString } from 'lib/utils/colors'

@@ -1,6 +1,6 @@
 import clsx from 'clsx'
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useCallback, useMemo, type ErrorInfo } from 'react'
 
 import { PieChart } from '@hanzo/quill-charts'

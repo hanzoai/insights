@@ -15,8 +15,8 @@ follow this workflow to systematically diagnose the cause.
 
 ## Available tools
 
-| Tool                                    | Purpose                                               |
-| --------------------------------------- | ----------------------------------------------------- |
+| Tool                                     | Purpose                                               |
+| ---------------------------------------- | ----------------------------------------------------- |
 | `insights:execute-sql`                   | Query session event properties for diagnostic signals |
 | `insights:session-recording-get`         | Check if a recording actually exists for the session  |
 | `insights:query-session-recordings-list` | Search for recordings matching criteria               |
@@ -134,7 +134,7 @@ Based on the verdict, recommend specific actions:
 | Trigger pending | The configured trigger (URL pattern, event, or feature flag) never matched. Review trigger configuration                              |
 | Sampled out     | Increase the sample rate in project settings, or use a trigger to guarantee capture for important sessions                            |
 | Buffering empty | Page closed before first snapshot. Common with very short sessions or single-page navigations. Consider lowering minimum duration     |
-| Unknown         | Direct user to troubleshooting docs: https://hanzo.ai/docs/session-replay/troubleshooting                                          |
+| Unknown         | Direct user to troubleshooting docs: https://hanzo.ai/docs/session-replay/troubleshooting                                             |
 
 ## Examples
 

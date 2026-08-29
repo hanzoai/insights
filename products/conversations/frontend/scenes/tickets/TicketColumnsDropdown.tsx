@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Checkbox, Divider, Dropdown } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { IconTuning } from 'lib/elements/icons'
 

@@ -131,9 +131,7 @@ export function CodeSeatsSection(): JSX.Element {
                         title: 'Status',
                         key: 'status',
                         align: 'center',
-                        render: (_, seat: SeatData) => (
-                            <Tag type={statusColor(seat.status)}>{seat.status}</Tag>
-                        ),
+                        render: (_, seat: SeatData) => <Tag type={statusColor(seat.status)}>{seat.status}</Tag>,
                     },
                     {
                         title: 'Cost',

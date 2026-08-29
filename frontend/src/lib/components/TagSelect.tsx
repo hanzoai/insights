@@ -70,12 +70,7 @@ export function TagSelect({
                     <ul className="deprecated-space-y-px">
                         {filteredTags.map((tag: string) => (
                             <li key={tag}>
-                                <Button
-                                    fullWidth
-                                    role="menuitem"
-                                    size="small"
-                                    onClick={() => handleTagToggle(tag)}
-                                >
+                                <Button fullWidth role="menuitem" size="small" onClick={() => handleTagToggle(tag)}>
                                     <span className="flex items-center justify-between gap-2 flex-1">
                                         <span className="flex items-center gap-2 max-w-full">
                                             <input

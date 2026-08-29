@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconBottomPanel, IconRabbit, IconSearch, IconTortoise } from '@hanzo/icons'
 import { Button, Dialog, Link } from '@hanzo/elements'
+import { IconBottomPanel, IconRabbit, IconSearch, IconTortoise } from '@hanzo/icons'
 
 import { SettingsBar, SettingsButton, SettingsMenu, SettingsToggle } from 'lib/components/PanelSettings/PanelSettings'
 import { SESSION_RECORDINGS_TTL_WARNING_THRESHOLD_DAYS } from 'lib/constants'

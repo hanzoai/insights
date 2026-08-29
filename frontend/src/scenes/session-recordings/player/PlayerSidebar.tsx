@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconBottomPanel, IconSidePanel, IconX } from '@hanzo/icons'
 import { Button, Tabs } from '@hanzo/elements'
+import { IconBottomPanel, IconSidePanel, IconX } from '@hanzo/icons'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'

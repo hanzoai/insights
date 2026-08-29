@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 
-import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { toast } from 'lib/elements/Toast'
+import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 
 import { useMarkdownEditorImageUpload } from './useMarkdownEditorImageUpload'
 

@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, isBreakpoint, kea, key, listeners, path, props, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { toast } from 'lib/elements/Toast/Toast'

@@ -693,9 +693,7 @@ continued line
     it('serializes legacy Image component tags as markdown image blocks', () => {
         expect(
             serializeMarkdownNotebook(
-                parseMarkdownNotebook(
-                    '<Image src="https://example.com/image.png" alt="Insights engineering" />'
-                )
+                parseMarkdownNotebook('<Image src="https://example.com/image.png" alt="Insights engineering" />')
             )
         ).toEqual('![Insights engineering](https://example.com/image.png)')
     })
@@ -3181,9 +3179,7 @@ Third paragraph`,
             container.querySelector('.MarkdownNotebook__line-insert-menu-button')?.getAttribute('aria-expanded')
         ).toEqual('true')
         expect(
-            container
-                .querySelector('.MarkdownNotebook__line-insert-menu-button')
-                ?.classList.contains('Button--active')
+            container.querySelector('.MarkdownNotebook__line-insert-menu-button')?.classList.contains('Button--active')
         ).toBe(true)
         expect(container.querySelector('.MarkdownNotebook__line-insert-menu-button svg')).toBeInstanceOf(SVGElement)
         expect(container.querySelector('[data-placeholder="Search for a tool"]')).toBeInstanceOf(HTMLElement)
@@ -3199,9 +3195,7 @@ Third paragraph`,
         editableTextBlock = getBodyTextBlock(container)
         expect(container.querySelector('[data-placeholder="Start writing..."]')).toBeNull()
         expect(
-            container
-                .querySelector('.MarkdownNotebook__line-insert-menu-button')
-                ?.classList.contains('Button--active')
+            container.querySelector('.MarkdownNotebook__line-insert-menu-button')?.classList.contains('Button--active')
         ).toBe(false)
         expect(editableTextBlock).toBeInstanceOf(HTMLElement)
 

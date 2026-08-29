@@ -3,6 +3,7 @@ import { deepEqual as equal } from 'fast-equals'
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { useEffect, useId, useRef, useState } from 'react'
 
+import { Badge, Button, Divider, Input, Modal, Tab, Tabs, Tag, Popover } from '@hanzo/elements'
 import {
     IconAsterisk,
     IconCheck,
@@ -18,17 +19,6 @@ import {
     IconTrash,
     IconX,
 } from '@hanzo/icons'
-import {
-    Badge,
-    Button,
-    Divider,
-    Input,
-    Modal,
-    Tab,
-    Tabs,
-    Tag,
-    Popover,
-} from '@hanzo/elements'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { SettingsMenu } from 'lib/components/PanelSettings/PanelSettings'
@@ -44,9 +34,9 @@ import UniversalFilters from 'lib/components/UniversalFilters/UniversalFilters'
 import { universalFiltersLogic } from 'lib/components/UniversalFilters/universalFiltersLogic'
 import { isCommentTextFilter, isUniversalGroupFilterLike } from 'lib/components/UniversalFilters/utils'
 import { FEATURE_FLAGS } from 'lib/constants'
+import { toast } from 'lib/elements/Toast/Toast'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
-import { toast } from 'lib/elements/Toast/Toast'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { getProjectEventExistence } from 'lib/utils/getAppContext'
 import { TestAccountFilter } from 'scenes/insights/filters/TestAccountFilter'

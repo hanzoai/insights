@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconCheck } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { sessionPlayerModalLogic } from 'scenes/session-recordings/player/modal/sessionPlayerModalLogic'

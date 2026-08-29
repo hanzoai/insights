@@ -1,18 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconGraph, IconNotebook } from '@hanzo/icons'
-import {
-    SegmentedButton,
-    Skeleton,
-    Table,
-    Tag,
-    Link,
-    Spinner,
-    SpinnerOverlay,
-    Tooltip,
-} from '@hanzo/elements'
+import { SegmentedButton, Skeleton, Table, Tag, Link, Spinner, SpinnerOverlay, Tooltip } from '@hanzo/elements'
 import type { TableColumn } from '@hanzo/elements'
+import { IconGraph, IconNotebook } from '@hanzo/icons'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { TZLabel } from 'lib/components/TZLabel'

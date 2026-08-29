@@ -1,5 +1,6 @@
 import { useActions, useValues } from 'kea'
 
+import { Card, Switch, Tag } from '@hanzo/elements'
 import {
     IconBolt,
     IconClock,
@@ -10,7 +11,6 @@ import {
     IconThumbsDownFilled,
     IconThumbsUpFilled,
 } from '@hanzo/icons'
-import { Card, Switch, Tag } from '@hanzo/elements'
 
 import { PropertyFilterButton } from 'lib/components/PropertyFilters/components/PropertyFilterButton'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -237,10 +237,7 @@ function PromptVersionHistory({ scanner }: { scanner: ReplayScanner }): JSX.Elem
                 {newestFirst.map((marker) => (
                     <div key={marker.version} className="border rounded p-3 space-y-2" id={`prompt-v${marker.version}`}>
                         <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-                            <Tag
-                                type={marker.version === currentVersion ? 'warning' : 'muted'}
-                                className="font-mono"
-                            >
+                            <Tag type={marker.version === currentVersion ? 'warning' : 'muted'} className="font-mono">
                                 v{marker.version}
                             </Tag>
                             <span>from {dayjs(marker.date).format('MMM D, YYYY')}</span>

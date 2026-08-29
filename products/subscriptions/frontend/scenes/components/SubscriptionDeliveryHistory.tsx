@@ -1,13 +1,5 @@
+import { Button, Divider, Select, Table, TableColumns, Tag, Tooltip } from '@hanzo/elements'
 import { IconSend, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
-import {
-    Button,
-    Divider,
-    Select,
-    Table,
-    TableColumns,
-    Tag,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 

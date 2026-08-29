@@ -1,10 +1,10 @@
 import clsx from 'clsx'
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconInfo, IconOpenSidebar, IconUnlock } from '@hanzo/icons'
 import { Button, Skeleton, Link, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconOpenSidebar, IconUnlock } from '@hanzo/icons'
 
 import { preflightLogic } from 'lib/logic/preflightLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'

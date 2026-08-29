@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconCursor, IconKeyboard, IconWarning } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconCursor, IconKeyboard, IconWarning } from '@hanzo/icons'
 
 import { pluralize } from 'lib/utils/strings'
 

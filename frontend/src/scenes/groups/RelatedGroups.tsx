@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconPerson } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconPerson } from '@hanzo/icons'
 
 import { Table, TableColumns } from 'lib/elements/Table'
 import { capitalizeFirstLetter } from 'lib/utils/strings'

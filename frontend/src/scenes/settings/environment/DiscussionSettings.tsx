@@ -1,5 +1,5 @@
-import { IconInfo } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

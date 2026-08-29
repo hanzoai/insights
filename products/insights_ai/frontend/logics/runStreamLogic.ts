@@ -1,4 +1,5 @@
 import { type EventSourceMessage, createParser } from 'eventsource-parser'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     type BreakPointFunction,
@@ -12,7 +13,6 @@ import {
     reducers,
     selectors,
 } from 'kea'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'

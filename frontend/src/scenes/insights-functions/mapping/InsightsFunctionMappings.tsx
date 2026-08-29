@@ -2,18 +2,8 @@ import { useValues } from 'kea'
 import { Group } from 'kea-forms'
 import { memo, useEffect, useState } from 'react'
 
+import { Banner, Button, Collapse, CollapsePanel, Dialog, Input, Label, Select, Tooltip } from '@hanzo/elements'
 import { IconArrowRight, IconEllipsis, IconFilter, IconPlus } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Collapse,
-    CollapsePanel,
-    Dialog,
-    Input,
-    Label,
-    Select,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -252,11 +242,7 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                         initialValues: { mappingName: mapping.name },
                         content: (
                             <Field name="mappingName">
-                                <Input
-                                    data-attr="mapping-name"
-                                    placeholder="Please enter the new name"
-                                    autoFocus
-                                />
+                                <Input data-attr="mapping-name" placeholder="Please enter the new name" autoFocus />
                             </Field>
                         ),
                         errors: {
@@ -318,9 +304,7 @@ export function InsightsFunctionMappings(): JSX.Element | null {
                                                                     <Button onClick={() => renameMapping(mapping)}>
                                                                         Rename
                                                                     </Button>
-                                                                    <Button
-                                                                        onClick={() => duplicateMapping(mapping)}
-                                                                    >
+                                                                    <Button onClick={() => duplicateMapping(mapping)}>
                                                                         Duplicate
                                                                     </Button>
                                                                     <Button

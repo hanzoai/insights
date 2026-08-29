@@ -1,5 +1,5 @@
-import { IconQuestion } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconQuestion } from '@hanzo/icons'
 
 import { PRIORITY_MEANING } from '../../filterOptions'
 import { SignalReportPriority } from '../../types'

@@ -2365,11 +2365,18 @@ ${spreads}
         ...generatedModules.map((m) => path.join(GENERATED_DIR, `${m}.ts`)),
         path.join(GENERATED_DIR, 'index.ts'),
     ]
-    spawnSync(path.join(REPO_ROOT, 'bin/insightscli'), ['format:js', ...generatedTsFiles], { stdio: 'pipe', cwd: REPO_ROOT })
-    spawnSync(path.join(REPO_ROOT, 'bin/insightscli'), ['format:yaml', DEFINITIONS_JSON_PATH, ALL_DEFINITIONS_JSON_PATH], {
+    spawnSync(path.join(REPO_ROOT, 'bin/insightscli'), ['format:js', ...generatedTsFiles], {
         stdio: 'pipe',
         cwd: REPO_ROOT,
     })
+    spawnSync(
+        path.join(REPO_ROOT, 'bin/insightscli'),
+        ['format:yaml', DEFINITIONS_JSON_PATH, ALL_DEFINITIONS_JSON_PATH],
+        {
+            stdio: 'pipe',
+            cwd: REPO_ROOT,
+        }
+    )
 }
 
 // Export for testing

@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 
-import { IconCheck } from '@hanzo/icons'
 import { Button, Input, Select } from '@hanzo/elements'
+import { IconCheck } from '@hanzo/icons'
 
 import { Field } from 'lib/elements/Field'
 import { WEB_SAFE_FONTS } from 'scenes/surveys/constants'

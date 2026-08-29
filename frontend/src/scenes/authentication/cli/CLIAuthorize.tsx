@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCode } from '@hanzo/icons'
 import { Button, Input, Select, Link } from '@hanzo/elements'
+import { IconCode } from '@hanzo/icons'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { ScopeAccessRow } from 'lib/components/ScopeAccessRow/ScopeAccessRow'
-import { IconErrorOutline } from 'lib/elements/icons'
 import { Banner } from 'lib/elements/Banner'
 import { Field } from 'lib/elements/Field'
+import { IconErrorOutline } from 'lib/elements/icons'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 

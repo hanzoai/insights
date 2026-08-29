@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCheck, IconFilter, IconX } from '@hanzo/icons'
 import { Skeleton, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconFilter, IconX } from '@hanzo/icons'
 
 import { humanFriendlyLargeNumber } from 'lib/utils/numbers'
 

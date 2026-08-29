@@ -2,24 +2,16 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useRef } from 'react'
 
+import { Banner, Input, SegmentedButton, SegmentedButtonOption, Link, Tooltip, toast } from '@hanzo/elements'
 import { IconBug, IconInfo, IconQuestion } from '@hanzo/icons'
-import {
-    Banner,
-    Input,
-    SegmentedButton,
-    SegmentedButtonOption,
-    Link,
-    Tooltip,
-    toast,
-} from '@hanzo/elements'
 
-import { useUploadFiles } from 'lib/hooks/useUploadFiles'
-import { IconFeedback } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
 import { FileInput } from 'lib/elements/FileInput/FileInput'
+import { IconFeedback } from 'lib/elements/icons'
 import { InputSelect } from 'lib/elements/InputSelect/InputSelect'
 import { Select } from 'lib/elements/Select/Select'
 import { TextArea } from 'lib/elements/TextArea/TextArea'
+import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { preflightLogic } from 'lib/logic/preflightLogic'
 import { userLogic } from 'scenes/userLogic'
 
@@ -176,8 +168,8 @@ export function SupportForm({ messageLabel, messagePlaceholder }: SupportFormPro
                     </div>
                     {sendSupportRequest.target_area === 'error_tracking' && (
                         <Banner type="warning">
-                            This topic is for our Error Tracking <i>product</i>. If you're reporting an error in Insights
-                            please choose the relevant topic so your submission is sent to the correct team.
+                            This topic is for our Error Tracking <i>product</i>. If you're reporting an error in
+                            Insights please choose the relevant topic so your submission is sent to the correct team.
                         </Banner>
                     )}
                 </>

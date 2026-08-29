@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useRef } from 'react'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Card, Select, Tag, Link, Spinner } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { Resizer } from 'lib/components/Resizer/Resizer'

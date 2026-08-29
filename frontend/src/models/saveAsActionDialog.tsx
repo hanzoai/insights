@@ -4,8 +4,8 @@ import api from 'lib/api'
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
 import { Input } from 'lib/elements/Input'
-import { toast } from 'lib/elements/Toast/Toast'
 import { Link } from 'lib/elements/Link'
+import { toast } from 'lib/elements/Toast/Toast'
 import { autoCaptureEventToDescription } from 'lib/utils/events'
 import {
     applyDataAttributeSelector,

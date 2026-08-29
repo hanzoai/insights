@@ -103,8 +103,8 @@ Product tours allow Insights users to implement automated onboarding and product
 
 ### API Endpoints
 
-| Method | Path                                     | Description                          |
-| ------ | ---------------------------------------- | ------------------------------------ |
+| Method | Path                                    | Description                          |
+| ------ | --------------------------------------- | ------------------------------------ |
 | GET    | `/v1/projects/{id}/product_tours/`      | List tours (authenticated)           |
 | POST   | `/v1/projects/{id}/product_tours/`      | Create tour                          |
 | GET    | `/v1/projects/{id}/product_tours/{id}/` | Get tour                             |

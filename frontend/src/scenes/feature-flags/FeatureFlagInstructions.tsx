@@ -3,8 +3,8 @@ import './FeatureFlagInstructions.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Checkbox, Select, Link } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { INSTANTLY_AVAILABLE_PROPERTIES } from 'lib/constants'
 import { Tooltip } from 'lib/elements/Tooltip'

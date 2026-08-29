@@ -1,6 +1,5 @@
 import { Replayer } from '@hanzo/insights-rrweb'
 import { EventType, type eventWithTime } from '@hanzo/insights-rrweb-types'
-
 import {
     AudioMuteReplayerPlugin,
     CanvasReplayerPlugin,

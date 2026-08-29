@@ -13,11 +13,11 @@ New diagnostic properties may be added as the SDK evolves.
 
 ## Core signals
 
-| Property                          | Type    | Description                                                   |
-| --------------------------------- | ------- | ------------------------------------------------------------- |
+| Property                          | Type    | Description                                                    |
+| --------------------------------- | ------- | -------------------------------------------------------------- |
 | `$has_recording`                  | boolean | Whether Insights has a stored recording linked to this session |
-| `$recording_status`               | string  | Current SDK recording state                                   |
-| `$session_recording_start_reason` | string  | Why recording started (or didn't)                             |
+| `$recording_status`               | string  | Current SDK recording state                                    |
+| `$session_recording_start_reason` | string  | Why recording started (or didn't)                              |
 
 ### `$recording_status` values
 
@@ -62,7 +62,7 @@ These indicate whether configured recording triggers have fired.
 | ------------------------------------------ | ------ | --------------------------------------- |
 | `$sdk_debug_replay_internal_buffer_length` | number | Number of events in the internal buffer |
 | `$sdk_debug_replay_internal_buffer_size`   | number | Size of the internal buffer in bytes    |
-| `$sdk_debug_replay_flushed_size`           | number | Total bytes flushed to Insights so far   |
+| `$sdk_debug_replay_flushed_size`           | number | Total bytes flushed to Insights so far  |
 
 ## Script loading
 
@@ -76,13 +76,13 @@ These indicate whether configured recording triggers have fired.
 | -------------------------------------------------- | ------ | ----------------------------------------------------------- |
 | `$replay_sample_rate`                              | number | The sample rate configured at the time (0.0 to 1.0)         |
 | `$replay_minimum_duration`                         | number | Minimum session duration (ms) before recording is persisted |
-| `$session_recording_remote_config`                 | object | Remote configuration received from Insights                  |
+| `$session_recording_remote_config`                 | object | Remote configuration received from Insights                 |
 | `$sdk_debug_replay_remote_trigger_matching_config` | object | Trigger matching configuration from remote config           |
 
 ## SDK metadata
 
 | Property                   | Type   | Description                                                      |
 | -------------------------- | ------ | ---------------------------------------------------------------- |
-| `$lib`                     | string | SDK library name (e.g., `web`, `insights-js`)                     |
+| `$lib`                     | string | SDK library name (e.g., `web`, `insights-js`)                    |
 | `$lib_version`             | string | SDK version (older versions may not emit all diagnostic signals) |
 | `$sdk_debug_session_start` | string | When the SDK session started                                     |

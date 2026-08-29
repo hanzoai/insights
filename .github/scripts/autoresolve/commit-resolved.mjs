@@ -77,9 +77,7 @@ if (committed) {
         `🔀 Merged \`master\` and resolved conflicts ${how}.\n\n` +
         `Pushed as a signed commit (${additions.length} file(s) changed). **Review before merging** — ` +
         `auto-resolution is a starting point, not an approval.` +
-        (usedAgent
-            ? '\n\n> Conflicts needed judgment, so an agent resolved them — give the diff an extra look.'
-            : '')
+        (usedAgent ? '\n\n> Conflicts needed judgment, so an agent resolved them — give the diff an extra look.' : '')
 } else if (branchProtected) {
     body =
         `🔒 \`${headRef}\` is a protected branch, so I won't push a resolution onto it — this one needs a human.\n\n` +

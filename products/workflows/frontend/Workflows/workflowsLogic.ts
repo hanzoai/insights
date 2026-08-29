@@ -339,9 +339,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
                         actions.loadWorkflows()
                         return values.workflows
                     } catch (error: any) {
-                        toast.error(
-                            `Failed to restore workflow: ${error?.detail || error?.message || 'Unknown error'}`
-                        )
+                        toast.error(`Failed to restore workflow: ${error?.detail || error?.message || 'Unknown error'}`)
                         return values.workflows
                     }
                 },

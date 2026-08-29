@@ -1,8 +1,8 @@
+import insights from 'insights-js'
 import { MakeLogicType, afterMount, kea, listeners, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { ErrorTrackingSpikeDetectionConfig } from 'lib/components/Errors/types'
@@ -170,7 +170,10 @@ export const spikeDetectionConfigLogic = kea<spikeDetectionConfigLogicType>([
     }),
 
     selectors({
-        hasSpikeAlerts: [(s) => [s.spikeAlerts], (spikeAlerts: InsightsFunctionType[]): boolean => spikeAlerts.length > 0],
+        hasSpikeAlerts: [
+            (s) => [s.spikeAlerts],
+            (spikeAlerts: InsightsFunctionType[]): boolean => spikeAlerts.length > 0,
+        ],
     }),
 
     forms(({ actions }) => ({

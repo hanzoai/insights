@@ -1,15 +1,7 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 
+import { Banner, Button, Dialog, Switch, Table, TableColumns, Tag } from '@hanzo/elements'
 import { IconEye } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Dialog,
-    Switch,
-    Table,
-    TableColumns,
-    Tag,
-} from '@hanzo/elements'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { TZLabel } from 'lib/components/TZLabel'

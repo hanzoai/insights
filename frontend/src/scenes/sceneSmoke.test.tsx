@@ -1,9 +1,9 @@
 import '@testing-library/jest-dom'
 
 import { cleanup, render, waitFor } from '@testing-library/react'
+import insights from 'insights-js'
 import { BindLogic, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { Component, type ReactNode } from 'react'
 
 import { useMocks } from '~/mocks/jest'

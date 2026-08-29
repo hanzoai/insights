@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 import { Button, Card, Skeleton } from '@hanzo/elements'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
 
 import { teamLogic } from 'scenes/teamLogic'
 

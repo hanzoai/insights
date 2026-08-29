@@ -25,15 +25,12 @@ export interface SearchableSelectPropsBase<T> extends SelectPropsBase<T> {
     noResultsMessage?: string
 }
 
-export interface SearchableSelectPropsClearable<T>
-    extends SearchableSelectPropsBase<T>, SelectPropsClearable<T> {}
+export interface SearchableSelectPropsClearable<T> extends SearchableSelectPropsBase<T>, SelectPropsClearable<T> {}
 
 export interface SearchableSelectPropsNonClearable<T>
     extends SearchableSelectPropsBase<T>, SelectPropsNonClearable<T> {}
 
-export type SearchableSelectProps<T> =
-    | SearchableSelectPropsClearable<T>
-    | SearchableSelectPropsNonClearable<T>
+export type SearchableSelectProps<T> = SearchableSelectPropsClearable<T> | SearchableSelectPropsNonClearable<T>
 
 function flattenOptions<T>(options: SelectOptions<T>): SelectOption<T>[] {
     const flatOptions: SelectOption<T>[] = []
@@ -101,10 +98,7 @@ function getSearchableLeaves<T>(options: SelectOptions<T>): SelectOption<T>[] {
 
 // Rebuild the option tree with the active option carrying the standard Button highlight class,
 // so keyboard navigation highlights it the same way hovering does.
-function highlightActiveOption<T>(
-    options: SelectOptions<T>,
-    activeOption: SelectOption<T> | null
-): SelectOptions<T> {
+function highlightActiveOption<T>(options: SelectOptions<T>, activeOption: SelectOption<T> | null): SelectOptions<T> {
     if (!activeOption) {
         return options
     }

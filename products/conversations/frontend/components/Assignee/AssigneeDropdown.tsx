@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall, IconX } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconPlusSmall, IconX } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 
@@ -25,13 +25,7 @@ export function AssigneeDropdown({ assignee, onChange }: AssigneeDropdownProps):
             <ul className="deprecated-space-y-2">
                 {assignee && (
                     <li>
-                        <Button
-                            fullWidth
-                            role="menuitem"
-                            size="small"
-                            icon={<IconX />}
-                            onClick={() => onChange(null)}
-                        >
+                        <Button fullWidth role="menuitem" size="small" icon={<IconX />} onClick={() => onChange(null)}>
                             Remove assignee
                         </Button>
                     </li>

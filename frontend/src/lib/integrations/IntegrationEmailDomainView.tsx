@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { useState } from 'react'
 
-import { IconCollapse, IconExpand, IconGear, IconLetter, IconTrash } from '@hanzo/icons'
 import { Button, Tag, Tooltip } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconGear, IconLetter, IconTrash } from '@hanzo/icons'
 
 import { EmailIntegrationDomainGroupedType, IntegrationType } from '~/types'
 

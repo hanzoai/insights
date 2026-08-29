@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
+import { Button, Dialog, Divider, Input, Table, Tag, Spinner } from '@hanzo/elements'
 import {
     IconArchive,
     IconCheckCircle,
@@ -14,7 +15,6 @@ import {
     IconStopFilled,
     IconTrash,
 } from '@hanzo/icons'
-import { Button, Dialog, Divider, Input, Table, Tag, Spinner } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
 import { More } from 'lib/elements/Button/More'
@@ -112,10 +112,7 @@ export function ProductToursTable(): JSX.Element {
                                     >
                                         {isAnnouncement(tour) ? 'Announcement' : 'Tour'}
                                     </Tag>
-                                    <TableLink
-                                        to={urls.productTour(tour.id)}
-                                        title={stringWithWBR(tour.name, 17)}
-                                    />
+                                    <TableLink to={urls.productTour(tour.id)} title={stringWithWBR(tour.name, 17)} />
                                 </div>
                             )
                         },
@@ -128,10 +125,7 @@ export function ProductToursTable(): JSX.Element {
                     },
                     ...(tab === ProductToursTabs.Active
                         ? [
-                              createdAtColumn<ProductTour>() as TableColumn<
-                                  ProductTour,
-                                  keyof ProductTour | undefined
-                              >,
+                              createdAtColumn<ProductTour>() as TableColumn<ProductTour, keyof ProductTour | undefined>,
                               {
                                   title: 'Status',
                                   width: 100,

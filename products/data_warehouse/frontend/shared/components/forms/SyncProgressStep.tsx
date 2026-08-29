@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
+import { Banner, Button, Table, TableColumns, Tag, TagType, Link, Tooltip } from '@hanzo/elements'
 import { IconWarning } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Table,
-    TableColumns,
-    Tag,
-    TagType,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
 import { ExternalDataSourceSchema } from '~/types'

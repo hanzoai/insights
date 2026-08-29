@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { IconClock } from '@hanzo/icons'
 import { Select } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
 import { RollingDateRangeFilter } from 'lib/components/DateFilter/RollingDateRangeFilter'
 import { useWindowSize } from 'lib/hooks/useWindowSize'

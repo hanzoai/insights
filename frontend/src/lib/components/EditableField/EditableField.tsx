@@ -7,11 +7,11 @@ import TextareaAutosize from 'react-textarea-autosize'
 
 import { IconMarkdownFilled, IconPencil } from '@hanzo/icons'
 
-import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { Button } from 'lib/elements/Button'
 import { RawInputAutosize } from 'lib/elements/Input/RawInputAutosize'
 import { Markdown } from 'lib/elements/Markdown'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { pluralize } from 'lib/utils/strings'
 
 import { AvailableFeature } from '~/types'

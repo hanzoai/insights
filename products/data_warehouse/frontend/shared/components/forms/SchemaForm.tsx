@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
+import { Button, Checkbox, Collapse, Input, Modal, Table, Tag, Tooltip } from '@hanzo/elements'
 import { IconInfo, IconWarning } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Collapse,
-    Input,
-    Modal,
-    Table,
-    Tag,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { pluralize } from 'lib/utils/strings'

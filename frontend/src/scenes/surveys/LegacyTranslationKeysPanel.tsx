@@ -1,5 +1,5 @@
-import { IconTrash, IconWarning } from '@hanzo/icons'
 import { Button, Dialog } from '@hanzo/elements'
+import { IconTrash, IconWarning } from '@hanzo/icons'
 
 interface LegacyTranslationKeysPanelProps {
     languages: string[]

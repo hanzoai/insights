@@ -81,9 +81,7 @@ export const experimentResultsNotificationLogic = kea<experimentResultsNotificat
             if (permission === 'granted') {
                 actions.setNotifyWhenResultsReady(true)
             } else if (permission === 'denied') {
-                toast.info(
-                    'Notifications are blocked. Enable them in your browser address bar or system settings.'
-                )
+                toast.info('Notifications are blocked. Enable them in your browser address bar or system settings.')
             }
         },
         setNotifyWhenResultsReady: ({ notify }) => {

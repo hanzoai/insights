@@ -156,7 +156,9 @@ export const AccountsNotebooksCreateBody = /* @__PURE__ */ zod.object({
 export const AccountsRelationshipsCreateBody = /* @__PURE__ */ zod
     .object({
         definition: zod.uuid().describe('Id of the relationship definition to assign.'),
-        user: zod.number().describe("Insights user id of the assignee. Must be a member of the account's organization."),
+        user: zod
+            .number()
+            .describe("Insights user id of the assignee. Must be a member of the account's organization."),
     })
     .describe('Input for assigning a user to an account relationship.')
 

@@ -3,8 +3,8 @@ import { router } from 'kea-router'
 
 import { IconGear } from '@hanzo/icons'
 
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { Select, SelectOption } from 'lib/elements/Select'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { urls } from 'scenes/urls'
 

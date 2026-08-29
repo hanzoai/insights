@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGithub } from '@hanzo/icons'
 import { Banner, Button, Input, Select, Switch, Table, Link } from '@hanzo/elements'
+import { IconGithub } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { TableColumns } from 'lib/elements/Table'

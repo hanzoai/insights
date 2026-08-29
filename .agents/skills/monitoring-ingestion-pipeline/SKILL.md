@@ -109,45 +109,45 @@ Each golden-chart deployment runs in its **own namespace** matching the deployme
 Every prefix here can be discovered live with `list_prometheus_metric_names`
 using `datasourceUid: "victoriametrics"` and `regex: "<prefix>.*"`.
 
-| Prefix                                                                           | Domain                                     | Key scope labels                                         |
-| -------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------- |
-| `ingestion_*`                                                                    | Core ingestion app metrics (~80 metrics)   | `app`, `ingestion_pipeline`, `ingestion_lane`            |
-| `ingestion_lag_ms*`                                                              | Per-partition lag (primary lag signal)     | `groupId`, `partition`                                   |
-| `consumed_batch_*`                                                               | Kafka consumer batch processing            | `topic`, `groupId`                                       |
-| `consumer_batch_*` / `consumer_background_*`                                     | Consumer loop health                       | `topic`, `groupId`                                       |
-| `kafka_broker_*`                                                                 | librdkafka broker stats                    | `broker_id`, `broker_name`, `consumer_group`             |
-| `kafka_consumer_*`                                                               | Consumer rebalance, assignment             | `groupId`, `type`                                        |
-| `events_pipeline_*`                                                              | Legacy pipeline step metrics               | `step_name`                                              |
-| `person_*`                                                                       | Person processing (~30 metrics)            | `db_write_mode`, `operation`, `method`                   |
-| `group_*` (non-AWS)                                                              | Group processing                           | `operation`                                              |
-| `personinsights_*`                                                                    | PersonHog gRPC client + service            | `method`, `source`, `client`                             |
-| `overflow_redirect_*`                                                            | Stateful overflow routing                  | `type`, `result`, `decision`, `operation`                |
-| `cookieless_*`                                                                   | Cookieless mode                            | —                                                        |
-| `http_request_duration_seconds`                                                  | HTTP health/readiness server               | `method`, `route`, `status_code`                         |
-| `recording_blob_ingestion_v2_*`                                                  | Session replay ingestion                   | `app`                                                    |
-| `logs_ingestion_*`                                                               | Logs ingestion pipeline                    | `app`                                                    |
-| `error_tracking_*` / `cymbal_*`                                                  | Error tracking pipeline                    | `app`                                                    |
-| `kminion_kafka_*`                                                                | KMinion consumer group lag & topic offsets | `group_id`, `topic_name`, `partition_id`                 |
-| `aws_msk_kafka_*`                                                                | MSK broker-side JMX metrics                | `environment`                                            |
-| `warpstream_agent_*`                                                             | WarpStream agent metrics (~10 metrics)     | `virtual_cluster_id`, `agent_group`, `operation`         |
-| `kube_*` / `container_*`                                                         | K8s resources                              | `namespace=~"ingestion-.*"`, `container=~"ingestion-.*"` |
-| `pg_*` / `pgbouncer_*`                                                           | Postgres exporter                          | varies                                                   |
-| `DatastoreMetrics_*` / `DatastoreProfileEvents_*` / `DatastoreAsyncMetrics_*` | Datastore cluster health                  | `type` (=cluster role)                                   |
-| `kafka_connect_*`                                                                | Kafka Connect bridge to Datastore         | `namespace`, `connector`                                 |
-| `insights_celery_datastore_*`                                                    | CH health monitors from Django celery      | `scenario`                                               |
+| Prefix                                                                        | Domain                                     | Key scope labels                                         |
+| ----------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------- |
+| `ingestion_*`                                                                 | Core ingestion app metrics (~80 metrics)   | `app`, `ingestion_pipeline`, `ingestion_lane`            |
+| `ingestion_lag_ms*`                                                           | Per-partition lag (primary lag signal)     | `groupId`, `partition`                                   |
+| `consumed_batch_*`                                                            | Kafka consumer batch processing            | `topic`, `groupId`                                       |
+| `consumer_batch_*` / `consumer_background_*`                                  | Consumer loop health                       | `topic`, `groupId`                                       |
+| `kafka_broker_*`                                                              | librdkafka broker stats                    | `broker_id`, `broker_name`, `consumer_group`             |
+| `kafka_consumer_*`                                                            | Consumer rebalance, assignment             | `groupId`, `type`                                        |
+| `events_pipeline_*`                                                           | Legacy pipeline step metrics               | `step_name`                                              |
+| `person_*`                                                                    | Person processing (~30 metrics)            | `db_write_mode`, `operation`, `method`                   |
+| `group_*` (non-AWS)                                                           | Group processing                           | `operation`                                              |
+| `personinsights_*`                                                            | PersonHog gRPC client + service            | `method`, `source`, `client`                             |
+| `overflow_redirect_*`                                                         | Stateful overflow routing                  | `type`, `result`, `decision`, `operation`                |
+| `cookieless_*`                                                                | Cookieless mode                            | —                                                        |
+| `http_request_duration_seconds`                                               | HTTP health/readiness server               | `method`, `route`, `status_code`                         |
+| `recording_blob_ingestion_v2_*`                                               | Session replay ingestion                   | `app`                                                    |
+| `logs_ingestion_*`                                                            | Logs ingestion pipeline                    | `app`                                                    |
+| `error_tracking_*` / `cymbal_*`                                               | Error tracking pipeline                    | `app`                                                    |
+| `kminion_kafka_*`                                                             | KMinion consumer group lag & topic offsets | `group_id`, `topic_name`, `partition_id`                 |
+| `aws_msk_kafka_*`                                                             | MSK broker-side JMX metrics                | `environment`                                            |
+| `warpstream_agent_*`                                                          | WarpStream agent metrics (~10 metrics)     | `virtual_cluster_id`, `agent_group`, `operation`         |
+| `kube_*` / `container_*`                                                      | K8s resources                              | `namespace=~"ingestion-.*"`, `container=~"ingestion-.*"` |
+| `pg_*` / `pgbouncer_*`                                                        | Postgres exporter                          | varies                                                   |
+| `DatastoreMetrics_*` / `DatastoreProfileEvents_*` / `DatastoreAsyncMetrics_*` | Datastore cluster health                   | `type` (=cluster role)                                   |
+| `kafka_connect_*`                                                             | Kafka Connect bridge to Datastore          | `namespace`, `connector`                                 |
+| `insights_celery_datastore_*`                                                 | CH health monitors from Django celery      | `scenario`                                               |
 
 ### Redis topology
 
 Ingestion workers depend on up to five Redis instances.
 Redis health is inferred from ingestion-side metrics and CloudWatch ElastiCache metrics.
 
-| Redis instance        | ElastiCache cluster (prod-us)     | Env var                    | Use                                  |
-| --------------------- | --------------------------------- | -------------------------- | ------------------------------------ |
-| Ingestion Redis       | `ingestion-prod-redis`            | `INGESTION_REDIS_HOST`     | Overflow state, pub/sub coordination |
-| Insights/Primary Redis | `insights-solo`                    | `INSIGHTS_REDIS_HOST`       | Billing/quota, restrictions, general |
-| Cookieless Redis      | `cookieless-prod-redis`           | `COOKIELESS_REDIS_HOST`    | Cookieless server hash mode          |
-| CDP Redis             | `cdp-delivery-prod-redis`         | `CDP_REDIS_HOST`           | CDP Script function delivery            |
-| Dedup Redis           | `ingestion-duplicates-prod-redis` | `DEDUPLICATION_REDIS_HOST` | Event deduplication                  |
+| Redis instance         | ElastiCache cluster (prod-us)     | Env var                    | Use                                  |
+| ---------------------- | --------------------------------- | -------------------------- | ------------------------------------ |
+| Ingestion Redis        | `ingestion-prod-redis`            | `INGESTION_REDIS_HOST`     | Overflow state, pub/sub coordination |
+| Insights/Primary Redis | `insights-solo`                   | `INSIGHTS_REDIS_HOST`      | Billing/quota, restrictions, general |
+| Cookieless Redis       | `cookieless-prod-redis`           | `COOKIELESS_REDIS_HOST`    | Cookieless server hash mode          |
+| CDP Redis              | `cdp-delivery-prod-redis`         | `CDP_REDIS_HOST`           | CDP Script function delivery         |
+| Dedup Redis            | `ingestion-duplicates-prod-redis` | `DEDUPLICATION_REDIS_HOST` | Event deduplication                  |
 
 Ingestion-side Redis metrics: `overflow_redirect_redis_*`, `cookieless_redis_error`.
 Infrastructure-side: CloudWatch datasource `P034F075C744B399F`.
@@ -185,16 +185,16 @@ Ingestion workers interact with **three Kafka systems** via separate producer/co
 **WarpStream virtual clusters** — each VC is a separate logical cluster backed by S3, with its own
 agent pool, KMinion instance, and topic namespace:
 
-| VC name                          | Topics carried                                                                                                                                                                                                                                                                                                                       | KMinion instance                         |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| VC name                          | Topics carried                                                                                                                                                                                                                                                                                                              | KMinion instance                         |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | `warpstream-ingestion-v2`        | `datastore_events_json`, `datastore_person`, `datastore_person_distinct_id`, `datastore_groups`, `datastore_ai_events_json`, `datastore_heatmap_events`, `datastore_app_metrics2`, `datastore_tophog`, `datastore_ingestion_warnings`, `distinct_id_usage_events_json`, `log_entries`, `team_event_partitioned_events_json` | `kminion-warpstream-ingestion`           |
-| `warpstream-replay-v2`           | `ingestion-sessionreplay-main-*`, `datastore_session_replay_events`, `datastore_session_replay_features`                                                                                                                                                                                                                           | `kminion-warpstream-replay`              |
-| `warpstream-logs`                | `ingestion-logs`, `datastore_logs`                                                                                                                                                                                                                                                                                                  | `kminion-warpstream-logs`                |
-| `warpstream-traces`              | `ingestion-traces`, `datastore_traces`                                                                                                                                                                                                                                                                                              | `kminion-warpstream-traces`              |
-| `warpstream-shared`              | `datastore_document_embeddings`, error tracking fingerprint/issue topics, `document_embeddings_input`                                                                                                                                                                                                                               | `kminion-warpstream-shared`              |
-| `warpstream-calculated-events`   | `datastore_precalculated_person_properties`, `datastore_prefiltered_events`, `cohort_membership_changed` (US only)                                                                                                                                                                                                                 | `kminion-warpstream-calculated-events`   |
-| `warpstream-cyclotron`           | CDP topics (`cdp_cyclotron_hog*`, `cdp_internal_events`, etc.)                                                                                                                                                                                                                                                                       | `kminion-warpstream-cyclotron`           |
-| `warpstream-warehouse-pipelines` | `data_warehouse_source_webhooks`, `data_warehouse_sources_jobs` (US only)                                                                                                                                                                                                                                                            | `kminion-warpstream-warehouse-pipelines` |
+| `warpstream-replay-v2`           | `ingestion-sessionreplay-main-*`, `datastore_session_replay_events`, `datastore_session_replay_features`                                                                                                                                                                                                                    | `kminion-warpstream-replay`              |
+| `warpstream-logs`                | `ingestion-logs`, `datastore_logs`                                                                                                                                                                                                                                                                                          | `kminion-warpstream-logs`                |
+| `warpstream-traces`              | `ingestion-traces`, `datastore_traces`                                                                                                                                                                                                                                                                                      | `kminion-warpstream-traces`              |
+| `warpstream-shared`              | `datastore_document_embeddings`, error tracking fingerprint/issue topics, `document_embeddings_input`                                                                                                                                                                                                                       | `kminion-warpstream-shared`              |
+| `warpstream-calculated-events`   | `datastore_precalculated_person_properties`, `datastore_prefiltered_events`, `cohort_membership_changed` (US only)                                                                                                                                                                                                          | `kminion-warpstream-calculated-events`   |
+| `warpstream-cyclotron`           | CDP topics (`cdp_cyclotron_hog*`, `cdp_internal_events`, etc.)                                                                                                                                                                                                                                                              | `kminion-warpstream-cyclotron`           |
+| `warpstream-warehouse-pipelines` | `data_warehouse_source_webhooks`, `data_warehouse_sources_jobs` (US only)                                                                                                                                                                                                                                                   | `kminion-warpstream-warehouse-pipelines` |
 
 WarpStream agent metrics: `warpstream_agent_*` prefix (~10 metrics).
 Key: `control_plane_operation_counter` (by `operation`), `file_cache_client_fetch_local_or_remote_counter` (cache hit/miss).
@@ -205,8 +205,8 @@ US-only personal dashboards (not synced to EU): `8e93b023-…` (CH Consumer Lag)
 
 ### Postgres topology
 
-| DB          | Aurora cluster (prod-us)                                      | Ingestion PgBouncer                                     |
-| ----------- | ------------------------------------------------------------- | ------------------------------------------------------- |
+| DB          | Aurora cluster (prod-us)                                       | Ingestion PgBouncer                                      |
+| ----------- | -------------------------------------------------------------- | -------------------------------------------------------- |
 | Main app DB | `insights-cloud-prod-us-east-1` (2x `db.r8g.16xlarge`)         | `ingestion-default-pgbouncer.insights.svc.cluster.local` |
 | Persons DB  | `insights-cloud-persons-prod-us-east-1` (3x `db.r8g.24xlarge`) | `ingestion-events-pgbouncer.insights.svc.cluster.local`  |
 
@@ -226,7 +226,7 @@ users see stale data.
 
 | `type` label      | Role                          | Notes                                      |
 | ----------------- | ----------------------------- | ------------------------------------------ |
-| `events`          | Main analytics events cluster | Consumes `datastore_events_json`          |
+| `events`          | Main analytics events cluster | Consumes `datastore_events_json`           |
 | `online`          | Online/fast queries cluster   | Replicated from events                     |
 | `offline`         | Offline/batch queries cluster | Replicated from events                     |
 | `medium`          | Medium-sized tables           | Persons, groups                            |
@@ -297,31 +297,31 @@ Profile types: `process_cpu:cpu:nanoseconds:cpu:nanoseconds`,
 
 ### Grafana dashboards
 
-| UID                                      | Title                                     | Focus                                                 |
-| ---------------------------------------- | ----------------------------------------- | ----------------------------------------------------- |
-| `ingestion-analytics`                    | Ingestion - Analytics                     | Per-pipeline analytics breakdown                      |
-| `ingestion-health`                       | Ingestion - Health                        | Health overview across all ingestion services         |
-| `ingestion-pipelines`                    | Ingestion - Pipelines                     | Per-lane pipeline step breakdown                      |
-| `ingestion-reliability`                  | Ingestion - Reliability                   | Event trends, processing-lag SLOs, restarts, E2E lag  |
-| `ingestion-person-processing`            | Ingestion -- Person Processing            | Person store, merge, cache                            |
-| `ingestion-group-processing`             | Ingestion -- Group Processing             | Group store                                           |
-| `ingestion-sessionreplay`                | Ingestion - Session Replay                | Replay blob pipeline                                  |
-| `capture`                                | Capture                                   | Capture-side ingestion metrics (overview)             |
-| `bexr9fnja75z4f`                         | Kafka Deduplicator                        | Event deduplication pipeline                          |
-| `pl-ingestion-slas`                      | Ingestion — SLIs / SLOs / SLAs            | SLI/SLO view from `ingestion_sli_*` metrics (US only) |
-| `warpstream`                             | Warpstream Agent Overview                 | Agent health, control plane ops, file cache           |
-| `dbfj5c31spa1ogf`                        | MSK vs Warpstream — Active Produce Topics | Side-by-side produce volume comparison                |
-| `8e93b023-a544-4a3b-8fac-123459d4eb84`   | WarpStream: Datastore Consumer Lag       | CH consumer lag on WarpStream topics (US only)        |
-| `ws-coarse-lag-explore`                  | WarpStream Coarse Lag — Explore           | Agent-reported lag (US only, personal dashboard)      |
-| `personinsights-service`                      | Personhog service                         | PersonHog latency decomposition                       |
-| `dbfgkwxs3gw8owd`                        | KMinion Consumer Group Lag                | Consumer lag by group (including CH groups)           |
-| `logs`                                   | Logs (product)                            | Logs ingestion                                        |
-| `vm-datastore-cluster-overview`         | Datastore (cluster overview)             | QPS, memory, disk, replication, parts, merges         |
-| `datastore-ingestion-overview-20260615` | Datastore Ingestion Layer Overview       | Ingestion-layer CH cluster health and resources       |
-| `datastore-keeper`                      | Datastore Keeper                         | ZooKeeper replacement health                          |
-| `fe469e59-e10a-465a-9dac-ac8f6f82dc9a`   | Datastore Stuck Merge Loop Investigation | Merges that stop making progress                      |
-| `cdzv7o1635n9ca`                         | Kafka Connect                             | Kafka Connect tasks, lag, DuckLake sink               |
-| `fdrcd04np3hfkf`                         | Datastore - Kafka consumption            | CH Kafka engine consumption stats (EU only)           |
+| UID                                     | Title                                     | Focus                                                 |
+| --------------------------------------- | ----------------------------------------- | ----------------------------------------------------- |
+| `ingestion-analytics`                   | Ingestion - Analytics                     | Per-pipeline analytics breakdown                      |
+| `ingestion-health`                      | Ingestion - Health                        | Health overview across all ingestion services         |
+| `ingestion-pipelines`                   | Ingestion - Pipelines                     | Per-lane pipeline step breakdown                      |
+| `ingestion-reliability`                 | Ingestion - Reliability                   | Event trends, processing-lag SLOs, restarts, E2E lag  |
+| `ingestion-person-processing`           | Ingestion -- Person Processing            | Person store, merge, cache                            |
+| `ingestion-group-processing`            | Ingestion -- Group Processing             | Group store                                           |
+| `ingestion-sessionreplay`               | Ingestion - Session Replay                | Replay blob pipeline                                  |
+| `capture`                               | Capture                                   | Capture-side ingestion metrics (overview)             |
+| `bexr9fnja75z4f`                        | Kafka Deduplicator                        | Event deduplication pipeline                          |
+| `pl-ingestion-slas`                     | Ingestion — SLIs / SLOs / SLAs            | SLI/SLO view from `ingestion_sli_*` metrics (US only) |
+| `warpstream`                            | Warpstream Agent Overview                 | Agent health, control plane ops, file cache           |
+| `dbfj5c31spa1ogf`                       | MSK vs Warpstream — Active Produce Topics | Side-by-side produce volume comparison                |
+| `8e93b023-a544-4a3b-8fac-123459d4eb84`  | WarpStream: Datastore Consumer Lag        | CH consumer lag on WarpStream topics (US only)        |
+| `ws-coarse-lag-explore`                 | WarpStream Coarse Lag — Explore           | Agent-reported lag (US only, personal dashboard)      |
+| `personinsights-service`                | Personhog service                         | PersonHog latency decomposition                       |
+| `dbfgkwxs3gw8owd`                       | KMinion Consumer Group Lag                | Consumer lag by group (including CH groups)           |
+| `logs`                                  | Logs (product)                            | Logs ingestion                                        |
+| `vm-datastore-cluster-overview`         | Datastore (cluster overview)              | QPS, memory, disk, replication, parts, merges         |
+| `datastore-ingestion-overview-20260615` | Datastore Ingestion Layer Overview        | Ingestion-layer CH cluster health and resources       |
+| `datastore-keeper`                      | Datastore Keeper                          | ZooKeeper replacement health                          |
+| `fe469e59-e10a-465a-9dac-ac8f6f82dc9a`  | Datastore Stuck Merge Loop Investigation  | Merges that stop making progress                      |
+| `cdzv7o1635n9ca`                        | Kafka Connect                             | Kafka Connect tasks, lag, DuckLake sink               |
+| `fdrcd04np3hfkf`                        | Datastore - Kafka consumption             | CH Kafka engine consumption stats (EU only)           |
 
 ## Discovery workflows
 

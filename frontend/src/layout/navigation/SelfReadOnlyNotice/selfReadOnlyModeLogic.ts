@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -10,7 +11,6 @@ import {
     reducers,
     selectors,
 } from 'kea'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 

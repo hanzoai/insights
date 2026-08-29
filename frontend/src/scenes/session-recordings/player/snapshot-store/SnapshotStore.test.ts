@@ -1,5 +1,4 @@
 import { EventType } from '@hanzo/insights-rrweb-types'
-
 import { SnapshotStore } from '@hanzo/replay-shared'
 
 import { RecordingSnapshot, SessionRecordingSnapshotSource } from '~/types'

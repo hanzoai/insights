@@ -1,8 +1,8 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import type { BuiltLogic } from 'kea'
 import { router } from 'kea-router'
 import type { LocationChangedPayload } from 'kea-router/lib/types'
-import insights from 'insights-js'
 
 import { IconBug, IconCheckbox, IconDashboard, IconGraph, IconNotebook } from '@hanzo/icons'
 

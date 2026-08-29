@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import React, { useMemo } from 'react'
 
-import { IconDatabase, IconExternal, IconPencil } from '@hanzo/icons'
 import { Button, Divider, Dropdown, Input, Skeleton } from '@hanzo/elements'
+import { IconDatabase, IconExternal, IconPencil } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { Field } from 'lib/elements/Field'

@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCamera, IconPause, IconPlay, IconRewindPlay } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCamera, IconPause, IconPlay, IconRewindPlay } from '@hanzo/icons'
 
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
+import { IconFullScreen, IconGhost, IconSanta, IconSkipEnd, IconSkipStart } from 'lib/elements/icons'
+import { Tooltip } from 'lib/elements/Tooltip'
 import { isChristmas, isHalloween } from 'lib/holidays'
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { IconFullScreen, IconGhost, IconSanta, IconSkipEnd, IconSkipStart } from 'lib/elements/icons'
-import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 import {
     CommentOnRecordingButton,

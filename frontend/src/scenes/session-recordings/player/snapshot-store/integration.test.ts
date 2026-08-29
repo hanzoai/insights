@@ -1,5 +1,4 @@
 import { EventType, IncrementalSource } from '@hanzo/insights-rrweb-types'
-
 import { LoadBatch, SnapshotStore } from '@hanzo/replay-shared'
 
 import { RecordingSegment, RecordingSnapshot, SessionRecordingSnapshotSource } from '~/types'

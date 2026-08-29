@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconPencil } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
 import { Popover } from 'lib/elements/Popover'
 

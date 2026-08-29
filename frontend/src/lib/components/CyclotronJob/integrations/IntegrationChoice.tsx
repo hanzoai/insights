@@ -4,8 +4,8 @@ import './integrationSetups'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconExternal, IconTrash, IconX } from '@hanzo/icons'
 import { Banner, Button, Menu, Skeleton } from '@hanzo/elements'
+import { IconExternal, IconTrash, IconX } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'

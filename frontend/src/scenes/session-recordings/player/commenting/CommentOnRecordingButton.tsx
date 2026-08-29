@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { IconComment, IconEmoji } from '@hanzo/icons'
 import { Button, Dropdown } from '@hanzo/elements'
+import { IconComment, IconEmoji } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'

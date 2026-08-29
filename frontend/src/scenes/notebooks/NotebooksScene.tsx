@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Menu, Tooltip, toast } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'

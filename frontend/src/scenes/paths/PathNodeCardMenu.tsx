@@ -1,7 +1,7 @@
 import { MouseEventHandler } from 'react'
 
-import { IconClock } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
 import { IconTrendingFlat, IconTrendingFlatDown } from 'lib/elements/icons'
 import { humanFriendlyDuration } from 'lib/utils/durations'

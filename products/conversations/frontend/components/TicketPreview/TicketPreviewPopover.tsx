@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconLock } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconLock } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Popover } from 'lib/elements/Popover'

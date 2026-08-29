@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Fragment, useEffect, useState } from 'react'
 
-import { IconDrag } from '@hanzo/icons'
 import { Button, Divider, Dropdown, Input, Tag, SpinnerOverlay } from '@hanzo/elements'
+import { IconDrag } from '@hanzo/icons'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { insightsFunctionTemplateListLogic } from 'scenes/insights-functions/list/insightsFunctionTemplateListLogic'
@@ -184,11 +184,7 @@ function InsightsFlowEditorToolbarNode({
 
     return (
         <div draggable onDragStart={onDragStart}>
-            <Button
-                icon={<span style={{ color: step.color }}>{step.icon}</span>}
-                sideIcon={<IconDrag />}
-                fullWidth
-            >
+            <Button icon={<span style={{ color: step.color }}>{step.icon}</span>} sideIcon={<IconDrag />} fullWidth>
                 {children ?? action.name}
             </Button>
         </div>
@@ -265,7 +261,9 @@ function InsightsFunctionTemplatesChooser(): JSX.Element {
                                                     <div>{template.name}</div>
                                                     <div className="text-xs text-muted">{template.description}</div>
                                                 </div>
-                                                {template.status && <InsightsFunctionStatusTag status={template.status} />}
+                                                {template.status && (
+                                                    <InsightsFunctionStatusTag status={template.status} />
+                                                )}
                                             </div>
                                         </InsightsFlowEditorToolbarNode>
                                     </li>

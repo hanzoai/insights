@@ -131,19 +131,19 @@ export class CdpEventsConsumer<
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
                     const [teamInsightsFunctions, teamFlows, team] = await Promise.all([
-                        this.insightsFunctionManager.getInsightsFunctionsForTeam(clickHouseEvent.team_id, this.hogTypes),
-                        this.flowManager.getFlowsForTeam(clickHouseEvent.team_id),
-                        this.deps.teamManager.getTeam(clickHouseEvent.team_id),
+                        this.insightsFunctionManager.getInsightsFunctionsForTeam(datastoreEvent.team_id, this.hogTypes),
+                        this.flowManager.getFlowsForTeam(datastoreEvent.team_id),
+                        this.deps.teamManager.getTeam(datastoreEvent.team_id),
                     ])
 
                     if ((!teamInsightsFunctions.length && !teamFlows.length) || !team) {
                         return
                     }
 
-                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.config.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.config.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()

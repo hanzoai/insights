@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconFilter } from '@hanzo/icons'
 import { Button, Checkbox, Dropdown } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 import { ExternalDataSchemaStatus } from '~/types'
 
@@ -85,10 +85,7 @@ export function IntegrationFilter(): JSX.Element {
                             className="justify-start"
                         >
                             <span className="flex items-center gap-2">
-                                <Checkbox
-                                    checked={selectedIds.includes(source.id)}
-                                    className="pointer-events-none"
-                                />
+                                <Checkbox checked={selectedIds.includes(source.id)} className="pointer-events-none" />
                                 <SourceIcon type={source.name} size="xsmall" disableTooltip />
                                 <span className="flex-1">{formatSourceLabel(source)}</span>
                                 {/* We don't show the status icon for Completed sources because it would be too many statuses */}

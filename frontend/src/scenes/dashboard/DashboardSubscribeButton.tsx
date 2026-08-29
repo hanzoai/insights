@@ -1,13 +1,13 @@
 import './DashboardSubscribeButton.scss'
 
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { IconBell } from '@hanzo/icons'
 
-import { IconWithCount } from 'lib/elements/icons/icons'
 import { Button } from 'lib/elements/Button'
+import { IconWithCount } from 'lib/elements/icons/icons'
 import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature } from '~/types'

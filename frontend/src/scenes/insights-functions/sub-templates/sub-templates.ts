@@ -513,7 +513,10 @@ function mcpNotificationVariants({
     ]
 }
 
-export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplateIdType, InsightsFunctionSubTemplateType[]> = {
+export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<
+    InsightsFunctionSubTemplateIdType,
+    InsightsFunctionSubTemplateType[]
+> = {
     'mcp-tool-error': mcpNotificationVariants({
         subTemplateId: 'mcp-tool-error',
         nameSuffix: 'when an MCP tool call fails',

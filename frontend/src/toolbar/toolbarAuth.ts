@@ -1,7 +1,7 @@
 import { toast } from 'lib/elements/Toast/Toast'
 
-import { toolbarLogger } from '~/toolbar/toolbarLogger'
 import { captureToolbarException, toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
+import { toolbarLogger } from '~/toolbar/toolbarLogger'
 import { ToolbarRequestError, isToolbarRequestError } from '~/toolbar/toolbarRequestError'
 import { asNonEmptyString, safeFetch } from '~/toolbar/utils'
 

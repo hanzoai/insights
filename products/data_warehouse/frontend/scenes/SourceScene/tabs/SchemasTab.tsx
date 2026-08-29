@@ -2,19 +2,8 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
+import { Button, Collapse, Dialog, Input, Select, Switch, Table, Tag, Spinner, Tooltip } from '@hanzo/elements'
 import { IconInfo } from '@hanzo/icons'
-import {
-    Button,
-    Collapse,
-    Dialog,
-    Input,
-    Select,
-    Switch,
-    Table,
-    Tag,
-    Spinner,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
 import { TZLabel } from 'lib/components/TZLabel'

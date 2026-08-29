@@ -16,7 +16,9 @@ describe('AssistantFailureMessage', () => {
     it('falls back when no failure message is supplied', () => {
         render(<AssistantFailureMessage id="failure-1" content={null} />)
 
-        expect(screen.getByText('*Insights AI has failed to generate an answer. Please try again.*')).toBeInTheDocument()
+        expect(
+            screen.getByText('*Insights AI has failed to generate an answer. Please try again.*')
+        ).toBeInTheDocument()
     })
 
     it('renders an optional action', () => {

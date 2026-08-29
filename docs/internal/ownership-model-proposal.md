@@ -46,7 +46,7 @@ Two data sources, one shared matcher, four consumers — all hand-maintained.
 | Consumer                                                  | Reads                      | Parser                                                                    |
 | --------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------- |
 | `.github/scripts/assign-reviewers.js` (CI auto-assign)    | soft + product.yaml        | vendored matcher + own YAML mini-parser                                   |
-| `insightscli product:lint:owners`                               | product.yaml               | own loader (`product_yaml.py`), validates slugs against live GitHub teams |
+| `insightscli product:lint:owners`                         | product.yaml               | own loader (`product_yaml.py`), validates slugs against live GitHub teams |
 | `.agents/skills/establishing-code-ownership/ownership.js` | hard + soft + product.yaml | vendored matcher + own YAML mini-parser                                   |
 | `tools/pr-approval-agent/gates.py`                        | soft only                  | fully independent reimplementation                                        |
 

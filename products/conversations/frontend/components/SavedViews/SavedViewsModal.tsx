@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import type { ReactNode } from 'react'
 
-import { IconHeart, IconHeartFilled } from '@hanzo/icons'
 import { Button, Dialog, Input, Modal, Table, TableColumns } from '@hanzo/elements'
+import { IconHeart, IconHeartFilled } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { More } from 'lib/elements/Button/More'

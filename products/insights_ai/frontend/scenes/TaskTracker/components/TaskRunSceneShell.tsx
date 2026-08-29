@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 
-import { IconArchive } from '@hanzo/icons'
 import { Divider } from '@hanzo/elements'
+import { IconArchive } from '@hanzo/icons'
 
 import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'
 import { dayjs } from 'lib/dayjs'

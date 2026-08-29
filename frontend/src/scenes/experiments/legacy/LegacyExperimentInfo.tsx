@@ -1,13 +1,13 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconRefresh, IconWarning } from '@hanzo/icons'
 import { Button, Tag, Link, ProfilePicture, Tooltip } from '@hanzo/elements'
+import { IconRefresh, IconWarning } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { dayjs } from 'lib/dayjs'
-import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
 import { IconOpenInNew } from 'lib/elements/icons'
+import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
 import { Label } from 'lib/ui/Label/Label'
 import { cn } from 'lib/utils/css-classes'
 import { urls } from 'scenes/urls'

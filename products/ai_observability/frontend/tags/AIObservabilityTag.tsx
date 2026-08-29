@@ -1,7 +1,6 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { Field, Form } from 'kea-forms'
 
-import { IconArrowLeft, IconCopy, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -16,6 +15,7 @@ import {
     Link,
     Tooltip,
 } from '@hanzo/elements'
+import { IconArrowLeft, IconCopy, IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
@@ -598,12 +598,7 @@ function AIObservabilityTaggerForm({ id }: { id: string }): JSX.Element {
                                 resourceType={AccessControlResourceType.Tagger}
                                 minAccessLevel={AccessControlLevel.Editor}
                             >
-                                <Button
-                                    type="secondary"
-                                    status="danger"
-                                    className="ml-auto"
-                                    onClick={deleteTagger}
-                                >
+                                <Button type="secondary" status="danger" className="ml-auto" onClick={deleteTagger}>
                                     Delete
                                 </Button>
                             </AccessControlAction>

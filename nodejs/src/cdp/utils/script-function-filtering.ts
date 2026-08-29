@@ -7,7 +7,7 @@ import { Flow } from '~/cdp/schema/flow'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
 import { createTrackedRE2 } from '~/common/utils/tracked-re2'
-import { UUIDT, clickHouseTimestampToISO } from '~/common/utils/utils'
+import { UUIDT, datastoreTimestampToISO } from '~/common/utils/utils'
 
 import { RawDatastoreEvent } from '../../types'
 import {
@@ -106,7 +106,7 @@ export function convertDatastoreRawEventToFilterGlobals(event: RawDatastoreEvent
     // Handle timestamp conversion
     const eventTimestamp = DateTime.fromISO(event.timestamp).isValid
         ? event.timestamp
-        : clickHouseTimestampToISO(event.timestamp)
+        : datastoreTimestampToISO(event.timestamp)
 
     // Handle person
     let person: InsightsFunctionFilterGlobals['person'] = null

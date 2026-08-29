@@ -1,5 +1,5 @@
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -22,13 +22,7 @@ export function InboxDetailHeader({ report, tab }: { report: SignalReport; tab: 
 
     return (
         <div className="shrink-0 border-b border-primary px-6 pt-5 pb-4 flex flex-col gap-3">
-            <Button
-                type="tertiary"
-                size="small"
-                icon={<IconArrowLeft />}
-                to={urls.inbox(tab)}
-                className="-ml-2 w-fit"
-            >
+            <Button type="tertiary" size="small" icon={<IconArrowLeft />} to={urls.inbox(tab)} className="-ml-2 w-fit">
                 {INBOX_TAB_LABEL[tab]}
             </Button>
             <div className="flex items-start justify-between gap-3 min-w-0">

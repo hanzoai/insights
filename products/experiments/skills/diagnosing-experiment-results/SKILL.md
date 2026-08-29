@@ -67,9 +67,9 @@ can be confirmed or ruled out from that data without an interview.
 | "Many metrics — some significant, some not"                                                | C — interpretation traps                     |
 | "Bayesian says 96% chance to win — should we ship?"                                        | C — interpretation traps                     |
 | "Confidence intervals overlap — does that mean not significant?"                           | C — interpretation traps                     |
-| "An external tool (significance calculator or AI agent) disagrees with Insights"            | C — interpretation traps                     |
+| "An external tool (significance calculator or AI agent) disagrees with Insights"           | C — interpretation traps                     |
 | "Should I ship? Primary is up but a secondary is down"                                     | C — interpretation traps                     |
-| "Insights numbers ≠ my SQL count"                                                           | D — numbers vs SQL                           |
+| "Insights numbers ≠ my SQL count"                                                          | D — numbers vs SQL                           |
 | "Funnel says X% but my raw event count says Y"                                             | D — numbers vs SQL                           |
 | "Sum of revenue looks wrong" / "breakdown shows 'none'"                                    | D — numbers vs SQL                           |
 | "Recordings panel doesn't match the stats"                                                 | D — numbers vs SQL                           |

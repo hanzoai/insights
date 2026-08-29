@@ -5,8 +5,8 @@
         "test": "pnpm build:products && playwright test"
     },
     "dependencies": {
-        "@playwright/test": "catalog:",
         "@hanzo/frontend": "workspace:*",
+        "@playwright/test": "catalog:",
         "snappyjs": "^0.7.0"
     },
     "peerDependencies": {}

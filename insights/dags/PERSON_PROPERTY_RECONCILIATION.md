@@ -126,7 +126,7 @@ with property-setting events (regardless of whether they had diffs), causing 100
 
 | Parameter                            | Type                | Default  | Description                                                              |
 | ------------------------------------ | ------------------- | -------- | ------------------------------------------------------------------------ |
-| `bug_window_start`                   | `str`               | Required | Start of bug window (Datastore format: "YYYY-MM-DD HH:MM:SS", UTC)      |
+| `bug_window_start`                   | `str`               | Required | Start of bug window (Datastore format: "YYYY-MM-DD HH:MM:SS", UTC)       |
 | `bug_window_end`                     | `str \| None`       | `None`   | End of bug window. Required if `team_ids` not supplied                   |
 | `team_ids`                           | `list[int] \| None` | `None`   | Explicit list of team IDs to process                                     |
 | `min_team_id`                        | `int \| None`       | `None`   | Minimum team_id (inclusive) for range scanning                           |

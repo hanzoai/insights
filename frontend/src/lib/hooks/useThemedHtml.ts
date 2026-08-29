@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { themeLogic } from 'lib/logic/themeLogic'

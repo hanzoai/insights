@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import type { ReactNode } from 'react'
 
-import { IconPencil, IconPlay } from '@hanzo/icons'
 import { Button, Card, SpinnerOverlay } from '@hanzo/elements'
+import { IconPencil, IconPlay } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { FEATURE_FLAGS } from 'lib/constants'

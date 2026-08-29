@@ -14,8 +14,8 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the Insights SDK. CrewAI uses LiteLLM under the hood,
-                        and Insights integrates with LiteLLM's callback system.
+                        Setting up analytics starts with installing the Insights SDK. CrewAI uses LiteLLM under the
+                        hood, and Insights integrates with LiteLLM's callback system.
                     </Markdown>
 
                     <CodeBlock
@@ -33,8 +33,8 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Install CrewAI. Insights instruments your LLM calls through LiteLLM's callback system that CrewAI
-                        uses natively.
+                        Install CrewAI. Insights instruments your LLM calls through LiteLLM's callback system that
+                        CrewAI uses natively.
                     </Markdown>
 
                     <CodeBlock
@@ -77,8 +77,8 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
                             CrewAI can route LLM calls either through its own provider clients or through LiteLLM.
-                            Insights hooks into LiteLLM's callback system, so you need `is_litellm=True` on the `LLM` you
-                            pass to your agents. With it, Insights captures every call as an `$ai_generation` event,
+                            Insights hooks into LiteLLM's callback system, so you need `is_litellm=True` on the `LLM`
+                            you pass to your agents. With it, Insights captures every call as an `$ai_generation` event,
                             without proxying your calls.
                         </Markdown>
                     </CalloutBox>

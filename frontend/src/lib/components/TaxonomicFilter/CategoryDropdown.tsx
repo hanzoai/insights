@@ -1,13 +1,13 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
 import { IconChevronDown } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { Button } from 'lib/elements/Button'
 import { Menu, MenuItem } from 'lib/elements/Menu'
+import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
 import { taxonomicFilterLogic } from './taxonomicFilterLogic'

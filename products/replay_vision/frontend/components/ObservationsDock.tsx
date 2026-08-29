@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconChevronDown, IconEye } from '@hanzo/icons'
 import { Button, Input, Link, Spinner } from '@hanzo/elements'
+import { IconChevronDown, IconEye } from '@hanzo/icons'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'

@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Tab, Tabs } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'

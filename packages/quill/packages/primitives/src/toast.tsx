@@ -1,3 +1,5 @@
+import './toast.css'
+
 import { Toast } from '@base-ui/react/toast'
 import { CircleCheckIcon, InfoIcon, XIcon, TriangleAlertIcon } from 'lucide-react'
 import * as React from 'react'
@@ -5,7 +7,6 @@ import * as React from 'react'
 import { Button } from './button'
 import { cn } from './lib/utils'
 import { Spinner } from './spinner'
-import './toast.css'
 
 // ── Global manager ────────────────────────────────────────────────────
 type ToastActionData = {
@@ -83,7 +84,12 @@ const ToastCard = React.forwardRef<HTMLDivElement, ToastCardProps>(
                 {action && (
                     <div className="flex items-center gap-3 mt-2">
                         {icon && <span className="size-6 shrink-0" />}
-                        <Button variant="outline" size="sm" className="quill-toast-card__action" onClick={action.onClick}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="quill-toast-card__action"
+                            onClick={action.onClick}
+                        >
                             {action.label}
                         </Button>
                     </div>

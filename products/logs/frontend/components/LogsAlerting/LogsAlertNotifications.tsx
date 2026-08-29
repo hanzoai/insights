@@ -68,10 +68,13 @@ export function LogsAlertNotifications({ alertId }: { alertId?: string }): JSX.E
 
     const existingDestinations: AlertNotificationDestinationView[] = destinationGroups.map((group) => {
         const detailInsightsFunctionId =
-            group.insightsFunctions.find((insightsFunction) => getInsightsFunctionEventKind(insightsFunction) === 'firing')?.id ??
-            group.insightsFunctions[0]?.id
+            group.insightsFunctions.find(
+                (insightsFunction) => getInsightsFunctionEventKind(insightsFunction) === 'firing'
+            )?.id ?? group.insightsFunctions[0]?.id
         const detailUrl =
-            alertId && detailInsightsFunctionId ? urls.logsAlertNotificationDetail(alertId, detailInsightsFunctionId) : undefined
+            alertId && detailInsightsFunctionId
+                ? urls.logsAlertNotificationDetail(alertId, detailInsightsFunctionId)
+                : undefined
 
         return {
             key: group.key,

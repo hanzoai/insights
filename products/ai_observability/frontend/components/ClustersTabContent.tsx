@@ -1,7 +1,7 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 
-import { IconRefresh } from '@hanzo/icons'
 import { Button, Skeleton, Table, Tag, Link } from '@hanzo/elements'
+import { IconRefresh } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { urls } from 'scenes/urls'

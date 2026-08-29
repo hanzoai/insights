@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGraph, IconTrends } from '@hanzo/icons'
 import { Select, SelectOptions } from '@hanzo/elements'
+import { IconGraph, IconTrends } from '@hanzo/icons'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'

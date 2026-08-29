@@ -1,5 +1,5 @@
-import { IconInfo } from '@hanzo/icons'
 import { Checkbox, Input, Link, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { Field } from 'lib/elements/Field'

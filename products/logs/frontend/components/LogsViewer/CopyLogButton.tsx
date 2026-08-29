@@ -1,5 +1,5 @@
-import { IconCopy } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {

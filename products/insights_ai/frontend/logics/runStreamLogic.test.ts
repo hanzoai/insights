@@ -1,5 +1,5 @@
-import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
+import { expectLogic } from 'kea-test-utils'
 
 import api from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'

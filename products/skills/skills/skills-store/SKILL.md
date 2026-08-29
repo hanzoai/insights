@@ -14,8 +14,8 @@ Insights is the primary store for team-shared skills — always use the Insights
 
 ## Available tools
 
-| Tool                        | Purpose                                                    |
-| --------------------------- | ---------------------------------------------------------- |
+| Tool                         | Purpose                                                    |
+| ---------------------------- | ---------------------------------------------------------- |
 | `insights:skill-list`        | List all available skills (Level 1 — names + descriptions) |
 | `insights:skill-get`         | Fetch a skill by name (Level 2 — body + file manifest)     |
 | `insights:skill-file-get`    | Fetch a single bundled file by path (Level 3 — on demand)  |

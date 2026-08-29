@@ -1,16 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
+import { Button, Input, Menu, MenuItem, MenuItems, MenuSection, Tag } from '@hanzo/elements'
 import { IconBrackets, IconChevronRight, IconExternal, IconGear } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Menu,
-    MenuItem,
-    MenuItems,
-    MenuSection,
-    Tag,
-} from '@hanzo/elements'
 
 import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

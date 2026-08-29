@@ -25,12 +25,7 @@ export interface bannerLogicMeta {
     key: string
 }
 
-export type bannerLogicType = MakeLogicType<
-    bannerLogicValues,
-    bannerLogicActions,
-    BannerLogicProps,
-    bannerLogicMeta
->
+export type bannerLogicType = MakeLogicType<bannerLogicValues, bannerLogicActions, BannerLogicProps, bannerLogicMeta>
 
 export const bannerLogic = kea<bannerLogicType>([
     path((key) => ['components', 'lemon-banner', 'bannerLogic', key]),

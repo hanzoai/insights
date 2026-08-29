@@ -1,5 +1,6 @@
 import { ComponentType } from 'react'
 
+import { toast } from '@hanzo/elements'
 import {
     IconBell,
     IconBug,
@@ -15,7 +16,6 @@ import {
     IconTrending,
     IconWarning,
 } from '@hanzo/icons'
-import { toast } from '@hanzo/elements'
 
 import { notificationsMenuLogic } from 'lib/components/NotificationsMenu/notificationsMenuLogic'
 

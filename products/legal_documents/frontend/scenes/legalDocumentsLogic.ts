@@ -263,9 +263,7 @@ export const legalDocumentsLogic = kea<legalDocumentsLogicType>([
                     const legalDocument = await api.legalDocumentsCreate(values.currentOrganizationId, payload)
                     actions.loadLegalDocuments()
                     actions.resetLegalDocument(defaultsFor(formValues.document_type))
-                    toast.success(
-                        `${legalDocument.document_type} submitted. Watch your inbox for a PandaDoc envelope.`
-                    )
+                    toast.success(`${legalDocument.document_type} submitted. Watch your inbox for a PandaDoc envelope.`)
                     router.actions.push(urls.legalDocuments())
                 } catch (error: any) {
                     toast.error(error?.detail || 'Could not submit the document. Please try again.')

@@ -1,20 +1,12 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import {
-    Button,
-    Input,
-    Modal,
-    Table,
-    TableColumn,
-    TableColumns,
-    Tag,
-} from '@hanzo/elements'
+import { Button, Input, Modal, Table, TableColumn, TableColumns, Tag } from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { More } from 'lib/elements/Button/More'
-import { ModalContent, ModalFooter, ModalHeader } from 'lib/elements/Modal/Modal'
 import { Link } from 'lib/elements/Link'
+import { ModalContent, ModalFooter, ModalHeader } from 'lib/elements/Modal/Modal'
 import { ProfilePicture } from 'lib/elements/ProfilePicture/ProfilePicture'
 import { InsightEmptyState } from 'scenes/insights/EmptyStates'
 
@@ -148,10 +140,7 @@ export function AIObservabilityReviewQueues(): JSX.Element {
                     b.created_by.first_name || b.created_by.email || ''
                 ),
         },
-        createdAtColumn<ReviewQueueItemApi>() as TableColumn<
-            ReviewQueueItemApi,
-            keyof ReviewQueueItemApi | undefined
-        >,
+        createdAtColumn<ReviewQueueItemApi>() as TableColumn<ReviewQueueItemApi, keyof ReviewQueueItemApi | undefined>,
         {
             width: 0,
             render: function renderActions(_, item) {

@@ -1,5 +1,5 @@
-import { IconInfo } from '@hanzo/icons'
 import { Checkbox, SegmentedButton, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { AlertFormType } from 'products/alerts/frontend/logic/alertFormLogic'
 

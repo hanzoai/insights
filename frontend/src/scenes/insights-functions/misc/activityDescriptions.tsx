@@ -281,5 +281,9 @@ export function insightsFunctionActivityDescriber(logItem: ActivityLogItem, asNo
                 ),
         }
     }
-    return defaultDescriber(logItem, asNotification, nameOrLinkToInsightsFunction(logItem?.item_id, logItem?.detail.name))
+    return defaultDescriber(
+        logItem,
+        asNotification,
+        nameOrLinkToInsightsFunction(logItem?.item_id, logItem?.detail.name)
+    )
 }

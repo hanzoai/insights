@@ -3,7 +3,6 @@ import { Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import {
     Button,
     Dialog,
@@ -17,6 +16,7 @@ import {
     ProfileBubbles,
     ProfilePicture,
 } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { CAPABILITIES } from 'lib/capabilities'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'

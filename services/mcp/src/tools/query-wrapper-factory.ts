@@ -157,7 +157,9 @@ export function createQueryWrapper<T extends ZodObjectAny>(config: QueryWrapperC
                 results,
                 _insightsUrl: buildInsightUrl('InsightVizNode', query, baseUrl, config.urlPrefix),
                 ...(data.warnings ? { warnings: data.warnings } : {}),
-                ...(shouldSurfaceFormatted ? { [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: data.formatted_results } : {}),
+                ...(shouldSurfaceFormatted
+                    ? { [INSIGHTS_FORMATTED_RESULTS_OVERRIDE_KEY]: data.formatted_results }
+                    : {}),
             }
         },
         _meta: {

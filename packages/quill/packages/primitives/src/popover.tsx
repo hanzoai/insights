@@ -1,8 +1,9 @@
+import './popover.css'
+
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import * as React from 'react'
 
 import { cn } from './lib/utils'
-import './popover.css'
 
 function Popover({ ...props }: PopoverPrimitive.Root.Props): React.ReactElement {
     return <PopoverPrimitive.Root data-slot="popover" {...props} />
@@ -47,10 +48,7 @@ function PopoverContent({
             >
                 <PopoverPrimitive.Popup
                     data-slot="popover-content"
-                    className={cn(
-                        'quill-popover__content flex flex-col gap-4',
-                        className
-                    )}
+                    className={cn('quill-popover__content flex flex-col gap-4', className)}
                     {...props}
                 />
             </PopoverPrimitive.Positioner>

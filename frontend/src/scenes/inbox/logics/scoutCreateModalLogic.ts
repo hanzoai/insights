@@ -229,9 +229,7 @@ export const scoutCreateModalLogic: LogicWrapper<scoutCreateModalLogicType> = ke
                     })
 
                     actions.resetScoutCreateForm()
-                    toast.success(
-                        scout.created ? 'Scout created' : 'Scout already exists. Its settings were updated.'
-                    )
+                    toast.success(scout.created ? 'Scout created' : 'Scout already exists. Its settings were updated.')
                     logicProps.onCreated?.(scout)
                     logicProps.onClose()
                 } catch (error) {

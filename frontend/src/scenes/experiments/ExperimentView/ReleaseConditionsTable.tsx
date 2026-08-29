@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconFlag } from '@hanzo/icons'
 import { Banner, Button, Modal, Table, TableColumns, Tag } from '@hanzo/elements'
+import { IconFlag } from '@hanzo/icons'
 
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
 import { FeatureFlagReleaseConditions } from 'scenes/feature-flags/FeatureFlagReleaseConditions'
@@ -104,11 +104,7 @@ export function ReleaseConditionsTable(): JSX.Element {
 
                 return (
                     <div>
-                        {releaseText.startsWith('100% of') ? (
-                            <Tag type="highlight">{releaseText}</Tag>
-                        ) : (
-                            releaseText
-                        )}
+                        {releaseText.startsWith('100% of') ? <Tag type="highlight">{releaseText}</Tag> : releaseText}
                     </div>
                 )
             },

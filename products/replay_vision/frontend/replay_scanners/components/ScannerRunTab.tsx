@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconEye, IconPlay } from '@hanzo/icons'
 import { Button, Input, Table, Link, Spinner } from '@hanzo/elements'
+import { IconEye, IconPlay } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { TableColumns } from 'lib/elements/Table'

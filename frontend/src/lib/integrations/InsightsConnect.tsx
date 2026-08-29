@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconLogomark, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Input, Modal, Select, Skeleton } from '@hanzo/elements'
+import { IconLogomark, IconPlus, IconTrash } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { ScopeAccessRow } from 'lib/components/ScopeAccessRow/ScopeAccessRow'
@@ -45,8 +45,8 @@ function InsightsConnectionRow({ integration }: { integration: IntegrationType }
             title: 'Disconnect this Insights connection?',
             description: (
                 <p>
-                    Insights will no longer be able to act in that project on your behalf. Anything using this connection
-                    (for example dispatched tasks) will stop working.
+                    Insights will no longer be able to act in that project on your behalf. Anything using this
+                    connection (for example dispatched tasks) will stop working.
                 </p>
             ),
             primaryButton: {

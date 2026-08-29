@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlusSmall } from '@hanzo/icons'
 import { Button, ButtonProps, Divider, Dropdown, Popover } from '@hanzo/elements'
+import { IconPlusSmall } from '@hanzo/icons'
 
 import { OperatorValueSelectProps } from 'lib/components/PropertyFilters/components/OperatorValueSelect'
 import { taxonomicFilterGroupTypeToEntityType } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
@@ -224,12 +224,7 @@ const AddFilterButton = (props: Omit<ButtonProps, 'onClick' | 'sideAction' | 'ic
             visible={dropdownOpen}
             onClickOutside={() => setDropdownOpen(false)}
         >
-            <Button
-                icon={<IconPlusSmall />}
-                sideIcon={null}
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                {...props}
-            >
+            <Button icon={<IconPlusSmall />} sideIcon={null} onClick={() => setDropdownOpen(!dropdownOpen)} {...props}>
                 {props?.title || 'Add filter'}
             </Button>
         </Dropdown>

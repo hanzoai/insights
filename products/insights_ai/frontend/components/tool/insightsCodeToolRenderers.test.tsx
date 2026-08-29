@@ -98,7 +98,9 @@ describe('insights-code tool renderers', () => {
                 message={makeMessage({
                     resolvedKey: qualified('list_repos'),
                     content: [
-                        textBlock('insights/insights: Product analytics platform\ninsights/insights-js: JavaScript SDK'),
+                        textBlock(
+                            'insights/insights: Product analytics platform\ninsights/insights-js: JavaScript SDK'
+                        ),
                     ],
                 })}
             />

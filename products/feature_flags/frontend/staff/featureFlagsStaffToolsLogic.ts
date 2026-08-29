@@ -547,9 +547,7 @@ export const featureFlagsStaffToolsLogic = kea<featureFlagsStaffToolsLogicType>(
                 scheduleWarmRunPoll(WARM_RUN_IDLE_POLL_MS)
             },
             cancelWarmRunSuccess: () => {
-                toast.success(
-                    'Cancellation requested. The warmer stops dispatching new teams at its next heartbeat.'
-                )
+                toast.success('Cancellation requested. The warmer stops dispatching new teams at its next heartbeat.')
                 actions.loadWarmRun()
             },
             cancelWarmRunFailure: () => {

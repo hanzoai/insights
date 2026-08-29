@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -9,9 +9,9 @@ import { RestrictionScope } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { Button } from 'lib/elements/Button'
 import { Dialog } from 'lib/elements/Dialog'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
@@ -99,9 +99,7 @@ export function InvitesTable(): JSX.Element {
             title: 'Level',
             dataIndex: 'level',
             render: function LevelRender(_, invite) {
-                return (
-                    <Tag data-attr="invite-membership-level">{OrganizationMembershipLevel[invite.level]}</Tag>
-                )
+                return <Tag data-attr="invite-membership-level">{OrganizationMembershipLevel[invite.level]}</Tag>
             },
         },
         createdByColumn() as TableColumn<OrganizationInviteType, keyof OrganizationInviteType | undefined>,

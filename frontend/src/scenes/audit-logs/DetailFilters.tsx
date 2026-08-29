@@ -1,15 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Button, Input, InputSelect, SearchableSelect, Select, Tooltip } from '@hanzo/elements'
 import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    InputSelect,
-    SearchableSelect,
-    Select,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { midEllipsis } from 'lib/utils/strings'
 

@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'

@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPencil } from '@hanzo/icons'
 import { Badge } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
-import { IconOpenInNew } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link'
 
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'

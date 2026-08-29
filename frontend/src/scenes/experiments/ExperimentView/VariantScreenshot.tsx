@@ -1,16 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Button, Divider, FileInput, Modal, Skeleton, toast, Spinner } from '@hanzo/elements'
 import { IconChevronLeft, IconChevronRight, IconX } from '@hanzo/icons'
-import {
-    Button,
-    Divider,
-    FileInput,
-    Modal,
-    Skeleton,
-    toast,
-    Spinner,
-} from '@hanzo/elements'
 
 import { ZoomableImage } from 'lib/components/ZoomableImage/ZoomableImage'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'

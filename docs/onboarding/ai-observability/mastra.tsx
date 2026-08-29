@@ -23,8 +23,8 @@ export const getMastraSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     </CalloutBox>
 
                     <Markdown>
-                        Install Mastra with the official `@mastra/insights` exporter. Mastra's observability system sends
-                        traces to Insights as `$ai_generation` events automatically.
+                        Install Mastra with the official `@mastra/insights` exporter. Mastra's observability system
+                        sends traces to Insights as `$ai_generation` events automatically.
                     </Markdown>
 
                     <CodeBlock
@@ -123,8 +123,7 @@ export const getMastraSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         <Markdown>
                             **Note:** If you want to capture LLM events anonymously, omit `userId` from
                             `tracingOptions.metadata` and don't set `defaultDistinctId`. See our docs on [anonymous vs
-                            identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn
-                            more.
+                            identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>
 

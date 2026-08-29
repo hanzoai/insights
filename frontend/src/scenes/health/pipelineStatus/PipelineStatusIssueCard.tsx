@@ -1,5 +1,5 @@
-import { IconDatabase, IconPlug, IconRevert, IconServer, IconX } from '@hanzo/icons'
 import { Button, Tag, Link } from '@hanzo/elements'
+import { IconDatabase, IconPlug, IconRevert, IconServer, IconX } from '@hanzo/icons'
 
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 import { urls } from 'scenes/urls'

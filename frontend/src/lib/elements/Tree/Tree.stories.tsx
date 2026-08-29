@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useRef } from 'react'
 
-import { IconArchive, IconShieldPeople } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconArchive, IconShieldPeople } from '@hanzo/icons'
 
 import { Tree, TreeProps } from './Tree'
 

@@ -78,11 +78,11 @@ make returning-user URL=https://example.com/ PAGE_VIEWS=5 INTERVAL=5
 The MCP server is registered in the monorepo's `.mcp.json` and exposes three
 tools:
 
-| Tool                      | Purpose                                                            |
-| ------------------------- | ------------------------------------------------------------------ |
+| Tool                      | Purpose                                                             |
+| ------------------------- | ------------------------------------------------------------------- |
 | `simulate_new_user`       | Send N fresh-browser visits and report which Insights events fired. |
-| `simulate_returning_user` | Send N page views in one session and report events.                |
-| `check_insights_loading`   | Inspect how Insights is loaded across one or more URLs.             |
+| `simulate_returning_user` | Send N page views in one session and report events.                 |
+| `check_insights_loading`  | Inspect how Insights is loaded across one or more URLs.             |
 
 Each tool returns a structured summary including `verified: true|false`,
 event counts, and any errors. See [`skills/`](./skills/) for orchestration

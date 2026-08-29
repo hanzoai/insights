@@ -16,7 +16,8 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                     <CalloutBox type="info" icon="IconInfo" title="Full working examples">
                         <Markdown>
                             See the complete
-                            [Node.js](https://github.com/Insights/insights-js/tree/main/examples/example-ai-anthropic) and
+                            [Node.js](https://github.com/Insights/insights-js/tree/main/examples/example-ai-anthropic)
+                            and
                             [Python](https://github.com/Insights/insights-python/tree/master/examples/example-ai-anthropic)
                             examples on GitHub.
                         </Markdown>
@@ -151,8 +152,8 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
 
                     <Blockquote>
                         <Markdown>
-                            **Note:** If you want to capture LLM events anonymously, omit `insights_distinct_id` from the
-                            call. See our docs on [anonymous vs identified
+                            **Note:** If you want to capture LLM events anonymously, omit `insights_distinct_id` from
+                            the call. See our docs on [anonymous vs identified
                             events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>

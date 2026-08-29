@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconExternal, IconGear } from '@hanzo/icons'
 import { Button, Table, TableColumns, Tag, Link } from '@hanzo/elements'
+import { IconExternal, IconGear } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Card } from 'lib/elements/Card'

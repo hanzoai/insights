@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useState } from 'react'
 
-import { IconSparkles, IconTerminal } from '@hanzo/icons'
 import { Button, ButtonProps, Tag } from '@hanzo/elements'
+import { IconSparkles, IconTerminal } from '@hanzo/icons'
 
 import { IconDocumentExpand } from 'lib/elements/icons'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'

@@ -22,8 +22,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                [`/v1/projects/:team_id/experiments/${EXPERIMENT_WITH_RATIO_METRIC.id}/`]:
-                    EXPERIMENT_WITH_RATIO_METRIC,
+                [`/v1/projects/:team_id/experiments/${EXPERIMENT_WITH_RATIO_METRIC.id}/`]: EXPERIMENT_WITH_RATIO_METRIC,
                 [`/v1/projects/:team_id/experiment_holdouts`]: [],
                 [`/v1/projects/:team_id/experiment_saved_metrics/`]: [],
                 [`/v1/projects/:team_id/feature_flags/${EXPERIMENT_WITH_RATIO_METRIC.feature_flag.id}/`]: {},

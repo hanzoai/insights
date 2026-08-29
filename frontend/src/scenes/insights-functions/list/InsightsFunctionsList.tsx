@@ -2,34 +2,23 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useCallback, useMemo } from 'react'
 
+import { Badge, Button, Checkbox, Input, Select, Table, TableColumn, Tag, Link, Tooltip } from '@hanzo/elements'
 import { IconBell } from '@hanzo/icons'
-import {
-    Badge,
-    Button,
-    Checkbox,
-    Input,
-    Select,
-    Table,
-    TableColumn,
-    Tag,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
 import { MemberSelect } from 'lib/components/MemberSelect'
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { More } from 'lib/elements/Button/More'
 import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { createdByColumn, updatedAtColumn } from 'lib/elements/Table/columnUtils'
 import { TableLink } from 'lib/elements/Table/TableLink'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { urls } from 'scenes/urls'
 
 import { InsightsFunctionConfigurationContextId, InsightsFunctionType } from '~/types'
 
 import { InsightsFunctionIcon } from '../configuration/InsightsFunctionIcon'
-import { humanizeInsightsFunctionType } from '../script-function-utils'
 import { InsightsFunctionStatusIndicator } from '../misc/InsightsFunctionStatusIndicator'
+import { humanizeInsightsFunctionType } from '../script-function-utils'
 import { eventToInsightsFunctionContextId } from '../sub-templates/sub-templates'
 import { DELIVERY_TYPE_FILTER_OPTIONS, DeliveryTypeTag } from './DeliveryTypeTag'
 import { InsightsFunctionOrderModal } from './InsightsFunctionOrderModal'
@@ -128,8 +117,14 @@ export function InsightsFunctionList({
     const { loading, filteredInsightsFunctions, filters, insightsFunctions, hiddenInsightsFunctions } = useValues(
         insightsFunctionsListLogic(props)
     )
-    const { loadInsightsFunctions, setFilters, resetFilters, toggleEnabled, deleteInsightsFunction, setReorderModalOpen } =
-        useActions(insightsFunctionsListLogic(props))
+    const {
+        loadInsightsFunctions,
+        setFilters,
+        resetFilters,
+        toggleEnabled,
+        deleteInsightsFunction,
+        setReorderModalOpen,
+    } = useActions(insightsFunctionsListLogic(props))
 
     const { openFeedbackDialog } = useActions(insightsFunctionRequestModalLogic)
 
@@ -164,7 +159,9 @@ export function InsightsFunctionList({
                     return (
                         <TableLink
                             to={urlForInsightsFunction(insightsFunction, returnTo)}
-                            onClick={onEditInsightsFunction ? () => onEditInsightsFunction(insightsFunction) : undefined}
+                            onClick={
+                                onEditInsightsFunction ? () => onEditInsightsFunction(insightsFunction) : undefined
+                            }
                             title={
                                 <>
                                     <Tooltip title="Click to update configuration, view metrics, and more">
@@ -261,7 +258,8 @@ export function InsightsFunctionList({
                                             : [
                                                   {
                                                       label: insightsFunction.enabled ? 'Pause' : 'Unpause',
-                                                      onClick: () => toggleEnabled(insightsFunction, !insightsFunction.enabled),
+                                                      onClick: () =>
+                                                          toggleEnabled(insightsFunction, !insightsFunction.enabled),
                                                   },
                                                   {
                                                       label: 'Delete',

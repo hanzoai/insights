@@ -1,5 +1,5 @@
-import { IconGear, IconTrash } from '@hanzo/icons'
 import { ColorGlyph, ColorPicker, Label, Menu, SegmentedButton } from '@hanzo/elements'
+import { IconGear, IconTrash } from '@hanzo/icons'
 
 import { getSeriesColorPalette } from 'lib/colors'
 import { Button } from 'lib/elements/Button'

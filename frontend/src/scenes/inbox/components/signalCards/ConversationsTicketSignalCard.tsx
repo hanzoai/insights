@@ -1,5 +1,5 @@
-import { IconChevronRight, IconComment, IconGithub, IconLetter } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconChevronRight, IconComment, IconGithub, IconLetter } from '@hanzo/icons'
 
 import { IconMicrosoftTeams, IconSlack } from 'lib/elements/icons'
 import { Markdown } from 'lib/elements/Markdown'

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconChevronRight, IconLock } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconChevronRight, IconLock } from '@hanzo/icons'
 
 import { isPolicyStateAllowedByCeiling } from '../gateway/gatewayPolicyUtils'
 import type { MCPServerInstallationToolApi } from '../generated/api.schemas'

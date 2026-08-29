@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconInfo, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
 import { Button, Collapse, Skeleton, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
 
 import { CompareFilter } from 'lib/components/CompareFilter/CompareFilter'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

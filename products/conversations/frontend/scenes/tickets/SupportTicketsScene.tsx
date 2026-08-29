@@ -3,7 +3,6 @@ import { useActions, useMountedLogic, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect, useMemo, useRef } from 'react'
 
-import { IconChevronDown, IconRefresh } from '@hanzo/icons'
 import {
     Button,
     Checkbox,
@@ -16,6 +15,7 @@ import {
     TableColumns,
     Tooltip,
 } from '@hanzo/elements'
+import { IconChevronDown, IconRefresh } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { useBulkSelection } from 'lib/elements/Table/useBulkSelection'

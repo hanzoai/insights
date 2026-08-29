@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconArchive, IconFlask, IconTrash } from '@hanzo/icons'
 import { Button, Divider, Tooltip } from '@hanzo/elements'
+import { IconArchive, IconFlask, IconTrash } from '@hanzo/icons'
 
 import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

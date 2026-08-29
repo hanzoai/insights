@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import React from 'react'
 
-import { IconPlusSmall, IconSparkles, IconWrench } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconPlusSmall, IconSparkles, IconWrench } from '@hanzo/icons'
 
 import { ToolRegistration } from './max-constants'
 import { useMaxTool } from './useMaxTool'

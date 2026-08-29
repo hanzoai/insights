@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronLeft, IconChevronRight, IconList, IconListTree, IconStack } from '@hanzo/icons'
 import { Button, SegmentedButton, type SegmentedButtonOption } from '@hanzo/elements'
+import { IconChevronLeft, IconChevronRight, IconList, IconListTree, IconStack } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

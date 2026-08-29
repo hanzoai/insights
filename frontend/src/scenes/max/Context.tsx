@@ -3,13 +3,14 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 import React from 'react'
 
-import { IconAtSign, IconDashboard, IconGraph, IconNotebook, IconPageChart } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconAtSign, IconDashboard, IconGraph, IconNotebook, IconPageChart } from '@hanzo/icons'
 
 import { TaxonomicPopover } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
 import { IconAction, IconEvent } from 'lib/elements/icons'
 
 import { ModeSelector } from './components/ModeSelector'
+import { insightsAiContextLogic } from './insightsAiContextLogic'
 import { maxContextLogic } from './maxContextLogic'
 import { maxThreadLogic } from './maxThreadLogic'
 import {
@@ -19,7 +20,6 @@ import {
     MaxInsightContext,
     MaxNotebookContext,
 } from './maxTypes'
-import { insightsAiContextLogic } from './insightsAiContextLogic'
 
 function pluralize(count: number, word: string): string {
     return `${count} ${word}${count > 1 ? 's' : ''}`

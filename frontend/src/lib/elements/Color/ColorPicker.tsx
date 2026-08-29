@@ -127,19 +127,11 @@ export const ColorPickerOverlay = ({
     )
 }
 
-export const ColorPicker = ({
-    hideDropdown = false,
-    customButton,
-    ...props
-}: ColorPickerProps): JSX.Element => {
+export const ColorPicker = ({ hideDropdown = false, customButton, ...props }: ColorPickerProps): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-        <Popover
-            visible={isOpen}
-            overlay={<ColorPickerOverlay {...props} />}
-            onClickOutside={() => setIsOpen(false)}
-        >
+        <Popover visible={isOpen} overlay={<ColorPickerOverlay {...props} />} onClickOutside={() => setIsOpen(false)}>
             <div className="relative">
                 {customButton ? (
                     cloneElement(customButton, {

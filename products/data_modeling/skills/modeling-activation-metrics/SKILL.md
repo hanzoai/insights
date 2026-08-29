@@ -72,7 +72,7 @@ activated_at) + tests. Recipes: [`references/dbt/`](references/dbt/).
 | File                                                                 | Read when                                                      |
 | -------------------------------------------------------------------- | -------------------------------------------------------------- |
 | [`references/activation-method.md`](references/activation-method.md) | The candidate → retention-lift → reach×power selection method. |
-| [`references/insights/`](references/insights/)                         | InsightsQL activated-flag + retention-lift recipes.                 |
+| [`references/insights/`](references/insights/)                       | InsightsQL activated-flag + retention-lift recipes.            |
 | [`references/dbt/`](references/dbt/)                                 | dbt `dim_activation_criteria` + `fct_user_activation` + tests. |
 
 ## Companions

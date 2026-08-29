@@ -1,7 +1,6 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import {
     Button,
     Dialog,
@@ -15,6 +14,7 @@ import {
     Tooltip,
     toast,
 } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -198,9 +198,9 @@ function DetailsSection({
                     <div className="flex flex-col">
                         <span>Enabled</span>
                         <span className="text-xs text-muted max-w-md">
-                            When enabled, this schema runs on the configured schedule and data is imported into Insights.
-                            Disabling pauses all syncs — existing data stays in place but is not updated until you
-                            re-enable.
+                            When enabled, this schema runs on the configured schedule and data is imported into
+                            Insights. Disabling pauses all syncs — existing data stays in place but is not updated until
+                            you re-enable.
                         </span>
                     </div>
                     <SchemaEditorAction schema={schema}>

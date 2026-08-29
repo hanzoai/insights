@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconInfo, IconPlusSmall, IconTrash, IconWarning } from '@hanzo/icons'
 import { Button, InputSelect, Select, Tag, TextArea, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconPlusSmall, IconTrash, IconWarning } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'

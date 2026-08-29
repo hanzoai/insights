@@ -1,5 +1,6 @@
 import { useValues } from 'kea'
 
+import { Skeleton, Link } from '@hanzo/elements'
 import {
     IconCheckCircle,
     IconCircleDashed,
@@ -9,7 +10,6 @@ import {
     IconWarning,
     IconX,
 } from '@hanzo/icons'
-import { Skeleton, Link } from '@hanzo/elements'
 
 import type { PullRequestCheckApi } from 'products/signals/frontend/generated/api.schemas'
 

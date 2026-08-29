@@ -176,8 +176,10 @@ export const mcpAnalyticsNotificationsLogic = kea<mcpAnalyticsNotificationsLogic
     })),
     reducers({
         notifications: {
-            setNotifications: (_: InsightsFunctionType[], { notifications }: { notifications: InsightsFunctionType[] }) =>
-                notifications,
+            setNotifications: (
+                _: InsightsFunctionType[],
+                { notifications }: { notifications: InsightsFunctionType[] }
+            ) => notifications,
         },
         notificationsTruncated: [
             false,

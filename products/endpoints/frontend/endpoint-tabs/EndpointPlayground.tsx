@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button, Divider, Label, Select, Switch } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'
-import { IconPlayCircle } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
+import { IconPlayCircle } from 'lib/elements/icons'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
 import { urls } from 'scenes/urls'
 

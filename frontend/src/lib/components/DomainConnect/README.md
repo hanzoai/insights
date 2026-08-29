@@ -120,8 +120,8 @@ The `templates/` directory contains backup copies of the JSON files submitted to
 pull from that external repo — they do not read these files. We keep them here so the
 canonical definitions live alongside the code.
 
-| File                                     | Purpose                |
-| ---------------------------------------- | ---------------------- |
+| File                                  | Purpose                |
+| ------------------------------------- | ---------------------- |
 | `hanzo.ai.email-verification-us.json` | Email DNS records (US) |
 | `hanzo.ai.email-verification-eu.json` | Email DNS records (EU) |
 | `hanzo.ai.reverse-proxy-us.json`      | Proxy CNAME (US)       |

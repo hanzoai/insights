@@ -1,13 +1,13 @@
 import './QuestionInput.scss'
 
 import { offset } from '@floating-ui/react'
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { IconArrowRight, IconCheck, IconPencil, IconStopFilled, IconTrash, IconX } from '@hanzo/icons'
 import { Button, Switch, TextArea, Spinner } from '@hanzo/elements'
+import { IconArrowRight, IconCheck, IconPencil, IconStopFilled, IconTrash, IconX } from '@hanzo/icons'
 
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
 import { cn } from 'lib/utils/css-classes'
@@ -450,9 +450,7 @@ export const QuestionInput = React.forwardRef<HTMLDivElement, QuestionInputProps
                                     <div className="flex justify-between items-start">
                                         <ContextDisplay size={contextDisplaySize} />
 
-                                        <div className="flex mr-1 items-start gap-1 h-full mt-1">
-                                            {topActions}
-                                        </div>
+                                        <div className="flex mr-1 items-start gap-1 h-full mt-1">{topActions}</div>
                                     </div>
                                 ) : (
                                     <ContextDisplay size={contextDisplaySize} />

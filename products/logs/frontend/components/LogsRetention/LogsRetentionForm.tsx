@@ -1,14 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { Input, SegmentedButton, SegmentedButtonOption, Switch, Link, Tooltip } from '@hanzo/elements'
 import { IconInfo } from '@hanzo/icons'
-import {
-    Input,
-    SegmentedButton,
-    SegmentedButtonOption,
-    Switch,
-    Link,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 import { userLogic } from 'scenes/userLogic'
@@ -69,10 +62,7 @@ export function LogsRetentionForm(): JSX.Element {
                     />
                 </Field.Pure>
                 <Field.Pure label="Enabled">
-                    <Switch
-                        checked={retentionForm.enabled}
-                        onChange={(v) => setRetentionFormValue('enabled', v)}
-                    />
+                    <Switch checked={retentionForm.enabled} onChange={(v) => setRetentionFormValue('enabled', v)} />
                 </Field.Pure>
             </div>
 

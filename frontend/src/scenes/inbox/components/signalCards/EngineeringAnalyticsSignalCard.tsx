@@ -1,5 +1,5 @@
-import { IconClock, IconGithub, IconWarning } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconClock, IconGithub, IconWarning } from '@hanzo/icons'
 
 import { Markdown } from 'lib/elements/Markdown'
 import { percentage } from 'lib/utils/numbers'

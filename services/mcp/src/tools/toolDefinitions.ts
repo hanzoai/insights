@@ -1,8 +1,8 @@
 import z from 'zod'
 
 import { hasScope, hasScopes } from '@/lib/api'
-import { OAUTH_SCOPES_SUPPORTED } from '@/lib/oauth-scopes.generated'
 import type { EvaluatedFlags } from '@/lib/insights/flags'
+import { OAUTH_SCOPES_SUPPORTED } from '@/lib/oauth-scopes.generated'
 import { isStaffOnlyTool } from '@/lib/staff-only-tools'
 
 import generatedToolDefinitionsJson from '../../schema/generated-tool-definitions.json'

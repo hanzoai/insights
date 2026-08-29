@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
-import { IconArrowRight } from '@hanzo/icons'
 import { Label, Skeleton, SpinnerOverlay, Tooltip } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { formatPercentageDiff, humanFriendlyNumber } from 'lib/utils/numbers'
 

@@ -53,7 +53,10 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
       }
     : DistributeReadOnlyOverUnions<T>
 
-export const getInsightsFunctionTemplatesListUrl = (projectId: string, params?: InsightsFunctionTemplatesListParams) => {
+export const getInsightsFunctionTemplatesListUrl = (
+    projectId: string,
+    params?: InsightsFunctionTemplatesListParams
+) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -74,10 +77,13 @@ export const insightsFunctionTemplatesList = async (
     params?: InsightsFunctionTemplatesListParams,
     options?: RequestInit
 ): Promise<PaginatedInsightsFunctionTemplateListApi> => {
-    return apiMutator<PaginatedInsightsFunctionTemplateListApi>(getInsightsFunctionTemplatesListUrl(projectId, params), {
-        ...options,
-        method: 'GET',
-    })
+    return apiMutator<PaginatedInsightsFunctionTemplateListApi>(
+        getInsightsFunctionTemplatesListUrl(projectId, params),
+        {
+            ...options,
+            method: 'GET',
+        }
+    )
 }
 
 export const getInsightsFunctionTemplatesRetrieveUrl = (projectId: string, templateId: string) => {
@@ -197,7 +203,11 @@ export const getInsightsFunctionsDestroyUrl = (projectId: string, id: string) =>
 /**
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
-export const insightsFunctionsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<unknown> => {
+export const insightsFunctionsDestroy = async (
+    projectId: string,
+    id: string,
+    options?: RequestInit
+): Promise<unknown> => {
     return apiMutator<unknown>(getInsightsFunctionsDestroyUrl(projectId, id), {
         ...options,
         method: 'DELETE',
@@ -345,10 +355,13 @@ export const insightsFunctionsMetricsTotalsRetrieve = async (
     params?: InsightsFunctionsMetricsTotalsRetrieveParams,
     options?: RequestInit
 ): Promise<AppMetricsTotalsResponseApi> => {
-    return apiMutator<AppMetricsTotalsResponseApi>(getInsightsFunctionsMetricsTotalsRetrieveUrl(projectId, id, params), {
-        ...options,
-        method: 'GET',
-    })
+    return apiMutator<AppMetricsTotalsResponseApi>(
+        getInsightsFunctionsMetricsTotalsRetrieveUrl(projectId, id, params),
+        {
+            ...options,
+            method: 'GET',
+        }
+    )
 }
 
 export const getInsightsFunctionsPublishCreateUrl = (projectId: string, id: string) => {

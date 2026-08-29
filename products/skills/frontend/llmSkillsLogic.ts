@@ -6,9 +6,9 @@ import { objectsEqual } from 'lib/utils/objects'
 
 import api, { ApiConfig } from '~/lib/api'
 import { downloadBlob } from '~/lib/components/ExportButton/exporter'
+import { PaginationManual } from '~/lib/elements/PaginationControl'
 import { Sorting } from '~/lib/elements/Table'
 import { toast } from '~/lib/elements/Toast/Toast'
-import { PaginationManual } from '~/lib/elements/PaginationControl'
 import { trackedActionToUrl } from '~/lib/logic/scenes/trackedActionToUrl'
 import { sceneLogic } from '~/scenes/sceneLogic'
 import { urls } from '~/scenes/urls'
@@ -726,9 +726,7 @@ export const llmSkillsLogic = kea<llmSkillsLogicType>([
                 actions.setMarketplaceState(state)
             } catch (e) {
                 console.error('Failed to issue marketplace credential', e)
-                toast.error(
-                    errorDetail(e) || 'Failed to issue credential. Do you have permission to manage API keys?'
-                )
+                toast.error(errorDetail(e) || 'Failed to issue credential. Do you have permission to manage API keys?')
             } finally {
                 actions.setIssuingCredential(false)
             }

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconChevronDown, IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { Button, Skeleton, Tag, Link, Spinner, Tooltip } from '@hanzo/elements'
+import { IconChevronDown, IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

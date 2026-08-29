@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconRefresh } from '@hanzo/icons'
 import { Button, Skeleton, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconRefresh } from '@hanzo/icons'
 
 import { Drawer } from 'lib/elements/Drawer/Drawer'
 

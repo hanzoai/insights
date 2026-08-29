@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo } from 'react'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { IconFullScreen } from 'lib/elements/icons'
 import { Modal } from 'lib/elements/Modal/Modal'

@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconFlag, IconRocket } from '@hanzo/icons'
 import { Divider, Tag } from '@hanzo/elements'
+import { IconFlag, IconRocket } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'

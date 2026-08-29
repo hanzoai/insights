@@ -1,8 +1,8 @@
 import type { Editor } from '@tiptap/core'
 import insights from 'insights-js'
 
-import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { toast } from 'lib/elements/Toast'
+import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 
 export function useMarkdownEditorImageUpload(editor: Editor | null): ReturnType<typeof useUploadFiles> {
     return useUploadFiles({

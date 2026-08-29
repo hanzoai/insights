@@ -285,9 +285,9 @@ describe('engineeringAnalyticsLogic', () => {
         expect(filterPullRequests(rows, { ...DEFAULT_FILTERS, state: 'draft' }).map((row) => row.number)).toEqual([4])
         expect(filterPullRequests(rows, { ...DEFAULT_FILTERS, state: 'closed' }).map((row) => row.number)).toEqual([5])
         expect(filterPullRequests(rows, { ...DEFAULT_FILTERS, state: 'all', author: 'bob' })).toHaveLength(2)
-        expect(filterPullRequests(rows, { ...DEFAULT_FILTERS, state: 'all', repo: 'insights/insights-js' })).toHaveLength(
-            1
-        )
+        expect(
+            filterPullRequests(rows, { ...DEFAULT_FILTERS, state: 'all', repo: 'insights/insights-js' })
+        ).toHaveLength(1)
         expect(filterPullRequests(rows, { ...DEFAULT_FILTERS, state: 'all', ciStatus: 'failing' })).toHaveLength(1)
         expect(filterPullRequests(rows, { ...DEFAULT_FILTERS, state: 'all', search: 'bump' })).toHaveLength(1)
         expect(filterPullRequests(rows, { ...DEFAULT_FILTERS, state: 'all', search: '#2' })).toHaveLength(1)

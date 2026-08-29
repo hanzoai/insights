@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
 import { getSeriesBackgroundColor } from 'lib/colors'

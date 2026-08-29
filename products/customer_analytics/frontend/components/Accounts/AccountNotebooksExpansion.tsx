@@ -1,6 +1,7 @@
-import { useActions, useMountedLogic, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useMountedLogic, useValues } from 'kea'
 
+import { Button, Input, Label, Skeleton, Table, TableColumns, Tabs, Link, ProfilePicture } from '@hanzo/elements'
 import {
     IconCloud,
     IconCopy,
@@ -11,17 +12,6 @@ import {
     IconPiggyBank,
     IconReceipt,
 } from '@hanzo/icons'
-import {
-    Button,
-    Input,
-    Label,
-    Skeleton,
-    Table,
-    TableColumns,
-    Tabs,
-    Link,
-    ProfilePicture,
-} from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS } from 'lib/constants'

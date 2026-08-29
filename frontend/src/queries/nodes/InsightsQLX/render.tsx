@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { IconAI } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconAI } from '@hanzo/icons'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { ExplainCSPViolationButton } from 'lib/components/LLMButton/ExplainCSPViolationButton'
@@ -150,7 +150,11 @@ export function renderInsightsQLX(value: any): JSX.Element {
         } else if (INSIGHTSQLX_TAGS_NO_ATTRIBUTES.includes(tag)) {
             const { children, source, key } = rest
             const value = children ?? source
-            const element = React.createElement(tag, { key: key ?? undefined }, value ? renderInsightsQLX(value) : undefined)
+            const element = React.createElement(
+                tag,
+                { key: key ?? undefined },
+                value ? renderInsightsQLX(value) : undefined
+            )
 
             return <LightErrorBoundary>{element}</LightErrorBoundary>
         }

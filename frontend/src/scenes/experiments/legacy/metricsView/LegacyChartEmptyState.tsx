@@ -1,5 +1,5 @@
-import { IconClock } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
 import { ExperimentFunnelsQuery, ExperimentTrendsQuery } from '~/queries/schema/schema-general'
 

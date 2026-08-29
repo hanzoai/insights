@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { IconCopy, IconFilter, IconGraph, IconRefresh, IconX } from '@hanzo/icons'
 import { Button, Select, SelectOptions, Switch } from '@hanzo/elements'
+import { IconCopy, IconFilter, IconGraph, IconRefresh, IconX } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { PropertyValue } from 'lib/components/PropertyFilters/components/PropertyValue'
@@ -149,11 +149,7 @@ export function SurveyResultsFiltersBar(): JSX.Element {
                     />
                 </div>
                 <div className="flex flex-wrap gap-2 items-center">
-                    <Switch
-                        checked={showArchivedResponses}
-                        onChange={setShowArchivedResponses}
-                        label="Show archived"
-                    />
+                    <Switch checked={showArchivedResponses} onChange={setShowArchivedResponses} label="Show archived" />
                     <Button size="small" type="secondary" icon={<IconGraph />} to={surveyAsInsightURL}>
                         View insights
                     </Button>

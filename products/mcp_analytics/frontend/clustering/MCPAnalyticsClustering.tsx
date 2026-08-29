@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRefresh, IconSearch, IconSparkles, IconWarning } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconRefresh, IconSearch, IconSparkles, IconWarning } from '@hanzo/icons'
 import {
     Badge,
     Button,

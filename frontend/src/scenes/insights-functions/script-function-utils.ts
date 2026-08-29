@@ -28,7 +28,10 @@ export const INSIGHTS_FUNCTION_CONTEXT_MAX_CHARS = 10_000
  * script source or inputs payload can't bloat the agent's context window. These are keyed entity-style items
  * (not `type: 'text'`), so they're sent once per run rather than every turn; the cap is a safety ceiling.
  */
-export function truncateInsightsFunctionContext(value: string, max: number = INSIGHTS_FUNCTION_CONTEXT_MAX_CHARS): string {
+export function truncateInsightsFunctionContext(
+    value: string,
+    max: number = INSIGHTS_FUNCTION_CONTEXT_MAX_CHARS
+): string {
     return value.length > max ? value.slice(0, max) + '… (truncated)' : value
 }
 

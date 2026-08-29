@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPencil, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import { Button, Input, Label, Modal, Select, TextArea } from '@hanzo/elements'
+import { IconPencil, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { Table } from 'lib/elements/Table'

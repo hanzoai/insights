@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
 
 import { TZLabel } from 'lib/components/TZLabel'
+import { Link } from 'lib/elements/Link'
 import { TableColumns } from 'lib/elements/Table'
 import { Table } from 'lib/elements/Table'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { Link } from 'lib/elements/Link'
 import {
     EXPERIMENTS_PER_PAGE,
     type ExperimentBasicApi,

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconComment, IconGitBranch } from '@hanzo/icons'
 import { Button, Divider, Link } from '@hanzo/elements'
+import { IconComment, IconGitBranch } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'

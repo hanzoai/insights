@@ -9,7 +9,9 @@ import { AppWrapper } from '../../components/AppWrapper'
 
 function LlmCostsApp(): JSX.Element {
     return (
-        <AppWrapper<LLMCostsData> appName="Insights Llm Costs">{({ data }) => <LLMCostsView data={data!} />}</AppWrapper>
+        <AppWrapper<LLMCostsData> appName="Insights Llm Costs">
+            {({ data }) => <LLMCostsView data={data!} />}
+        </AppWrapper>
     )
 }
 

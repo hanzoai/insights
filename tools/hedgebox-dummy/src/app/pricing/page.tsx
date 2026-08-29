@@ -16,8 +16,8 @@ export default function PricingPage(): React.JSX.Element {
                     <div className="text-center mb-16">
                         <h1 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Hedgebox Plan</h1>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Whether you're a solo mascot or running a full mascot business, we have the perfect plan
-                            for your file sharing needs.
+                            Whether you're a solo mascot or running a full mascot business, we have the perfect plan for
+                            your file sharing needs.
                         </p>
                     </div>
 

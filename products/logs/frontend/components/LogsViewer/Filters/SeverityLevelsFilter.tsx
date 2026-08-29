@@ -1,5 +1,5 @@
-import { IconChevronDown } from '@hanzo/icons'
 import { Button, Checkbox, Dropdown } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { LogMessage } from '~/queries/schema/schema-general'
 
@@ -29,9 +29,7 @@ export const SeverityLevelsFilter = ({ value, onChange }: SeverityLevelsFilterPr
                             type="tertiary"
                             size="small"
                             fullWidth
-                            icon={
-                                <Checkbox checked={value.includes(option.key)} className="pointer-events-none" />
-                            }
+                            icon={<Checkbox checked={value.includes(option.key)} className="pointer-events-none" />}
                             onClick={() => {
                                 const newLevels = value.includes(option.key)
                                     ? value.filter((l) => l !== option.key)

@@ -1,6 +1,6 @@
 import { TZLabel } from 'lib/components/TZLabel'
-import { Skeleton } from 'lib/elements/Skeleton'
 import { Link } from 'lib/elements/Link'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 

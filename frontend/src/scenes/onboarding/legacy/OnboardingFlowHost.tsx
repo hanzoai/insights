@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useEffect } from 'react'
 
 import { Banner, Link, Spinner } from '@hanzo/elements'
@@ -20,9 +20,12 @@ export function OnboardingFlowHost(): JSX.Element {
 
     useEffect(() => {
         if (isMisconfigured) {
-            insights.captureException(new Error('Onboarding flow misconfigured: product registered but no flow steps'), {
-                productKey,
-            })
+            insights.captureException(
+                new Error('Onboarding flow misconfigured: product registered but no flow steps'),
+                {
+                    productKey,
+                }
+            )
         }
     }, [isMisconfigured, productKey])
 

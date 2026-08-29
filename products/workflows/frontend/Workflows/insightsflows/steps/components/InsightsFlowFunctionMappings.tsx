@@ -1,16 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { Banner, Button, Collapse, CollapsePanel, Dialog, Input, Label, Select } from '@hanzo/elements'
 import { IconEllipsis } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Collapse,
-    CollapsePanel,
-    Dialog,
-    Input,
-    Label,
-    Select,
-} from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 import { InsightsFunctionMapping, MappingSummary } from 'scenes/insights-functions/mapping/InsightsFunctionMappings'
@@ -149,16 +140,11 @@ export function InsightsFlowFunctionMappings({
                                             dropdown: {
                                                 overlay: (
                                                     <div className="deprecated-space-y-px">
-                                                        <Button onClick={() => renameMapping(mapping)}>
-                                                            Rename
-                                                        </Button>
+                                                        <Button onClick={() => renameMapping(mapping)}>Rename</Button>
                                                         <Button onClick={() => duplicateMapping(mapping)}>
                                                             Duplicate
                                                         </Button>
-                                                        <Button
-                                                            status="danger"
-                                                            onClick={() => removeMapping(mapping)}
-                                                        >
+                                                        <Button status="danger" onClick={() => removeMapping(mapping)}>
                                                             Remove
                                                         </Button>
                                                     </div>

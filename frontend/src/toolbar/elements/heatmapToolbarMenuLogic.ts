@@ -1,3 +1,4 @@
+import { Insights } from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -13,7 +14,6 @@ import {
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
 import { windowValues } from 'kea-window-values'
-import { Insights } from 'insights-js'
 import { collectAllElementsDeep } from 'query-selector-shadow-dom'
 
 import type { PaginatedResponse } from 'lib/api'

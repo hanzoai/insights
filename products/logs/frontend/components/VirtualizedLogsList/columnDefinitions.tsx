@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import type { RefObject } from 'react'
 
-import { IconArrowLeft, IconArrowRight, IconChevronRight, IconEllipsis, IconTrash } from '@hanzo/icons'
 import { Button, Checkbox, Menu, Tooltip } from '@hanzo/elements'
+import { IconArrowLeft, IconArrowRight, IconChevronRight, IconEllipsis, IconTrash } from '@hanzo/icons'
 
 import { ResizableElement } from 'lib/components/ResizeElement/ResizeElement'
 import { TZLabel, TZLabelProps } from 'lib/components/TZLabel'

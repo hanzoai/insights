@@ -2,9 +2,9 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCode, IconRevert } from '@hanzo/icons'
 import { Modal } from '@hanzo/elements'
 import { Button } from '@hanzo/elements'
+import { IconCode, IconRevert } from '@hanzo/icons'
 
 import { SkeletonLog } from 'lib/components/ActivityLog/ActivityLog'
 import { HumanizedActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'

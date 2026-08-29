@@ -2,8 +2,8 @@ import { Handle, Position } from '@xyflow/react'
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconCheckCircle, IconPlus, IconX } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconCheckCircle, IconPlus, IconX } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
@@ -87,11 +87,7 @@ export const PathFlowNode = React.memo(function PathFlowNode({ data, id }: PathF
                         size="xsmall"
                         className="ml-1 shrink-0"
                         overlay={
-                            <Button
-                                fullWidth
-                                icon={<IconCheckCircle />}
-                                onClick={() => toggleStagedNodeOptional(id)}
-                            >
+                            <Button fullWidth icon={<IconCheckCircle />} onClick={() => toggleStagedNodeOptional(id)}>
                                 {isOptional ? 'Make required' : 'Make optional'}
                             </Button>
                         }

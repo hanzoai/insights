@@ -1,11 +1,11 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconMagicWand, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconMagicWand, IconX } from '@hanzo/icons'
 
-import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
+import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
 import { isSourceMapsRecommendation, recommendationsTabLogic } from '../recommendations/recommendationsTabLogic'
 import { SourceMapsFixModal } from '../recommendations/SourceMapsFixModal'

@@ -1,12 +1,12 @@
 import './CollapsibleFrameHeader.scss'
 
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { IconBox, IconEllipsis, IconSpinner, IconWarning } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconBox, IconEllipsis, IconSpinner, IconWarning } from '@hanzo/icons'
 
 import { Collapsible } from 'lib/ui/Collapsible/Collapsible'
 import { cn } from 'lib/utils/css-classes'

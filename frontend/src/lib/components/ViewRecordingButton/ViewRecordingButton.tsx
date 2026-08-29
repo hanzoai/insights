@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { isValidElement, ReactNode, useEffect } from 'react'
 
-import { IconWarning } from '@hanzo/icons'
 import { Button, ButtonProps, Link, Spinner, Tooltip } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Dayjs, dayjs } from 'lib/dayjs'
@@ -252,8 +252,8 @@ export const recordingDisabledReason = (
         return (
             <>
                 No session ID associated with this event.{' '}
-                <Link to="https://hanzo.ai/docs/data/sessions#automatically-sending-session-ids">Learn how</Link> to
-                set it on all events.
+                <Link to="https://hanzo.ai/docs/data/sessions#automatically-sending-session-ids">Learn how</Link> to set
+                it on all events.
             </>
         )
     } else if (recordingStatus && !['active', 'sampled', 'buffering'].includes(recordingStatus)) {

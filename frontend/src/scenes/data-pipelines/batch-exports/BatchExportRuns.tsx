@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar, IconRefresh } from '@hanzo/icons'
 import { Button, Dialog, Switch, Table, Tag, Tooltip } from '@hanzo/elements'
+import { IconCalendar, IconRefresh } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { NotFound } from 'lib/components/NotFound'

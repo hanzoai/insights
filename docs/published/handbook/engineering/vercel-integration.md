@@ -151,20 +151,20 @@ graph LR
 ### How Vercel customers differ from regular customers
 
 | Aspect                          | Vercel customer                        | Regular Insights customer |
-| ------------------------------- | -------------------------------------- | ------------------------ |
-| **Signs up via**                | Vercel Marketplace                     | hanzo.ai              |
-| **Pays through**                | Vercel                                 | Stripe (card on file)    |
-| **Stripe `collection_method`**  | `send_invoice`                         | `charge_automatically`   |
-| **`days_until_due`**            | 30                                     | N/A                      |
-| **`metadata.billing_provider`** | `"vercel"`                             | Not set                  |
-| **Invoice status**              | "open" until Vercel webhook            | "paid" after card charge |
-| **Customer email**              | `noreply+vercel-{org_id}@hanzo.ai`  | Real email               |
+| ------------------------------- | -------------------------------------- | ------------------------- |
+| **Signs up via**                | Vercel Marketplace                     | hanzo.ai                  |
+| **Pays through**                | Vercel                                 | Stripe (card on file)     |
+| **Stripe `collection_method`**  | `send_invoice`                         | `charge_automatically`    |
+| **`days_until_due`**            | 30                                     | N/A                       |
+| **`metadata.billing_provider`** | `"vercel"`                             | Not set                   |
+| **Invoice status**              | "open" until Vercel webhook            | "paid" after card charge  |
+| **Customer email**              | `noreply+vercel-{org_id}@hanzo.ai`     | Real email                |
 | **Communications**              | Vercel handles                         | Insights sends            |
-| **Daily usage**                 | Reported to Vercel + Stripe            | Stripe only              |
-| **Invoice submission**          | Submitted to Vercel after finalization | Not needed               |
+| **Daily usage**                 | Reported to Vercel + Stripe            | Stripe only               |
+| **Invoice submission**          | Submitted to Vercel after finalization | Not needed                |
 | **Feature flags**               | Synced to Vercel Experimentation       | Insights only             |
 | **SSO**                         | Via Vercel (`/login/vercel`)           | Insights login            |
-| **Uninstall**                   | Resets to `billing_provider=insights`   | N/A                      |
+| **Uninstall**                   | Resets to `billing_provider=insights`  | N/A                       |
 
 ### The `billing_provider` field
 
@@ -532,17 +532,17 @@ For integration or billing issues that need Vercel's involvement, post in the sh
 
 ### Insights repo (`insights/`)
 
-| File                                         | Purpose                                                                |
-| -------------------------------------------- | ---------------------------------------------------------------------- |
-| `ee/api/vercel/vercel_installation.py`       | Installation CRUD (`PUT /v1/vercel/v1/installations/{id}`)            |
-| `ee/api/vercel/vercel_connect.py`            | Connectable account OAuth flow                                         |
-| `ee/api/vercel/vercel_sso.py`                | SSO endpoints (`/login/vercel`)                                        |
-| `ee/api/vercel/vercel_webhooks.py`           | Webhook handler (`/webhooks/vercel`)                                   |
-| `ee/api/vercel/vercel_resource.py`           | Resource management (Vercel projects)                                  |
-| `ee/api/vercel/vercel_product.py`            | Product plans                                                          |
-| `ee/vercel/client.py`                        | `VercelAPIClient` - HTTP client for Vercel APIs                        |
-| `ee/vercel/integration.py`                   | `VercelIntegration` class - core logic (upsert, delete, sync flags)    |
-| `ee/billing/billing_manager.py`              | `BillingManager` - intermediary for all billing service calls          |
+| File                                          | Purpose                                                                |
+| --------------------------------------------- | ---------------------------------------------------------------------- |
+| `ee/api/vercel/vercel_installation.py`        | Installation CRUD (`PUT /v1/vercel/v1/installations/{id}`)             |
+| `ee/api/vercel/vercel_connect.py`             | Connectable account OAuth flow                                         |
+| `ee/api/vercel/vercel_sso.py`                 | SSO endpoints (`/login/vercel`)                                        |
+| `ee/api/vercel/vercel_webhooks.py`            | Webhook handler (`/webhooks/vercel`)                                   |
+| `ee/api/vercel/vercel_resource.py`            | Resource management (Vercel projects)                                  |
+| `ee/api/vercel/vercel_product.py`             | Product plans                                                          |
+| `ee/vercel/client.py`                         | `VercelAPIClient` - HTTP client for Vercel APIs                        |
+| `ee/vercel/integration.py`                    | `VercelIntegration` class - core logic (upsert, delete, sync flags)    |
+| `ee/billing/billing_manager.py`               | `BillingManager` - intermediary for all billing service calls          |
 | `insights/models/organization_integration.py` | `OrganizationIntegration` model (org-level, stores Vercel credentials) |
 | `insights/models/integration.py`              | `Integration` model (team/project-level resource record)               |
 
@@ -551,10 +551,10 @@ For integration or billing issues that need Vercel's involvement, post in the sh
 | File                                            | Purpose                                                               |
 | ----------------------------------------------- | --------------------------------------------------------------------- |
 | `api/activate.py`                               | `BillingAuthorizeViewSet` - authorize + deprecated uninstall redirect |
-| `api/billing.py`                                | Canonical uninstall endpoint (`/v1/billing/uninstall`)               |
+| `api/billing.py`                                | Canonical uninstall endpoint (`/v1/billing/uninstall`)                |
 | `api/billing_provider_webhook.py`               | Receives "invoice paid" webhook from Vercel                           |
 | `billing_providers/clients/vercel.py`           | `VercelClient` - submits usage & invoices to Vercel                   |
-| `billing_providers/clients/vercel_api.py`       | Low-level API calls via Insights proxy                                 |
+| `billing_providers/clients/vercel_api.py`       | Low-level API calls via Insights proxy                                |
 | `billing_providers/clients/vercel_formatter.py` | Formats invoices/usage for Vercel's API                               |
 | `models/customer.py`                            | `billing_provider` field, `cancel_billing_provider_subscription()`    |
 | `tasks/usage.py`                                | `submit_usage_to_vercel()` daily task                                 |

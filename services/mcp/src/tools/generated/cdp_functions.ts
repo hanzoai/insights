@@ -38,7 +38,9 @@ const CdpFunctionsCreateSchema = InsightsFunctionsCreateBody.extend({
     script: InsightsFunctionsCreateBody.shape['script'].describe(
         'Source code for the function. For most types this is Script code; for site_destination and site_app types this is TypeScript. Required if no template_id is provided.'
     ),
-    enabled: InsightsFunctionsCreateBody.shape['enabled'].describe('Whether the function is active and processing events.'),
+    enabled: InsightsFunctionsCreateBody.shape['enabled'].describe(
+        'Whether the function is active and processing events.'
+    ),
     execution_order: InsightsFunctionsCreateBody.shape['execution_order'].describe(
         'Execution priority for transformation functions (lower runs first). Only applies to type=transformation. If omitted, the function is appended at the end.'
     ),
@@ -132,7 +134,10 @@ const cdpFunctionsDiscardDraft = (): ToolBase<typeof CdpFunctionsDiscardDraftSch
 
 const CdpFunctionsGetRevisionSchema = InsightsFunctionsRevisionsRetrieveParams.omit({ project_id: true })
 
-const cdpFunctionsGetRevision = (): ToolBase<typeof CdpFunctionsGetRevisionSchema, Schemas.InsightsFunctionRevision> => ({
+const cdpFunctionsGetRevision = (): ToolBase<
+    typeof CdpFunctionsGetRevisionSchema,
+    Schemas.InsightsFunctionRevision
+> => ({
     name: 'cdp-functions-get-revision',
     schema: CdpFunctionsGetRevisionSchema,
     handler: async (context: Context, params: z.infer<typeof CdpFunctionsGetRevisionSchema>) => {
@@ -381,7 +386,10 @@ const CdpFunctionsPublishSchema = InsightsFunctionsPublishCreateParams.omit({ pr
     InsightsFunctionsPublishCreateBody.shape
 )
 
-const cdpFunctionsPublish = (): ToolBase<typeof CdpFunctionsPublishSchema, Schemas.InsightsFunctionPublishResponse> => ({
+const cdpFunctionsPublish = (): ToolBase<
+    typeof CdpFunctionsPublishSchema,
+    Schemas.InsightsFunctionPublishResponse
+> => ({
     name: 'cdp-functions-publish',
     schema: CdpFunctionsPublishSchema,
     handler: async (context: Context, params: z.infer<typeof CdpFunctionsPublishSchema>) => {
@@ -425,11 +433,14 @@ const cdpFunctionsRearrangePartialUpdate = (): ToolBase<
     },
 })
 
-const CdpFunctionsRestoreRevisionSchema = InsightsFunctionsRevisionsRestoreCreateParams.omit({ project_id: true }).extend(
-    InsightsFunctionsRevisionsRestoreCreateBody.shape
-)
+const CdpFunctionsRestoreRevisionSchema = InsightsFunctionsRevisionsRestoreCreateParams.omit({
+    project_id: true,
+}).extend(InsightsFunctionsRevisionsRestoreCreateBody.shape)
 
-const cdpFunctionsRestoreRevision = (): ToolBase<typeof CdpFunctionsRestoreRevisionSchema, Schemas.InsightsFunction> => ({
+const cdpFunctionsRestoreRevision = (): ToolBase<
+    typeof CdpFunctionsRestoreRevisionSchema,
+    Schemas.InsightsFunction
+> => ({
     name: 'cdp-functions-restore-revision',
     schema: CdpFunctionsRestoreRevisionSchema,
     handler: async (context: Context, params: z.infer<typeof CdpFunctionsRestoreRevisionSchema>) => {

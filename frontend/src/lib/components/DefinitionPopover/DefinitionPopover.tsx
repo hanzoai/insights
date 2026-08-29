@@ -3,8 +3,8 @@ import './DefinitionPopover.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconPin, IconPinFilled } from '@hanzo/icons'
 import { Button, Divider, ProfilePicture } from '@hanzo/elements'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
 
 import { DefinitionPopoverState, definitionPopoverLogic } from 'lib/components/DefinitionPopover/definitionPopoverLogic'
 import { ImageCarousel } from 'lib/components/ImageCarousel/ImageCarousel'
@@ -12,8 +12,8 @@ import { taxonomicFilterLogic } from 'lib/components/TaxonomicFilter/taxonomicFi
 import { taxonomicFilterPinnedPropertiesLogic } from 'lib/components/TaxonomicFilter/taxonomicFilterPinnedPropertiesLogic'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { dayjs } from 'lib/dayjs'
-import { Markdown } from 'lib/elements/Markdown'
 import { Link } from 'lib/elements/Link'
+import { Markdown } from 'lib/elements/Markdown'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
 import { getCoreFilterDefinition } from '~/taxonomy/helpers'

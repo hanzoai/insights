@@ -1,7 +1,7 @@
 import clsx from 'clsx'
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'

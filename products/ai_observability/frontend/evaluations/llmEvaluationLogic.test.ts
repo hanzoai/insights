@@ -589,7 +589,10 @@ return result`,
                 ['missing conditions', { ...mockEvaluation, conditions: undefined }],
                 ['missing evaluation_config', { ...mockEvaluation, evaluation_config: undefined }],
                 ['llm_judge missing prompt', { ...mockEvaluation, evaluation_config: {} }],
-                ['script missing source', { ...mockEvaluation, evaluation_type: 'script' as const, evaluation_config: {} }],
+                [
+                    'script missing source',
+                    { ...mockEvaluation, evaluation_type: 'script' as const, evaluation_config: {} },
+                ],
             ])('returns false without throwing when %s', async (_label, malformed) => {
                 logic.actions.loadEvaluationSuccess(malformed as unknown as EvaluationConfig)
 

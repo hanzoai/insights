@@ -4,10 +4,10 @@
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
     "dependencies": {
+        "insights-js": "catalog:",
         "kea": "catalog:",
         "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "insights-js": "catalog:"
+        "kea-router": "catalog:"
     },
     "devDependencies": {
         "@storybook/react": "catalog:",

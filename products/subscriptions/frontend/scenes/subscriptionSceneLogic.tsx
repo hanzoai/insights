@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import { toast } from 'lib/elements/Toast'
 import { getCurrentTeamId } from 'lib/utils/getAppContext'

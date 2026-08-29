@@ -12,8 +12,8 @@ import ReactModal from 'react-modal'
 import { IconX } from '@hanzo/icons'
 
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
-import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { Button } from 'lib/elements/Button'
+import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 
 import { Tooltip } from '../Tooltip'
 
@@ -114,10 +114,7 @@ export function Modal({
                     // providing immediate visual feedback on click
                     <div
                         key={ignoredOverlayClickCount}
-                        className={clsx(
-                            'Modal__close',
-                            ignoredOverlayClickCount > 0 && 'Modal__close--highlighted'
-                        )}
+                        className={clsx('Modal__close', ignoredOverlayClickCount > 0 && 'Modal__close--highlighted')}
                     >
                         <Tooltip
                             visible={!!ignoredOverlayClickCount || undefined}

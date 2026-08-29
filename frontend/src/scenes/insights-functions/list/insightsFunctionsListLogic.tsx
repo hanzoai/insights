@@ -376,8 +376,13 @@ export const insightsFunctionsListLogic = kea<insightsFunctionsListLogicType>([
 
         hiddenInsightsFunctions: [
             (s) => [s.sortedInsightsFunctions, s.filteredInsightsFunctions],
-            (sortedInsightsFunctions: InsightsFunctionType[], filteredInsightsFunctions: InsightsFunctionType[]): InsightsFunctionType[] => {
-                return sortedInsightsFunctions.filter((insightsFunction) => !filteredInsightsFunctions.includes(insightsFunction))
+            (
+                sortedInsightsFunctions: InsightsFunctionType[],
+                filteredInsightsFunctions: InsightsFunctionType[]
+            ): InsightsFunctionType[] => {
+                return sortedInsightsFunctions.filter(
+                    (insightsFunction) => !filteredInsightsFunctions.includes(insightsFunction)
+                )
             },
         ],
     }),

@@ -1,7 +1,7 @@
 import { Fragment, memo } from 'react'
 
-import { IconCheck, IconInfo, IconX } from '@hanzo/icons'
 import { Divider, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconInfo, IconX } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 import { isObject } from 'lib/utils/guards'

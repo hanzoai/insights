@@ -1,5 +1,5 @@
-import { BindLogic, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 
 import { Button } from '@hanzo/elements'
 
@@ -70,11 +70,7 @@ function ErrorTrackingAlertingInner(): JSX.Element {
                 subTemplateIds={subTemplateIds}
                 getConfigurationOverrides={(id) => (id ? { filters: getFiltersFromSubTemplateId(id) } : undefined)}
                 extraControls={
-                    <Button
-                        type="secondary"
-                        size="small"
-                        onClick={() => setAlertCreationView(AlertCreationView.None)}
-                    >
+                    <Button type="secondary" size="small" onClick={() => setAlertCreationView(AlertCreationView.None)}>
                         Cancel
                     </Button>
                 }

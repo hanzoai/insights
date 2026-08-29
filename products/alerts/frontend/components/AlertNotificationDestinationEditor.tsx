@@ -1,16 +1,7 @@
 import { ReactNode } from 'react'
 
+import { Button, Banner, Input, Select, SelectOptions, Skeleton, Tag, TagType } from '@hanzo/elements'
 import { IconExternal, IconTrash } from '@hanzo/icons'
-import {
-    Button,
-    Banner,
-    Input,
-    Select,
-    SelectOptions,
-    Skeleton,
-    Tag,
-    TagType,
-} from '@hanzo/elements'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { SlackChannelPicker, SlackNotConfiguredBanner } from 'lib/integrations/SlackIntegrationHelpers'

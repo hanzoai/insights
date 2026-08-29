@@ -1,7 +1,7 @@
 import { MakeLogicType, actions, kea, path, reducers, useActions, useValues } from 'kea'
 
-import { IconCheck, IconX } from '@hanzo/icons'
 import { Button, Divider, Input, Switch, Tag } from '@hanzo/elements'
+import { IconCheck, IconX } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 

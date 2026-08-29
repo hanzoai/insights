@@ -1,5 +1,5 @@
-import { IconComment, IconExternal, IconGithub, IconLetter } from '@hanzo/icons'
 import { Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconComment, IconExternal, IconGithub, IconLetter } from '@hanzo/icons'
 
 import { IconMicrosoftTeams, IconSlack } from 'lib/elements/icons'
 

@@ -41,7 +41,7 @@ As shipped, the two sections a reviewer needs ran 190 words and the two under th
 | Text                                                                                                                                           | From                       | To                                     |
 | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------------------------- |
 | "I considered returning a 400 for unknown keys on write and rejected it: the UI echoes persisted blobs into saves, so that would block saving" | Agent context, last bullet | Changes, as a bullet                   |
-| "Ran `pytest` on the two touched test files (52 passed), repo-wide `mypy` (clean), and `insightscli ci:preflight --fix` (no failures)"               | Testing                    | Deleted. The checks report all three   |
+| "Ran `pytest` on the two touched test files (52 passed), repo-wide `mypy` (clean), and `insightscli ci:preflight --fix` (no failures)"         | Testing                    | Deleted. The checks report all three   |
 | "The existing PATCH round-trip test in `test_dashboard.py` guards the wiring"                                                                  | Testing                    | Deleted. An existing test still passes |
 
 The rejected alternative is the one line a reviewer needs to judge the design. It sat below the changelog checkbox.

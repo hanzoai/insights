@@ -1,8 +1,8 @@
 import { combineUrl } from 'kea-router'
 import { useState } from 'react'
 
-import { IconExternal, IconList } from '@hanzo/icons'
 import { Button, Tag, Link } from '@hanzo/elements'
+import { IconExternal, IconList } from '@hanzo/icons'
 
 import { Markdown } from 'lib/elements/Markdown'
 import { Progress } from 'lib/elements/Progress/Progress'

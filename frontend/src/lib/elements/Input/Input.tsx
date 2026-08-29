@@ -4,11 +4,11 @@ import { useMergeRefs } from '@floating-ui/react'
 import clsx from 'clsx'
 import React, { useRef, useState } from 'react'
 
-import { IconEye, IconSearch, IconX } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconEye, IconSearch, IconX } from '@hanzo/icons'
 
-import { IconEyeHidden } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconEyeHidden } from 'lib/elements/icons'
 import { Tag } from 'lib/elements/Tag'
 
 import { RawInputAutosize } from './RawInputAutosize'

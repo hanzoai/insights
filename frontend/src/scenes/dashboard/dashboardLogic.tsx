@@ -2483,7 +2483,10 @@ export const dashboardLogic = kea<dashboardLogicType>([
         ],
         effectiveDashboardVariableOverrides: [
             (s) => [s.dashboard, s.urlVariables],
-            (dashboard: DashboardType<QueryBasedInsightModel> | null, urlVariables: Record<string, InsightsQLVariable>) => ({
+            (
+                dashboard: DashboardType<QueryBasedInsightModel> | null,
+                urlVariables: Record<string, InsightsQLVariable>
+            ) => ({
                 ...dashboard?.persisted_variables,
                 ...urlVariables,
             }),

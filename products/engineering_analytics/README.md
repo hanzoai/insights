@@ -122,8 +122,8 @@ Change one only in a separate PR with a written reason. Engineering-level decisi
 
 ## Glossary
 
-| Term                | Definition                                                                                   |
-| ------------------- | -------------------------------------------------------------------------------------------- |
-| Good / bad friction | Checks that catch real problems (keep, optimize) vs checks engineers ignore (remove)         |
-| Wedge               | End-to-end code visibility, served via MCP to Insights Desktop and engineers driving agents   |
+| Term                | Definition                                                                                     |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| Good / bad friction | Checks that catch real problems (keep, optimize) vs checks engineers ignore (remove)           |
+| Wedge               | End-to-end code visibility, served via MCP to Insights Desktop and engineers driving agents    |
 | The dark middle     | The CI / review / merge / deploy steps between Insights Desktop and Insights product analytics |

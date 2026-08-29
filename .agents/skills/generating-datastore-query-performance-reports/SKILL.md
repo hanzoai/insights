@@ -54,7 +54,7 @@ Key columns (full list via `system.columns WHERE table='query_log_archive'`):
 | `lc_kind`                                                                                 | How the query was issued: `request` (sync API/web), `celery` (async refresh), `temporal`, `cohort_calculation`, `dagster`. |
 | `lc_product`                                                                              | `product_analytics`, `warehouse`, `experiments`, `messaging`, `web_analytics`, `replay`, `llm_analytics`, `cohorts`, ...   |
 | `lc_access_method`                                                                        | `personal_api_key`, `oauth`, `sharing_token`, or empty (logged-in web).                                                    |
-| `lc_query__kind`                                                                          | Product query type: `TrendsQuery`, `FunnelsQuery`, `RetentionQuery`, `InsightsQLQuery`, ...                                     |
+| `lc_query__kind`                                                                          | Product query type: `TrendsQuery`, `FunnelsQuery`, `RetentionQuery`, `InsightsQLQuery`, ...                                |
 | `lc_workload`                                                                             | `Workload.OFFLINE` / `ONLINE`.                                                                                             |
 | `lc_feature`, `lc_temporal__workflow_type`, `lc_route_id`, `lc_api_key_label`             | Origin detail for attribution.                                                                                             |
 | `lc_dashboard_id`, `lc_insight_id`, `lc_experiment_id`, `lc_cohort_id`                    | Link a query back to the object that triggered it.                                                                         |
@@ -175,15 +175,15 @@ in. The agents research and report only; they do not change code.
 Not every recommendation is researchable this way. Spawn an agent only where source code is the source of
 truth; skip operational / infra items:
 
-| Recommendation shape                     | Researchable? | What the agent reads                                                     |
-| ---------------------------------------- | ------------- | ------------------------------------------------------------------------ |
-| Rewrite a slow insight / query shape     | yes           | the query runner under `insights/insightsql_queries/`, the InsightsQL it emits      |
-| Materialize property X                   | yes           | the materialized-column registry (`ee/datastore/materialized_columns/`) |
-| Make pipeline Y incremental              | yes           | the dagster / temporal job that builds it                                |
-| Cap memory / add a query guard per key   | yes           | where Datastore SETTINGS and per-key throttling are applied             |
-| Add a breakdown cardinality guard        | yes           | the trends / breakdown query runner                                      |
-| Investigate an infra incident window     | no            | n/a (deploys, node health, cluster state)                                |
-| Watch / confirm a tenant's intended load | no            | n/a (a judgement call for a human)                                       |
+| Recommendation shape                     | Researchable? | What the agent reads                                                           |
+| ---------------------------------------- | ------------- | ------------------------------------------------------------------------------ |
+| Rewrite a slow insight / query shape     | yes           | the query runner under `insights/insightsql_queries/`, the InsightsQL it emits |
+| Materialize property X                   | yes           | the materialized-column registry (`ee/datastore/materialized_columns/`)        |
+| Make pipeline Y incremental              | yes           | the dagster / temporal job that builds it                                      |
+| Cap memory / add a query guard per key   | yes           | where Datastore SETTINGS and per-key throttling are applied                    |
+| Add a breakdown cardinality guard        | yes           | the trends / breakdown query runner                                            |
+| Investigate an infra incident window     | no            | n/a (deploys, node health, cluster state)                                      |
+| Watch / confirm a tenant's intended load | no            | n/a (a judgement call for a human)                                             |
 
 Give each agent a focused prompt: the recommendation, the specific question, and an instruction to return
 file paths + current behavior + the precise change point and to change nothing. The agents read the

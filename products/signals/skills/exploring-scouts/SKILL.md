@@ -206,7 +206,7 @@ Each entry's `key` carries a category prefix that tells you _what kind_ of learn
 | `not-in-use:` | A product/surface this team doesn't use (close-out memo)                               |
 | `mcp-gap:`    | A tooling gap a scout noticed worth raising later                                      |
 | `improve:`    | A custom scout's suggested change to its own skill body, awaiting owner review         |
-| `reported:`   | A canonical scout's record of a skill gap already fed back upstream to Insights         |
+| `reported:`   | A canonical scout's record of a skill gap already fed back upstream to Insights        |
 | `report:`     | A report a scout authored — stores the `report_id` so later runs edit/dedup against it |
 | `reviewer:`   | A resolved owner (GitHub login) for an area, cached for `suggested_reviewers` routing  |
 

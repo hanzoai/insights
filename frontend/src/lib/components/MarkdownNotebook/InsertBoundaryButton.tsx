@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconPlus } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { isInlineInsertMenuRow, isTextBlockNode } from './documentModel'
 import { NotebookBlockNode } from './types'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlus } from '@hanzo/icons'
 import { Label } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Collapse } from 'lib/elements/Collapse'

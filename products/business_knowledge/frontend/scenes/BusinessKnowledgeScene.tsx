@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBook, IconCheck, IconPencil, IconPlusSmall, IconRefresh, IconTrash, IconX } from '@hanzo/icons'
 import { Button, Card, Collapse, Dialog, Table, Tag, Link } from '@hanzo/elements'
+import { IconBook, IconCheck, IconPencil, IconPlusSmall, IconRefresh, IconTrash, IconX } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'

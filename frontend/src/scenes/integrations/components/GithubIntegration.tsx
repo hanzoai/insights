@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import api from 'lib/api'
+import { Menu } from 'lib/elements/Menu'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
-import { Menu } from 'lib/elements/Menu'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 

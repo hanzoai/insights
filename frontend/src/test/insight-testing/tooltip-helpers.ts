@@ -34,7 +34,9 @@ export function createInsightTooltipAccessor(element: HTMLElement): InsightToolt
                 const normalize = (text: string | null | undefined): string => (text ?? '').replace(/\s+/g, ' ').trim()
                 const needle = normalize(label)
                 const row = defaultRows().find((r) =>
-                    normalize(r.querySelector('[data-attr="script-chart-tooltip-series"]')?.textContent).includes(needle)
+                    normalize(r.querySelector('[data-attr="script-chart-tooltip-series"]')?.textContent).includes(
+                        needle
+                    )
                 )
                 return row?.querySelector('[data-attr="script-chart-tooltip-value"]')?.textContent ?? undefined
             }

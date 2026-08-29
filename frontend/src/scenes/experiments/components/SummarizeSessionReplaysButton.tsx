@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconSparkles } from '@hanzo/icons'
 import { Tag } from '@hanzo/elements'
+import { IconSparkles } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

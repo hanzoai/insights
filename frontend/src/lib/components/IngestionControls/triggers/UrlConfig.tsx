@@ -1,8 +1,8 @@
 import { LogicWrapper, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCheck, IconPencil, IconPlus, IconTrash, IconX } from '@hanzo/icons'
 import { Banner, Button, Dialog, Input, Label, toast } from '@hanzo/elements'
+import { IconCheck, IconPencil, IconPlus, IconTrash, IconX } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'
@@ -85,9 +85,7 @@ export function UrlConfig({
 
             {!props.isAddFormVisible && props.config && props.config.length > 0 && (
                 <div className="border rounded p-3 bg-surface-primary">
-                    <Label className="text-sm font-medium mb-2 block">
-                        Test a URL against these patterns:
-                    </Label>
+                    <Label className="text-sm font-medium mb-2 block">Test a URL against these patterns:</Label>
                     <Input
                         value={checkUrl}
                         onChange={setCheckUrl}

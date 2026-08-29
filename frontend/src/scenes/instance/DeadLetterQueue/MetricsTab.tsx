@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar, IconRefresh } from '@hanzo/icons'
 import { Divider } from '@hanzo/elements'
+import { IconCalendar, IconRefresh } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { Button } from 'lib/elements/Button'
-import { Table } from 'lib/elements/Table'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Table } from 'lib/elements/Table'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { userLogic } from 'scenes/userLogic'
 

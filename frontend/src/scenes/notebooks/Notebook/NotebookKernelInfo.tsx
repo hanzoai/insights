@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Button, Select, Tag, Popover } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { Slider } from 'lib/elements/Slider'
+import { Spinner } from 'lib/elements/Spinner'
 import { TextArea } from 'lib/elements/TextArea'
 import { Widget } from 'lib/elements/Widget'
-import { Spinner } from 'lib/elements/Spinner'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 
 import { cpuCoreOptions, idleTimeoutOptions, memoryGbOptions, notebookKernelInfoLogic } from './notebookKernelInfoLogic'
@@ -147,9 +147,7 @@ export const NotebookKernelInfo = (): JSX.Element => {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                             {statusInfo ? <Tag type={statusInfo.tone}>{statusInfo.label}</Tag> : null}
-                            <Tag type="default">
-                                {kernelInfo.backend === 'modal' ? 'Modal' : 'Local - Docker'}
-                            </Tag>
+                            <Tag type="default">{kernelInfo.backend === 'modal' ? 'Modal' : 'Local - Docker'}</Tag>
                             {kernelInfo.cpu_cores && !isDockerKernel ? (
                                 <Tag type="default">{formatCores(kernelInfo.cpu_cores)}</Tag>
                             ) : null}

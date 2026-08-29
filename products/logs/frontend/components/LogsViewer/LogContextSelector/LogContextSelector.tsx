@@ -1,8 +1,8 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 
-import { IconList } from '@hanzo/icons'
 import { Button, Menu } from '@hanzo/elements'
+import { IconList } from '@hanzo/icons'
 
 import { logsConfigLogic } from 'products/logs/frontend/logsConfigLogic'
 import { ParsedLogMessage } from 'products/logs/frontend/types'

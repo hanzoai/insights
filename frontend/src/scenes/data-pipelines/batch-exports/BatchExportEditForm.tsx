@@ -1,5 +1,5 @@
-import { IconInfo } from '@hanzo/icons'
 import { Checkbox, Input, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { DatePicker } from 'lib/components/DatePicker/DatePicker'
 import { dayjs } from 'lib/dayjs'

@@ -10,9 +10,9 @@ import {
 } from '@stripe/ui-extension-sdk/ui'
 import { useEffect, useState } from 'react'
 
-import { logger } from '../logger'
 import { InsightsClient } from '../insights/client'
 import type { InsightsExperiment } from '../insights/types'
+import { logger } from '../logger'
 import ExternalLink from './components/ExternalLink'
 import { experimentStatusOf } from './utils'
 

@@ -49,7 +49,7 @@ your_dbt_project/
 
 A domain skill ships both. The metric definition is identical; only the substrate differs:
 
-| Insights-native                          | dbt                                                                  |
+| Insights-native                         | dbt                                                                  |
 | --------------------------------------- | -------------------------------------------------------------------- |
 | staging view (virtual)                  | `staging/stg_*.sql` (`materialized: view`)                           |
 | metric view, materialized               | `marts/fct_*.sql` (`materialized: table`)                            |

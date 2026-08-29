@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { IconChevronLeft, IconChevronRight, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Spinner } from '@hanzo/elements'
+import { IconChevronLeft, IconChevronRight, IconTrash } from '@hanzo/icons'
 
 export interface ImageCarouselProps {
     imageUrls: string[]

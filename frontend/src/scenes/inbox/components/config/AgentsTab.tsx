@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

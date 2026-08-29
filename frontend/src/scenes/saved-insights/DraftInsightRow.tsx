@@ -52,12 +52,7 @@ export function DraftInsightMoreMenu({ item }: { item: SavedInsightListItem }): 
                         Continue editing
                     </Button>
                     <Divider />
-                    <Button
-                        status="danger"
-                        onClick={discardDraftQuery}
-                        data-attr="draft-insight-discard"
-                        fullWidth
-                    >
+                    <Button status="danger" onClick={discardDraftQuery} data-attr="draft-insight-discard" fullWidth>
                         Discard draft
                     </Button>
                 </>

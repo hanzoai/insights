@@ -3,8 +3,8 @@ import './LiveEventsTable.scss'
 import clsx from 'clsx'
 import { type ReactNode, useMemo } from 'react'
 
-import { IconPauseFilled } from '@hanzo/icons'
 import { Spinner, Tooltip } from '@hanzo/elements'
+import { IconPauseFilled } from '@hanzo/icons'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

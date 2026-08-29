@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { Card } from 'lib/elements/Card'
 import { Spinner } from 'lib/elements/Spinner'

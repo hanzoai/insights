@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRevert, IconSparkles } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconRevert, IconSparkles } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 

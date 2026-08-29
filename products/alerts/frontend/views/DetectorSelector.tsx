@@ -1,5 +1,5 @@
-import { IconInfo, IconPlus, IconX } from '@hanzo/icons'
 import { Button, Input, Select, SegmentedButton, Tooltip } from '@hanzo/elements'
+import { IconInfo, IconPlus, IconX } from '@hanzo/icons'
 
 import { Collapse } from 'lib/elements/Collapse'
 

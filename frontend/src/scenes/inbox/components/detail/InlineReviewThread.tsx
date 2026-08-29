@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { KeyboardEvent, useState } from 'react'
 
-import { IconEllipsis, IconExternal, IconGithub, IconPencil, IconEmojiAdd, IconTrash } from '@hanzo/icons'
 import { Button, Menu, TextArea, Link, Popover, Tooltip } from '@hanzo/elements'
+import { IconEllipsis, IconExternal, IconGithub, IconPencil, IconEmojiAdd, IconTrash } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Markdown } from 'lib/elements/Markdown'

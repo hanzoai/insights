@@ -12,7 +12,8 @@
  * * `organization` - Organization
  * * `global` - Global
  */
-export type InsightsFlowTemplateScopeEnumApi = (typeof InsightsFlowTemplateScopeEnumApi)[keyof typeof InsightsFlowTemplateScopeEnumApi]
+export type InsightsFlowTemplateScopeEnumApi =
+    (typeof InsightsFlowTemplateScopeEnumApi)[keyof typeof InsightsFlowTemplateScopeEnumApi]
 
 export const InsightsFlowTemplateScopeEnumApi = {
     Team: 'team',
@@ -398,7 +399,8 @@ export interface InsightsFlowEdgeApi {
  * * `random_cohort_branch` - random_cohort_branch
  * * `exit` - exit
  */
-export type InsightsFlowActionTypeEnumApi = (typeof InsightsFlowActionTypeEnumApi)[keyof typeof InsightsFlowActionTypeEnumApi]
+export type InsightsFlowActionTypeEnumApi =
+    (typeof InsightsFlowActionTypeEnumApi)[keyof typeof InsightsFlowActionTypeEnumApi]
 
 export const InsightsFlowActionTypeEnumApi = {
     Trigger: 'trigger',

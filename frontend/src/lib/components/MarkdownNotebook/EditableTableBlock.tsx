@@ -12,8 +12,8 @@ import {
     useState,
 } from 'react'
 
-import { IconMinus, IconPlus } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconMinus, IconPlus } from '@hanzo/icons'
 
 import { shouldUseMarkdownPaste } from './documentModel'
 import { getInlineLinkPasteResult, getSelectionRange } from './domSelection'

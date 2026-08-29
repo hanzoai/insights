@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import type { DeepPartial, DeepPartialMap, FieldName, ValidationErrorType } from 'kea-forms'
-import insights from 'insights-js'
 
 import { SelectOptions } from '@hanzo/elements'
 

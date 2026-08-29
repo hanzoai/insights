@@ -1,14 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import {
-    Button,
-    Checkbox,
-    Collapse,
-    Input,
-    Modal,
-    Select,
-    Switch,
-} from '@hanzo/elements'
+import { Button, Checkbox, Collapse, Input, Modal, Select, Switch } from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 

@@ -1,15 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import {
-    Banner,
-    Button,
-    Card,
-    Checkbox,
-    Divider,
-    Input,
-    Tag,
-    Link,
-} from '@hanzo/elements'
+import { Banner, Button, Card, Checkbox, Divider, Input, Tag, Link } from '@hanzo/elements'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { FEATURE_FLAGS, OrganizationMembershipLevel } from 'lib/constants'

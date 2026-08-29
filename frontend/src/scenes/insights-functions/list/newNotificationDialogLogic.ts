@@ -10,7 +10,10 @@ import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 import { CyclotronJobFiltersType, InsightsFunctionSubTemplateIdType, InsightsFunctionType } from '~/types'
 
 import type { IntegrationType } from '../../../types'
-import { INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES, INSIGHTS_FUNCTION_SUB_TEMPLATES } from '../sub-templates/sub-templates'
+import {
+    INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
+    INSIGHTS_FUNCTION_SUB_TEMPLATES,
+} from '../sub-templates/sub-templates'
 
 export type DestinationKey = 'slack' | 'discord' | 'microsoft-teams' | 'webhook'
 

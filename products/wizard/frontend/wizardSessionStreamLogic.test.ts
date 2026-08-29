@@ -1,7 +1,7 @@
 import { installMockEventSource, MockEventSource } from 'lib/wizard-sync/eventSource.mock'
 
-import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
+import { expectLogic } from 'kea-test-utils'
 
 import { ApiError } from 'lib/api-error'
 import { FEATURE_FLAGS } from 'lib/constants'

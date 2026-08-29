@@ -1,20 +1,20 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconDatabase, IconRefresh } from '@hanzo/icons'
 import { Link } from '@hanzo/elements'
+import { IconDatabase, IconRefresh } from '@hanzo/icons'
 
-import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { IconPlayCircle, IconReplay } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
+import { IconPlayCircle, IconReplay } from 'lib/elements/icons'
 import { Progress } from 'lib/elements/Progress'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { Table, TableColumn } from 'lib/elements/Table'
 import { TableLink } from 'lib/elements/Table/TableLink'
 import { Tabs } from 'lib/elements/Tabs'
 import { Tag, TagType } from 'lib/elements/Tag/Tag'
-import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 import { AsyncMigrationParametersModal } from 'scenes/instance/AsyncMigrations/AsyncMigrationParametersModal'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -169,10 +169,7 @@ export function AsyncMigrations(): JSX.Element {
                                     <Button onClick={() => forceStopMigration(asyncMigration)} fullWidth>
                                         Stop and rollback
                                     </Button>
-                                    <Button
-                                        onClick={() => forceStopMigrationWithoutRollback(asyncMigration)}
-                                        fullWidth
-                                    >
+                                    <Button onClick={() => forceStopMigrationWithoutRollback(asyncMigration)} fullWidth>
                                         Stop
                                     </Button>
                                 </>
@@ -195,11 +192,7 @@ export function AsyncMigrations(): JSX.Element {
                         />
                     ) : status === AsyncMigrationStatus.RolledBack ? (
                         <Tooltip title="Restart">
-                            <Button
-                                icon={<IconReplay />}
-                                onClick={() => triggerMigration(asyncMigration)}
-                                fullWidth
-                            />
+                            <Button icon={<IconReplay />} onClick={() => triggerMigration(asyncMigration)} fullWidth />
                         </Tooltip>
                     ) : null}
                 </div>

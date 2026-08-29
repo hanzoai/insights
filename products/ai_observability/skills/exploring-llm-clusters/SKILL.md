@@ -11,8 +11,8 @@ comparing cluster behavior, and drilling into individual clusters.
 
 ## Tools
 
-| Tool                               | Purpose                                         |
-| ---------------------------------- | ----------------------------------------------- |
+| Tool                                | Purpose                                         |
+| ----------------------------------- | ----------------------------------------------- |
 | `insights:llma-clustering-job-list` | List clustering job configurations for the team |
 | `insights:llma-clustering-job-get`  | Get a specific clustering job by ID             |
 | `insights:execute-sql`              | Query cluster run events and compute metrics    |

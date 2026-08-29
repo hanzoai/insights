@@ -73,7 +73,10 @@ export const insightRetentionBannerLogic = kea<insightRetentionBannerLogicType>(
                     return false
                 }
                 // SQL/InsightsQL insights can scan arbitrary history with no resolvable range, so warn whenever eligible.
-                if (query && (isInsightsQLQuery(query) || (isDataVisualizationNode(query) && isInsightsQLQuery(query.source)))) {
+                if (
+                    query &&
+                    (isInsightsQLQuery(query) || (isDataVisualizationNode(query) && isInsightsQLQuery(query.source)))
+                ) {
                     return true
                 }
                 // "All time" is an unbounded intent: warn even when the team's data doesn't yet reach that far back.

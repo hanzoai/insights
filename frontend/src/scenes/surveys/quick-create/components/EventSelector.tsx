@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button, Label } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { AddEventButton } from 'scenes/surveys/AddEventButton'
 import { quickSurveyFormLogic } from 'scenes/surveys/quick-create/quickSurveyFormLogic'

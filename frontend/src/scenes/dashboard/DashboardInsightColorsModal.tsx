@@ -72,9 +72,7 @@ export function DashboardInsightColorsModal(): JSX.Element {
                                 })
                             }}
                             customButton={
-                                colorToken === null ? (
-                                    <Button type="tertiary">Customize color</Button>
-                                ) : undefined
+                                colorToken === null ? <Button type="tertiary">Customize color</Button> : undefined
                             }
                             themeId={dataColorThemeId}
                         />

@@ -22,15 +22,15 @@ regression debugging, and materializing results as insights, dashboards, or aler
 
 ## Tools
 
-| Tool                            | Purpose                                                             |
-| ------------------------------- | ------------------------------------------------------------------- |
+| Tool                             | Purpose                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------ |
 | `insights:execute-sql`           | Ad-hoc InsightsQL for any cost aggregation — the workhorse of this skill |
-| `insights:query-llm-traces-list` | List traces with rolled-up cost, token, and error metrics           |
-| `insights:query-llm-trace`       | Cost breakdown of a single trace across all its events              |
-| `insights:read-data-schema`      | Discover which custom properties exist for breakdowns               |
-| `insights:insight-create`        | Materialize a cost chart as a saved insight                         |
-| `insights:dashboard-create`      | Bundle cost insights into a dashboard                               |
-| `insights:alert-create`          | Alert when cost crosses a threshold                                 |
+| `insights:query-llm-traces-list` | List traces with rolled-up cost, token, and error metrics                |
+| `insights:query-llm-trace`       | Cost breakdown of a single trace across all its events                   |
+| `insights:read-data-schema`      | Discover which custom properties exist for breakdowns                    |
+| `insights:insight-create`        | Materialize a cost chart as a saved insight                              |
+| `insights:dashboard-create`      | Bundle cost insights into a dashboard                                    |
+| `insights:alert-create`          | Alert when cost crosses a threshold                                      |
 
 ## Core rules
 

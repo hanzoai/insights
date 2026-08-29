@@ -1,16 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
+import { Button, Checkbox, Input, Modal, Select, TextArea, Tooltip } from '@hanzo/elements'
 import { IconPlus, IconTrash, IconWarning } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Input,
-    Modal,
-    Select,
-    TextArea,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 import { Table, TableColumns } from 'lib/elements/Table'
@@ -204,11 +196,7 @@ export function PropertyGroupModal({ logicKey, onAfterSave }: PropertyGroupModal
 
                     {propertyGroupForm.properties.length > 0 ? (
                         <>
-                            <Table
-                                columns={columns}
-                                dataSource={propertyGroupForm.properties}
-                                pagination={undefined}
-                            />
+                            <Table columns={columns} dataSource={propertyGroupForm.properties} pagination={undefined} />
                             {propertyGroupFormValidationError && (
                                 <div className="text-danger text-sm mt-2">{propertyGroupFormValidationError}</div>
                             )}

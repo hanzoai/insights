@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPencil } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 

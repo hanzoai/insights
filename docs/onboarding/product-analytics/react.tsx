@@ -110,8 +110,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                     <CalloutBox type="fyi" title="defaults option">
                         <Markdown>
                             The `defaults` option automatically configures Insights with recommended settings for new
-                            projects. See [SDK defaults](https://hanzo.ai/docs/libraries/js#sdk-defaults) for
-                            details.
+                            projects. See [SDK defaults](https://hanzo.ai/docs/libraries/js#sdk-defaults) for details.
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -147,7 +146,9 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                             },
                         ]}
                     />
-                    <Markdown>You can also import `insights` directly for non-React code or utility functions:</Markdown>
+                    <Markdown>
+                        You can also import `insights` directly for non-React code or utility functions:
+                    </Markdown>
                     <CodeBlock
                         blocks={[
                             {

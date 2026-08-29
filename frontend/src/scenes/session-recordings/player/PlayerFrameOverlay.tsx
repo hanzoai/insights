@@ -5,8 +5,8 @@ import { MouseEvent } from 'react'
 
 import { IconEmoji, IconPlay, IconRewindPlay, IconWarning } from '@hanzo/icons'
 
-import { IconSkipBackward } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconSkipBackward } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 import { urls } from 'scenes/urls'

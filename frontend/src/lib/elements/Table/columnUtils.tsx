@@ -3,8 +3,8 @@ import { Dayjs, dayjs } from 'lib/dayjs'
 
 import { UserBasicType } from '~/types'
 
-import { Tag } from '../Tag'
 import { ProfilePicture } from '../ProfilePicture'
+import { Tag } from '../Tag'
 import { TableColumn } from './types'
 
 // Moved to a render-free leaf so Table internals can use them without importing

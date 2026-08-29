@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { IconRefresh } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
-import { Table, TableColumns } from 'lib/elements/Table'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Table, TableColumns } from 'lib/elements/Table'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
 import { AsyncMigration, AsyncMigrationError, asyncMigrationsLogic } from './asyncMigrationsLogic'

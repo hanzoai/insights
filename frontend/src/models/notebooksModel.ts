@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, BuiltLogic, actions, connect, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 
 import api from 'lib/api'
 import { JSONContent } from 'lib/components/RichContentEditor/types'

@@ -1,5 +1,5 @@
-import { BindLogic, useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { BindLogic, useActions, useValues } from 'kea'
 
 import { Button } from '@hanzo/elements'
 
@@ -102,11 +102,7 @@ function HealthAlertsEntryPointInner(): JSX.Element {
                     return Object.keys(overrides).length > 0 ? overrides : undefined
                 }}
                 extraControls={
-                    <Button
-                        type="secondary"
-                        size="small"
-                        onClick={() => setAlertCreationView(AlertCreationView.None)}
-                    >
+                    <Button type="secondary" size="small" onClick={() => setAlertCreationView(AlertCreationView.None)}>
                         Cancel
                     </Button>
                 }

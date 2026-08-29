@@ -84,7 +84,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 // readers can reach it and announce busy. Activation stays blocked.
 
                 focusableWhenDisabled={loading ? true : focusableWhenDisabled}
-
                 className={cn(buttonVariants({ variant, size, className, focusableWhenDisabled, left }))}
                 {...props}
             >

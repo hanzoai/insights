@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconPlus, IconTarget, IconTrending } from '@hanzo/icons'
 import { Button, Divider, Input, Link } from '@hanzo/elements'
+import { IconPlus, IconTarget, IconTrending } from '@hanzo/icons'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TZLabel } from 'lib/components/TZLabel'

@@ -1,7 +1,6 @@
 import { BindLogic, useActions, useAsyncActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconInfo, IconTrash } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -14,13 +13,14 @@ import {
     Table,
     Tooltip,
 } from '@hanzo/elements'
+import { IconInfo, IconTrash } from '@hanzo/icons'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
 import { UserSelectItem } from 'lib/components/UserSelectItem'
+import { ProfileBubbles, ProfilePicture } from 'lib/elements/ProfilePicture'
 import { TableColumns } from 'lib/elements/Table'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { ProfileBubbles, ProfilePicture } from 'lib/elements/ProfilePicture'
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
 import { fullName } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'

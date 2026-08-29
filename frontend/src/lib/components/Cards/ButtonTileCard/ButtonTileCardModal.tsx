@@ -70,11 +70,7 @@ export function ButtonTileCardModal({
             >
                 <div className="flex flex-col gap-4">
                     <Field name="url" label="URL">
-                        <Input
-                            placeholder="https://example.com or /dashboards"
-                            data-attr="button-tile-url"
-                            autoFocus
-                        />
+                        <Input placeholder="https://example.com or /dashboards" data-attr="button-tile-url" autoFocus />
                     </Field>
                     <Field name="text" label="Button text">
                         <Input placeholder="Click me" data-attr="button-tile-text" />

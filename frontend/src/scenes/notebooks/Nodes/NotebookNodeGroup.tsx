@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconTrending } from '@hanzo/icons'
 import { Tag, Tooltip } from '@hanzo/elements'
+import { IconTrending } from '@hanzo/icons'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { NotFound } from 'lib/components/NotFound'

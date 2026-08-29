@@ -1,17 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
+import { Button, Dialog, Input, Skeleton, Table, Tag, Spinner, Tooltip } from '@hanzo/elements'
 import { IconPlusSmall } from '@hanzo/icons'
-import {
-    Button,
-    Dialog,
-    Input,
-    Skeleton,
-    Table,
-    Tag,
-    Spinner,
-    Tooltip,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
@@ -172,9 +163,7 @@ export function ManagedSourcesTable(): JSX.Element {
                                     return <Tag type="muted">Not syncing</Tag>
                                 }
                                 const tagContent = (
-                                    <Tag type={StatusTagSetting[source.status] || 'default'}>
-                                        {source.status}
-                                    </Tag>
+                                    <Tag type={StatusTagSetting[source.status] || 'default'}>{source.status}</Tag>
                                 )
                                 return source.latest_error && source.status === 'Failed' ? (
                                     <Tooltip title={source.latest_error} interactive>

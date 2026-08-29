@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconFlask } from '@hanzo/icons'
 import { Banner, Button, Modal, SegmentedButton, Spinner } from '@hanzo/elements'
+import { IconFlask } from '@hanzo/icons'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

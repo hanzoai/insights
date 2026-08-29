@@ -12,8 +12,8 @@ import {
     useRef,
 } from 'react'
 
-import { IconArrowRight, IconStopFilled } from '@hanzo/icons'
 import { Button, TextArea } from '@hanzo/elements'
+import { IconArrowRight, IconStopFilled } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 

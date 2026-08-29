@@ -10,8 +10,8 @@
         "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/icons": "catalog:",
         "@hanzo/elements": "*",
+        "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "@types/react-dom": "*",
         "clsx": "*",

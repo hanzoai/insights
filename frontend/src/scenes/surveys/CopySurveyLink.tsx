@@ -1,5 +1,5 @@
-import { IconCode } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCode } from '@hanzo/icons'
 
 import { IconLink } from 'lib/elements/icons'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

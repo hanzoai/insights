@@ -3,8 +3,8 @@ import '../MarketingAnalyticsTable/MarketingAnalyticsTableStyleOverride.scss'
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button, Skeleton } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { urls } from 'scenes/urls'
 import { MARKETING_ANALYTICS_DEFAULT_QUERY_TAGS } from 'scenes/web-analytics/common'

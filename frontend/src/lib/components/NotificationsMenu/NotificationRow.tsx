@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArchive, IconCheckCircle } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconArchive, IconCheckCircle } from '@hanzo/icons'
 
 import {
     NotificationActionButton,

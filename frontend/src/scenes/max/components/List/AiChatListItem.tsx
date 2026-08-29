@@ -1,8 +1,8 @@
 import { useActions } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { IconMessage, IconOpenSidebar, IconShare, IconTrash } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconMessage, IconOpenSidebar, IconShare, IconTrash } from '@hanzo/icons'
 
 import { Link } from 'lib/elements/Link'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

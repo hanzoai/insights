@@ -3,24 +3,13 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { QRCodeSVG } from 'qrcode.react'
 
+import { Button, Divider, Input, Label, Select, SelectOptions, Skeleton, Tag, TextArea, Link } from '@hanzo/elements'
 import { IconCopy, IconDownload } from '@hanzo/icons'
-import {
-    Button,
-    Divider,
-    Input,
-    Label,
-    Select,
-    SelectOptions,
-    Skeleton,
-    Tag,
-    TextArea,
-    Link,
-} from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
-import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
+import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -213,19 +202,11 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                                 {displayForm ? (
                                     <div className="flex gap-1 items-center">
                                         <Field name="short_link_domain">
-                                            <Select<AvailableDomain>
-                                                options={DOMAIN_OPTIONS}
-                                                className="text-muted"
-                                            />
+                                            <Select<AvailableDomain> options={DOMAIN_OPTIONS} className="text-muted" />
                                         </Field>
                                         <span className="text-muted">/</span>
                                         <Field name="short_code" className="w-full">
-                                            <Input
-                                                fullWidth
-                                                placeholder="short"
-                                                className="flex-1"
-                                                autoWidth={false}
-                                            />
+                                            <Input fullWidth placeholder="short" className="flex-1" autoWidth={false} />
                                         </Field>
                                     </div>
                                 ) : (

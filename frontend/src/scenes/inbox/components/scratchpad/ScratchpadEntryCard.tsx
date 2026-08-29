@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { type ComponentProps } from 'react'
 
-import { IconChevronDown, IconClock } from '@hanzo/icons'
 import { Tag, Link } from '@hanzo/elements'
+import { IconChevronDown, IconClock } from '@hanzo/icons'
 
 import { dayjs } from 'lib/dayjs'
 import { Markdown } from 'lib/elements/Markdown'

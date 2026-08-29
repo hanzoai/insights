@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCollapse, IconExpand, IconShare } from '@hanzo/icons'
 import { Button, Menu, Link } from '@hanzo/elements'
+import { IconCollapse, IconExpand, IconShare } from '@hanzo/icons'
 
 import { AutocapturePreviewImage } from 'lib/components/AutocapturePreviewImage/AutocapturePreviewImage'
 import { ErrorDisplay, idFrom } from 'lib/components/Errors/ErrorDisplay'
@@ -252,9 +252,7 @@ function SingleEventDetail({ item }: ItemEventProps): JSX.Element {
                                 <p>
                                     Person properties sent with this event. Will replace any property value that may
                                     have been set on this person profile before now.{' '}
-                                    <Link to="https://hanzo.ai/docs/getting-started/person-properties">
-                                        Learn more
-                                    </Link>
+                                    <Link to="https://hanzo.ai/docs/getting-started/person-properties">Learn more</Link>
                                 </p>
                                 <SimpleKeyValueList item={properties} promotedKeys={promotedKeys} />
                             </>
@@ -265,9 +263,7 @@ function SingleEventDetail({ item }: ItemEventProps): JSX.Element {
                                 <p>
                                     "Set once" person properties sent with this event. Will replace any property value
                                     that has never been set on this person profile before now.{' '}
-                                    <Link to="https://hanzo.ai/docs/getting-started/person-properties">
-                                        Learn more
-                                    </Link>
+                                    <Link to="https://hanzo.ai/docs/getting-started/person-properties">Learn more</Link>
                                 </p>
                                 <SimpleKeyValueList item={properties} promotedKeys={promotedKeys} />
                             </>

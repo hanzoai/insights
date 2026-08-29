@@ -872,9 +872,7 @@ export const reviewHogSettingsLogic = kea<reviewHogSettingsLogicType>([
                 await reviewHogPerspectivesPartialUpdate(currentProjectId(), skillName, { enabled })
             } catch (error: any) {
                 // `data?.[0]`: DRF renders bare-string ValidationErrors (e.g. the min-1 floor) as a list.
-                toast.error(
-                    error?.detail || error?.data?.[0] || error?.message || 'Failed to update the perspective'
-                )
+                toast.error(error?.detail || error?.data?.[0] || error?.message || 'Failed to update the perspective')
                 actions.loadPerspectives()
             } finally {
                 actions.setSkillSaving(skillName, false)

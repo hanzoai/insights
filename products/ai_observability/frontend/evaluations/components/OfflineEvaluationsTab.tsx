@@ -1,8 +1,8 @@
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconArrowLeft, IconExternal, IconInfo, IconRefresh, IconSearch } from '@hanzo/icons'
 import { Button, Input, Table, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconArrowLeft, IconExternal, IconInfo, IconRefresh, IconSearch } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { TZLabel } from 'lib/components/TZLabel'

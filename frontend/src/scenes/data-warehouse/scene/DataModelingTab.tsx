@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDirectedGraph, IconList } from '@hanzo/icons'
 import { Input, SegmentedButton, Select, Spinner } from '@hanzo/elements'
+import { IconDirectedGraph, IconList } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

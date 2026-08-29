@@ -182,8 +182,8 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
   failure-path refactor is **behavior-preserving** — every stage ran, full 3-perspective fan-out, the
   same finding hotspot, and the same validator behavior as the in-process and step-15 runs.
 
-| #   | perspective               | prio       | file:line                       | verdict                                            |
-| --- | ------------------------- | ---------- | ------------------------------- | -------------------------------------------------- |
+| #   | perspective               | prio       | file:line                            | verdict                                            |
+| --- | ------------------------- | ---------- | ------------------------------------ | -------------------------------------------------- |
 | 1   | Contracts & Security      | should_fix | insightsql/database/database.py:1478 | ❌ dropped · "intended rebinding, not a contract"  |
 | 2   | Performance & Reliability | should_fix | insightsql/database/database.py:1478 | ❌ dropped · "relies on an unwrapped DoesNotExist" |
 
@@ -218,8 +218,8 @@ chars`. Publish gated off.
   served the skill live from the DB (no restart needed).
 - **Findings:** 1 · **Validator:** **0 kept / 1 dropped** (criteria-driven).
 
-| #   | perspective               | prio       | file:line                       | finding                                                                                                          | verdict                                      |
-| --- | ------------------------- | ---------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| #   | perspective               | prio       | file:line                            | finding                                                                                                          | verdict                                      |
+| --- | ------------------------- | ---------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | 1   | Performance & Reliability | should_fix | insightsql/database/database.py:1478 | broadened guard now reaches a raising `get_table()` for previously short-circuited tables → potential hard crash | ❌ dropped · bug · "practically unreachable" |
 
 > **Behavior change vs baseline:** the baseline (criteria-less validator) **kept** a finding on this same
@@ -235,8 +235,8 @@ chars`. Publish gated off.
 - **Pipeline:** 9/9 stages. 1 chunk (small PR). Artefacts: `chunk_analysis` 1, `perspective_result` 3 (3×1).
 - **Findings:** 1 · **Validator:** **1 kept / 0 dropped** · report body 2,173 chars.
 
-| #   | perspective         | prio       | file:line                       | finding                                                                                                                                                                | verdict       |
-| --- | ------------------- | ---------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| #   | perspective         | prio       | file:line                            | finding                                                                                                                                                                | verdict       |
+| --- | ------------------- | ---------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | 1   | Logic & Correctness | should_fix | insightsql/database/database.py:1478 | remapped `timestamp_field` now triggers `get_table` for view-namespace tables that previously skipped it → `DoesNotExist` turns a successful build into a hard failure | ✅ kept · bug |
 
 ## 2026-07-23 · GLM 5.2 vs Sonnet 5 as perspective reviewer — PR #72680 @ `1341596e`

@@ -64,7 +64,7 @@ or joined (e.g. by `modeling-activation-metrics`).
 | File                                                                               | Read when                                                         |
 | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | [`references/usage-metric-definitions.md`](references/usage-metric-definitions.md) | Precise definitions of retention, stickiness, lifecycle buckets.  |
-| [`references/insights/`](references/insights/)                                       | InsightsQL recipes for each lens.                                      |
+| [`references/insights/`](references/insights/)                                     | InsightsQL recipes for each lens.                                 |
 | [`references/dbt/`](references/dbt/)                                               | dbt `fct_retention` / `fct_stickiness` / `fct_lifecycle` + tests. |
 
 ## Companions

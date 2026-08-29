@@ -358,7 +358,9 @@ export const kindClauseFor = (
  * resolves to that aggregate alias, which Datastore rejects in WHERE.
  */
 export const parentClauseFor = (props: HogInvocationsLogicProps): ReturnType<typeof insightsql.raw> =>
-    props.parentRunId ? insightsql.raw(`AND parent_run_id = ${escapeInsightsQLString(props.parentRunId)}`) : insightsql.raw('')
+    props.parentRunId
+        ? insightsql.raw(`AND parent_run_id = ${escapeInsightsQLString(props.parentRunId)}`)
+        : insightsql.raw('')
 
 /**
  * Optional predicate restricting to invocations that logged an error/warning entry. Uses a

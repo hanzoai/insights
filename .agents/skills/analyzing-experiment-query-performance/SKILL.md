@@ -24,8 +24,8 @@ Frontend types (authoritative response shapes): `frontend/src/scenes/instance/Qu
 
 ## Environment
 
-| Region | Base URL                 |
-| ------ | ------------------------ |
+| Region | Base URL              |
+| ------ | --------------------- |
 | US     | `https://us.hanzo.ai` |
 | EU     | `https://eu.hanzo.ai` |
 
@@ -156,7 +156,7 @@ Check enablement in the UI, or in code via `TeamExperimentsConfig.experiment_pre
 | ---- | ----------------------------- | --------------------------------------------------------------------------- |
 | 0    | success                       |                                                                             |
 | 307  | TOO_MANY_BYTES                | per-query read-bytes cap; big teams' funnel metrics and giant build windows |
-| 159  | TIMEOUT_EXCEEDED              | hit the Datastore max execution time                                       |
+| 159  | TIMEOUT_EXCEEDED              | hit the Datastore max execution time                                        |
 | 241  | MEMORY_LIMIT_EXCEEDED         | OOM at query level                                                          |
 | 202  | TOO_MANY_SIMULTANEOUS_QUERIES | cluster busy — transient/retryable, not a query problem                     |
 | 164  | READONLY                      | replica in read-only (cluster issue), not a query problem                   |

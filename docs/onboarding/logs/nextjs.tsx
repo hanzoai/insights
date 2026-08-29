@@ -12,8 +12,8 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Insights logs uses the standard OpenTelemetry SDK. No Insights-specific packages required. Install
-                        the OTel SDK and the logs signal package:
+                        Insights logs uses the standard OpenTelemetry SDK. No Insights-specific packages required.
+                        Install the OTel SDK and the logs signal package:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -152,8 +152,8 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         ]}
                     />
                     <Markdown>
-                        Logs appear in Insights within a few seconds. Use the [Logs page](https://app.hanzo.ai/logs)
-                        to search and filter by service name, severity, or any attribute you attach.
+                        Logs appear in Insights within a few seconds. Use the [Logs page](https://app.hanzo.ai/logs) to
+                        search and filter by service name, severity, or any attribute you attach.
                     </Markdown>
                 </>
             ),

@@ -3,7 +3,6 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useMemo } from 'react'
 
-import { IconCheckCircle, IconEllipsis, IconInfo, IconWarning, IconX } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -17,14 +16,15 @@ import {
     Spinner,
     Tooltip,
 } from '@hanzo/elements'
+import { IconCheckCircle, IconEllipsis, IconInfo, IconWarning, IconX } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { DomainConnectBanner } from 'lib/components/DomainConnect'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { Field } from 'lib/elements/Field'
-import { Markdown } from 'lib/elements/Markdown'
 import { Link } from 'lib/elements/Link'
+import { Markdown } from 'lib/elements/Markdown'
 import { isKeyOf } from 'lib/utils/guards'
 import { useMaxTool } from 'scenes/max/useMaxTool'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
@@ -418,11 +418,7 @@ function CreateRecordForm(): JSX.Element {
                         </ul>
                     </Banner>
                     <Field name="domain" label="Domain">
-                        <Input
-                            autoFocus
-                            placeholder="Enter a domain (e.g. t.mydomain.com)"
-                            data-attr="domain-input"
-                        />
+                        <Input autoFocus placeholder="Enter a domain (e.g. t.mydomain.com)" data-attr="domain-input" />
                     </Field>
                     <div className="flex justify-end gap-2">
                         <Button
@@ -432,12 +428,7 @@ function CreateRecordForm(): JSX.Element {
                         >
                             Cancel
                         </Button>
-                        <Button
-                            htmlType="submit"
-                            type="primary"
-                            data-attr="domain-save"
-                            loading={proxyRecordsLoading}
-                        >
+                        <Button htmlType="submit" type="primary" data-attr="domain-save" loading={proxyRecordsLoading}>
                             Add
                         </Button>
                     </div>

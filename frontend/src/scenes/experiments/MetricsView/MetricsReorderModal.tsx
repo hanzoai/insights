@@ -6,8 +6,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconDrag } from '@hanzo/icons'
 import { Badge, Button, Modal, Tag } from '@hanzo/elements'
+import { IconDrag } from '@hanzo/icons'
 
 import { ExperimentMetric } from '~/queries/schema/schema-general'
 

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPencil } from '@hanzo/icons'
 import { Button, Divider, Dropdown, Input } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
 import { ACCOUNT_LINK_FIELDS, accountLinksLogic } from './accountLinksLogic'
 

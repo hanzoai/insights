@@ -41,7 +41,7 @@ The dashboard uses the `_total` names; the source code does not have them.
 
 | Want                              | Where                                                                                               | State                                                           |
 | --------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Notebook request E2E latency      | `insights_notebooks_node_run_seconds{node_type,outcome}` + `notebook node run completed` event       | Covered — see "Node-run instrumentation" below                  |
+| Notebook request E2E latency      | `insights_notebooks_node_run_seconds{node_type,outcome}` + `notebook node run completed` event      | Covered — see "Node-run instrumentation" below                  |
 | CH latency for notebook queries   | `query_log_archive.query_duration_ms` (SQL 1)                                                       | Covered                                                         |
 | CH scanned bytes                  | `query_log_archive.read_bytes` (SQL 1, 6)                                                           | Covered                                                         |
 | CH bytes returned                 | `result_bytes` / `WriteBufferFromS3Bytes` (SQL 4)                                                   | Covered, but mode-dependent — see below                         |

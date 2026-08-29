@@ -1,12 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 
 import { Splotch, SplotchColor } from '../Splotch'
-import {
-    MenuItems,
-    MenuOverlay as MenuOverlayComponent,
-    MenuOverlayProps,
-    MenuSection,
-} from './Menu'
+import { MenuItems, MenuOverlay as MenuOverlayComponent, MenuOverlayProps, MenuSection } from './Menu'
 
 type Story = StoryObj<MenuOverlayProps>
 const meta: Meta<MenuOverlayProps> = {

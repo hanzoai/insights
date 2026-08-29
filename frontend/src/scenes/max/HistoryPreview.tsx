@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button, Skeleton, Tag, Link, Spinner } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { cn } from 'lib/utils/css-classes'
 import { urls } from 'scenes/urls'

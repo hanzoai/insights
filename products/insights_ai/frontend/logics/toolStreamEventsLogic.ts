@@ -1,5 +1,5 @@
-import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers } from 'kea'
 import insights from 'insights-js'
+import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, reducers } from 'kea'
 
 import type { RunLifecycleEvent, ToolStreamEvent, TurnCompleteEvent } from '../types/streamTypes'
 import { foregroundStreamLogic } from './foregroundStreamLogic'

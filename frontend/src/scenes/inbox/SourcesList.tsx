@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconArrowRight, IconBell, IconGithub, IconGraph, IconHeartPlus, IconLinear } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconArrowRight, IconBell, IconGithub, IconGraph, IconHeartPlus, IconLinear } from '@hanzo/icons'
 
 import { RecordingsUniversalFiltersDisplay } from 'lib/components/Cards/InsightCard/RecordingsUniversalFiltersDisplay'
 import { IconSlack } from 'lib/elements/icons'

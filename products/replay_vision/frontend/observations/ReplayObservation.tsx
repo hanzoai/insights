@@ -2,6 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
+import { Button, Card, Tag, Link, SpinnerOverlay } from '@hanzo/elements'
 import {
     IconArrowLeft,
     IconArrowRight,
@@ -14,7 +15,6 @@ import {
     IconThoughtBubble,
     IconVideoCamera,
 } from '@hanzo/icons'
-import { Button, Card, Tag, Link, SpinnerOverlay } from '@hanzo/elements'
 
 import { NotFound } from 'lib/components/NotFound'
 import { TZLabel } from 'lib/components/TZLabel'

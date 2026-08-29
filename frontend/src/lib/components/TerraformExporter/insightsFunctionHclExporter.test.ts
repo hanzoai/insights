@@ -5,7 +5,12 @@ import {
     stripMappingsServerFields,
 } from 'lib/components/TerraformExporter/insightsFunctionHclExporter'
 
-import { CyclotronJobFiltersType, CyclotronJobInputType, InsightsFunctionMappingType, InsightsFunctionType } from '~/types'
+import {
+    CyclotronJobFiltersType,
+    CyclotronJobInputType,
+    InsightsFunctionMappingType,
+    InsightsFunctionType,
+} from '~/types'
 
 const createTestInsightsFunction = (props: Record<string, unknown>): Partial<InsightsFunctionType> =>
     props as Partial<InsightsFunctionType>

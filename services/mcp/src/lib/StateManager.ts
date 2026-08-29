@@ -8,8 +8,8 @@ import {
     InsightsApiError,
     wrapError,
 } from '@/lib/errors'
-import { buildActiveEnvironmentContextPrompt } from '@/lib/instructions'
 import { getInsightsClient } from '@/lib/insights'
+import { buildActiveEnvironmentContextPrompt } from '@/lib/instructions'
 import { sanitizeHeaderValue } from '@/lib/utils'
 import type { ApiUser } from '@/schema/api'
 import type { CachedOrg, CachedProject, CachedUser, State } from '@/tools/types'
@@ -208,7 +208,12 @@ export class StateManager {
 
     private _reportException(error: unknown, context: string, extra: Record<string, unknown> = {}): void {
         try {
-            getInsightsClient().captureException(error, undefined, { tag: 'mcp', team: 'insights_ai', context, ...extra })
+            getInsightsClient().captureException(error, undefined, {
+                tag: 'mcp',
+                team: 'insights_ai',
+                context,
+                ...extra,
+            })
         } catch {
             // Never let observability break the request.
         }

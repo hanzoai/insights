@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { toast } from 'lib/elements/Toast'
@@ -1336,7 +1336,8 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                         name: evaluation.name,
                         description: evaluation.description,
                         evaluation_type: evaluation.evaluation_type,
-                        hog_source: evaluation.evaluation_type === 'script' ? evaluation.evaluation_config.source : null,
+                        hog_source:
+                            evaluation.evaluation_type === 'script' ? evaluation.evaluation_config.source : null,
                     }),
                 ]
             },

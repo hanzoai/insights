@@ -71,7 +71,10 @@ export const batchWorkflowJobsLogic = kea<batchWorkflowJobsLogicType>([
         ],
     })),
     selectors({
-        jobs: [(s) => [s.batchWorkflowJobs], (batchWorkflowJobs: InsightsFlowBatchJob[] | null) => batchWorkflowJobs || []],
+        jobs: [
+            (s) => [s.batchWorkflowJobs],
+            (batchWorkflowJobs: InsightsFlowBatchJob[] | null) => batchWorkflowJobs || [],
+        ],
     }),
     urlToAction(({ props, actions }) => ({
         [urls.workflow(props.id || 'new', 'invocations')]: (_, __, ___, currentLocation, previousLocation) => {

@@ -2,8 +2,8 @@ import '@testing-library/jest-dom'
 
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Provider } from 'kea'
 import insights from 'insights-js'
+import { Provider } from 'kea'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

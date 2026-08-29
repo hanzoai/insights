@@ -9,8 +9,8 @@ the integration records.
 
 There are two integration records, created by two related flows:
 
-| Record                                | Model                                | Created by                                                        | Used by                                        |
-| ------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- | ---------------------------------------------- |
+| Record                                | Model                                 | Created by                                                        | Used by                                        |
+| ------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------- |
 | **Team** `Integration(kind="github")` | `insights/models/integration.py`      | `team_services.create_team_github_integration_from_oauth_code`    | Tasks/Code, signals custom agents, deployments |
 | **Personal** `UserIntegration`        | `insights/models/user_integration.py` | `personal_finish.github_link_complete` (`/complete/github-link/`) | per-user GitHub linking                        |
 
@@ -103,7 +103,7 @@ personal GitHub OAuth link; non-admins still need one as an ownership proof (see
 | ------------------------------- | ----------------------------------------------------- | ------------------ |
 | `/integrations/github/callback` | `integrationsLogic` (frontend) → `Integration` create | team integration   |
 | `/complete/github-link/`        | `personal_finish.github_link_complete`                | personal user-link |
-| `/webhooks/github` (+ `/pr`)    | `insights/urls.py:github_webhook`                      | inbound events     |
+| `/webhooks/github` (+ `/pr`)    | `insights/urls.py:github_webhook`                     | inbound events     |
 
 The team code exchange (`team_services`) calls `github_user_from_code(code)`
 **without** a `redirect_uri`, so GitHub does not enforce a redirect_uri match on

@@ -36,10 +36,10 @@ The `/api/feature_flag/local_evaluation` endpoint was historically served by a d
 
 All in `insights/api/feature_flag.py` unless noted otherwise.
 
-| Viewset                       | Route                                   | Notes                                                                    |
-| ----------------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
-| `FeatureFlagViewSet`          | `api/projects/{id}/feature_flags/`      | Primary viewset. Full CRUD, soft delete via `ForbidDestroyModel`.        |
-| `LegacyFeatureFlagViewSet`    | `api/feature_flag/`                     | Inherits `FeatureFlagViewSet`, derives team from session.                |
+| Viewset                       | Route                                   | Notes                                                                     |
+| ----------------------------- | --------------------------------------- | ------------------------------------------------------------------------- |
+| `FeatureFlagViewSet`          | `api/projects/{id}/feature_flags/`      | Primary viewset. Full CRUD, soft delete via `ForbidDestroyModel`.         |
+| `LegacyFeatureFlagViewSet`    | `api/feature_flag/`                     | Inherits `FeatureFlagViewSet`, derives team from session.                 |
 | `OrganizationFeatureFlagView` | `api/organizations/{id}/feature_flags/` | Cross-team operations. File: `insights/api/organization_feature_flag.py`. |
 | `FlagValueViewSet`            | `api/projects/{id}/flag_value/`         | Returns possible values for a flag. File: `insights/api/flag_value.py`.   |
 
@@ -63,8 +63,8 @@ Standard REST on `/v1/projects/{id}/feature_flags/`. Hard `DELETE` is blocked â€
 
 ### Organization endpoints
 
-| Method | URL                                                 | Description                                     |
-| ------ | --------------------------------------------------- | ----------------------------------------------- |
+| Method | URL                                                | Description                                     |
+| ------ | -------------------------------------------------- | ----------------------------------------------- |
 | `GET`  | `/v1/organizations/{id}/feature_flags/{key}/`      | Get a flag by key across all accessible teams   |
 | `POST` | `/v1/organizations/{id}/feature_flags/copy_flags/` | Copy a flag from one project to target projects |
 
@@ -108,8 +108,8 @@ Key things to know:
 
 ### Supporting modules
 
-| File                                               | Purpose                                                                    |
-| -------------------------------------------------- | -------------------------------------------------------------------------- |
+| File                                                | Purpose                                                                    |
+| --------------------------------------------------- | -------------------------------------------------------------------------- |
 | `insights/models/feature_flag/flag_matching.py`     | **Legacy** Python evaluation engine (only used for static cohort creation) |
 | `insights/models/feature_flag/flags_cache.py`       | HyperCache for the Rust flags service with signal-based invalidation       |
 | `insights/models/feature_flag/local_evaluation.py`  | Prepares flag data for SDK local evaluation with HyperCache                |

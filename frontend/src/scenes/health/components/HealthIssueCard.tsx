@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconRevert, IconSparkles, IconX } from '@hanzo/icons'
 import { Button, Tag } from '@hanzo/elements'
+import { IconRevert, IconSparkles, IconX } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { FEATURE_FLAGS } from 'lib/constants'

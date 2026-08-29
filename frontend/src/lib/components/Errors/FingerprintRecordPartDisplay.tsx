@@ -2,8 +2,8 @@ import { useRef } from 'react'
 
 import { Tooltip } from '@hanzo/elements'
 
-import useIsHovering from 'lib/hooks/useIsHovering'
 import { IconFingerprint } from 'lib/elements/icons'
+import useIsHovering from 'lib/hooks/useIsHovering'
 import { cn } from 'lib/utils/css-classes'
 
 import { FingerprintRecordPart } from './types'

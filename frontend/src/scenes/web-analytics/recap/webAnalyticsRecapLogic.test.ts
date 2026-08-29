@@ -1,6 +1,6 @@
+import insights from 'insights-js'
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
-import insights from 'insights-js'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { urls } from 'scenes/urls'

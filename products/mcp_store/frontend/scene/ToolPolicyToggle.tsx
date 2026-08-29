@@ -1,5 +1,5 @@
-import { IconCheck, IconShieldLock, IconX } from '@hanzo/icons'
 import { SegmentedButton } from '@hanzo/elements'
+import { IconCheck, IconShieldLock, IconX } from '@hanzo/icons'
 
 import type { ToolApprovalState } from '../mcpStoreLogic'
 

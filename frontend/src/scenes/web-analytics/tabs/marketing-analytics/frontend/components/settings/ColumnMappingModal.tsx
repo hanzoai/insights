@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 import { Button, Modal, Spinner } from '@hanzo/elements'
+import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
 
 import { InputSelect, InputSelectOption } from 'lib/elements/InputSelect/InputSelect'
 import { CURRENCY_SYMBOL_TO_NAME_MAP, IMPORTANT_CURRENCIES, OTHER_CURRENCIES } from 'lib/utils/currency'

@@ -1,5 +1,5 @@
-import { IconCheckCircle, IconPullRequest, IconX } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconCheckCircle, IconPullRequest, IconX } from '@hanzo/icons'
 
 import { InstallationStepStatus } from './installationProgressLogic'
 

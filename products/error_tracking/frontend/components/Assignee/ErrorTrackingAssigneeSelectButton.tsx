@@ -2,7 +2,6 @@ import { useActions, useValues } from 'kea'
 
 import { Button } from '@hanzo/elements'
 
-
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
 
 import { issueQueryOptionsLogic } from '../IssueQueryOptions/issueQueryOptionsLogic'

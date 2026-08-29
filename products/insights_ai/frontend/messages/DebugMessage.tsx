@@ -1,7 +1,7 @@
 import { memo } from 'react'
 
-import { IconCopy, IconTerminal } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCopy, IconTerminal } from '@hanzo/icons'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'

@@ -1,6 +1,7 @@
 import { JSONContent } from '@tiptap/core'
 import { useRef, useState } from 'react'
 
+import { Button, Input, ProfilePicture, Tooltip } from '@hanzo/elements'
 import {
     IconCopy,
     IconPencil,
@@ -11,7 +12,6 @@ import {
     IconTrash,
     IconWarning,
 } from '@hanzo/icons'
-import { Button, Input, ProfilePicture, Tooltip } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
@@ -104,12 +104,7 @@ export function Message({
                                 <div className="flex items-center justify-end gap-2">
                                     {onEdit && (
                                         <Tooltip title="Edit note">
-                                            <Button
-                                                size="xsmall"
-                                                icon={<IconPencil />}
-                                                noPadding
-                                                onClick={onEdit}
-                                            />
+                                            <Button size="xsmall" icon={<IconPencil />} noPadding onClick={onEdit} />
                                         </Tooltip>
                                     )}
                                     {onDelete && (

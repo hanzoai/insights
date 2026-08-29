@@ -1,9 +1,9 @@
-import { useActions, useValues } from 'kea'
 import { PropertyMatchType } from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconX } from '@hanzo/icons'
 import { Card, Checkbox, Collapse } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

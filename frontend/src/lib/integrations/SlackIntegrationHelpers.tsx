@@ -1,21 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import {
-    Banner,
-    BannerProps,
-    Button,
-    InputSelect,
-    InputSelectOption,
-    Link,
-    ProfilePicture,
-} from '@hanzo/elements'
+import { Banner, BannerProps, Button, InputSelect, InputSelectOption, Link, ProfilePicture } from '@hanzo/elements'
 
 import api from 'lib/api'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { FEATURE_FLAGS, OrganizationMembershipLevel } from 'lib/constants'
-import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
 import { IconSlackExternal } from 'lib/elements/icons'
+import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
 import { IntegrationType, SlackChannelType } from '~/types'

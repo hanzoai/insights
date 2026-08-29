@@ -28,8 +28,8 @@ results match the UI, and you never hand-write the InsightsQL.
 
 Lead with these when the user is unsure what to ask:
 
-| Ask the user…                                     | Answered by                                                                                     |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Ask the user…                                     | Answered by                                                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | "Which tools fail most, or are slowest?"          | `exploring-mcp-tool-quality` (ranks all tools), then `insights:query-mcp-tool-stats` to drill in |
 | "How is tool X doing overall?"                    | `insights:query-mcp-tool-stats` — calls, errors, p50/p95, users, sessions, intents               |
 | "How has tool X trended?"                         | `insights:query-mcp-tool-daily-stats` — day-by-day series                                        |
@@ -39,9 +39,9 @@ Lead with these when the user is unsure what to ask:
 | "What are agents trying to do with tool X?"       | `insights:query-mcp-tool-sample-intents` — recent agent intents                                  |
 | "What description is tool X registered with?"     | `insights:query-mcp-tool-descriptions` — distinct descriptions seen                              |
 | "Which harnesses use my MCP, how reliably?"       | `insights:query-mcp-harness-breakdown` — calls/errors/sessions per client                        |
-| "What are agents trying to do, across all tools?" | `exploring-mcp-intent-clusters` — semantic goal clusters                                        |
+| "What are agents trying to do, across all tools?" | `exploring-mcp-intent-clusters` — semantic goal clusters                                         |
 | "Who is connecting, and how active are they?"     | `insights:mcp-analytics-sessions-list` — one row per session, with client and person             |
-| "What did this one session do?"                   | `exploring-mcp-sessions` — a single agent run's tool sequence                                   |
+| "What did this one session do?"                   | `exploring-mcp-sessions` — a single agent run's tool sequence                                    |
 
 ## Finding the tool name
 
@@ -70,8 +70,8 @@ Then offer a natural follow-up from the menu — e.g. after
 
 **Covered by a typed tool — don't hand-write SQL for these:**
 
-| Question                           | Tool                                        |
-| ---------------------------------- | ------------------------------------------- |
+| Question                           | Tool                                         |
+| ---------------------------------- | -------------------------------------------- |
 | One tool's headline numbers        | `insights:query-mcp-tool-stats`              |
 | One tool's day-by-day trend        | `insights:query-mcp-tool-daily-stats`        |
 | One tool's top errors              | `insights:query-mcp-tool-failures`           |

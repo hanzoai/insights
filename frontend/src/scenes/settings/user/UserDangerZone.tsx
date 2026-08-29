@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Input, Modal, Table, Tag, Tooltip } from '@hanzo/elements'
+import { IconTrash } from '@hanzo/icons'
 
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { detailedTime, humanFriendlyDetailedTime } from 'lib/utils/datetime'

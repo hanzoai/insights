@@ -3,12 +3,12 @@ import './SessionTimeline.scss'
 import { cva } from 'cva'
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
-import { IconCollapse, IconEllipsis, IconExpand } from '@hanzo/icons'
 import { Spinner } from '@hanzo/elements'
+import { IconCollapse, IconEllipsis, IconExpand } from '@hanzo/icons'
 
 import { Dayjs } from 'lib/dayjs'
-import { useScrollObserver } from 'lib/hooks/useScrollObserver'
 import { IconVerticalAlignCenter } from 'lib/elements/icons'
+import { useScrollObserver } from 'lib/hooks/useScrollObserver'
 import { ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 import {
     DropdownMenu,

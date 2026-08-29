@@ -1,5 +1,5 @@
-import { IconDashboard } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconDashboard } from '@hanzo/icons'
 
 import { IconOpenInNew } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
@@ -34,13 +34,7 @@ export function UpsertDashboardWidget(props: ToolRendererProps): JSX.Element {
                         <span className="font-medium">{dashboard.name || 'Dashboard ready'}</span>
                     </div>
                     {to && (
-                        <Button
-                            to={to}
-                            targetBlank
-                            icon={<IconOpenInNew />}
-                            size="xsmall"
-                            tooltip="Open dashboard"
-                        >
+                        <Button to={to} targetBlank icon={<IconOpenInNew />} size="xsmall" tooltip="Open dashboard">
                             View dashboard
                         </Button>
                     )}

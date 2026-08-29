@@ -1,5 +1,5 @@
-import { IconInfo } from '@hanzo/icons'
 import { Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 export function EarlyExitIndicator(): JSX.Element {
     return (

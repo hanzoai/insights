@@ -29,8 +29,7 @@ export function LinkToModal(): JSX.Element {
             title={`Select a folder to create ${s} in`}
             description={
                 <>
-                    You are creating {pluralize(linkingItems.length, 'shortcut')} in{' '}
-                    <Snack>{destinationFolder}</Snack>
+                    You are creating {pluralize(linkingItems.length, 'shortcut')} in <Snack>{destinationFolder}</Snack>
                 </>
             }
             // This is a bit of a hack. Without it, the flow "insight" -> "add to dashboard button" ->

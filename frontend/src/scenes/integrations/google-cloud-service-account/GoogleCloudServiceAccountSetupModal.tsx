@@ -103,8 +103,8 @@ export const GoogleCloudServiceAccountSetupModal = (
                                     </span>
                                     <p className="m-0 text-secondary">
                                         Assign Insights's service account:{' '}
-                                        <code>insights-batch-exports@insights-external.iam.gserviceaccount.com</code> as a
-                                        principal with access to your service account with the role{' '}
+                                        <code>insights-batch-exports@insights-external.iam.gserviceaccount.com</code> as
+                                        a principal with access to your service account with the role{' '}
                                         <code>roles/iam.serviceAccountTokenCreator</code> to allow impersonation, and
                                         any role containing <code>iam.serviceAccounts.get</code> permission to allow us
                                         to verify ownership.

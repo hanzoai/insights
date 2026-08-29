@@ -1,7 +1,6 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconDownload, IconInfo, IconPerson } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -17,6 +16,7 @@ import {
     Tooltip,
     Link,
 } from '@hanzo/elements'
+import { IconDownload, IconInfo, IconPerson } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { AccessDenied } from 'lib/components/AccessDenied'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconQuestion } from '@hanzo/icons'
 import { Button, Skeleton, Tag, Link, Tooltip } from '@hanzo/elements'
+import { IconQuestion } from '@hanzo/icons'
 
 import { Banner } from 'lib/elements/Banner'
 import { Markdown } from 'lib/elements/Markdown'
@@ -79,9 +79,7 @@ export function SourceConnectScene(): JSX.Element {
                                 {sourceConfig.permissionsCaption && (
                                     <Tooltip
                                         title={
-                                            <Markdown className="text-sm">
-                                                {sourceConfig.permissionsCaption}
-                                            </Markdown>
+                                            <Markdown className="text-sm">{sourceConfig.permissionsCaption}</Markdown>
                                         }
                                         interactive
                                     >

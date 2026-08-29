@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus, IconPlusSmall } from '@hanzo/icons'
 import { Banner, Button, Divider, Skeleton } from '@hanzo/elements'
+import { IconPlus, IconPlusSmall } from '@hanzo/icons'
 import { Input } from '@hanzo/quill-primitives'
 
 import { Link } from 'lib/elements/Link'

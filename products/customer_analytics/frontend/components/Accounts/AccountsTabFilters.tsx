@@ -1,14 +1,7 @@
 import { useActions, useValues } from 'kea'
 
+import { Button, Checkbox, Divider, Dropdown, Input, InputSelect } from '@hanzo/elements'
 import { IconChevronDown, IconRefresh, IconX } from '@hanzo/icons'
-import {
-    Button,
-    Checkbox,
-    Divider,
-    Dropdown,
-    Input,
-    InputSelect,
-} from '@hanzo/elements'
 
 import { MemberSelectMultiple } from 'lib/components/MemberSelectMultiple'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useMemo, useRef } from 'react'
 
-import { IconDownload, IconPlusSmall, IconUpload } from '@hanzo/icons'
 import { Divider, Modal, Switch, Tabs, Tag, Link } from '@hanzo/elements'
+import { IconDownload, IconPlusSmall, IconUpload } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet/CodeSnippet'
@@ -372,8 +372,8 @@ function MarketplaceCredentialSection(): JSX.Element {
                     {marketplaceCommand}
                 </CodeSnippet>
                 <p className="m-0 text-xs text-secondary">
-                    Run each line in Claude Code — skills then appear as <code>/insights-skill-store:&lt;name&gt;</code>,
-                    auto-updating as you publish.
+                    Run each line in Claude Code — skills then appear as <code>/insights-skill-store:&lt;name&gt;</code>
+                    , auto-updating as you publish.
                 </p>
             </div>
             <div className="flex flex-col gap-1">

@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconInfo, IconRefresh } from '@hanzo/icons'
 import { Button, Dialog } from '@hanzo/elements'
+import { IconInfo, IconRefresh } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip/Tooltip'
 import { compactNumber, humanizeBytes } from 'lib/utils/numbers'

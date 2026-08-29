@@ -1,6 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
+import { Banner, Dialog, Divider } from '@hanzo/elements'
 import {
     IconCheck,
     IconClock,
@@ -18,7 +19,6 @@ import {
     IconServer,
     IconTrash,
 } from '@hanzo/icons'
-import { Banner, Dialog, Divider } from '@hanzo/elements'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileItems'

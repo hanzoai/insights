@@ -5,8 +5,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { BindLogic, useActions, useValues } from 'kea'
 import { PropsWithChildren, useEffect } from 'react'
 
-import { IconPencil, IconTrash } from '@hanzo/icons'
 import { Banner, Button, Card, Dialog, Select, Spinner, toast } from '@hanzo/elements'
+import { IconPencil, IconTrash } from '@hanzo/icons'
 
 import { PropertyFilters, PropertyFiltersProps } from 'lib/components/PropertyFilters/PropertyFilters'
 import { SortableDragIcon } from 'lib/elements/icons'

@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconFilter } from '@hanzo/icons'
 import { Button, Tag, Link } from '@hanzo/elements'
+import { IconFilter } from '@hanzo/icons'
 
 import { Tooltip } from 'lib/elements/Tooltip'
 import { PersonDisplay, PersonIcon } from 'scenes/persons/PersonDisplay'

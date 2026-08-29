@@ -1,15 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import {
-    Banner,
-    Button,
-    InputSelect,
-    Table,
-    TableColumns,
-    Tag,
-    TextArea,
-    Link,
-} from '@hanzo/elements'
+import { Banner, Button, InputSelect, Table, TableColumns, Tag, TextArea, Link } from '@hanzo/elements'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { urls } from 'scenes/urls'

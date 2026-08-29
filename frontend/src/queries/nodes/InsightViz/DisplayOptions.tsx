@@ -1,10 +1,10 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { ReactNode } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
-import { IconInfo } from '@hanzo/icons'
 import { Checkbox, Input, Switch, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { SmoothingFilter } from 'lib/components/SmoothingFilter/SmoothingFilter'
 import { UnitPicker } from 'lib/components/UnitPicker/UnitPicker'

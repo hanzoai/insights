@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { IconInfo } from '@hanzo/icons'
 import { Button, Input, Select } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { TeamMembershipLevel } from 'lib/constants'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Spinner } from 'lib/elements/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { debounce } from 'lib/utils/async'
 import { teamLogic } from 'scenes/teamLogic'
 

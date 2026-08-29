@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconX } from '@hanzo/icons'
 
 import { WizardStep, alertWizardLogic } from './alertWizardLogic'
 import { AlertWizardStepper } from './AlertWizardStepper'

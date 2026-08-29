@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { urls } from 'scenes/urls'

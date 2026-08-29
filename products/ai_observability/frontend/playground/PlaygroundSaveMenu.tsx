@@ -1,10 +1,10 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
-import insights from 'insights-js'
 import React from 'react'
 
-import { IconLlmPromptManagement } from '@hanzo/icons'
 import { Button, Divider, Dropdown, Input } from '@hanzo/elements'
+import { IconLlmPromptManagement } from '@hanzo/icons'
 
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
@@ -150,13 +150,7 @@ export function PlaygroundSaveMenu({ prompt }: { prompt: PromptConfig }): JSX.El
             </Button>
         )
         loadActions.push(
-            <Button
-                key="load-evaluation"
-                type="tertiary"
-                size="small"
-                fullWidth
-                to={urls.aiObservabilityEvaluations()}
-            >
+            <Button key="load-evaluation" type="tertiary" size="small" fullWidth to={urls.aiObservabilityEvaluations()}>
                 Load evaluation
             </Button>
         )

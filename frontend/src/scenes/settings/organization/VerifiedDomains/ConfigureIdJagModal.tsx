@@ -32,11 +32,7 @@ export function ConfigureIdJagModal(): JSX.Element {
                         label="IdP issuer URL"
                         info="The trusted identity provider issuer URL. Must match the iss claim on ID-JAG tokens for users on this domain."
                     >
-                        <Input
-                            className="ph-ignore-input"
-                            placeholder="https://idp.example.com"
-                            autoComplete="off"
-                        />
+                        <Input className="ph-ignore-input" placeholder="https://idp.example.com" autoComplete="off" />
                     </Field>
                     <Field
                         name="id_jag_jwks_url"

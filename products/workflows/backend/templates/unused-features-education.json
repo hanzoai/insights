@@ -116,11 +116,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -170,9 +166,7 @@
                                     "rows": [
                                         {
                                             "id": "-sL7LJ6rhD",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "columns": [
                                                 {
                                                     "id": "IT_J8vPWTn",
@@ -544,10 +538,7 @@
                                                     "repeat": "no-repeat",
                                                     "size": "custom",
                                                     "position": "center",
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "padding": "0px",
                                                 "anchor": "",
@@ -666,11 +657,7 @@
                     {
                         "filters": {
                             "source": "events",
-                            "bytecode": [
-                                "_H",
-                                1,
-                                29
-                            ]
+                            "bytecode": ["_H", 1, 29]
                         }
                     }
                 ]
@@ -720,9 +707,7 @@
                                     "rows": [
                                         {
                                             "id": "-sL7LJ6rhD",
-                                            "cells": [
-                                                1
-                                            ],
+                                            "cells": [1],
                                             "columns": [
                                                 {
                                                     "id": "IT_J8vPWTn",
@@ -1094,10 +1079,7 @@
                                                     "repeat": "no-repeat",
                                                     "size": "custom",
                                                     "position": "center",
-                                                    "customPosition": [
-                                                        "50%",
-                                                        "50%"
-                                                    ]
+                                                    "customPosition": ["50%", "50%"]
                                                 },
                                                 "padding": "0px",
                                                 "anchor": "",
@@ -1206,12 +1188,8 @@
     ],
     "abort_action": null,
     "variables": [],
-    "billable_action_types": [
-        "function_email"
-    ],
+    "billable_action_types": ["function_email"],
     "image_url": null,
-    "tags": [
-        "product usage"
-    ],
+    "tags": ["product usage"],
     "scope": "global"
 }

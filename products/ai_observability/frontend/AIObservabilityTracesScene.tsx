@@ -2,12 +2,12 @@ import { useActions, useMountedLogic, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconGear } from '@hanzo/icons'
 import { Button, Dropdown, Switch, Tag } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { TZLabel } from 'lib/components/TZLabel'
-import { Skeleton } from 'lib/elements/Skeleton'
 import { Link } from 'lib/elements/Link'
+import { Skeleton } from 'lib/elements/Skeleton'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { urls } from 'scenes/urls'
 

@@ -97,9 +97,9 @@ export function InstanceConfigSaveModal({ onClose, isOpen }: { onClose: () => vo
                 {Object.keys(instanceConfigEditingState).includes('RECORDINGS_PERFORMANCE_EVENTS_TTL_WEEKS') && (
                     <Banner type="warning">
                         <>
-                            Changing your performance events TTL requires Datastore to have enough free space to
-                            perform the operation (even when reducing this value). In addition, please mind that
-                            removing old recordings will be removed asynchronously, not immediately.
+                            Changing your performance events TTL requires Datastore to have enough free space to perform
+                            the operation (even when reducing this value). In addition, please mind that removing old
+                            recordings will be removed asynchronously, not immediately.
                         </>
                     </Banner>
                 )}

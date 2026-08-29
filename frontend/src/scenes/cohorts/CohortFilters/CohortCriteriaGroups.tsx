@@ -51,15 +51,9 @@ export function CohortCriteriaGroups(logicProps: CohortLogicProps): JSX.Element 
                                                 value={group.type}
                                             />
                                             <div className="flex-1 min-w-[0.5rem]" />
-                                            <Button
-                                                icon={<IconCopy />}
-                                                onClick={() => duplicateFilter(groupIndex)}
-                                            />
+                                            <Button icon={<IconCopy />} onClick={() => duplicateFilter(groupIndex)} />
                                             {cohort.filters.properties.values.length > 1 && (
-                                                <Button
-                                                    icon={<IconTrash />}
-                                                    onClick={() => removeFilter(groupIndex)}
-                                                />
+                                                <Button icon={<IconTrash />} onClick={() => removeFilter(groupIndex)} />
                                             )}
                                         </div>
                                         <Divider className="my-4" />

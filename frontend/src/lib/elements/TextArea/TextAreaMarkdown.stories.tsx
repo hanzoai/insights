@@ -2,10 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
 import { type TextAreaProps } from 'lib/elements/TextArea/TextArea'
-import {
-    TextAreaMarkdown,
-    TextAreaMarkdown as _TextMarkdown,
-} from 'lib/elements/TextArea/TextAreaMarkdown'
+import { TextAreaMarkdown, TextAreaMarkdown as _TextMarkdown } from 'lib/elements/TextArea/TextAreaMarkdown'
 
 type Story = StoryObj<TextAreaProps>
 const meta: Meta<TextAreaProps> = {

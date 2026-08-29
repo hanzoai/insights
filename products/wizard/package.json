@@ -5,8 +5,8 @@
         "backend:contract-check": "echo 'Contract files unchanged'"
     },
     "dependencies": {
-        "kea": "catalog:",
-        "insights-js": "catalog:"
+        "insights-js": "catalog:",
+        "kea": "catalog:"
     },
     "devDependencies": {
         "kea-test-utils": "catalog:"

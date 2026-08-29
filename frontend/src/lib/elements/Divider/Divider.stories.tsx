@@ -18,9 +18,7 @@ export default meta
 const HorizontalRender = (props: DividerProps): JSX.Element => {
     return (
         <>
-            <Row icon={<Lettermark name={1} color={LettermarkColor.Gray} />}>
-                I just wanna tell you how I'm feeling
-            </Row>
+            <Row icon={<Lettermark name={1} color={LettermarkColor.Gray} />}>I just wanna tell you how I'm feeling</Row>
             <Row icon={<Lettermark name={2} color={LettermarkColor.Gray} />}>Gotta make you understand</Row>
             <Divider {...props} />
             <Row icon={<Lettermark name={3} color={LettermarkColor.Gray} />}>Never gonna give you up</Row>

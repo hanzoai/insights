@@ -1,5 +1,5 @@
-import { IconWarning } from '@hanzo/icons'
 import { Dialog, Link } from '@hanzo/elements'
+import { IconWarning } from '@hanzo/icons'
 
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { urls } from 'scenes/urls'

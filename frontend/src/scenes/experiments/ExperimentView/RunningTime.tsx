@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconCalculator, IconCheck, IconClock, IconGear } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCalculator, IconCheck, IconClock, IconGear } from '@hanzo/icons'
 
 import { ProgressCircle } from 'lib/elements/ProgressCircle/ProgressCircle'
 import { Label } from 'lib/ui/Label/Label'
@@ -64,10 +64,7 @@ export const RunningTime = ({
                                 {Math.ceil(remainingDays) !== 1 ? 's' : ''}
                             </span>
                             {showProgress && (
-                                <ProgressCircle
-                                    progress={Math.min(currentExposures / targetSampleSize, 1)}
-                                    size={22}
-                                />
+                                <ProgressCircle progress={Math.min(currentExposures / targetSampleSize, 1)} size={22} />
                             )}
                         </>
                     )}

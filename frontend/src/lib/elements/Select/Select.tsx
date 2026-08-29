@@ -286,15 +286,11 @@ function convertToMenuSingle<T>(
     } as MenuItemLeaf
 }
 
-export function isSelectSection<T>(
-    candidate: SelectSection<T> | SelectOption<T>
-): candidate is SelectSection<T> {
+export function isSelectSection<T>(candidate: SelectSection<T> | SelectOption<T>): candidate is SelectSection<T> {
     return candidate && 'options' in candidate && !('label' in candidate)
 }
 
-export function isSelectOptionNode<T>(
-    candidate: SelectSection<T> | SelectOption<T>
-): candidate is SelectOptionNode<T> {
+export function isSelectOptionNode<T>(candidate: SelectSection<T> | SelectOption<T>): candidate is SelectOptionNode<T> {
     return candidate && 'options' in candidate && 'label' in candidate
 }
 

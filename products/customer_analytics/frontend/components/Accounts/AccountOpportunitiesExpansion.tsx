@@ -1,5 +1,5 @@
-import { useValues } from 'kea'
 import insights from 'insights-js'
+import { useValues } from 'kea'
 
 import { Skeleton, Table, TableColumns, Link } from '@hanzo/elements'
 
@@ -106,13 +106,5 @@ export function AccountOpportunitiesExpansion({ accountId }: { accountId: string
         )
     }
 
-    return (
-        <Table<AccountOpportunity>
-            size="small"
-            embedded
-            dataSource={opportunities}
-            columns={columns}
-            rowKey="id"
-        />
-    )
+    return <Table<AccountOpportunity> size="small" embedded dataSource={opportunities} columns={columns} rowKey="id" />
 }

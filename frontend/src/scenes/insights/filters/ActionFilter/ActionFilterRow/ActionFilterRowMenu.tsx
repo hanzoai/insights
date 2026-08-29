@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
-import { IconEllipsis } from '@hanzo/icons'
 import { Badge, Checkbox, Divider, Menu } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { Button } from 'lib/elements/Button'
 import { Tooltip } from 'lib/elements/Tooltip'

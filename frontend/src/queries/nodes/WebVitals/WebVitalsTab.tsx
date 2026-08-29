@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconInfo } from '@hanzo/icons'
 import { Skeleton, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { WebVitalsMetric } from '~/queries/schema/schema-general'
 

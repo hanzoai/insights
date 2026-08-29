@@ -2,15 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useId } from 'react'
 
-import {
-    Button,
-    Input,
-    InputSelect,
-    Modal,
-    Select,
-    Switch,
-    TextArea,
-} from '@hanzo/elements'
+import { Button, Input, InputSelect, Modal, Select, Switch, TextArea } from '@hanzo/elements'
 
 import { Field } from 'lib/elements/Field'
 import { teamLogic } from 'scenes/teamLogic'

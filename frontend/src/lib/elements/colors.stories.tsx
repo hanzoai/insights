@@ -1,8 +1,8 @@
 import { Meta } from '@storybook/react'
 import { useState } from 'react'
 
-import { Table } from './Table'
 import { Popover } from './Popover/Popover'
+import { Table } from './Table'
 
 const meta: Meta = {
     title: 'Elements/Colors',

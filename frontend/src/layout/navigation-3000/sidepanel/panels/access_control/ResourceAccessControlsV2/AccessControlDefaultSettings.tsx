@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconHome, IconInfo, IconPlus } from '@hanzo/icons'
 import { Button, Dropdown, Select, Table, Tooltip } from '@hanzo/elements'
+import { IconHome, IconInfo, IconPlus } from '@hanzo/icons'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'

@@ -3,8 +3,8 @@ import { IconBalance, IconInfo } from '@hanzo/icons'
 import { getSeriesColor } from 'lib/colors'
 import { Button } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input'
-import { Slider } from 'lib/elements/Slider'
 import { Lettermark, LettermarkColor } from 'lib/elements/Lettermark'
+import { Slider } from 'lib/elements/Slider'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { formatPercentage } from 'lib/utils/numbers'
 import { alphabet } from 'lib/utils/strings'
@@ -264,13 +264,7 @@ export const VariantDistributionEditor = ({
                             className="w-24"
                         />
                     </div>
-                    <Slider
-                        value={rolloutPercentage}
-                        onChange={onRolloutPercentageChange}
-                        min={0}
-                        max={100}
-                        step={1}
-                    />
+                    <Slider value={rolloutPercentage} onChange={onRolloutPercentageChange} min={0} max={100} step={1} />
                 </div>
             )}
 

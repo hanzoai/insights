@@ -1,15 +1,15 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconArchive, IconEllipsis, IconExternal, IconPlus, IconRocket, IconTrash, IconX } from '@hanzo/icons'
 import { Button, SegmentedButton } from '@hanzo/elements'
+import { IconArchive, IconEllipsis, IconExternal, IconPlus, IconRocket, IconTrash, IconX } from '@hanzo/icons'
 
 import { Input } from 'lib/elements/Input'
+import { Link } from 'lib/elements/Link'
 import { Menu } from 'lib/elements/Menu'
 import { Radio } from 'lib/elements/Radio'
 import { Select } from 'lib/elements/Select'
 import { TextArea } from 'lib/elements/TextArea'
-import { Link } from 'lib/elements/Link'
 
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
 import { urls } from '~/toolbar/urls'

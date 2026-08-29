@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 
-import { IconExternal } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconExternal } from '@hanzo/icons'
 
 import { signalCardSourceLine } from 'lib/signals/signalCardSourceLine'
 import { urls } from 'scenes/urls'

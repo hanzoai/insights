@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconBookmark } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconBookmark } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 

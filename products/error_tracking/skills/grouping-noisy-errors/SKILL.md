@@ -29,8 +29,8 @@ in step 1 exist to keep that from happening.
 
 ## Available tools
 
-| Tool                                           | Purpose                                                |
-| ---------------------------------------------- | ------------------------------------------------------ |
+| Tool                                            | Purpose                                                |
+| ----------------------------------------------- | ------------------------------------------------------ |
 | `insights:query-error-tracking-issues-list`     | Find candidate duplicate issues                        |
 | `insights:query-error-tracking-issue`           | Pull compact details for an individual issue           |
 | `insights:query-error-tracking-issue-events`    | Sampled `$exception` events with stack and message     |

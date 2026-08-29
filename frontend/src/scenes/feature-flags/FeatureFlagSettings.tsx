@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconRefresh, IconTrash } from '@hanzo/icons'
 import { Button, Dialog, Switch, Tag, TextArea } from '@hanzo/elements'
+import { IconRefresh, IconTrash } from '@hanzo/icons'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'

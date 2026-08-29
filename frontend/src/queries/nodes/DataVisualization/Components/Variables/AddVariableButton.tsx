@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGear, IconPlus } from '@hanzo/icons'
 import { Button, ButtonProps, Input, Menu } from '@hanzo/elements'
+import { IconGear, IconPlus } from '@hanzo/icons'
 
 import { dataVisualizationLogic } from '../../dataVisualizationLogic'
 import { NewVariableModal } from './NewVariableModal'

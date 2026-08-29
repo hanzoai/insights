@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconChevronRight, IconCollapse, IconExpand } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
+import { IconChevronRight, IconCollapse, IconExpand } from '@hanzo/icons'
 
 import { Tree, TreeDataItem } from 'lib/elements/Tree/Tree'
 import { DropdownMenuGroup } from 'lib/ui/DropdownMenu/DropdownMenu'

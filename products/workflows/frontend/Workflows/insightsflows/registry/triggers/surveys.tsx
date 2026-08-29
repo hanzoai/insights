@@ -1,12 +1,12 @@
 import { useActions, useValues } from 'kea'
 
-import { IconMessage, IconPlusSmall } from '@hanzo/icons'
 import { Banner, Button, Input, Select, Spinner } from '@hanzo/elements'
+import { IconMessage, IconPlusSmall } from '@hanzo/icons'
 
-import { IconOpenInNew } from 'lib/elements/icons'
 import { Field } from 'lib/elements/Field'
-import { Radio } from 'lib/elements/Radio'
+import { IconOpenInNew } from 'lib/elements/icons'
 import { Link } from 'lib/elements/Link'
+import { Radio } from 'lib/elements/Radio'
 import { truncate } from 'lib/utils/strings'
 import { TestAccountFilter } from 'scenes/insights/filters/TestAccountFilter/TestAccountFilter'
 import { urls } from 'scenes/urls'

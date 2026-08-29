@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconChevronDown } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconChevronDown } from '@hanzo/icons'
 
 import { Menu } from 'lib/elements/Menu/Menu'
 

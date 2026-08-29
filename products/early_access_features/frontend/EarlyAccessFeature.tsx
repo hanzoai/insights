@@ -3,17 +3,8 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
+import { Banner, Button, Input, Menu, Select, Skeleton, Tag, Link } from '@hanzo/elements'
 import { IconCopy, IconFlag, IconQuestion, IconTrash, IconX } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Input,
-    Menu,
-    Select,
-    Skeleton,
-    Tag,
-    Link,
-} from '@hanzo/elements'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
@@ -24,10 +15,10 @@ import { SceneMenuBarFileItems } from 'lib/components/Scenes/SceneMenuBarFileIte
 import { SceneMetalyticsSummaryButton } from 'lib/components/Scenes/SceneMetalyticsSummaryButton'
 import { SceneSelect } from 'lib/components/Scenes/SceneSelect'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { Dialog } from 'lib/elements/Dialog'
 import { Field } from 'lib/elements/Field'
 import { Tabs } from 'lib/elements/Tabs'
+import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'

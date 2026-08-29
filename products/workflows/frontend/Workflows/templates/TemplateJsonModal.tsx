@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCopy } from '@hanzo/icons'
 import { Button, Modal } from '@hanzo/elements'
+import { IconCopy } from '@hanzo/icons'
 
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

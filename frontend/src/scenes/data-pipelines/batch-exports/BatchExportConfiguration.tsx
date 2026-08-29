@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCheckCircle, IconPlus, IconX, IconInfo } from '@hanzo/icons'
 import { Select, Switch } from '@hanzo/elements'
+import { IconCheckCircle, IconPlus, IconX, IconInfo } from '@hanzo/icons'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
@@ -290,12 +290,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                             configuration.include_events ? configuration.include_events : []
                                         }
                                         addElement={
-                                            <Button
-                                                size="small"
-                                                type="secondary"
-                                                icon={<IconPlus />}
-                                                sideIcon={null}
-                                            >
+                                            <Button size="small" type="secondary" icon={<IconPlus />} sideIcon={null}>
                                                 Include event
                                             </Button>
                                         }
@@ -318,12 +313,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                             configuration.exclude_events ? configuration.exclude_events : []
                                         }
                                         addElement={
-                                            <Button
-                                                size="small"
-                                                type="secondary"
-                                                icon={<IconPlus />}
-                                                sideIcon={null}
-                                            >
+                                            <Button size="small" type="secondary" icon={<IconPlus />} sideIcon={null}>
                                                 Exclude event
                                             </Button>
                                         }

@@ -29,10 +29,10 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 The gateway supports two authentication methods:
 
-| Method             | Token Prefix | Header                                                  |
-| ------------------ | ------------ | ------------------------------------------------------- |
-| Personal API Key   | `sk-`       | `Authorization: Bearer sk-...` or `x-api-key: sk-...` |
-| OAuth Access Token | `at-`       | `Authorization: Bearer at-...`                         |
+| Method             | Token Prefix | Header                                                |
+| ------------------ | ------------ | ----------------------------------------------------- |
+| Personal API Key   | `sk-`        | `Authorization: Bearer sk-...` or `x-api-key: sk-...` |
+| OAuth Access Token | `at-`        | `Authorization: Bearer at-...`                        |
 
 **Required Scope**: `llm_gateway:read`
 
@@ -239,7 +239,7 @@ OAuth access is permitted only for products with an explicit `allowed_applicatio
 | -------------------- | --------------- | -------------------------- | ------------------------------- |
 | `llm_gateway`        | API key only    | All                        | Default when no product in path |
 | `ci`                 | API key only    | All                        | CI / e2e test runs              |
-| `insights_code`       | OAuth only      | Restricted set             | Desktop coding agent            |
+| `insights_code`      | OAuth only      | Restricted set             | Desktop coding agent            |
 | `background_agents`  | OAuth only      | Restricted set             | Cloud background agents         |
 | `onboarding`         | OAuth only      | claude-sonnet-5            | Unbilled setup wizard cloud run |
 | `wizard`             | API key + OAuth | All                        | Max AI assistant                |

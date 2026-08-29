@@ -25,12 +25,7 @@ export function ReplayCaptureDiagnosticsModalButton({
             >
                 Check session recording status
             </Button>
-            <Modal
-                isOpen={isOpen}
-                onClose={() => setIsOpen(false)}
-                title="Session recording diagnosis"
-                width={600}
-            >
+            <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Session recording diagnosis" width={600}>
                 <ReplayCaptureDiagnosticsPanel eventProperties={eventProperties} />
             </Modal>
         </>

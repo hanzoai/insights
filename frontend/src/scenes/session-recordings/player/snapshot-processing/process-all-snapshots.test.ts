@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { IncrementalSource } from '@hanzo/insights-rrweb-types'
 
+import { IncrementalSource } from '@hanzo/insights-rrweb-types'
 import { hasAnyWireframes, keyForSource, processAllSnapshots } from '@hanzo/replay-shared'
 
 import { RecordingSnapshot, SessionRecordingSnapshotSource } from '~/types'

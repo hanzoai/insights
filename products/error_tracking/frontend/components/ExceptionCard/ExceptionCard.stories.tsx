@@ -379,7 +379,10 @@ function sessionTimelineParameters(event: ErrorEventType): Record<string, unknow
             .slice(0, limit)
     }
 
-    const filterLogRowsFromInsightsQL = <T extends [string, ...unknown[]]>(rows: T[], query: TimelineQueryLike): T[] => {
+    const filterLogRowsFromInsightsQL = <T extends [string, ...unknown[]]>(
+        rows: T[],
+        query: TimelineQueryLike
+    ): T[] => {
         const queryString = String(query?.query ?? '')
         const descending = /ORDER BY\s+timestamp\s+DESC/i.test(queryString)
         const limitMatch = queryString.match(/LIMIT\s+(\d+)/i)

@@ -85,7 +85,13 @@ export const RunningProvisioning: Story = {
 // flat timeline, indistinguishable from pipeline steps.
 const wizardSubSteps: InstallationProgress['steps'] = [
     { id: 'wizard-task:a', label: 'Detected Next.js', status: 'completed', detail: null, source: 'wizard' },
-    { id: 'wizard-task:b', label: 'Installing the Insights SDK', status: 'in_progress', detail: null, source: 'wizard' },
+    {
+        id: 'wizard-task:b',
+        label: 'Installing the Insights SDK',
+        status: 'in_progress',
+        detail: null,
+        source: 'wizard',
+    },
     { id: 'wizard-task:c', label: 'Wiring up event capture', status: 'pending', detail: null, source: 'wizard' },
 ]
 

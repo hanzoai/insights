@@ -1,5 +1,5 @@
-import { IconArrowLeft } from '@hanzo/icons'
 import { Button, Modal, SpinnerOverlay } from '@hanzo/elements'
+import { IconArrowLeft } from '@hanzo/icons'
 
 import { type SDK, SDKInstructionsMap } from '~/types'
 

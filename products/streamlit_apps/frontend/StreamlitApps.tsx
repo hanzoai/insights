@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconEllipsis, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Menu, Tag, TagType } from '@hanzo/elements'
+import { IconEllipsis, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { NotFound } from 'lib/components/NotFound'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Dialog } from 'lib/elements/Dialog'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -79,12 +79,7 @@ function AppCard({ app }: { app: AppSummaryContractApi }): JSX.Element {
                         ]}
                         placement="bottom-end"
                     >
-                        <Button
-                            size="xsmall"
-                            noPadding
-                            icon={<IconEllipsis />}
-                            onClick={(e) => e.stopPropagation()}
-                        />
+                        <Button size="xsmall" noPadding icon={<IconEllipsis />} onClick={(e) => e.stopPropagation()} />
                     </Menu>
                 </div>
             </div>

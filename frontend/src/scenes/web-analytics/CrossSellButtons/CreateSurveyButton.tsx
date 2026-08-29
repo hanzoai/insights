@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconMessage } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconMessage } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

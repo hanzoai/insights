@@ -1,12 +1,12 @@
+import insights from 'insights-js'
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import insights from 'insights-js'
 import { useEffect, useState } from 'react'
 
 import { FEATURE_FLAGS } from 'lib/constants'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Modal } from 'lib/elements/Modal'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { userLogic } from 'scenes/userLogic'
 
 import { DashboardType, InsightShortId } from '~/types'
@@ -52,15 +52,7 @@ export function SubscriptionsModal(props: SubscriptionsModalProps): JSX.Element 
         return <Spinner className="text-2xl" />
     }
     return (
-        <Modal
-            onClose={closeModal}
-            isOpen={isOpen}
-            width={720}
-            simple
-            title=""
-            inline={inline}
-            data-attr={dataAttr}
-        >
+        <Modal onClose={closeModal} isOpen={isOpen} width={720} simple title="" inline={inline} data-attr={dataAttr}>
             {!subscriptionId ? (
                 useTabbedOverview ? (
                     <TabbedManageSubscriptions

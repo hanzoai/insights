@@ -38,20 +38,14 @@ export function PathRegexModal({ filter, isOpen, onSave, onClose }: PathRegexMod
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <Modal.Header>
-                {isNew ? <b>Add Path Cleaning Rule</b> : <b>Edit Path Cleaning Rule</b>}
-            </Modal.Header>
+            <Modal.Header>{isNew ? <b>Add Path Cleaning Rule</b> : <b>Edit Path Cleaning Rule</b>}</Modal.Header>
 
             <Modal.Content>
                 <div className="px-2 py-1" data-attr="path-regex-modal-content">
                     <div className="deprecated-space-y-2">
                         <div>
                             <span>Regex</span>
-                            <Input
-                                value={regex}
-                                onChange={(regex) => setRegex(regex)}
-                                onPressEnter={() => false}
-                            />
+                            <Input value={regex} onChange={(regex) => setRegex(regex)} onPressEnter={() => false} />
                             <p className="text-muted">
                                 <span>
                                     Example:{' '}
@@ -70,11 +64,7 @@ export function PathRegexModal({ filter, isOpen, onSave, onClose }: PathRegexMod
                         </div>
                         <div>
                             <span>Alias</span>
-                            <Input
-                                value={alias}
-                                onChange={(alias) => setAlias(alias)}
-                                onPressEnter={() => false}
-                            />
+                            <Input value={alias} onChange={(alias) => setAlias(alias)} onPressEnter={() => false} />
                             <p className="text-muted">
                                 <span>How the path will appear after path cleaning</span>
                                 <br />

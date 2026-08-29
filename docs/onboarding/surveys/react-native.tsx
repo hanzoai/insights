@@ -62,8 +62,8 @@ function getSurveysReactNativeSteps(ctx: OnboardingComponentsContext): StepDefin
                         ]}
                     />
                     <Markdown>
-                        If you&apos;re not using the `InsightsProvider`, add `InsightsSurveyProvider` to your app anywhere
-                        inside your app root component.
+                        If you&apos;re not using the `InsightsProvider`, add `InsightsSurveyProvider` to your app
+                        anywhere inside your app root component.
                     </Markdown>
                     <CodeBlock
                         blocks={[
