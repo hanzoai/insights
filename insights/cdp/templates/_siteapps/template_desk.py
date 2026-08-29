@@ -18,7 +18,7 @@ const style = (inputs) => `
         right: 20px;
         color: black;
         font-weight: normal;
-        font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        font-family: "Zen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
         text-align: left;
         z-index: ${parseInt(inputs.zIndex) || 99999};
     }
@@ -56,7 +56,7 @@ const style = (inputs) => `
     .form textarea {
         color: #2d2d2d;
         font-size: 14px;
-        font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        font-family: "Zen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
         margin-bottom: 10px;
         background: white;
         color: black;
@@ -147,7 +147,7 @@ const style = (inputs) => `
         padding-top: 10px;
         font-size: 14px;
         color: #747ea1;
-        font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        font-family: "Zen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     }
     .specific-issue a:link {
         color: #5879FF;
