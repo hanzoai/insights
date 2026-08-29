@@ -84,9 +84,9 @@ var y = {
 	"2xl": [v(24), { lineHeight: v(32) }]
 }, b = {
 	sans: [
+		"Zen",
 		"-apple-system",
 		"BlinkMacSystemFont",
-		"Inter",
 		"Segoe UI",
 		"Roboto",
 		"Helvetica Neue",

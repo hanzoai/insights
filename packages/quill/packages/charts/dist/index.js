@@ -724,7 +724,7 @@ function dt() {
 }
 //#endregion
 //#region src/utils/text-measure.ts
-var ft = "-apple-system, BlinkMacSystemFont, \"Inter\", \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif", pt = `12px ${ft}`, mt = 160, ht = null;
+var ft = "Zen, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif", pt = `12px ${ft}`, mt = 160, ht = null;
 function gt() {
 	return ht ||= document.createElement("canvas").getContext("2d"), ht;
 }
@@ -4216,7 +4216,7 @@ function ra({ fillRect: e, fillColor: t, fillOpacity: n, lineStyle: r, hitAreaSt
 }
 //#endregion
 //#region src/overlays/ValueLabels.tsx
-var ia = "600 12px -apple-system, BlinkMacSystemFont, \"Inter\", \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif", aa = 22, oa = 4, sa = 2, ca = 12, la = "__stack_total__", ua = 6;
+var ia = "600 12px Zen, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif", aa = 22, oa = 4, sa = 2, ca = 12, la = "__stack_total__", ua = 6;
 function da(e) {
 	return e.toLocaleString();
 }

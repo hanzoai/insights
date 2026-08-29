@@ -34,7 +34,7 @@ export function onLoad({ inputs }) {
             color: ${inputs.textColor || 'default'};
             background: ${inputs.backgroundColor || 'default'};
             font-weight: normal;
-            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-family: "Zen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             text-align: center;
             position: ${inputs.position === 'sticky' ? 'fixed' : 'absolute'};
             left: 0;

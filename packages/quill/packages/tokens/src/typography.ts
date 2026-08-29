@@ -21,7 +21,7 @@ export const fontSize = {
 } as const
 
 export const fontFamily = {
-    sans: ['-apple-system', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
+    sans: ['Zen', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
     mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
 } as const
 

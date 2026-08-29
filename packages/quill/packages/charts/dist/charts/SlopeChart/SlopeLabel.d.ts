@@ -2,7 +2,7 @@ import { default as React } from 'react';
 import { SlopeSide } from './slope-data';
 export declare const SLOPE_LABEL_FONT_SIZE = 12;
 /** The font slope labels render and measure with — keeps rendering and width measurement in step. */
-export declare const SLOPE_LABEL_FONT = "600 12px -apple-system, BlinkMacSystemFont, \"Inter\", \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif";
+export declare const SLOPE_LABEL_FONT = "600 12px Zen, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif";
 export interface SlopeLabelProps {
     x: number;
     y: number;
