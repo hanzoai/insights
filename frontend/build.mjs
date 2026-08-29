@@ -178,7 +178,7 @@ export function writePreloadManifest(outputs = {}) {
     }
 
     const cssOutput = Object.keys(outputs).find((out) => /\/index(-[^./-]+)?\.css$/.test(out))
-    const fontOutput = Object.keys(outputs).find((out) => /\/Inter(-[^./-]+)?\.woff2$/.test(out))
+    const fontOutput = Object.keys(outputs).find((out) => /\/Zen-Variable(-[^./]+)?\.woff2$/.test(out))
 
     const dedupe = (urls) => [...new Set(urls)]
     const manifest = {

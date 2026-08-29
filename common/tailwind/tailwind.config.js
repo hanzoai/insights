@@ -771,10 +771,9 @@ const config = {
             fontFamily: {
                 sans: [
                     'Emoji Flags Polyfill',
-                    'Geist',
+                    'Zen',
                     '-apple-system',
                     'BlinkMacSystemFont',
-                    'Inter',
                     'Segoe UI',
                     'Roboto',
                     'Helvetica Neue',
@@ -787,10 +786,9 @@ const config = {
                 ],
                 title: [
                     'Emoji Flags Polyfill',
-                    'Geist',
+                    'Zen',
                     '-apple-system',
                     'BlinkMacSystemFont',
-                    'Inter',
                     'Segoe UI',
                     'Roboto',
                     'Helvetica Neue',

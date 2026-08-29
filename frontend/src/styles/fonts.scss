@@ -1,61 +1,30 @@
-/* Inter; bold (700); latin */
+/* Zen is the house typeface, self-hosted from our own origin so no third party
+ * sees a request. One variable file spans 100-900, so every weight the app asks
+ * for arrives in a single response; italics are synthesized, as Zen ships no
+ * italic axis.
+ *
+ * Zen is our OFL cut of the design Vercel released as Geist. OFL reserves the
+ * original name, so the family here is `Zen` and the binaries carry both
+ * copyright holders — see `public/fonts/LICENSE.txt` and, in the bytes, the two
+ * nameID 0 records that `@hanzo/font`'s identity check insists on.
+ *
+ * The bytes come from `@hanzo/font` (`dist/fonts/zen-sans/Zen-Variable.woff2`,
+ * `dist/fonts/zen-mono/ZenMono-Variable.woff2`), so a new cut lands in one
+ * place. `format('woff2')` rather than the deprecated `woff2-variations`: it is
+ * what that package's own zen.css declares, and a woff2 carries its weight axis
+ * either way. */
 @font-face {
-    font-family: Inter;
-    font-style: normal;
-    font-weight: 700;
-    src:
-        url('../../public/Inter.woff2') format('woff2'),
-        url('../../public/Inter.woff') format('woff');
-    font-display: swap;
-    unicode-range:
-        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-    font-family: Inter;
-    font-style: normal;
-    font-weight: 500;
-    src:
-        url('../../public/Inter.woff2') format('woff2'),
-        url('../../public/Inter.woff') format('woff');
-    font-display: swap;
-    unicode-range:
-        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* Inter; normal (400); latin */
-@font-face {
-    font-family: Inter;
-    font-style: normal;
-    font-weight: 400;
-    src:
-        url('../../public/Inter.woff2') format('woff2'),
-        url('../../public/Inter.woff') format('woff');
-    font-display: swap;
-    unicode-range:
-        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* Geist is the house typeface across every Hanzo surface, so it is declared the
- * same way here: our own copy under `public/fonts`, served from our own origin.
- * One variable file spans 100-900, which is why eight static faces collapse to
- * one; italics are synthesized, as Geist ships no italic axis. Licensed SIL OFL
- * 1.1 (see `public/fonts/LICENSE.txt`), so it travels with the source. */
-@font-face {
-    font-family: Geist;
+    font-family: Zen;
     font-style: normal;
     font-weight: 100 900;
-    src: url('../../public/fonts/Geist-Variable.woff2') format('woff2-variations');
+    src: url('../../public/fonts/Zen-Variable.woff2') format('woff2');
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Geist Mono';
+    font-family: 'Zen Mono';
     font-style: normal;
     font-weight: 100 900;
-    src: url('../../public/fonts/GeistMono-Variable.woff2') format('woff2-variations');
+    src: url('../../public/fonts/ZenMono-Variable.woff2') format('woff2');
     font-display: swap;
 }

@@ -25,7 +25,7 @@ export declare const fontSize: {
     }];
 };
 export declare const fontFamily: {
-    readonly sans: readonly ["-apple-system", "BlinkMacSystemFont", "Inter", "Segoe UI", "Roboto", "Helvetica Neue", "sans-serif"];
+    readonly sans: readonly ["Zen", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "sans-serif"];
     readonly mono: readonly ["JetBrains Mono", "Fira Code", "monospace"];
 };
 export type FontSize = typeof fontSize;
