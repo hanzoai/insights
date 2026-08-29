@@ -1430,7 +1430,7 @@ class TestSelfCaptureBrowserFlagToken(TestCase):
 
 VALID_PRELOAD_MANIFEST = {
     "css": "static/index-ABC123.css",
-    "font": "static/assets/Inter-DEF456.woff2",
+    "font": "static/assets/Zen-Variable-DEF456.woff2",
     "js": ["static/index-GHI789.js", "static/chunk-APP111.js"],
     "authenticatedJs": ["static/chunk-SHELL222.js", "static/chunk-APP111.js"],
 }
@@ -1455,7 +1455,7 @@ class TestReadPreloadManifest(SimpleTestCase):
         assert _read_preload_manifest(path, include_authenticated_shell=False) == (
             "static/index-ABC123.css",
             ("static/index-GHI789.js", "static/chunk-APP111.js"),
-            "static/assets/Inter-DEF456.woff2",
+            "static/assets/Zen-Variable-DEF456.woff2",
         )
 
     def test_appends_authenticated_chunks_deduplicated(self):

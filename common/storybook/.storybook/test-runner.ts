@@ -739,18 +739,15 @@ async function waitForPageReady(page: Page, skipNetworkIdle = false): Promise<vo
     }
 
     // `document.fonts.ready` only covers fonts that have already been *requested* — a story that
-    // renders no text until async data arrives (loaders, mocked API calls) requests Geist/Inter
+    // renders no text until async data arrives (loaders, mocked API calls) requests Zen
     // only close to capture time, and the screenshot races the font-display:swap repaint. Kicking
     // the loads off explicitly here means late-mounted text renders in the real fonts directly, so
     // there is no swap left to race. No-op once the fonts are cached.
     await page
         .evaluate(() =>
-            Promise.all(
-                ['400', '500', '700', '800'].flatMap((weight) => [
-                    document.fonts.load(`${weight} 16px Geist`),
-                    document.fonts.load(`${weight} 16px Inter`),
-                ])
-            ).then(() => document.fonts.ready)
+            Promise.all(['400', '500', '700', '800'].map((weight) => document.fonts.load(`${weight} 16px Zen`))).then(
+                () => document.fonts.ready
+            )
         )
         .catch(() => undefined)
 }

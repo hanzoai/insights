@@ -44,8 +44,7 @@ export interface ValueLabelsProps {
     offset?: number
 }
 
-const LABEL_FONT =
-    '600 12px -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif'
+const LABEL_FONT = '600 12px Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", Helvetica, Arial, sans-serif'
 const LABEL_HEIGHT = 22
 const LABEL_PADDING_X = 4
 const LABEL_BORDER = 2

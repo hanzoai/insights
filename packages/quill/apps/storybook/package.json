@@ -11,7 +11,6 @@
         "test:visual:debug": "PWDEBUG=1 pnpm exec test-storybook --browsers chromium --no-index-json"
     },
     "dependencies": {
-        "@fontsource-variable/inter": "^5.2.8",
         "@hanzo/quill": "workspace:^",
         "@hanzo/quill-charts": "workspace:^",
         "@hanzo/quill-tokens": "workspace:^",
