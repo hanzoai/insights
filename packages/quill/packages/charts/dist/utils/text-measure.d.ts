@@ -1,5 +1,5 @@
-export declare const FONT_FAMILY = "-apple-system, BlinkMacSystemFont, \"Inter\", \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif";
-export declare const AXIS_LABEL_FONT = "12px -apple-system, BlinkMacSystemFont, \"Inter\", \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif";
+export declare const FONT_FAMILY = "Zen, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif";
+export declare const AXIS_LABEL_FONT = "12px Zen, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", Helvetica, Arial, sans-serif";
 export declare const ELLIPSIS = "\u2026";
 /** Largest pixel width a category (breakdown) tick label may occupy before it's truncated
  *  with an ellipsis. Without this, long breakdown values — most notably URLs — grow the axis

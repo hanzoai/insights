@@ -1,62 +1,23 @@
-/* Inter; bold (700); latin */
-@font-face {
-    font-family: Inter;
-    font-style: normal;
-    font-weight: 700;
-    src:
-        url('../../public/Inter.woff2') format('woff2'),
-        url('../../public/Inter.woff') format('woff');
-    font-display: swap;
-    unicode-range:
-        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-    font-family: Inter;
-    font-style: normal;
-    font-weight: 500;
-    src:
-        url('../../public/Inter.woff2') format('woff2'),
-        url('../../public/Inter.woff') format('woff');
-    font-display: swap;
-    unicode-range:
-        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* Inter; normal (400); latin */
-@font-face {
-    font-family: Inter;
-    font-style: normal;
-    font-weight: 400;
-    src:
-        url('../../public/Inter.woff2') format('woff2'),
-        url('../../public/Inter.woff') format('woff');
-    font-display: swap;
-    unicode-range:
-        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-        U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* Zen is the house typeface across every Hanzo surface, so it is declared the
- * same way here: our own copy under `public/fonts`, served from our own origin.
- * One variable file spans 100-900, which is why eight static faces collapse to
- * one; italics are synthesized, as this cut ships no italic axis.
+/* Zen is the house typeface, self-hosted from our own origin so no third party
+ * sees a request. One variable file spans 100-900, so every weight the app asks
+ * for arrives in a single response; italics are synthesized, as Zen ships no
+ * italic axis.
  *
- * These files were named Geist until now, which was the UPSTREAM name for the
- * same design: Zen is our OFL fork of it (hanzoai/font, Copyright 2023 Vercel
- * in collaboration with basement.studio, Copyright 2026 Hanzo AI). OFL reserves
- * the original name, so shipping a modified cut as `Geist` is both a licence
- * problem and another vendor's brand on our own analytics product. Same design,
- * our name. Binaries come from hanzoai/font `fonts/Zen/webfonts/Zen[wght].woff2`
- * so there is one place a new cut lands. Licence travels beside them in
- * `public/fonts/LICENSE.txt`. */
+ * Zen is our OFL cut of the design Vercel released as Geist. OFL reserves the
+ * original name, so the family here is `Zen` and the binaries carry both
+ * copyright holders — see `public/fonts/LICENSE.txt` and, in the bytes, the two
+ * nameID 0 records that `@hanzo/font`'s identity check insists on.
+ *
+ * The bytes come from `@hanzo/font` (`dist/fonts/zen-sans/Zen-Variable.woff2`,
+ * `dist/fonts/zen-mono/ZenMono-Variable.woff2`), so a new cut lands in one
+ * place. `format('woff2')` rather than the deprecated `woff2-variations`: it is
+ * what that package's own zen.css declares, and a woff2 carries its weight axis
+ * either way. */
 @font-face {
     font-family: Zen;
     font-style: normal;
     font-weight: 100 900;
-    src: url('../../public/fonts/Zen-Variable.woff2') format('woff2-variations');
+    src: url('../../public/fonts/Zen-Variable.woff2') format('woff2');
     font-display: swap;
 }
 
@@ -64,6 +25,6 @@
     font-family: 'Zen Mono';
     font-style: normal;
     font-weight: 100 900;
-    src: url('../../public/fonts/ZenMono-Variable.woff2') format('woff2-variations');
+    src: url('../../public/fonts/ZenMono-Variable.woff2') format('woff2');
     font-display: swap;
 }

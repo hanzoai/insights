@@ -421,7 +421,7 @@ def _resolve_entry_assets(include_authenticated_shell: bool) -> tuple[str, tuple
     """
     Return (css_url, js_preload_urls, font_url) for <head> preload tags, relative to JS_URL.
     Preloading lets the browser fetch the boot chain (entry -> App -> AuthenticatedShell chunks,
-    the CSS bundle, and the Inter font, which is otherwise discovered only once the CSS is parsed)
+    the CSS bundle, and the Zen font, which is otherwise discovered only once the CSS is parsed)
     in parallel instead of as a waterfall.
 
     Reads the esbuild preload manifest (see writePreloadManifest in frontend/build.mjs). Returns

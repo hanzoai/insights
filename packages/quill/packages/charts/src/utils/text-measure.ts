@@ -1,8 +1,7 @@
 // Cached offscreen canvas — createElement+getContext is slow, measureText is fast.
 // Callers must set ctx.font themselves before measuring.
 
-export const FONT_FAMILY =
-    '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif'
+export const FONT_FAMILY = 'Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", Helvetica, Arial, sans-serif'
 
 export const AXIS_LABEL_FONT = `12px ${FONT_FAMILY}`
 
