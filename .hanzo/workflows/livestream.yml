@@ -119,15 +119,29 @@ jobs:
               run: |
                   set -euo pipefail
                   IMAGE="ghcr.io/hanzoai/insights-livestream:${VERSION}"
+                  # BOTH architectures. The fleet is amd64 and arm64, so a
+                  # single-arch image means the pin lands and the pod never
+                  # starts on half of it. arm64 is emulated on this amd64 pool,
+                  # which needs binfmt registered before buildx is asked for that
+                  # platform; without it the arm64 leg dies on `exec format
+                  # error`. The builder stage runs under that emulation rather
+                  # than cross-compiling -- it is a plain `go build` with no
+                  # GOARCH from $TARGETARCH -- so the arm64 leg costs real time.
+                  # Teaching the Dockerfile to cross-compile would remove it.
+                  docker run --privileged --rm tonistiigi/binfmt --install arm64 >/dev/null 2>&1 || true
+
+                  # buildx and --push, not build-then-push: two platforms are a
+                  # manifest LIST, and a local daemon cannot hold one, so the
+                  # registry is the only place the pair can exist under one name.
                   # The commit rides the image, so dropping it from the tag loses nothing:
                   # `docker inspect` still answers which source built this.
-                  docker build -f livestream/Dockerfile \
+                  docker buildx build -f livestream/Dockerfile \
+                    --platform linux/amd64,linux/arm64 \
                     --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
                     --label "org.opencontainers.image.version=${VERSION}" \
                     --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
-                    -t "$IMAGE" livestream
-                  docker push "$IMAGE"
-                  echo "built $IMAGE (revision ${GITHUB_SHA})"
+                    -t "$IMAGE" --push livestream
+                  echo "built $IMAGE linux/amd64+linux/arm64 (revision ${GITHUB_SHA})"
 
             # THE DEPLOY. Everything above this PUBLISHES an image; this is the step
             # that makes production run it. cd.hanzo.ai watches hanzoai/universe, not
