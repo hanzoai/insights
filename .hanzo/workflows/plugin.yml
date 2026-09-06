@@ -151,16 +151,27 @@ jobs:
               run: |
                   set -euo pipefail
                   IMAGE="ghcr.io/hanzoai/insights-plugin:${VERSION}"
+                  # BOTH architectures, for the same reason the monolith builds
+                  # both: the lab runs amd64 and arm64, and a plugin server that
+                  # exists for only one of them is a pod that never starts on the
+                  # other half of the fleet. arm64 is emulated on this amd64 pool,
+                  # which needs binfmt registered before buildx is asked for that
+                  # platform; without it the arm64 leg dies on `exec format error`.
+                  docker run --privileged --rm tonistiigi/binfmt --install arm64 >/dev/null 2>&1 || true
+
+                  # buildx and --push, not build-then-push: two platforms are a
+                  # manifest LIST, and a local daemon cannot hold one, so the
+                  # registry is the only place the pair can exist under one name.
                   # The commit rides the image, so dropping it from the tag loses nothing:
                   # `docker inspect` still answers which source built this.
-                  docker build -f Dockerfile.node \
+                  docker buildx build -f Dockerfile.node \
+                    --platform linux/amd64,linux/arm64 \
                     --build-arg COMMIT_HASH="${GITHUB_SHA}" \
                     --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
                     --label "org.opencontainers.image.version=${VERSION}" \
                     --label "org.opencontainers.image.source=https://github.com/hanzoai/insights" \
-                    -t "$IMAGE" .
-                  docker push "$IMAGE"
-                  echo "built $IMAGE (revision ${GITHUB_SHA})"
+                    -t "$IMAGE" --push .
+                  echo "built $IMAGE linux/amd64+linux/arm64 (revision ${GITHUB_SHA})"
 
             # THE DEPLOY. Everything above PUBLISHES an image; this is the step that
             # makes production run it. cd.hanzo.ai watches hanzoai/universe, not the
