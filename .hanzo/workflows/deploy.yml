@@ -99,7 +99,7 @@ jobs:
     # mean exactly one thing. Separate job so it fails in minutes rather than behind
     # an hour of image build.
     typecheck:
-        runs-on: hanzo-build-linux-amd64
+        runs-on: linux-amd64
         steps:
             - uses: actions/checkout@v4
             - name: No self-shadowed declarations
@@ -136,10 +136,10 @@ jobs:
                   echo "no self-referencing names (TS2448/TS7022/TS1117 clean)"
 
     build:
-        # The live runner fleet advertises `hanzo-build-linux-amd64`. The old
-        # `hanzo-linux-amd64` matched no runner, so every job here queued forever —
+        # The live runner fleet advertises `linux-amd64`. The old
+        # `linux-amd64` matched no runner, so every job here queued forever —
         # which is why the deployed image sat at 1.52.2 while main moved on.
-        runs-on: hanzo-build-linux-amd64
+        runs-on: linux-amd64
         # Serialized above with cancel-in-progress false, so a run that hangs does
         # not just burn a runner: it holds the release lock and no later commit can
         # ship behind it. Generous against a cold cache on a tree that has doubled,
@@ -439,7 +439,7 @@ jobs:
     # by this point; what this decides is whether we find out.
     verify:
         needs: build
-        runs-on: hanzo-build-linux-amd64
+        runs-on: linux-amd64
         steps:
             - uses: actions/checkout@v4
 
