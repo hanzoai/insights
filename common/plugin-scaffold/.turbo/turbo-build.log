@@ -1,4 +1,0 @@
-
-> @hanzo/plugin-scaffold@1.5.0 build /home/z/work/hanzo/insights/common/plugin-scaffold
-> tsc -p tsconfig.json
-
