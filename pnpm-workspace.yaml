@@ -379,7 +379,7 @@ catalog:
   'jest-junit': '^17.0.0'
   'jose': '^6.2.10'
   'js-big-decimal': '^2.2.0'
-  'js-yaml': '^5.4.1'
+  'js-yaml': '4.1.1'
   'jsonwebtoken': '^9.0.3'
   'kea': '^3.1.7'
   'kea-router': '^3.4.1'
