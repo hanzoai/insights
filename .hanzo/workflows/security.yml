@@ -57,7 +57,7 @@ jobs:
     # git.hanzo.ai reads, and that fleet advertises no ubuntu-* label at all —
     # deliberately, so ~1400 mirrored repos cannot claim it. An unmatched label
     # does not fail, it queues until the timeout: silence, not an error.
-    runs-on: hanzo-build-linux-amd64
+    runs-on: linux-amd64
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4

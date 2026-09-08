@@ -41,9 +41,9 @@ on:
 
 jobs:
     build:
-        # The live runner fleet advertises `hanzo-build-linux-amd64`. Any other
+        # The live runner fleet advertises `linux-amd64`. Any other
         # label matches no runner and the job queues forever instead of failing.
-        runs-on: hanzo-build-linux-amd64
+        runs-on: linux-amd64
         steps:
             - uses: actions/checkout@v4
 

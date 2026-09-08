@@ -31,7 +31,7 @@ on:
 
 jobs:
   tables:
-    runs-on: hanzo-build-linux-amd64
+    runs-on: linux-amd64
     steps:
       - uses: actions/checkout@v4
 
