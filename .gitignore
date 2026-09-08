@@ -239,3 +239,7 @@ common/insightsql_parser/build/
 common/insightsql_parser/build_wasm/
 common/insightsql_parser/dist/
 common/insightsql_parser/*.so
+.next/
+.turbo/
+coverage/
+.venv/
