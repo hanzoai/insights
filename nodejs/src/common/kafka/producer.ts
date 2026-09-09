@@ -59,6 +59,14 @@ export class KafkaProducerWrapper {
         'retry.backoff.ms': 500, // Backoff between retry attempts
         'socket.timeout.ms': 30000, // Timeout for socket operations
         'max.in.flight.requests.per.connection': 5, // Required for idempotence ordering
+        // Anything a consumer can fetch, a producer must be able to re-send, or a
+        // message is consumable and not re-producible and the pipeline stalls on it.
+        // No smaller cap expresses that: fetch.message.max.bytes counts COMPRESSED
+        // bytes while message.max.bytes checks the UNCOMPRESSED message, so a snappy
+        // message that fits a 10MB fetch can be arbitrarily larger raw and the two
+        // limits are not comparable. This is librdkafka's maximum; process memory
+        // bounds what can be held, and the broker enforces whatever limit it has.
+        'message.max.bytes': 1_000_000_000,
     }
 
     /** Emit librdkafka stats every 30s so ProducerStatsTracker can export them as Prom metrics. */
