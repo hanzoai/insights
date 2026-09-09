@@ -12,7 +12,7 @@
     },
     "peerDependencies": {
         "@hanzo/icons": "catalog:",
-        "@hanzo/elements": "*",
+        "@hanzo/elements": "catalog:",
         "@storybook/react": "catalog:",
         "@testing-library/dom": "*",
         "@testing-library/user-event": "*",

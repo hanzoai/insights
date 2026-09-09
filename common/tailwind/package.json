@@ -5,8 +5,8 @@
         "./tailwind.config.js": "./tailwind.config.js"
     },
     "dependencies": {
-        "@tailwindcss/container-queries": "0.1.1",
+        "@tailwindcss/container-queries": "catalog:",
         "tailwindcss": "4.3.0",
-        "tailwindcss-scroll-mask": "^0.0.3"
+        "tailwindcss-scroll-mask": "catalog:"
     }
 }

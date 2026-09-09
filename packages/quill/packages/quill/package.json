@@ -44,10 +44,10 @@
         "build:js": "vite build"
     },
     "dependencies": {
-        "class-variance-authority": "^0.7.1",
+        "class-variance-authority": "catalog:",
         "clsx": "^2.1.1",
-        "lucide-react": "^0.577.0",
-        "react-resizable-panels": "^4.7.1",
+        "lucide-react": "catalog:",
+        "react-resizable-panels": "catalog:",
         "tailwind-merge": "^2.2.2"
     },
     "devDependencies": {
@@ -58,7 +58,7 @@
         "@hanzo/quill-tokens": "workspace:*",
         "tsx": "^4.19.0",
         "vite": "catalog:",
-        "vite-plugin-dts": "^4.5.4"
+        "vite-plugin-dts": "catalog:"
     },
     "peerDependencies": {
         "@base-ui/react": "^1.4.0",

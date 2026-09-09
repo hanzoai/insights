@@ -39,6 +39,6 @@
     "devDependencies": {
         "tsx": "^4.19.0",
         "vite": "catalog:",
-        "vite-plugin-dts": "^4.5.4"
+        "vite-plugin-dts": "catalog:"
     }
 }

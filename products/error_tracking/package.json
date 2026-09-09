@@ -30,7 +30,7 @@
         "@types/react": "*",
         "@types/react-dom": "*",
         "clsx": "*",
-        "cva": "1.0.0-beta.3",
+        "cva": "catalog:",
         "d3": "*",
         "fast-equals": "catalog:",
         "fuse.js": "*",

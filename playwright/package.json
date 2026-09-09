@@ -7,7 +7,7 @@
     "dependencies": {
         "@playwright/test": "catalog:",
         "@hanzo/frontend": "workspace:*",
-        "snappyjs": "^0.7.0"
+        "snappyjs": "catalog:"
     },
     "peerDependencies": {}
 }

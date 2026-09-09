@@ -17,7 +17,7 @@
         "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/elements": "*",
+        "@hanzo/elements": "catalog:",
         "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "chartjs-plugin-annotation": "*",

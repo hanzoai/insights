@@ -29,7 +29,7 @@
         "@types/papaparse": "*",
         "@types/react": "*",
         "@types/react-dom": "*",
-        "ansi-colors": "*",
+        "ansi-colors": "catalog:",
         "clsx": "*",
         "eslint": "*",
         "fast-equals": "catalog:",

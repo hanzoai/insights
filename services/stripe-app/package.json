@@ -9,11 +9,11 @@
         "test": "jest --passWithNoTests"
     },
     "dependencies": {
-        "@stripe/ui-extension-sdk": "9.2.0-alpha.6",
-        "stripe": "^20.4.1"
+        "@stripe/ui-extension-sdk": "catalog:",
+        "stripe": "catalog:"
     },
     "devDependencies": {
-        "@stripe/ui-extension-tools": "^0.0.1",
+        "@stripe/ui-extension-tools": "catalog:",
         "@types/jest": "^27.5.2",
         "jest": "^27.5.1"
     }

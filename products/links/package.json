@@ -8,7 +8,7 @@
         "kea-forms": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "qrcode.react": "^4.2.0"
+        "qrcode.react": "catalog:"
     },
     "peerDependencies": {
         "@hanzo/icons": "catalog:",

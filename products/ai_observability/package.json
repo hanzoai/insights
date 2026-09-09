@@ -10,8 +10,8 @@
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
-        "partial-json": "^0.1.7",
-        "torph": "^0.0.9",
+        "partial-json": "catalog:",
+        "torph": "catalog:",
         "yaml": "catalog:"
     },
     "devDependencies": {

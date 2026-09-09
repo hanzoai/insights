@@ -11,10 +11,10 @@
         "test": "jest"
     },
     "dependencies": {
-        "@hanzo/insights-rrweb": "0.0.26",
-        "@hanzo/insights-rrweb-types": "0.0.26",
-        "fflate": "^0.8.2",
-        "fzstd": "^0.1.1",
+        "@hanzo/insights-rrweb": "catalog:",
+        "@hanzo/insights-rrweb-types": "catalog:",
+        "fflate": "catalog:",
+        "fzstd": "catalog:",
         "hls.js": "^1.5.7",
         "insights-js": "catalog:"
     },

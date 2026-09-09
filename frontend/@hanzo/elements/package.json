@@ -20,7 +20,7 @@
     },
     "devDependencies": {
         "@hanzo/esbuilder": "workspace:*",
-        "tsup": "^5.12.8",
+        "tsup": "catalog:",
         "typescript": "catalog:"
     },
     "peerDependencies": {
