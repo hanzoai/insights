@@ -36,7 +36,7 @@ on:
         branches: [main]
         paths:
             - 'livestream/**'
-            - '.hanzo/workflows/livestream.yml'
+            - '.github/workflows/livestream.yml'
     workflow_dispatch:
 
 jobs:

@@ -65,7 +65,7 @@ on:
             - 'common/scriptvm/typescript/**'
             - 'common/siphash/**'
             - 'Dockerfile.node'
-            - '.hanzo/workflows/plugin.yml'
+            - '.github/workflows/plugin.yml'
     workflow_dispatch:
 
 # One release at a time. Two runs that both read the same last published tag both
