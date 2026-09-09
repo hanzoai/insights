@@ -11,7 +11,7 @@
     },
     "peerDependencies": {
         "@hanzo/icons": "*",
-        "@hanzo/elements": "*",
+        "@hanzo/elements": "catalog:",
         "@types/react": "*",
         "react": "*"
     }

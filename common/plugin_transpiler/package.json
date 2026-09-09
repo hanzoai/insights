@@ -11,7 +11,7 @@
         "start": "npm run build && npm run start:dist"
     },
     "dependencies": {
-        "@babel/standalone": "^7.23.2",
+        "@babel/standalone": "catalog:",
         "@hanzo/esbuilder": "workspace:*",
         "@types/babel__standalone": "^7.1.6",
         "@types/node": "^22.13.14",

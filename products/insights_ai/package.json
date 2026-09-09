@@ -6,13 +6,13 @@
     "dependencies": {
         "@hanzo/quill-primitives": "workspace:*",
         "@tanstack/react-virtual": "*",
-        "@toon-format/toon": "^2.1.0",
+        "@toon-format/toon": "catalog:",
         "eventsource-parser": "*",
         "kea-subscriptions": "catalog:",
         "marked": "*",
-        "monaco-editor": "^0.55.1",
+        "monaco-editor": "catalog:",
         "insights-js": "catalog:",
-        "react-intersection-observer": "^9.5.3",
+        "react-intersection-observer": "catalog:",
         "tailwind-merge": "*"
     },
     "devDependencies": {
