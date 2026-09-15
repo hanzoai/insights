@@ -222,6 +222,7 @@ function ProductSelectionStep(): JSX.Element {
                             type="primary"
                             status="alt"
                             data-attr="onboarding-continue"
+                            className="h-[38px] px-5 font-semibold shrink-0"
                         >
                             Go
                         </Button>

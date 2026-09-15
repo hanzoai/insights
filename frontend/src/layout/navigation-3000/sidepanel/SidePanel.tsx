@@ -3,7 +3,7 @@ import './SidePanel.scss'
 import { useActions, useValues } from 'kea'
 import { Suspense, useEffect, useRef } from 'react'
 
-import { IconLock, IconLogomark, IconNotebook } from '@hanzo/icons'
+import { IconLock, IconNotebook, IconSparkles } from '@hanzo/icons'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
@@ -38,7 +38,7 @@ import { sidePanelStateLogic } from './sidePanelStateLogic'
 export const SIDE_PANEL_TABS: Record<SidePanelTab, { label: string; Icon: any; Content: any }> = {
     [SidePanelTab.Max]: {
         label: 'Insights AI',
-        Icon: IconLogomark,
+        Icon: IconSparkles,
         Content: SidePanelMax,
     },
     [SidePanelTab.Notebooks]: {

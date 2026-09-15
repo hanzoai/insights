@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 
-import { IconLogomark } from '@hanzo/icons'
 import { Button, ProfilePicture } from '@hanzo/elements'
 
+import { Logomark } from 'lib/brand'
 import { AccountMenu } from 'lib/components/Account/AccountMenu'
 import { ProjectMenu } from 'lib/components/Account/ProjectMenu'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -33,7 +33,7 @@ export function MinimalNavigation(): JSX.Element {
 
     return (
         <nav className="flex items-center gap-2 p-2 border-b min-h-[var(--minimal-navigation-height)]">
-            <Button noPadding icon={<IconLogomark className="text-3xl mx-2" />} to={logoUrl} />
+            <Button noPadding icon={<Logomark size="md" className="mx-2" />} to={logoUrl} />
             {zenMode && (
                 <span className="font-semibold text-base flex items-center gap-2">
                     {iconType ? iconForType(iconType) : null}
