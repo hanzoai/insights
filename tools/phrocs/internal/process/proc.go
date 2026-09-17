@@ -318,8 +318,6 @@ func (p *Process) AppendLine(line string) {
 	}
 }
 
-func ptr[T any](v T) *T { return &v }
-
 // Returns a consistent point-in-time view of the process.
 // If the process is running, metrics are sampled on the spot.
 func (p *Process) Snapshot() Snapshot {
@@ -339,18 +337,18 @@ func (p *Process) Snapshot() Snapshot {
 		snap.PID = p.cmd.Process.Pid
 	}
 	if !p.readyAt.IsZero() {
-		snap.ReadyAt = ptr(p.readyAt)
-		snap.StartupDurationS = ptr(p.readyAt.Sub(p.startedAt).Seconds())
+		snap.ReadyAt = new(p.readyAt)
+		snap.StartupDurationS = new(p.readyAt.Sub(p.startedAt).Seconds())
 	}
 	if m := p.metrics; m != nil {
-		snap.MemRSSMB = ptr(m.MemRSSMB)
-		snap.PeakMemRSSMB = ptr(m.PeakMemMB)
-		snap.CPUPercent = ptr(m.CPUPercent)
-		snap.CPUTimeS = ptr(m.CPUTimeS)
-		snap.ThreadCount = ptr(m.Threads)
-		snap.ChildProcessCount = ptr(m.Children)
-		snap.FDCount = ptr(m.FDs)
-		snap.LastSampledAt = ptr(m.SampledAt)
+		snap.MemRSSMB = new(m.MemRSSMB)
+		snap.PeakMemRSSMB = new(m.PeakMemMB)
+		snap.CPUPercent = new(m.CPUPercent)
+		snap.CPUTimeS = new(m.CPUTimeS)
+		snap.ThreadCount = new(m.Threads)
+		snap.ChildProcessCount = new(m.Children)
+		snap.FDCount = new(m.FDs)
+		snap.LastSampledAt = new(m.SampledAt)
 	}
 	return snap
 }

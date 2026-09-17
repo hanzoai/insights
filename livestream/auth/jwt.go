@@ -81,7 +81,7 @@ func GetAuthClaims(header http.Header) (teamID int, token string, err error) {
 func verificationKeys() jwt.VerificationKeySet {
 	keys := []jwt.VerificationKey{[]byte(viper.GetString("jwt.secret"))}
 	for _, entry := range viper.GetStringSlice("jwt.secret_fallbacks") {
-		for _, fallback := range strings.Split(entry, ",") {
+		for fallback := range strings.SplitSeq(entry, ",") {
 			if fallback = strings.TrimSpace(fallback); fallback != "" {
 				keys = append(keys, []byte(fallback))
 			}
@@ -104,7 +104,7 @@ func decodeAuthToken(authHeader string) (jwt.MapClaims, error) {
 	}
 
 	// Parse the token.
-	token, err := jwt.Parse(bearerToken[1], func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(bearerToken[1], func(token *jwt.Token) (any, error) {
 		// Make sure the token's signature algorithm isn't 'none'
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

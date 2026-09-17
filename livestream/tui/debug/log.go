@@ -33,7 +33,7 @@ func Init() error {
 	return nil
 }
 
-func Log(component, format string, args ...interface{}) {
+func Log(component, format string, args ...any) {
 	if !enabled {
 		return
 	}

@@ -827,7 +827,7 @@ func TestFilter_clearedOnProcSwitch(t *testing.T) {
 func TestSearch_homeEndScrollsViewport(t *testing.T) {
 	m := readyModel(t, "backend")
 	p, _ := m.mgr.Get("backend")
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		p.AppendLine(fmt.Sprintf("line %d", i))
 	}
 	m = update(m, process.OutputMsg{Name: "backend"})
@@ -846,7 +846,7 @@ func TestSearch_homeEndScrollsViewport(t *testing.T) {
 func TestFilter_homeEndScrollsViewport(t *testing.T) {
 	m := readyModel(t, "backend")
 	p, _ := m.mgr.Get("backend")
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		p.AppendLine(fmt.Sprintf("line %d", i))
 	}
 	m = update(m, process.OutputMsg{Name: "backend"})

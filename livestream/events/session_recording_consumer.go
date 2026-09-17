@@ -34,9 +34,9 @@ func NewSessionRecordingKafkaConsumer(
 		"auto.offset.reset":          "latest",
 		"enable.auto.commit":         false,
 		"security.protocol":          consumerConfig.SecurityProtocol,
-		"fetch.message.max.bytes":    10_000_000,  // 10MB - we only read headers
-		"fetch.max.bytes":            50_000_000,  // 50MB - reduced from 1GB
-		"queued.max.messages.kbytes": 100_000,     // 100MB - reduced from 2GB
+		"fetch.message.max.bytes":    10_000_000, // 10MB - we only read headers
+		"fetch.max.bytes":            50_000_000, // 50MB - reduced from 1GB
+		"queued.max.messages.kbytes": 100_000,    // 100MB - reduced from 2GB
 	}
 	applyKafkaConfigOverrides(config, consumerConfig)
 
@@ -68,8 +68,7 @@ func (c *SessionRecordingKafkaConsumer) Consume(ctx context.Context) {
 		default:
 			msg, err := c.consumer.ReadMessage(1 * time.Second)
 			if err != nil {
-				var inErr kafka.Error
-				if errors.As(err, &inErr) {
+				if inErr, ok := errors.AsType[kafka.Error](err); ok {
 					if inErr.Code() == kafka.ErrTransport {
 						metrics.SessionRecordingConnectFailure.Inc()
 					} else if inErr.IsTimeout() {

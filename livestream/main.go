@@ -11,15 +11,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/labstack/echo-contrib/echoprometheus"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/insights/insights/livestream/auth"
 	"github.com/insights/insights/livestream/configs"
 	"github.com/insights/insights/livestream/events"
 	"github.com/insights/insights/livestream/geo"
 	"github.com/insights/insights/livestream/handlers"
 	"github.com/insights/insights/livestream/metrics"
+	"github.com/labstack/echo-contrib/echoprometheus"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -159,7 +159,7 @@ func main() {
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 			// Build log entry, omitting error field when empty to avoid
 			// Grafana/Loki incorrectly categorizing successful requests as errors
-			logEntry := map[string]interface{}{
+			logEntry := map[string]any{
 				"time":          v.StartTime.Format(time.RFC3339Nano),
 				"id":            c.Response().Header().Get(echo.HeaderXRequestID),
 				"remote_ip":     v.RemoteIP,

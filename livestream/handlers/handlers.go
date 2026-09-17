@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"github.com/insights/insights/livestream/auth"
 	"github.com/insights/insights/livestream/events"
 	"github.com/insights/insights/livestream/metrics"
+	"github.com/labstack/echo/v4"
 	"github.com/redis/rueidis"
 )
 
@@ -145,7 +145,7 @@ func StreamEventsHandler(log echo.Logger, subChan chan events.Subscription, unSu
 			Columns:         columns,
 			EventTypes:      eventTypes,
 			PropertyFilters: propertyFilters,
-			EventChan:       make(chan interface{}, 100),
+			EventChan:       make(chan any, 100),
 			ShouldClose:     &atomic.Bool{},
 			DroppedEvents:   &atomic.Uint64{},
 		}
@@ -206,9 +206,9 @@ func parsePropertyFiltersJSON(raw string) []events.CompiledPropertyFilter {
 	dec := json.NewDecoder(strings.NewReader(raw))
 	dec.UseNumber()
 	var payloads []struct {
-		Key      string      `json:"key"`
-		Operator string      `json:"operator"`
-		Value    interface{} `json:"value"`
+		Key      string `json:"key"`
+		Operator string `json:"operator"`
+		Value    any    `json:"value"`
 	}
 	if err := dec.Decode(&payloads); err != nil {
 		return nil
@@ -246,11 +246,11 @@ func parseLegacyPropertyFilters(raw []string) []events.CompiledPropertyFilter {
 	return out
 }
 
-func normalizeFilterValues(value interface{}) []string {
+func normalizeFilterValues(value any) []string {
 	switch v := value.(type) {
 	case nil:
 		return nil
-	case []interface{}:
+	case []any:
 		out := make([]string, 0, len(v))
 		for _, item := range v {
 			if item != nil {
@@ -344,7 +344,7 @@ func NotificationsHandler(redisClient rueidis.Client) func(c echo.Context) error
 // the SSE client for userID. When the message is dropped, the reason is
 // returned so callers can emit a labeled metric.
 func filterNotificationForUser(payload string, userID int) (cleaned string, deliver bool, dropReason string) {
-	var data map[string]interface{}
+	var data map[string]any
 	if err := json.Unmarshal([]byte(payload), &data); err != nil {
 		return "", false, "malformed_payload"
 	}
@@ -354,7 +354,7 @@ func filterNotificationForUser(payload string, userID int) (cleaned string, deli
 		return "", false, "malformed_payload"
 	}
 
-	ids, ok := resolvedIDs.([]interface{})
+	ids, ok := resolvedIDs.([]any)
 	if !ok {
 		return "", false, "malformed_payload"
 	}

@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -69,12 +70,12 @@ func (v *StatusBarView) ViewHeader() string {
 	pausedStyle := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#F57C00", Dark: "#FFB74D"}).Bold(true)
 
 	logoColors := []lipgloss.Color{"#CCCCCC", "#8F8F8F", "#333333", "#1D1F27"}
-	logo := ""
+	var logo strings.Builder
 	for _, c := range logoColors {
-		logo += lipgloss.NewStyle().Background(c).Render(" ")
+		logo.WriteString(lipgloss.NewStyle().Background(c).Render(" "))
 	}
 
-	title := headerStyle.Render(" Insights Live ") + " " + logo
+	title := headerStyle.Render(" Insights Live ") + " " + logo.String()
 
 	var state string
 	switch v.connState {
@@ -116,10 +117,7 @@ func (v *StatusBarView) ViewHeader() string {
 	}
 
 	// Right-align team name
-	gap := v.width - lipgloss.Width(title) - lipgloss.Width(state) - lipgloss.Width(filters) - lipgloss.Width(team) - 4
-	if gap < 1 {
-		gap = 1
-	}
+	gap := max(v.width-lipgloss.Width(title)-lipgloss.Width(state)-lipgloss.Width(filters)-lipgloss.Width(team)-4, 1)
 
 	spaces := lipgloss.NewStyle().Width(gap).Render("")
 
@@ -163,13 +161,13 @@ func (v *StatusBarView) ViewFooter() string {
 		parts = append(parts, keyStyle.Render("["+b.key+"]")+" "+descStyle.Render(b.desc))
 	}
 
-	content := ""
+	var content strings.Builder
 	for i, p := range parts {
 		if i > 0 {
-			content += descStyle.Render(" • ")
+			content.WriteString(descStyle.Render(" • "))
 		}
-		content += p
+		content.WriteString(p)
 	}
 
-	return footerStyle.Render(content)
+	return footerStyle.Render(content.String())
 }

@@ -73,7 +73,7 @@ func TestConvertToResponseInsightsEvent(t *testing.T) {
 		Timestamp:  timestamp,
 		DistinctId: "user1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{"url": "https://example.com"},
+		Properties: map[string]any{"url": "https://example.com"},
 	}
 
 	result := convertToResponseInsightsEvent(event, 1, nil)
@@ -96,7 +96,7 @@ func TestFilterRun(t *testing.T) {
 	go filter.Run()
 
 	// Test subscription
-	eventChan := make(chan interface{}, 1)
+	eventChan := make(chan any, 1)
 	sub := Subscription{
 		SubID:         1,
 		TeamId:        1,
@@ -120,7 +120,7 @@ func TestFilterRun(t *testing.T) {
 		DistinctId: "user1",
 		Token:      "token1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{"url": "https://example.com"},
+		Properties: map[string]any{"url": "https://example.com"},
 	}
 	inboundChan <- event
 
@@ -155,7 +155,7 @@ func TestFilterRunWithGeoEvent(t *testing.T) {
 	go filter.Run()
 
 	// Test subscription with Geo enabled
-	eventChan := make(chan interface{}, 1)
+	eventChan := make(chan any, 1)
 	sub := Subscription{
 		SubID:         1,
 		TeamId:        1,
@@ -200,7 +200,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 
 	go filter.Run()
 
-	eventChan1 := make(chan interface{}, 1)
+	eventChan1 := make(chan any, 1)
 	sub1 := Subscription{
 		SubID:         1,
 		TeamId:        1,
@@ -211,7 +211,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 		Columns:       []string{"url"},
 	}
 
-	eventChan2 := make(chan interface{}, 1)
+	eventChan2 := make(chan any, 1)
 	sub2 := Subscription{
 		SubID:         2,
 		TeamId:        1,
@@ -222,7 +222,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 		Columns:       []string{"url", "$browser"},
 	}
 
-	eventChan3 := make(chan interface{}, 1)
+	eventChan3 := make(chan any, 1)
 	sub3 := Subscription{
 		SubID:         3,
 		TeamId:        1,
@@ -245,7 +245,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 		DistinctId: "user1",
 		Token:      "token1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{
+		Properties: map[string]any{
 			"url":          "https://example.com",
 			"$browser":     "Chrome",
 			"$device_type": "Desktop",
@@ -257,7 +257,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 	case received := <-eventChan1:
 		responseEvent, ok := received.(ResponseInsightsEvent)
 		require.True(t, ok)
-		assert.Equal(t, map[string]interface{}{"url": "https://example.com"}, responseEvent.Properties)
+		assert.Equal(t, map[string]any{"url": "https://example.com"}, responseEvent.Properties)
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("Timed out waiting for event on subscriber 1")
 	}
@@ -266,7 +266,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 	case received := <-eventChan2:
 		responseEvent, ok := received.(ResponseInsightsEvent)
 		require.True(t, ok)
-		assert.Equal(t, map[string]interface{}{
+		assert.Equal(t, map[string]any{
 			"url":      "https://example.com",
 			"$browser": "Chrome",
 		}, responseEvent.Properties)
@@ -278,7 +278,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 	case received := <-eventChan3:
 		responseEvent, ok := received.(ResponseInsightsEvent)
 		require.True(t, ok)
-		assert.Equal(t, map[string]interface{}{
+		assert.Equal(t, map[string]any{
 			"url":          "https://example.com",
 			"$browser":     "Chrome",
 			"$device_type": "Desktop",
@@ -297,31 +297,31 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 func TestMatchesPropertyFilters(t *testing.T) {
 	tests := []struct {
 		name    string
-		props   map[string]interface{}
+		props   map[string]any
 		filters []CompiledPropertyFilter
 		want    bool
 	}{
 		{
 			name:    "exact single key match",
-			props:   map[string]interface{}{"$browser": "Chrome"},
+			props:   map[string]any{"$browser": "Chrome"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpExact, []string{"Chrome"})},
 			want:    true,
 		},
 		{
 			name:    "exact single key miss",
-			props:   map[string]interface{}{"$browser": "Firefox"},
+			props:   map[string]any{"$browser": "Firefox"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpExact, []string{"Chrome"})},
 			want:    false,
 		},
 		{
 			name:    "exact multiple values OR match",
-			props:   map[string]interface{}{"$browser": "Firefox"},
+			props:   map[string]any{"$browser": "Firefox"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpExact, []string{"Chrome", "Firefox"})},
 			want:    true,
 		},
 		{
 			name:  "multi-key AND match",
-			props: map[string]interface{}{"$browser": "Chrome", "plan": "enterprise"},
+			props: map[string]any{"$browser": "Chrome", "plan": "enterprise"},
 			filters: []CompiledPropertyFilter{
 				NewCompiledPropertyFilter("$browser", OpExact, []string{"Chrome"}),
 				NewCompiledPropertyFilter("plan", OpExact, []string{"enterprise"}),
@@ -330,7 +330,7 @@ func TestMatchesPropertyFilters(t *testing.T) {
 		},
 		{
 			name:  "multi-key AND miss on one key",
-			props: map[string]interface{}{"$browser": "Chrome", "plan": "free"},
+			props: map[string]any{"$browser": "Chrome", "plan": "free"},
 			filters: []CompiledPropertyFilter{
 				NewCompiledPropertyFilter("$browser", OpExact, []string{"Chrome"}),
 				NewCompiledPropertyFilter("plan", OpExact, []string{"enterprise"}),
@@ -339,193 +339,193 @@ func TestMatchesPropertyFilters(t *testing.T) {
 		},
 		{
 			name:    "exact missing key fails",
-			props:   map[string]interface{}{"$os": "Linux"},
+			props:   map[string]any{"$os": "Linux"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpExact, []string{"Chrome"})},
 			want:    false,
 		},
 		{
 			name:    "numeric value coerced for exact",
-			props:   map[string]interface{}{"count": 42},
+			props:   map[string]any{"count": 42},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("count", OpExact, []string{"42"})},
 			want:    true,
 		},
 		{
 			name:    "boolean value coerced for exact",
-			props:   map[string]interface{}{"is_admin": true},
+			props:   map[string]any{"is_admin": true},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("is_admin", OpExact, []string{"true"})},
 			want:    true,
 		},
 		{
 			name:    "is_not match",
-			props:   map[string]interface{}{"$browser": "Firefox"},
+			props:   map[string]any{"$browser": "Firefox"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsNot, []string{"Chrome"})},
 			want:    true,
 		},
 		{
 			name:    "is_not miss",
-			props:   map[string]interface{}{"$browser": "Chrome"},
+			props:   map[string]any{"$browser": "Chrome"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsNot, []string{"Chrome"})},
 			want:    false,
 		},
 		{
 			name:    "is_not on missing key matches",
-			props:   map[string]interface{}{"$os": "Linux"},
+			props:   map[string]any{"$os": "Linux"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsNot, []string{"Chrome"})},
 			want:    true,
 		},
 		{
 			name:    "is_not multi-value none match",
-			props:   map[string]interface{}{"$browser": "Safari"},
+			props:   map[string]any{"$browser": "Safari"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsNot, []string{"Chrome", "Firefox"})},
 			want:    true,
 		},
 		{
 			name:    "is_not multi-value one matches",
-			props:   map[string]interface{}{"$browser": "Firefox"},
+			props:   map[string]any{"$browser": "Firefox"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsNot, []string{"Chrome", "Firefox"})},
 			want:    false,
 		},
 		{
 			name:    "icontains case-insensitive substring match",
-			props:   map[string]interface{}{"$current_url": "https://app.hanzo.ai/CheckOut"},
+			props:   map[string]any{"$current_url": "https://app.hanzo.ai/CheckOut"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpIContains, []string{"checkout"})},
 			want:    true,
 		},
 		{
 			name:    "icontains miss",
-			props:   map[string]interface{}{"$current_url": "https://app.hanzo.ai/insights"},
+			props:   map[string]any{"$current_url": "https://app.hanzo.ai/insights"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpIContains, []string{"checkout"})},
 			want:    false,
 		},
 		{
 			name:    "not_icontains match",
-			props:   map[string]interface{}{"$current_url": "https://app.hanzo.ai/insights"},
+			props:   map[string]any{"$current_url": "https://app.hanzo.ai/insights"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpNotIContains, []string{"checkout"})},
 			want:    true,
 		},
 		{
 			name:    "not_icontains miss",
-			props:   map[string]interface{}{"$current_url": "https://app.hanzo.ai/checkout"},
+			props:   map[string]any{"$current_url": "https://app.hanzo.ai/checkout"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpNotIContains, []string{"checkout"})},
 			want:    false,
 		},
 		{
 			name:    "not_icontains on missing key matches",
-			props:   map[string]interface{}{"$os": "Linux"},
+			props:   map[string]any{"$os": "Linux"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpNotIContains, []string{"checkout"})},
 			want:    true,
 		},
 		{
 			name:    "regex match",
-			props:   map[string]interface{}{"$current_url": "https://app.hanzo.ai/insights/123"},
+			props:   map[string]any{"$current_url": "https://app.hanzo.ai/insights/123"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpRegex, []string{`/insights/\d+`})},
 			want:    true,
 		},
 		{
 			name:    "regex miss",
-			props:   map[string]interface{}{"$current_url": "https://app.hanzo.ai/insights/abc"},
+			props:   map[string]any{"$current_url": "https://app.hanzo.ai/insights/abc"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpRegex, []string{`/insights/\d+`})},
 			want:    false,
 		},
 		{
 			name:    "invalid regex fails closed",
-			props:   map[string]interface{}{"$current_url": "anything"},
+			props:   map[string]any{"$current_url": "anything"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpRegex, []string{`(`})},
 			want:    false,
 		},
 		{
 			name:    "not_regex match",
-			props:   map[string]interface{}{"$current_url": "https://app.hanzo.ai/insights/abc"},
+			props:   map[string]any{"$current_url": "https://app.hanzo.ai/insights/abc"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpNotRegex, []string{`/insights/\d+`})},
 			want:    true,
 		},
 		{
 			name:    "not_regex with invalid pattern fails closed",
-			props:   map[string]interface{}{"$current_url": "anything"},
+			props:   map[string]any{"$current_url": "anything"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpNotRegex, []string{`(`})},
 			want:    false,
 		},
 		{
 			name:    "not_regex with invalid pattern and missing property fails closed",
-			props:   map[string]interface{}{},
+			props:   map[string]any{},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$current_url", OpNotRegex, []string{`(`})},
 			want:    false,
 		},
 		{
 			name:    "gt numeric match",
-			props:   map[string]interface{}{"count": 42},
+			props:   map[string]any{"count": 42},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("count", OpGreaterThan, []string{"10"})},
 			want:    true,
 		},
 		{
 			name:    "gt numeric miss",
-			props:   map[string]interface{}{"count": 5},
+			props:   map[string]any{"count": 5},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("count", OpGreaterThan, []string{"10"})},
 			want:    false,
 		},
 		{
 			name:    "gte boundary match",
-			props:   map[string]interface{}{"count": 10},
+			props:   map[string]any{"count": 10},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("count", OpGreaterEqual, []string{"10"})},
 			want:    true,
 		},
 		{
 			name:    "lt numeric match",
-			props:   map[string]interface{}{"count": 3},
+			props:   map[string]any{"count": 3},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("count", OpLessThan, []string{"10"})},
 			want:    true,
 		},
 		{
 			name:    "lte boundary match",
-			props:   map[string]interface{}{"count": 10},
+			props:   map[string]any{"count": 10},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("count", OpLessEqual, []string{"10"})},
 			want:    true,
 		},
 		{
 			name:    "numeric op on non-numeric event value fails",
-			props:   map[string]interface{}{"count": "not-a-number"},
+			props:   map[string]any{"count": "not-a-number"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("count", OpGreaterThan, []string{"10"})},
 			want:    false,
 		},
 		{
 			name:    "numeric op skips non-numeric filter value",
-			props:   map[string]interface{}{"count": 42},
+			props:   map[string]any{"count": 42},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("count", OpGreaterThan, []string{"abc"})},
 			want:    false,
 		},
 		{
 			name:    "is_set on present key matches",
-			props:   map[string]interface{}{"$browser": "Chrome"},
+			props:   map[string]any{"$browser": "Chrome"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsSet, nil)},
 			want:    true,
 		},
 		{
 			name:    "is_set on missing key fails",
-			props:   map[string]interface{}{"$os": "Linux"},
+			props:   map[string]any{"$os": "Linux"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsSet, nil)},
 			want:    false,
 		},
 		{
 			name:    "is_not_set on missing key matches",
-			props:   map[string]interface{}{"$os": "Linux"},
+			props:   map[string]any{"$os": "Linux"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsNotSet, nil)},
 			want:    true,
 		},
 		{
 			name:    "is_not_set on present key fails",
-			props:   map[string]interface{}{"$browser": "Chrome"},
+			props:   map[string]any{"$browser": "Chrome"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", OpIsNotSet, nil)},
 			want:    false,
 		},
 		{
 			name:    "unknown operator fails closed",
-			props:   map[string]interface{}{"$browser": "Chrome"},
+			props:   map[string]any{"$browser": "Chrome"},
 			filters: []CompiledPropertyFilter{NewCompiledPropertyFilter("$browser", "totally_made_up", []string{"Chrome"})},
 			want:    false,
 		},
 		{
 			name:    "no filters matches everything",
-			props:   map[string]interface{}{"$browser": "Chrome"},
+			props:   map[string]any{"$browser": "Chrome"},
 			filters: nil,
 			want:    true,
 		},
@@ -547,7 +547,7 @@ func TestFilterRunWithPropertyFilter(t *testing.T) {
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 	go filter.Run()
 
-	eventChan := make(chan interface{}, 2)
+	eventChan := make(chan any, 2)
 	sub := Subscription{
 		SubID:           1,
 		TeamId:          1,
@@ -565,14 +565,14 @@ func TestFilterRunWithPropertyFilter(t *testing.T) {
 		Token:      "token1",
 		DistinctId: "user1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{"$browser": "Chrome"},
+		Properties: map[string]any{"$browser": "Chrome"},
 	}
 	nonMatching := InsightsEvent{
 		Uuid:       "miss",
 		Token:      "token1",
 		DistinctId: "user1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{"$browser": "Firefox"},
+		Properties: map[string]any{"$browser": "Firefox"},
 	}
 	inboundChan <- matching
 	inboundChan <- nonMatching
@@ -606,7 +606,7 @@ func TestFilterRunWithPropertyAndEventTypeFilter(t *testing.T) {
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 	go filter.Run()
 
-	eventChan := make(chan interface{}, 4)
+	eventChan := make(chan any, 4)
 	sub := Subscription{
 		SubID:           1,
 		TeamId:          1,
@@ -625,21 +625,21 @@ func TestFilterRunWithPropertyAndEventTypeFilter(t *testing.T) {
 		Uuid:       "both",
 		Token:      "token1",
 		Event:      "checkout_completed",
-		Properties: map[string]interface{}{"plan": "enterprise"},
+		Properties: map[string]any{"plan": "enterprise"},
 	}
 	// Wrong event type
 	inboundChan <- InsightsEvent{
 		Uuid:       "wrong-event",
 		Token:      "token1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{"plan": "enterprise"},
+		Properties: map[string]any{"plan": "enterprise"},
 	}
 	// Wrong property
 	inboundChan <- InsightsEvent{
 		Uuid:       "wrong-prop",
 		Token:      "token1",
 		Event:      "checkout_completed",
-		Properties: map[string]interface{}{"plan": "free"},
+		Properties: map[string]any{"plan": "free"},
 	}
 
 	select {
@@ -670,7 +670,7 @@ func TestResponseInsightsEvent_MarshalJSON(t *testing.T) {
 		DistinctId: "user1",
 		PersonId:   "person1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{"url": "https://example.com"},
+		Properties: map[string]any{"url": "https://example.com"},
 	}
 
 	json, err := json.Marshal(event)
@@ -679,7 +679,7 @@ func TestResponseInsightsEvent_MarshalJSON(t *testing.T) {
 }
 
 func TestIncludeProperties_NilIncludesAllProperties(t *testing.T) {
-	properties := map[string]interface{}{
+	properties := map[string]any{
 		"url":          "https://example.com",
 		"$device_type": "Desktop",
 		"$browser":     "Chrome",
@@ -704,7 +704,7 @@ func TestIncludeProperties_EmptySliceIncludesNoProperties(t *testing.T) {
 		Timestamp:  "2026-01-01T00:00:00Z",
 		DistinctId: "user1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{
+		Properties: map[string]any{
 			"url":          "https://example.com",
 			"$device_type": "Desktop",
 		},
@@ -712,7 +712,7 @@ func TestIncludeProperties_EmptySliceIncludesNoProperties(t *testing.T) {
 
 	result := convertToResponseInsightsEvent(event, 1, []string{})
 
-	assert.Equal(t, map[string]interface{}{}, result.Properties)
+	assert.Equal(t, map[string]any{}, result.Properties)
 }
 
 func TestIncludeProperties_SpecificPropertiesFiltersCorrectly(t *testing.T) {
@@ -721,7 +721,7 @@ func TestIncludeProperties_SpecificPropertiesFiltersCorrectly(t *testing.T) {
 		Timestamp:  "2026-01-01T00:00:00Z",
 		DistinctId: "user1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{
+		Properties: map[string]any{
 			"url":          "https://example.com",
 			"$device_type": "Desktop",
 			"$browser":     "Chrome",
@@ -730,7 +730,7 @@ func TestIncludeProperties_SpecificPropertiesFiltersCorrectly(t *testing.T) {
 
 	result := convertToResponseInsightsEvent(event, 1, []string{"url", "$device_type"})
 
-	assert.Equal(t, map[string]interface{}{
+	assert.Equal(t, map[string]any{
 		"url":          "https://example.com",
 		"$device_type": "Desktop",
 	}, result.Properties)
@@ -742,14 +742,14 @@ func TestIncludeProperties_NonExistentPropertiesAreIgnored(t *testing.T) {
 		Timestamp:  "2026-01-01T00:00:00Z",
 		DistinctId: "user1",
 		Event:      "pageview",
-		Properties: map[string]interface{}{
+		Properties: map[string]any{
 			"url": "https://example.com",
 		},
 	}
 
 	result := convertToResponseInsightsEvent(event, 1, []string{"url", "nonexistent"})
 
-	assert.Equal(t, map[string]interface{}{
+	assert.Equal(t, map[string]any{
 		"url": "https://example.com",
 	}, result.Properties)
 }

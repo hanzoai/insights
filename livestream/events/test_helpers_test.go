@@ -7,7 +7,7 @@ func makeTestSub(id uint64, token string, opts ...func(*Subscription)) Subscript
 		SubID:         id,
 		TeamId:        1,
 		Token:         token,
-		EventChan:     make(chan interface{}, 100),
+		EventChan:     make(chan any, 100),
 		ShouldClose:   &atomic.Bool{},
 		DroppedEvents: &atomic.Uint64{},
 	}

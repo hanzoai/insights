@@ -3,12 +3,12 @@ package sse
 import "time"
 
 type EventMsg struct {
-	UUID       string                 `json:"uuid"`
-	Timestamp  interface{}            `json:"timestamp"`
-	DistinctID string                 `json:"distinct_id"`
-	PersonID   string                 `json:"person_id"`
-	Event      string                 `json:"event"`
-	Properties map[string]interface{} `json:"properties"`
+	UUID       string         `json:"uuid"`
+	Timestamp  any            `json:"timestamp"`
+	DistinctID string         `json:"distinct_id"`
+	PersonID   string         `json:"person_id"`
+	Event      string         `json:"event"`
+	Properties map[string]any `json:"properties"`
 	ReceivedAt time.Time
 }
 

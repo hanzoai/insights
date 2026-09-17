@@ -12,12 +12,12 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	jlexer "github.com/mailru/easyjson/jlexer"
-	jwriter "github.com/mailru/easyjson/jwriter"
 	"github.com/insights/insights/livestream/bot"
 	"github.com/insights/insights/livestream/configs"
 	"github.com/insights/insights/livestream/geo"
 	"github.com/insights/insights/livestream/metrics"
+	jlexer "github.com/mailru/easyjson/jlexer"
+	jwriter "github.com/mailru/easyjson/jwriter"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -106,10 +106,10 @@ type InsightsEventWrapper struct {
 
 //easyjson:json
 type InsightsEvent struct {
-	Token      string                 `json:"api_key,omitempty"`
-	Event      string                 `json:"event"`
-	Properties map[string]interface{} `json:"properties"`
-	Timestamp  interface{}            `json:"timestamp,omitempty"`
+	Token      string         `json:"api_key,omitempty"`
+	Event      string         `json:"event"`
+	Properties map[string]any `json:"properties"`
+	Timestamp  any            `json:"timestamp,omitempty"`
 
 	Uuid        string
 	DistinctId  string
@@ -131,15 +131,15 @@ type KafkaConsumerInterface interface {
 }
 
 type InsightsKafkaConsumer struct {
-	consumer       KafkaConsumerInterface
-	topic          string
-	geolocator     geo.GeoLocator
-	botClassifier  *bot.Classifier
-	incoming       chan []byte
-	outgoingChan   chan InsightsEvent
-	statsChan      chan CountEvent
-	parallel       int
-	Broker         *RedisEventBroker
+	consumer      KafkaConsumerInterface
+	topic         string
+	geolocator    geo.GeoLocator
+	botClassifier *bot.Classifier
+	incoming      chan []byte
+	outgoingChan  chan InsightsEvent
+	statsChan     chan CountEvent
+	parallel      int
+	Broker        *RedisEventBroker
 	// Shared across all runParsing goroutines so the log cadence is global,
 	// not per-worker. The Prometheus counter is already global; this keeps
 	// the log line consistent with it.
@@ -202,8 +202,7 @@ func (c *InsightsKafkaConsumer) Consume(ctx context.Context) {
 	for {
 		msg, err := c.consumer.ReadMessage(15 * time.Second)
 		if err != nil {
-			var inErr kafka.Error
-			if errors.As(err, &inErr) {
+			if inErr, ok := errors.AsType[kafka.Error](err); ok {
 				if inErr.Code() == kafka.ErrTransport {
 					metrics.ConnectFailure.Inc()
 				} else if inErr.IsTimeout() {
@@ -285,7 +284,7 @@ func parse(geolocator geo.GeoLocator, classifier *bot.Classifier, kafkaMessage [
 		Timestamp:  wrapperMessage.Timestamp,
 		Token:      "",
 		Event:      "",
-		Properties: make(map[string]interface{}),
+		Properties: make(map[string]any),
 	}
 
 	data := []byte(wrapperMessage.Data)
@@ -350,10 +349,10 @@ func parse(geolocator geo.GeoLocator, classifier *bot.Classifier, kafkaMessage [
 }
 
 var botClassifyEvents = map[string]bool{
-	"$pageview":  true,
-	"$pageleave": true,
-	"$screen":    true,
-	"$http_log":  true,
+	"$pageview":    true,
+	"$pageleave":   true,
+	"$screen":      true,
+	"$http_log":    true,
 	"$autocapture": true,
 }
 
@@ -361,7 +360,7 @@ func shouldClassifyBot(event string) bool {
 	return botClassifyEvents[event]
 }
 
-func extractUserAgent(props map[string]interface{}) string {
+func extractUserAgent(props map[string]any) string {
 	if uaValue, ok := props["$user_agent"]; ok {
 		if ua, ok := uaValue.(string); ok && ua != "" {
 			return ua

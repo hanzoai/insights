@@ -212,10 +212,7 @@ func (v *EventsView) View() string {
 	header += fmt.Sprintf("  %-*s", colTime, "Time")
 	header = headerStyle.Width(v.width).Render(header)
 
-	visibleRows := v.height - 2
-	if visibleRows < 1 {
-		visibleRows = 1
-	}
+	visibleRows := max(v.height-2, 1)
 
 	// Adjust offset so cursor is always visible
 	if v.cursor < v.offset {

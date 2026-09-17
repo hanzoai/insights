@@ -1,6 +1,6 @@
 module github.com/insights/insights/phrocs
 
-go 1.25.5
+go 1.27.1
 
 require (
 	charm.land/bubbles/v2 v2.0.0

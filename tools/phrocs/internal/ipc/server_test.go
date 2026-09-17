@@ -536,7 +536,7 @@ func TestServe_quit_idempotent(t *testing.T) {
 	mgr := testManager(t, "web")
 	path := startServe(t, mgr)
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		resp := send(t, path, map[string]any{"cmd": "quit"})
 		if resp["ok"] != true {
 			t.Fatalf("quit #%d ok: got %v, want true", i, resp["ok"])

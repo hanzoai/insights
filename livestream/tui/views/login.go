@@ -35,7 +35,7 @@ func (v *LoginView) Spinner() spinner.Model {
 }
 
 func (v *LoginView) UpdateSpinner(msg spinner.TickMsg) spinner.Model {
-	var cmd interface{}
+	var cmd any
 	_ = cmd
 	v.spinner, _ = v.spinner.Update(msg)
 	return v.spinner

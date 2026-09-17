@@ -84,7 +84,7 @@ type Subscription struct {
 	Columns []string
 
 	// Channels
-	EventChan   chan interface{}
+	EventChan   chan any
 	ShouldClose *atomic.Bool
 
 	// Stats
@@ -93,12 +93,12 @@ type Subscription struct {
 
 //easyjson:json
 type ResponseInsightsEvent struct {
-	Uuid       string                 `json:"uuid"`
-	Timestamp  interface{}            `json:"timestamp"`
-	DistinctId string                 `json:"distinct_id"`
-	PersonId   string                 `json:"person_id"`
-	Event      string                 `json:"event"`
-	Properties map[string]interface{} `json:"properties"`
+	Uuid       string         `json:"uuid"`
+	Timestamp  any            `json:"timestamp"`
+	DistinctId string         `json:"distinct_id"`
+	PersonId   string         `json:"person_id"`
+	Event      string         `json:"event"`
+	Properties map[string]any `json:"properties"`
 }
 
 //easyjson:json
@@ -132,11 +132,11 @@ func convertToResponseGeoEvent(event InsightsEvent) *ResponseGeoEvent {
 }
 
 func convertToResponseInsightsEvent(event InsightsEvent, teamId int, columns []string) *ResponseInsightsEvent {
-	var properties map[string]interface{}
+	var properties map[string]any
 	if columns == nil {
 		properties = event.Properties
 	} else {
-		properties = make(map[string]interface{})
+		properties = make(map[string]any)
 		for _, key := range columns {
 			if val, ok := event.Properties[key]; ok {
 				properties[key] = val
@@ -211,7 +211,7 @@ func (c *Filter) Run() {
 	}
 }
 
-func matchesPropertyFilters(props map[string]interface{}, filters []CompiledPropertyFilter) bool {
+func matchesPropertyFilters(props map[string]any, filters []CompiledPropertyFilter) bool {
 	for i := range filters {
 		if !filters[i].matches(props) {
 			return false
@@ -229,7 +229,7 @@ func (f *CompiledPropertyFilter) hasValidRegex() bool {
 	return false
 }
 
-func (f *CompiledPropertyFilter) matches(props map[string]interface{}) bool {
+func (f *CompiledPropertyFilter) matches(props map[string]any) bool {
 	raw, present := props[f.Key]
 
 	switch f.Operator {

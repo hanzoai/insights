@@ -16,17 +16,17 @@ func TestFilterEquivalence(t *testing.T) {
 		sub        func() Subscription
 		event      InsightsEvent
 		streamType string
-		wantProps  map[string]interface{}
+		wantProps  map[string]any
 	}{
 		{
 			name: "basic match",
 			sub:  func() Subscription { return makeTestSub(1, "tok_a") },
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{"url": "https://example.com"},
+				Properties: map[string]any{"url": "https://example.com"},
 			},
 			streamType: "event",
-			wantProps:  map[string]interface{}{"url": "https://example.com"},
+			wantProps:  map[string]any{"url": "https://example.com"},
 		},
 		{
 			name: "distinctId match",
@@ -35,7 +35,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "event",
 		},
@@ -46,7 +46,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u2", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "none",
 		},
@@ -57,7 +57,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "event",
 		},
@@ -68,7 +68,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "event",
 		},
@@ -79,7 +79,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$identify", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "none",
 		},
@@ -90,7 +90,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "event",
 		},
@@ -102,7 +102,7 @@ func TestFilterEquivalence(t *testing.T) {
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
 				Lat: 40.7128, Lng: -74.0060, CountryCode: "US",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "geo",
 		},
@@ -114,7 +114,7 @@ func TestFilterEquivalence(t *testing.T) {
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
 				Lat: 0, Lng: 0,
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "none",
 		},
@@ -125,10 +125,10 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{"url": "https://example.com", "$browser": "Chrome"},
+				Properties: map[string]any{"url": "https://example.com", "$browser": "Chrome"},
 			},
 			streamType: "event",
-			wantProps:  map[string]interface{}{"url": "https://example.com"},
+			wantProps:  map[string]any{"url": "https://example.com"},
 		},
 		{
 			name: "columns nil returns all properties",
@@ -137,10 +137,10 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{"url": "https://example.com", "$browser": "Chrome"},
+				Properties: map[string]any{"url": "https://example.com", "$browser": "Chrome"},
 			},
 			streamType: "event",
-			wantProps:  map[string]interface{}{"url": "https://example.com", "$browser": "Chrome"},
+			wantProps:  map[string]any{"url": "https://example.com", "$browser": "Chrome"},
 		},
 		{
 			name: "shouldClose prevents delivery",
@@ -151,7 +151,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "none",
 		},
@@ -165,7 +165,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$pageview", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "event",
 		},
@@ -179,7 +179,7 @@ func TestFilterEquivalence(t *testing.T) {
 			},
 			event: InsightsEvent{
 				Token: "tok_a", Event: "$identify", DistinctId: "u1", Uuid: "uuid-1",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 			},
 			streamType: "none",
 		},
@@ -228,7 +228,7 @@ func TestFilterEquivalence(t *testing.T) {
 	}
 }
 
-func drainChan(ch chan interface{}) interface{} {
+func drainChan(ch chan any) any {
 	select {
 	case v := <-ch:
 		return v

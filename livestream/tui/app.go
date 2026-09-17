@@ -488,10 +488,7 @@ func (a *App) saveColumnPrefs(cols []views.PropColumn) {
 }
 
 func (a *App) resize() {
-	eventsHeight := a.height - 6
-	if eventsHeight < 3 {
-		eventsHeight = 3
-	}
+	eventsHeight := max(a.height-6, 3)
 	debug.Log("resize", "eventsHeight=%d (terminal=%dx%d)", eventsHeight, a.width, a.height)
 	a.events.SetSize(a.width, eventsHeight)
 	if a.events.ColumnsExceedWidth(a.events.PropertyColumns()) {

@@ -114,8 +114,8 @@ func TestParse(t *testing.T) {
 		Token:     "this is token",
 		Timestamp: 1738073128810.,
 		Event:     "consumer_ack",
-		Properties: map[string]interface{}{
-			"$groups": map[string]interface{}{
+		Properties: map[string]any{
+			"$groups": map[string]any{
 				"account": "757eb2c3-7343-4e92-b040-a1d0201b54e6",
 			},
 			"consumer_id":   "67dc0ac7-c9ec-4f8a-8cad-0fbb3695c86c",

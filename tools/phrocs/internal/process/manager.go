@@ -84,11 +84,9 @@ func (m *Manager) StopAll() {
 	m.mu.Unlock()
 	var wg sync.WaitGroup
 	for _, p := range procs {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			p.Stop()
-		}()
+		})
 	}
 	wg.Wait()
 }

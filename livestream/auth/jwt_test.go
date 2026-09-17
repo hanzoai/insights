@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"maps"
 	"net/http"
 	"testing"
 	"time"
@@ -152,9 +153,7 @@ func createValidToken(audience string, claims jwt.MapClaims) string {
 		"aud": audience,
 		"exp": time.Now().Add(time.Hour).Unix(),
 	}
-	for k, v := range claims {
-		newClaims[k] = v
-	}
+	maps.Copy(newClaims, claims)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
 	tokenString, _ := token.SignedString([]byte(viper.GetString("jwt.secret")))
 	return tokenString

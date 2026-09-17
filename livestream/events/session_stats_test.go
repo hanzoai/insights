@@ -153,7 +153,7 @@ func TestSessionStats_Concurrency(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(iterations)
 
-	for i := 0; i < iterations; i++ {
+	for i := range iterations {
 		go func(idx int) {
 			defer wg.Done()
 			statsChan <- SessionRecordingEvent{

@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"maps"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,9 +11,9 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 	"github.com/insights/insights/livestream/auth"
 	"github.com/insights/insights/livestream/events"
+	"github.com/labstack/echo/v4"
 	"github.com/redis/rueidis"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -152,9 +153,7 @@ func createJWTToken(audience string, claims jwt.MapClaims) string {
 		"aud": audience,
 		"exp": time.Now().Add(time.Hour).Unix(),
 	}
-	for k, v := range claims {
-		newClaims[k] = v
-	}
+	maps.Copy(newClaims, claims)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
 	tokenString, _ := token.SignedString([]byte(viper.GetString("jwt.secret")))
 	return tokenString
@@ -298,7 +297,7 @@ func TestFilterNotificationForUser(t *testing.T) {
 			assert.Equal(t, tt.wantOK, ok)
 			assert.Equal(t, tt.wantReason, reason)
 			if ok {
-				var out map[string]interface{}
+				var out map[string]any
 				require.NoError(t, json.Unmarshal([]byte(cleaned), &out))
 				_, present := out["resolved_user_ids"]
 				assert.False(t, present, "resolved_user_ids must be stripped from delivered payload")

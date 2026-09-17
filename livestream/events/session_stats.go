@@ -189,8 +189,8 @@ func (ss *SessionStats) KeysForToken(token string) []string {
 	prefix := token + ":"
 	var sessions []string
 	for _, key := range ss.store.Keys() {
-		if strings.HasPrefix(key, prefix) {
-			sessions = append(sessions, strings.TrimPrefix(key, prefix))
+		if after, ok := strings.CutPrefix(key, prefix); ok {
+			sessions = append(sessions, after)
 		}
 	}
 	return sessions

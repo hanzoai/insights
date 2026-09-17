@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
 	"github.com/insights/insights/livestream/events"
 	"github.com/insights/insights/livestream/handlers"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,7 +41,7 @@ func TestStatsHandler(t *testing.T) {
 	c.Set("teamStats", stats)
 
 	handler := func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusOK, map[string]any{
 			"users_on_product": stats.GetStoreForToken("mock_token").Len(),
 		})
 	}

@@ -230,8 +230,8 @@ func (s *Stream) connectAndStream() error {
 
 		line := scanner.Text()
 
-		if strings.HasPrefix(line, "data: ") {
-			dataLines = append(dataLines, strings.TrimPrefix(line, "data: "))
+		if after, ok := strings.CutPrefix(line, "data: "); ok {
+			dataLines = append(dataLines, after)
 			continue
 		}
 

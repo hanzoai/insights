@@ -11,12 +11,12 @@ import (
 )
 
 type DetailView struct {
-	event    *sse.EventMsg
-	scroll   int
-	width    int
-	height   int
-	lines    []string
-	visible  bool
+	event   *sse.EventMsg
+	scroll  int
+	width   int
+	height  int
+	lines   []string
+	visible bool
 }
 
 func NewDetailView() *DetailView {
@@ -51,21 +51,14 @@ func (v *DetailView) ScrollUp() {
 }
 
 func (v *DetailView) ScrollDown() {
-	maxScroll := len(v.lines) - v.contentHeight()
-	if maxScroll < 0 {
-		maxScroll = 0
-	}
+	maxScroll := max(len(v.lines)-v.contentHeight(), 0)
 	if v.scroll < maxScroll {
 		v.scroll++
 	}
 }
 
 func (v *DetailView) contentHeight() int {
-	h := v.height - 6
-	if h < 1 {
-		h = 1
-	}
-	return h
+	return max(v.height-6, 1)
 }
 
 func (v *DetailView) buildLines() {
@@ -91,10 +84,7 @@ func (v *DetailView) buildLines() {
 
 	if v.event.Properties != nil {
 		// border (2) + padding (2*2) + indent (2) = 8 chars of overhead
-		maxValWidth := v.width - 8
-		if maxValWidth < 20 {
-			maxValWidth = 20
-		}
+		maxValWidth := max(v.width-8, 20)
 
 		keys := make([]string, 0, len(v.event.Properties))
 		for k := range v.event.Properties {
@@ -106,10 +96,7 @@ func (v *DetailView) buildLines() {
 			val := v.event.Properties[k]
 			valStr := formatValue(val)
 			// key prefix takes up space: "  " + key + ": "
-			available := maxValWidth - len(k) - 4
-			if available < 10 {
-				available = 10
-			}
+			available := max(maxValWidth-len(k)-4, 10)
 			if len(valStr) > available {
 				valStr = valStr[:available-3] + "..."
 			}
@@ -120,7 +107,7 @@ func (v *DetailView) buildLines() {
 	v.lines = lines
 }
 
-func formatValue(v interface{}) string {
+func formatValue(v any) string {
 	switch val := v.(type) {
 	case string:
 		return val
@@ -152,14 +139,8 @@ func (v *DetailView) View() string {
 		Foreground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"})
 
 	ch := v.contentHeight()
-	end := v.scroll + ch
-	if end > len(v.lines) {
-		end = len(v.lines)
-	}
-	start := v.scroll
-	if start > len(v.lines) {
-		start = len(v.lines)
-	}
+	end := min(v.scroll+ch, len(v.lines))
+	start := min(v.scroll, len(v.lines))
 
 	hintStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#888888", Dark: "#666666"})

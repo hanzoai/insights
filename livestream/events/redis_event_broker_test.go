@@ -17,7 +17,7 @@ func TestInsightsEventRoundTrip(t *testing.T) {
 			input: InsightsEvent{
 				Token:       "tok_abc",
 				Event:       "$pageview",
-				Properties:  map[string]interface{}{"url": "https://example.com", "$browser": "Chrome"},
+				Properties:  map[string]any{"url": "https://example.com", "$browser": "Chrome"},
 				Timestamp:   "2026-01-01T00:00:00Z",
 				Uuid:        "550e8400-e29b-41d4-a716-446655440000",
 				DistinctId:  "user-42",
@@ -31,7 +31,7 @@ func TestInsightsEventRoundTrip(t *testing.T) {
 			input: InsightsEvent{
 				Token:      "tok_abc",
 				Event:      "$pageview",
-				Properties: map[string]interface{}{"count": float64(42), "price": 9.99},
+				Properties: map[string]any{"count": float64(42), "price": 9.99},
 				Uuid:       "uuid-1",
 				DistinctId: "user-1",
 			},
@@ -41,7 +41,7 @@ func TestInsightsEventRoundTrip(t *testing.T) {
 			input: InsightsEvent{
 				Token:      "tok_abc",
 				Event:      "$identify",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 				Uuid:       "uuid-2",
 				DistinctId: "user-2",
 			},
@@ -61,7 +61,7 @@ func TestInsightsEventRoundTrip(t *testing.T) {
 			input: InsightsEvent{
 				Token:      "tok_abc",
 				Event:      "$pageview",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 				Uuid:       "uuid-4",
 				DistinctId: "user-4",
 				Lat:        0.0,
@@ -73,7 +73,7 @@ func TestInsightsEventRoundTrip(t *testing.T) {
 			input: InsightsEvent{
 				Token:      "tok_abc",
 				Event:      "$pageview",
-				Properties: map[string]interface{}{},
+				Properties: map[string]any{},
 				Timestamp:  float64(1704067200),
 				Uuid:       "uuid-5",
 				DistinctId: "user-5",
@@ -84,9 +84,9 @@ func TestInsightsEventRoundTrip(t *testing.T) {
 			input: InsightsEvent{
 				Token: "tok_abc",
 				Event: "$pageview",
-				Properties: map[string]interface{}{
-					"nested": map[string]interface{}{"key": "value"},
-					"list":   []interface{}{"a", "b"},
+				Properties: map[string]any{
+					"nested": map[string]any{"key": "value"},
+					"list":   []any{"a", "b"},
 				},
 				Uuid:       "uuid-6",
 				DistinctId: "user-6",

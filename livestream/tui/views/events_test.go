@@ -20,7 +20,7 @@ func TestEventsView_CircularBuffer(t *testing.T) {
 	v := NewEventsView()
 	v.SetSize(80, 20)
 
-	for i := 0; i < maxEvents+50; i++ {
+	for range maxEvents + 50 {
 		v.AddEvent(sse.EventMsg{Event: "$pageview", ReceivedAt: time.Now()})
 	}
 

@@ -65,7 +65,7 @@ func TestConcurrency(t *testing.T) {
 	var wg sync.WaitGroup
 
 	wg.Add(iterations)
-	for i := 0; i < iterations; i++ {
+	for range iterations {
 		go func() {
 			defer wg.Done()
 			swc.Increment()

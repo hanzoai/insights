@@ -260,7 +260,7 @@ func runInsightsCliListUnits(intents []string) ([]string, error) {
 		return nil, fmt.Errorf("insightscli dev:list-units: %s", strings.TrimSpace(stderr.String()))
 	}
 	var units []string
-	for _, line := range strings.Split(strings.TrimSpace(string(output)), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSpace(string(output)), "\n") {
 		if line != "" {
 			units = append(units, line)
 		}
@@ -346,10 +346,7 @@ func (m Model) renderSetupView() string {
 		desc := entry.Description
 
 		maxNameW := 25
-		maxDescW := w - maxNameW - 8
-		if maxDescW < 0 {
-			maxDescW = 0
-		}
+		maxDescW := max(w-maxNameW-8, 0)
 
 		name = truncate(name, maxNameW)
 		desc = truncate(desc, maxDescW)
