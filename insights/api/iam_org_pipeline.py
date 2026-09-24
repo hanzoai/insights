@@ -20,18 +20,34 @@ Security invariants (RED H2/M2/M3/M7):
     silently allowed into a self-created or wrong org.
   - Membership level is derived from the IAM role claim and DEFAULTS TO MEMBER.
     Being the first user in an org does NOT grant ownership.
+
+Binding to the cloud project: cloud forwards every event it admits with a
+project's publishable `pk-` key, and ingestion keeps an event only when that key
+is some team's `api_token`. A team created here starts with a random token, so
+until sign-in points it at the org's cloud project key, its events are dropped.
+The lookup is `GET /v1/projects` asked as the signed-in user, with the IAM access
+token this sign-in just issued: cloud answers only for an org the user belongs
+to, and the token is used for that one call and never stored.
 """
 
 from typing import Any, Optional, Union
 
 import structlog
+from django.conf import settings
 from django.db import IntegrityError, transaction
+
+import requests
 from social_core.exceptions import AuthFailed
 from social_django.strategy import DjangoStrategy
 
 from insights.models import Organization, OrganizationMembership, Team, User
+from insights.models.team.team_caching import set_team_in_cache
 
 logger = structlog.get_logger(__name__)
+
+# Sign-in waits on this call, so a slow cloud costs at most this much and the
+# binding is retried at the next sign-in.
+_CLOUD_TIMEOUT_SECONDS = 5
 
 
 def _normalize_slug(org_slug: str) -> str:
@@ -115,6 +131,90 @@ def _ensure_default_team(org: Organization) -> Team:
     return team
 
 
+def _cloud_project(org_slug: str, access_token: str) -> Optional[dict]:
+    """The org's cloud project whose publishable key its events carry.
+
+    The oldest project with a `pk-` key, so the choice is the same at every
+    sign-in. None when cloud does not answer or the org has no such project:
+    analytics binding never decides whether a sign-in succeeds.
+    """
+    slug = _normalize_slug(org_slug)
+    try:
+        response = requests.get(
+            f"{settings.HANZO_API_URL}/v1/projects",
+            headers={"Authorization": f"Bearer {access_token}", "X-Org-Id": slug},
+            timeout=_CLOUD_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        projects = response.json()
+    except Exception as e:
+        # The body is not logged: an error can echo back the bearer.
+        logger.warning("iam_org_pipeline_cloud_projects_unavailable", org_slug=slug, error=type(e).__name__)
+        return None
+
+    if not isinstance(projects, list):
+        logger.warning("iam_org_pipeline_cloud_projects_malformed", org_slug=slug)
+        return None
+
+    # Only the org that was asked about: a project of any other org is never
+    # a key this org's team may carry.
+    keyed = [
+        p
+        for p in projects
+        if isinstance(p, dict)
+        and str(p.get("org", "")).lower() == slug
+        and isinstance(p.get("key"), str)
+        and p["key"].startswith("pk-")
+    ]
+    if not keyed:
+        return None
+    return min(keyed, key=lambda p: (p.get("createdAt") or 0, str(p.get("id", ""))))
+
+
+def _bind_cloud_project(org: Organization, org_slug: str, access_token: Optional[str]) -> None:
+    """Give the org's first team its cloud project's key and name.
+
+    Once any team of the org carries a `pk-` key this is one query and no call.
+    A key already held by another org's team is never moved.
+    """
+    if not access_token:
+        return
+    if Team.objects.filter(organization=org, api_token__startswith="pk-").exists():
+        return
+
+    project = _cloud_project(org_slug, access_token)
+    if project is None:
+        return
+
+    key = project["key"]
+    if Team.objects.filter(api_token=key).exists():
+        logger.warning("iam_org_pipeline_cloud_key_held_elsewhere", org_id=str(org.id), project=project.get("slug"))
+        return
+
+    team = Team.objects.filter(organization=org).order_by("id").first()
+    if team is None:
+        return
+
+    old_token = team.api_token
+    team.api_token = key
+    if isinstance(project.get("name"), str) and project["name"]:
+        team.name = project["name"][:200]
+    try:
+        with transaction.atomic():
+            team.save(update_fields=["api_token", "name"])
+    except IntegrityError:
+        # Another org's team took the key between the check and the save.
+        logger.warning("iam_org_pipeline_cloud_key_held_elsewhere", org_id=str(org.id), project=project.get("slug"))
+        return
+    set_team_in_cache(old_token, None)
+    logger.info(
+        "iam_org_pipeline_bound_cloud_project",
+        org_id=str(org.id),
+        team_id=team.id,
+        project=project.get("slug"),
+    )
+
+
 def _membership_level(response: dict) -> int:
     """Derive the org membership level from the IAM role claim. Default MEMBER.
 
@@ -196,6 +296,7 @@ def iam_org_assign(
     try:
         org = _ensure_organization(org_slug)
         _ensure_default_team(org)
+        _bind_cloud_project(org, org_slug, response.get("access_token"))
         _ensure_membership(user, org, _membership_level(response))
 
         if user.current_organization_id != org.id:

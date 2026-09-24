@@ -1,6 +1,6 @@
 """RED regression tests for the Hanzo IAM org pipeline (H2/M2/M3/M7)."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from social_core.exceptions import AuthFailed
@@ -89,3 +89,76 @@ class TestIAMOrgPipelineDB(BaseTest):
 
     def _make_user(self, email):
         return User.objects.create(email=email, first_name="T", distinct_id=email)
+
+
+def _projects(*projects):
+    answer = MagicMock()
+    answer.raise_for_status.return_value = None
+    answer.json.return_value = list(projects)
+    return answer
+
+
+class TestIAMOrgPipelineCloudBinding(BaseTest):
+    """Sign-in points a new org's team at its cloud project's publishable key."""
+
+    def _login(self, user, owner, token="iam-access-token"):
+        response = {"owner": owner}
+        if token:
+            response["access_token"] = token
+        return iam_org_assign(MagicMock(), {}, MagicMock(), user=user, response=response)
+
+    def _make_user(self, email):
+        return User.objects.create(email=email, first_name="T", distinct_id=email)
+
+    @patch("insights.api.iam_org_pipeline.requests.get")
+    def test_binds_the_oldest_keyed_project_as_the_user(self, get):
+        get.return_value = _projects(
+            {"id": "p2", "org": "fresh", "slug": "later", "name": "later", "key": "pk-later-000000", "createdAt": 20},
+            {"id": "p1", "org": "fresh", "slug": "site", "name": "site", "key": "pk-site-0000000", "createdAt": 10},
+        )
+        self._login(self._make_user("u@fresh.io"), "fresh")
+
+        team = Team.objects.get(organization__slug="fresh")
+        assert team.api_token == "pk-site-0000000"
+        assert team.name == "site"
+        url = get.call_args.args[0]
+        headers = get.call_args.kwargs["headers"]
+        assert url.endswith("/v1/projects")
+        assert headers == {"Authorization": "Bearer iam-access-token", "X-Org-Id": "fresh"}
+
+    @patch("insights.api.iam_org_pipeline.requests.get")
+    def test_bound_org_asks_cloud_nothing(self, get):
+        get.return_value = _projects({"id": "p1", "org": "bound", "name": "a", "key": "pk-bound-000000"})
+        self._login(self._make_user("a@bound.io"), "bound")
+        self._login(self._make_user("b@bound.io"), "bound")
+        assert get.call_count == 1
+
+    @patch("insights.api.iam_org_pipeline.requests.get")
+    def test_no_token_no_call(self, get):
+        self._login(self._make_user("u@quiet.io"), "quiet", token=None)
+        get.assert_not_called()
+        assert not Team.objects.get(organization__slug="quiet").api_token.startswith("pk-")
+
+    @patch("insights.api.iam_org_pipeline.requests.get", side_effect=ConnectionError("down"))
+    def test_cloud_down_still_signs_in(self, get):
+        user = self._make_user("u@down.io")
+        self._login(user, "down")
+        org = Organization.objects.get(slug="down")
+        assert user.current_organization_id == org.id
+        assert not Team.objects.get(organization=org).api_token.startswith("pk-")
+
+    @patch("insights.api.iam_org_pipeline.requests.get")
+    def test_another_orgs_project_is_ignored(self, get):
+        get.return_value = _projects({"id": "p1", "org": "someone-else", "name": "x", "key": "pk-other-000000"})
+        self._login(self._make_user("u@asker.io"), "asker")
+        assert not Team.objects.get(organization__slug="asker").api_token.startswith("pk-")
+
+    @patch("insights.api.iam_org_pipeline.requests.get")
+    def test_key_held_by_another_org_is_not_moved(self, get):
+        self.team.api_token = "pk-held-0000000"
+        self.team.save()
+        get.return_value = _projects({"id": "p1", "org": "thief", "name": "x", "key": "pk-held-0000000"})
+        self._login(self._make_user("u@thief.io"), "thief")
+        self.team.refresh_from_db()
+        assert self.team.api_token == "pk-held-0000000"
+        assert not Team.objects.get(organization__slug="thief").api_token.startswith("pk-")
