@@ -18,11 +18,8 @@ export function liveEventsHostOrigin(): string | null {
     const appOrigin = window.location.origin
     const appContext = getAppContext()
 
-    if (appOrigin === 'https://insights.hanzo.ai') {
-        return 'https://live.insights.hanzo.ai'
-    } else if (appOrigin === 'https://insights.hanzo.ai') {
-        return 'https://live.insights.hanzo.ai'
-    } else if (appOrigin === 'https://app.dev.insights.dev') {
+    // insights.hanzo.ai takes its livestream host from the server (LIVESTREAM_HOST).
+    if (appOrigin === 'https://app.dev.insights.dev') {
         return 'https://live.dev.insights.dev'
     } else if (process.env.STORYBOOK) {
         return 'http://localhost:6006'
