@@ -107,8 +107,8 @@ export const getDomainsListUrl = (organizationId: string, params?: DomainsListPa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/domains/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/domains/`
+        ? `/v1/organizations/${organizationId}/domains/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/domains/`
 }
 
 export const domainsList = async (
@@ -123,7 +123,7 @@ export const domainsList = async (
 }
 
 export const getDomainsCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/domains/`
+    return `/v1/organizations/${organizationId}/domains/`
 }
 
 export const domainsCreate = async (
@@ -140,7 +140,7 @@ export const domainsCreate = async (
 }
 
 export const getDomainsRetrieveUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/domains/${id}/`
+    return `/v1/organizations/${organizationId}/domains/${id}/`
 }
 
 export const domainsRetrieve = async (
@@ -155,7 +155,7 @@ export const domainsRetrieve = async (
 }
 
 export const getDomainsUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/domains/${id}/`
+    return `/v1/organizations/${organizationId}/domains/${id}/`
 }
 
 export const domainsUpdate = async (
@@ -173,7 +173,7 @@ export const domainsUpdate = async (
 }
 
 export const getDomainsPartialUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/domains/${id}/`
+    return `/v1/organizations/${organizationId}/domains/${id}/`
 }
 
 export const domainsPartialUpdate = async (
@@ -191,7 +191,7 @@ export const domainsPartialUpdate = async (
 }
 
 export const getDomainsDestroyUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/domains/${id}/`
+    return `/v1/organizations/${organizationId}/domains/${id}/`
 }
 
 export const domainsDestroy = async (organizationId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -205,7 +205,7 @@ export const domainsDestroy = async (organizationId: string, id: string, options
  * Regenerate SCIM bearer token.
  */
 export const getDomainsScimTokenCreateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/domains/${id}/scim/token/`
+    return `/v1/organizations/${organizationId}/domains/${id}/scim/token/`
 }
 
 export const domainsScimTokenCreate = async (
@@ -223,7 +223,7 @@ export const domainsScimTokenCreate = async (
 }
 
 export const getDomainsVerifyCreateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/domains/${id}/verify/`
+    return `/v1/organizations/${organizationId}/domains/${id}/verify/`
 }
 
 export const domainsVerifyCreate = async (
@@ -252,8 +252,8 @@ export const getInvitesListUrl = (organizationId: string, params?: InvitesListPa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/invites/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/invites/`
+        ? `/v1/organizations/${organizationId}/invites/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/invites/`
 }
 
 export const invitesList = async (
@@ -268,7 +268,7 @@ export const invitesList = async (
 }
 
 export const getInvitesCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/invites/`
+    return `/v1/organizations/${organizationId}/invites/`
 }
 
 export const invitesCreate = async (
@@ -285,7 +285,7 @@ export const invitesCreate = async (
 }
 
 export const getInvitesDestroyUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/invites/${id}/`
+    return `/v1/organizations/${organizationId}/invites/${id}/`
 }
 
 export const invitesDestroy = async (organizationId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -296,7 +296,7 @@ export const invitesDestroy = async (organizationId: string, id: string, options
 }
 
 export const getInvitesBulkCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/invites/bulk/`
+    return `/v1/organizations/${organizationId}/invites/bulk/`
 }
 
 export const invitesBulkCreate = async (
@@ -324,8 +324,8 @@ export const getMembersListUrl = (organizationId: string, params?: MembersListPa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/members/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/members/`
+        ? `/v1/organizations/${organizationId}/members/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/members/`
 }
 
 export const membersList = async (
@@ -340,7 +340,7 @@ export const membersList = async (
 }
 
 export const getMembersUpdateUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/`
 }
 
 export const membersUpdate = async (
@@ -358,7 +358,7 @@ export const membersUpdate = async (
 }
 
 export const getMembersPartialUpdateUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/`
 }
 
 export const membersPartialUpdate = async (
@@ -376,7 +376,7 @@ export const membersPartialUpdate = async (
 }
 
 export const getMembersDestroyUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/`
 }
 
 export const membersDestroy = async (
@@ -391,7 +391,7 @@ export const membersDestroy = async (
 }
 
 export const getMembersScopedApiKeysRetrieveUrl = (organizationId: string, userUuid: string) => {
-    return `/api/organizations/${organizationId}/members/${userUuid}/scoped_api_keys/`
+    return `/v1/organizations/${organizationId}/members/${userUuid}/scoped_api_keys/`
 }
 
 export const membersScopedApiKeysRetrieve = async (
@@ -420,8 +420,8 @@ export const getList2Url = (organizationId: string, params?: List2Params) => {
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/projects/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/projects/`
+        ? `/v1/organizations/${organizationId}/projects/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/projects/`
 }
 
 export const list2 = async (
@@ -439,7 +439,7 @@ export const list2 = async (
  * Projects for the current organization.
  */
 export const getCreate2Url = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/projects/`
+    return `/v1/organizations/${organizationId}/projects/`
 }
 
 export const create2 = async (
@@ -459,7 +459,7 @@ export const create2 = async (
  * Projects for the current organization.
  */
 export const getRetrieve2Url = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/`
+    return `/v1/organizations/${organizationId}/projects/${id}/`
 }
 
 export const retrieve2 = async (
@@ -477,7 +477,7 @@ export const retrieve2 = async (
  * Projects for the current organization.
  */
 export const getUpdate2Url = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/`
+    return `/v1/organizations/${organizationId}/projects/${id}/`
 }
 
 export const update2 = async (
@@ -498,7 +498,7 @@ export const update2 = async (
  * Projects for the current organization.
  */
 export const getPartialUpdate2Url = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/`
+    return `/v1/organizations/${organizationId}/projects/${id}/`
 }
 
 export const partialUpdate2 = async (
@@ -519,7 +519,7 @@ export const partialUpdate2 = async (
  * Projects for the current organization.
  */
 export const getDestroy2Url = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/`
+    return `/v1/organizations/${organizationId}/projects/${id}/`
 }
 
 export const destroy2 = async (organizationId: string, id: number, options?: RequestInit): Promise<void> => {
@@ -533,7 +533,7 @@ export const destroy2 = async (organizationId: string, id: number, options?: Req
  * Projects for the current organization.
  */
 export const getActivityRetrieveUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/activity/`
+    return `/v1/organizations/${organizationId}/projects/${id}/activity/`
 }
 
 export const activityRetrieve = async (
@@ -551,7 +551,7 @@ export const activityRetrieve = async (
  * Projects for the current organization.
  */
 export const getAddProductIntentPartialUpdateUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/add_product_intent/`
+    return `/v1/organizations/${organizationId}/projects/${id}/add_product_intent/`
 }
 
 export const addProductIntentPartialUpdate = async (
@@ -572,7 +572,7 @@ export const addProductIntentPartialUpdate = async (
  * Projects for the current organization.
  */
 export const getChangeOrganizationCreateUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/change_organization/`
+    return `/v1/organizations/${organizationId}/projects/${id}/change_organization/`
 }
 
 export const changeOrganizationCreate = async (
@@ -593,7 +593,7 @@ export const changeOrganizationCreate = async (
  * Projects for the current organization.
  */
 export const getCompleteProductOnboardingPartialUpdateUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/complete_product_onboarding/`
+    return `/v1/organizations/${organizationId}/projects/${id}/complete_product_onboarding/`
 }
 
 export const completeProductOnboardingPartialUpdate = async (
@@ -614,7 +614,7 @@ export const completeProductOnboardingPartialUpdate = async (
  * Projects for the current organization.
  */
 export const getDeleteSecretTokenBackupPartialUpdateUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/delete_secret_token_backup/`
+    return `/v1/organizations/${organizationId}/projects/${id}/delete_secret_token_backup/`
 }
 
 export const deleteSecretTokenBackupPartialUpdate = async (
@@ -635,7 +635,7 @@ export const deleteSecretTokenBackupPartialUpdate = async (
  * Projects for the current organization.
  */
 export const getGenerateConversationsPublicTokenCreateUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/generate_conversations_public_token/`
+    return `/v1/organizations/${organizationId}/projects/${id}/generate_conversations_public_token/`
 }
 
 export const generateConversationsPublicTokenCreate = async (
@@ -656,7 +656,7 @@ export const generateConversationsPublicTokenCreate = async (
  * Projects for the current organization.
  */
 export const getIsGeneratingDemoDataRetrieveUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/is_generating_demo_data/`
+    return `/v1/organizations/${organizationId}/projects/${id}/is_generating_demo_data/`
 }
 
 export const isGeneratingDemoDataRetrieve = async (
@@ -674,7 +674,7 @@ export const isGeneratingDemoDataRetrieve = async (
  * Projects for the current organization.
  */
 export const getResetTokenPartialUpdateUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/reset_token/`
+    return `/v1/organizations/${organizationId}/projects/${id}/reset_token/`
 }
 
 export const resetTokenPartialUpdate = async (
@@ -695,7 +695,7 @@ export const resetTokenPartialUpdate = async (
  * Projects for the current organization.
  */
 export const getRotateSecretTokenPartialUpdateUrl = (organizationId: string, id: number) => {
-    return `/api/organizations/${organizationId}/projects/${id}/rotate_secret_token/`
+    return `/v1/organizations/${organizationId}/projects/${id}/rotate_secret_token/`
 }
 
 export const rotateSecretTokenPartialUpdate = async (
@@ -724,8 +724,8 @@ export const getRolesListUrl = (organizationId: string, params?: RolesListParams
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/roles/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/roles/`
+        ? `/v1/organizations/${organizationId}/roles/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/roles/`
 }
 
 export const rolesList = async (
@@ -740,7 +740,7 @@ export const rolesList = async (
 }
 
 export const getRolesCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/roles/`
+    return `/v1/organizations/${organizationId}/roles/`
 }
 
 export const rolesCreate = async (
@@ -757,7 +757,7 @@ export const rolesCreate = async (
 }
 
 export const getRolesRetrieveUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${id}/`
 }
 
 export const rolesRetrieve = async (organizationId: string, id: string, options?: RequestInit): Promise<RoleApi> => {
@@ -768,7 +768,7 @@ export const rolesRetrieve = async (organizationId: string, id: string, options?
 }
 
 export const getRolesUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${id}/`
 }
 
 export const rolesUpdate = async (
@@ -786,7 +786,7 @@ export const rolesUpdate = async (
 }
 
 export const getRolesPartialUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${id}/`
 }
 
 export const rolesPartialUpdate = async (
@@ -804,7 +804,7 @@ export const rolesPartialUpdate = async (
 }
 
 export const getRolesDestroyUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/roles/${id}/`
+    return `/v1/organizations/${organizationId}/roles/${id}/`
 }
 
 export const rolesDestroy = async (organizationId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -829,8 +829,8 @@ export const getAnnotationsListUrl = (projectId: string, params?: AnnotationsLis
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/annotations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/annotations/`
+        ? `/v1/projects/${projectId}/annotations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/annotations/`
 }
 
 export const annotationsList = async (
@@ -848,7 +848,7 @@ export const annotationsList = async (
  * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/annotations/`
+    return `/v1/projects/${projectId}/annotations/`
 }
 
 export const annotationsCreate = async (
@@ -868,7 +868,7 @@ export const annotationsCreate = async (
  * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/annotations/${id}/`
+    return `/v1/projects/${projectId}/annotations/${id}/`
 }
 
 export const annotationsRetrieve = async (
@@ -886,7 +886,7 @@ export const annotationsRetrieve = async (
  * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/annotations/${id}/`
+    return `/v1/projects/${projectId}/annotations/${id}/`
 }
 
 export const annotationsUpdate = async (
@@ -907,7 +907,7 @@ export const annotationsUpdate = async (
  * Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
  */
 export const getAnnotationsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/annotations/${id}/`
+    return `/v1/projects/${projectId}/annotations/${id}/`
 }
 
 export const annotationsPartialUpdate = async (
@@ -928,7 +928,7 @@ export const annotationsPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getAnnotationsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/annotations/${id}/`
+    return `/v1/projects/${projectId}/annotations/${id}/`
 }
 
 export const annotationsDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<unknown> => {
@@ -950,8 +950,8 @@ export const getCommentsListUrl = (projectId: string, params?: CommentsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/comments/?${stringifiedParams}`
-        : `/api/projects/${projectId}/comments/`
+        ? `/v1/projects/${projectId}/comments/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/comments/`
 }
 
 export const commentsList = async (
@@ -966,7 +966,7 @@ export const commentsList = async (
 }
 
 export const getCommentsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/comments/`
+    return `/v1/projects/${projectId}/comments/`
 }
 
 export const commentsCreate = async (
@@ -983,7 +983,7 @@ export const commentsCreate = async (
 }
 
 export const getCommentsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/`
+    return `/v1/projects/${projectId}/comments/${id}/`
 }
 
 export const commentsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<CommentApi> => {
@@ -994,7 +994,7 @@ export const commentsRetrieve = async (projectId: string, id: string, options?: 
 }
 
 export const getCommentsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/`
+    return `/v1/projects/${projectId}/comments/${id}/`
 }
 
 export const commentsUpdate = async (
@@ -1012,7 +1012,7 @@ export const commentsUpdate = async (
 }
 
 export const getCommentsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/`
+    return `/v1/projects/${projectId}/comments/${id}/`
 }
 
 export const commentsPartialUpdate = async (
@@ -1033,7 +1033,7 @@ export const commentsPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getCommentsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/`
+    return `/v1/projects/${projectId}/comments/${id}/`
 }
 
 export const commentsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<unknown> => {
@@ -1044,7 +1044,7 @@ export const commentsDestroy = async (projectId: string, id: string, options?: R
 }
 
 export const getCommentsThreadRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/comments/${id}/thread/`
+    return `/v1/projects/${projectId}/comments/${id}/thread/`
 }
 
 export const commentsThreadRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -1055,7 +1055,7 @@ export const commentsThreadRetrieve = async (projectId: string, id: string, opti
 }
 
 export const getCommentsCountRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/comments/count/`
+    return `/v1/projects/${projectId}/comments/count/`
 }
 
 export const commentsCountRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -1077,8 +1077,8 @@ export const getDashboardTemplatesListUrl = (projectId: string, params?: Dashboa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboard_templates/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboard_templates/`
+        ? `/v1/projects/${projectId}/dashboard_templates/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboard_templates/`
 }
 
 export const dashboardTemplatesList = async (
@@ -1093,7 +1093,7 @@ export const dashboardTemplatesList = async (
 }
 
 export const getDashboardTemplatesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/dashboard_templates/`
+    return `/v1/projects/${projectId}/dashboard_templates/`
 }
 
 export const dashboardTemplatesCreate = async (
@@ -1110,7 +1110,7 @@ export const dashboardTemplatesCreate = async (
 }
 
 export const getDashboardTemplatesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/dashboard_templates/${id}/`
+    return `/v1/projects/${projectId}/dashboard_templates/${id}/`
 }
 
 export const dashboardTemplatesRetrieve = async (
@@ -1125,7 +1125,7 @@ export const dashboardTemplatesRetrieve = async (
 }
 
 export const getDashboardTemplatesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/dashboard_templates/${id}/`
+    return `/v1/projects/${projectId}/dashboard_templates/${id}/`
 }
 
 export const dashboardTemplatesUpdate = async (
@@ -1143,7 +1143,7 @@ export const dashboardTemplatesUpdate = async (
 }
 
 export const getDashboardTemplatesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/dashboard_templates/${id}/`
+    return `/v1/projects/${projectId}/dashboard_templates/${id}/`
 }
 
 export const dashboardTemplatesPartialUpdate = async (
@@ -1164,7 +1164,7 @@ export const dashboardTemplatesPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getDashboardTemplatesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/dashboard_templates/${id}/`
+    return `/v1/projects/${projectId}/dashboard_templates/${id}/`
 }
 
 export const dashboardTemplatesDestroy = async (
@@ -1179,7 +1179,7 @@ export const dashboardTemplatesDestroy = async (
 }
 
 export const getDashboardTemplatesJsonSchemaRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/dashboard_templates/json_schema/`
+    return `/v1/projects/${projectId}/dashboard_templates/json_schema/`
 }
 
 export const dashboardTemplatesJsonSchemaRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -1201,8 +1201,8 @@ export const getEventDefinitionsListUrl = (projectId: string, params?: EventDefi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/event_definitions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/event_definitions/`
+        ? `/v1/projects/${projectId}/event_definitions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/event_definitions/`
 }
 
 export const eventDefinitionsList = async (
@@ -1217,7 +1217,7 @@ export const eventDefinitionsList = async (
 }
 
 export const getEventDefinitionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/`
+    return `/v1/projects/${projectId}/event_definitions/`
 }
 
 export const eventDefinitionsCreate = async (
@@ -1234,7 +1234,7 @@ export const eventDefinitionsCreate = async (
 }
 
 export const getEventDefinitionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/`
 }
 
 export const eventDefinitionsRetrieve = async (
@@ -1249,7 +1249,7 @@ export const eventDefinitionsRetrieve = async (
 }
 
 export const getEventDefinitionsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/`
 }
 
 export const eventDefinitionsUpdate = async (
@@ -1267,7 +1267,7 @@ export const eventDefinitionsUpdate = async (
 }
 
 export const getEventDefinitionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/`
 }
 
 export const eventDefinitionsPartialUpdate = async (
@@ -1285,7 +1285,7 @@ export const eventDefinitionsPartialUpdate = async (
 }
 
 export const getEventDefinitionsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/`
 }
 
 export const eventDefinitionsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -1296,7 +1296,7 @@ export const eventDefinitionsDestroy = async (projectId: string, id: string, opt
 }
 
 export const getEventDefinitionsMetricsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/event_definitions/${id}/metrics/`
+    return `/v1/projects/${projectId}/event_definitions/${id}/metrics/`
 }
 
 export const eventDefinitionsMetricsRetrieve = async (
@@ -1328,8 +1328,8 @@ export const getEventDefinitionsByNameRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/event_definitions/by_name/?${stringifiedParams}`
-        : `/api/projects/${projectId}/event_definitions/by_name/`
+        ? `/v1/projects/${projectId}/event_definitions/by_name/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/event_definitions/by_name/`
 }
 
 export const eventDefinitionsByNameRetrieve = async (
@@ -1344,7 +1344,7 @@ export const eventDefinitionsByNameRetrieve = async (
 }
 
 export const getEventDefinitionsGolangRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/golang/`
+    return `/v1/projects/${projectId}/event_definitions/golang/`
 }
 
 export const eventDefinitionsGolangRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -1355,7 +1355,7 @@ export const eventDefinitionsGolangRetrieve = async (projectId: string, options?
 }
 
 export const getEventDefinitionsPythonRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/python/`
+    return `/v1/projects/${projectId}/event_definitions/python/`
 }
 
 export const eventDefinitionsPythonRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -1366,7 +1366,7 @@ export const eventDefinitionsPythonRetrieve = async (projectId: string, options?
 }
 
 export const getEventDefinitionsTypescriptRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/event_definitions/typescript/`
+    return `/v1/projects/${projectId}/event_definitions/typescript/`
 }
 
 export const eventDefinitionsTypescriptRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -1388,8 +1388,8 @@ export const getExportsListUrl = (projectId: string, params?: ExportsListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/exports/?${stringifiedParams}`
-        : `/api/projects/${projectId}/exports/`
+        ? `/v1/projects/${projectId}/exports/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/exports/`
 }
 
 export const exportsList = async (
@@ -1404,7 +1404,7 @@ export const exportsList = async (
 }
 
 export const getExportsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/exports/`
+    return `/v1/projects/${projectId}/exports/`
 }
 
 export const exportsCreate = async (
@@ -1421,7 +1421,7 @@ export const exportsCreate = async (
 }
 
 export const getExportsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/exports/${id}/`
+    return `/v1/projects/${projectId}/exports/${id}/`
 }
 
 export const exportsRetrieve = async (
@@ -1436,7 +1436,7 @@ export const exportsRetrieve = async (
 }
 
 export const getExportsContentRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/exports/${id}/content/`
+    return `/v1/projects/${projectId}/exports/${id}/content/`
 }
 
 export const exportsContentRetrieve = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {
@@ -1458,8 +1458,8 @@ export const getFileSystemListUrl = (projectId: string, params?: FileSystemListP
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/file_system/?${stringifiedParams}`
-        : `/api/projects/${projectId}/file_system/`
+        ? `/v1/projects/${projectId}/file_system/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/file_system/`
 }
 
 export const fileSystemList = async (
@@ -1474,7 +1474,7 @@ export const fileSystemList = async (
 }
 
 export const getFileSystemCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/file_system/`
+    return `/v1/projects/${projectId}/file_system/`
 }
 
 export const fileSystemCreate = async (
@@ -1491,7 +1491,7 @@ export const fileSystemCreate = async (
 }
 
 export const getFileSystemRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/file_system/${id}/`
+    return `/v1/projects/${projectId}/file_system/${id}/`
 }
 
 export const fileSystemRetrieve = async (
@@ -1506,7 +1506,7 @@ export const fileSystemRetrieve = async (
 }
 
 export const getFileSystemUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/file_system/${id}/`
+    return `/v1/projects/${projectId}/file_system/${id}/`
 }
 
 export const fileSystemUpdate = async (
@@ -1524,7 +1524,7 @@ export const fileSystemUpdate = async (
 }
 
 export const getFileSystemPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/file_system/${id}/`
+    return `/v1/projects/${projectId}/file_system/${id}/`
 }
 
 export const fileSystemPartialUpdate = async (
@@ -1542,7 +1542,7 @@ export const fileSystemPartialUpdate = async (
 }
 
 export const getFileSystemDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/file_system/${id}/`
+    return `/v1/projects/${projectId}/file_system/${id}/`
 }
 
 export const fileSystemDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -1556,7 +1556,7 @@ export const fileSystemDestroy = async (projectId: string, id: string, options?:
  * Get count of all files in a folder.
  */
 export const getFileSystemCountCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/file_system/${id}/count/`
+    return `/v1/projects/${projectId}/file_system/${id}/count/`
 }
 
 export const fileSystemCountCreate = async (
@@ -1574,7 +1574,7 @@ export const fileSystemCountCreate = async (
 }
 
 export const getFileSystemLinkCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/file_system/${id}/link/`
+    return `/v1/projects/${projectId}/file_system/${id}/link/`
 }
 
 export const fileSystemLinkCreate = async (
@@ -1592,7 +1592,7 @@ export const fileSystemLinkCreate = async (
 }
 
 export const getFileSystemMoveCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/file_system/${id}/move/`
+    return `/v1/projects/${projectId}/file_system/${id}/move/`
 }
 
 export const fileSystemMoveCreate = async (
@@ -1613,7 +1613,7 @@ export const fileSystemMoveCreate = async (
  * Get count of all files in a folder.
  */
 export const getFileSystemCountByPathCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/file_system/count_by_path/`
+    return `/v1/projects/${projectId}/file_system/count_by_path/`
 }
 
 export const fileSystemCountByPathCreate = async (
@@ -1630,7 +1630,7 @@ export const fileSystemCountByPathCreate = async (
 }
 
 export const getFileSystemLogViewRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/file_system/log_view/`
+    return `/v1/projects/${projectId}/file_system/log_view/`
 }
 
 export const fileSystemLogViewRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -1641,7 +1641,7 @@ export const fileSystemLogViewRetrieve = async (projectId: string, options?: Req
 }
 
 export const getFileSystemLogViewCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/file_system/log_view/`
+    return `/v1/projects/${projectId}/file_system/log_view/`
 }
 
 export const fileSystemLogViewCreate = async (
@@ -1658,7 +1658,7 @@ export const fileSystemLogViewCreate = async (
 }
 
 export const getFileSystemUndoDeleteCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/file_system/undo_delete/`
+    return `/v1/projects/${projectId}/file_system/undo_delete/`
 }
 
 export const fileSystemUndoDeleteCreate = async (
@@ -1675,7 +1675,7 @@ export const fileSystemUndoDeleteCreate = async (
 }
 
 export const getFileSystemUnfiledRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/file_system/unfiled/`
+    return `/v1/projects/${projectId}/file_system/unfiled/`
 }
 
 export const fileSystemUnfiledRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -1706,8 +1706,8 @@ export const getFlagValueValuesRetrieveUrl = (projectId: string, params?: FlagVa
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/flag_value/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/flag_value/values/`
+        ? `/v1/projects/${projectId}/flag_value/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/flag_value/values/`
 }
 
 export const flagValueValuesRetrieve = async (
@@ -1722,7 +1722,7 @@ export const flagValueValuesRetrieve = async (
 }
 
 export const getInsightsSharingListUrl = (projectId: string, insightId: number) => {
-    return `/api/projects/${projectId}/insights/${insightId}/sharing/`
+    return `/v1/projects/${projectId}/insights/${insightId}/sharing/`
 }
 
 export const insightsSharingList = async (
@@ -1740,7 +1740,7 @@ export const insightsSharingList = async (
  * Create a new password for the sharing configuration.
  */
 export const getInsightsSharingPasswordsCreateUrl = (projectId: string, insightId: number) => {
-    return `/api/projects/${projectId}/insights/${insightId}/sharing/passwords/`
+    return `/v1/projects/${projectId}/insights/${insightId}/sharing/passwords/`
 }
 
 export const insightsSharingPasswordsCreate = async (
@@ -1761,7 +1761,7 @@ export const insightsSharingPasswordsCreate = async (
  * Delete a password from the sharing configuration.
  */
 export const getInsightsSharingPasswordsDestroyUrl = (projectId: string, insightId: number, passwordId: string) => {
-    return `/api/projects/${projectId}/insights/${insightId}/sharing/passwords/${passwordId}/`
+    return `/v1/projects/${projectId}/insights/${insightId}/sharing/passwords/${passwordId}/`
 }
 
 export const insightsSharingPasswordsDestroy = async (
@@ -1777,7 +1777,7 @@ export const insightsSharingPasswordsDestroy = async (
 }
 
 export const getInsightsSharingRefreshCreateUrl = (projectId: string, insightId: number) => {
-    return `/api/projects/${projectId}/insights/${insightId}/sharing/refresh/`
+    return `/v1/projects/${projectId}/insights/${insightId}/sharing/refresh/`
 }
 
 export const insightsSharingRefreshCreate = async (
@@ -1806,8 +1806,8 @@ export const getIntegrationsList2Url = (projectId: string, params?: Integrations
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/integrations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/integrations/`
+        ? `/v1/projects/${projectId}/integrations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/integrations/`
 }
 
 export const integrationsList2 = async (
@@ -1822,7 +1822,7 @@ export const integrationsList2 = async (
 }
 
 export const getIntegrationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/`
+    return `/v1/projects/${projectId}/integrations/`
 }
 
 export const integrationsCreate = async (
@@ -1839,7 +1839,7 @@ export const integrationsCreate = async (
 }
 
 export const getIntegrationsRetrieve2Url = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/`
+    return `/v1/projects/${projectId}/integrations/${id}/`
 }
 
 export const integrationsRetrieve2 = async (
@@ -1854,7 +1854,7 @@ export const integrationsRetrieve2 = async (
 }
 
 export const getIntegrationsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/`
+    return `/v1/projects/${projectId}/integrations/${id}/`
 }
 
 export const integrationsDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {
@@ -1865,7 +1865,7 @@ export const integrationsDestroy = async (projectId: string, id: number, options
 }
 
 export const getIntegrationsChannelsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/channels/`
+    return `/v1/projects/${projectId}/integrations/${id}/channels/`
 }
 
 export const integrationsChannelsRetrieve = async (
@@ -1880,7 +1880,7 @@ export const integrationsChannelsRetrieve = async (
 }
 
 export const getIntegrationsClickupListsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/clickup_lists/`
+    return `/v1/projects/${projectId}/integrations/${id}/clickup_lists/`
 }
 
 export const integrationsClickupListsRetrieve = async (
@@ -1895,7 +1895,7 @@ export const integrationsClickupListsRetrieve = async (
 }
 
 export const getIntegrationsClickupSpacesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/clickup_spaces/`
+    return `/v1/projects/${projectId}/integrations/${id}/clickup_spaces/`
 }
 
 export const integrationsClickupSpacesRetrieve = async (
@@ -1910,7 +1910,7 @@ export const integrationsClickupSpacesRetrieve = async (
 }
 
 export const getIntegrationsClickupWorkspacesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/clickup_workspaces/`
+    return `/v1/projects/${projectId}/integrations/${id}/clickup_workspaces/`
 }
 
 export const integrationsClickupWorkspacesRetrieve = async (
@@ -1925,7 +1925,7 @@ export const integrationsClickupWorkspacesRetrieve = async (
 }
 
 export const getIntegrationsEmailPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/email/`
+    return `/v1/projects/${projectId}/integrations/${id}/email/`
 }
 
 export const integrationsEmailPartialUpdate = async (
@@ -1943,7 +1943,7 @@ export const integrationsEmailPartialUpdate = async (
 }
 
 export const getIntegrationsEmailVerifyCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/email/verify/`
+    return `/v1/projects/${projectId}/integrations/${id}/email/verify/`
 }
 
 export const integrationsEmailVerifyCreate = async (
@@ -1961,7 +1961,7 @@ export const integrationsEmailVerifyCreate = async (
 }
 
 export const getIntegrationsGithubReposRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/github_repos/`
+    return `/v1/projects/${projectId}/integrations/${id}/github_repos/`
 }
 
 export const integrationsGithubReposRetrieve = async (
@@ -1976,7 +1976,7 @@ export const integrationsGithubReposRetrieve = async (
 }
 
 export const getIntegrationsGoogleAccessibleAccountsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/google_accessible_accounts/`
+    return `/v1/projects/${projectId}/integrations/${id}/google_accessible_accounts/`
 }
 
 export const integrationsGoogleAccessibleAccountsRetrieve = async (
@@ -1991,7 +1991,7 @@ export const integrationsGoogleAccessibleAccountsRetrieve = async (
 }
 
 export const getIntegrationsGoogleConversionActionsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/google_conversion_actions/`
+    return `/v1/projects/${projectId}/integrations/${id}/google_conversion_actions/`
 }
 
 export const integrationsGoogleConversionActionsRetrieve = async (
@@ -2006,7 +2006,7 @@ export const integrationsGoogleConversionActionsRetrieve = async (
 }
 
 export const getIntegrationsJiraProjectsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/jira_projects/`
+    return `/v1/projects/${projectId}/integrations/${id}/jira_projects/`
 }
 
 export const integrationsJiraProjectsRetrieve = async (
@@ -2021,7 +2021,7 @@ export const integrationsJiraProjectsRetrieve = async (
 }
 
 export const getIntegrationsLinearTeamsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/linear_teams/`
+    return `/v1/projects/${projectId}/integrations/${id}/linear_teams/`
 }
 
 export const integrationsLinearTeamsRetrieve = async (
@@ -2036,7 +2036,7 @@ export const integrationsLinearTeamsRetrieve = async (
 }
 
 export const getIntegrationsLinkedinAdsAccountsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/linkedin_ads_accounts/`
+    return `/v1/projects/${projectId}/integrations/${id}/linkedin_ads_accounts/`
 }
 
 export const integrationsLinkedinAdsAccountsRetrieve = async (
@@ -2051,7 +2051,7 @@ export const integrationsLinkedinAdsAccountsRetrieve = async (
 }
 
 export const getIntegrationsLinkedinAdsConversionRulesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/linkedin_ads_conversion_rules/`
+    return `/v1/projects/${projectId}/integrations/${id}/linkedin_ads_conversion_rules/`
 }
 
 export const integrationsLinkedinAdsConversionRulesRetrieve = async (
@@ -2066,7 +2066,7 @@ export const integrationsLinkedinAdsConversionRulesRetrieve = async (
 }
 
 export const getIntegrationsTwilioPhoneNumbersRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/twilio_phone_numbers/`
+    return `/v1/projects/${projectId}/integrations/${id}/twilio_phone_numbers/`
 }
 
 export const integrationsTwilioPhoneNumbersRetrieve = async (
@@ -2081,7 +2081,7 @@ export const integrationsTwilioPhoneNumbersRetrieve = async (
 }
 
 export const getIntegrationsAuthorizeRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/authorize/`
+    return `/v1/projects/${projectId}/integrations/authorize/`
 }
 
 export const integrationsAuthorizeRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -2099,7 +2099,7 @@ The backend resolves the domain, template variables, and service ID
 based on context, then builds the signed apply URL.
  */
 export const getIntegrationsDomainConnectApplyUrlCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/domain-connect/apply-url/`
+    return `/v1/projects/${projectId}/integrations/domain-connect/apply-url/`
 }
 
 export const integrationsDomainConnectApplyUrlCreate = async (
@@ -2116,7 +2116,7 @@ export const integrationsDomainConnectApplyUrlCreate = async (
 }
 
 export const getIntegrationsDomainConnectCheckRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/integrations/domain-connect/check/`
+    return `/v1/projects/${projectId}/integrations/domain-connect/check/`
 }
 
 export const integrationsDomainConnectCheckRetrieve = async (
@@ -2141,8 +2141,8 @@ export const getPropertyDefinitionsListUrl = (projectId: string, params?: Proper
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/property_definitions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/property_definitions/`
+        ? `/v1/projects/${projectId}/property_definitions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/property_definitions/`
 }
 
 export const propertyDefinitionsList = async (
@@ -2157,7 +2157,7 @@ export const propertyDefinitionsList = async (
 }
 
 export const getPropertyDefinitionsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/property_definitions/${id}/`
+    return `/v1/projects/${projectId}/property_definitions/${id}/`
 }
 
 export const propertyDefinitionsRetrieve = async (
@@ -2172,7 +2172,7 @@ export const propertyDefinitionsRetrieve = async (
 }
 
 export const getPropertyDefinitionsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/property_definitions/${id}/`
+    return `/v1/projects/${projectId}/property_definitions/${id}/`
 }
 
 export const propertyDefinitionsUpdate = async (
@@ -2190,7 +2190,7 @@ export const propertyDefinitionsUpdate = async (
 }
 
 export const getPropertyDefinitionsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/property_definitions/${id}/`
+    return `/v1/projects/${projectId}/property_definitions/${id}/`
 }
 
 export const propertyDefinitionsPartialUpdate = async (
@@ -2208,7 +2208,7 @@ export const propertyDefinitionsPartialUpdate = async (
 }
 
 export const getPropertyDefinitionsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/property_definitions/${id}/`
+    return `/v1/projects/${projectId}/property_definitions/${id}/`
 }
 
 export const propertyDefinitionsDestroy = async (
@@ -2227,7 +2227,7 @@ export const propertyDefinitionsDestroy = async (
 Returns a map of the event names to a boolean representing whether that property has ever been seen with that event_name
  */
 export const getPropertyDefinitionsSeenTogetherRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/property_definitions/seen_together/`
+    return `/v1/projects/${projectId}/property_definitions/seen_together/`
 }
 
 export const propertyDefinitionsSeenTogetherRetrieve = async (
@@ -2255,8 +2255,8 @@ export const getScheduledChangesListUrl = (projectId: string, params?: Scheduled
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/scheduled_changes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/scheduled_changes/`
+        ? `/v1/projects/${projectId}/scheduled_changes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/scheduled_changes/`
 }
 
 export const scheduledChangesList = async (
@@ -2274,7 +2274,7 @@ export const scheduledChangesList = async (
  * Create, read, update and delete scheduled changes.
  */
 export const getScheduledChangesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/scheduled_changes/`
+    return `/v1/projects/${projectId}/scheduled_changes/`
 }
 
 export const scheduledChangesCreate = async (
@@ -2294,7 +2294,7 @@ export const scheduledChangesCreate = async (
  * Create, read, update and delete scheduled changes.
  */
 export const getScheduledChangesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/scheduled_changes/${id}/`
+    return `/v1/projects/${projectId}/scheduled_changes/${id}/`
 }
 
 export const scheduledChangesRetrieve = async (
@@ -2312,7 +2312,7 @@ export const scheduledChangesRetrieve = async (
  * Create, read, update and delete scheduled changes.
  */
 export const getScheduledChangesUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/scheduled_changes/${id}/`
+    return `/v1/projects/${projectId}/scheduled_changes/${id}/`
 }
 
 export const scheduledChangesUpdate = async (
@@ -2333,7 +2333,7 @@ export const scheduledChangesUpdate = async (
  * Create, read, update and delete scheduled changes.
  */
 export const getScheduledChangesPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/scheduled_changes/${id}/`
+    return `/v1/projects/${projectId}/scheduled_changes/${id}/`
 }
 
 export const scheduledChangesPartialUpdate = async (
@@ -2354,7 +2354,7 @@ export const scheduledChangesPartialUpdate = async (
  * Create, read, update and delete scheduled changes.
  */
 export const getScheduledChangesDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/scheduled_changes/${id}/`
+    return `/v1/projects/${projectId}/scheduled_changes/${id}/`
 }
 
 export const scheduledChangesDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {
@@ -2365,7 +2365,7 @@ export const scheduledChangesDestroy = async (projectId: string, id: number, opt
 }
 
 export const getSessionRecordingsSharingListUrl = (projectId: string, recordingId: string) => {
-    return `/api/projects/${projectId}/session_recordings/${recordingId}/sharing/`
+    return `/v1/projects/${projectId}/session_recordings/${recordingId}/sharing/`
 }
 
 export const sessionRecordingsSharingList = async (
@@ -2383,7 +2383,7 @@ export const sessionRecordingsSharingList = async (
  * Create a new password for the sharing configuration.
  */
 export const getSessionRecordingsSharingPasswordsCreateUrl = (projectId: string, recordingId: string) => {
-    return `/api/projects/${projectId}/session_recordings/${recordingId}/sharing/passwords/`
+    return `/v1/projects/${projectId}/session_recordings/${recordingId}/sharing/passwords/`
 }
 
 export const sessionRecordingsSharingPasswordsCreate = async (
@@ -2408,7 +2408,7 @@ export const getSessionRecordingsSharingPasswordsDestroyUrl = (
     recordingId: string,
     passwordId: string
 ) => {
-    return `/api/projects/${projectId}/session_recordings/${recordingId}/sharing/passwords/${passwordId}/`
+    return `/v1/projects/${projectId}/session_recordings/${recordingId}/sharing/passwords/${passwordId}/`
 }
 
 export const sessionRecordingsSharingPasswordsDestroy = async (
@@ -2424,7 +2424,7 @@ export const sessionRecordingsSharingPasswordsDestroy = async (
 }
 
 export const getSessionRecordingsSharingRefreshCreateUrl = (projectId: string, recordingId: string) => {
-    return `/api/projects/${projectId}/session_recordings/${recordingId}/sharing/refresh/`
+    return `/v1/projects/${projectId}/session_recordings/${recordingId}/sharing/refresh/`
 }
 
 export const sessionRecordingsSharingRefreshCreate = async (
@@ -2453,8 +2453,8 @@ export const getSubscriptionsListUrl = (projectId: string, params?: Subscription
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/subscriptions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/subscriptions/`
+        ? `/v1/projects/${projectId}/subscriptions/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/subscriptions/`
 }
 
 export const subscriptionsList = async (
@@ -2469,7 +2469,7 @@ export const subscriptionsList = async (
 }
 
 export const getSubscriptionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/subscriptions/`
+    return `/v1/projects/${projectId}/subscriptions/`
 }
 
 export const subscriptionsCreate = async (
@@ -2486,7 +2486,7 @@ export const subscriptionsCreate = async (
 }
 
 export const getSubscriptionsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/`
 }
 
 export const subscriptionsRetrieve = async (
@@ -2501,7 +2501,7 @@ export const subscriptionsRetrieve = async (
 }
 
 export const getSubscriptionsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/`
 }
 
 export const subscriptionsUpdate = async (
@@ -2519,7 +2519,7 @@ export const subscriptionsUpdate = async (
 }
 
 export const getSubscriptionsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/`
 }
 
 export const subscriptionsPartialUpdate = async (
@@ -2540,7 +2540,7 @@ export const subscriptionsPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getSubscriptionsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/subscriptions/${id}/`
+    return `/v1/projects/${projectId}/subscriptions/${id}/`
 }
 
 export const subscriptionsDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<unknown> => {
@@ -2561,7 +2561,7 @@ export const getUsersListUrl = (params?: UsersListParams) => {
 
     const stringifiedParams = normalizedParams.toString()
 
-    return stringifiedParams.length > 0 ? `/api/users/?${stringifiedParams}` : `/api/users/`
+    return stringifiedParams.length > 0 ? `/v1/users/?${stringifiedParams}` : `/v1/users/`
 }
 
 export const usersList = async (params?: UsersListParams, options?: RequestInit): Promise<PaginatedUserListApi> => {
@@ -2572,7 +2572,7 @@ export const usersList = async (params?: UsersListParams, options?: RequestInit)
 }
 
 export const getUsersRetrieveUrl = (uuid: string) => {
-    return `/api/users/${uuid}/`
+    return `/v1/users/${uuid}/`
 }
 
 export const usersRetrieve = async (uuid: string, options?: RequestInit): Promise<UserApi> => {
@@ -2583,7 +2583,7 @@ export const usersRetrieve = async (uuid: string, options?: RequestInit): Promis
 }
 
 export const getUsersUpdateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/`
+    return `/v1/users/${uuid}/`
 }
 
 export const usersUpdate = async (
@@ -2600,7 +2600,7 @@ export const usersUpdate = async (
 }
 
 export const getUsersPartialUpdateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/`
+    return `/v1/users/${uuid}/`
 }
 
 export const usersPartialUpdate = async (
@@ -2617,7 +2617,7 @@ export const usersPartialUpdate = async (
 }
 
 export const getUsersDestroyUrl = (uuid: string) => {
-    return `/api/users/${uuid}/`
+    return `/v1/users/${uuid}/`
 }
 
 export const usersDestroy = async (uuid: string, options?: RequestInit): Promise<void> => {
@@ -2628,7 +2628,7 @@ export const usersDestroy = async (uuid: string, options?: RequestInit): Promise
 }
 
 export const getUsersScenePersonalisationCreateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/scene_personalisation/`
+    return `/v1/users/${uuid}/scene_personalisation/`
 }
 
 export const usersScenePersonalisationCreate = async (
@@ -2645,7 +2645,7 @@ export const usersScenePersonalisationCreate = async (
 }
 
 export const getUsersStart2faSetupRetrieveUrl = (uuid: string) => {
-    return `/api/users/${uuid}/start_2fa_setup/`
+    return `/v1/users/${uuid}/start_2fa_setup/`
 }
 
 export const usersStart2faSetupRetrieve = async (uuid: string, options?: RequestInit): Promise<void> => {
@@ -2659,7 +2659,7 @@ export const usersStart2faSetupRetrieve = async (uuid: string, options?: Request
  * Generate new backup codes, invalidating any existing ones
  */
 export const getUsersTwoFactorBackupCodesCreateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/two_factor_backup_codes/`
+    return `/v1/users/${uuid}/two_factor_backup_codes/`
 }
 
 export const usersTwoFactorBackupCodesCreate = async (
@@ -2679,7 +2679,7 @@ export const usersTwoFactorBackupCodesCreate = async (
  * Disable 2FA and remove all related devices
  */
 export const getUsersTwoFactorDisableCreateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/two_factor_disable/`
+    return `/v1/users/${uuid}/two_factor_disable/`
 }
 
 export const usersTwoFactorDisableCreate = async (
@@ -2696,7 +2696,7 @@ export const usersTwoFactorDisableCreate = async (
 }
 
 export const getUsersTwoFactorStartSetupRetrieveUrl = (uuid: string) => {
-    return `/api/users/${uuid}/two_factor_start_setup/`
+    return `/v1/users/${uuid}/two_factor_start_setup/`
 }
 
 export const usersTwoFactorStartSetupRetrieve = async (uuid: string, options?: RequestInit): Promise<void> => {
@@ -2710,7 +2710,7 @@ export const usersTwoFactorStartSetupRetrieve = async (uuid: string, options?: R
  * Get current 2FA status including backup codes if enabled
  */
 export const getUsersTwoFactorStatusRetrieveUrl = (uuid: string) => {
-    return `/api/users/${uuid}/two_factor_status/`
+    return `/v1/users/${uuid}/two_factor_status/`
 }
 
 export const usersTwoFactorStatusRetrieve = async (uuid: string, options?: RequestInit): Promise<void> => {
@@ -2721,7 +2721,7 @@ export const usersTwoFactorStatusRetrieve = async (uuid: string, options?: Reque
 }
 
 export const getUsersTwoFactorValidateCreateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/two_factor_validate/`
+    return `/v1/users/${uuid}/two_factor_validate/`
 }
 
 export const usersTwoFactorValidateCreate = async (
@@ -2738,7 +2738,7 @@ export const usersTwoFactorValidateCreate = async (
 }
 
 export const getUsersValidate2faCreateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/validate_2fa/`
+    return `/v1/users/${uuid}/validate_2fa/`
 }
 
 export const usersValidate2faCreate = async (
@@ -2755,7 +2755,7 @@ export const usersValidate2faCreate = async (
 }
 
 export const getUsersCancelEmailChangeRequestPartialUpdateUrl = () => {
-    return `/api/users/cancel_email_change_request/`
+    return `/v1/users/cancel_email_change_request/`
 }
 
 export const usersCancelEmailChangeRequestPartialUpdate = async (
@@ -2771,7 +2771,7 @@ export const usersCancelEmailChangeRequestPartialUpdate = async (
 }
 
 export const getUsersRequestEmailVerificationCreateUrl = () => {
-    return `/api/users/request_email_verification/`
+    return `/v1/users/request_email_verification/`
 }
 
 export const usersRequestEmailVerificationCreate = async (
@@ -2787,7 +2787,7 @@ export const usersRequestEmailVerificationCreate = async (
 }
 
 export const getUsersVerifyEmailCreateUrl = () => {
-    return `/api/users/verify_email/`
+    return `/v1/users/verify_email/`
 }
 
 export const usersVerifyEmailCreate = async (userApi: NonReadonly<UserApi>, options?: RequestInit): Promise<void> => {

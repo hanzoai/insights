@@ -65,7 +65,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
 
                     try {
                         const response = await api.get<ChangesResponse>(
-                            `api/projects/${values.currentProjectId}/my_notifications?` +
+                            `v1/projects/${values.currentProjectId}/my_notifications?` +
                                 toParams({ unread: onlyUnread })
                         )
 
@@ -104,7 +104,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                         return current
                     }
 
-                    await api.create(`api/projects/${values.currentProjectId}/my_notifications/bookmark`, {
+                    await api.create(`v1/projects/${values.currentProjectId}/my_notifications/bookmark`, {
                         bookmark: latestNotification.created_at.toISOString(),
                     })
 

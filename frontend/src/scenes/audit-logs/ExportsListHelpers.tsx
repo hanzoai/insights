@@ -190,7 +190,7 @@ export const getFilterTooltip = (exportAsset: ExportedAsset): JSX.Element => {
 
 export const downloadExport = (exportAsset: ExportedAsset): void => {
     const link = document.createElement('a')
-    link.href = `/api/environments/@current/exports/${exportAsset.id}/content/?download=true`
+    link.href = `/v1/environments/@current/exports/${exportAsset.id}/content/?download=true`
     link.download = exportAsset.filename || ''
     document.body.appendChild(link)
     link.click()

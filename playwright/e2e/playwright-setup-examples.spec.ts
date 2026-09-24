@@ -38,7 +38,7 @@ test('test with API calls', async ({ page, playwrightSetup }) => {
     await expect(workspace.personal_api_key).toMatch(/^hix_/)
     const apiKey = workspace.personal_api_key
 
-    const response = await page.request.get(`/api/projects/${workspace.team_id}/`, {
+    const response = await page.request.get(`/v1/projects/${workspace.team_id}/`, {
         headers: {
             Authorization: `Bearer ${apiKey}`,
         },

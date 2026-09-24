@@ -5,7 +5,7 @@ import { expect, test } from '../../utils/playwright-test-base'
 
 test.describe('Billing', () => {
     test.beforeEach(async ({ page }) => {
-        // This replicates cy.intercept('/api/billing/') with fixture
+        // This replicates cy.intercept('/v1/billing/') with fixture
         // We'll read the JSON from a fixture folder. Adjust the path as needed.
         await page.route('**/api/billing/', async (route) => {
             // If your codebase uses a different structure, update accordingly

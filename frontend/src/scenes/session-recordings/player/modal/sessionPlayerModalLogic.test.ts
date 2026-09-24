@@ -13,7 +13,7 @@ describe('sessionPlayerModalLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/session_recordings': [
+                '/v1/environments/:team_id/session_recordings': [
                     200,
                     {
                         results: listOfSessionRecordings,

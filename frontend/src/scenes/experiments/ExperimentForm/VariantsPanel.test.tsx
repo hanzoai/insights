@@ -93,7 +93,7 @@ describe('VariantsPanel', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/@current/experiments/eligible_feature_flags/': (req) => {
+                '/v1/projects/@current/experiments/eligible_feature_flags/': (req) => {
                     const url = new URL(req.url)
                     const search = url.searchParams.get('search')
 
@@ -106,7 +106,7 @@ describe('VariantsPanel', () => {
 
                     return [200, { results: mockEligibleFlags, count: mockEligibleFlags.length }]
                 },
-                '/api/projects/@current/experiments': () => [200, { results: [], count: 0 }],
+                '/v1/projects/@current/experiments': () => [200, { results: [], count: 0 }],
             },
         })
         initKeaTests()
@@ -181,7 +181,7 @@ describe('VariantsPanel', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/@current/experiments/eligible_feature_flags/': (req) => {
+                    '/v1/projects/@current/experiments/eligible_feature_flags/': (req) => {
                         const url = new URL(req.url)
                         const search = url.searchParams.get('search')
                         if (search) {
@@ -196,7 +196,7 @@ describe('VariantsPanel', () => {
                             { results: [...mockEligibleFlags, existingFlag], count: mockEligibleFlags.length + 1 },
                         ]
                     },
-                    '/api/projects/@current/experiments': () => [200, { results: [], count: 0 }],
+                    '/v1/projects/@current/experiments': () => [200, { results: [], count: 0 }],
                 },
             })
 
@@ -449,11 +449,11 @@ describe('VariantsPanel', () => {
         it('handles empty feature flags list in modal', async () => {
             useMocks({
                 get: {
-                    '/api/projects/@current/experiments/eligible_feature_flags/': () => [
+                    '/v1/projects/@current/experiments/eligible_feature_flags/': () => [
                         200,
                         { results: [], count: 0 },
                     ],
-                    '/api/projects/@current/experiments': () => [200, { results: [], count: 0 }],
+                    '/v1/projects/@current/experiments': () => [200, { results: [], count: 0 }],
                 },
             })
 

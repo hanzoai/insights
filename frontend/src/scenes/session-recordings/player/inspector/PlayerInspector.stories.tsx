@@ -19,7 +19,7 @@ const meta: Meta<typeof PlayerInspector> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/comments': {
+                '/v1/projects/:team_id/comments': {
                     count: 1,
                     results: [
                         {
@@ -48,8 +48,8 @@ const meta: Meta<typeof PlayerInspector> = {
                         },
                     ],
                 },
-                '/api/environments/:team_id/session_recordings/:id': largeRecordingMetaJson,
-                '/api/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
+                '/v1/environments/:team_id/session_recordings/:id': largeRecordingMetaJson,
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
                     if (req.url.searchParams.get('source') === 'blob_v2') {
                         return res(ctx.text(largeRecordingJSONL))
                     }
@@ -69,7 +69,7 @@ const meta: Meta<typeof PlayerInspector> = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query': (req, res, ctx) => {
+                '/v1/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
 
                     if (body.query.kind === 'InsightsQLQuery') {
@@ -84,7 +84,7 @@ const meta: Meta<typeof PlayerInspector> = {
                 },
             },
             patch: {
-                '/api/environments/:team_id/session_recordings/:id': (_, res, ctx) => {
+                '/v1/environments/:team_id/session_recordings/:id': (_, res, ctx) => {
                     return res(ctx.json({}))
                 },
             },

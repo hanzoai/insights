@@ -65,7 +65,7 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
 
                     const plugins: Record<number, PluginType> = {}
 
-                    return plugins[props.pluginId] || api.get(`api/organizations/@current/plugins/${props.pluginId}`)
+                    return plugins[props.pluginId] || api.get(`v1/organizations/@current/plugins/${props.pluginId}`)
                 },
             },
         ],

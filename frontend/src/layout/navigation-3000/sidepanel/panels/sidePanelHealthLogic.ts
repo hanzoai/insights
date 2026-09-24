@@ -58,7 +58,7 @@ export const sidePanelHealthLogic = kea<sidePanelHealthLogicType>([
                     }
                     try {
                         const response = await api.get<DataHealthIssuesResponse>(
-                            'api/environments/@current/data_warehouse/data_health_issues/'
+                            'v1/environments/@current/data_warehouse/data_health_issues/'
                         )
                         return response
                     } catch (error) {

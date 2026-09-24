@@ -29,9 +29,9 @@ describe('subscriptionLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team/subscriptions': { count: 1, results: [fixtureSubscriptionResponse(1)] },
-                '/api/environments/:team/subscriptions/1': fixtureSubscriptionResponse(1),
-                '/api/projects/:team/integrations': { count: 0, results: [] },
+                '/v1/environments/:team/subscriptions': { count: 1, results: [fixtureSubscriptionResponse(1)] },
+                '/v1/environments/:team/subscriptions/1': fixtureSubscriptionResponse(1),
+                '/v1/projects/:team/integrations': { count: 0, results: [] },
             },
         })
         initKeaTests()

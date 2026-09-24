@@ -127,7 +127,7 @@ export const twoFactorLogic = kea<twoFactorLogicType>([
                     actions.setSetupCallOngoing(true)
 
                     breakpoint()
-                    const response = await api.get('api/users/@me/two_factor_start_setup/')
+                    const response = await api.get('v1/users/@me/two_factor_start_setup/')
                     return response
                 },
             },
@@ -136,7 +136,7 @@ export const twoFactorLogic = kea<twoFactorLogicType>([
             null as TwoFactorStatus | null,
             {
                 loadStatus: async () => {
-                    return await api.get('api/users/@me/two_factor_status/')
+                    return await api.get('v1/users/@me/two_factor_status/')
                 },
             },
         ],
@@ -144,7 +144,7 @@ export const twoFactorLogic = kea<twoFactorLogicType>([
             null as { backup_codes: string[] } | null,
             {
                 generateBackupCodes: async () => {
-                    return await api.create<any>('api/users/@me/two_factor_backup_codes/')
+                    return await api.create<any>('v1/users/@me/two_factor_backup_codes/')
                 },
             },
         ],
@@ -158,7 +158,7 @@ export const twoFactorLogic = kea<twoFactorLogicType>([
             submit: async ({ token }, breakpoint) => {
                 breakpoint()
                 try {
-                    return await api.create<any>('api/users/@me/two_factor_validate/', { token })
+                    return await api.create<any>('v1/users/@me/two_factor_validate/', { token })
                 } catch (e) {
                     const { code, detail } = e as Record<string, any>
                     actions.setGeneralError(code, detail)
@@ -175,7 +175,7 @@ export const twoFactorLogic = kea<twoFactorLogicType>([
         },
         disable2FA: async () => {
             try {
-                await api.create<any>('api/users/@me/two_factor_disable/')
+                await api.create<any>('v1/users/@me/two_factor_disable/')
                 toast.success('2FA disabled successfully. The page will reload.')
                 actions.loadStatus()
 

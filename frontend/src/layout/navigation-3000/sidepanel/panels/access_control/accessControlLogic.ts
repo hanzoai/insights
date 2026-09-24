@@ -168,9 +168,9 @@ export const accessControlLogic = kea<accessControlLogicType>([
             (resource, resource_id): string => {
                 // TODO: This is far from perfect... but it's a start
                 if (resource === 'project') {
-                    return `api/projects/@current/access_controls`
+                    return `v1/projects/@current/access_controls`
                 }
-                return `api/projects/@current/${resource}s/${resource_id}/access_controls`
+                return `v1/projects/@current/${resource}s/${resource_id}/access_controls`
             },
         ],
 

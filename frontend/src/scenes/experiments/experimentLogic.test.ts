@@ -30,26 +30,26 @@ describe('experimentLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team/experiments': {
+                '/v1/projects/:team/experiments': {
                     count: 1,
                     next: null,
                     previous: null,
                     results: [{ id: 1, name: 'Test Exp', description: 'bla' }],
                 },
-                '/api/projects/:team/experiment_holdouts': {
+                '/v1/projects/:team/experiment_holdouts': {
                     count: 0,
                     next: null,
                     previous: null,
                     results: [],
                 },
-                '/api/projects/:team/experiment_saved_metrics': {
+                '/v1/projects/:team/experiment_saved_metrics': {
                     count: 0,
                     next: null,
                     previous: null,
                     results: [],
                 },
-                '/api/projects/:team/experiments/:id': experiment,
-                [`/api/projects/:team/experiments/${RUNNING_EXP_ID}/results`]: {
+                '/v1/projects/:team/experiments/:id': experiment,
+                [`/v1/projects/:team/experiments/${RUNNING_EXP_ID}/results`]: {
                     filters: { breakdown: '$feature/test-experiment', breakdown_type: 'event', insight: 'TRENDS' },
                     insight: [
                         { breakdown_value: 'control', count: 200 },
@@ -59,7 +59,7 @@ describe('experimentLogic', () => {
                     ],
                     probability: { control: 0.7, test_1: 0.1, test_2: 0.2, test_3: 0 },
                 },
-                [`/api/projects/:team/experiments/${RUNNING_FUNNEL_EXP_ID}/results`]: {
+                [`/v1/projects/:team/experiments/${RUNNING_FUNNEL_EXP_ID}/results`]: {
                     filters: { breakdown: '$feature/test-experiment', breakdown_type: 'event', insight: 'FUNNELS' },
                     insight: [
                         [
@@ -95,7 +95,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team/query': (() => {
+                    '/v1/environments/:team/query': (() => {
                         let callCount = 0
                         return () => {
                             callCount++
@@ -113,7 +113,7 @@ describe('experimentLogic', () => {
                     })(),
                 },
                 get: {
-                    '/api/environments/:team/query/:id': (() => {
+                    '/v1/environments/:team/query/:id': (() => {
                         let callCount = 0
                         return () => {
                             callCount++
@@ -173,7 +173,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team/query': (() => {
+                    '/v1/environments/:team/query': (() => {
                         let callCount = 0
                         return () => {
                             callCount++
@@ -191,7 +191,7 @@ describe('experimentLogic', () => {
                     })(),
                 },
                 get: {
-                    '/api/environments/:team/query/:id': (() => {
+                    '/v1/environments/:team/query/:id': (() => {
                         let callCount = 0
                         return () => {
                             callCount++
@@ -274,7 +274,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/experiments/:id': experimentWithOrphan,
+                    '/v1/projects/:team/experiments/:id': experimentWithOrphan,
                 },
             })
 
@@ -314,7 +314,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/experiments/:id': experimentWithOrphan,
+                    '/v1/projects/:team/experiments/:id': experimentWithOrphan,
                 },
             })
 

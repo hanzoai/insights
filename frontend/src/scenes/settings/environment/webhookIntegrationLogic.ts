@@ -26,7 +26,7 @@ export const webhookIntegrationLogic = kea<webhookIntegrationLogicType>([
 
                     if (webhook) {
                         try {
-                            const response = await api.create('api/user/test_slack_webhook', { webhook })
+                            const response = await api.create('v1/user/test_slack_webhook', { webhook })
                             if (response.success) {
                                 return webhook
                             }

@@ -31,7 +31,7 @@ export function SignalsDebug(): JSX.Element {
         }
 
         try {
-            await api.create(`api/environments/@current/signals/emit/`, {
+            await api.create(`v1/environments/@current/signals/emit/`, {
                 source_product: sourceProduct,
                 source_type: sourceType,
                 description,

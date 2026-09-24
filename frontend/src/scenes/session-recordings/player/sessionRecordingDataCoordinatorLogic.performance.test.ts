@@ -41,7 +41,7 @@ describe('sessionRecordingDataCoordinatorLogic performance', () => {
                 },
             ],
             getMocks: {
-                '/api/environments/:team_id/session_recordings/:id/snapshots': async (req, res, ctx) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': async (req, res, ctx) => {
                     if (req.url.searchParams.get('source') === 'blob_v2') {
                         const key = req.url.searchParams.get('blob_key')
                         const contents = key === '0' ? keyZero : keyOne

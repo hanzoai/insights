@@ -21,8 +21,8 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/notebooks/recording_comments': { results: [] },
-                '/api/environments/:team_id/session_recordings': (req) => {
+                '/v1/projects/:team_id/notebooks/recording_comments': { results: [] },
+                '/v1/environments/:team_id/session_recordings': (req) => {
                     const version = req.url.searchParams.get('version')
                     return [
                         200,
@@ -33,8 +33,8 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists': recordingPlaylists,
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
+                '/v1/projects/:team_id/session_recording_playlists': recordingPlaylists,
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
                     const playlistId = req.params.playlist_id
 
                     return [
@@ -82,12 +82,12 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id/recordings': (req) => {
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id/recordings': (req) => {
                     const playlistId = req.params.playlist_id
                     const response = playlistId === '1234567' ? recordings : []
                     return [200, { has_next: false, results: response, version: 1 }]
                 },
-                '/api/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
                     if (req.url.searchParams.get('source') === 'blob_v2') {
                         return res(ctx.text(snapshotsAsJSONLines()))
                     }
@@ -105,7 +105,7 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/session_recordings/:id': (req, res, ctx) => {
+                '/v1/environments/:team_id/session_recordings/:id': (req, res, ctx) => {
                     if (req.params.id === '12345') {
                         return res(ctx.json(recordingMetaJson))
                     } else if (req.params.id === 'thirty_others') {
@@ -118,7 +118,7 @@ const meta: Meta = {
                     }
                     return res(ctx.json({ ...recordingMetaJson, viewers: ['abcdefg'] }))
                 },
-                'api/projects/:team/notebooks': {
+                'v1/projects/:team/notebooks': {
                     count: 0,
                     next: null,
                     previous: null,
@@ -126,7 +126,7 @@ const meta: Meta = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query': (req, res, ctx) => {
+                '/v1/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
                     if (
                         body.query.kind === 'InsightsQLQuery' &&

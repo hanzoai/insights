@@ -20,12 +20,12 @@ export const STATE = 'live/.auth/session.json'
 
 setup('sign in', async ({ request }) => {
     expect(PASSWORD, 'LOGIN_PASSWORD must be set -- in CI it comes from KMS').not.toBe('')
-    const response = await request.post('/api/login', { data: { email: USERNAME, password: PASSWORD } })
+    const response = await request.post('/v1/login', { data: { email: USERNAME, password: PASSWORD } })
     expect(response.status(), `sign-in failed for ${USERNAME}`).toBe(200)
 
     // Prove the session resolves to the account we meant, not just that the POST
     // returned 200 -- a redirect to a login page is also a 200.
-    const me = await request.get('/api/users/@me/')
+    const me = await request.get('/v1/users/@me/')
     expect(me.status()).toBe(200)
     expect((await me.json()).email).toBe(USERNAME)
 

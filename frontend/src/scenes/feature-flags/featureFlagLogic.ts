@@ -956,7 +956,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                     if (!updatedFlag.id) {
                         // Creating a new flag
                         savedFlag = await api.create(
-                            `api/projects/${values.currentProjectId}/feature_flags`,
+                            `v1/projects/${values.currentProjectId}/feature_flags`,
                             preparedFlag
                         )
                         actions.addProductIntent({
@@ -980,7 +980,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                         }
 
                         savedFlag = await api.update(
-                            `api/projects/${values.currentProjectId}/feature_flags/${updatedFlag.id}`,
+                            `v1/projects/${values.currentProjectId}/feature_flags/${updatedFlag.id}`,
                             {
                                 ...preparedFlag,
                                 original_flag: values.originalFeatureFlag,
@@ -1006,12 +1006,12 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                     if (!updatedFlag.id) {
                         // Creating a new flag
                         savedFlag = await api.create(
-                            `api/projects/${values.currentProjectId}/feature_flags`,
+                            `v1/projects/${values.currentProjectId}/feature_flags`,
                             preparedFlag
                         )
                     } else {
                         savedFlag = await api.update(
-                            `api/projects/${values.currentProjectId}/feature_flags/${updatedFlag.id}`,
+                            `v1/projects/${values.currentProjectId}/feature_flags/${updatedFlag.id}`,
                             {
                                 ...preparedFlag,
                                 original_flag: values.originalFeatureFlag,
@@ -1038,7 +1038,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                         throw new Error('Cannot toggle active state of unsaved flag')
                     }
                     const savedFlag = await api.update(
-                        `api/projects/${values.currentProjectId}/feature_flags/${values.featureFlag.id}`,
+                        `v1/projects/${values.currentProjectId}/feature_flags/${values.featureFlag.id}`,
                         { active }
                     )
                     savedFlag.id && refreshTreeItem('feature_flag', String(savedFlag.id))
@@ -1052,7 +1052,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                 loadRelatedInsights: async () => {
                     if (props.id && props.id !== 'new' && values.featureFlag.key) {
                         const response = await api.get<PaginatedResponse<InsightModel>>(
-                            `api/environments/${values.currentProjectId}/insights/?feature_flag=${values.featureFlag.key}&order=-created_at`
+                            `v1/environments/${values.currentProjectId}/insights/?feature_flag=${values.featureFlag.key}&order=-created_at`
                         )
                         return response.results.map((legacyInsight) => getQueryBasedInsightModel(legacyInsight))
                     }
@@ -1250,7 +1250,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
                     const { currentProjectId } = values
                     if (currentProjectId && props.id && props.id !== 'new' && props.id !== 'link') {
                         return await api.get(
-                            `api/projects/${currentProjectId}/feature_flags/${props.id}/dependent_flags/`
+                            `v1/projects/${currentProjectId}/feature_flags/${props.id}/dependent_flags/`
                         )
                     }
                     return []
@@ -1262,7 +1262,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         showDependentFlagsConfirmation: sharedListeners.showDependentFlagsConfirmation,
         generateUsageDashboard: async () => {
             if (props.id) {
-                await api.create(`api/projects/${values.currentProjectId}/feature_flags/${props.id}/dashboard`)
+                await api.create(`v1/projects/${values.currentProjectId}/feature_flags/${props.id}/dashboard`)
                 actions.loadFeatureFlag()
             }
         },
@@ -1270,7 +1270,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
             if (props.id) {
                 await breakpoint(1000) // in ms
                 await api.create(
-                    `api/projects/${values.currentProjectId}/feature_flags/${props.id}/enrich_usage_dashboard`
+                    `v1/projects/${values.currentProjectId}/feature_flags/${props.id}/enrich_usage_dashboard`
                 )
             }
         },

@@ -87,7 +87,7 @@ export const passkeyLogic = kea<passkeyLogicType>([
                 startPasskeyAuthentication: async () => {
                     try {
                         // Step 1: Get authentication options from server
-                        const beginResponse = await api.create<PasskeyLoginBeginResponse>('api/webauthn/login/begin/')
+                        const beginResponse = await api.create<PasskeyLoginBeginResponse>('v1/webauthn/login/begin/')
 
                         // Step 2: Use SimpleWebAuthn to get assertion from authenticator
                         // Use provided allowCredentials if available (from precheck), otherwise use server response
@@ -106,7 +106,7 @@ export const passkeyLogic = kea<passkeyLogicType>([
                         })
 
                         // Step 3: Send assertion to server to complete login
-                        await api.create('api/webauthn/login/complete/', assertion)
+                        await api.create('v1/webauthn/login/complete/', assertion)
 
                         return null
                     } catch (e: unknown) {

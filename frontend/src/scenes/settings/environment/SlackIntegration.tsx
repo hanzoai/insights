@@ -37,7 +37,7 @@ const getSlackAppManifest = (): any => ({
     },
     settings: {
         event_subscriptions: {
-            request_url: `${window.location.origin.replace('http://', 'https://')}/api/integrations/slack/events`,
+            request_url: `${window.location.origin.replace('http://', 'https://')}/v1/integrations/slack/events`,
             bot_events: ['link_shared'],
         },
         org_deploy_enabled: false,

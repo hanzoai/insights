@@ -44,7 +44,7 @@ const allNotebooks = [
 const Template: StoryFn<typeof NotebookSelectButton> = (props) => {
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/notebooks/': (req, res, ctx) => {
+            '/v1/projects/:team_id/notebooks/': (req, res, ctx) => {
                 const contains = req.url.searchParams.get('contains')
                 const sessionRecordingId = contains?.split(':')[1]
                 const unfiltered = contains == null && sessionRecordingId === undefined
@@ -109,7 +109,7 @@ WithNoNotebooks.args = {
 const SessionTemplate: StoryFn<typeof NotebookSelectButton> = (props) => {
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/notebooks/': () => {
+            '/v1/projects/:team_id/notebooks/': () => {
                 return [
                     200,
                     {

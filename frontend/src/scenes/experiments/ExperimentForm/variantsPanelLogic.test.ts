@@ -72,7 +72,7 @@ describe('variantsPanelLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/@current/feature_flags/': (req) => {
+                '/v1/projects/@current/feature_flags/': (req) => {
                     const url = new URL(req.url)
                     const search = url.searchParams.get('search')
 
@@ -85,7 +85,7 @@ describe('variantsPanelLogic', () => {
 
                     return [200, { results: mockFeatureFlags, count: mockFeatureFlags.length }]
                 },
-                '/api/projects/@current/experiments': () => [
+                '/v1/projects/@current/experiments': () => [
                     200,
                     {
                         results: [
@@ -239,7 +239,7 @@ describe('variantsPanelLogic', () => {
         it('handles validation errors gracefully', async () => {
             useMocks({
                 get: {
-                    '/api/projects/@current/feature_flags/': () => [500, { error: 'Server error' }],
+                    '/v1/projects/@current/feature_flags/': () => [500, { error: 'Server error' }],
                 },
             })
 

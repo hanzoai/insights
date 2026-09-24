@@ -10,7 +10,7 @@
 import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
 
 export const getMarketingAnalyticsTestMappingCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/marketing_analytics/test_mapping/`
+    return `/v1/environments/${projectId}/marketing_analytics/test_mapping/`
 }
 
 export const marketingAnalyticsTestMappingCreate = async (projectId: string, options?: RequestInit): Promise<void> => {

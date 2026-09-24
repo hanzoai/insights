@@ -61,7 +61,7 @@ export const defaultEvaluationContextsLogic = kea<defaultEvaluationContextsLogic
                         return null
                     }
 
-                    const response = await api.get(`/api/environments/${teamId}/default_evaluation_tags/`)
+                    const response = await api.get(`/v1/environments/${teamId}/default_evaluation_tags/`)
                     return response as DefaultEvaluationContextsResponse
                 },
 
@@ -72,7 +72,7 @@ export const defaultEvaluationContextsLogic = kea<defaultEvaluationContextsLogic
                     }
 
                     try {
-                        const response = await api.create(`/api/environments/${teamId}/default_evaluation_tags/`, {
+                        const response = await api.create(`/v1/environments/${teamId}/default_evaluation_tags/`, {
                             tag_name: tagName,
                         })
 
@@ -107,7 +107,7 @@ export const defaultEvaluationContextsLogic = kea<defaultEvaluationContextsLogic
 
                     try {
                         await api.delete(
-                            `/api/environments/${teamId}/default_evaluation_tags/?tag_name=${encodeURIComponent(tagName)}`
+                            `/v1/environments/${teamId}/default_evaluation_tags/?tag_name=${encodeURIComponent(tagName)}`
                         )
 
                         const currentData = values.defaultEvaluationContexts

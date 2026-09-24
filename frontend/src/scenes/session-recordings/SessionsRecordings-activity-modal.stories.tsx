@@ -25,7 +25,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/environments/:team_id/query': eventsQuery,
+                '/v1/environments/:team_id/query': eventsQuery,
             },
         }),
     ],
@@ -35,11 +35,11 @@ export default meta
 export const EventExplorerWithModal: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/session_recordings/:id/': () => [
+            '/v1/environments/:team_id/session_recordings/:id/': () => [
                 200,
                 { ...recordingMetaJson, id: 'modal-recording-001' },
             ],
-            '/api/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
+            '/v1/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
                 if (req.url.searchParams.get('source') === 'blob_v2') {
                     return res(ctx.text(snapshotsAsJSONLines()))
                 }
@@ -59,7 +59,7 @@ export const EventExplorerWithModal: StoryFn = () => {
             },
         },
         post: {
-            '/api/environments/:team_id/query': eventsQuery,
+            '/v1/environments/:team_id/query': eventsQuery,
         },
     })
 
@@ -83,11 +83,11 @@ EventExplorerWithModal.tags = ['test-skip']
 export const EventExplorerWithModalNotFound: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': () => [404, { detail: 'Not found.' }],
-            '/api/environments/:team_id/session_recordings/:id/snapshots': () => [404, { detail: 'Not found.' }],
+            '/v1/environments/:team_id/session_recordings/:id': () => [404, { detail: 'Not found.' }],
+            '/v1/environments/:team_id/session_recordings/:id/snapshots': () => [404, { detail: 'Not found.' }],
         },
         post: {
-            '/api/environments/:team_id/query': eventsQuery,
+            '/v1/environments/:team_id/query': eventsQuery,
         },
     })
 

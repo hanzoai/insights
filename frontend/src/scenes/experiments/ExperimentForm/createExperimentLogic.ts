@@ -458,12 +458,12 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                         saved_metrics_ids: savedMetrics,
                     }
                     response = (await api.update(
-                        `api/projects/@current/experiments/${values.experiment.id}`,
+                        `v1/projects/@current/experiments/${values.experiment.id}`,
                         filteredPayload
                     )) as Experiment
                 } else {
                     // Create new experiment - send all fields
-                    response = (await api.create(`api/projects/@current/experiments`, experimentPayload)) as Experiment
+                    response = (await api.create(`v1/projects/@current/experiments`, experimentPayload)) as Experiment
                 }
 
                 if (response.id) {

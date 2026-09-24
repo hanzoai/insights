@@ -54,16 +54,16 @@ describe('sessionRecordingsPlaylistLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/properties': {
+                '/v1/environments/:team_id/session_recordings/properties': {
                     results: [
                         { id: 's1', properties: { blah: 'blah1' } },
                         { id: 's2', properties: { blah: 'blah2' } },
                     ],
                 },
 
-                'api/projects/:team/property_definitions/seen_together': { $pageview: true },
+                'v1/projects/:team/property_definitions/seen_together': { $pageview: true },
 
-                '/api/environments/:team_id/session_recordings': (req) => {
+                '/v1/environments/:team_id/session_recordings': (req) => {
                     const { searchParams } = req.url
                     if (
                         (searchParams.get('events')?.length || 0) > 0 &&
@@ -117,7 +117,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
                         },
                     ]
                 },
-                '/api/projects/:team/session_recording_playlists/:playlist_id/recordings': () => {
+                '/v1/projects/:team/session_recording_playlists/:playlist_id/recordings': () => {
                     return [
                         200,
                         {

@@ -46,8 +46,8 @@ export const getCustomerJourneysListUrl = (projectId: string, params?: CustomerJ
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/customer_journeys/?${stringifiedParams}`
-        : `/api/environments/${projectId}/customer_journeys/`
+        ? `/v1/environments/${projectId}/customer_journeys/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/customer_journeys/`
 }
 
 export const customerJourneysList = async (
@@ -62,7 +62,7 @@ export const customerJourneysList = async (
 }
 
 export const getCustomerJourneysCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/customer_journeys/`
+    return `/v1/environments/${projectId}/customer_journeys/`
 }
 
 export const customerJourneysCreate = async (
@@ -90,8 +90,8 @@ export const getCustomerProfileConfigsListUrl = (projectId: string, params?: Cus
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/customer_profile_configs/?${stringifiedParams}`
-        : `/api/environments/${projectId}/customer_profile_configs/`
+        ? `/v1/environments/${projectId}/customer_profile_configs/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/customer_profile_configs/`
 }
 
 export const customerProfileConfigsList = async (
@@ -106,7 +106,7 @@ export const customerProfileConfigsList = async (
 }
 
 export const getCustomerProfileConfigsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/customer_profile_configs/`
+    return `/v1/environments/${projectId}/customer_profile_configs/`
 }
 
 export const customerProfileConfigsCreate = async (

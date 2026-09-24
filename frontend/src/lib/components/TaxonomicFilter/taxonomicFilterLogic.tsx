@@ -328,7 +328,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         options: [{ name: 'All events', value: null }].filter(
                             (o) => !excludedProperties[TaxonomicFilterGroupType.Events]?.includes(o.value)
                         ),
-                        endpoint: combineUrl(`api/projects/${projectId}/event_definitions`, {
+                        endpoint: combineUrl(`v1/projects/${projectId}/event_definitions`, {
                             event_type: EventDefinitionType.Event,
                             exclude_hidden: true,
                             ordering: eventOrdering ?? undefined,
@@ -447,7 +447,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Event properties',
                         searchPlaceholder: 'event properties',
                         type: TaxonomicFilterGroupType.EventProperties,
-                        endpoint: combineUrl(`api/projects/${projectId}/property_definitions`, {
+                        endpoint: combineUrl(`v1/projects/${projectId}/property_definitions`, {
                             is_feature_flag: false,
                             ...(eventNames.length > 0 ? { event_names: eventNames } : {}),
                             properties: propertyAllowList?.[TaxonomicFilterGroupType.EventProperties]
@@ -457,7 +457,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         }).url,
                         scopedEndpoint:
                             eventNames.length > 0
-                                ? combineUrl(`api/projects/${projectId}/property_definitions`, {
+                                ? combineUrl(`v1/projects/${projectId}/property_definitions`, {
                                       event_names: eventNames,
                                       is_feature_flag: false,
                                       filter_by_event_names: true,
@@ -509,7 +509,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         },
                         getValue: (option: PropertyDefinition) => option.id,
                         valuesEndpoint: (key) => {
-                            return `api/event/values/?key=${encodeURIComponent(key)}&is_column=true`
+                            return `v1/event/values/?key=${encodeURIComponent(key)}&is_column=true`
                         },
                         getPopoverHeader: () => 'Event metadata',
                     },
@@ -517,13 +517,13 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Feature flags',
                         searchPlaceholder: 'feature flags',
                         type: TaxonomicFilterGroupType.EventFeatureFlags,
-                        endpoint: combineUrl(`api/projects/${projectId}/property_definitions`, {
+                        endpoint: combineUrl(`v1/projects/${projectId}/property_definitions`, {
                             is_feature_flag: true,
                             ...(eventNames.length > 0 ? { event_names: eventNames } : {}),
                         }).url,
                         scopedEndpoint:
                             eventNames.length > 0
-                                ? combineUrl(`api/projects/${projectId}/property_definitions`, {
+                                ? combineUrl(`v1/projects/${projectId}/property_definitions`, {
                                       event_names: eventNames,
                                       is_feature_flag: true,
                                       filter_by_event_names: true,
@@ -560,7 +560,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         getName: (option) => option.name,
                         getValue: (option) => option.value,
                         valuesEndpoint: (key) =>
-                            `api/environments/${projectId}/error_tracking/issues/values?key=` + key,
+                            `v1/environments/${projectId}/error_tracking/issues/values?key=` + key,
                         getPopoverHeader: () => 'Issues',
                     },
                     {
@@ -615,7 +615,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         },
                         getValue: (option: PropertyDefinition) => option.id,
                         valuesEndpoint: (key) => {
-                            return `api/environments/${projectId}/revenue_analytics/taxonomy/values?key=${encodeURIComponent(
+                            return `v1/environments/${projectId}/revenue_analytics/taxonomy/values?key=${encodeURIComponent(
                                 key
                             )}`
                         },
@@ -647,12 +647,12 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Log attributes',
                         searchPlaceholder: 'attributes',
                         type: TaxonomicFilterGroupType.LogAttributes,
-                        endpoint: combineUrl(`api/environments/${projectId}/logs/attributes`, {
+                        endpoint: combineUrl(`v1/environments/${projectId}/logs/attributes`, {
                             attribute_type: 'log',
                             ...endpointFilters,
                         }).url,
                         valuesEndpoint: (key) =>
-                            combineUrl(`api/environments/${projectId}/logs/values`, {
+                            combineUrl(`v1/environments/${projectId}/logs/values`, {
                                 attribute_type: 'log',
                                 key: key,
                                 ...endpointFilters,
@@ -665,12 +665,12 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Resource attributes',
                         searchPlaceholder: 'resources',
                         type: TaxonomicFilterGroupType.LogResourceAttributes,
-                        endpoint: combineUrl(`api/environments/${projectId}/logs/attributes`, {
+                        endpoint: combineUrl(`v1/environments/${projectId}/logs/attributes`, {
                             attribute_type: 'resource',
                             ...endpointFilters,
                         }).url,
                         valuesEndpoint: (key) =>
-                            combineUrl(`api/environments/${projectId}/logs/values`, {
+                            combineUrl(`v1/environments/${projectId}/logs/values`, {
                                 attribute_type: 'resource',
                                 key: key,
                                 ...endpointFilters,
@@ -683,7 +683,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Numerical event properties',
                         searchPlaceholder: 'numerical event properties',
                         type: TaxonomicFilterGroupType.NumericalEventProperties,
-                        endpoint: combineUrl(`api/projects/${projectId}/property_definitions`, {
+                        endpoint: combineUrl(`v1/projects/${projectId}/property_definitions`, {
                             is_numerical: true,
                             event_names: eventNames,
                         }).url,
@@ -695,7 +695,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'User properties',
                         searchPlaceholder: 'user properties',
                         type: TaxonomicFilterGroupType.PersonProperties,
-                        endpoint: combineUrl(`api/projects/${projectId}/property_definitions`, {
+                        endpoint: combineUrl(`v1/projects/${projectId}/property_definitions`, {
                             type: 'person',
                             properties: propertyAllowList?.[TaxonomicFilterGroupType.PersonProperties]
                                 ? propertyAllowList[TaxonomicFilterGroupType.PersonProperties].join(',')
@@ -712,7 +712,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Cohorts',
                         searchPlaceholder: 'cohorts',
                         type: TaxonomicFilterGroupType.Cohorts,
-                        endpoint: combineUrl(`api/projects/${projectId}/cohorts/`).url,
+                        endpoint: combineUrl(`v1/projects/${projectId}/cohorts/`).url,
                         value: 'cohorts',
                         getName: (cohort: CohortType) => cohort.name || `Cohort ${cohort.id}`,
                         getValue: (cohort: CohortType) => cohort.id,
@@ -732,7 +732,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Cohorts',
                         searchPlaceholder: 'cohorts',
                         type: TaxonomicFilterGroupType.CohortsWithAllUsers,
-                        endpoint: combineUrl(`api/projects/${projectId}/cohorts/`).url,
+                        endpoint: combineUrl(`v1/projects/${projectId}/cohorts/`).url,
                         options: COHORTS_WITH_ALL_USERS_OPTIONS,
                         getName: (cohort: CohortType) => cohort.name || `Cohort ${cohort.id}`,
                         getValue: (cohort: CohortType) => cohort.id,
@@ -748,7 +748,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Pageview URLs',
                         searchPlaceholder: 'pageview URLs',
                         type: TaxonomicFilterGroupType.PageviewUrls,
-                        endpoint: `api/environments/${teamId}/events/values/?key=$current_url&event_name=$pageview`,
+                        endpoint: `v1/environments/${teamId}/events/values/?key=$current_url&event_name=$pageview`,
                         searchAlias: 'value',
                         getName: (option: SimpleOption) => option.name,
                         getValue: (option: SimpleOption) => option.name,
@@ -759,7 +759,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Pageview events',
                         searchPlaceholder: 'pageview events',
                         type: TaxonomicFilterGroupType.PageviewEvents,
-                        endpoint: `api/environments/${teamId}/events/values/?key=$current_url&event_name=$pageview`,
+                        endpoint: `v1/environments/${teamId}/events/values/?key=$current_url&event_name=$pageview`,
                         searchAlias: 'value',
                         getName: (option: SimpleOption) => option.name,
                         getValue: (option: SimpleOption) => option.name,
@@ -773,7 +773,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Screens',
                         searchPlaceholder: 'screens',
                         type: TaxonomicFilterGroupType.Screens,
-                        endpoint: `api/environments/${teamId}/events/values/?key=$screen_name&event_name=$screen`,
+                        endpoint: `v1/environments/${teamId}/events/values/?key=$screen_name&event_name=$screen`,
                         searchAlias: 'value',
                         getName: (option: SimpleOption) => option.name,
                         getValue: (option: SimpleOption) => option.name,
@@ -784,7 +784,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Screen events',
                         searchPlaceholder: 'screen events',
                         type: TaxonomicFilterGroupType.ScreenEvents,
-                        endpoint: `api/environments/${teamId}/events/values/?key=$screen_name&event_name=$screen`,
+                        endpoint: `v1/environments/${teamId}/events/values/?key=$screen_name&event_name=$screen`,
                         searchAlias: 'value',
                         getName: (option: SimpleOption) => option.name,
                         getValue: (option: SimpleOption) => option.name,
@@ -795,7 +795,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Email addresses',
                         searchPlaceholder: 'email addresses',
                         type: TaxonomicFilterGroupType.EmailAddresses,
-                        endpoint: `api/environments/${teamId}/persons/values/?key=email`,
+                        endpoint: `v1/environments/${teamId}/persons/values/?key=email`,
                         searchAlias: 'value',
                         getName: (option: SimpleOption) => option.name,
                         getValue: (option: SimpleOption) => option.name,
@@ -806,7 +806,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Autocapture events',
                         searchPlaceholder: 'autocapture events',
                         type: TaxonomicFilterGroupType.AutocaptureEvents,
-                        endpoint: `api/environments/${teamId}/events/values/?key=$el_text&event_name=$autocapture`,
+                        endpoint: `v1/environments/${teamId}/events/values/?key=$el_text&event_name=$autocapture`,
                         searchAlias: 'value',
                         getName: (option: SimpleOption) => option.name,
                         getValue: (option: SimpleOption) => option.name,
@@ -817,7 +817,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Custom Events',
                         searchPlaceholder: 'custom events',
                         type: TaxonomicFilterGroupType.CustomEvents,
-                        endpoint: combineUrl(`api/projects/${projectId}/event_definitions`, {
+                        endpoint: combineUrl(`v1/projects/${projectId}/event_definitions`, {
                             event_type: EventDefinitionType.EventCustom,
                             exclude_hidden: true,
                         }).url,
@@ -838,7 +838,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Users',
                         searchPlaceholder: 'users',
                         type: TaxonomicFilterGroupType.Persons,
-                        endpoint: `api/environments/${teamId}/persons/`,
+                        endpoint: `v1/environments/${teamId}/persons/`,
                         getName: (person: PersonType) => person.name || 'Anon user?',
                         getValue: (person: PersonType) => person.distinct_ids[0],
                         getPopoverHeader: () => `Person`,
@@ -847,7 +847,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Insights',
                         searchPlaceholder: 'insights',
                         type: TaxonomicFilterGroupType.Insights,
-                        endpoint: combineUrl(`api/environments/${teamId}/insights/`, {
+                        endpoint: combineUrl(`v1/environments/${teamId}/insights/`, {
                             saved: true,
                         }).url,
                         getName: (insight: QueryBasedInsightModel) => insight.name,
@@ -858,7 +858,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         name: 'Feature Flags',
                         searchPlaceholder: 'feature flags',
                         type: TaxonomicFilterGroupType.FeatureFlags, // Feature flag dependencies
-                        endpoint: combineUrl(`api/projects/${projectId}/feature_flags/`).url,
+                        endpoint: combineUrl(`v1/projects/${projectId}/feature_flags/`).url,
                         getName: (featureFlag: FeatureFlagType) => {
                             const name = featureFlag.key || featureFlag.name
                             const isInactive = !featureFlag.active
@@ -922,7 +922,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         searchPlaceholder: 'notebooks',
                         type: TaxonomicFilterGroupType.Notebooks,
                         value: 'notebooks',
-                        endpoint: `api/projects/${projectId}/notebooks/`,
+                        endpoint: `v1/projects/${projectId}/notebooks/`,
                         getName: (notebook: NotebookType) => notebook.title || `Notebook ${notebook.short_id}`,
                         getValue: (notebook: NotebookType) => notebook.short_id,
                         getPopoverHeader: () => 'Notebooks',
@@ -941,7 +941,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                                       })),
                               }
                             : {
-                                  endpoint: `api/environments/${teamId}/sessions/property_definitions`,
+                                  endpoint: `v1/environments/${teamId}/sessions/property_definitions`,
                               }),
                         getName: (option: any) => option.name,
                         getValue: (option) => option.name,
@@ -979,8 +979,8 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         valuesEndpoint: (key) => {
                             if (key === 'visited_page') {
                                 return (
-                                    `api/environments/${teamId}/events/values/?key=` +
-                                    'api/event/values/?key=' +
+                                    `v1/environments/${teamId}/events/values/?key=` +
+                                    'v1/event/values/?key=' +
                                     encodeURIComponent('$current_url') +
                                     '&event_name=' +
                                     encodeURIComponent('$pageview')
@@ -1079,7 +1079,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                     name: `${capitalizeFirstLetter(aggregationLabel(type.group_type_index).plural)}`,
                     searchPlaceholder: `${aggregationLabel(type.group_type_index).plural}`,
                     type: `${TaxonomicFilterGroupType.GroupNamesPrefix}_${type.group_type_index}` as unknown as TaxonomicFilterGroupType,
-                    endpoint: combineUrl(`api/environments/${teamId}/groups/`, {
+                    endpoint: combineUrl(`v1/environments/${teamId}/groups/`, {
                         group_type_index: type.group_type_index,
                     }).url,
                     getPopoverHeader: () => `Group Names`,
@@ -1095,13 +1095,13 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                     name: `${capitalizeFirstLetter(aggregationLabel(type.group_type_index).singular)} properties`,
                     searchPlaceholder: `${aggregationLabel(type.group_type_index).singular} properties`,
                     type: `${TaxonomicFilterGroupType.GroupsPrefix}_${type.group_type_index}` as unknown as TaxonomicFilterGroupType,
-                    endpoint: combineUrl(`api/projects/${projectId}/property_definitions`, {
+                    endpoint: combineUrl(`v1/projects/${projectId}/property_definitions`, {
                         type: 'group',
                         group_type_index: type.group_type_index,
                         exclude_hidden: true,
                     }).url,
                     valuesEndpoint: (key) =>
-                        `api/projects/${projectId}/groups/property_values?${toParams({
+                        `v1/projects/${projectId}/groups/property_values?${toParams({
                             key,
                             group_type_index: type.group_type_index,
                         })}`,

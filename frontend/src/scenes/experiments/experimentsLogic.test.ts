@@ -116,7 +116,7 @@ describe('experimentsLogic', () => {
                 .toFinishAllListeners()
 
             expect(api.get).toHaveBeenCalledWith(
-                expect.stringMatching(/api\/projects\/\d+\/experiments\/eligible_feature_flags\/\?/)
+                expect.stringMatching(/v1\/projects\/\d+\/experiments\/eligible_feature_flags\/\?/)
             )
         })
 
@@ -235,7 +235,7 @@ describe('experimentsLogic', () => {
                 logic.actions.loadExperiments()
             }).toFinishAllListeners()
 
-            expect(api.get).toHaveBeenCalledWith(expect.stringMatching(/api\/projects\/\d+\/experiments\?/))
+            expect(api.get).toHaveBeenCalledWith(expect.stringMatching(/v1\/projects\/\d+\/experiments\?/))
         })
 
         it('updates filters and triggers API call with debounce', async () => {

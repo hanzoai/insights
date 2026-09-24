@@ -31,7 +31,7 @@ export default meta
 export const BillingProductWithoutAddons = (): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/billing/': {
+            '/v1/billing/': {
                 ...billingJson,
             },
         },
@@ -45,7 +45,7 @@ export const BillingProductWithoutAddons = (): JSX.Element => {
 export const BillingProductWithAddons = (): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/billing/': {
+            '/v1/billing/': {
                 ...billingJson,
             },
         },
@@ -59,7 +59,7 @@ export const BillingProductWithAddons = (): JSX.Element => {
 export const BillingProductWithStandalonePricingAddon = (): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/billing/': {
+            '/v1/billing/': {
                 ...billingJson,
             },
         },
@@ -73,7 +73,7 @@ export const BillingProductWithStandalonePricingAddon = (): JSX.Element => {
 export const BillingProductTemporarilyFree = (): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/billing/': {
+            '/v1/billing/': {
                 ...billingJson,
             },
         },
@@ -284,7 +284,7 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
 export const BillingProductInclusionOnlyWithAddon = (): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/billing/': {
+            '/v1/billing/': {
                 ...billingJson,
             },
         },

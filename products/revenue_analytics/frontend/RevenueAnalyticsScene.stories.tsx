@@ -36,7 +36,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/external_data_sources/': () => {
+                '/v1/environments/:team_id/external_data_sources/': () => {
                     return [
                         200,
                         {
@@ -47,7 +47,7 @@ const meta: Meta = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query': (req) => {
+                '/v1/environments/:team_id/query': (req) => {
                     const query = (req.body as any).query
                     const queryKind = query.kind
 
@@ -100,7 +100,7 @@ export function RevenueAnalyticsDashboardSyncInProgress(): JSX.Element {
 
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/external_data_sources/': () => {
+            '/v1/environments/:team_id/external_data_sources/': () => {
                 return [
                     200,
                     {

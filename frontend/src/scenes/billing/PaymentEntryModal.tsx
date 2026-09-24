@@ -13,7 +13,7 @@ const PAY_URL = process.env.HANZO_PAY_URL ?? 'https://pay.hanzo.ai'
  * Hanzo Commerce backend. We do not host Stripe Elements anymore.
  *
  * The insights backend still returns a `clientSecret` from
- * /api/billing/activate/authorize — that token is now a Hanzo Commerce
+ * /v1/billing/activate/authorize — that token is now a Hanzo Commerce
  * checkout-session token. Pay forwards it back through commerce.
  */
 export const PaymentEntryModal = (): JSX.Element => {

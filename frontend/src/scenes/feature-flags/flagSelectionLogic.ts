@@ -100,7 +100,7 @@ export const flagSelectionLogic = kea<flagSelectionLogicType>([
                     // Build query params matching the current filters (without pagination)
                     const { limit, offset, ...filters } = values.paramsFromFilters
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/feature_flags/matching_ids/?${toParams(filters)}`
+                        `v1/projects/${values.currentProjectId}/feature_flags/matching_ids/?${toParams(filters)}`
                     )
                     return response as { ids: number[]; total: number }
                 },
@@ -116,14 +116,14 @@ export const flagSelectionLogic = kea<flagSelectionLogicType>([
                         // Use filter-based deletion - backend handles all matching flags
                         const { limit, offset, ...filters } = paramsFromFilters
                         const response = await api.create(
-                            `api/projects/${currentProjectId}/feature_flags/bulk_delete/`,
+                            `v1/projects/${currentProjectId}/feature_flags/bulk_delete/`,
                             { filters }
                         )
                         return response as BulkDeleteResult
                     }
 
                     // Use ID-based deletion (explicit selection)
-                    const response = await api.create(`api/projects/${currentProjectId}/feature_flags/bulk_delete/`, {
+                    const response = await api.create(`v1/projects/${currentProjectId}/feature_flags/bulk_delete/`, {
                         ids: selectedFlagIds,
                     })
                     return response as BulkDeleteResult

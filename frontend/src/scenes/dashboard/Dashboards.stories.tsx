@@ -36,8 +36,8 @@ const dashboard = {
 const insightMocks = dashboard.tiles.reduce((acc: Record<string, any>, tile: any) => {
     if (tile.insight) {
         // Add both the old project-based path and the new environment-based path
-        acc[`/api/projects/:team_id/insights/${tile.insight.id}/`] = tile.insight
-        acc[`/api/environments/:team_id/insights/${tile.insight.id}/`] = tile.insight
+        acc[`/v1/projects/:team_id/insights/${tile.insight.id}/`] = tile.insight
+        acc[`/v1/environments/:team_id/insights/${tile.insight.id}/`] = tile.insight
     }
     return acc
 }, {})
@@ -55,8 +55,8 @@ const insightFetchMock = (req: any): [number, any] => {
 
     // Fallback to checking our insight mocks
     const insight =
-        insightMocks[`/api/environments/:team_id/insights/${insightId}/`] ||
-        insightMocks[`/api/projects/:team_id/insights/${insightId}/`]
+        insightMocks[`/v1/environments/:team_id/insights/${insightId}/`] ||
+        insightMocks[`/v1/projects/:team_id/insights/${insightId}/`]
     if (insight) {
         return [200, insight]
     }
@@ -74,29 +74,29 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/dashboards/': require('./__mocks__/dashboards.json'),
-                [`/api/environments/:team_id/dashboards/${BASE_DASHBOARD_ID}/`]: dashboard,
+                '/v1/environments/:team_id/dashboards/': require('./__mocks__/dashboards.json'),
+                [`/v1/environments/:team_id/dashboards/${BASE_DASHBOARD_ID}/`]: dashboard,
                 ...insightMocks,
-                '/api/environments/:team_id/insights/:id/': insightFetchMock,
-                [`/api/environments/:team_id/dashboards/${BASE_DASHBOARD_ID}/collaborators/`]: [],
-                [`/api/environments/:team_id/dashboards/${SERVER_ERROR_DASHBOARD_ID}/`]: [
+                '/v1/environments/:team_id/insights/:id/': insightFetchMock,
+                [`/v1/environments/:team_id/dashboards/${BASE_DASHBOARD_ID}/collaborators/`]: [],
+                [`/v1/environments/:team_id/dashboards/${SERVER_ERROR_DASHBOARD_ID}/`]: [
                     500,
                     { detail: 'Server error' },
                 ],
-                '/api/projects/:team_id/dashboard_templates/': require('./__mocks__/dashboard_templates.json'),
-                '/api/projects/:team_id/dashboard_templates/json_schema/': require('./__mocks__/dashboard_template_schema.json'),
-                '/api/environments/:team_id/dashboards/:dash_id/sharing/': {
+                '/v1/projects/:team_id/dashboard_templates/': require('./__mocks__/dashboard_templates.json'),
+                '/v1/projects/:team_id/dashboard_templates/json_schema/': require('./__mocks__/dashboard_template_schema.json'),
+                '/v1/environments/:team_id/dashboards/:dash_id/sharing/': {
                     created_at: '2023-02-25T13:28:20.454940Z',
                     enabled: false,
                     access_token: 'a-secret-token',
                 },
                 // Add variable data mock to prevent loading issues
-                '/api/environments/:team_id/warehouse/variables/': [],
+                '/v1/environments/:team_id/warehouse/variables/': [],
                 // Add team endpoint
-                '/api/environments/:team_id/': { id: BASE_DASHBOARD_ID, name: 'Test Team' },
+                '/v1/environments/:team_id/': { id: BASE_DASHBOARD_ID, name: 'Test Team' },
             },
             post: {
-                '/api/environments/:team_id/insights/cancel/': [201],
+                '/v1/environments/:team_id/insights/cancel/': [201],
             },
         }),
     ],
@@ -280,8 +280,8 @@ const accessControlDashboard = {
 const accessControlInsightMocks = accessControlDashboard.tiles.reduce((acc: Record<string, any>, tile: any) => {
     if (tile.insight) {
         // Add both project and environment paths
-        acc[`/api/projects/:team_id/insights/${tile.insight.id}/`] = tile.insight
-        acc[`/api/environments/:team_id/insights/${tile.insight.id}/`] = tile.insight
+        acc[`/v1/projects/:team_id/insights/${tile.insight.id}/`] = tile.insight
+        acc[`/v1/environments/:team_id/insights/${tile.insight.id}/`] = tile.insight
     }
     return acc
 }, {})
@@ -291,15 +291,15 @@ export const AccessControlDashboard: Story = {
         mswDecorator({
             get: {
                 ...accessControlInsightMocks,
-                '/api/projects/:team_id/dashboards/': {
+                '/v1/projects/:team_id/dashboards/': {
                     count: 1,
                     next: null,
                     previous: null,
                     results: [accessControlDashboard],
                 },
-                [`/api/projects/:team_id/dashboards/${ACCESS_CONTROL_DASHBOARD_ID}/`]: accessControlDashboard,
-                [`/api/environments/:team_id/dashboards/${ACCESS_CONTROL_DASHBOARD_ID}/`]: accessControlDashboard,
-                [`/api/environments/:team_id/insights/:id/`]: insightFetchMock,
+                [`/v1/projects/:team_id/dashboards/${ACCESS_CONTROL_DASHBOARD_ID}/`]: accessControlDashboard,
+                [`/v1/environments/:team_id/dashboards/${ACCESS_CONTROL_DASHBOARD_ID}/`]: accessControlDashboard,
+                [`/v1/environments/:team_id/insights/:id/`]: insightFetchMock,
             },
         }),
     ],
@@ -322,15 +322,15 @@ export const ViewOnlyDashboard: Story = {
         mswDecorator({
             get: {
                 ...accessControlInsightMocks,
-                '/api/projects/:team_id/dashboards/': {
+                '/v1/projects/:team_id/dashboards/': {
                     count: 1,
                     next: null,
                     previous: null,
                     results: [viewOnlyDashboard],
                 },
-                [`/api/projects/:team_id/dashboards/${ACCESS_CONTROL_DASHBOARD_ID + 1}/`]: viewOnlyDashboard,
-                [`/api/environments/:team_id/dashboards/${ACCESS_CONTROL_DASHBOARD_ID + 1}/`]: viewOnlyDashboard,
-                [`/api/environments/:team_id/insights/:id/`]: insightFetchMock,
+                [`/v1/projects/:team_id/dashboards/${ACCESS_CONTROL_DASHBOARD_ID + 1}/`]: viewOnlyDashboard,
+                [`/v1/environments/:team_id/dashboards/${ACCESS_CONTROL_DASHBOARD_ID + 1}/`]: viewOnlyDashboard,
+                [`/v1/environments/:team_id/insights/:id/`]: insightFetchMock,
             },
         }),
     ],

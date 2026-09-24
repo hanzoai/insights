@@ -142,7 +142,7 @@ export const featureFlagsLogic = kea<featureFlagsLogicType>([
             {
                 loadFeatureFlags: async () => {
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/feature_flags/?${toParams(values.paramsFromFilters)}`
+                        `v1/projects/${values.currentProjectId}/feature_flags/?${toParams(values.paramsFromFilters)}`
                     )
 
                     return {
@@ -153,7 +153,7 @@ export const featureFlagsLogic = kea<featureFlagsLogicType>([
                 },
                 updateFeatureFlag: async ({ id, payload }: { id: number; payload: Partial<FeatureFlagType> }) => {
                     const response = await api.update(
-                        `api/projects/${values.currentProjectId}/feature_flags/${id}`,
+                        `v1/projects/${values.currentProjectId}/feature_flags/${id}`,
                         payload
                     )
                     const updatedFlags = [...values.featureFlags.results].map((flag) =>

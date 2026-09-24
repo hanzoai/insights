@@ -3,14 +3,14 @@ import { mockActionDefinition } from '~/test/mocks'
 
 export const taxonomicFilterMocksDecorator = mswDecorator({
     get: {
-        '/api/projects/:team_id/actions': { results: [mockActionDefinition] },
-        '/api/environments/:team_id/persons/properties': [
+        '/v1/projects/:team_id/actions': { results: [mockActionDefinition] },
+        '/v1/environments/:team_id/persons/properties': [
             { id: 1, name: 'location', count: 1 },
             { id: 2, name: 'role', count: 2 },
             { id: 3, name: 'height', count: 3 },
             { id: 4, name: '$browser', count: 4 },
         ],
-        '/api/projects/:team_id/property_definitions': [
+        '/v1/projects/:team_id/property_definitions': [
             {
                 name: 'file_count',
                 count: 205,
@@ -36,7 +36,7 @@ export const taxonomicFilterMocksDecorator = mswDecorator({
                 count: 205,
             },
         ],
-        '/api/projects/:team_id/event_definitions': [
+        '/v1/projects/:team_id/event_definitions': [
             {
                 id: 'a',
                 name: 'signed up',
@@ -57,7 +57,7 @@ export const taxonomicFilterMocksDecorator = mswDecorator({
                 count: 103,
             },
         ],
-        '/api/projects/:team_id/cohorts/': [
+        '/v1/projects/:team_id/cohorts/': [
             {
                 id: 1,
                 name: 'Properties Cohort',

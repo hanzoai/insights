@@ -121,8 +121,8 @@ describe('llmEvaluationLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
-                '/api/environments/:teamId/llm_analytics/evaluation_config/': {
+                '/v1/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
+                '/v1/environments/:teamId/llm_analytics/evaluation_config/': {
                     trial_eval_limit: 100,
                     trial_evals_used: 0,
                     trial_evals_remaining: 100,
@@ -130,8 +130,8 @@ describe('llmEvaluationLogic', () => {
                     created_at: '2024-01-01T00:00:00Z',
                     updated_at: '2024-01-01T00:00:00Z',
                 },
-                '/api/environments/:teamId/evaluations/:id/': mockEvaluation,
-                '/api/environments/:teamId/llm_analytics/models/': {
+                '/v1/environments/:teamId/evaluations/:id/': mockEvaluation,
+                '/v1/environments/:teamId/llm_analytics/models/': {
                     models: [
                         { id: 'gpt-5-mini', insights_available: true },
                         { id: 'gpt-5', insights_available: false },

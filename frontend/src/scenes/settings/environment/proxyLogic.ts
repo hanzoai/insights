@@ -87,12 +87,12 @@ export const proxyLogic = kea<proxyLogicType>([
         proxyRecords: {
             __default: [] as ProxyRecord[],
             loadRecords: async () => {
-                const response = await api.get(`api/organizations/${values.currentOrganization?.id}/proxy_records`)
+                const response = await api.get(`v1/organizations/${values.currentOrganization?.id}/proxy_records`)
                 actions.setMaxProxyRecords(response.max_proxy_records)
                 return response.results
             },
             createRecord: async ({ domain }: { domain: string }) => {
-                const response = await api.create(`api/organizations/${values.currentOrganization?.id}/proxy_records`, {
+                const response = await api.create(`v1/organizations/${values.currentOrganization?.id}/proxy_records`, {
                     domain,
                 })
                 toast.success('Record created')
@@ -100,7 +100,7 @@ export const proxyLogic = kea<proxyLogicType>([
                 return [response, ...values.proxyRecords]
             },
             deleteRecord: async (id: ProxyRecord['id']) => {
-                void api.delete(`api/organizations/${values.currentOrganization?.id}/proxy_records/${id}`)
+                void api.delete(`v1/organizations/${values.currentOrganization?.id}/proxy_records/${id}`)
                 const newRecords = [...values.proxyRecords].map((r) => ({
                     ...r,
                     status: r.id === id ? 'deleting' : r.status,

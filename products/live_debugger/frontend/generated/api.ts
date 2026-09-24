@@ -50,8 +50,8 @@ export const getLiveDebuggerBreakpointsListUrl = (projectId: string, params?: Li
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/live_debugger_breakpoints/?${stringifiedParams}`
-        : `/api/projects/${projectId}/live_debugger_breakpoints/`
+        ? `/v1/projects/${projectId}/live_debugger_breakpoints/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/live_debugger_breakpoints/`
 }
 
 export const liveDebuggerBreakpointsList = async (
@@ -69,7 +69,7 @@ export const liveDebuggerBreakpointsList = async (
  * Create, Read, Update and Delete breakpoints for live debugging.
  */
 export const getLiveDebuggerBreakpointsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/live_debugger_breakpoints/`
+    return `/v1/projects/${projectId}/live_debugger_breakpoints/`
 }
 
 export const liveDebuggerBreakpointsCreate = async (
@@ -106,8 +106,8 @@ export const getLiveDebuggerBreakpointsActiveRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/live_debugger_breakpoints/active/?${stringifiedParams}`
-        : `/api/projects/${projectId}/live_debugger_breakpoints/active/`
+        ? `/v1/projects/${projectId}/live_debugger_breakpoints/active/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/live_debugger_breakpoints/active/`
 }
 
 export const liveDebuggerBreakpointsActiveRetrieve = async (
@@ -142,8 +142,8 @@ export const getLiveDebuggerBreakpointsBreakpointHitsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/live_debugger_breakpoints/breakpoint_hits/?${stringifiedParams}`
-        : `/api/projects/${projectId}/live_debugger_breakpoints/breakpoint_hits/`
+        ? `/v1/projects/${projectId}/live_debugger_breakpoints/breakpoint_hits/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/live_debugger_breakpoints/breakpoint_hits/`
 }
 
 export const liveDebuggerBreakpointsBreakpointHitsRetrieve = async (

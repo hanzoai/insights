@@ -13,7 +13,7 @@ describe('personsModalLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/session_recordings': () => [200, { results: [] }],
+                '/v1/environments/:team_id/session_recordings': () => [200, { results: [] }],
             },
         })
         initKeaTests()

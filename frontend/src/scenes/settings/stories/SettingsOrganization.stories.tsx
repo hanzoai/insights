@@ -34,13 +34,13 @@ const meta: Meta<(props: StoryProps) => JSX.Element> = {
                     cloud: true,
                     realm: 'cloud',
                 },
-                '/api/projects/:id/integrations': { results: [] },
-                '/api/organizations/:id/integrations': { results: [] },
-                '/api/environments/:team_id/conversations/': { results: [] },
-                '/api/user_home_settings/@me/': {},
+                '/v1/projects/:id/integrations': { results: [] },
+                '/v1/organizations/:id/integrations': { results: [] },
+                '/v1/environments/:team_id/conversations/': { results: [] },
+                '/v1/user_home_settings/@me/': {},
             },
             patch: {
-                '/api/projects/:id': async (req, res, ctx) => {
+                '/v1/projects/:id': async (req, res, ctx) => {
                     // bounce the setting back as is
                     const newTeamSettings = { ...MOCK_DEFAULT_TEAM, ...(await req.json()) }
                     return res(ctx.json(newTeamSettings))

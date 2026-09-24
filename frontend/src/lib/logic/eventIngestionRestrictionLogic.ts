@@ -24,7 +24,7 @@ export const eventIngestionRestrictionLogic = kea<eventIngestionRestrictionLogic
             __default: [] as EventIngestionRestriction[],
             loadEventIngestionRestrictions: async () => {
                 try {
-                    const response = await api.get('api/environments/@current/event_ingestion_restrictions/')
+                    const response = await api.get('v1/environments/@current/event_ingestion_restrictions/')
                     return response
                 } catch (error) {
                     console.error('Failed to load event ingestion restrictions:', error)

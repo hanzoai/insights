@@ -34,8 +34,8 @@ const dashboard = {
 const insightMocks = dashboard.tiles.reduce((acc: Record<string, any>, tile: any) => {
     if (tile.insight) {
         // Add both the old project-based path and the new environment-based path
-        acc[`/api/projects/:team_id/insights/${tile.insight.id}/`] = tile.insight
-        acc[`/api/environments/:team_id/insights/${tile.insight.id}/`] = tile.insight
+        acc[`/v1/projects/:team_id/insights/${tile.insight.id}/`] = tile.insight
+        acc[`/v1/environments/:team_id/insights/${tile.insight.id}/`] = tile.insight
     }
     return acc
 }, {})
@@ -53,8 +53,8 @@ const insightFetchMock = (req: any): [number, any] => {
 
     // Fallback to checking our insight mocks
     const insight =
-        insightMocks[`/api/environments/:team_id/insights/${insightId}/`] ||
-        insightMocks[`/api/projects/:team_id/insights/${insightId}/`]
+        insightMocks[`/v1/environments/:team_id/insights/${insightId}/`] ||
+        insightMocks[`/v1/projects/:team_id/insights/${insightId}/`]
     if (insight) {
         return [200, insight]
     }
@@ -68,20 +68,20 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/dashboards/': require('../dashboard/__mocks__/dashboards.json'),
-                '/api/environments/:team_id/dashboards/1/': dashboard,
+                '/v1/environments/:team_id/dashboards/': require('../dashboard/__mocks__/dashboards.json'),
+                '/v1/environments/:team_id/dashboards/1/': dashboard,
                 ...insightMocks,
-                '/api/environments/:team_id/insights/:id/': insightFetchMock,
-                '/api/environments/:team_id/dashboards/1/collaborators/': [],
-                '/api/environments/:team_id/session_recordings/': EMPTY_PAGINATED_RESPONSE,
-                '/api/environments/:team_id/insights/my_last_viewed/': [],
+                '/v1/environments/:team_id/insights/:id/': insightFetchMock,
+                '/v1/environments/:team_id/dashboards/1/collaborators/': [],
+                '/v1/environments/:team_id/session_recordings/': EMPTY_PAGINATED_RESPONSE,
+                '/v1/environments/:team_id/insights/my_last_viewed/': [],
                 // Add variable data mock to prevent loading issues
-                '/api/environments/:team_id/warehouse/variables/': [],
+                '/v1/environments/:team_id/warehouse/variables/': [],
                 // Add team endpoint
-                '/api/environments/:team_id/': { id: 1, name: 'Test Team' },
+                '/v1/environments/:team_id/': { id: 1, name: 'Test Team' },
             },
             post: {
-                '/api/environments/:team_id/insights/cancel/': [201],
+                '/v1/environments/:team_id/insights/cancel/': [201],
             },
         }),
     ],
@@ -129,7 +129,7 @@ export const NoPrimaryDashboard: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/file_system/log_view': [],
+                '/v1/environments/:team_id/file_system/log_view': [],
             },
         }),
     ],

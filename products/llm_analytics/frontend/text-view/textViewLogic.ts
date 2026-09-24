@@ -136,7 +136,7 @@ export const textViewLogic = kea<textViewLogicType>([
                 try {
                     // Call Django API with timeout
                     const response = await api.create(
-                        `api/environments/${props.teamId}/llm_analytics/text_repr/`,
+                        `v1/environments/${props.teamId}/llm_analytics/text_repr/`,
                         requestData,
                         { signal: abortController.signal }
                     )

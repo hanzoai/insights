@@ -107,7 +107,7 @@ describe('liveDebuggerLogic', () => {
             await expectLogic(logic).toDispatchActions(['loadBreakpointsSuccess', 'loadBreakpointInstancesSuccess'])
 
             expect(api.get).toHaveBeenCalledWith(
-                'api/projects/@current/live_debugger_breakpoints/?repository=Insights%2Finsights&filename=test.py'
+                'v1/projects/@current/live_debugger_breakpoints/?repository=Insights%2Finsights&filename=test.py'
             )
         })
 
@@ -215,7 +215,7 @@ describe('liveDebuggerLogic', () => {
                 logic.actions.toggleBreakpoint('test.py', 50, 'Insights/insights')
             }).toDispatchActions(['toggleBreakpoint', 'loadBreakpoints', 'loadBreakpointInstances'])
 
-            expect(api.create).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/', {
+            expect(api.create).toHaveBeenCalledWith('v1/projects/@current/live_debugger_breakpoints/', {
                 repository: 'Insights/insights',
                 filename: 'test.py',
                 line_number: 50,
@@ -242,7 +242,7 @@ describe('liveDebuggerLogic', () => {
                 logic.actions.toggleBreakpoint('capture_event.py', 100, 'Insights/insights')
             }).toDispatchActions(['toggleBreakpoint'])
 
-            expect(api.delete).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/bp-1/')
+            expect(api.delete).toHaveBeenCalledWith('v1/projects/@current/live_debugger_breakpoints/bp-1/')
         })
 
         it('only deletes breakpoint with matching repository', async () => {
@@ -267,7 +267,7 @@ describe('liveDebuggerLogic', () => {
             }).toDispatchActions(['toggleBreakpoint'])
 
             expect(api.delete).not.toHaveBeenCalled()
-            expect(api.create).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/', {
+            expect(api.create).toHaveBeenCalledWith('v1/projects/@current/live_debugger_breakpoints/', {
                 repository: 'Insights/backend',
                 filename: 'capture_event.py',
                 line_number: 100,
@@ -290,7 +290,7 @@ describe('liveDebuggerLogic', () => {
                 logic.actions.toggleBreakpointForFile('test.py', 50, 'Insights/insights')
             }).toDispatchActions(['toggleBreakpointForFile', 'loadBreakpoints', 'loadBreakpointInstances'])
 
-            expect(api.create).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/', {
+            expect(api.create).toHaveBeenCalledWith('v1/projects/@current/live_debugger_breakpoints/', {
                 repository: 'Insights/insights',
                 filename: 'test.py',
                 line_number: 50,
@@ -320,9 +320,9 @@ describe('liveDebuggerLogic', () => {
             }).toDispatchActions(['clearAllBreakpoints', 'loadBreakpoints', 'loadBreakpointInstances'])
 
             expect(api.delete).toHaveBeenCalledTimes(3)
-            expect(api.delete).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/bp-1/')
-            expect(api.delete).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/bp-2/')
-            expect(api.delete).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/bp-3/')
+            expect(api.delete).toHaveBeenCalledWith('v1/projects/@current/live_debugger_breakpoints/bp-1/')
+            expect(api.delete).toHaveBeenCalledWith('v1/projects/@current/live_debugger_breakpoints/bp-2/')
+            expect(api.delete).toHaveBeenCalledWith('v1/projects/@current/live_debugger_breakpoints/bp-3/')
         })
 
         it('handles empty breakpoints array gracefully', async () => {
@@ -744,7 +744,7 @@ describe('liveDebuggerLogic', () => {
                 logic.actions.toggleBreakpoint('capture_event.py', 100, 'Insights/insights')
             }).toDispatchActions(['toggleBreakpoint'])
 
-            expect(api.delete).toHaveBeenCalledWith('api/projects/@current/live_debugger_breakpoints/bp-1/')
+            expect(api.delete).toHaveBeenCalledWith('v1/projects/@current/live_debugger_breakpoints/bp-1/')
         })
     })
 

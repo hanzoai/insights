@@ -20,10 +20,10 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/integrations': {},
+                '/v1/projects/:team_id/integrations': {},
 
-                '/api/projects/:team_id/feature_flags': featureFlags,
-                '/api/projects/:team_id/feature_flags/1111111111111/': [
+                '/v1/projects/:team_id/feature_flags': featureFlags,
+                '/v1/projects/:team_id/feature_flags/1111111111111/': [
                     404,
                     {
                         type: 'invalid',
@@ -31,26 +31,26 @@ const meta: Meta = {
                         detail: 'Not found.',
                     },
                 ],
-                '/api/projects/:team_id/feature_flags/:flagId/': (req) => [
+                '/v1/projects/:team_id/feature_flags/:flagId/': (req) => [
                     200,
                     featureFlags.results.find((r) => r.id === Number(req.params['flagId'])),
                 ],
-                '/api/projects/:team_id/feature_flags/:flagId/status': () => [
+                '/v1/projects/:team_id/feature_flags/:flagId/status': () => [
                     200,
                     {
                         status: 'active',
                         reason: 'Feature flag is active',
                     },
                 ],
-                '/api/environments/:team_id/default_evaluation_tags/': {
+                '/v1/environments/:team_id/default_evaluation_tags/': {
                     default_evaluation_tags: [],
                     enabled: false,
                 },
             },
             post: {
-                '/api/environments/:team_id/query': {},
+                '/v1/environments/:team_id/query': {},
                 // flag targeting has loaders, make sure they don't keep loading
-                '/api/projects/:team_id/feature_flags/user_blast_radius/': () => [
+                '/v1/projects/:team_id/feature_flags/user_blast_radius/': () => [
                     200,
                     { users_affected: 120, total_users: 2000 },
                 ],

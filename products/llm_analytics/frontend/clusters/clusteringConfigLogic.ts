@@ -19,7 +19,7 @@ export interface ClusteringConfig {
     updated_at: string
 }
 
-const API_PATH = 'api/environments/@current/llm_analytics/clustering_config'
+const API_PATH = 'v1/environments/@current/llm_analytics/clustering_config'
 
 export const clusteringConfigLogic = kea<clusteringConfigLogicType>([
     path(['products', 'llm_analytics', 'frontend', 'clusters', 'clusteringConfigLogic']),

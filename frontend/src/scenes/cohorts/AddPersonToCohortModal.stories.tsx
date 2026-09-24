@@ -81,7 +81,7 @@ function ModalShell({
 
 export const ModalInline: StoryFn = () => {
     useStorybookMocks({
-        post: { '/api/environments/:team_id/query/': mockQueryResponse },
+        post: { '/v1/environments/:team_id/query/': mockQueryResponse },
     })
 
     return (
@@ -104,7 +104,7 @@ export const ModalInline: StoryFn = () => {
 
 export const ModalWithAllSelected: StoryFn = () => {
     useStorybookMocks({
-        post: { '/api/environments/:team_id/query/': mockQueryResponse },
+        post: { '/v1/environments/:team_id/query/': mockQueryResponse },
     })
 
     const allSelected = Object.fromEntries(mockPersons.map((p) => [p.id, true]))
@@ -126,7 +126,7 @@ export const ModalWithAllSelected: StoryFn = () => {
 export const ModalEmpty: StoryFn = () => {
     useStorybookMocks({
         post: {
-            '/api/environments/:team_id/query/': {
+            '/v1/environments/:team_id/query/': {
                 ...mockQueryResponse,
                 results: [],
             },

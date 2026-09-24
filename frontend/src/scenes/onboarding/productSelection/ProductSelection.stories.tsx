@@ -30,17 +30,17 @@ const meta: Meta = {
                     cloud: true,
                     realm: 'cloud',
                 },
-                '/api/billing/': billingJson,
+                '/v1/billing/': billingJson,
             },
             post: {
-                '/api/environments/:team_id/onboarding/recommend_products/': {
+                '/v1/environments/:team_id/onboarding/recommend_products/': {
                     products: ['product-analytics', 'session-replay', 'experiments'],
                     reasoning:
                         'Based on your goal to improve checkout conversion, we recommend Product Analytics for funnel analysis, Session Replay to watch user behavior, and Experiments to test improvements.',
                 },
             },
             patch: {
-                '/api/environments/@current/add_product_intent/': {},
+                '/v1/environments/@current/add_product_intent/': {},
             },
         }),
     ],

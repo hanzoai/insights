@@ -42,8 +42,8 @@ describe('cohortCountWarningLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/cohorts': [mockCohort],
-                '/api/projects/:team/cohorts/:id': mockCohort,
+                '/v1/projects/:team/cohorts': [mockCohort],
+                '/v1/projects/:team/cohorts/:id': mockCohort,
             },
         })
         initKeaTests()

@@ -83,11 +83,11 @@ const BasicTemplate: StoryFn<ToolbarStoryProps> = (props) => {
                     endpoint: '/s/',
                 },
             },
-            '/api/element/stats/': listHeatmapStatsAPIResponse,
-            '/api/projects/@current/feature_flags/my_flags': listMyFlagsAPIResponse,
-            '/api/projects/@current/actions/': listActionsAPIResponse,
-            '/api/projects/@current/web_experiments/': listExperimentsAPIResponse,
-            '/api/environments/@current/web_vitals/': listWebVitalsAPIResponse,
+            '/v1/element/stats/': listHeatmapStatsAPIResponse,
+            '/v1/projects/@current/feature_flags/my_flags': listMyFlagsAPIResponse,
+            '/v1/projects/@current/actions/': listActionsAPIResponse,
+            '/v1/projects/@current/web_experiments/': listExperimentsAPIResponse,
+            '/v1/environments/@current/web_vitals/': listWebVitalsAPIResponse,
         },
     })
 

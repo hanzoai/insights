@@ -72,17 +72,17 @@ describe('surveyWizardLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                    '/api/projects/:team/surveys/responses_count': () => [200, {}],
+                    '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                    '/v1/projects/:team/surveys/responses_count': () => [200, {}],
                 },
                 post: {
-                    '/api/projects/:team/surveys/': () => {
+                    '/v1/projects/:team/surveys/': () => {
                         const mockSurvey = createMockSurvey()
                         return [200, { ...mockSurvey, id: 'new-survey-123', start_date: new Date().toISOString() }]
                     },
                 },
                 patch: {
-                    '/api/environments/@current/add_product_intent/': async (req) => {
+                    '/v1/environments/@current/add_product_intent/': async (req) => {
                         const data = await req.json()
                         capturedIntentRequests.push(data)
                         return [200, {}]
@@ -134,7 +134,7 @@ describe('surveyWizardLogic', () => {
         it('should track SURVEY_CREATED intent when saving draft', async () => {
             useMocks({
                 post: {
-                    '/api/projects/:team/surveys/': () => {
+                    '/v1/projects/:team/surveys/': () => {
                         const mockSurvey = createMockSurvey()
                         return [200, { ...mockSurvey, id: 'draft-survey-123', start_date: null }]
                     },
@@ -176,11 +176,11 @@ describe('surveyWizardLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                    '/api/projects/:team/surveys/responses_count': () => [200, {}],
+                    '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                    '/v1/projects/:team/surveys/responses_count': () => [200, {}],
                 },
                 patch: {
-                    '/api/environments/@current/add_product_intent/': () => [200, {}],
+                    '/v1/environments/@current/add_product_intent/': () => [200, {}],
                 },
             })
         })
@@ -236,11 +236,11 @@ describe('surveyWizardLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                    '/api/projects/:team/surveys/responses_count': () => [200, {}],
+                    '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                    '/v1/projects/:team/surveys/responses_count': () => [200, {}],
                 },
                 patch: {
-                    '/api/environments/@current/add_product_intent/': () => [200, {}],
+                    '/v1/environments/@current/add_product_intent/': () => [200, {}],
                 },
             })
         })

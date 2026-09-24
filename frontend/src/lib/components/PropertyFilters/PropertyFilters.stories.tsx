@@ -36,7 +36,7 @@ const propertyFilters = [
 export function ComparingPropertyFilters(): JSX.Element {
     useStorybookMocks({
         get: {
-            '/api/event/values/': [],
+            '/v1/event/values/': [],
         },
     })
     return (
@@ -194,7 +194,7 @@ const operatorGroups = [
 ]
 
 export function OperatorVariantsEditing(): JSX.Element {
-    useStorybookMocks({ get: { '/api/event/values/': [] } })
+    useStorybookMocks({ get: { '/v1/event/values/': [] } })
     return (
         <div className="space-y-6">
             {operatorGroups.map(({ id, name, filters: groupFilters }) => (

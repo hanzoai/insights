@@ -46,8 +46,8 @@ export const getDataModelingEdgesListUrl = (projectId: string, params?: DataMode
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/data_modeling_edges/?${stringifiedParams}`
-        : `/api/environments/${projectId}/data_modeling_edges/`
+        ? `/v1/environments/${projectId}/data_modeling_edges/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/data_modeling_edges/`
 }
 
 export const dataModelingEdgesList = async (
@@ -62,7 +62,7 @@ export const dataModelingEdgesList = async (
 }
 
 export const getDataModelingEdgesCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/data_modeling_edges/`
+    return `/v1/environments/${projectId}/data_modeling_edges/`
 }
 
 export const dataModelingEdgesCreate = async (
@@ -90,8 +90,8 @@ export const getDataModelingNodesListUrl = (projectId: string, params?: DataMode
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/data_modeling_nodes/?${stringifiedParams}`
-        : `/api/environments/${projectId}/data_modeling_nodes/`
+        ? `/v1/environments/${projectId}/data_modeling_nodes/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/data_modeling_nodes/`
 }
 
 export const dataModelingNodesList = async (
@@ -106,7 +106,7 @@ export const dataModelingNodesList = async (
 }
 
 export const getDataModelingNodesCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/data_modeling_nodes/`
+    return `/v1/environments/${projectId}/data_modeling_nodes/`
 }
 
 export const dataModelingNodesCreate = async (
@@ -126,7 +126,7 @@ export const dataModelingNodesCreate = async (
  * Get all distinct dag_ids for the team's nodes.
  */
 export const getDataModelingNodesDagIdsRetrieveUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/data_modeling_nodes/dag_ids/`
+    return `/v1/environments/${projectId}/data_modeling_nodes/dag_ids/`
 }
 
 export const dataModelingNodesDagIdsRetrieve = async (projectId: string, options?: RequestInit): Promise<NodeApi> => {

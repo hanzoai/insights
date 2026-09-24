@@ -120,16 +120,16 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
             [] as PasskeyCredential[],
             {
                 loadPasskeys: async () => {
-                    const response = await api.get<PasskeyCredential[]>('api/webauthn/credentials/')
+                    const response = await api.get<PasskeyCredential[]>('v1/webauthn/credentials/')
                     return response
                 },
                 deletePasskey: async ({ id }) => {
-                    await api.delete(`api/webauthn/credentials/${id}/`)
+                    await api.delete(`v1/webauthn/credentials/${id}/`)
                     toast.success('Passkey deleted')
                     return values.passkeys.filter((p: PasskeyCredential) => p.id !== id)
                 },
                 renamePasskey: async ({ id, label }) => {
-                    const updated = await api.update<PasskeyCredential>(`api/webauthn/credentials/${id}/`, { label })
+                    const updated = await api.update<PasskeyCredential>(`v1/webauthn/credentials/${id}/`, { label })
                     toast.success('Passkey renamed')
                     return values.passkeys.map((p: PasskeyCredential) => (p.id === id ? updated : p))
                 },
@@ -137,7 +137,7 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
                     try {
                         // Step 1: Begin verification
                         const verifyResponse = await api.create<VerificationBeginResponse>(
-                            `api/webauthn/credentials/${id}/verify`
+                            `v1/webauthn/credentials/${id}/verify`
                         )
 
                         // Step 2: Verify with authenticator
@@ -153,7 +153,7 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
 
                         // Step 3: Complete verification
                         const updated = await api.create<PasskeyCredential>(
-                            `api/webauthn/credentials/${id}/verify_complete`,
+                            `v1/webauthn/credentials/${id}/verify_complete`,
                             assertion
                         )
 
@@ -172,7 +172,7 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
                 beginRegistration: async ({ label }) => {
                     try {
                         // Step 1: Get registration options
-                        const beginResponse = await api.create<RegistrationBeginResponse>('api/webauthn/register/begin')
+                        const beginResponse = await api.create<RegistrationBeginResponse>('v1/webauthn/register/begin')
 
                         // Step 2: Create credential with authenticator
                         const attestation = await startRegistration({
@@ -191,7 +191,7 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
 
                         // Step 3: Send attestation to server
                         const { credential_id: credentialId } = await api.create<RegistrationCompleteResponse>(
-                            'api/webauthn/register/complete',
+                            'v1/webauthn/register/complete',
                             {
                                 ...attestation,
                                 label,
@@ -205,7 +205,7 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
                         actions.setRegistrationStep('verifying')
 
                         const verifyResponse = await api.create<VerificationBeginResponse>(
-                            `api/webauthn/credentials/${credentialId}/verify`
+                            `v1/webauthn/credentials/${credentialId}/verify`
                         )
 
                         // Step 5: Verify with authenticator
@@ -220,7 +220,7 @@ export const passkeySettingsLogic = kea<passkeySettingsLogicType>([
                         })
 
                         // Step 6: Complete verification
-                        await api.create(`api/webauthn/credentials/${credentialId}/verify_complete`, assertion)
+                        await api.create(`v1/webauthn/credentials/${credentialId}/verify_complete`, assertion)
 
                         actions.setRegistrationStep('complete')
                         toast.success('Passkey added successfully!')

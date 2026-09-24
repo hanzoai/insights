@@ -29,18 +29,18 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/dashboard_templates/': {},
-                '/api/projects/:id/integrations': { results: [] },
-                '/api/organizations/@current/pipeline_destinations/': { results: [] },
-                '/api/projects/:id/pipeline_destination_configs/': { results: [] },
-                '/api/projects/:id/batch_exports/': { results: [] },
-                '/api/projects/:id/surveys/': { results: [] },
-                '/api/projects/:id/surveys/responses_count/': { results: [] },
-                '/api/environments/:team_id/exports/': { results: [] },
-                '/api/environments/:team_id/events': { results: [] },
+                '/v1/projects/:team_id/dashboard_templates/': {},
+                '/v1/projects/:id/integrations': { results: [] },
+                '/v1/organizations/@current/pipeline_destinations/': { results: [] },
+                '/v1/projects/:id/pipeline_destination_configs/': { results: [] },
+                '/v1/projects/:id/batch_exports/': { results: [] },
+                '/v1/projects/:id/surveys/': { results: [] },
+                '/v1/projects/:id/surveys/responses_count/': { results: [] },
+                '/v1/environments/:team_id/exports/': { results: [] },
+                '/v1/environments/:team_id/events': { results: [] },
             },
             post: {
-                '/api/environments/:team_id/query': {},
+                '/v1/environments/:team_id/query': {},
             },
         }),
     ],
@@ -105,7 +105,7 @@ export const SidePanelSupportWithEmail: StoryFn = () => {
     useStorybookMocks({
         get: {
             // TODO: setting available featues should be a decorator to make this easy
-            '/api/users/@me': () => [
+            '/v1/users/@me': () => [
                 200,
                 {
                     email: 'test@hanzo.ai',

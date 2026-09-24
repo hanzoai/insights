@@ -16,8 +16,8 @@ const meta: Meta = {
     },
     decorators: [
         mswDecorator({
-            get: { '/api/users/@me': () => [500, null] },
-            post: { '/api/signup': (_, __, ctx) => [ctx.delay(1000), ctx.status(200), ctx.json({ success: true })] },
+            get: { '/v1/users/@me': () => [500, null] },
+            post: { '/v1/signup': (_, __, ctx) => [ctx.delay(1000), ctx.status(200), ctx.json({ success: true })] },
         }),
     ],
 }

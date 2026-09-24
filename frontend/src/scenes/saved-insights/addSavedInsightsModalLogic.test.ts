@@ -50,7 +50,7 @@ function useSetupWithUrlCapture(options: { userInsightCount?: number; variant?: 
 
     useMocks({
         get: {
-            '/api/environments/:team_id/insights/': (req) => {
+            '/v1/environments/:team_id/insights/': (req) => {
                 capturedUrls.push(req.url)
                 if (req.url.searchParams.get('user') === 'true') {
                     return [200, { count: userInsightCount, results: [] }]
@@ -182,7 +182,7 @@ describe('addSavedInsightsModalLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/insights/': (req) => {
+                    '/v1/environments/:team_id/insights/': (req) => {
                         if (req.url.searchParams.get('user') === 'true') {
                             return [200, { count: 0, results: [] }]
                         }
@@ -207,7 +207,7 @@ describe('addSavedInsightsModalLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/environments/:team_id/insights/': (req) => {
+                    '/v1/environments/:team_id/insights/': (req) => {
                         if (req.url.searchParams.get('user') === 'true') {
                             return [200, { count: 0, results: [] }]
                         }
@@ -238,7 +238,7 @@ describe('addSavedInsightsModalLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/environments/:team_id/insights/': () => {
+                    '/v1/environments/:team_id/insights/': () => {
                         apiCallCount++
                         return [200, { count: 1, results: [createInsight(1, 'abc')] }]
                     },

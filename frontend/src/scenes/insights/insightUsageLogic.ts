@@ -64,7 +64,7 @@ export const insightUsageLogic = kea<insightUsageLogicType>([
             // Report the insight being viewed to our '/viewed' endpoint.
             // Used for "recently viewed insights", and in insights dashboard.
             if (values.insight.id) {
-                void api.create(`api/environments/${values.currentProjectId}/insights/viewed`, {
+                void api.create(`v1/environments/${values.currentProjectId}/insights/viewed`, {
                     insight_ids: [values.insight.id],
                 })
             }

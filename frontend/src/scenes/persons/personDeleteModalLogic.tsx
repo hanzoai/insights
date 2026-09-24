@@ -66,7 +66,7 @@ export const personDeleteModalLogic = kea<personDeleteModalLogicType>([
                         params.delete_recordings = true
                     }
 
-                    await api.delete(`api/person/${person.id}?${toParams(params)}`)
+                    await api.delete(`v1/person/${person.id}?${toParams(params)}`)
                     insights.capture('delete person', params)
 
                     toast.success(

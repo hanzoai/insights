@@ -31,7 +31,7 @@ describe('messageActionsMenuLogic', () => {
 
         useMocks({
             get: {
-                '/api/organizations/@current/': {
+                '/v1/organizations/@current/': {
                     id: 'test-org',
                     is_ai_data_processing_approved: true,
                 },
@@ -250,7 +250,7 @@ describe('messageActionsMenuLogic', () => {
             it('returns true when organization has approved AI data processing', async () => {
                 useMocks({
                     get: {
-                        '/api/organizations/@current/': {
+                        '/v1/organizations/@current/': {
                             id: 'test-org',
                             is_ai_data_processing_approved: true,
                         },
@@ -270,7 +270,7 @@ describe('messageActionsMenuLogic', () => {
             it('returns false when organization has not approved AI data processing', async () => {
                 useMocks({
                     get: {
-                        '/api/organizations/@current/': {
+                        '/v1/organizations/@current/': {
                             id: 'test-org',
                             is_ai_data_processing_approved: false,
                         },
@@ -357,7 +357,7 @@ describe('messageActionsMenuLogic', () => {
             it('throws error when data processing not accepted', async () => {
                 useMocks({
                     get: {
-                        '/api/organizations/@current/': {
+                        '/v1/organizations/@current/': {
                             id: 'test-org',
                             is_ai_data_processing_approved: false,
                         },

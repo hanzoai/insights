@@ -20,8 +20,8 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [500, null],
-                '/api/signup/1234/': () => [
+                '/v1/users/@me': () => [500, null],
+                '/v1/signup/1234/': () => [
                     200,
                     {
                         id: '1234',
@@ -32,9 +32,9 @@ const meta: Meta = {
                 ],
             },
             post: {
-                '/api/signup': (_, __, ctx) => [ctx.delay(1000), ctx.status(200), ctx.json({ success: true })],
-                '/api/signup/1234': (_, __, ctx) => [ctx.delay(1000), ctx.status(200), ctx.json({ success: true })],
-                '/api/login/precheck': { sso_enforcement: null, saml_available: false },
+                '/v1/signup': (_, __, ctx) => [ctx.delay(1000), ctx.status(200), ctx.json({ success: true })],
+                '/v1/signup/1234': (_, __, ctx) => [ctx.delay(1000), ctx.status(200), ctx.json({ success: true })],
+                '/v1/login/precheck': { sso_enforcement: null, saml_available: false },
             },
         }),
     ],
@@ -129,7 +129,7 @@ export const LoggedIn = (): JSX.Element => {
                 can_create_org: true,
                 available_social_auth_providers: { github: true, gitlab: true, 'google-oauth2': true, saml: false },
             },
-            '/api/users/@me': () => [
+            '/v1/users/@me': () => [
                 200,
                 {
                     email: 'ben@hanzo.ai',
@@ -159,7 +159,7 @@ export const LoggedInWrongUser = (): JSX.Element => {
                 can_create_org: true,
                 available_social_auth_providers: { github: true, gitlab: true, 'google-oauth2': true, saml: false },
             },
-            '/api/users/@me': () => [
+            '/v1/users/@me': () => [
                 200,
                 {
                     email: 'ben@hanzo.ai',
@@ -169,7 +169,7 @@ export const LoggedInWrongUser = (): JSX.Element => {
                     },
                 },
             ],
-            '/api/signup/1234/': () => [
+            '/v1/signup/1234/': () => [
                 400,
                 {
                     code: 'invalid_recipient',
@@ -193,7 +193,7 @@ export const LoggedInWrongUser = (): JSX.Element => {
 export const SSOEnforcedSaml = (): JSX.Element => {
     useStorybookMocks({
         post: {
-            '/api/login/precheck': { sso_enforcement: 'saml', saml_available: true },
+            '/v1/login/precheck': { sso_enforcement: 'saml', saml_available: true },
         },
     })
 
@@ -211,7 +211,7 @@ export const SSOEnforcedSaml = (): JSX.Element => {
 
 export const SSOEnforcedGoogle = (): JSX.Element => {
     useStorybookMocks({
-        post: { '/api/login/precheck': { sso_enforcement: 'google-oauth2', saml_available: false } },
+        post: { '/v1/login/precheck': { sso_enforcement: 'google-oauth2', saml_available: false } },
     })
 
     useDelayedOnMountEffect(() => {

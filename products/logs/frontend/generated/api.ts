@@ -16,7 +16,7 @@ import type { ExplainRequestApi, PaginatedPluginLogEntryListApi, PluginConfigsLo
 POST /api/environments/:id/logs/explainLogWithAI/
  */
 export const getLogsExplainLogWithAICreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/logs/explainLogWithAI/`
+    return `/v1/environments/${projectId}/logs/explainLogWithAI/`
 }
 
 export const logsExplainLogWithAICreate = async (
@@ -33,7 +33,7 @@ export const logsExplainLogWithAICreate = async (
 }
 
 export const getInsightsFlowTemplatesLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_flow_templates/${id}/logs/`
+    return `/v1/projects/${projectId}/insights_flow_templates/${id}/logs/`
 }
 
 export const insightsFlowTemplatesLogsRetrieve = async (
@@ -48,7 +48,7 @@ export const insightsFlowTemplatesLogsRetrieve = async (
 }
 
 export const getInsightsFlowsLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_flows/${id}/logs/`
+    return `/v1/projects/${projectId}/insights_flows/${id}/logs/`
 }
 
 export const insightsFlowsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -59,7 +59,7 @@ export const insightsFlowsLogsRetrieve = async (projectId: string, id: string, o
 }
 
 export const getInsightsFunctionsLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/insights_functions/${id}/logs/`
+    return `/v1/projects/${projectId}/insights_functions/${id}/logs/`
 }
 
 export const insightsFunctionsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -70,7 +70,7 @@ export const insightsFunctionsLogsRetrieve = async (projectId: string, id: strin
 }
 
 export const getLogsAttributesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/attributes/`
+    return `/v1/projects/${projectId}/logs/attributes/`
 }
 
 export const logsAttributesRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -81,7 +81,7 @@ export const logsAttributesRetrieve = async (projectId: string, options?: Reques
 }
 
 export const getLogsExportCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/export/`
+    return `/v1/projects/${projectId}/logs/export/`
 }
 
 export const logsExportCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -92,7 +92,7 @@ export const logsExportCreate = async (projectId: string, options?: RequestInit)
 }
 
 export const getLogsHasLogsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/has_logs/`
+    return `/v1/projects/${projectId}/logs/has_logs/`
 }
 
 export const logsHasLogsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -103,7 +103,7 @@ export const logsHasLogsRetrieve = async (projectId: string, options?: RequestIn
 }
 
 export const getLogsQueryCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/query/`
+    return `/v1/projects/${projectId}/logs/query/`
 }
 
 export const logsQueryCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -114,7 +114,7 @@ export const logsQueryCreate = async (projectId: string, options?: RequestInit):
 }
 
 export const getLogsSparklineCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/sparkline/`
+    return `/v1/projects/${projectId}/logs/sparkline/`
 }
 
 export const logsSparklineCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -125,7 +125,7 @@ export const logsSparklineCreate = async (projectId: string, options?: RequestIn
 }
 
 export const getLogsValuesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/logs/values/`
+    return `/v1/projects/${projectId}/logs/values/`
 }
 
 export const logsValuesRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -151,8 +151,8 @@ export const getPluginConfigsLogsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/plugin_configs/${pluginConfigId}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/plugin_configs/${pluginConfigId}/logs/`
+        ? `/v1/projects/${projectId}/plugin_configs/${pluginConfigId}/logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/plugin_configs/${pluginConfigId}/logs/`
 }
 
 export const pluginConfigsLogsList = async (
@@ -172,7 +172,7 @@ export const pluginConfigsLogsList = async (
  * @summary Get task run logs
  */
 export const getTasksRunsLogsRetrieveUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/logs/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/logs/`
 }
 
 export const tasksRunsLogsRetrieve = async (

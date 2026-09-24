@@ -88,11 +88,11 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
             [] as OrganizationDomainType[],
             {
                 loadVerifiedDomains: async () =>
-                    (await api.get(`api/organizations/${values.currentOrganization?.id}/domains`))
+                    (await api.get(`v1/organizations/${values.currentOrganization?.id}/domains`))
                         .results as OrganizationDomainType[],
                 addVerifiedDomain: async (domain: string) => {
                     const response = await api.create<OrganizationDomainType>(
-                        `api/organizations/${values.currentOrganization?.id}/domains`,
+                        `v1/organizations/${values.currentOrganization?.id}/domains`,
                         {
                             domain,
                         }
@@ -100,7 +100,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                     return [response, ...values.verifiedDomains]
                 },
                 deleteVerifiedDomain: async (id: string) => {
-                    await api.delete(`api/organizations/${values.currentOrganization?.id}/domains/${id}`)
+                    await api.delete(`v1/organizations/${values.currentOrganization?.id}/domains/${id}`)
                     return values.verifiedDomains.filter((domain) => domain.id !== id)
                 },
             },
@@ -110,7 +110,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
             {
                 updateDomain: async (payload: OrganizationDomainUpdatePayload) => {
                     const response = await api.update<OrganizationDomainType>(
-                        `api/organizations/${values.currentOrganization?.id}/domains/${payload.id}`,
+                        `v1/organizations/${values.currentOrganization?.id}/domains/${payload.id}`,
                         { ...payload, id: undefined }
                     )
                     toast.success('Domain updated successfully! Changes will take effect immediately.')
@@ -119,7 +119,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                 },
                 verifyDomain: async () => {
                     const response = await api.create<OrganizationDomainType>(
-                        `api/organizations/${values.currentOrganization?.id}/domains/${values.verifyModal}/verify`
+                        `v1/organizations/${values.currentOrganization?.id}/domains/${values.verifyModal}/verify`
                     )
                     if (response.is_verified) {
                         toast.success('Domain verified successfully.')
@@ -147,7 +147,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                 },
                 enableScim: async (domainId: string) => {
                     const domain = await api.update<OrganizationDomainType>(
-                        `api/organizations/${values.currentOrganization?.id}/domains/${domainId}`,
+                        `v1/organizations/${values.currentOrganization?.id}/domains/${domainId}`,
                         { scim_enabled: true }
                     )
                     actions.replaceDomain({ ...domain, scim_bearer_token: undefined })
@@ -161,7 +161,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                 },
                 disableScim: async (domainId: string) => {
                     const domain = await api.update<OrganizationDomainType>(
-                        `api/organizations/${values.currentOrganization?.id}/domains/${domainId}`,
+                        `v1/organizations/${values.currentOrganization?.id}/domains/${domainId}`,
                         { scim_enabled: false }
                     )
                     actions.replaceDomain({ ...domain, scim_bearer_token: undefined })
@@ -174,7 +174,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                 },
                 regenerateScimToken: async (domainId: string) => {
                     const response = await api.create<SCIMConfigType>(
-                        `api/organizations/${values.currentOrganization?.id}/domains/${domainId}/scim/token`
+                        `v1/organizations/${values.currentOrganization?.id}/domains/${domainId}/scim/token`
                     )
                     toast.success('SCIM token regenerated successfully!')
                     return { ...response, id: domainId }
@@ -231,7 +231,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                     return
                 }
                 const response = await api.update<OrganizationDomainType>(
-                    `api/organizations/${values.currentOrganization?.id}/domains/${payload.id}`,
+                    `v1/organizations/${values.currentOrganization?.id}/domains/${payload.id}`,
                     {
                         ...updateParams,
                     }

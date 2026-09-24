@@ -50,8 +50,8 @@ export const getConversationsListUrl = (projectId: string, params?: Conversation
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/conversations/?${stringifiedParams}`
-        : `/api/environments/${projectId}/conversations/`
+        ? `/v1/environments/${projectId}/conversations/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/conversations/`
 }
 
 export const conversationsList = async (
@@ -72,7 +72,7 @@ export const conversationsList = async (
 - If no message: Stream from existing conversation
  */
 export const getConversationsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/conversations/`
+    return `/v1/environments/${projectId}/conversations/`
 }
 
 export const conversationsCreate = async (
@@ -89,7 +89,7 @@ export const conversationsCreate = async (
 }
 
 export const getConversationsRetrieveUrl = (projectId: string, conversation: string) => {
-    return `/api/environments/${projectId}/conversations/${conversation}/`
+    return `/v1/environments/${projectId}/conversations/${conversation}/`
 }
 
 export const conversationsRetrieve = async (
@@ -109,7 +109,7 @@ This is used for client-side generated messages that need to be persisted
 (e.g., support ticket confirmation messages).
  */
 export const getConversationsAppendMessageCreateUrl = (projectId: string, conversation: string) => {
-    return `/api/environments/${projectId}/conversations/${conversation}/append_message/`
+    return `/v1/environments/${projectId}/conversations/${conversation}/append_message/`
 }
 
 export const conversationsAppendMessageCreate = async (
@@ -127,7 +127,7 @@ export const conversationsAppendMessageCreate = async (
 }
 
 export const getConversationsCancelPartialUpdateUrl = (projectId: string, conversation: string) => {
-    return `/api/environments/${projectId}/conversations/${conversation}/cancel/`
+    return `/v1/environments/${projectId}/conversations/${conversation}/cancel/`
 }
 
 export const conversationsCancelPartialUpdate = async (
@@ -145,7 +145,7 @@ export const conversationsCancelPartialUpdate = async (
 }
 
 export const getConversationsQueueRetrieveUrl = (projectId: string, conversation: string) => {
-    return `/api/environments/${projectId}/conversations/${conversation}/queue/`
+    return `/v1/environments/${projectId}/conversations/${conversation}/queue/`
 }
 
 export const conversationsQueueRetrieve = async (
@@ -160,7 +160,7 @@ export const conversationsQueueRetrieve = async (
 }
 
 export const getConversationsQueueCreateUrl = (projectId: string, conversation: string) => {
-    return `/api/environments/${projectId}/conversations/${conversation}/queue/`
+    return `/v1/environments/${projectId}/conversations/${conversation}/queue/`
 }
 
 export const conversationsQueueCreate = async (
@@ -178,7 +178,7 @@ export const conversationsQueueCreate = async (
 }
 
 export const getConversationsQueuePartialUpdateUrl = (projectId: string, conversation: string, queueId: string) => {
-    return `/api/environments/${projectId}/conversations/${conversation}/queue/${queueId}/`
+    return `/v1/environments/${projectId}/conversations/${conversation}/queue/${queueId}/`
 }
 
 export const conversationsQueuePartialUpdate = async (
@@ -197,7 +197,7 @@ export const conversationsQueuePartialUpdate = async (
 }
 
 export const getConversationsQueueDestroyUrl = (projectId: string, conversation: string, queueId: string) => {
-    return `/api/environments/${projectId}/conversations/${conversation}/queue/${queueId}/`
+    return `/v1/environments/${projectId}/conversations/${conversation}/queue/${queueId}/`
 }
 
 export const conversationsQueueDestroy = async (
@@ -213,7 +213,7 @@ export const conversationsQueueDestroy = async (
 }
 
 export const getConversationsQueueClearCreateUrl = (projectId: string, conversation: string) => {
-    return `/api/environments/${projectId}/conversations/${conversation}/queue/clear/`
+    return `/v1/environments/${projectId}/conversations/${conversation}/queue/clear/`
 }
 
 export const conversationsQueueClearCreate = async (
@@ -245,8 +245,8 @@ export const getConversationsTicketsListUrl = (projectId: string, params?: Conve
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/conversations/tickets/?${stringifiedParams}`
-        : `/api/projects/${projectId}/conversations/tickets/`
+        ? `/v1/projects/${projectId}/conversations/tickets/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/conversations/tickets/`
 }
 
 export const conversationsTicketsList = async (
@@ -261,7 +261,7 @@ export const conversationsTicketsList = async (
 }
 
 export const getConversationsTicketsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/`
+    return `/v1/projects/${projectId}/conversations/tickets/`
 }
 
 export const conversationsTicketsCreate = async (
@@ -281,7 +281,7 @@ export const conversationsTicketsCreate = async (
  * Get single ticket and mark as read by team.
  */
 export const getConversationsTicketsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/`
 }
 
 export const conversationsTicketsRetrieve = async (
@@ -299,7 +299,7 @@ export const conversationsTicketsRetrieve = async (
  * Handle ticket updates including assignee changes.
  */
 export const getConversationsTicketsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/`
 }
 
 export const conversationsTicketsUpdate = async (
@@ -317,7 +317,7 @@ export const conversationsTicketsUpdate = async (
 }
 
 export const getConversationsTicketsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/`
 }
 
 export const conversationsTicketsPartialUpdate = async (
@@ -335,7 +335,7 @@ export const conversationsTicketsPartialUpdate = async (
 }
 
 export const getConversationsTicketsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/${id}/`
+    return `/v1/projects/${projectId}/conversations/tickets/${id}/`
 }
 
 export const conversationsTicketsDestroy = async (
@@ -356,7 +356,7 @@ Returns the sum of unread_team_count for all non-resolved tickets.
 Cached in Redis for 30 seconds, invalidated on changes.
  */
 export const getConversationsTicketsUnreadCountRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/conversations/tickets/unread_count/`
+    return `/v1/projects/${projectId}/conversations/tickets/unread_count/`
 }
 
 export const conversationsTicketsUnreadCountRetrieve = async (

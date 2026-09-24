@@ -49,7 +49,7 @@ describe('DatabaseTablePreview', () => {
 
         useMocks({
             post: {
-                '/api/environments/:team/query': () => {
+                '/v1/environments/:team/query': () => {
                     queryCount += 1
                     return [200, { columns: [], results: [] }]
                 },
@@ -93,7 +93,7 @@ describe('DatabaseTablePreview', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team/query': (req) => {
+                    '/v1/environments/:team/query': (req) => {
                         const queryString = queryStringFromRequestBody(req.body)
                         executedQueries.push(queryString)
 

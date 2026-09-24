@@ -24,12 +24,12 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/projects/:team_id/error_tracking/issue/:id': async (_, res, ctx) => {
+                'v1/projects/:team_id/error_tracking/issue/:id': async (_, res, ctx) => {
                     return res(ctx.json(errorTrackingTypeIssue))
                 },
             },
             post: {
-                '/api/environments/:team_id/query': async (req, res, ctx) => {
+                '/v1/environments/:team_id/query': async (req, res, ctx) => {
                     const query = (await req.clone().json()).query
                     if (query.kind === NodeKind.ErrorTrackingQuery) {
                         return res(ctx.json(errorTrackingQueryResponse))

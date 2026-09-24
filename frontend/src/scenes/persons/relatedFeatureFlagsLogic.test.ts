@@ -82,11 +82,11 @@ describe('relatedFeatureFlagsLogic', () => {
             // oxlint-disable-next-line react-hooks/rules-of-hooks
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${queryParams}`]: {
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${queryParams}`]: {
                         results: filteredFlags,
                         count: filteredFlags.length,
                     },
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/evaluation_reasons`]:
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/evaluation_reasons`]:
                         MOCK_EVALUATION_REASONS,
                 },
             })

@@ -23,7 +23,7 @@ describe('the authorized urls list logic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/trend/': (req) => {
+                '/v1/environments/:team_id/insights/trend/': (req) => {
                     if (JSON.parse(req.url.searchParams.get('events') || '[]')?.[0]?.throw) {
                         return [500, { status: 0, detail: 'error from the API' }]
                     }
@@ -31,7 +31,7 @@ describe('the authorized urls list logic', () => {
                 },
             },
             patch: {
-                '/api/projects/:team': [200, {}],
+                '/v1/projects/:team': [200, {}],
             },
         })
         initKeaTests()
@@ -47,7 +47,7 @@ describe('the authorized urls list logic', () => {
 
     it('encodes an app url correctly', () => {
         expect(appEditorUrl('http://127.0.0.1:8000')).toEqual(
-            '/api/user/redirect_to_site/?userIntent=add-action&apiURL=http%3A%2F%2Flocalhost&appUrl=http%3A%2F%2F127.0.0.1%3A8000'
+            '/v1/user/redirect_to_site/?userIntent=add-action&apiURL=http%3A%2F%2Flocalhost&appUrl=http%3A%2F%2F127.0.0.1%3A8000'
         )
     })
 
@@ -155,7 +155,7 @@ describe('the authorized urls list logic', () => {
 
             expectLogic(logic, () => logic.actions.addUrl('http://*.example.com')).toFinishAllListeners()
 
-            expect(api.update).toHaveBeenCalledWith(`api/environments/${MOCK_TEAM_ID}`, {
+            expect(api.update).toHaveBeenCalledWith(`v1/environments/${MOCK_TEAM_ID}`, {
                 recording_domains: ['https://recordings.hanzo.ai/', 'http://*.example.com'],
             })
         })

@@ -56,7 +56,7 @@ describe('the feature flag release conditions logic', () => {
 
         useMocks({
             post: {
-                '/api/projects/:team/feature_flags/user_blast_radius': () => [
+                '/v1/projects/:team/feature_flags/user_blast_radius': () => [
                     200,
                     { users_affected: 120, total_users: 2000 },
                 ],

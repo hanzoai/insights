@@ -45,8 +45,8 @@ export const getSurveysListUrl = (projectId: string, params?: SurveysListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/surveys/?${stringifiedParams}`
-        : `/api/projects/${projectId}/surveys/`
+        ? `/v1/projects/${projectId}/surveys/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/surveys/`
 }
 
 export const surveysList = async (
@@ -61,7 +61,7 @@ export const surveysList = async (
 }
 
 export const getSurveysCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/surveys/`
+    return `/v1/projects/${projectId}/surveys/`
 }
 
 export const surveysCreate = async (
@@ -78,7 +78,7 @@ export const surveysCreate = async (
 }
 
 export const getSurveysRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/`
+    return `/v1/projects/${projectId}/surveys/${id}/`
 }
 
 export const surveysRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<SurveyApi> => {
@@ -89,7 +89,7 @@ export const surveysRetrieve = async (projectId: string, id: string, options?: R
 }
 
 export const getSurveysUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/`
+    return `/v1/projects/${projectId}/surveys/${id}/`
 }
 
 export const surveysUpdate = async (
@@ -107,7 +107,7 @@ export const surveysUpdate = async (
 }
 
 export const getSurveysPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/`
+    return `/v1/projects/${projectId}/surveys/${id}/`
 }
 
 export const surveysPartialUpdate = async (
@@ -125,7 +125,7 @@ export const surveysPartialUpdate = async (
 }
 
 export const getSurveysDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/`
+    return `/v1/projects/${projectId}/surveys/${id}/`
 }
 
 export const surveysDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -136,7 +136,7 @@ export const surveysDestroy = async (projectId: string, id: string, options?: Re
 }
 
 export const getSurveysActivityRetrieve2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/activity/`
+    return `/v1/projects/${projectId}/surveys/${id}/activity/`
 }
 
 export const surveysActivityRetrieve2 = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -153,7 +153,7 @@ Returns list of UUIDs that the frontend can use to filter out archived responses
 in InsightsQL queries.
  */
 export const getSurveysArchivedResponseUuidsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/archived-response-uuids/`
+    return `/v1/projects/${projectId}/surveys/${id}/archived-response-uuids/`
 }
 
 export const surveysArchivedResponseUuidsRetrieve = async (
@@ -174,7 +174,7 @@ Accepts a list of target team IDs and creates a copy of the survey in each proje
 Uses an all-or-nothing approach - if any duplication fails, all changes are rolled back.
  */
 export const getSurveysDuplicateToProjectsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/duplicate_to_projects/`
+    return `/v1/projects/${projectId}/surveys/${id}/duplicate_to_projects/`
 }
 
 export const surveysDuplicateToProjectsCreate = async (
@@ -195,7 +195,7 @@ export const surveysDuplicateToProjectsCreate = async (
  * Archive a single survey response.
  */
 export const getSurveysResponsesArchiveCreateUrl = (projectId: string, id: string, responseUuid: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/responses/${responseUuid}/archive/`
+    return `/v1/projects/${projectId}/surveys/${id}/responses/${responseUuid}/archive/`
 }
 
 export const surveysResponsesArchiveCreate = async (
@@ -217,7 +217,7 @@ export const surveysResponsesArchiveCreate = async (
  * Unarchive a single survey response.
  */
 export const getSurveysResponsesUnarchiveCreateUrl = (projectId: string, id: string, responseUuid: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/responses/${responseUuid}/unarchive/`
+    return `/v1/projects/${projectId}/surveys/${id}/responses/${responseUuid}/unarchive/`
 }
 
 export const surveysResponsesUnarchiveCreate = async (
@@ -247,7 +247,7 @@ Returns:
     Survey statistics including event counts, unique respondents, and conversion rates
  */
 export const getSurveysStatsRetrieve2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/stats/`
+    return `/v1/projects/${projectId}/surveys/${id}/stats/`
 }
 
 export const surveysStatsRetrieve2 = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -258,7 +258,7 @@ export const surveysStatsRetrieve2 = async (projectId: string, id: string, optio
 }
 
 export const getSurveysSummarizeResponsesCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/summarize_responses/`
+    return `/v1/projects/${projectId}/surveys/${id}/summarize_responses/`
 }
 
 export const surveysSummarizeResponsesCreate = async (
@@ -276,7 +276,7 @@ export const surveysSummarizeResponsesCreate = async (
 }
 
 export const getSurveysSummaryHeadlineCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/surveys/${id}/summary_headline/`
+    return `/v1/projects/${projectId}/surveys/${id}/summary_headline/`
 }
 
 export const surveysSummaryHeadlineCreate = async (
@@ -294,7 +294,7 @@ export const surveysSummaryHeadlineCreate = async (
 }
 
 export const getSurveysActivityRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/surveys/activity/`
+    return `/v1/projects/${projectId}/surveys/activity/`
 }
 
 export const surveysActivityRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -315,7 +315,7 @@ Returns:
     Dictionary mapping survey IDs to response counts
  */
 export const getSurveysResponsesCountRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/surveys/responses_count/`
+    return `/v1/projects/${projectId}/surveys/responses_count/`
 }
 
 export const surveysResponsesCountRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -336,7 +336,7 @@ Returns:
     Aggregated statistics across all surveys including total counts and rates
  */
 export const getSurveysStatsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/surveys/stats/`
+    return `/v1/projects/${projectId}/surveys/stats/`
 }
 
 export const surveysStatsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {

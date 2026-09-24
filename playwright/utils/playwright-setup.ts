@@ -47,7 +47,7 @@ export class PlaywrightSetup {
      */
     async callSetupEndpoint(setupType: string, options: PlaywrightSetupOptions = {}): Promise<TestSetupResponse> {
         const { data = {}, throwOnError = true, baseURL } = options
-        const url = `${baseURL || this.baseURL}/api/setup_test/${setupType}/`
+        const url = `${baseURL || this.baseURL}/v1/setup_test/${setupType}/`
 
         try {
             const response = await this.request.post(url, { data })
@@ -120,7 +120,7 @@ export class PlaywrightSetup {
 
     async login(page: Page, workspace: PlaywrightWorkspaceSetupResult): Promise<void> {
         // Use page.request to share cookies/session with the browser context
-        await page.request.post(`${this.baseURL}/api/login/`, {
+        await page.request.post(`${this.baseURL}/v1/login/`, {
             data: {
                 email: workspace.user_email,
                 password: LOGIN_PASSWORD,

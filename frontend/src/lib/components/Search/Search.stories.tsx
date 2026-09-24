@@ -96,18 +96,18 @@ const SearchContainer = ({ children }: { children: React.ReactNode }): JSX.Eleme
 )
 
 const SHARED_MOCKS = {
-    '/api/environments/:team_id/file_system/log_view/': () => [200, []],
-    '/api/environments/:team_id/persons/': () => [200, EMPTY_PAGINATED_RESPONSE],
-    '/api/environments/:team_id/groups/': () => [200, EMPTY_PAGINATED_RESPONSE],
+    '/v1/environments/:team_id/file_system/log_view/': () => [200, []],
+    '/v1/environments/:team_id/persons/': () => [200, EMPTY_PAGINATED_RESPONSE],
+    '/v1/environments/:team_id/groups/': () => [200, EMPTY_PAGINATED_RESPONSE],
 }
 
 export const Default: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/file_system/': (_req, res, ctx) => {
+            '/v1/environments/:team_id/file_system/': (_req, res, ctx) => {
                 return res(ctx.delay(10), ctx.json(toPaginatedResponse(MOCK_RECENTS)))
             },
-            '/api/environments/:team_id/search/': () => [200, { results: [], counts: {} }],
+            '/v1/environments/:team_id/search/': () => [200, { results: [], counts: {} }],
             ...SHARED_MOCKS,
         },
     })
@@ -130,10 +130,10 @@ Default.parameters = {
 export const Searching: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/file_system/': (_req, res, ctx) => {
+            '/v1/environments/:team_id/file_system/': (_req, res, ctx) => {
                 return res(ctx.delay(10), ctx.json(toPaginatedResponse(MOCK_RECENTS)))
             },
-            '/api/environments/:team_id/search/': (_req, res, ctx) => {
+            '/v1/environments/:team_id/search/': (_req, res, ctx) => {
                 return res(ctx.delay(100), ctx.json(MOCK_SEARCH_RESULTS))
             },
             ...SHARED_MOCKS,

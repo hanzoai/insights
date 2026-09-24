@@ -24,7 +24,7 @@ describe('sessionRecordingCollectionsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/session_recording_playlists': (req) => {
+                '/v1/projects/:team/session_recording_playlists': (req) => {
                     const { searchParams } = req.url
                     if (searchParams.get('date_to') === '2021-10-05') {
                         return [

@@ -19,7 +19,7 @@ describe('the activity log logic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_TEAM_ID}/feature_flags/activity/`]: {
+                    [`/v1/projects/${MOCK_TEAM_ID}/feature_flags/activity/`]: {
                         results: featureFlagsActivityResponseJson,
                         next: 'a provided url',
                     },
@@ -56,7 +56,7 @@ describe('the activity log logic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_TEAM_ID}/feature_flags/7/activity/`]: {
+                    [`/v1/projects/${MOCK_TEAM_ID}/feature_flags/7/activity/`]: {
                         results: featureFlagsActivityResponseJson,
                         next: 'a provided url',
                     },
@@ -80,7 +80,7 @@ describe('the activity log logic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_TEAM_ID}/feature_flags/7/activity/`]: (req) => {
+                    [`/v1/projects/${MOCK_TEAM_ID}/feature_flags/7/activity/`]: (req) => {
                         const isOnPageFour = req.url.searchParams.get('page') === '4'
 
                         return [

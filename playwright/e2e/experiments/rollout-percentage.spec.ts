@@ -78,7 +78,7 @@ test.describe('Experiment Rollout Percentage', () => {
                     return { ok: res.ok, status: res.status, body: await res.text() }
                 },
                 {
-                    url: `/api/projects/${featureFlagTeamId}/feature_flags/${featureFlagId}/`,
+                    url: `/v1/projects/${featureFlagTeamId}/feature_flags/${featureFlagId}/`,
                     filters: { ...featureFlagFilters, groups: updatedGroups },
                 }
             )

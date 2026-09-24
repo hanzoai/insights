@@ -59,15 +59,15 @@ describe('cohortEditLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team/cohorts': [mockCohort],
-                '/api/projects/:team/cohorts/:id': mockCohort,
+                '/v1/projects/:team/cohorts': [mockCohort],
+                '/v1/projects/:team/cohorts/:id': mockCohort,
             },
             post: {
-                '/api/projects/:team/cohorts': mockCohort,
-                '/api/projects/:team/cohorts/:id': mockCohort,
+                '/v1/projects/:team/cohorts': mockCohort,
+                '/v1/projects/:team/cohorts/:id': mockCohort,
             },
             patch: {
-                '/api/projects/:team/cohorts/:id': mockCohort,
+                '/v1/projects/:team/cohorts/:id': mockCohort,
             },
         })
         initKeaTests()
@@ -878,7 +878,7 @@ describe('cohortEditLogic', () => {
                 logic.actions.duplicateCohort(true)
             }).toFinishAllListeners()
 
-            expect(api.create).toHaveBeenCalledWith('api/cohort', {
+            expect(api.create).toHaveBeenCalledWith('v1/cohort', {
                 is_static: true,
                 name: 'Static Cohort (static copy)',
                 query: {
@@ -912,7 +912,7 @@ describe('cohortEditLogic', () => {
                 logic.actions.duplicateCohort(true)
             }).toFinishAllListeners()
 
-            expect(api.create).toHaveBeenCalledWith('api/cohort', {
+            expect(api.create).toHaveBeenCalledWith('v1/cohort', {
                 is_static: true,
                 name: 'Dynamic Cohort (static copy)',
                 query: {

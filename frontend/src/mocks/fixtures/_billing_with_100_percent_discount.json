@@ -3371,5 +3371,5 @@
             ]
         }
     ],
-    "stripe_portal_url": "http://localhost:8000/api/billing/portal"
+    "stripe_portal_url": "http://localhost:8000/v1/billing/portal"
 }

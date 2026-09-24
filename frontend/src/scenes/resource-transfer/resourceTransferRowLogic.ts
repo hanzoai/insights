@@ -41,7 +41,7 @@ export const resourceTransferRowLogic = kea<resourceTransferRowLogicType>([
                     }
 
                     return await api.create<SearchResponse>(
-                        `api/organizations/${currentOrganization.id}/resource_transfers/search/`,
+                        `v1/organizations/${currentOrganization.id}/resource_transfers/search/`,
                         {
                             team_id: destinationTeamId,
                             resource_kind: resourceKind,

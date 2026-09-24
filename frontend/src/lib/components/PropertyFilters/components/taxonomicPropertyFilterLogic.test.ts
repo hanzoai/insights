@@ -11,7 +11,7 @@ describe('taxonomicPropertyFilterLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/property_definitions': { results: [], count: 0 },
+                '/v1/projects/:team/property_definitions': { results: [], count: 0 },
             },
         })
         initKeaTests()

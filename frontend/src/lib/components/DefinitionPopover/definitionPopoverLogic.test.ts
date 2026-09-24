@@ -27,25 +27,25 @@ describe('definitionPopoverLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/@current/event_definitions/': {
+                '/v1/projects/@current/event_definitions/': {
                     results: mockEventDefinitions,
                     count: mockEventDefinitions.length,
                 },
-                '/api/projects/@current/property_definitions/': {
+                '/v1/projects/@current/property_definitions/': {
                     results: [mockEventPropertyDefinition],
                     count: 1,
                 },
-                '/api/projects/@current/actions/': {
+                '/v1/projects/@current/actions/': {
                     results: [mockActionDefinition],
                     count: 1,
                 },
-                '/api/projects/@current/cohorts/': {
+                '/v1/projects/@current/cohorts/': {
                     results: [mockCohort],
                     count: 1,
                 },
             },
             patch: {
-                '/api/projects/@current/:object/:id/': {},
+                '/v1/projects/@current/:object/:id/': {},
             },
         })
 
@@ -123,19 +123,19 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.Actions,
                     definition: mockActionDefinition as ActionType,
-                    url: `api/projects/@current/actions/${mockActionDefinition.id}`,
+                    url: `v1/projects/@current/actions/${mockActionDefinition.id}`,
                     dispatchActions: [actionsModel, ['updateAction']],
                 },
                 {
                     type: TaxonomicFilterGroupType.CustomEvents,
                     definition: mockEventDefinitions[0],
-                    url: `api/projects/@current/event_definitions/${mockEventDefinitions[0].id}`,
+                    url: `v1/projects/@current/event_definitions/${mockEventDefinitions[0].id}`,
                     dispatchActions: [],
                 },
                 {
                     type: TaxonomicFilterGroupType.Events,
                     definition: mockEventDefinitions[1],
-                    url: `api/projects/@current/event_definitions/${mockEventDefinitions[1].id}`,
+                    url: `v1/projects/@current/event_definitions/${mockEventDefinitions[1].id}`,
                     dispatchActions: [],
                 },
                 {
@@ -146,7 +146,7 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.EventProperties,
                     definition: mockEventPropertyDefinition as PropertyDefinition,
-                    url: `api/projects/@current/property_definitions/${mockEventPropertyDefinition.id}`,
+                    url: `v1/projects/@current/property_definitions/${mockEventPropertyDefinition.id}`,
                     dispatchActions: [propertyDefinitionsModel, ['updatePropertyDefinitions']],
                 },
                 {
@@ -162,7 +162,7 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.Cohorts,
                     definition: mockCohort,
-                    url: `api/projects/@current/cohorts/${mockCohort.id}`,
+                    url: `v1/projects/@current/cohorts/${mockCohort.id}`,
                     dispatchActions: [cohortsModel, ['updateCohort']],
                 },
                 {

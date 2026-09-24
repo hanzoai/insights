@@ -54,18 +54,18 @@ describe('savedInsightsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': (req) => [
+                '/v1/environments/:team_id/insights/': (req) => [
                     200,
                     createSavedInsights(
                         req.url.searchParams.get('search') ?? '',
                         parseInt(req.url.searchParams.get('offset') ?? '0')
                     ),
                 ],
-                '/api/environments/:team_id/insights/42': createInsight(42),
-                '/api/environments/:team_id/insights/123': createInsight(123),
+                '/v1/environments/:team_id/insights/42': createInsight(42),
+                '/v1/environments/:team_id/insights/123': createInsight(123),
             },
             post: {
-                '/api/environments/:team_id/insights/': () => [200, createInsight(42)],
+                '/v1/environments/:team_id/insights/': () => [200, createInsight(42)],
             },
         })
         initKeaTests()
@@ -197,7 +197,7 @@ describe('savedInsightsLogic', () => {
         sourceInsight.derived_name = 'should be copied'
         await logic.asyncActions.duplicateInsight(sourceInsight)
         expect(api.create).toHaveBeenCalledWith(
-            `api/environments/${MOCK_TEAM_ID}/insights`,
+            `v1/environments/${MOCK_TEAM_ID}/insights`,
             expect.objectContaining({ name: '' }),
             expect.objectContaining({})
         )
@@ -209,7 +209,7 @@ describe('savedInsightsLogic', () => {
         sourceInsight.derived_name = ''
         await logic.asyncActions.duplicateInsight(sourceInsight)
         expect(api.create).toHaveBeenCalledWith(
-            `api/environments/${MOCK_TEAM_ID}/insights`,
+            `v1/environments/${MOCK_TEAM_ID}/insights`,
             expect.objectContaining({ name: 'should be copied (copy)' }),
             expect.objectContaining({})
         )
@@ -228,7 +228,7 @@ describe('savedInsightsLogic', () => {
 
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': (req) => {
+                '/v1/environments/:team_id/insights/': (req) => {
                     const search = req.url.searchParams.get('search') ?? ''
                     return new Promise<[number, any]>((resolve) => {
                         pendingRequests.push({ resolve, search })

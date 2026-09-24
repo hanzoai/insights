@@ -70,7 +70,7 @@ describe('featureFlagLogic', () => {
 
         expect(flagRequests(get)).toEqual(['v1/flags/'])
         const url = flagRequests(get)[0]
-        expect(url).not.toContain('/api/')
+        expect(url).not.toMatch(/^\/?api\//)
         expect(url).not.toContain('v2')
     })
 

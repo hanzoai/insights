@@ -432,7 +432,7 @@ export class ApiRequest {
     }
 
     public assembleFullUrl(includeLeadingSlash = false): string {
-        return (includeLeadingSlash ? '/api/' : 'api/') + this.assembleEndpointUrl()
+        return (includeLeadingSlash ? '/v1/' : 'v1/') + this.assembleEndpointUrl()
     }
 
     // Generic endpoint composition
@@ -1905,7 +1905,7 @@ const prepareUrl = (url: string): string => {
     return output
 }
 
-const PROJECT_ID_REGEX = /\/api\/(project|environment)s\/(\w+)(?:$|[/?#])/
+const PROJECT_ID_REGEX = /\/v1\/(project|environment)s\/(\w+)(?:$|[/?#])/
 
 const ensureProjectIdNotInvalid = (url: string): void => {
     const projectIdMatch = PROJECT_ID_REGEX.exec(url)
@@ -1937,11 +1937,8 @@ function getDistinctId(): string | undefined {
 /**
  * The assistant's threads, at `/v1/`.
  *
- * Built here rather than through `ApiRequest`, whose `assembleFullUrl` prefixes
- * `api/` by design — that prefix is where this fork's inherited endpoints live,
- * and new surfaces are versioned at the root instead. The project id is a path
- * segment because it names which project is being asked for; the server
- * authorizes it against the caller rather than trusting it.
+ * The project id is a path segment because it names which project is being
+ * asked for; the server authorizes it against the caller rather than trusting it.
  */
 function assistantConversationsUrl(): string {
     return `/v1/projects/${ApiConfig.getCurrentTeamId()}/assistant/conversations`
@@ -2859,7 +2856,7 @@ const api = {
             return new ApiRequest().cohorts().assembleEndpointUrl()
         },
         determineListUrl(cohortId: number | 'new', params: PersonListParams): string {
-            return `/api/cohort/${cohortId}/persons?${toParams(params)}`
+            return `/v1/cohort/${cohortId}/persons?${toParams(params)}`
         },
         async listPaginated(
             params: {

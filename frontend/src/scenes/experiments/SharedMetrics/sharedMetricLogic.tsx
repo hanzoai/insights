@@ -66,7 +66,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
                 const { sharedMetricId } = props
 
                 if (sharedMetricId) {
-                    const response = await api.get(`api/projects/@current/experiment_saved_metrics/${sharedMetricId}`)
+                    const response = await api.get(`v1/projects/@current/experiment_saved_metrics/${sharedMetricId}`)
                     return response as SharedMetric
                 }
 
@@ -98,7 +98,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
             }
         },
         createSharedMetric: async () => {
-            const response = await api.create(`api/projects/@current/experiment_saved_metrics/`, values.sharedMetric)
+            const response = await api.create(`v1/projects/@current/experiment_saved_metrics/`, values.sharedMetric)
             if (response.id) {
                 toast.success('Shared metric created successfully')
                 actions.reportExperimentSharedMetricCreated(response as SharedMetric)
@@ -108,7 +108,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
         },
         updateSharedMetric: async ({ redirect = true }: { redirect?: boolean } = {}) => {
             const response = await api.update(
-                `api/projects/@current/experiment_saved_metrics/${values.sharedMetricId}`,
+                `v1/projects/@current/experiment_saved_metrics/${values.sharedMetricId}`,
                 values.sharedMetric
             )
             if (response.id) {
@@ -121,7 +121,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
         },
         deleteSharedMetric: async () => {
             try {
-                await api.delete(`api/projects/@current/experiment_saved_metrics/${values.sharedMetricId}`)
+                await api.delete(`v1/projects/@current/experiment_saved_metrics/${values.sharedMetricId}`)
                 toast.success('Shared metric deleted successfully')
                 actions.loadSharedMetrics()
                 router.actions.push('/experiments?tab=shared-metrics')

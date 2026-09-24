@@ -19,7 +19,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/comments/': commentsJson,
+                '/v1/projects/:team_id/comments/': commentsJson,
             },
         }),
     ],

@@ -92,7 +92,7 @@ export const clustersAdminLogic = kea<clustersAdminLogicType>([
             {
                 triggerClusteringRun: async () => {
                     const response = await api.create(
-                        'api/environments/@current/llm_analytics/clustering_runs',
+                        'v1/environments/@current/llm_analytics/clustering_runs',
                         values.params
                     )
                     return response as ClusteringRunResponse

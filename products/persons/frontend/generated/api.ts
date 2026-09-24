@@ -68,8 +68,8 @@ export const getPersonsListUrl = (projectId: string, params?: PersonsListParams)
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/`
+        ? `/v1/projects/${projectId}/persons/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/`
 }
 
 export const personsList = async (
@@ -98,8 +98,8 @@ export const getPersonsRetrieveUrl = (projectId: string, id: number, params?: Pe
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/`
+        ? `/v1/projects/${projectId}/persons/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/`
 }
 
 export const personsRetrieve = async (
@@ -131,8 +131,8 @@ export const getPersonsUpdateUrl = (projectId: string, id: number, params?: Pers
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/`
+        ? `/v1/projects/${projectId}/persons/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/`
 }
 
 export const personsUpdate = async (
@@ -165,8 +165,8 @@ export const getPersonsPartialUpdateUrl = (projectId: string, id: number, params
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/`
+        ? `/v1/projects/${projectId}/persons/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/`
 }
 
 export const personsPartialUpdate = async (
@@ -203,8 +203,8 @@ export const getPersonsActivityRetrieve2Url = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/activity/`
+        ? `/v1/projects/${projectId}/persons/${id}/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/activity/`
 }
 
 export const personsActivityRetrieve2 = async (
@@ -238,8 +238,8 @@ export const getPersonsDeletePropertyCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/delete_property/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/delete_property/`
+        ? `/v1/projects/${projectId}/persons/${id}/delete_property/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/delete_property/`
 }
 
 export const personsDeletePropertyCreate = async (
@@ -276,8 +276,8 @@ export const getPersonsPropertiesTimelineRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/properties_timeline/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/properties_timeline/`
+        ? `/v1/projects/${projectId}/persons/${id}/properties_timeline/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/properties_timeline/`
 }
 
 export const personsPropertiesTimelineRetrieve = async (
@@ -307,8 +307,8 @@ export const getPersonsSplitCreateUrl = (projectId: string, id: number, params?:
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/split/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/split/`
+        ? `/v1/projects/${projectId}/persons/${id}/split/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/split/`
 }
 
 export const personsSplitCreate = async (
@@ -345,8 +345,8 @@ export const getPersonsUpdatePropertyCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/${id}/update_property/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/${id}/update_property/`
+        ? `/v1/projects/${projectId}/persons/${id}/update_property/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/${id}/update_property/`
 }
 
 export const personsUpdatePropertyCreate = async (
@@ -379,8 +379,8 @@ export const getPersonsActivityRetrieveUrl = (projectId: string, params?: Person
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/activity/`
+        ? `/v1/projects/${projectId}/persons/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/activity/`
 }
 
 export const personsActivityRetrieve = async (
@@ -412,8 +412,8 @@ export const getPersonsBatchByDistinctIdsCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/batch_by_distinct_ids/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/batch_by_distinct_ids/`
+        ? `/v1/projects/${projectId}/persons/batch_by_distinct_ids/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/batch_by_distinct_ids/`
 }
 
 export const personsBatchByDistinctIdsCreate = async (
@@ -445,8 +445,8 @@ export const getPersonsBulkDeleteCreateUrl = (projectId: string, params?: Person
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/bulk_delete/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/bulk_delete/`
+        ? `/v1/projects/${projectId}/persons/bulk_delete/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/bulk_delete/`
 }
 
 export const personsBulkDeleteCreate = async (
@@ -478,8 +478,8 @@ export const getPersonsCohortsRetrieveUrl = (projectId: string, params?: Persons
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/cohorts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/cohorts/`
+        ? `/v1/projects/${projectId}/persons/cohorts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/cohorts/`
 }
 
 export const personsCohortsRetrieve = async (
@@ -508,8 +508,8 @@ export const getPersonsFunnelRetrieveUrl = (projectId: string, params?: PersonsF
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/funnel/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/funnel/`
+        ? `/v1/projects/${projectId}/persons/funnel/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/funnel/`
 }
 
 export const personsFunnelRetrieve = async (
@@ -538,8 +538,8 @@ export const getPersonsFunnelCreateUrl = (projectId: string, params?: PersonsFun
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/funnel/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/funnel/`
+        ? `/v1/projects/${projectId}/persons/funnel/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/funnel/`
 }
 
 export const personsFunnelCreate = async (
@@ -574,8 +574,8 @@ export const getPersonsFunnelCorrelationRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/funnel/correlation/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/funnel/correlation/`
+        ? `/v1/projects/${projectId}/persons/funnel/correlation/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/funnel/correlation/`
 }
 
 export const personsFunnelCorrelationRetrieve = async (
@@ -607,8 +607,8 @@ export const getPersonsFunnelCorrelationCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/funnel/correlation/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/funnel/correlation/`
+        ? `/v1/projects/${projectId}/persons/funnel/correlation/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/funnel/correlation/`
 }
 
 export const personsFunnelCorrelationCreate = async (
@@ -640,8 +640,8 @@ export const getPersonsLifecycleRetrieveUrl = (projectId: string, params?: Perso
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/lifecycle/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/lifecycle/`
+        ? `/v1/projects/${projectId}/persons/lifecycle/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/lifecycle/`
 }
 
 export const personsLifecycleRetrieve = async (
@@ -673,8 +673,8 @@ export const getPersonsResetPersonDistinctIdCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/reset_person_distinct_id/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/reset_person_distinct_id/`
+        ? `/v1/projects/${projectId}/persons/reset_person_distinct_id/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/reset_person_distinct_id/`
 }
 
 export const personsResetPersonDistinctIdCreate = async (
@@ -706,8 +706,8 @@ export const getPersonsStickinessRetrieveUrl = (projectId: string, params?: Pers
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/stickiness/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/stickiness/`
+        ? `/v1/projects/${projectId}/persons/stickiness/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/stickiness/`
 }
 
 export const personsStickinessRetrieve = async (
@@ -736,8 +736,8 @@ export const getPersonsTrendsRetrieveUrl = (projectId: string, params?: PersonsT
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/trends/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/trends/`
+        ? `/v1/projects/${projectId}/persons/trends/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/trends/`
 }
 
 export const personsTrendsRetrieve = async (
@@ -766,8 +766,8 @@ export const getPersonsValuesRetrieveUrl = (projectId: string, params?: PersonsV
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/persons/values/?${stringifiedParams}`
-        : `/api/projects/${projectId}/persons/values/`
+        ? `/v1/projects/${projectId}/persons/values/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/persons/values/`
 }
 
 export const personsValuesRetrieve = async (

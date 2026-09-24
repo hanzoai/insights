@@ -67,7 +67,7 @@ export const liveDebuggerLogic = kea<liveDebuggerLogicType>([
                     params.append('filename', values.selectedFilePath)
 
                     const queryString = params.toString()
-                    const url = `api/projects/@current/live_debugger_breakpoints/?${queryString}`
+                    const url = `v1/projects/@current/live_debugger_breakpoints/?${queryString}`
                     const response = await api.get(url)
                     return response.results || []
                 },
@@ -84,7 +84,7 @@ export const liveDebuggerLogic = kea<liveDebuggerLogicType>([
                     breakpointIds.forEach((id: string) => params.append('breakpoint_ids', id))
 
                     const queryString = params.toString()
-                    const url = `api/projects/@current/live_debugger_breakpoints/breakpoint_hits/${queryString ? `?${queryString}` : ''}`
+                    const url = `v1/projects/@current/live_debugger_breakpoints/breakpoint_hits/${queryString ? `?${queryString}` : ''}`
                     const response = await api.get(url)
                     return response.results || []
                 },
@@ -159,9 +159,9 @@ export const liveDebuggerLogic = kea<liveDebuggerLogicType>([
                 : undefined
 
             if (existingBreakpoint) {
-                await api.delete(`api/projects/@current/live_debugger_breakpoints/${existingBreakpoint.id}/`)
+                await api.delete(`v1/projects/@current/live_debugger_breakpoints/${existingBreakpoint.id}/`)
             } else {
-                await api.create('api/projects/@current/live_debugger_breakpoints/', {
+                await api.create('v1/projects/@current/live_debugger_breakpoints/', {
                     repository,
                     filename,
                     line_number: lineNumber,
@@ -180,9 +180,9 @@ export const liveDebuggerLogic = kea<liveDebuggerLogicType>([
                 : undefined
 
             if (existingBreakpoint) {
-                await api.delete(`api/projects/@current/live_debugger_breakpoints/${existingBreakpoint.id}/`)
+                await api.delete(`v1/projects/@current/live_debugger_breakpoints/${existingBreakpoint.id}/`)
             } else {
-                await api.create('api/projects/@current/live_debugger_breakpoints/', {
+                await api.create('v1/projects/@current/live_debugger_breakpoints/', {
                     repository,
                     filename,
                     line_number: lineNumber,
@@ -197,7 +197,7 @@ export const liveDebuggerLogic = kea<liveDebuggerLogicType>([
             if (Array.isArray(values.breakpoints)) {
                 await Promise.all(
                     values.breakpoints.map((bp) =>
-                        api.delete(`api/projects/@current/live_debugger_breakpoints/${bp.id}/`)
+                        api.delete(`v1/projects/@current/live_debugger_breakpoints/${bp.id}/`)
                     )
                 )
             }

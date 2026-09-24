@@ -68,7 +68,7 @@ export const approvalsLogic = kea<approvalsLogicType>([
 
                     const actualUrl =
                         url ||
-                        `api/environments/${values.currentTeamId}/change_requests/?${new URLSearchParams({
+                        `v1/environments/${values.currentTeamId}/change_requests/?${new URLSearchParams({
                             ...(values.filters.state && { state: values.filters.state }),
                             ...(values.filters.action_type && { action_type: values.filters.action_type }),
                             ...(values.filters.resource_type && { resource_type: values.filters.resource_type }),
@@ -113,7 +113,7 @@ export const approvalsLogic = kea<approvalsLogicType>([
             actions.loadChangeRequests()
         },
         loadMore: async () => {
-            const nextUrl = `api/environments/${values.currentTeamId}/change_requests/?${new URLSearchParams({
+            const nextUrl = `v1/environments/${values.currentTeamId}/change_requests/?${new URLSearchParams({
                 offset: values.changeRequests.length.toString(),
                 ...(values.filters.state && { state: values.filters.state }),
                 ...(values.filters.action_type && { action_type: values.filters.action_type }),
@@ -126,7 +126,7 @@ export const approvalsLogic = kea<approvalsLogicType>([
         },
         approveChangeRequest: async ({ id, reason }) => {
             try {
-                await api.create(`api/environments/${values.currentTeamId}/change_requests/${id}/approve/`, {
+                await api.create(`v1/environments/${values.currentTeamId}/change_requests/${id}/approve/`, {
                     reason: reason || '',
                 })
                 toast.success('Change request approved')
@@ -137,7 +137,7 @@ export const approvalsLogic = kea<approvalsLogicType>([
         },
         rejectChangeRequest: async ({ id, reason }) => {
             try {
-                await api.create(`api/environments/${values.currentTeamId}/change_requests/${id}/reject/`, {
+                await api.create(`v1/environments/${values.currentTeamId}/change_requests/${id}/reject/`, {
                     reason,
                 })
                 toast.success('Change request rejected')

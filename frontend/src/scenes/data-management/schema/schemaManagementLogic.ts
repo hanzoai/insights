@@ -118,12 +118,12 @@ export const schemaManagementLogic = kea<schemaManagementLogicType>([
             [] as SchemaPropertyGroup[],
             {
                 loadPropertyGroups: async () => {
-                    const response = await api.get(`api/projects/@current/schema_property_groups/`)
+                    const response = await api.get(`v1/projects/@current/schema_property_groups/`)
                     return response.results || response || []
                 },
                 createPropertyGroup: async (data: Partial<SchemaPropertyGroup>) => {
                     try {
-                        const response = await api.create(`api/projects/@current/schema_property_groups/`, data)
+                        const response = await api.create(`v1/projects/@current/schema_property_groups/`, data)
                         toast.success('Property group created')
                         return [response, ...values.propertyGroups]
                     } catch (error: any) {
@@ -134,7 +134,7 @@ export const schemaManagementLogic = kea<schemaManagementLogicType>([
                 },
                 updatePropertyGroup: async ({ id, data }: { id: string; data: Partial<SchemaPropertyGroup> }) => {
                     try {
-                        const response = await api.update(`api/projects/@current/schema_property_groups/${id}/`, data)
+                        const response = await api.update(`v1/projects/@current/schema_property_groups/${id}/`, data)
                         toast.success('Property group updated')
                         return values.propertyGroups.map((pg) => (pg.id === id ? response : pg))
                     } catch (error: any) {
@@ -277,7 +277,7 @@ export const schemaManagementLogic = kea<schemaManagementLogicType>([
     listeners(({ actions }) => ({
         deletePropertyGroup: async ({ id }) => {
             try {
-                await api.delete(`api/projects/@current/schema_property_groups/${id}/`)
+                await api.delete(`v1/projects/@current/schema_property_groups/${id}/`)
                 actions.loadPropertyGroups()
                 toast.success('Property group deleted')
             } catch (error: any) {

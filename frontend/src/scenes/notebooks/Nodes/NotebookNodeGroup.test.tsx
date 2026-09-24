@@ -206,7 +206,7 @@ describe('GroupInfo Component', () => {
         // Set up API mocks for teamLogic
         useMocks({
             get: {
-                '/api/projects/@current': () => [
+                '/v1/projects/@current': () => [
                     200,
                     {
                         id: 1,
@@ -380,7 +380,7 @@ describe('Integration scenarios', () => {
         // Set up API mocks for teamLogic with EUR currency
         useMocks({
             get: {
-                '/api/projects/@current': () => [
+                '/v1/projects/@current': () => [
                     200,
                     {
                         id: 1,

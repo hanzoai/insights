@@ -19,7 +19,7 @@ const meta: Meta<typeof ActivityLog> = {
         mswDecorator({
             get: {
                 // TODO: setting available featues should be a decorator to make this easy
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         email: 'test@hanzo.ai',
@@ -35,23 +35,23 @@ const meta: Meta<typeof ActivityLog> = {
                         },
                     },
                 ],
-                '/api/projects/:team/feature_flags/6/activity': (_, __, ctx) => [
+                '/v1/projects/:team/feature_flags/6/activity': (_, __, ctx) => [
                     ctx.status(200),
                     ctx.json({ results: [] }),
                 ],
-                '/api/projects/:team/feature_flags/7/activity': (_, __, ctx) => [
+                '/v1/projects/:team/feature_flags/7/activity': (_, __, ctx) => [
                     ctx.status(200),
                     ctx.json({ results: featureFlagsActivityResponseJson }),
                 ],
-                '/api/environments/:team_id/insights/activity': (_, __, ctx) => [
+                '/v1/environments/:team_id/insights/activity': (_, __, ctx) => [
                     ctx.status(200),
                     ctx.json({ results: insightsActivityResponseJson }),
                 ],
-                '/api/person/:id/activity': (_, __, ctx) => [
+                '/v1/person/:id/activity': (_, __, ctx) => [
                     ctx.status(200),
                     ctx.json({ results: personActivityResponseJson }),
                 ],
-                '/api/projects/:id/activity': (_, __, ctx) => [
+                '/v1/projects/:id/activity': (_, __, ctx) => [
                     ctx.status(200),
                     ctx.json({ results: teamActivityResponseJson }),
                 ],
@@ -107,7 +107,7 @@ export function WithNoData(): JSX.Element {
 export function WithoutAuditLogsFeaure(): JSX.Element {
     useStorybookMocks({
         get: {
-            '/api/users/@me': () => [
+            '/v1/users/@me': () => [
                 200,
                 {
                     email: 'test@hanzo.ai',

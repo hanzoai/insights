@@ -40,7 +40,7 @@ export const navigationLogic = kea<navigationLogicType>([
             },
             {
                 loadNavigationStatus: async () => {
-                    return await api.get('api/instance_settings')
+                    return await api.get('v1/instance_settings')
                 },
             },
         ],

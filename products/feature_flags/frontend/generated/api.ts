@@ -41,7 +41,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 export const getFeatureFlagsRetrieveUrl = (organizationId: string, featureFlagKey: string) => {
-    return `/api/organizations/${organizationId}/feature_flags/${featureFlagKey}/`
+    return `/v1/organizations/${organizationId}/feature_flags/${featureFlagKey}/`
 }
 
 export const featureFlagsRetrieve = async (
@@ -56,7 +56,7 @@ export const featureFlagsRetrieve = async (
 }
 
 export const getFeatureFlagsCopyFlagsCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/feature_flags/copy_flags/`
+    return `/v1/organizations/${organizationId}/feature_flags/copy_flags/`
 }
 
 export const featureFlagsCopyFlagsCreate = async (organizationId: string, options?: RequestInit): Promise<void> => {
@@ -83,8 +83,8 @@ export const getFeatureFlagsListUrl = (projectId: string, params?: FeatureFlagsL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/`
+        ? `/v1/projects/${projectId}/feature_flags/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/`
 }
 
 export const featureFlagsList = async (
@@ -104,7 +104,7 @@ export const featureFlagsList = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/`
+    return `/v1/projects/${projectId}/feature_flags/`
 }
 
 export const featureFlagsCreate = async (
@@ -126,7 +126,7 @@ export const featureFlagsCreate = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsRetrieve2Url = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/`
 }
 
 export const featureFlagsRetrieve2 = async (
@@ -146,7 +146,7 @@ export const featureFlagsRetrieve2 = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/`
 }
 
 export const featureFlagsUpdate = async (
@@ -169,7 +169,7 @@ export const featureFlagsUpdate = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/`
 }
 
 export const featureFlagsPartialUpdate = async (
@@ -190,7 +190,7 @@ export const featureFlagsPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getFeatureFlagsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/`
 }
 
 export const featureFlagsDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<unknown> => {
@@ -221,8 +221,8 @@ export const getFeatureFlagsActivityRetrieve2Url = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/${id}/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/${id}/activity/`
+        ? `/v1/projects/${projectId}/feature_flags/${id}/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/${id}/activity/`
 }
 
 export const featureFlagsActivityRetrieve2 = async (
@@ -243,7 +243,7 @@ export const featureFlagsActivityRetrieve2 = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsCreateStaticCohortForFlagCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/create_static_cohort_for_flag/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/create_static_cohort_for_flag/`
 }
 
 export const featureFlagsCreateStaticCohortForFlagCreate = async (
@@ -266,7 +266,7 @@ export const featureFlagsCreateStaticCohortForFlagCreate = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsDashboardCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/dashboard/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/dashboard/`
 }
 
 export const featureFlagsDashboardCreate = async (
@@ -287,7 +287,7 @@ export const featureFlagsDashboardCreate = async (
  * Get other active flags that depend on this flag.
  */
 export const getFeatureFlagsDependentFlagsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/dependent_flags/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/dependent_flags/`
 }
 
 export const featureFlagsDependentFlagsRetrieve = async (
@@ -307,7 +307,7 @@ export const featureFlagsDependentFlagsRetrieve = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsEnrichUsageDashboardCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/enrich_usage_dashboard/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/enrich_usage_dashboard/`
 }
 
 export const featureFlagsEnrichUsageDashboardCreate = async (
@@ -330,7 +330,7 @@ export const featureFlagsEnrichUsageDashboardCreate = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsRemoteConfigRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/remote_config/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/remote_config/`
 }
 
 export const featureFlagsRemoteConfigRetrieve = async (
@@ -350,7 +350,7 @@ export const featureFlagsRemoteConfigRetrieve = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsStatusRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/feature_flags/${id}/status/`
+    return `/v1/projects/${projectId}/feature_flags/${id}/status/`
 }
 
 export const featureFlagsStatusRetrieve = async (
@@ -381,8 +381,8 @@ export const getFeatureFlagsActivityRetrieveUrl = (projectId: string, params?: F
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/activity/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/activity/`
+        ? `/v1/projects/${projectId}/feature_flags/activity/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/activity/`
 }
 
 export const featureFlagsActivityRetrieve = async (
@@ -409,7 +409,7 @@ Uses bulk operations for efficiency: database updates are batched and cache
 invalidation happens once at the end rather than per-flag.
  */
 export const getFeatureFlagsBulkDeleteCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/bulk_delete/`
+    return `/v1/projects/${projectId}/feature_flags/bulk_delete/`
 }
 
 export const featureFlagsBulkDeleteCreate = async (
@@ -430,7 +430,7 @@ export const featureFlagsBulkDeleteCreate = async (
 Accepts a list of feature flag IDs and returns a mapping of ID to key.
  */
 export const getFeatureFlagsBulkKeysCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/bulk_keys/`
+    return `/v1/projects/${projectId}/feature_flags/bulk_keys/`
 }
 
 export const featureFlagsBulkKeysCreate = async (
@@ -466,8 +466,8 @@ export const getFeatureFlagsEvaluationReasonsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/evaluation_reasons/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/evaluation_reasons/`
+        ? `/v1/projects/${projectId}/feature_flags/evaluation_reasons/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/evaluation_reasons/`
 }
 
 export const featureFlagsEvaluationReasonsRetrieve = async (
@@ -501,8 +501,8 @@ export const getFeatureFlagsLocalEvaluationRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/local_evaluation/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/local_evaluation/`
+        ? `/v1/projects/${projectId}/feature_flags/local_evaluation/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/local_evaluation/`
 }
 
 export const featureFlagsLocalEvaluationRetrieve = async (
@@ -522,7 +522,7 @@ Uses the same filtering logic as the list endpoint.
 Returns only IDs that the user has permission to edit.
  */
 export const getFeatureFlagsMatchingIdsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/matching_ids/`
+    return `/v1/projects/${projectId}/feature_flags/matching_ids/`
 }
 
 export const featureFlagsMatchingIdsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -549,8 +549,8 @@ export const getFeatureFlagsMyFlagsRetrieveUrl = (projectId: string, params?: Fe
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/feature_flags/my_flags/?${stringifiedParams}`
-        : `/api/projects/${projectId}/feature_flags/my_flags/`
+        ? `/v1/projects/${projectId}/feature_flags/my_flags/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/feature_flags/my_flags/`
 }
 
 export const featureFlagsMyFlagsRetrieve = async (
@@ -570,7 +570,7 @@ export const featureFlagsMyFlagsRetrieve = async (
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
 export const getFeatureFlagsUserBlastRadiusCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/feature_flags/user_blast_radius/`
+    return `/v1/projects/${projectId}/feature_flags/user_blast_radius/`
 }
 
 export const featureFlagsUserBlastRadiusCreate = async (

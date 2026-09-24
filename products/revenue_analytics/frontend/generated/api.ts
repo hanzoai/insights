@@ -10,7 +10,7 @@
 import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
 
 export const getRevenueAnalyticsTaxonomyValuesRetrieveUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/revenue_analytics/taxonomy/values/`
+    return `/v1/environments/${projectId}/revenue_analytics/taxonomy/values/`
 }
 
 export const revenueAnalyticsTaxonomyValuesRetrieve = async (

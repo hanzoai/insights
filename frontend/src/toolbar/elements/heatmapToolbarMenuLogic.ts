@@ -248,7 +248,7 @@ export const heatmapToolbarMenuLogic = kea<heatmapToolbarMenuLogicType>([
                             date_to: values.commonFilters.date_to,
                         }
 
-                        defaultUrl = `/api/element/stats/${encodeParams(
+                        defaultUrl = `/v1/element/stats/${encodeParams(
                             { ...params, paginate_response: true, sampling_factor: values.samplingFactor },
                             '?'
                         )}`

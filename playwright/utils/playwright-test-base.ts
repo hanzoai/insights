@@ -13,7 +13,7 @@ export const test = coreTest.extend<{ loginBeforeTests: void }>({
     loginBeforeTests: [
         async ({ page }, use) => {
             // Perform authentication via API
-            await page.request.post('/api/login/', {
+            await page.request.post('/v1/login/', {
                 data: {
                     email: LOGIN_USERNAME,
                     password: LOGIN_PASSWORD,

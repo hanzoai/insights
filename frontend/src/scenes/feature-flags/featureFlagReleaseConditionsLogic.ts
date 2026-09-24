@@ -310,7 +310,7 @@ export const featureFlagReleaseConditionsLogic = kea<featureFlagReleaseCondition
 
             await breakpoint(1000) // in ms
             const response = await api.create(
-                `api/projects/${values.currentProjectId}/feature_flags/user_blast_radius`,
+                `v1/projects/${values.currentProjectId}/feature_flags/user_blast_radius`,
                 {
                     condition: { properties: newProperties },
                     group_type_index: values.filters?.aggregation_group_type_index ?? null,
@@ -375,7 +375,7 @@ export const featureFlagReleaseConditionsLogic = kea<featureFlagReleaseCondition
                 } else if (properties.length === 0) {
                     // Request total users for empty condition sets
                     responsePromise = api.create(
-                        `api/projects/${values.currentProjectId}/feature_flags/user_blast_radius`,
+                        `v1/projects/${values.currentProjectId}/feature_flags/user_blast_radius`,
                         {
                             condition: { properties: [] },
                             group_type_index: values.filters?.aggregation_group_type_index ?? null,
@@ -383,7 +383,7 @@ export const featureFlagReleaseConditionsLogic = kea<featureFlagReleaseCondition
                     )
                 } else {
                     responsePromise = api.create(
-                        `api/projects/${values.currentProjectId}/feature_flags/user_blast_radius`,
+                        `v1/projects/${values.currentProjectId}/feature_flags/user_blast_radius`,
                         {
                             condition,
                             group_type_index: values.filters?.aggregation_group_type_index ?? null,

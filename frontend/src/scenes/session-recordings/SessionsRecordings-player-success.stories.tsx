@@ -102,7 +102,7 @@ const meta: Meta = {
         mswDecorator({
             get: {
                 '/stats': () => [200, { users_on_product: 42, active_recordings: 7 }],
-                '/api/environments/:team_id/session_recordings': (req) => {
+                '/v1/environments/:team_id/session_recordings': (req) => {
                     const version = req.url.searchParams.get('version')
                     return [
                         200,
@@ -113,18 +113,18 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists': recordingPlaylists,
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
+                '/v1/projects/:team_id/session_recording_playlists': recordingPlaylists,
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
                     const playlistId = req.params.playlist_id as string
 
                     return [200, playlist(playlistId)]
                 },
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id/recordings': (req) => {
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id/recordings': (req) => {
                     const playlistId = req.params.playlist_id
                     const response = playlistId === '1234567' ? recordings : []
                     return [200, { has_next: false, results: response, version: 1 }]
                 },
-                '/api/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
                     // with no sources, returns sources...
                     if (req.url.searchParams.get('source') === 'blob_v2') {
                         return res(ctx.text(snapshotsAsJSONLines()))
@@ -144,8 +144,8 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-                'api/projects/:team/notebooks': {
+                '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+                'v1/projects/:team/notebooks': {
                     count: 0,
                     next: null,
                     previous: null,
@@ -153,22 +153,22 @@ const meta: Meta = {
                 },
             },
             patch: {
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
                     const playlistId = req.params.playlist_id as string
                     const body = req.body as Partial<SessionRecordingPlaylistType>
                     return [200, { ...playlist(playlistId), ...body }]
                 },
             },
             post: {
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id/playlist_viewed': [
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id/playlist_viewed': [
                     200,
                     { success: true },
                 ],
-                '/api/environments/:team_id/session_recording_playlists/:playlist_id/playlist_viewed': [
+                '/v1/environments/:team_id/session_recording_playlists/:playlist_id/playlist_viewed': [
                     200,
                     { success: true },
                 ],
-                '/api/environments/:team_id/query': (req, res, ctx) => {
+                '/v1/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
 
                     if (body.query.kind === 'InsightsQLQuery' && body.query.query.includes('$session_id as session_id')) {
@@ -228,15 +228,15 @@ export const RecentRecordingsEmpty: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/session_recordings': () => [
+                '/v1/environments/:team_id/session_recordings': () => [
                     200,
                     { has_next: false, results: [], version: '1' },
                 ],
-                '/api/projects/:team_id/session_recording_playlists': recordingPlaylists,
-                'api/projects/:team/notebooks': { count: 0, next: null, previous: null, results: [] },
+                '/v1/projects/:team_id/session_recording_playlists': recordingPlaylists,
+                'v1/projects/:team/notebooks': { count: 0, next: null, previous: null, results: [] },
             },
             post: {
-                '/api/environments/:team_id/query': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query': () => [200, { results: [] }],
             },
         }),
     ],
@@ -280,7 +280,7 @@ const filtersExpandedStory = (extraMocks: Record<string, any> = {}): StoryFn => 
     const Story: StoryFn = () => {
         useStorybookMocks({
             get: {
-                '/api/users/@me/': userSeenReplayIntroMock,
+                '/v1/users/@me/': userSeenReplayIntroMock,
                 ...extraMocks,
             },
         })
@@ -296,14 +296,14 @@ FiltersExpanded.parameters = {
 }
 
 export const FiltersExpandedLotsOfResults: StoryFn = filtersExpandedStory({
-    '/api/environments/:team_id/session_recordings': manyRecordingsMock,
+    '/v1/environments/:team_id/session_recordings': manyRecordingsMock,
 })
 FiltersExpandedLotsOfResults.parameters = {
     waitForSelector: '[data-attr="session-recordings-filters-tab"]',
 }
 
 export const FiltersExpandedLotsOfResultsNarrow: StoryFn = filtersExpandedStory({
-    '/api/environments/:team_id/session_recordings': manyRecordingsMock,
+    '/v1/environments/:team_id/session_recordings': manyRecordingsMock,
 })
 FiltersExpandedLotsOfResultsNarrow.parameters = {
     waitForSelector: '[data-attr="session-recordings-filters-tab"]',

@@ -67,7 +67,7 @@ export const screenshotUploadLogic = kea<screenshotUploadLogicType>([
                     }
                     await breakpoint(300)
                     const response = await toolbarFetch(
-                        `/api/projects/@current/event_definitions/?search=${encodeURIComponent(query)}&limit=20&event_type=event_custom`
+                        `/v1/projects/@current/event_definitions/?search=${encodeURIComponent(query)}&limit=20&event_type=event_custom`
                     )
 
                     if (response.status === 403) {
@@ -95,7 +95,7 @@ export const screenshotUploadLogic = kea<screenshotUploadLogicType>([
                     const { mediaId } = await uploadScreenshot(blob)
                     breakpoint()
 
-                    await toolbarFetch('/api/projects/@current/object_media_previews/', 'POST', {
+                    await toolbarFetch('/v1/projects/@current/object_media_previews/', 'POST', {
                         uploaded_media_id: mediaId,
                         event_definition_id: selectedDefinition.id,
                     })

@@ -120,7 +120,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                         params.append('key_id', keyId)
                     }
                     const response = await api.get(
-                        `/api/environments/${teamId}/llm_analytics/models/?${params.toString()}`
+                        `/v1/environments/${teamId}/llm_analytics/models/?${params.toString()}`
                     )
                     return response.models
                 },
@@ -139,7 +139,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                     const requestFilter = values.evaluationSummaryFilter
 
                     // Backend fetches data server-side by ID - we just pass the filter
-                    const response = await api.create(`/api/environments/${teamId}/llm_analytics/evaluation_summary/`, {
+                    const response = await api.create(`/v1/environments/${teamId}/llm_analytics/evaluation_summary/`, {
                         evaluation_id: props.evaluationId,
                         filter: requestFilter,
                         force_refresh: shouldRefresh,
@@ -276,7 +276,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                         return
                     }
 
-                    const evaluation = await api.get(`/api/environments/${teamId}/evaluations/${props.evaluationId}/`)
+                    const evaluation = await api.get(`/v1/environments/${teamId}/evaluations/${props.evaluationId}/`)
                     actions.loadEvaluationSuccess(evaluation)
                 } catch (error) {
                     console.error('Failed to load evaluation:', error)
@@ -430,12 +430,12 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                 }
 
                 if (props.evaluationId === 'new') {
-                    const response = await api.create(`/api/environments/${teamId}/evaluations/`, values.evaluation!)
+                    const response = await api.create(`/v1/environments/${teamId}/evaluations/`, values.evaluation!)
                     actions.saveEvaluationSuccess(response)
                     llmEvaluationsLogic.findMounted()?.actions.loadEvaluations()
                 } else {
                     const response = await api.update(
-                        `/api/environments/${teamId}/evaluations/${props.evaluationId}/`,
+                        `/v1/environments/${teamId}/evaluations/${props.evaluationId}/`,
                         values.evaluation!
                     )
                     actions.saveEvaluationSuccess(response)

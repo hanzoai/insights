@@ -76,7 +76,7 @@ win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, insights?
     if (insights && toolbarParams.toolbarFlagsKey) {
         const apiHost = insights.config?.api_host || toolbarParams.apiURL || window.location.origin
         const trimmedHost = apiHost.replace(/\/+$/, '')
-        await fetch(`${trimmedHost}/api/user/get_toolbar_preloaded_flags?key=${toolbarParams.toolbarFlagsKey}`, {
+        await fetch(`${trimmedHost}/v1/user/get_toolbar_preloaded_flags?key=${toolbarParams.toolbarFlagsKey}`, {
             credentials: 'include',
         })
             .then((response) => response.json())

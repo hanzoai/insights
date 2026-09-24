@@ -85,25 +85,25 @@ describe('sqlEditorLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': (req) => {
+                '/v1/environments/:team_id/insights/': (req) => {
                     const shortId = req.url.searchParams.get('short_id')
                     if (shortId === MOCK_INSIGHT_SHORT_ID) {
                         return [200, { results: [MOCK_INSIGHT] }]
                     }
                     return [200, { results: [] }]
                 },
-                '/api/environments/:team_id/warehouse_saved_queries/': { results: [] },
-                '/api/environments/:team_id/warehouse_saved_queries/:id/': [404],
-                '/api/user_home_settings/@me/': {},
+                '/v1/environments/:team_id/warehouse_saved_queries/': { results: [] },
+                '/v1/environments/:team_id/warehouse_saved_queries/:id/': [404],
+                '/v1/user_home_settings/@me/': {},
             },
             post: {
-                '/api/environments/:team_id/query/': { results: [] },
+                '/v1/environments/:team_id/query/': { results: [] },
             },
             patch: {
-                '/api/user_home_settings/@me/': [200],
+                '/v1/user_home_settings/@me/': [200],
             },
             delete: {
-                '/api/environments/:team_id/query/:id/': [204],
+                '/v1/environments/:team_id/query/:id/': [204],
             },
         })
 

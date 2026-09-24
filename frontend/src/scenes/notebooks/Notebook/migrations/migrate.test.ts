@@ -12,7 +12,7 @@ describe('migrate()', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/environments/:team_id/query/upgrade': (req) => {
+                '/v1/environments/:team_id/query/upgrade': (req) => {
                     const data = req.body as any
                     if (data?.query?.source?.kind === 'RetentionQuery') {
                         return [

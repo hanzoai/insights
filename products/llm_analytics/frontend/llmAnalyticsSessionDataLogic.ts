@@ -203,7 +203,7 @@ export const llmAnalyticsSessionDataLogic = kea<llmAnalyticsSessionDataLogicType
             }
 
             try {
-                const data = await api.create(`api/environments/${teamId}/llm_analytics/summarization/batch_check/`, {
+                const data = await api.create(`v1/environments/${teamId}/llm_analytics/summarization/batch_check/`, {
                     trace_ids: traceIds,
                     mode: 'minimal',
                 })
@@ -278,7 +278,7 @@ export const llmAnalyticsSessionDataLogic = kea<llmAnalyticsSessionDataLogicType
                 // Build the hierarchy tree from full trace events
                 const hierarchy = restoreTree(fullTrace.events || [], traceId)
 
-                const data = await api.create(`api/environments/${teamId}/llm_analytics/summarization/`, {
+                const data = await api.create(`v1/environments/${teamId}/llm_analytics/summarization/`, {
                     summarize_type: 'trace',
                     mode: 'minimal',
                     force_refresh: forceRefresh,

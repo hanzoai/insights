@@ -97,7 +97,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
             logic.unmount()
             overrideSessionRecordingMocks({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id': () => [500, { status: 0 }],
+                    '/v1/environments/:team_id/session_recordings/:id': () => [500, { status: 0 }],
                 },
             })
             logic.mount()
@@ -128,7 +128,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
             logic.unmount()
             overrideSessionRecordingMocks({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
+                    '/v1/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
                 },
             })
             logic.mount()

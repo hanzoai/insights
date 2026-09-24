@@ -51,8 +51,8 @@ export const getBatchExportsListUrl = (organizationId: string, params?: BatchExp
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/organizations/${organizationId}/batch_exports/?${stringifiedParams}`
-        : `/api/organizations/${organizationId}/batch_exports/`
+        ? `/v1/organizations/${organizationId}/batch_exports/?${stringifiedParams}`
+        : `/v1/organizations/${organizationId}/batch_exports/`
 }
 
 export const batchExportsList = async (
@@ -67,7 +67,7 @@ export const batchExportsList = async (
 }
 
 export const getBatchExportsCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/`
+    return `/v1/organizations/${organizationId}/batch_exports/`
 }
 
 export const batchExportsCreate = async (
@@ -84,7 +84,7 @@ export const batchExportsCreate = async (
 }
 
 export const getBatchExportsRetrieveUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/${id}/`
+    return `/v1/organizations/${organizationId}/batch_exports/${id}/`
 }
 
 export const batchExportsRetrieve = async (
@@ -99,7 +99,7 @@ export const batchExportsRetrieve = async (
 }
 
 export const getBatchExportsUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/${id}/`
+    return `/v1/organizations/${organizationId}/batch_exports/${id}/`
 }
 
 export const batchExportsUpdate = async (
@@ -117,7 +117,7 @@ export const batchExportsUpdate = async (
 }
 
 export const getBatchExportsPartialUpdateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/${id}/`
+    return `/v1/organizations/${organizationId}/batch_exports/${id}/`
 }
 
 export const batchExportsPartialUpdate = async (
@@ -135,7 +135,7 @@ export const batchExportsPartialUpdate = async (
 }
 
 export const getBatchExportsDestroyUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/${id}/`
+    return `/v1/organizations/${organizationId}/batch_exports/${id}/`
 }
 
 export const batchExportsDestroy = async (organizationId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -146,7 +146,7 @@ export const batchExportsDestroy = async (organizationId: string, id: string, op
 }
 
 export const getBatchExportsLogsRetrieveUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/${id}/logs/`
+    return `/v1/organizations/${organizationId}/batch_exports/${id}/logs/`
 }
 
 export const batchExportsLogsRetrieve = async (
@@ -164,7 +164,7 @@ export const batchExportsLogsRetrieve = async (
  * Pause a BatchExport.
  */
 export const getBatchExportsPauseCreateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/${id}/pause/`
+    return `/v1/organizations/${organizationId}/batch_exports/${id}/pause/`
 }
 
 export const batchExportsPauseCreate = async (
@@ -182,7 +182,7 @@ export const batchExportsPauseCreate = async (
 }
 
 export const getBatchExportsRunTestStepCreateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/${id}/run_test_step/`
+    return `/v1/organizations/${organizationId}/batch_exports/${id}/run_test_step/`
 }
 
 export const batchExportsRunTestStepCreate = async (
@@ -203,7 +203,7 @@ export const batchExportsRunTestStepCreate = async (
  * Unpause a BatchExport.
  */
 export const getBatchExportsUnpauseCreateUrl = (organizationId: string, id: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/${id}/unpause/`
+    return `/v1/organizations/${organizationId}/batch_exports/${id}/unpause/`
 }
 
 export const batchExportsUnpauseCreate = async (
@@ -221,7 +221,7 @@ export const batchExportsUnpauseCreate = async (
 }
 
 export const getBatchExportsRunTestStepNewCreateUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/run_test_step_new/`
+    return `/v1/organizations/${organizationId}/batch_exports/run_test_step_new/`
 }
 
 export const batchExportsRunTestStepNewCreate = async (
@@ -238,7 +238,7 @@ export const batchExportsRunTestStepNewCreate = async (
 }
 
 export const getBatchExportsTestRetrieveUrl = (organizationId: string) => {
-    return `/api/organizations/${organizationId}/batch_exports/test/`
+    return `/v1/organizations/${organizationId}/batch_exports/test/`
 }
 
 export const batchExportsTestRetrieve = async (organizationId: string, options?: RequestInit): Promise<void> => {
@@ -260,8 +260,8 @@ export const getBatchExportsList2Url = (projectId: string, params?: BatchExports
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/batch_exports/?${stringifiedParams}`
-        : `/api/projects/${projectId}/batch_exports/`
+        ? `/v1/projects/${projectId}/batch_exports/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/batch_exports/`
 }
 
 export const batchExportsList2 = async (
@@ -276,7 +276,7 @@ export const batchExportsList2 = async (
 }
 
 export const getBatchExportsCreate2Url = (projectId: string) => {
-    return `/api/projects/${projectId}/batch_exports/`
+    return `/v1/projects/${projectId}/batch_exports/`
 }
 
 export const batchExportsCreate2 = async (
@@ -313,8 +313,8 @@ export const getBatchExportsBackfillsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/batch_exports/${batchExportId}/backfills/?${stringifiedParams}`
-        : `/api/projects/${projectId}/batch_exports/${batchExportId}/backfills/`
+        ? `/v1/projects/${projectId}/batch_exports/${batchExportId}/backfills/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/batch_exports/${batchExportId}/backfills/`
 }
 
 export const batchExportsBackfillsList = async (
@@ -336,7 +336,7 @@ export const batchExportsBackfillsList = async (
  * Create a new backfill for a BatchExport.
  */
 export const getBatchExportsBackfillsCreateUrl = (projectId: string, batchExportId: string) => {
-    return `/api/projects/${projectId}/batch_exports/${batchExportId}/backfills/`
+    return `/v1/projects/${projectId}/batch_exports/${batchExportId}/backfills/`
 }
 
 export const batchExportsBackfillsCreate = async (
@@ -359,7 +359,7 @@ export const batchExportsBackfillsCreate = async (
 Allows creating and reading backfills, but not updating or deleting them.
  */
 export const getBatchExportsBackfillsRetrieveUrl = (projectId: string, batchExportId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${batchExportId}/backfills/${id}/`
+    return `/v1/projects/${projectId}/batch_exports/${batchExportId}/backfills/${id}/`
 }
 
 export const batchExportsBackfillsRetrieve = async (
@@ -378,7 +378,7 @@ export const batchExportsBackfillsRetrieve = async (
  * Cancel a batch export backfill.
  */
 export const getBatchExportsBackfillsCancelCreateUrl = (projectId: string, batchExportId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${batchExportId}/backfills/${id}/cancel/`
+    return `/v1/projects/${projectId}/batch_exports/${batchExportId}/backfills/${id}/cancel/`
 }
 
 export const batchExportsBackfillsCancelCreate = async (
@@ -412,8 +412,8 @@ export const getBatchExportsRunsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/batch_exports/${batchExportId}/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/batch_exports/${batchExportId}/runs/`
+        ? `/v1/projects/${projectId}/batch_exports/${batchExportId}/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/batch_exports/${batchExportId}/runs/`
 }
 
 export const batchExportsRunsList = async (
@@ -429,7 +429,7 @@ export const batchExportsRunsList = async (
 }
 
 export const getBatchExportsRunsRetrieveUrl = (projectId: string, batchExportId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${batchExportId}/runs/${id}/`
+    return `/v1/projects/${projectId}/batch_exports/${batchExportId}/runs/${id}/`
 }
 
 export const batchExportsRunsRetrieve = async (
@@ -448,7 +448,7 @@ export const batchExportsRunsRetrieve = async (
  * Cancel a batch export run.
  */
 export const getBatchExportsRunsCancelCreateUrl = (projectId: string, batchExportId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${batchExportId}/runs/${id}/cancel/`
+    return `/v1/projects/${projectId}/batch_exports/${batchExportId}/runs/${id}/cancel/`
 }
 
 export const batchExportsRunsCancelCreate = async (
@@ -467,7 +467,7 @@ export const batchExportsRunsCancelCreate = async (
 }
 
 export const getBatchExportsRunsLogsRetrieveUrl = (projectId: string, batchExportId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${batchExportId}/runs/${id}/logs/`
+    return `/v1/projects/${projectId}/batch_exports/${batchExportId}/runs/${id}/logs/`
 }
 
 export const batchExportsRunsLogsRetrieve = async (
@@ -489,7 +489,7 @@ We use the same underlying mechanism as when backfilling a batch export, as retr
 a run is the same as backfilling one run.
  */
 export const getBatchExportsRunsRetryCreateUrl = (projectId: string, batchExportId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${batchExportId}/runs/${id}/retry/`
+    return `/v1/projects/${projectId}/batch_exports/${batchExportId}/runs/${id}/retry/`
 }
 
 export const batchExportsRunsRetryCreate = async (
@@ -508,7 +508,7 @@ export const batchExportsRunsRetryCreate = async (
 }
 
 export const getBatchExportsRetrieve2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${id}/`
+    return `/v1/projects/${projectId}/batch_exports/${id}/`
 }
 
 export const batchExportsRetrieve2 = async (
@@ -523,7 +523,7 @@ export const batchExportsRetrieve2 = async (
 }
 
 export const getBatchExportsUpdate2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${id}/`
+    return `/v1/projects/${projectId}/batch_exports/${id}/`
 }
 
 export const batchExportsUpdate2 = async (
@@ -541,7 +541,7 @@ export const batchExportsUpdate2 = async (
 }
 
 export const getBatchExportsPartialUpdate2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${id}/`
+    return `/v1/projects/${projectId}/batch_exports/${id}/`
 }
 
 export const batchExportsPartialUpdate2 = async (
@@ -559,7 +559,7 @@ export const batchExportsPartialUpdate2 = async (
 }
 
 export const getBatchExportsDestroy2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${id}/`
+    return `/v1/projects/${projectId}/batch_exports/${id}/`
 }
 
 export const batchExportsDestroy2 = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -570,7 +570,7 @@ export const batchExportsDestroy2 = async (projectId: string, id: string, option
 }
 
 export const getBatchExportsLogsRetrieve2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${id}/logs/`
+    return `/v1/projects/${projectId}/batch_exports/${id}/logs/`
 }
 
 export const batchExportsLogsRetrieve2 = async (
@@ -588,7 +588,7 @@ export const batchExportsLogsRetrieve2 = async (
  * Pause a BatchExport.
  */
 export const getBatchExportsPauseCreate2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${id}/pause/`
+    return `/v1/projects/${projectId}/batch_exports/${id}/pause/`
 }
 
 export const batchExportsPauseCreate2 = async (
@@ -606,7 +606,7 @@ export const batchExportsPauseCreate2 = async (
 }
 
 export const getBatchExportsRunTestStepCreate2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${id}/run_test_step/`
+    return `/v1/projects/${projectId}/batch_exports/${id}/run_test_step/`
 }
 
 export const batchExportsRunTestStepCreate2 = async (
@@ -627,7 +627,7 @@ export const batchExportsRunTestStepCreate2 = async (
  * Unpause a BatchExport.
  */
 export const getBatchExportsUnpauseCreate2Url = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/batch_exports/${id}/unpause/`
+    return `/v1/projects/${projectId}/batch_exports/${id}/unpause/`
 }
 
 export const batchExportsUnpauseCreate2 = async (
@@ -645,7 +645,7 @@ export const batchExportsUnpauseCreate2 = async (
 }
 
 export const getBatchExportsRunTestStepNewCreate2Url = (projectId: string) => {
-    return `/api/projects/${projectId}/batch_exports/run_test_step_new/`
+    return `/v1/projects/${projectId}/batch_exports/run_test_step_new/`
 }
 
 export const batchExportsRunTestStepNewCreate2 = async (
@@ -662,7 +662,7 @@ export const batchExportsRunTestStepNewCreate2 = async (
 }
 
 export const getBatchExportsTestRetrieve2Url = (projectId: string) => {
-    return `/api/projects/${projectId}/batch_exports/test/`
+    return `/v1/projects/${projectId}/batch_exports/test/`
 }
 
 export const batchExportsTestRetrieve2 = async (projectId: string, options?: RequestInit): Promise<void> => {

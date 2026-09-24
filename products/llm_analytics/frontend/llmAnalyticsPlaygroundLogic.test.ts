@@ -23,7 +23,7 @@ describe('llmAnalyticsPlaygroundLogic', () => {
 
         useMocks({
             get: {
-                '/api/llm_proxy/models/': MOCK_MODEL_OPTIONS,
+                '/v1/llm_proxy/models/': MOCK_MODEL_OPTIONS,
             },
         })
 
@@ -85,7 +85,7 @@ describe('llmAnalyticsPlaygroundLogic', () => {
             // Mock empty response
             useMocks({
                 get: {
-                    '/api/llm_proxy/models/': [],
+                    '/v1/llm_proxy/models/': [],
                 },
             })
 
@@ -156,7 +156,7 @@ describe('llmAnalyticsPlaygroundLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/llm_proxy/models/': extendedMockOptions,
+                    '/v1/llm_proxy/models/': extendedMockOptions,
                 },
             })
 
@@ -219,7 +219,7 @@ describe('llmAnalyticsPlaygroundLogic', () => {
             // Now: override mock to throw error
             useMocks({
                 get: {
-                    '/api/llm_proxy/models/': () => {
+                    '/v1/llm_proxy/models/': () => {
                         throw new Error('API Error')
                     },
                 },

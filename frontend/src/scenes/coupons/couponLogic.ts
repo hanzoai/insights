@@ -46,7 +46,7 @@ export const couponLogic = kea<couponLogicType>([
             null as CouponsOverview | null,
             {
                 loadCouponsOverview: async () => {
-                    return await api.get('api/billing/coupons/overview')
+                    return await api.get('v1/billing/coupons/overview')
                 },
             },
         ],
@@ -88,7 +88,7 @@ export const couponLogic = kea<couponLogicType>([
             },
             submit: async (formValues: CouponFormValues) => {
                 try {
-                    const res = await api.create('api/billing/coupons/claim', {
+                    const res = await api.create('v1/billing/coupons/claim', {
                         code: formValues.code,
                     })
                     actions.setClaimed(true)

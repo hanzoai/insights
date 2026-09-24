@@ -18,7 +18,7 @@ describe('ExperimentForm Integration', () => {
 
         useMocks({
             post: {
-                '/api/projects/@current/experiments': async (req) => {
+                '/v1/projects/@current/experiments': async (req) => {
                     const body = (await req.json()) as Experiment
                     return [
                         200,
@@ -33,7 +33,7 @@ describe('ExperimentForm Integration', () => {
                 },
             },
             patch: {
-                '/api/environments/@current/add_product_intent/': () => [200, {}],
+                '/v1/environments/@current/add_product_intent/': () => [200, {}],
             },
         })
         initKeaTests()

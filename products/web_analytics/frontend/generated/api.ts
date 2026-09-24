@@ -30,8 +30,8 @@ export const getWebAnalyticsBreakdownRetrieveUrl = (projectId: string, params: W
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/web_analytics/breakdown/?${stringifiedParams}`
-        : `/api/projects/${projectId}/web_analytics/breakdown/`
+        ? `/v1/projects/${projectId}/web_analytics/breakdown/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/web_analytics/breakdown/`
 }
 
 export const webAnalyticsBreakdownRetrieve = async (
@@ -60,8 +60,8 @@ export const getWebAnalyticsOverviewRetrieveUrl = (projectId: string, params: We
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/web_analytics/overview/?${stringifiedParams}`
-        : `/api/projects/${projectId}/web_analytics/overview/`
+        ? `/v1/projects/${projectId}/web_analytics/overview/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/web_analytics/overview/`
 }
 
 export const webAnalyticsOverviewRetrieve = async (

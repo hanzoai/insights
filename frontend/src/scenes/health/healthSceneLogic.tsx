@@ -66,7 +66,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
                     }
 
                     const queryString = new URLSearchParams(params).toString()
-                    const url = `api/environments/@current/health_issues/?${queryString}`
+                    const url = `v1/environments/@current/health_issues/?${queryString}`
 
                     return await api.get(url)
                 },
@@ -146,7 +146,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
         },
         dismissIssue: async ({ id }) => {
             try {
-                await api.update(`api/environments/@current/health_issues/${id}/`, { dismissed: true })
+                await api.update(`v1/environments/@current/health_issues/${id}/`, { dismissed: true })
                 actions.loadHealthIssues()
                 unifiedHealthMenuLogic.actions.loadHealthSummary()
             } catch {
@@ -155,7 +155,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
         },
         undismissIssue: async ({ id }) => {
             try {
-                await api.update(`api/environments/@current/health_issues/${id}/`, { dismissed: false })
+                await api.update(`v1/environments/@current/health_issues/${id}/`, { dismissed: false })
                 actions.loadHealthIssues()
                 unifiedHealthMenuLogic.actions.loadHealthSummary()
             } catch {

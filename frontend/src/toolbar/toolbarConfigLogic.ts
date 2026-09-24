@@ -203,7 +203,7 @@ export async function toolbarUploadMedia(file: File): Promise<{ id: string; url:
     const formData = new FormData()
     formData.append('image', file)
 
-    const url = `${apiHost}/api/projects/@current/uploaded_media/${encodeParams({ temporary_token: temporaryToken }, '?')}`
+    const url = `${apiHost}/v1/projects/@current/uploaded_media/${encodeParams({ temporary_token: temporaryToken }, '?')}`
 
     const response = await fetch(url, {
         method: 'POST',

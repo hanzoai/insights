@@ -68,7 +68,7 @@ export const pipelineNodeMetricsLogic = kea<pipelineNodeMetricsLogicType>([
             {
                 loadMetrics: async () => {
                     const params = toParams({ date_from: values.dateRange.from, date_to: values.dateRange.to })
-                    return await api.get(`api/projects/${values.currentProjectId}/app_metrics/${props.id}?${params}`)
+                    return await api.get(`v1/projects/${values.currentProjectId}/app_metrics/${props.id}?${params}`)
                 },
             },
         ],
@@ -78,7 +78,7 @@ export const pipelineNodeMetricsLogic = kea<pipelineNodeMetricsLogicType>([
                 openErrorDetailsModal: async ({ errorType }) => {
                     const params = toParams({ error_type: errorType })
                     const { result } = await api.get(
-                        `api/projects/${values.currentProjectId}/app_metrics/${props.id}/error_details?${params}`
+                        `v1/projects/${values.currentProjectId}/app_metrics/${props.id}/error_details?${params}`
                     )
                     return result
                 },

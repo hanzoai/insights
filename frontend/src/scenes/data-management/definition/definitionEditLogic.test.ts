@@ -17,20 +17,20 @@ describe('definitionEditLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions/:id': mockEventDefinitions[0],
-                '/api/projects/:team/property_definitions/:id': mockEventPropertyDefinition,
-                '/api/projects/@current/event_definitions/': {
+                '/v1/projects/:team/event_definitions/:id': mockEventDefinitions[0],
+                '/v1/projects/:team/property_definitions/:id': mockEventPropertyDefinition,
+                '/v1/projects/@current/event_definitions/': {
                     results: mockEventDefinitions,
                     count: mockEventDefinitions.length,
                 },
-                '/api/projects/@current/property_definitions/': {
+                '/v1/projects/@current/property_definitions/': {
                     results: [mockEventPropertyDefinition],
                     count: 1,
                 },
             },
             patch: {
-                '/api/projects/:team/event_definitions/:id': mockEventDefinitions[0],
-                '/api/projects/:team/property_definitions/:id': mockEventPropertyDefinition,
+                '/v1/projects/:team/event_definitions/:id': mockEventDefinitions[0],
+                '/v1/projects/:team/property_definitions/:id': mockEventPropertyDefinition,
             },
         })
         initKeaTests()

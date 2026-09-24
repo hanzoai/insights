@@ -48,8 +48,8 @@ export const getColumnConfigurationsListUrl = (projectId: string, params?: Colum
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/column_configurations/?${stringifiedParams}`
-        : `/api/environments/${projectId}/column_configurations/`
+        ? `/v1/environments/${projectId}/column_configurations/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/column_configurations/`
 }
 
 export const columnConfigurationsList = async (
@@ -64,7 +64,7 @@ export const columnConfigurationsList = async (
 }
 
 export const getColumnConfigurationsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/column_configurations/`
+    return `/v1/environments/${projectId}/column_configurations/`
 }
 
 export const columnConfigurationsCreate = async (
@@ -81,7 +81,7 @@ export const columnConfigurationsCreate = async (
 }
 
 export const getColumnConfigurationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/column_configurations/${id}/`
+    return `/v1/environments/${projectId}/column_configurations/${id}/`
 }
 
 export const columnConfigurationsRetrieve = async (
@@ -96,7 +96,7 @@ export const columnConfigurationsRetrieve = async (
 }
 
 export const getColumnConfigurationsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/column_configurations/${id}/`
+    return `/v1/environments/${projectId}/column_configurations/${id}/`
 }
 
 export const columnConfigurationsUpdate = async (
@@ -114,7 +114,7 @@ export const columnConfigurationsUpdate = async (
 }
 
 export const getColumnConfigurationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/column_configurations/${id}/`
+    return `/v1/environments/${projectId}/column_configurations/${id}/`
 }
 
 export const columnConfigurationsPartialUpdate = async (
@@ -132,7 +132,7 @@ export const columnConfigurationsPartialUpdate = async (
 }
 
 export const getColumnConfigurationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/column_configurations/${id}/`
+    return `/v1/environments/${projectId}/column_configurations/${id}/`
 }
 
 export const columnConfigurationsDestroy = async (
@@ -158,8 +158,8 @@ export const getElementsListUrl = (projectId: string, params?: ElementsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/elements/?${stringifiedParams}`
-        : `/api/projects/${projectId}/elements/`
+        ? `/v1/projects/${projectId}/elements/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/elements/`
 }
 
 export const elementsList = async (
@@ -174,7 +174,7 @@ export const elementsList = async (
 }
 
 export const getElementsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/elements/`
+    return `/v1/projects/${projectId}/elements/`
 }
 
 export const elementsCreate = async (
@@ -191,7 +191,7 @@ export const elementsCreate = async (
 }
 
 export const getElementsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/elements/${id}/`
+    return `/v1/projects/${projectId}/elements/${id}/`
 }
 
 export const elementsRetrieve = async (projectId: string, id: number, options?: RequestInit): Promise<ElementApi> => {
@@ -202,7 +202,7 @@ export const elementsRetrieve = async (projectId: string, id: number, options?: 
 }
 
 export const getElementsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/elements/${id}/`
+    return `/v1/projects/${projectId}/elements/${id}/`
 }
 
 export const elementsUpdate = async (
@@ -220,7 +220,7 @@ export const elementsUpdate = async (
 }
 
 export const getElementsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/elements/${id}/`
+    return `/v1/projects/${projectId}/elements/${id}/`
 }
 
 export const elementsPartialUpdate = async (
@@ -238,7 +238,7 @@ export const elementsPartialUpdate = async (
 }
 
 export const getElementsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/elements/${id}/`
+    return `/v1/projects/${projectId}/elements/${id}/`
 }
 
 export const elementsDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {
@@ -255,7 +255,7 @@ Now, you can pass a combination of include query parameters to get different typ
 Currently only $autocapture and $rageclick and $dead_click are supported
  */
 export const getElementsStatsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/elements/stats/`
+    return `/v1/projects/${projectId}/elements/stats/`
 }
 
 export const elementsStatsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -266,7 +266,7 @@ export const elementsStatsRetrieve = async (projectId: string, options?: Request
 }
 
 export const getElementsValuesRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/elements/values/`
+    return `/v1/projects/${projectId}/elements/values/`
 }
 
 export const elementsValuesRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {

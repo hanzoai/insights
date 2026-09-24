@@ -30,7 +30,7 @@ describe('InfiniteSelectResults - CategoryPill logic mounting', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': (res) => {
+                '/v1/projects/:team/event_definitions': (res) => {
                     const search = res.url.searchParams.get('search')
                     const results = search
                         ? mockEventDefinitions.filter((e) => e.name.includes(search))

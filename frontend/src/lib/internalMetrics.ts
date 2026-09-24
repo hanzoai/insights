@@ -38,7 +38,7 @@ export async function captureTimeToSeeData(teamId: number | null, payload: TimeT
         }
 
         try {
-            await api.create(`api/projects/${teamId}/insights/timing`, {
+            await api.create(`v1/projects/${teamId}/insights/timing`, {
                 session_id: currentSessionId(),
                 current_url: window.location.href,
                 ...payload,

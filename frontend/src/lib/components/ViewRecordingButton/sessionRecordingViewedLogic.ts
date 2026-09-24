@@ -30,7 +30,7 @@ export const sessionRecordingViewedLogic = kea<sessionRecordingViewedLogicType>(
                 }
 
                 const response = await api.get(
-                    `/api/projects/${values.currentTeamId}/session_recordings/${props.sessionRecordingId}/viewed`
+                    `/v1/projects/${values.currentTeamId}/session_recordings/${props.sessionRecordingId}/viewed`
                 )
                 return response as SessionRecordingViewedResult
             },

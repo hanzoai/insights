@@ -41,7 +41,7 @@ const Template = (
                 slack_service: noIntegrations ? { available: false } : { available: true, client_id: 'test-client-id' },
                 site_url: noIntegrations ? 'bad-value' : window.location.origin,
             },
-            '/api/environments/:id/subscriptions': {
+            '/v1/environments/:id/subscriptions': {
                 results:
                     insightShortIdRef.current === 'empty'
                         ? []
@@ -62,9 +62,9 @@ const Template = (
                               }),
                           ],
             },
-            '/api/environments/:id/subscriptions/:subId': createMockSubscription(),
-            '/api/projects/:id/integrations': { results: !noIntegrations ? [mockIntegration] : [] },
-            '/api/projects/:id/integrations/:intId/channels': { channels: mockSlackChannels },
+            '/v1/environments/:id/subscriptions/:subId': createMockSubscription(),
+            '/v1/projects/:id/integrations': { results: !noIntegrations ? [mockIntegration] : [] },
+            '/v1/projects/:id/integrations/:intId/channels': { channels: mockSlackChannels },
         },
     })
 

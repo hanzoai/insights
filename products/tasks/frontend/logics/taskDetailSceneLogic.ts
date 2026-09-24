@@ -107,7 +107,7 @@ export const taskDetailSceneLogic = kea<taskDetailSceneLogicType>([
                     const run = await api.tasks.runs.get(props.taskId, values.selectedRunId)
                     // Use proxy endpoint to avoid CORS issues with direct S3 access
                     actions.loadLogs({
-                        url: `/api/projects/@current/tasks/${props.taskId}/runs/${values.selectedRunId}/logs/`,
+                        url: `/v1/projects/@current/tasks/${props.taskId}/runs/${values.selectedRunId}/logs/`,
                     })
                     return run
                 },

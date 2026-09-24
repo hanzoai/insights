@@ -19,10 +19,10 @@ describe('defaultEvaluationContextsLogic', () => {
 
         useMocks({
             get: {
-                '/api/environments/:team_id/default_evaluation_tags/': () => [200, mockResponse],
+                '/v1/environments/:team_id/default_evaluation_tags/': () => [200, mockResponse],
             },
             post: {
-                '/api/environments/:team_id/default_evaluation_tags/': async (req) => {
+                '/v1/environments/:team_id/default_evaluation_tags/': async (req) => {
                     const body = await req.json()
                     const tagName = body.tag_name
                     const newTag = {
@@ -34,7 +34,7 @@ describe('defaultEvaluationContextsLogic', () => {
                 },
             },
             delete: {
-                '/api/environments/:team_id/default_evaluation_tags/': (req) => {
+                '/v1/environments/:team_id/default_evaluation_tags/': (req) => {
                     const tagName = req.url.searchParams.get('tag_name')
                     mockResponse.default_evaluation_tags = mockResponse.default_evaluation_tags.filter(
                         (t) => t.name !== tagName
@@ -43,7 +43,7 @@ describe('defaultEvaluationContextsLogic', () => {
                 },
             },
             patch: {
-                '/api/environments/:team_id/': async (req) => {
+                '/v1/environments/:team_id/': async (req) => {
                     const body = await req.json()
                     return [200, { ...body }]
                 },

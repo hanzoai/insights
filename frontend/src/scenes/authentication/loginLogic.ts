@@ -103,7 +103,7 @@ export const loginLogic = kea<loginLogicType>([
                     }
 
                     breakpoint()
-                    const response = await api.create<any>('api/login/precheck', { email })
+                    const response = await api.create<any>('v1/login/precheck', { email })
                     return { status: 'completed', ...response }
                 },
             },
@@ -114,7 +114,7 @@ export const loginLogic = kea<loginLogicType>([
                 resendEmailMFA: async (_, breakpoint) => {
                     breakpoint()
                     try {
-                        const response = await api.create<any>('api/login/email-mfa/resend')
+                        const response = await api.create<any>('v1/login/email-mfa/resend')
                         toast.success('Verification email resent')
                         return response
                     } catch (e) {
@@ -151,7 +151,7 @@ export const loginLogic = kea<loginLogicType>([
                 // Clear any previous passkey errors when submitting with password
                 actions.clearGeneralError()
                 try {
-                    return await api.create<any>('api/login', { email, password })
+                    return await api.create<any>('v1/login', { email, password })
                 } catch (e) {
                     const { code, detail } = e as Record<string, any>
                     if (code === '2fa_required') {

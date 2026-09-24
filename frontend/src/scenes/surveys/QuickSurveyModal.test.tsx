@@ -37,14 +37,14 @@ describe('QuickSurveyForm API payloads', () => {
         initKeaTests()
         useMocks({
             get: {
-                '/api/projects/:team_id/property_definitions': { results: [], count: 0 },
-                '/api/projects/:team_id/surveys': { results: [] },
+                '/v1/projects/:team_id/property_definitions': { results: [], count: 0 },
+                '/v1/projects/:team_id/surveys': { results: [] },
             },
             post: {
-                '/api/projects/:team_id/surveys': () => [200, { id: 'new-survey' }],
+                '/v1/projects/:team_id/surveys': () => [200, { id: 'new-survey' }],
             },
             patch: {
-                '/api/environments/@current/add_product_intent/': () => [200, {}],
+                '/v1/environments/@current/add_product_intent/': () => [200, {}],
             },
         })
     })
@@ -57,7 +57,7 @@ describe('QuickSurveyForm API payloads', () => {
         let capturedRequest: any
         useMocks({
             post: {
-                '/api/projects/:team_id/surveys': async (req) => {
+                '/v1/projects/:team_id/surveys': async (req) => {
                     capturedRequest = await req.json()
                     return [200, { id: 'new-survey' }]
                 },
@@ -82,7 +82,7 @@ describe('QuickSurveyForm API payloads', () => {
         let capturedRequest: any
         useMocks({
             post: {
-                '/api/projects/:team_id/surveys': async (req) => {
+                '/v1/projects/:team_id/surveys': async (req) => {
                     capturedRequest = await req.json()
                     return [200, { id: 'new-survey' }]
                 },

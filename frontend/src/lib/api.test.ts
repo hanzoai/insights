@@ -38,7 +38,7 @@ describe('API helper', () => {
             )
 
             expect(fakeFetch).toHaveBeenCalledWith(
-                '/api/environments/2/events?properties=%5B%7B%22key%22%3A%22something%22%2C%22value%22%3A%22is_set%22%2C%22operator%22%3A%22is_set%22%2C%22type%22%3A%22event%22%7D%5D&limit=10&orderBy=%5B%22-timestamp%22%5D',
+                '/v1/environments/2/events?properties=%5B%7B%22key%22%3A%22something%22%2C%22value%22%3A%22is_set%22%2C%22operator%22%3A%22is_set%22%2C%22type%22%3A%22event%22%7D%5D&limit=10&orderBy=%5B%22-timestamp%22%5D',
                 {
                     signal: undefined,
                     headers: {
@@ -90,27 +90,27 @@ describe('API helper', () => {
     })
 
     it('rejects project-based requests with void project ID', async () => {
-        await expect(api.get('/api/projects/2/')).resolves.not.toThrow()
-        await expect(api.get('/api/projects/089908')).resolves.not.toThrow()
-        await expect(api.get('/api/projects/089908?x')).resolves.not.toThrow()
-        await expect(api.get('/api/projects/xyz/dings/')).resolves.not.toThrow()
-        await expect(api.get('/api/projects/null/')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/2/')).resolves.not.toThrow()
+        await expect(api.get('/v1/projects/089908')).resolves.not.toThrow()
+        await expect(api.get('/v1/projects/089908?x')).resolves.not.toThrow()
+        await expect(api.get('/v1/projects/xyz/dings/')).resolves.not.toThrow()
+        await expect(api.get('/v1/projects/null/')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
-        await expect(api.get('/api/projects/null')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/null')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
-        await expect(api.get('/api/projects/null?x')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/null?x')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
-        await expect(api.get('/api/projects/null#x')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/null#x')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
-        await expect(api.get('/api/projects/null/dings')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/null/dings')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })

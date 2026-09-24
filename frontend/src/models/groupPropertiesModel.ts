@@ -20,7 +20,7 @@ export const groupPropertiesModel = kea<groupPropertiesModelType>([
             {
                 loadAllGroupProperties: async () => {
                     if (values.groupsEnabled) {
-                        return await api.get(`api/projects/${values.currentProjectId}/groups/property_definitions`)
+                        return await api.get(`v1/projects/${values.currentProjectId}/groups/property_definitions`)
                     }
                     return {}
                 },

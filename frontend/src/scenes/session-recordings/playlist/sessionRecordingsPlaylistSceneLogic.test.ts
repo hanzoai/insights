@@ -26,10 +26,10 @@ describe('sessionRecordingsPlaylistSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/session_recording_playlists/:id': mockPlaylist,
+                '/v1/projects/:team/session_recording_playlists/:id': mockPlaylist,
             },
             patch: {
-                '/api/projects/:team/session_recording_playlists/:id': () => {
+                '/v1/projects/:team/session_recording_playlists/:id': () => {
                     return [
                         200,
                         {

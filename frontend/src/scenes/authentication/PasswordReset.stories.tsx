@@ -47,7 +47,7 @@ export const Initial = (): JSX.Element => {
             },
         },
         post: {
-            '/api/reset': {},
+            '/v1/reset': {},
         },
     })
 
@@ -65,7 +65,7 @@ export const Success = (): JSX.Element => {
             },
         },
         post: {
-            '/api/reset': {},
+            '/v1/reset': {},
         },
     })
 
@@ -88,7 +88,7 @@ export const Throttled = (): JSX.Element => {
             },
         },
         post: {
-            '/api/reset': {},
+            '/v1/reset': {},
         },
     })
 
@@ -112,7 +112,7 @@ export const WithEmailFromQuery = (): JSX.Element => {
             },
         },
         post: {
-            '/api/reset': {},
+            '/v1/reset': {},
         },
     })
 

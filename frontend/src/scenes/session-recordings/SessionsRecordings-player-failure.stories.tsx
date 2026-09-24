@@ -24,7 +24,7 @@ const meta: Meta = {
         mswDecorator({
             get: {
                 '/stats': () => [200, { users_on_product: 42, active_recordings: 7 }],
-                '/api/environments/:team_id/session_recordings': (req) => {
+                '/v1/environments/:team_id/session_recordings': (req) => {
                     const version = req.url.searchParams.get('version')
                     return [
                         200,
@@ -35,8 +35,8 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists': recordingPlaylists,
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
+                '/v1/projects/:team_id/session_recording_playlists': recordingPlaylists,
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
                     const playlistId = req.params.playlist_id
 
                     return [
@@ -84,12 +84,12 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id/recordings': (req) => {
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id/recordings': (req) => {
                     const playlistId = req.params.playlist_id
                     const response = playlistId === '1234567' ? recordings : []
                     return [200, { has_next: false, results: response, version: 1 }]
                 },
-                '/api/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
                     // with no sources, returns sources...
                     if (req.url.searchParams.get('source') === 'blob_v2') {
                         return res(ctx.text(snapshotsAsJSONLines()))
@@ -109,10 +109,10 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/session_recordings/:id': () => {
+                '/v1/environments/:team_id/session_recordings/:id': () => {
                     return [404, {}]
                 },
-                'api/projects/:team/notebooks': {
+                'v1/projects/:team/notebooks': {
                     count: 0,
                     next: null,
                     previous: null,
@@ -120,7 +120,7 @@ const meta: Meta = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query': recordingEventsJson,
+                '/v1/environments/:team_id/query': recordingEventsJson,
             },
         }),
     ],

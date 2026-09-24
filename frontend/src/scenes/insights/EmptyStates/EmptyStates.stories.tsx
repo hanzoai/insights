@@ -29,7 +29,7 @@ export default meta
 export const Empty: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/insights/': (_, __, ctx) => [
+            '/v1/environments/:team_id/insights/': (_, __, ctx) => [
                 ctx.delay(100),
                 ctx.status(200),
                 ctx.json({ count: 1, results: [{ ...insight, result: [] }] }),
@@ -43,12 +43,12 @@ export const Empty: StoryFn = () => {
 export const ServerError: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/insights/': (_, __, ctx) => [
+            '/v1/environments/:team_id/insights/': (_, __, ctx) => [
                 ctx.delay(100),
                 ctx.status(200),
                 ctx.json({ count: 1, results: [{ ...insight, result: null }] }),
             ],
-            '/api/environments/:team_id/insights/:id': (_, __, ctx) => [
+            '/v1/environments/:team_id/insights/:id': (_, __, ctx) => [
                 ctx.delay(100),
                 ctx.status(500),
                 ctx.json({
@@ -65,7 +65,7 @@ export const ServerError: StoryFn = () => {
 export const QueryServerError: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/insights/': (_, __, ctx) => [
+            '/v1/environments/:team_id/insights/': (_, __, ctx) => [
                 ctx.delay(100),
                 ctx.status(200),
                 ctx.json({
@@ -75,7 +75,7 @@ export const QueryServerError: StoryFn = () => {
             ],
         },
         post: {
-            '/api/environments/:team_id/query/': (_, __, ctx) => [
+            '/v1/environments/:team_id/query/': (_, __, ctx) => [
                 ctx.delay(100),
                 ctx.status(500),
                 ctx.json({
@@ -97,14 +97,14 @@ QueryServerError.parameters = {
 export const ValidationError: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/insights/': (_, __, ctx) => [
+            '/v1/environments/:team_id/insights/': (_, __, ctx) => [
                 ctx.delay(100),
                 ctx.status(200),
                 ctx.json({ count: 1, results: [{ ...insight, result: null }] }),
             ],
         },
         post: {
-            '/api/environments/:team_id/insights/:id': (_, __, ctx) => [
+            '/v1/environments/:team_id/insights/:id': (_, __, ctx) => [
                 ctx.delay(100),
                 ctx.status(400),
                 ctx.json({
@@ -121,13 +121,13 @@ export const ValidationError: StoryFn = () => {
 export const EstimatedQueryExecutionTimeTooLong: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/insights/': (_, __, ctx) => [
+            '/v1/environments/:team_id/insights/': (_, __, ctx) => [
                 ctx.status(200),
                 ctx.json({ count: 1, results: [{ ...insight, result: null }] }),
             ],
         },
         post: {
-            '/api/environments/:team_id/query/': (_, __, ctx) => [
+            '/v1/environments/:team_id/query/': (_, __, ctx) => [
                 ctx.delay(100),
                 ctx.status(512),
                 ctx.json({
@@ -150,13 +150,13 @@ EstimatedQueryExecutionTimeTooLong.parameters = {
 export const LongLoading: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/insights/': (_, __, ctx) => [
+            '/v1/environments/:team_id/insights/': (_, __, ctx) => [
                 ctx.status(200),
                 ctx.json({ count: 1, results: [{ ...insight, result: null }] }),
             ],
         },
         post: {
-            '/api/environments/:team_id/query/': (_, __, ctx) => [ctx.delay('infinite')],
+            '/v1/environments/:team_id/query/': (_, __, ctx) => [ctx.delay('infinite')],
         },
     })
 

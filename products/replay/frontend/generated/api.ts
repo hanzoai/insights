@@ -54,8 +54,8 @@ export const getSessionRecordingPlaylistsListUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/session_recording_playlists/?${stringifiedParams}`
-        : `/api/projects/${projectId}/session_recording_playlists/`
+        ? `/v1/projects/${projectId}/session_recording_playlists/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/session_recording_playlists/`
 }
 
 export const sessionRecordingPlaylistsList = async (
@@ -73,7 +73,7 @@ export const sessionRecordingPlaylistsList = async (
 }
 
 export const getSessionRecordingPlaylistsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/session_recording_playlists/`
+    return `/v1/projects/${projectId}/session_recording_playlists/`
 }
 
 export const sessionRecordingPlaylistsCreate = async (
@@ -90,7 +90,7 @@ export const sessionRecordingPlaylistsCreate = async (
 }
 
 export const getSessionRecordingPlaylistsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/session_recording_playlists/${shortId}/`
+    return `/v1/projects/${projectId}/session_recording_playlists/${shortId}/`
 }
 
 export const sessionRecordingPlaylistsRetrieve = async (
@@ -105,7 +105,7 @@ export const sessionRecordingPlaylistsRetrieve = async (
 }
 
 export const getSessionRecordingPlaylistsUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/session_recording_playlists/${shortId}/`
+    return `/v1/projects/${projectId}/session_recording_playlists/${shortId}/`
 }
 
 export const sessionRecordingPlaylistsUpdate = async (
@@ -123,7 +123,7 @@ export const sessionRecordingPlaylistsUpdate = async (
 }
 
 export const getSessionRecordingPlaylistsPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/session_recording_playlists/${shortId}/`
+    return `/v1/projects/${projectId}/session_recording_playlists/${shortId}/`
 }
 
 export const sessionRecordingPlaylistsPartialUpdate = async (
@@ -144,7 +144,7 @@ export const sessionRecordingPlaylistsPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getSessionRecordingPlaylistsDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/session_recording_playlists/${shortId}/`
+    return `/v1/projects/${projectId}/session_recording_playlists/${shortId}/`
 }
 
 export const sessionRecordingPlaylistsDestroy = async (
@@ -159,7 +159,7 @@ export const sessionRecordingPlaylistsDestroy = async (
 }
 
 export const getSessionRecordingPlaylistsRecordingsRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/session_recording_playlists/${shortId}/recordings/`
+    return `/v1/projects/${projectId}/session_recording_playlists/${shortId}/recordings/`
 }
 
 export const sessionRecordingPlaylistsRecordingsRetrieve = async (
@@ -178,7 +178,7 @@ export const getSessionRecordingPlaylistsRecordingsCreateUrl = (
     shortId: string,
     sessionRecordingId: string
 ) => {
-    return `/api/projects/${projectId}/session_recording_playlists/${shortId}/recordings/${sessionRecordingId}/`
+    return `/v1/projects/${projectId}/session_recording_playlists/${shortId}/recordings/${sessionRecordingId}/`
 }
 
 export const sessionRecordingPlaylistsRecordingsCreate = async (
@@ -201,7 +201,7 @@ export const getSessionRecordingPlaylistsRecordingsDestroyUrl = (
     shortId: string,
     sessionRecordingId: string
 ) => {
-    return `/api/projects/${projectId}/session_recording_playlists/${shortId}/recordings/${sessionRecordingId}/`
+    return `/v1/projects/${projectId}/session_recording_playlists/${shortId}/recordings/${sessionRecordingId}/`
 }
 
 export const sessionRecordingPlaylistsRecordingsDestroy = async (
@@ -228,8 +228,8 @@ export const getSessionRecordingsListUrl = (projectId: string, params?: SessionR
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/session_recordings/?${stringifiedParams}`
-        : `/api/projects/${projectId}/session_recordings/`
+        ? `/v1/projects/${projectId}/session_recordings/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/session_recordings/`
 }
 
 export const sessionRecordingsList = async (
@@ -244,7 +244,7 @@ export const sessionRecordingsList = async (
 }
 
 export const getSessionRecordingsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/session_recordings/${id}/`
+    return `/v1/projects/${projectId}/session_recordings/${id}/`
 }
 
 export const sessionRecordingsRetrieve = async (
@@ -259,7 +259,7 @@ export const sessionRecordingsRetrieve = async (
 }
 
 export const getSessionRecordingsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/session_recordings/${id}/`
+    return `/v1/projects/${projectId}/session_recordings/${id}/`
 }
 
 export const sessionRecordingsUpdate = async (
@@ -277,7 +277,7 @@ export const sessionRecordingsUpdate = async (
 }
 
 export const getSessionRecordingsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/session_recordings/${id}/`
+    return `/v1/projects/${projectId}/session_recordings/${id}/`
 }
 
 export const sessionRecordingsPartialUpdate = async (
@@ -295,7 +295,7 @@ export const sessionRecordingsPartialUpdate = async (
 }
 
 export const getSessionRecordingsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/session_recordings/${id}/`
+    return `/v1/projects/${projectId}/session_recordings/${id}/`
 }
 
 export const sessionRecordingsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {

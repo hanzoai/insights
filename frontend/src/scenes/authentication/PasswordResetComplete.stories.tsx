@@ -25,8 +25,8 @@ export const InvalidLink: Story = {}
 export const Default: Story = {
     decorators: [
         mswDecorator({
-            get: { '/api/reset/user-uuid-3f32/': { success: true } },
-            post: { '/api/reset/user-uuid-3f32/': (_, __, ctx) => [ctx.delay(1000), ctx.status(200)] },
+            get: { '/v1/reset/user-uuid-3f32/': { success: true } },
+            post: { '/v1/reset/user-uuid-3f32/': (_, __, ctx) => [ctx.delay(1000), ctx.status(200)] },
         }),
     ],
 }

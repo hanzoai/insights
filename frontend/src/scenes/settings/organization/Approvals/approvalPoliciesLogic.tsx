@@ -31,7 +31,7 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
                         return []
                     }
                     const response = await api.get<{ results: ApprovalPolicy[] }>(
-                        `api/environments/${teamId}/approval_policies/`
+                        `v1/environments/${teamId}/approval_policies/`
                     )
                     return response.results || []
                 },
@@ -52,7 +52,7 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
                 if (!teamId) {
                     throw new Error('No team selected')
                 }
-                await api.create(`api/environments/${teamId}/approval_policies/`, policy)
+                await api.create(`v1/environments/${teamId}/approval_policies/`, policy)
                 toast.success('Approval policy created')
                 actions.loadPolicies()
             } catch (error: any) {
@@ -65,7 +65,7 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
                 if (!teamId) {
                     throw new Error('No team selected')
                 }
-                await api.update(`api/environments/${teamId}/approval_policies/${id}/`, policy)
+                await api.update(`v1/environments/${teamId}/approval_policies/${id}/`, policy)
                 toast.success('Approval policy updated')
                 actions.loadPolicies()
             } catch (error: any) {
@@ -78,7 +78,7 @@ export const approvalPoliciesLogic = kea<approvalPoliciesLogicType>([
                 if (!teamId) {
                     throw new Error('No team selected')
                 }
-                await api.delete(`api/environments/${teamId}/approval_policies/${id}/`)
+                await api.delete(`v1/environments/${teamId}/approval_policies/${id}/`)
                 toast.success('Approval policy deleted')
                 actions.loadPolicies()
             } catch (error: any) {

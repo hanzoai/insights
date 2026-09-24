@@ -255,8 +255,8 @@ describe('sessionRecordingPlayerLogic', () => {
             logic.unmount()
             overrideSessionRecordingMocks({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
-                    '/api/projects/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
+                    '/v1/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
+                    '/v1/projects/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
                 },
             })
             logic = sessionRecordingPlayerLogic({
@@ -323,7 +323,7 @@ describe('sessionRecordingPlayerLogic', () => {
                 .toDispatchActions(['deleteRecording'])
                 .toFinishAllListeners()
 
-            expect(api.delete).toHaveBeenCalledWith(`api/environments/${MOCK_TEAM_ID}/session_recordings/3`)
+            expect(api.delete).toHaveBeenCalledWith(`v1/environments/${MOCK_TEAM_ID}/session_recordings/3`)
             expect(onRecordingDeleted).toHaveBeenCalled()
             resumeKeaLoadersErrors()
         })
@@ -350,7 +350,7 @@ describe('sessionRecordingPlayerLogic', () => {
 
             expect(removeProjectIdIfPresent(router.values.location.pathname)).toEqual(urls.replay())
 
-            expect(api.delete).toHaveBeenCalledWith(`api/environments/${MOCK_TEAM_ID}/session_recordings/3`)
+            expect(api.delete).toHaveBeenCalledWith(`v1/environments/${MOCK_TEAM_ID}/session_recordings/3`)
             resumeKeaLoadersErrors()
         })
 
@@ -375,7 +375,7 @@ describe('sessionRecordingPlayerLogic', () => {
 
             expect(router.values.location.pathname).toEqual('/project/997')
 
-            expect(api.delete).toHaveBeenCalledWith(`api/environments/${MOCK_TEAM_ID}/session_recordings/3`)
+            expect(api.delete).toHaveBeenCalledWith(`v1/environments/${MOCK_TEAM_ID}/session_recordings/3`)
             resumeKeaLoadersErrors()
         })
     })

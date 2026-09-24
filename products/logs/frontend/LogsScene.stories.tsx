@@ -325,13 +325,13 @@ export default {
         // mocks used by all stories in this file
         mswDecorator({
             get: {
-                '/api/environments/:team_id/logs/attributes': attributesMock,
-                '/api/environments/:team_id/logs/values': valuesMock,
-                '/api/environments/:team_id/logs/has_logs': (_, res, ctx) => res(ctx.json({ hasLogs: true })),
+                '/v1/environments/:team_id/logs/attributes': attributesMock,
+                '/v1/environments/:team_id/logs/values': valuesMock,
+                '/v1/environments/:team_id/logs/has_logs': (_, res, ctx) => res(ctx.json({ hasLogs: true })),
             },
             post: {
-                '/api/environments/:team_id/logs/query': queryMock,
-                '/api/environments/:team_id/logs/sparkline': sparklineMock,
+                '/v1/environments/:team_id/logs/query': queryMock,
+                '/v1/environments/:team_id/logs/sparkline': sparklineMock,
             },
         }),
     ],

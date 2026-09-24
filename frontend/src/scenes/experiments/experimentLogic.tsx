@@ -1143,7 +1143,7 @@ export const experimentLogic = kea<experimentLogicType>([
             try {
                 if (isUpdate) {
                     response = await api.update(
-                        `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
+                        `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
                         {
                             ...values.experiment,
                             parameters: {
@@ -1178,7 +1178,7 @@ export const experimentLogic = kea<experimentLogicType>([
                         timeseries: true,
                     }
 
-                    response = await api.create(`api/projects/${values.currentProjectId}/experiments`, {
+                    response = await api.create(`v1/projects/${values.currentProjectId}/experiments`, {
                         ...values.experiment,
                         parameters:
                             /**
@@ -1416,7 +1416,7 @@ export const experimentLogic = kea<experimentLogicType>([
                     ...values.experiment.parameters,
                     variant_screenshot_media_ids: variantPreviewMediaIds,
                 }
-                await api.update(`api/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
+                await api.update(`v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
                     parameters: updatedParameters,
                 })
                 actions.setExperiment({
@@ -1432,7 +1432,7 @@ export const experimentLogic = kea<experimentLogicType>([
             const preparedFlag = indexToVariantKeyFeatureFlagPayloads(flag)
 
             const savedFlag = await api.update(
-                `api/projects/${values.currentProjectId}/feature_flags/${id}`,
+                `v1/projects/${values.currentProjectId}/feature_flags/${id}`,
                 preparedFlag
             )
 
@@ -1458,7 +1458,7 @@ export const experimentLogic = kea<experimentLogicType>([
             })
             const combinedMetricsIds = [...existingMetricsIds, ...newMetricsIds]
 
-            await api.update(`api/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
+            await api.update(`v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
                 saved_metrics_ids: combinedMetricsIds,
             })
 
@@ -1480,7 +1480,7 @@ export const experimentLogic = kea<experimentLogicType>([
                 (m) => !('isSharedMetric' in m && m.isSharedMetric && m.sharedMetricId === sharedMetricId)
             )
 
-            await api.update(`api/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
+            await api.update(`v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
                 saved_metrics_ids: sharedMetricsIds,
                 metrics: cleanedMetrics,
                 metrics_secondary: cleanedMetricsSecondary,
@@ -1522,7 +1522,7 @@ export const experimentLogic = kea<experimentLogicType>([
                  * create a new dashboard
                  */
                 const dashboard: DashboardType = await api.create(
-                    `api/environments/${values.currentTeamId}/dashboards/`,
+                    `v1/environments/${values.currentTeamId}/dashboards/`,
                     {
                         name: 'Experiment: ' + values.experiment.name,
                         description: `Dashboard for [${experimentUrl}](${experimentUrl})`,
@@ -1557,7 +1557,7 @@ export const experimentLogic = kea<experimentLogicType>([
                     for (const query of metrics) {
                         const insightQuery = queryBuilder(query)
 
-                        await api.create(`api/projects/${projectLogic.values.currentProjectId}/insights`, {
+                        await api.create(`v1/projects/${projectLogic.values.currentProjectId}/insights`, {
                             name: query.name || undefined,
                             query: insightQuery,
                             dashboards: [dashboard.id],
@@ -1596,7 +1596,7 @@ export const experimentLogic = kea<experimentLogicType>([
         validateFeatureFlag: async ({ featureFlagKey }: { featureFlagKey: string }, breakpoint) => {
             await breakpoint(200)
             const response = await api.get(
-                `api/projects/${values.currentProjectId}/feature_flags/?${toParams({ search: featureFlagKey })}`
+                `v1/projects/${values.currentProjectId}/feature_flags/?${toParams({ search: featureFlagKey })}`
             )
             const existingErrors = {
                 // :KLUDGE: If there is no name error, we don't want to trigger the 'required' error early
@@ -1890,7 +1890,7 @@ export const experimentLogic = kea<experimentLogicType>([
                 if (values.experimentId && values.experimentId !== 'new') {
                     try {
                         let response: Experiment = await api.get(
-                            `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`
+                            `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`
                         )
 
                         /**
@@ -1934,7 +1934,7 @@ export const experimentLogic = kea<experimentLogicType>([
             },
             updateExperiment: async (update: Partial<Experiment>) => {
                 const response: Experiment = await api.update(
-                    `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
+                    `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
                     update
                 )
                 const responseWithMetricsOrdering = initializeMetricOrdering(response)
@@ -1966,7 +1966,7 @@ export const experimentLogic = kea<experimentLogicType>([
                     const newFilters = transformFiltersForWinningVariant(currentFlagFilters, selectedVariantKey)
 
                     await api.update(
-                        `api/projects/${values.currentProjectId}/feature_flags/${values.experiment.feature_flag?.id}`,
+                        `v1/projects/${values.currentProjectId}/feature_flags/${values.experiment.feature_flag?.id}`,
                         { filters: newFilters }
                     )
 

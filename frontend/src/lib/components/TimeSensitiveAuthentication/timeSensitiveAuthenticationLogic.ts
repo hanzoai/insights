@@ -80,7 +80,7 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
             null as PrecheckResponseType | null,
             {
                 precheck: async () => {
-                    const response = await api.create('api/login/precheck', { email: values.user!.email })
+                    const response = await api.create('v1/login/precheck', { email: values.user!.email })
                     return { status: 'completed', ...response }
                 },
             },
@@ -93,7 +93,7 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
 
                     // Step 1: Get authentication options from server
                     const beginResponse =
-                        await api.create<PublicKeyCredentialRequestOptionsJSON>('api/login/2fa/passkey/begin/')
+                        await api.create<PublicKeyCredentialRequestOptionsJSON>('v1/login/2fa/passkey/begin/')
 
                     // Step 2: Use SimpleWebAuthn to get assertion from authenticator
                     const assertion = await startAuthentication({
@@ -107,7 +107,7 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
                     })
 
                     // Step 3: Send assertion to server to complete 2FA
-                    await api.create('api/login/token', {
+                    await api.create('v1/login/token', {
                         credential_id: assertion.id,
                         response: assertion.response,
                     })
@@ -122,7 +122,7 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
                 checkPasskeysAvailable: async () => {
                     try {
                         // Get available 2FA methods
-                        const methods = await api.get<TwoFAMethodsResponse>('api/login/2fa/passkey/methods/')
+                        const methods = await api.get<TwoFAMethodsResponse>('v1/login/2fa/passkey/methods/')
                         // Store TOTP availability for UI
                         actions.setTotpAvailable(methods.has_totp)
                         return methods.has_passkeys
@@ -149,9 +149,9 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
 
                 try {
                     if (!token) {
-                        await api.create('api/login', { email, password })
+                        await api.create('v1/login', { email, password })
                     } else {
-                        await api.create('api/login/token', { token })
+                        await api.create('v1/login/token', { token })
                     }
                 } catch (e: unknown) {
                     if (e instanceof ApiError) {

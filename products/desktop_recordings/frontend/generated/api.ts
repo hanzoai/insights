@@ -52,8 +52,8 @@ export const getDesktopRecordingsListUrl = (projectId: string, params?: DesktopR
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/desktop_recordings/?${stringifiedParams}`
-        : `/api/environments/${projectId}/desktop_recordings/`
+        ? `/v1/environments/${projectId}/desktop_recordings/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/desktop_recordings/`
 }
 
 export const desktopRecordingsList = async (
@@ -71,7 +71,7 @@ export const desktopRecordingsList = async (
  * Create a new recording and get Recall.ai upload token for the desktop SDK
  */
 export const getDesktopRecordingsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/desktop_recordings/`
+    return `/v1/environments/${projectId}/desktop_recordings/`
 }
 
 export const desktopRecordingsCreate = async (
@@ -93,7 +93,7 @@ export const desktopRecordingsCreate = async (
 Standard CRUD operations plus transcript management as a subresource.
  */
 export const getDesktopRecordingsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/desktop_recordings/${id}/`
+    return `/v1/environments/${projectId}/desktop_recordings/${id}/`
 }
 
 export const desktopRecordingsRetrieve = async (
@@ -113,7 +113,7 @@ export const desktopRecordingsRetrieve = async (
 Standard CRUD operations plus transcript management as a subresource.
  */
 export const getDesktopRecordingsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/desktop_recordings/${id}/`
+    return `/v1/environments/${projectId}/desktop_recordings/${id}/`
 }
 
 export const desktopRecordingsUpdate = async (
@@ -136,7 +136,7 @@ export const desktopRecordingsUpdate = async (
 Standard CRUD operations plus transcript management as a subresource.
  */
 export const getDesktopRecordingsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/desktop_recordings/${id}/`
+    return `/v1/environments/${projectId}/desktop_recordings/${id}/`
 }
 
 export const desktopRecordingsPartialUpdate = async (
@@ -159,7 +159,7 @@ export const desktopRecordingsPartialUpdate = async (
 Standard CRUD operations plus transcript management as a subresource.
  */
 export const getDesktopRecordingsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/desktop_recordings/${id}/`
+    return `/v1/environments/${projectId}/desktop_recordings/${id}/`
 }
 
 export const desktopRecordingsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -173,7 +173,7 @@ export const desktopRecordingsDestroy = async (projectId: string, id: string, op
  * Append transcript segments (supports batched real-time streaming)
  */
 export const getDesktopRecordingsAppendSegmentsCreateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/desktop_recordings/${id}/append_segments/`
+    return `/v1/environments/${projectId}/desktop_recordings/${id}/append_segments/`
 }
 
 export const desktopRecordingsAppendSegmentsCreate = async (

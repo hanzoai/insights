@@ -66,7 +66,7 @@ export const userLogic = kea<userLogicType>([
             {
                 loadUser: async () => {
                     try {
-                        return await api.get<UserType>('api/users/@me/')
+                        return await api.get<UserType>('v1/users/@me/')
                     } catch (error: any) {
                         console.error(error)
                         actions.loadUserFailure(error.message)
@@ -78,7 +78,7 @@ export const userLogic = kea<userLogicType>([
                         throw new Error('Current user has not been loaded yet, so it cannot be updated!')
                     }
                     try {
-                        const response = await api.update<UserType>('api/users/@me/', user)
+                        const response = await api.update<UserType>('v1/users/@me/', user)
                         successCallback?.()
                         return response
                     } catch (error: any) {
@@ -92,7 +92,7 @@ export const userLogic = kea<userLogicType>([
                         throw new Error('Current user has not been loaded yet, so it cannot be updated!')
                     }
                     try {
-                        const response = await api.update<UserType>('api/users/cancel_email_change_request/', {})
+                        const response = await api.update<UserType>('v1/users/cancel_email_change_request/', {})
                         toast.success('The email change request was cancelled successfully.')
                         return response
                     } catch (error: any) {
@@ -104,7 +104,7 @@ export const userLogic = kea<userLogicType>([
                     }
                 },
                 deleteUser: async () => {
-                    return await api.delete('api/users/@me/').then(() => {
+                    return await api.delete('v1/users/@me/').then(() => {
                         return null
                     })
                 },
@@ -113,7 +113,7 @@ export const userLogic = kea<userLogicType>([
                         throw new Error('Current user has not been loaded yet, so it cannot be updated!')
                     }
                     try {
-                        return await api.create<UserType>('api/users/@me/scene_personalisation', {
+                        return await api.create<UserType>('v1/users/@me/scene_personalisation', {
                             scene,
                             dashboard,
                         })
@@ -240,7 +240,7 @@ export const userLogic = kea<userLogicType>([
                 return
             }
             await breakpoint(10)
-            await api.update('api/users/@me/', { set_current_organization: organizationId })
+            await api.update('v1/users/@me/', { set_current_organization: organizationId })
 
             sidePanelStateLogic.findMounted()?.actions.closeSidePanel()
 
@@ -249,7 +249,7 @@ export const userLogic = kea<userLogicType>([
         updateHasSeenProductIntroFor: async ({ productKey, value }, breakpoint) => {
             await breakpoint(10)
             await api
-                .update('api/users/@me/', {
+                .update('v1/users/@me/', {
                     has_seen_product_intro_for: {
                         ...values.user?.has_seen_product_intro_for,
                         [productKey]: value,

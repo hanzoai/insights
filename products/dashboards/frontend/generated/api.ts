@@ -48,7 +48,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 export const getDashboardsCollaboratorsListUrl = (projectId: string, dashboardId: number) => {
-    return `/api/environments/${projectId}/dashboards/${dashboardId}/collaborators/`
+    return `/v1/environments/${projectId}/dashboards/${dashboardId}/collaborators/`
 }
 
 export const dashboardsCollaboratorsList = async (
@@ -63,7 +63,7 @@ export const dashboardsCollaboratorsList = async (
 }
 
 export const getDashboardsCollaboratorsCreateUrl = (projectId: string, dashboardId: number) => {
-    return `/api/environments/${projectId}/dashboards/${dashboardId}/collaborators/`
+    return `/v1/environments/${projectId}/dashboards/${dashboardId}/collaborators/`
 }
 
 export const dashboardsCollaboratorsCreate = async (
@@ -81,7 +81,7 @@ export const dashboardsCollaboratorsCreate = async (
 }
 
 export const getDashboardsCollaboratorsDestroyUrl = (projectId: string, dashboardId: number, userUuid: string) => {
-    return `/api/environments/${projectId}/dashboards/${dashboardId}/collaborators/${userUuid}/`
+    return `/v1/environments/${projectId}/dashboards/${dashboardId}/collaborators/${userUuid}/`
 }
 
 export const dashboardsCollaboratorsDestroy = async (
@@ -108,8 +108,8 @@ export const getDashboardsListUrl = (projectId: string, params?: DashboardsListP
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/`
+        ? `/v1/projects/${projectId}/dashboards/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/`
 }
 
 export const dashboardsList = async (
@@ -135,8 +135,8 @@ export const getDashboardsCreateUrl = (projectId: string, params?: DashboardsCre
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/`
+        ? `/v1/projects/${projectId}/dashboards/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/`
 }
 
 export const dashboardsCreate = async (
@@ -154,7 +154,7 @@ export const dashboardsCreate = async (
 }
 
 export const getDashboardsCollaboratorsList2Url = (projectId: string, dashboardId: number) => {
-    return `/api/projects/${projectId}/dashboards/${dashboardId}/collaborators/`
+    return `/v1/projects/${projectId}/dashboards/${dashboardId}/collaborators/`
 }
 
 export const dashboardsCollaboratorsList2 = async (
@@ -169,7 +169,7 @@ export const dashboardsCollaboratorsList2 = async (
 }
 
 export const getDashboardsCollaboratorsCreate2Url = (projectId: string, dashboardId: number) => {
-    return `/api/projects/${projectId}/dashboards/${dashboardId}/collaborators/`
+    return `/v1/projects/${projectId}/dashboards/${dashboardId}/collaborators/`
 }
 
 export const dashboardsCollaboratorsCreate2 = async (
@@ -187,7 +187,7 @@ export const dashboardsCollaboratorsCreate2 = async (
 }
 
 export const getDashboardsCollaboratorsDestroy2Url = (projectId: string, dashboardId: number, userUuid: string) => {
-    return `/api/projects/${projectId}/dashboards/${dashboardId}/collaborators/${userUuid}/`
+    return `/v1/projects/${projectId}/dashboards/${dashboardId}/collaborators/${userUuid}/`
 }
 
 export const dashboardsCollaboratorsDestroy2 = async (
@@ -203,7 +203,7 @@ export const dashboardsCollaboratorsDestroy2 = async (
 }
 
 export const getDashboardsSharingListUrl = (projectId: string, dashboardId: number) => {
-    return `/api/projects/${projectId}/dashboards/${dashboardId}/sharing/`
+    return `/v1/projects/${projectId}/dashboards/${dashboardId}/sharing/`
 }
 
 export const dashboardsSharingList = async (
@@ -221,7 +221,7 @@ export const dashboardsSharingList = async (
  * Create a new password for the sharing configuration.
  */
 export const getDashboardsSharingPasswordsCreateUrl = (projectId: string, dashboardId: number) => {
-    return `/api/projects/${projectId}/dashboards/${dashboardId}/sharing/passwords/`
+    return `/v1/projects/${projectId}/dashboards/${dashboardId}/sharing/passwords/`
 }
 
 export const dashboardsSharingPasswordsCreate = async (
@@ -242,7 +242,7 @@ export const dashboardsSharingPasswordsCreate = async (
  * Delete a password from the sharing configuration.
  */
 export const getDashboardsSharingPasswordsDestroyUrl = (projectId: string, dashboardId: number, passwordId: string) => {
-    return `/api/projects/${projectId}/dashboards/${dashboardId}/sharing/passwords/${passwordId}/`
+    return `/v1/projects/${projectId}/dashboards/${dashboardId}/sharing/passwords/${passwordId}/`
 }
 
 export const dashboardsSharingPasswordsDestroy = async (
@@ -258,7 +258,7 @@ export const dashboardsSharingPasswordsDestroy = async (
 }
 
 export const getDashboardsSharingRefreshCreateUrl = (projectId: string, dashboardId: number) => {
-    return `/api/projects/${projectId}/dashboards/${dashboardId}/sharing/refresh/`
+    return `/v1/projects/${projectId}/dashboards/${dashboardId}/sharing/refresh/`
 }
 
 export const dashboardsSharingRefreshCreate = async (
@@ -287,8 +287,8 @@ export const getDashboardsRetrieveUrl = (projectId: string, id: number, params?:
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/${id}/`
+        ? `/v1/projects/${projectId}/dashboards/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/${id}/`
 }
 
 export const dashboardsRetrieve = async (
@@ -315,8 +315,8 @@ export const getDashboardsUpdateUrl = (projectId: string, id: number, params?: D
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/${id}/`
+        ? `/v1/projects/${projectId}/dashboards/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/${id}/`
 }
 
 export const dashboardsUpdate = async (
@@ -350,8 +350,8 @@ export const getDashboardsPartialUpdateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/${id}/`
+        ? `/v1/projects/${projectId}/dashboards/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/${id}/`
 }
 
 export const dashboardsPartialUpdate = async (
@@ -384,8 +384,8 @@ export const getDashboardsDestroyUrl = (projectId: string, id: number, params?: 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/${id}/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/${id}/`
+        ? `/v1/projects/${projectId}/dashboards/${id}/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/${id}/`
 }
 
 export const dashboardsDestroy = async (
@@ -416,8 +416,8 @@ export const getDashboardsMoveTilePartialUpdateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/${id}/move_tile/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/${id}/move_tile/`
+        ? `/v1/projects/${projectId}/dashboards/${id}/move_tile/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/${id}/move_tile/`
 }
 
 export const dashboardsMoveTilePartialUpdate = async (
@@ -454,8 +454,8 @@ export const getDashboardsStreamTilesRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/${id}/stream_tiles/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/${id}/stream_tiles/`
+        ? `/v1/projects/${projectId}/dashboards/${id}/stream_tiles/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/${id}/stream_tiles/`
 }
 
 export const dashboardsStreamTilesRetrieve = async (
@@ -485,8 +485,8 @@ export const getDashboardsCreateFromTemplateJsonCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/create_from_template_json/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/create_from_template_json/`
+        ? `/v1/projects/${projectId}/dashboards/create_from_template_json/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/create_from_template_json/`
 }
 
 export const dashboardsCreateFromTemplateJsonCreate = async (
@@ -523,8 +523,8 @@ export const getDashboardsCreateUnlistedDashboardCreateUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dashboards/create_unlisted_dashboard/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dashboards/create_unlisted_dashboard/`
+        ? `/v1/projects/${projectId}/dashboards/create_unlisted_dashboard/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dashboards/create_unlisted_dashboard/`
 }
 
 export const dashboardsCreateUnlistedDashboardCreate = async (
@@ -553,8 +553,8 @@ export const getDataColorThemesListUrl = (projectId: string, params?: DataColorT
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/data_color_themes/?${stringifiedParams}`
-        : `/api/projects/${projectId}/data_color_themes/`
+        ? `/v1/projects/${projectId}/data_color_themes/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/data_color_themes/`
 }
 
 export const dataColorThemesList = async (
@@ -569,7 +569,7 @@ export const dataColorThemesList = async (
 }
 
 export const getDataColorThemesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/data_color_themes/`
+    return `/v1/projects/${projectId}/data_color_themes/`
 }
 
 export const dataColorThemesCreate = async (
@@ -586,7 +586,7 @@ export const dataColorThemesCreate = async (
 }
 
 export const getDataColorThemesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/data_color_themes/${id}/`
+    return `/v1/projects/${projectId}/data_color_themes/${id}/`
 }
 
 export const dataColorThemesRetrieve = async (
@@ -601,7 +601,7 @@ export const dataColorThemesRetrieve = async (
 }
 
 export const getDataColorThemesUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/data_color_themes/${id}/`
+    return `/v1/projects/${projectId}/data_color_themes/${id}/`
 }
 
 export const dataColorThemesUpdate = async (
@@ -619,7 +619,7 @@ export const dataColorThemesUpdate = async (
 }
 
 export const getDataColorThemesPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/data_color_themes/${id}/`
+    return `/v1/projects/${projectId}/data_color_themes/${id}/`
 }
 
 export const dataColorThemesPartialUpdate = async (
@@ -637,7 +637,7 @@ export const dataColorThemesPartialUpdate = async (
 }
 
 export const getDataColorThemesDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/data_color_themes/${id}/`
+    return `/v1/projects/${projectId}/data_color_themes/${id}/`
 }
 
 export const dataColorThemesDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<void> => {

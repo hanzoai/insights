@@ -51,8 +51,8 @@ describe('surveysLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                    '/api/projects/:team/surveys/responses_count': () => [200, {}],
+                    '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                    '/v1/projects/:team/surveys/responses_count': () => [200, {}],
                 },
             })
 
@@ -200,11 +200,11 @@ describe('surveysLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                    '/api/projects/:team/surveys/responses_count': () => [200, {}],
+                    '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                    '/v1/projects/:team/surveys/responses_count': () => [200, {}],
                 },
                 patch: {
-                    '/api/environments/@current/add_product_intent/': async (req) => {
+                    '/v1/environments/@current/add_product_intent/': async (req) => {
                         const data = await req.json()
                         capturedIntentRequests.push(data)
                         return [200, {}]
@@ -254,7 +254,7 @@ describe('surveysLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/projects/:team/surveys/': () => [200, { id: 'new-survey-123' }],
+                    '/v1/projects/:team/surveys/': () => [200, { id: 'new-survey-123' }],
                 },
             })
 
@@ -283,7 +283,7 @@ describe('surveysLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/projects/:team/surveys/': () => [
+                    '/v1/projects/:team/surveys/': () => [
                         200,
                         { ...mockSurvey, id: duplicatedSurveyId, name: 'Test Survey (copy)' },
                     ],
@@ -313,7 +313,7 @@ describe('surveysLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/projects/:team/surveys/:id/duplicate_to_projects/': () => [200, { count: 3, duplicates: [] }],
+                    '/v1/projects/:team/surveys/:id/duplicate_to_projects/': () => [200, { count: 3, duplicates: [] }],
                 },
             })
 
@@ -345,7 +345,7 @@ describe('surveysLogic', () => {
 
             useMocks({
                 delete: {
-                    '/api/projects/:team/surveys/:id/': () => [200, {}],
+                    '/v1/projects/:team/surveys/:id/': () => [200, {}],
                 },
             })
 

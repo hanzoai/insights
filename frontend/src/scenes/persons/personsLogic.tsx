@@ -150,7 +150,7 @@ export const personsLogic = kea<personsLogicType>([
                         newFilters.include_total = true // The total count is slow, but needed for infinite loading
                         if (props.cohort) {
                             result = {
-                                ...(await api.get(`api/cohort/${props.cohort}/persons/?${toParams(newFilters)}`)),
+                                ...(await api.get(`v1/cohort/${props.cohort}/persons/?${toParams(newFilters)}`)),
                                 offset: 0,
                             }
                         } else {
@@ -220,7 +220,7 @@ export const personsLogic = kea<personsLogicType>([
                     if (!values.person?.id) {
                         return null
                     }
-                    const response = await api.get(`api/person/cohorts/?person_id=${values.person?.id}`)
+                    const response = await api.get(`v1/person/cohorts/?person_id=${values.person?.id}`)
                     return response.results
                 },
             },
@@ -458,7 +458,7 @@ export const personsLogic = kea<personsLogicType>([
                 delete updatedProperties[key]
 
                 actions.setPerson({ ...person, properties: updatedProperties }) // To update the UI immediately
-                // await api.create(`api/person/${person.id}/delete_property`, { $unset: key })
+                // await api.create(`v1/person/${person.id}/delete_property`, { $unset: key })
                 await api.persons.deleteProperty(person.id, key)
                 toast.success(`User property deleted`)
 

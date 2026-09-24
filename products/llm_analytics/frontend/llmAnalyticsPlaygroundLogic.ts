@@ -313,7 +313,7 @@ export const llmAnalyticsPlaygroundLogic = kea<llmAnalyticsPlaygroundLogicType>(
         modelOptions: {
             __default: [] as ModelOption[],
             loadModelOptions: async () => {
-                const response = await api.get('/api/llm_proxy/models/')
+                const response = await api.get('/v1/llm_proxy/models/')
 
                 if (!response) {
                     return []
@@ -409,7 +409,7 @@ export const llmAnalyticsPlaygroundLogic = kea<llmAnalyticsPlaygroundLogicType>(
                     requestData.reasoning_level = values.reasoningLevel
                 }
 
-                await api.stream('/api/llm_proxy/completion', {
+                await api.stream('/v1/llm_proxy/completion', {
                     method: 'POST',
                     data: requestData,
                     headers: { 'Content-Type': 'application/json' },

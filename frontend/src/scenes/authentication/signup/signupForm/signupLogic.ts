@@ -131,7 +131,7 @@ export const signupLogic = kea<signupLogicType>([
                 actions.setPasskeyError(null)
                 actions.setError(null)
                 try {
-                    await api.create<SignupEmailPrecheckResponse>('api/signup/precheck', {
+                    await api.create<SignupEmailPrecheckResponse>('v1/signup/precheck', {
                         email,
                     })
                 } catch (e: any) {
@@ -206,7 +206,7 @@ export const signupLogic = kea<signupLogicType>([
                         signupData.password = values.signupPanelAuth.password
                     }
 
-                    const res = await api.create('api/signup/', signupData)
+                    const res = await api.create('v1/signup/', signupData)
 
                     if (!payload.organization_name) {
                         insights.capture('sign up organization name not provided')
@@ -266,7 +266,7 @@ export const signupLogic = kea<signupLogicType>([
                 actions.setSignupPanel1ManualErrors({})
                 let precheckResponse: SignupEmailPrecheckResponse
                 try {
-                    precheckResponse = await api.create<SignupEmailPrecheckResponse>('api/signup/precheck', {
+                    precheckResponse = await api.create<SignupEmailPrecheckResponse>('v1/signup/precheck', {
                         email,
                     })
                 } catch (e: any) {
@@ -311,7 +311,7 @@ export const signupLogic = kea<signupLogicType>([
                 try {
                     const nextUrl = getRelativeNextPath(new URLSearchParams(location.search).get('next'), location)
 
-                    const res = await api.create('api/signup/', {
+                    const res = await api.create('v1/signup/', {
                         ...values.signupPanel1,
                         ...payload,
                         first_name: payload.name.split(' ')[0],
@@ -449,7 +449,7 @@ export const signupLogic = kea<signupLogicType>([
             try {
                 // Step 1: Begin registration - get options from server
                 const beginResponse = await api.create<RegistrationBeginResponse>(
-                    'api/webauthn/signup-register/begin/',
+                    'v1/webauthn/signup-register/begin/',
                     { email }
                 )
 
@@ -474,7 +474,7 @@ export const signupLogic = kea<signupLogicType>([
                 })
 
                 // Step 3: Complete registration - send attestation to server
-                await api.create('api/webauthn/signup-register/complete/', attestation)
+                await api.create('v1/webauthn/signup-register/complete/', attestation)
 
                 actions.setPasskeyRegistered(true)
                 actions.setSignupPanelAuthValue('password', '') // Clear password since we're using passkey

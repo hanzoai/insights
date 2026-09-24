@@ -366,7 +366,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         breakpoint()
 
                         const dashboard: DashboardType<InsightModel> = await api.update(
-                            `api/environments/${values.currentTeamId}/dashboards/${props.id}`,
+                            `v1/environments/${values.currentTeamId}/dashboards/${props.id}`,
                             {
                                 filters: values.effectiveEditBarFilters,
                                 variables: values.effectiveDashboardVariableOverrides,
@@ -384,7 +384,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                     }
                 },
                 updateTileColor: async ({ tileId, color }) => {
-                    await api.update(`api/environments/${values.currentTeamId}/dashboards/${props.id}`, {
+                    await api.update(`v1/environments/${values.currentTeamId}/dashboards/${props.id}`, {
                         tiles: [{ id: tileId, color }],
                     })
                     const matchingTile = values.tiles.find((tile) => tile.id === tileId)
@@ -395,7 +395,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                 },
                 removeTile: async ({ tile }) => {
                     try {
-                        await api.update(`api/environments/${values.currentTeamId}/dashboards/${props.id}`, {
+                        await api.update(`v1/environments/${values.currentTeamId}/dashboards/${props.id}`, {
                             tiles: [{ id: tile.id, deleted: true }],
                         })
                         dashboardsModel.actions.tileRemovedFromDashboard({
@@ -439,7 +439,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         const { duplicateLayouts, tilesToUpdate } = calculateDuplicateLayout(values.layouts, tile.id)
 
                         const dashboard: DashboardType<InsightModel> = await api.update(
-                            `api/environments/${values.currentTeamId}/dashboards/${props.id}`,
+                            `v1/environments/${values.currentTeamId}/dashboards/${props.id}`,
                             {
                                 duplicate_tiles: [{ ...newTile, layouts: duplicateLayouts }],
                                 tiles: tilesToUpdate.length > 0 ? tilesToUpdate : undefined,
@@ -460,7 +460,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         return values.dashboard
                     }
                     const dashboard: DashboardType<InsightModel> = await api.update(
-                        `api/environments/${teamLogic.values.currentTeamId}/dashboards/${props.id}/move_tile`,
+                        `v1/environments/${teamLogic.values.currentTeamId}/dashboards/${props.id}/move_tile`,
                         {
                             tile,
                             toDashboard,
@@ -1099,7 +1099,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                     variablesOverride?: Record<string, InsightsQLVariable>,
                     layoutSize?: 'sm' | 'xs'
                 ) =>
-                    `api/environments/${teamLogic.values.currentTeamId}/dashboards/${id}/?${toParams({
+                    `v1/environments/${teamLogic.values.currentTeamId}/dashboards/${id}/?${toParams({
                         refresh,
                         filters_override: filtersOverride,
                         variables_override: variablesOverride,
@@ -1779,7 +1779,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                 .filter((id): id is number => !!id)
 
             if (insightIds.length > 0 && values.currentTeamId) {
-                void api.create(`api/environments/${values.currentTeamId}/insights/viewed`, {
+                void api.create(`v1/environments/${values.currentTeamId}/insights/viewed`, {
                     insight_ids: insightIds,
                 })
             }
@@ -1936,7 +1936,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                 onSubmit: async () => {
                     const tileFilterOverrides = logic.values.overrides
 
-                    await api.update(`api/environments/${teamLogic.values.currentTeamId}/dashboards/${props.id}`, {
+                    await api.update(`v1/environments/${teamLogic.values.currentTeamId}/dashboards/${props.id}`, {
                         tiles: [{ id: tile.id, filters_overrides: tileFilterOverrides }],
                     })
 

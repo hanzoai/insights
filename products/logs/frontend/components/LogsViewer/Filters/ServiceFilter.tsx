@@ -15,7 +15,7 @@ export const ServiceFilter = (): JSX.Element => {
     const { currentProjectId } = useValues(projectLogic)
     const { setServiceNames } = useActions(logsViewerFiltersLogic)
 
-    const endpoint = combineUrl(`api/environments/${currentProjectId}/logs/values`, {
+    const endpoint = combineUrl(`v1/environments/${currentProjectId}/logs/values`, {
         key: 'service.name',
         attribute_type: 'resource',
         dateRange,

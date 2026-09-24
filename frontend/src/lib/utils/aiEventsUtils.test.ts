@@ -24,7 +24,7 @@ describe('aiEventsUtils', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team_id/event_definitions/': {
+                    '/v1/projects/:team_id/event_definitions/': {
                         results: [
                             {
                                 id: '1',
@@ -50,7 +50,7 @@ describe('aiEventsUtils', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team_id/event_definitions/': {
+                    '/v1/projects/:team_id/event_definitions/': {
                         results: [
                             {
                                 id: '1',
@@ -73,7 +73,7 @@ describe('aiEventsUtils', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team_id/event_definitions/': {
+                    '/v1/projects/:team_id/event_definitions/': {
                         results: [
                             {
                                 id: '1',
@@ -99,7 +99,7 @@ describe('aiEventsUtils', () => {
         it('falls back to Datastore when no EventDefinition exists', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/event_definitions/': {
+                    '/v1/projects/:team_id/event_definitions/': {
                         results: [],
                         count: 0,
                     },
@@ -119,7 +119,7 @@ describe('aiEventsUtils', () => {
         it('returns false when neither Postgres nor Datastore has AI events', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/event_definitions/': {
+                    '/v1/projects/:team_id/event_definitions/': {
                         results: [],
                         count: 0,
                     },
@@ -140,7 +140,7 @@ describe('aiEventsUtils', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team_id/event_definitions/': {
+                    '/v1/projects/:team_id/event_definitions/': {
                         results: [
                             {
                                 id: '1',
@@ -166,7 +166,7 @@ describe('aiEventsUtils', () => {
         it('handles null results from Datastore gracefully', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/event_definitions/': {
+                    '/v1/projects/:team_id/event_definitions/': {
                         results: [],
                         count: 0,
                     },
@@ -185,7 +185,7 @@ describe('aiEventsUtils', () => {
         it('handles undefined results from Datastore gracefully', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/event_definitions/': {
+                    '/v1/projects/:team_id/event_definitions/': {
                         results: [],
                         count: 0,
                     },

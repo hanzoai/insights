@@ -182,7 +182,7 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
                 actions.setIsLoading(true)
                 try {
                     const result: DashboardType = await api.create(
-                        `api/environments/${teamLogic.values.currentTeamId}/dashboards/`,
+                        `v1/environments/${teamLogic.values.currentTeamId}/dashboards/`,
                         {
                             name: name,
                             description: description,
@@ -242,7 +242,7 @@ export const newDashboardLogic = kea<newDashboardLogicType>([
             try {
                 actions.hideNewDashboardModal()
                 const result: DashboardType = await api.create(
-                    `api/environments/${teamLogic.values.currentTeamId}/dashboards/create_from_template_json`,
+                    `v1/environments/${teamLogic.values.currentTeamId}/dashboards/create_from_template_json`,
                     {
                         template: dashboardJSON,
                         creation_context: creationContext,

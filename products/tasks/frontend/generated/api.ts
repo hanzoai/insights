@@ -62,8 +62,8 @@ export const getTasksListUrl = (projectId: string, params?: TasksListParams) => 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/`
+        ? `/v1/projects/${projectId}/tasks/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/`
 }
 
 export const tasksList = async (
@@ -81,7 +81,7 @@ export const tasksList = async (
  * API for managing tasks within a project. Tasks represent units of work to be performed by an agent.
  */
 export const getTasksCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/tasks/`
+    return `/v1/projects/${projectId}/tasks/`
 }
 
 export const tasksCreate = async (projectId: string, taskApi: TaskApi, options?: RequestInit): Promise<TaskApi> => {
@@ -97,7 +97,7 @@ export const tasksCreate = async (projectId: string, taskApi: TaskApi, options?:
  * API for managing tasks within a project. Tasks represent units of work to be performed by an agent.
  */
 export const getTasksRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/`
+    return `/v1/projects/${projectId}/tasks/${id}/`
 }
 
 export const tasksRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<TaskApi> => {
@@ -111,7 +111,7 @@ export const tasksRetrieve = async (projectId: string, id: string, options?: Req
  * API for managing tasks within a project. Tasks represent units of work to be performed by an agent.
  */
 export const getTasksUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/`
+    return `/v1/projects/${projectId}/tasks/${id}/`
 }
 
 export const tasksUpdate = async (
@@ -132,7 +132,7 @@ export const tasksUpdate = async (
  * API for managing tasks within a project. Tasks represent units of work to be performed by an agent.
  */
 export const getTasksPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/`
+    return `/v1/projects/${projectId}/tasks/${id}/`
 }
 
 export const tasksPartialUpdate = async (
@@ -153,7 +153,7 @@ export const tasksPartialUpdate = async (
  * API for managing tasks within a project. Tasks represent units of work to be performed by an agent.
  */
 export const getTasksDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/`
+    return `/v1/projects/${projectId}/tasks/${id}/`
 }
 
 export const tasksDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -168,7 +168,7 @@ export const tasksDestroy = async (projectId: string, id: string, options?: Requ
  * @summary Run task
  */
 export const getTasksRunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${id}/run/`
+    return `/v1/projects/${projectId}/tasks/${id}/run/`
 }
 
 export const tasksRunCreate = async (
@@ -201,8 +201,8 @@ export const getTasksRunsListUrl = (projectId: string, taskId: string, params?: 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/${taskId}/runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/${taskId}/runs/`
+        ? `/v1/projects/${projectId}/tasks/${taskId}/runs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/${taskId}/runs/`
 }
 
 export const tasksRunsList = async (
@@ -222,7 +222,7 @@ export const tasksRunsList = async (
  * @summary Create task run
  */
 export const getTasksRunsCreateUrl = (projectId: string, taskId: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/`
 }
 
 export const tasksRunsCreate = async (
@@ -240,7 +240,7 @@ export const tasksRunsCreate = async (
  * API for managing task runs. Each run represents an execution of a task.
  */
 export const getTasksRunsRetrieveUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/`
 }
 
 export const tasksRunsRetrieve = async (
@@ -260,7 +260,7 @@ export const tasksRunsRetrieve = async (
  * @summary Update task run
  */
 export const getTasksRunsPartialUpdateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/`
 }
 
 export const tasksRunsPartialUpdate = async (
@@ -283,7 +283,7 @@ export const tasksRunsPartialUpdate = async (
  * @summary Append log entries
  */
 export const getTasksRunsAppendLogCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/append_log/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/append_log/`
 }
 
 export const tasksRunsAppendLogCreate = async (
@@ -306,7 +306,7 @@ export const tasksRunsAppendLogCreate = async (
  * @summary Upload artifacts for a task run
  */
 export const getTasksRunsArtifactsCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/`
 }
 
 export const tasksRunsArtifactsCreate = async (
@@ -329,7 +329,7 @@ export const tasksRunsArtifactsCreate = async (
  * @summary Generate presigned URL for an artifact
  */
 export const getTasksRunsArtifactsPresignCreateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/presign/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/artifacts/presign/`
 }
 
 export const tasksRunsArtifactsPresignCreate = async (
@@ -352,7 +352,7 @@ export const tasksRunsArtifactsPresignCreate = async (
  * @summary Get sandbox connection token
  */
 export const getTasksRunsConnectionTokenRetrieveUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/connection_token/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/connection_token/`
 }
 
 export const tasksRunsConnectionTokenRetrieve = async (
@@ -388,8 +388,8 @@ export const getTasksRunsSessionLogsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/session_logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/session_logs/`
+        ? `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/session_logs/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/session_logs/`
 }
 
 export const tasksRunsSessionLogsRetrieve = async (
@@ -410,7 +410,7 @@ export const tasksRunsSessionLogsRetrieve = async (
  * @summary Set run output
  */
 export const getTasksRunsSetOutputPartialUpdateUrl = (projectId: string, taskId: string, id: string) => {
-    return `/api/projects/${projectId}/tasks/${taskId}/runs/${id}/set_output/`
+    return `/v1/projects/${projectId}/tasks/${taskId}/runs/${id}/set_output/`
 }
 
 export const tasksRunsSetOutputPartialUpdate = async (
@@ -444,8 +444,8 @@ export const getTasksRepositoryReadinessRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/tasks/repository_readiness/?${stringifiedParams}`
-        : `/api/projects/${projectId}/tasks/repository_readiness/`
+        ? `/v1/projects/${projectId}/tasks/repository_readiness/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/tasks/repository_readiness/`
 }
 
 export const tasksRepositoryReadinessRetrieve = async (

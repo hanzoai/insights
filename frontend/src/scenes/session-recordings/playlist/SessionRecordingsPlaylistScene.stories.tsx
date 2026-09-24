@@ -94,16 +94,16 @@ const meta: Meta = {
         mswDecorator({
             get: {
                 '/stats': () => [200, { users_on_product: 42, active_recordings: 7 }],
-                '/api/environments/:team_id/session_recordings': () => [
+                '/v1/environments/:team_id/session_recordings': () => [
                     200,
                     { has_next: false, results: recordings, version: '1' },
                 ],
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id': () => [200, playlistWithRecordings],
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id/recordings': () => [
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id': () => [200, playlistWithRecordings],
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id/recordings': () => [
                     200,
                     { has_next: false, results: recordings, version: 1 },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': (req, res, ctx) => {
                     if (req.url.searchParams.get('source') === 'blob_v2') {
                         return res(ctx.text(snapshotsAsJSONLines()))
                     }
@@ -121,28 +121,28 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: recordings[0].id },
                 ],
-                'api/projects/:team/notebooks': { count: 0, next: null, previous: null, results: [] },
+                'v1/projects/:team/notebooks': { count: 0, next: null, previous: null, results: [] },
             },
             patch: {
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id': (req) => {
                     const body = req.body as Partial<SessionRecordingPlaylistType>
                     return [200, { ...playlistWithRecordings, ...body }]
                 },
             },
             post: {
-                '/api/projects/:team_id/session_recording_playlists/:playlist_id/playlist_viewed': [
+                '/v1/projects/:team_id/session_recording_playlists/:playlist_id/playlist_viewed': [
                     200,
                     { success: true },
                 ],
-                '/api/environments/:team_id/session_recording_playlists/:playlist_id/playlist_viewed': [
+                '/v1/environments/:team_id/session_recording_playlists/:playlist_id/playlist_viewed': [
                     200,
                     { success: true },
                 ],
-                '/api/environments/:team_id/query': (req, res, ctx) => {
+                '/v1/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
 
                     if (body.query.kind === 'EventsQuery') {

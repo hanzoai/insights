@@ -14,7 +14,7 @@ import type { SessionSummariesApi } from './api.schemas'
  * Generate AI summary for a group of session recordings to find patterns and generate a notebook.
  */
 export const getCreateSessionSummariesUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/session_summaries/create_session_summaries/`
+    return `/v1/environments/${projectId}/session_summaries/create_session_summaries/`
 }
 
 export const createSessionSummaries = async (
@@ -34,7 +34,7 @@ export const createSessionSummaries = async (
  * Generate AI individual summary for each session, without grouping.
  */
 export const getCreateSessionSummariesIndividuallyUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/session_summaries/create_session_summaries_individually/`
+    return `/v1/environments/${projectId}/session_summaries/create_session_summaries_individually/`
 }
 
 export const createSessionSummariesIndividually = async (

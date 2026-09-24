@@ -61,7 +61,7 @@ This endpoint validates the request and enqueues a Temporal workflow
 to asynchronously execute the evaluation.
  */
 export const getEvaluationRunsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/evaluation_runs/`
+    return `/v1/environments/${projectId}/evaluation_runs/`
 }
 
 export const evaluationRunsCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -83,8 +83,8 @@ export const getEvaluationsListUrl = (projectId: string, params?: EvaluationsLis
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/evaluations/?${stringifiedParams}`
-        : `/api/environments/${projectId}/evaluations/`
+        ? `/v1/environments/${projectId}/evaluations/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/evaluations/`
 }
 
 export const evaluationsList = async (
@@ -99,7 +99,7 @@ export const evaluationsList = async (
 }
 
 export const getEvaluationsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/evaluations/`
+    return `/v1/environments/${projectId}/evaluations/`
 }
 
 export const evaluationsCreate = async (
@@ -119,7 +119,7 @@ export const evaluationsCreate = async (
  * Team-level clustering configuration (event filters for automated pipelines).
  */
 export const getLlmAnalyticsClusteringConfigRetrieveUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/clustering_config/`
+    return `/v1/environments/${projectId}/llm_analytics/clustering_config/`
 }
 
 export const llmAnalyticsClusteringConfigRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -133,7 +133,7 @@ export const llmAnalyticsClusteringConfigRetrieve = async (projectId: string, op
  * Team-level clustering configuration (event filters for automated pipelines).
  */
 export const getLlmAnalyticsClusteringConfigSetEventFiltersCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/clustering_config/set_event_filters/`
+    return `/v1/environments/${projectId}/llm_analytics/clustering_config/set_event_filters/`
 }
 
 export const llmAnalyticsClusteringConfigSetEventFiltersCreate = async (
@@ -153,7 +153,7 @@ This endpoint validates the request parameters and starts a Temporal workflow
 to perform trace clustering with the specified configuration.
  */
 export const getLlmAnalyticsClusteringRunsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/clustering_runs/`
+    return `/v1/environments/${projectId}/llm_analytics/clustering_runs/`
 }
 
 export const llmAnalyticsClusteringRunsCreate = async (
@@ -173,7 +173,7 @@ export const llmAnalyticsClusteringRunsCreate = async (
  * Get the evaluation config for this team
  */
 export const getLlmAnalyticsEvaluationConfigRetrieveUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/evaluation_config/`
+    return `/v1/environments/${projectId}/llm_analytics/evaluation_config/`
 }
 
 export const llmAnalyticsEvaluationConfigRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -187,7 +187,7 @@ export const llmAnalyticsEvaluationConfigRetrieve = async (projectId: string, op
  * Set the active provider key for evaluations
  */
 export const getLlmAnalyticsEvaluationConfigSetActiveKeyCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/evaluation_config/set_active_key/`
+    return `/v1/environments/${projectId}/llm_analytics/evaluation_config/set_active_key/`
 }
 
 export const llmAnalyticsEvaluationConfigSetActiveKeyCreate = async (
@@ -217,7 +217,7 @@ Data is fetched server-side by evaluation ID to ensure data integrity.
         
  */
 export const getLlmAnalyticsEvaluationSummaryCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/evaluation_summary/`
+    return `/v1/environments/${projectId}/llm_analytics/evaluation_summary/`
 }
 
 export const llmAnalyticsEvaluationSummaryCreate = async (
@@ -237,7 +237,7 @@ export const llmAnalyticsEvaluationSummaryCreate = async (
  * List available models for a provider.
  */
 export const getLlmAnalyticsModelsRetrieveUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/models/`
+    return `/v1/environments/${projectId}/llm_analytics/models/`
 }
 
 export const llmAnalyticsModelsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -251,7 +251,7 @@ export const llmAnalyticsModelsRetrieve = async (projectId: string, options?: Re
  * Validate LLM provider API keys without persisting them
  */
 export const getLlmAnalyticsProviderKeyValidationsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/provider_key_validations/`
+    return `/v1/environments/${projectId}/llm_analytics/provider_key_validations/`
 }
 
 export const llmAnalyticsProviderKeyValidationsCreate = async (
@@ -276,8 +276,8 @@ export const getLlmAnalyticsProviderKeysListUrl = (projectId: string, params?: L
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/llm_analytics/provider_keys/?${stringifiedParams}`
-        : `/api/environments/${projectId}/llm_analytics/provider_keys/`
+        ? `/v1/environments/${projectId}/llm_analytics/provider_keys/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/llm_analytics/provider_keys/`
 }
 
 export const llmAnalyticsProviderKeysList = async (
@@ -292,7 +292,7 @@ export const llmAnalyticsProviderKeysList = async (
 }
 
 export const getLlmAnalyticsProviderKeysCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/provider_keys/`
+    return `/v1/environments/${projectId}/llm_analytics/provider_keys/`
 }
 
 export const llmAnalyticsProviderKeysCreate = async (
@@ -309,7 +309,7 @@ export const llmAnalyticsProviderKeysCreate = async (
 }
 
 export const getLlmAnalyticsProviderKeysRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/llm_analytics/provider_keys/${id}/`
+    return `/v1/environments/${projectId}/llm_analytics/provider_keys/${id}/`
 }
 
 export const llmAnalyticsProviderKeysRetrieve = async (
@@ -324,7 +324,7 @@ export const llmAnalyticsProviderKeysRetrieve = async (
 }
 
 export const getLlmAnalyticsProviderKeysUpdateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/llm_analytics/provider_keys/${id}/`
+    return `/v1/environments/${projectId}/llm_analytics/provider_keys/${id}/`
 }
 
 export const llmAnalyticsProviderKeysUpdate = async (
@@ -342,7 +342,7 @@ export const llmAnalyticsProviderKeysUpdate = async (
 }
 
 export const getLlmAnalyticsProviderKeysPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/llm_analytics/provider_keys/${id}/`
+    return `/v1/environments/${projectId}/llm_analytics/provider_keys/${id}/`
 }
 
 export const llmAnalyticsProviderKeysPartialUpdate = async (
@@ -360,7 +360,7 @@ export const llmAnalyticsProviderKeysPartialUpdate = async (
 }
 
 export const getLlmAnalyticsProviderKeysDestroyUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/llm_analytics/provider_keys/${id}/`
+    return `/v1/environments/${projectId}/llm_analytics/provider_keys/${id}/`
 }
 
 export const llmAnalyticsProviderKeysDestroy = async (
@@ -378,7 +378,7 @@ export const llmAnalyticsProviderKeysDestroy = async (
  * Get evaluations using this key and alternative keys for replacement.
  */
 export const getLlmAnalyticsProviderKeysDependentConfigsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/llm_analytics/provider_keys/${id}/dependent_configs/`
+    return `/v1/environments/${projectId}/llm_analytics/provider_keys/${id}/dependent_configs/`
 }
 
 export const llmAnalyticsProviderKeysDependentConfigsRetrieve = async (
@@ -393,7 +393,7 @@ export const llmAnalyticsProviderKeysDependentConfigsRetrieve = async (
 }
 
 export const getLlmAnalyticsProviderKeysValidateCreateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/llm_analytics/provider_keys/${id}/validate/`
+    return `/v1/environments/${projectId}/llm_analytics/provider_keys/${id}/validate/`
 }
 
 export const llmAnalyticsProviderKeysValidateCreate = async (
@@ -411,7 +411,7 @@ export const llmAnalyticsProviderKeysValidateCreate = async (
 }
 
 export const getLlmAnalyticsSentimentCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/sentiment/`
+    return `/v1/environments/${projectId}/llm_analytics/sentiment/`
 }
 
 export const llmAnalyticsSentimentCreate = async (
@@ -449,7 +449,7 @@ The response includes the summary text and optional metadata.
         
  */
 export const getLlmAnalyticsSummarizationCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/summarization/`
+    return `/v1/environments/${projectId}/llm_analytics/summarization/`
 }
 
 export const llmAnalyticsSummarizationCreate = async (
@@ -480,7 +480,7 @@ with their titles.
         
  */
 export const getLlmAnalyticsSummarizationBatchCheckCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/summarization/batch_check/`
+    return `/v1/environments/${projectId}/llm_analytics/summarization/batch_check/`
 }
 
 export const llmAnalyticsSummarizationBatchCheckCreate = async (
@@ -533,7 +533,7 @@ The response includes the formatted text and metadata about the rendering.
         
  */
 export const getLlmAnalyticsTextReprCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/text_repr/`
+    return `/v1/environments/${projectId}/llm_analytics/text_repr/`
 }
 
 export const llmAnalyticsTextReprCreate = async (
@@ -553,7 +553,7 @@ export const llmAnalyticsTextReprCreate = async (
  * Translate text to target language.
  */
 export const getLlmAnalyticsTranslateCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/llm_analytics/translate/`
+    return `/v1/environments/${projectId}/llm_analytics/translate/`
 }
 
 export const llmAnalyticsTranslateCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -575,8 +575,8 @@ export const getDatasetItemsListUrl = (projectId: string, params?: DatasetItemsL
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/dataset_items/?${stringifiedParams}`
-        : `/api/projects/${projectId}/dataset_items/`
+        ? `/v1/projects/${projectId}/dataset_items/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/dataset_items/`
 }
 
 export const datasetItemsList = async (
@@ -591,7 +591,7 @@ export const datasetItemsList = async (
 }
 
 export const getDatasetItemsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/dataset_items/`
+    return `/v1/projects/${projectId}/dataset_items/`
 }
 
 export const datasetItemsCreate = async (
@@ -608,7 +608,7 @@ export const datasetItemsCreate = async (
 }
 
 export const getDatasetItemsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/dataset_items/${id}/`
+    return `/v1/projects/${projectId}/dataset_items/${id}/`
 }
 
 export const datasetItemsRetrieve = async (
@@ -623,7 +623,7 @@ export const datasetItemsRetrieve = async (
 }
 
 export const getDatasetItemsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/dataset_items/${id}/`
+    return `/v1/projects/${projectId}/dataset_items/${id}/`
 }
 
 export const datasetItemsUpdate = async (
@@ -641,7 +641,7 @@ export const datasetItemsUpdate = async (
 }
 
 export const getDatasetItemsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/dataset_items/${id}/`
+    return `/v1/projects/${projectId}/dataset_items/${id}/`
 }
 
 export const datasetItemsPartialUpdate = async (
@@ -662,7 +662,7 @@ export const datasetItemsPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getDatasetItemsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/dataset_items/${id}/`
+    return `/v1/projects/${projectId}/dataset_items/${id}/`
 }
 
 export const datasetItemsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<unknown> => {
@@ -684,8 +684,8 @@ export const getDatasetsListUrl = (projectId: string, params?: DatasetsListParam
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/datasets/?${stringifiedParams}`
-        : `/api/projects/${projectId}/datasets/`
+        ? `/v1/projects/${projectId}/datasets/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/datasets/`
 }
 
 export const datasetsList = async (
@@ -700,7 +700,7 @@ export const datasetsList = async (
 }
 
 export const getDatasetsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/datasets/`
+    return `/v1/projects/${projectId}/datasets/`
 }
 
 export const datasetsCreate = async (
@@ -717,7 +717,7 @@ export const datasetsCreate = async (
 }
 
 export const getDatasetsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/`
+    return `/v1/projects/${projectId}/datasets/${id}/`
 }
 
 export const datasetsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<DatasetApi> => {
@@ -728,7 +728,7 @@ export const datasetsRetrieve = async (projectId: string, id: string, options?: 
 }
 
 export const getDatasetsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/`
+    return `/v1/projects/${projectId}/datasets/${id}/`
 }
 
 export const datasetsUpdate = async (
@@ -746,7 +746,7 @@ export const datasetsUpdate = async (
 }
 
 export const getDatasetsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/`
+    return `/v1/projects/${projectId}/datasets/${id}/`
 }
 
 export const datasetsPartialUpdate = async (
@@ -767,7 +767,7 @@ export const datasetsPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getDatasetsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/datasets/${id}/`
+    return `/v1/projects/${projectId}/datasets/${id}/`
 }
 
 export const datasetsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<unknown> => {

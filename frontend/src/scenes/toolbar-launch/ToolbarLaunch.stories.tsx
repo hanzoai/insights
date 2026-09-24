@@ -26,7 +26,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/environments/:environment_id/query/': () => [
+                '/v1/environments/:environment_id/query/': () => [
                     200,
                     {
                         results: [
@@ -64,7 +64,7 @@ export const NoUrlsTemplate: StoryFn = () => {
 
 export const NoSuggestionsTemplate: StoryFn = () => {
     useStorybookMocks({
-        post: { '/api/environments/:environment_id/query/': () => [200, { results: [] }] },
+        post: { '/v1/environments/:environment_id/query/': () => [200, { results: [] }] },
     })
 
     return <Template />
@@ -80,7 +80,7 @@ export const EmptyStateTemplate: StoryFn = () => {
     })
 
     useStorybookMocks({
-        post: { '/api/environments/:environment_id/query/': () => [200, { results: [] }] },
+        post: { '/v1/environments/:environment_id/query/': () => [200, { results: [] }] },
     })
 
     return <Template />

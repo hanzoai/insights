@@ -17,10 +17,10 @@ describe('sceneDashboardChoiceModalLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/@current': () => MOCK_DEFAULT_TEAM,
+                '/v1/projects/@current': () => MOCK_DEFAULT_TEAM,
             },
             post: {
-                '/api/users/@me/scene_personalisation': (req) => {
+                '/v1/users/@me/scene_personalisation': (req) => {
                     const data = req.body as any
                     return [
                         200,
@@ -35,7 +35,7 @@ describe('sceneDashboardChoiceModalLogic', () => {
                 },
             },
             patch: {
-                '/api/environments/:team': (req) => {
+                '/v1/environments/:team': (req) => {
                     const data = req.body as any
                     return [
                         200,

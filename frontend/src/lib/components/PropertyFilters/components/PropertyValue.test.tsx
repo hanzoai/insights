@@ -21,8 +21,8 @@ describe('PropertyValue', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/event/values': [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
-                '/api/environments/:team/events/values': [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
+                '/v1/event/values': [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
+                '/v1/environments/:team/events/values': [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
             },
         })
         initKeaTests()

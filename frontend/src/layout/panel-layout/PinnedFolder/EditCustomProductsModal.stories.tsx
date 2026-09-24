@@ -18,7 +18,7 @@ const meta: Meta<typeof EditCustomProductsModal> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/user_product_list/': {
+                '/v1/environments/:team_id/user_product_list/': {
                     results: INITIAL_PRODUCTS.map((path, index) => ({
                         id: `product-${index}`,
                         product_path: path,
@@ -26,7 +26,7 @@ const meta: Meta<typeof EditCustomProductsModal> = {
                         updated_at: '2024-01-01T00:00:00Z',
                     })),
                 },
-                '/api/users/@me': {
+                '/v1/users/@me': {
                     ...MOCK_DEFAULT_USER,
                     allow_sidebar_suggestions: true,
                 },

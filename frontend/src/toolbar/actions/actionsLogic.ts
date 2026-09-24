@@ -20,7 +20,7 @@ export const actionsLogic = kea<actionsLogicType>([
             {
                 // oxlint-disable-next-line @typescript-eslint/no-unused-vars
                 getActions: async (_ = null, breakpoint: () => void) => {
-                    const response = await toolbarFetch('/api/projects/@current/actions/')
+                    const response = await toolbarFetch('/v1/projects/@current/actions/')
                     const results = await response.json()
 
                     if (response.status === 403) {

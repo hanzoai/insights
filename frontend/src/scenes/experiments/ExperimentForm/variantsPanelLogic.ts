@@ -85,7 +85,7 @@ export const variantsPanelLogic = kea<variantsPanelLogicType>({
                     }
 
                     // Double-check with API for recently created flags
-                    const response = await api.get(`api/projects/@current/feature_flags/?${toParams({ search: key })}`)
+                    const response = await api.get(`v1/projects/@current/feature_flags/?${toParams({ search: key })}`)
 
                     if (response.results.length > 0) {
                         const exactMatch = response.results.find((flag: FeatureFlagType) => flag.key === key)

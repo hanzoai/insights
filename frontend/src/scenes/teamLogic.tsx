@@ -96,7 +96,7 @@ export const teamLogic = kea<teamLogicType>([
                     }
 
                     try {
-                        return await api.get('api/environments/@current')
+                        return await api.get('v1/environments/@current')
                     } catch {
                         return values.currentTeam
                     }
@@ -115,12 +115,12 @@ export const teamLogic = kea<teamLogicType>([
                     }
 
                     const promises: [Promise<TeamType>, Promise<ProjectType> | undefined] = [
-                        api.update(`api/environments/${values.currentTeam.id}`, payload),
+                        api.update(`v1/environments/${values.currentTeam.id}`, payload),
                         undefined,
                     ]
                     if (Object.keys(payload).length === 1 && payload.name && values.currentProject) {
                         // If we're only updating the name, update the project name as well for equivalence
-                        promises[1] = api.update(`api/projects/${values.currentProject.id}`, { name: payload.name })
+                        promises[1] = api.update(`v1/projects/${values.currentProject.id}`, { name: payload.name })
                     }
                     const [patchedTeam] = await Promise.all(promises)
                     breakpoint()
@@ -201,15 +201,15 @@ export const teamLogic = kea<teamLogicType>([
                             'Environment could not be created, because the parent project has not been loaded yet!'
                         )
                     }
-                    return await api.create(`api/projects/${values.currentProject.id}/environments/`, { name, is_demo })
+                    return await api.create(`v1/projects/${values.currentProject.id}/environments/`, { name, is_demo })
                 },
                 // Project API Token
-                resetToken: async () => await api.update(`api/environments/${values.currentTeamId}/reset_token`, {}),
+                resetToken: async () => await api.update(`v1/environments/${values.currentTeamId}/reset_token`, {}),
                 // Feature Flags Secure API Token
                 rotateSecretToken: async () =>
-                    await api.update(`api/environments/${values.currentTeamId}/rotate_secret_token`, {}),
+                    await api.update(`v1/environments/${values.currentTeamId}/rotate_secret_token`, {}),
                 deleteSecretTokenBackup: async () =>
-                    await api.update(`api/environments/${values.currentTeamId}/delete_secret_token_backup`, {}),
+                    await api.update(`v1/environments/${values.currentTeamId}/delete_secret_token_backup`, {}),
                 /**
                  * If adding a product intent that also represents regular product usage, see explainer in insights.models.product_intent.product_intent.py.
                  * Also, we refresh the list of custom products to show the possible new entry in the sidebar after we've added the intent.
@@ -228,7 +228,7 @@ export const teamLogic = kea<teamLogicType>([
                 },
                 recordProductIntentOnboardingComplete: async ({ product_type }: { product_type: ProductKey }) => {
                     const result = await api.update(
-                        `api/environments/${values.currentTeamId}/complete_product_onboarding`,
+                        `v1/environments/${values.currentTeamId}/complete_product_onboarding`,
                         {
                             product_type,
                         }
@@ -341,7 +341,7 @@ export const teamLogic = kea<teamLogicType>([
         },
         deleteTeam: async ({ team }) => {
             try {
-                await api.delete(`api/environments/${team.id}`)
+                await api.delete(`v1/environments/${team.id}`)
                 location.reload()
                 actions.deleteTeamSuccess()
             } catch {

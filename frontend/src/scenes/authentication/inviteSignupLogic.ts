@@ -80,7 +80,7 @@ export const inviteSignupLogic = kea<inviteSignupLogicType>([
                     breakpoint()
 
                     try {
-                        return await api.get(`api/signup/${id}/`)
+                        return await api.get(`v1/signup/${id}/`)
                     } catch (e: any) {
                         if (e.status === 400) {
                             if (e.code === 'invalid_recipient') {
@@ -105,7 +105,7 @@ export const inviteSignupLogic = kea<inviteSignupLogicType>([
                     if (!values.invite) {
                         return null
                     }
-                    return api.create(`api/signup/${values.invite.id}/`)
+                    return api.create(`v1/signup/${values.invite.id}/`)
                 },
             },
         ],
@@ -136,7 +136,7 @@ export const inviteSignupLogic = kea<inviteSignupLogicType>([
                         delete submitPayload.password
                     }
 
-                    const res = await api.create(`api/signup/${values.invite.id}/`, submitPayload)
+                    const res = await api.create(`v1/signup/${values.invite.id}/`, submitPayload)
                     location.href = res.redirect_url || '/' // hard refresh because the current_organization changed
                 } catch (e) {
                     insights.captureException(e)
@@ -188,7 +188,7 @@ export const inviteSignupLogic = kea<inviteSignupLogicType>([
 
             try {
                 const beginResponse = await api.create<RegistrationBeginResponse>(
-                    'api/webauthn/signup-register/begin/',
+                    'v1/webauthn/signup-register/begin/',
                     { email }
                 )
 
@@ -211,7 +211,7 @@ export const inviteSignupLogic = kea<inviteSignupLogicType>([
                     },
                 })
 
-                await api.create('api/webauthn/signup-register/complete/', attestation)
+                await api.create('v1/webauthn/signup-register/complete/', attestation)
 
                 actions.setPasskeyRegistered(true)
                 actions.setSignupValue('password', '')

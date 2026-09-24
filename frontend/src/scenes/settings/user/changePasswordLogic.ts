@@ -46,7 +46,7 @@ export const changePasswordLogic = kea<changePasswordLogicType>([
                 const hasPassword = values.user?.has_password ?? false
 
                 try {
-                    await api.update('api/users/@me/', {
+                    await api.update('v1/users/@me/', {
                         password,
                         ...(hasPassword ? { current_password } : {}),
                     })

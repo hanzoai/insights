@@ -123,7 +123,7 @@ export const CodeInstructionsRubyWithGroupFlagLocalEvaluation = (): JSX.Element 
     useAvailableFeatures([AvailableFeature.GROUP_ANALYTICS])
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/groups_types/': [
+            '/v1/projects/:team_id/groups_types/': [
                 { group_type: 'project', group_type_index: 0, name_singular: null, name_plural: null },
                 { group_type: 'organization', group_type_index: 1, name_singular: null, name_plural: null },
                 { group_type: 'instance', group_type_index: 2, name_singular: null, name_plural: null },
@@ -148,7 +148,7 @@ export const CodeInstructionsNodeWithGroupMultivariateFlagLocalEvaluation = (): 
     useAvailableFeatures([AvailableFeature.GROUP_ANALYTICS])
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/groups_types/': [
+            '/v1/projects/:team_id/groups_types/': [
                 { group_type: 'project', group_type_index: 0, name_singular: null, name_plural: null },
                 { group_type: 'organization', group_type_index: 1, name_singular: null, name_plural: null },
                 { group_type: 'instance', group_type_index: 2, name_singular: null, name_plural: null },

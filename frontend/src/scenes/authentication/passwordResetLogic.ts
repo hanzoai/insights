@@ -37,7 +37,7 @@ export const passwordResetLogic = kea<passwordResetLogicType>([
             {
                 validateResetToken: async ({ uuid, token }: { uuid: string; token: string }) => {
                     try {
-                        await api.get(`api/reset/${uuid}/?token=${token}`)
+                        await api.get(`v1/reset/${uuid}/?token=${token}`)
                         return { success: true, token, uuid }
                     } catch (e: any) {
                         return { success: false, errorCode: e.code, errorDetail: e.detail }
@@ -71,7 +71,7 @@ export const passwordResetLogic = kea<passwordResetLogicType>([
                 breakpoint()
 
                 try {
-                    await api.create('api/reset/', { email })
+                    await api.create('v1/reset/', { email })
                 } catch (e: any) {
                     actions.setRequestPasswordResetManualErrors({ email: e.detail ?? 'An error occurred' })
                     insights.captureException('Failed to reset password', { extra: { error: e } })
@@ -99,7 +99,7 @@ export const passwordResetLogic = kea<passwordResetLogicType>([
                     return
                 }
                 try {
-                    const response = await api.create(`api/reset/${values.validatedResetToken.uuid}/`, {
+                    const response = await api.create(`v1/reset/${values.validatedResetToken.uuid}/`, {
                         password,
                         token: values.validatedResetToken.token,
                     })

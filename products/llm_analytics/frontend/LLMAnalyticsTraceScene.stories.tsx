@@ -24,7 +24,7 @@ export default meta
 const Template: StoryFn<{ trace: LLMTrace; eventId?: string }> = ({ trace, eventId }): JSX.Element => {
     useStorybookMocks({
         post: {
-            '/api/environments/:team_id/query/': () => [200, { results: [trace] }],
+            '/v1/environments/:team_id/query/': () => [200, { results: [trace] }],
         },
     })
 

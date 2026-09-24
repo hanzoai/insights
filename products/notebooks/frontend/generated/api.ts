@@ -47,8 +47,8 @@ export const getNotebooksListUrl = (projectId: string, params?: NotebooksListPar
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/notebooks/?${stringifiedParams}`
-        : `/api/projects/${projectId}/notebooks/`
+        ? `/v1/projects/${projectId}/notebooks/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/notebooks/`
 }
 
 export const notebooksList = async (
@@ -66,7 +66,7 @@ export const notebooksList = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notebooks/`
+    return `/v1/projects/${projectId}/notebooks/`
 }
 
 export const notebooksCreate = async (
@@ -86,7 +86,7 @@ export const notebooksCreate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/`
 }
 
 export const notebooksRetrieve = async (
@@ -104,7 +104,7 @@ export const notebooksRetrieve = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/`
 }
 
 export const notebooksUpdate = async (
@@ -125,7 +125,7 @@ export const notebooksUpdate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksPartialUpdateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/`
 }
 
 export const notebooksPartialUpdate = async (
@@ -146,7 +146,7 @@ export const notebooksPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getNotebooksDestroyUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/`
 }
 
 export const notebooksDestroy = async (projectId: string, shortId: string, options?: RequestInit): Promise<unknown> => {
@@ -160,7 +160,7 @@ export const notebooksDestroy = async (projectId: string, shortId: string, optio
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksActivityRetrieve2Url = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/activity/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/activity/`
 }
 
 export const notebooksActivityRetrieve2 = async (
@@ -178,7 +178,7 @@ export const notebooksActivityRetrieve2 = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksInsightsQLExecuteCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/insightsql/execute/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/insightsql/execute/`
 }
 
 export const notebooksInsightsQLExecuteCreate = async (
@@ -199,7 +199,7 @@ export const notebooksInsightsQLExecuteCreate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksKernelConfigCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/config/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/config/`
 }
 
 export const notebooksKernelConfigCreate = async (
@@ -220,7 +220,7 @@ export const notebooksKernelConfigCreate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksKernelDataframeRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/dataframe/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/dataframe/`
 }
 
 export const notebooksKernelDataframeRetrieve = async (
@@ -238,7 +238,7 @@ export const notebooksKernelDataframeRetrieve = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksKernelExecuteCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/execute/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/execute/`
 }
 
 export const notebooksKernelExecuteCreate = async (
@@ -259,7 +259,7 @@ export const notebooksKernelExecuteCreate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksKernelExecuteStreamCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/execute/stream/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/execute/stream/`
 }
 
 export const notebooksKernelExecuteStreamCreate = async (
@@ -280,7 +280,7 @@ export const notebooksKernelExecuteStreamCreate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksKernelRestartCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/restart/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/restart/`
 }
 
 export const notebooksKernelRestartCreate = async (
@@ -301,7 +301,7 @@ export const notebooksKernelRestartCreate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksKernelStartCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/start/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/start/`
 }
 
 export const notebooksKernelStartCreate = async (
@@ -322,7 +322,7 @@ export const notebooksKernelStartCreate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksKernelStatusRetrieveUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/status/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/status/`
 }
 
 export const notebooksKernelStatusRetrieve = async (
@@ -340,7 +340,7 @@ export const notebooksKernelStatusRetrieve = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksKernelStopCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/kernel/stop/`
+    return `/v1/projects/${projectId}/notebooks/${shortId}/kernel/stop/`
 }
 
 export const notebooksKernelStopCreate = async (
@@ -361,7 +361,7 @@ export const notebooksKernelStopCreate = async (
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksActivityRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notebooks/activity/`
+    return `/v1/projects/${projectId}/notebooks/activity/`
 }
 
 export const notebooksActivityRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -375,7 +375,7 @@ export const notebooksActivityRetrieve = async (projectId: string, options?: Req
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
 export const getNotebooksRecordingCommentsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/notebooks/recording_comments/`
+    return `/v1/projects/${projectId}/notebooks/recording_comments/`
 }
 
 export const notebooksRecordingCommentsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {

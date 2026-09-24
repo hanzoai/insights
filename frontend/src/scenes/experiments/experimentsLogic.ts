@@ -227,7 +227,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
             {
                 loadExperiments: async () => {
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/experiments?${toParams(values.paramsFromFilters)}`
+                        `v1/projects/${values.currentProjectId}/experiments?${toParams(values.paramsFromFilters)}`
                     )
                     return {
                         ...response,
@@ -235,7 +235,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                     }
                 },
                 archiveExperiment: async (id: number) => {
-                    await api.update(`api/projects/${values.currentProjectId}/experiments/${id}`, { archived: true })
+                    await api.update(`v1/projects/${values.currentProjectId}/experiments/${id}`, { archived: true })
                     toast.info('Experiment archived')
                     return {
                         ...values.experiments,
@@ -246,7 +246,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                 duplicateExperiment: async (payload: { id: number; featureFlagKey?: string }) => {
                     const data = payload.featureFlagKey ? { feature_flag_key: payload.featureFlagKey } : {}
                     const duplicatedExperiment = await api.create(
-                        `api/projects/${values.currentProjectId}/experiments/${payload.id}/duplicate`,
+                        `v1/projects/${values.currentProjectId}/experiments/${payload.id}/duplicate`,
                         data
                     )
                     toast.success('Experiment duplicated successfully')
@@ -280,7 +280,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
             {
                 loadFeatureFlagModalFeatureFlags: async () => {
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/experiments/eligible_feature_flags/?${toParams({
+                        `v1/projects/${values.currentProjectId}/experiments/eligible_feature_flags/?${toParams({
                             ...values.featureFlagModalParamsFromFilters,
                         })}`
                     )
@@ -298,7 +298,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
             } as ExperimentVelocityStats,
             {
                 loadExperimentsStats: async () => {
-                    const response = await api.get(`api/projects/${values.currentProjectId}/experiments/stats/`)
+                    const response = await api.get(`v1/projects/${values.currentProjectId}/experiments/stats/`)
                     return response
                 },
             },

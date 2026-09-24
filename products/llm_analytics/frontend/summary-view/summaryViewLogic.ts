@@ -144,7 +144,7 @@ export const summaryViewLogic = kea<summaryViewLogicType>([
                     throw new Error('Team ID not available')
                 }
 
-                const data = await api.create(`api/environments/${teamId}/llm_analytics/summarization/`, payload)
+                const data = await api.create(`v1/environments/${teamId}/llm_analytics/summarization/`, payload)
 
                 return {
                     summary: data.summary,

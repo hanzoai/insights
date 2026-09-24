@@ -30,8 +30,8 @@ describe('insightsFlowEditorNotificationTestLogic', () => {
 
         useMocks({
             get: {
-                '/api/environments/:team_id/persons/': { results: [] },
-                '/api/environments/@current/insights_flows/test-workflow-id/': {
+                '/v1/environments/:team_id/persons/': { results: [] },
+                '/v1/environments/@current/insights_flows/test-workflow-id/': {
                     id: 'test-workflow-id',
                     team_id: 1,
                     name: 'Test Workflow',
@@ -39,7 +39,7 @@ describe('insightsFlowEditorNotificationTestLogic', () => {
                     actions: [],
                     edges: [],
                 },
-                '/api/environments/@current/messaging_categories': [],
+                '/v1/environments/@current/messaging_categories': [],
             },
         })
 
@@ -318,7 +318,7 @@ describe('insightsFlowEditorNotificationTestLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/environments/:team_id/persons/': {
+                    '/v1/environments/:team_id/persons/': {
                         results: [
                             {
                                 id: 'person-1',
@@ -345,7 +345,7 @@ describe('insightsFlowEditorNotificationTestLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/environments/:team_id/persons/': {
+                    '/v1/environments/:team_id/persons/': {
                         results: [
                             {
                                 id: 'person-2',
@@ -378,7 +378,7 @@ describe('insightsFlowEditorNotificationTestLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/environments/:team_id/persons/': {
+                    '/v1/environments/:team_id/persons/': {
                         results: [
                             {
                                 id: 'person-1',

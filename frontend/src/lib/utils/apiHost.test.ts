@@ -22,8 +22,8 @@ describe('liveEventsHostOrigin', () => {
 
 describe('isSameOrigin', () => {
     it('keeps Django paths on this origin', () => {
-        expect(isSameOrigin('/api/llm_proxy/completion')).toBe(true)
-        expect(isSameOrigin('https://insights.hanzo.ai/api/environments/1/')).toBe(true)
+        expect(isSameOrigin('/v1/llm_proxy/completion')).toBe(true)
+        expect(isSameOrigin('https://insights.hanzo.ai/v1/environments/1/')).toBe(true)
     })
 
     it('puts the livestream on another origin', () => {

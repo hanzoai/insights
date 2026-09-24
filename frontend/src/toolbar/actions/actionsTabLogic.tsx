@@ -229,12 +229,12 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
                 let response: ActionType
                 if (selectedActionId && selectedActionId !== 'new') {
                     response = await api.update(
-                        `${apiHost}/api/projects/@current/actions/${selectedActionId}/?temporary_token=${temporaryToken}`,
+                        `${apiHost}/v1/projects/@current/actions/${selectedActionId}/?temporary_token=${temporaryToken}`,
                         actionToSave
                     )
                 } else {
                     response = await api.create(
-                        `${apiHost}/api/projects/@current/actions/?temporary_token=${temporaryToken}`,
+                        `${apiHost}/v1/projects/@current/actions/?temporary_token=${temporaryToken}`,
                         actionToSave
                     )
                 }

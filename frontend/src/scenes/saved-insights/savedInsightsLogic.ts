@@ -121,7 +121,7 @@ export const savedInsightsLogic = kea<savedInsightsLogicType>([
                 }
 
                 const legacyResponse: CountedPaginatedResponse<InsightModel> = await api.get(
-                    `api/environments/${teamLogic.values.currentTeamId}/insights/?${toParams(params)}`
+                    `v1/environments/${teamLogic.values.currentTeamId}/insights/?${toParams(params)}`
                 )
 
                 // Cancel if a newer request came in while this one was in flight

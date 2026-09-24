@@ -79,7 +79,7 @@ export const experimentTimeseriesLogic = kea<experimentTimeseriesLogicType>([
                     }
 
                     const response = await api.get(
-                        `api/projects/@current/experiments/${props.experiment.id}/timeseries_results/?metric_uuid=${metric.uuid}&fingerprint=${metric.fingerprint}`
+                        `v1/projects/@current/experiments/${props.experiment.id}/timeseries_results/?metric_uuid=${metric.uuid}&fingerprint=${metric.fingerprint}`
                     )
                     return response
                 },
@@ -91,7 +91,7 @@ export const experimentTimeseriesLogic = kea<experimentTimeseriesLogicType>([
 
                     try {
                         const response = await api.createResponse(
-                            `api/projects/@current/experiments/${props.experiment.id}/recalculate_timeseries/`,
+                            `v1/projects/@current/experiments/${props.experiment.id}/recalculate_timeseries/`,
                             {
                                 metric: metric,
                                 fingerprint: metric.fingerprint,

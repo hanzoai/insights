@@ -235,7 +235,7 @@ export const runningTimeLogic = kea<runningTimeLogicType>([
                 recommended_sample_size: targetSampleSize,
             }
 
-            await api.update(`api/projects/${currentProjectId}/experiments/${props.experimentId}`, {
+            await api.update(`v1/projects/${currentProjectId}/experiments/${props.experimentId}`, {
                 parameters: updatedParameters,
             })
 

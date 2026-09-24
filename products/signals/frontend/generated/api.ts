@@ -28,7 +28,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 export const getSignalsEmitCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/signals/emit/`
+    return `/v1/environments/${projectId}/signals/emit/`
 }
 
 export const signalsEmitCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -53,8 +53,8 @@ export const getSignalReportsListUrl = (projectId: string, params?: SignalReport
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/signal_reports/?${stringifiedParams}`
-        : `/api/projects/${projectId}/signal_reports/`
+        ? `/v1/projects/${projectId}/signal_reports/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/signal_reports/`
 }
 
 export const signalReportsList = async (
@@ -73,7 +73,7 @@ export const signalReportsList = async (
  * @summary Run session analysis
  */
 export const getSignalReportsAnalyzeSessionsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/signal_reports/analyze_sessions/`
+    return `/v1/projects/${projectId}/signal_reports/analyze_sessions/`
 }
 
 export const signalReportsAnalyzeSessionsCreate = async (

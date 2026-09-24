@@ -4,7 +4,7 @@ import { downloadExportedAsset } from './exporter'
 
 jest.mock('lib/api', () => ({
     exports: {
-        determineExportUrl: jest.fn((id: number) => `/api/environments/1/exports/${id}/content?download=true`),
+        determineExportUrl: jest.fn((id: number) => `/v1/environments/1/exports/${id}/content?download=true`),
     },
 }))
 
@@ -21,7 +21,7 @@ describe('downloadExportedAsset', () => {
 
         downloadExportedAsset({ id: 123 } as ExportedAssetType)
 
-        expect((fakeAnchor as any).href).toBe('/api/environments/1/exports/123/content?download=true')
+        expect((fakeAnchor as any).href).toBe('/v1/environments/1/exports/123/content?download=true')
         expect(appendSpy).toHaveBeenCalledWith(fakeAnchor)
         expect((fakeAnchor as any).click).toHaveBeenCalled()
         expect(removeSpy).toHaveBeenCalledWith(fakeAnchor)

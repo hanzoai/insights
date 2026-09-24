@@ -18,11 +18,11 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/experiments/20/': EXPERIMENT_DRAFT,
-                '/api/projects/:team_id/experiment_holdouts': [],
-                '/api/projects/:team_id/experiment_saved_metrics/': [],
-                '/api/projects/:team_id/feature_flags/24/': {},
-                '/api/projects/:team_id/feature_flags/24/status/': {},
+                '/v1/projects/:team_id/experiments/20/': EXPERIMENT_DRAFT,
+                '/v1/projects/:team_id/experiment_holdouts': [],
+                '/v1/projects/:team_id/experiment_saved_metrics/': [],
+                '/v1/projects/:team_id/feature_flags/24/': {},
+                '/v1/projects/:team_id/feature_flags/24/status/': {},
             },
         }),
     ],

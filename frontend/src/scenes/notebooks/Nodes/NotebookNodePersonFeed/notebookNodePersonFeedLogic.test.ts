@@ -145,10 +145,10 @@ describe('notebookNodePersonFeedLogic', () => {
         initKeaTests()
         useMocks({
             post: {
-                [`/api/environments/${MOCK_TEAM_ID}/query/`]: {
+                [`/v1/environments/${MOCK_TEAM_ID}/query/`]: {
                     results: mockSessionsWithRecording,
                 },
-                [`/api/environments/${MOCK_TEAM_ID}/session_summaries/create_session_summaries_individually`]: async (
+                [`/v1/environments/${MOCK_TEAM_ID}/session_summaries/create_session_summaries_individually`]: async (
                     req: any
                 ) => {
                     const { session_ids } = await req.json()
@@ -182,7 +182,7 @@ describe('notebookNodePersonFeedLogic', () => {
         it('handles sessions loading failure', async () => {
             useMocks({
                 post: {
-                    [`/api/environments/${MOCK_TEAM_ID}/query/`]: () => [500, { detail: 'Internal badaras error' }],
+                    [`/v1/environments/${MOCK_TEAM_ID}/query/`]: () => [500, { detail: 'Internal badaras error' }],
                 },
             })
 
@@ -213,7 +213,7 @@ describe('notebookNodePersonFeedLogic', () => {
         it('returns empty array when no sessions have recordings', async () => {
             useMocks({
                 post: {
-                    [`/api/environments/${MOCK_TEAM_ID}/query/`]: {
+                    [`/v1/environments/${MOCK_TEAM_ID}/query/`]: {
                         results: mockSessionsWithoutRecording,
                     },
                 },
@@ -230,7 +230,7 @@ describe('notebookNodePersonFeedLogic', () => {
         it('filters mixed sessions correctly', async () => {
             useMocks({
                 post: {
-                    [`/api/environments/${MOCK_TEAM_ID}/query/`]: {
+                    [`/v1/environments/${MOCK_TEAM_ID}/query/`]: {
                         results: mockMixedSessions,
                     },
                 },
@@ -331,7 +331,7 @@ describe('notebookNodePersonFeedLogic', () => {
             logic.unmount()
             useMocks({
                 post: {
-                    [`/api/environments/${MOCK_TEAM_ID}/query/`]: {
+                    [`/v1/environments/${MOCK_TEAM_ID}/query/`]: {
                         results: mockSessionsWithoutRecording,
                     },
                 },
@@ -424,7 +424,7 @@ describe('notebookNodePersonFeedLogic', () => {
         it('sets state to completed when all sessions fail', async () => {
             useMocks({
                 post: {
-                    [`/api/environments/${MOCK_TEAM_ID}/query/`]: {
+                    [`/v1/environments/${MOCK_TEAM_ID}/query/`]: {
                         results: mockFailingSessions,
                     },
                 },
@@ -448,7 +448,7 @@ describe('notebookNodePersonFeedLogic', () => {
         it('sets state to completed when mix of successes and failures', async () => {
             useMocks({
                 post: {
-                    [`/api/environments/${MOCK_TEAM_ID}/query/`]: {
+                    [`/v1/environments/${MOCK_TEAM_ID}/query/`]: {
                         results: [...mockFailingSessions, ...mockSessionsWithRecording],
                     },
                 },
@@ -469,7 +469,7 @@ describe('notebookNodePersonFeedLogic', () => {
         it('includes failed sessions in numProcessedSessions', async () => {
             useMocks({
                 post: {
-                    [`/api/environments/${MOCK_TEAM_ID}/query/`]: {
+                    [`/v1/environments/${MOCK_TEAM_ID}/query/`]: {
                         results: mockSessionsWithRecording,
                     },
                 },
@@ -488,7 +488,7 @@ describe('notebookNodePersonFeedLogic', () => {
         it('generates correct progress text with failures', async () => {
             useMocks({
                 post: {
-                    [`/api/environments/${MOCK_TEAM_ID}/query/`]: {
+                    [`/v1/environments/${MOCK_TEAM_ID}/query/`]: {
                         results: mockSessionsWithRecording,
                     },
                 },

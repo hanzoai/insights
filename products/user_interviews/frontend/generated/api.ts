@@ -44,8 +44,8 @@ export const getUserInterviewsListUrl = (projectId: string, params?: UserIntervi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/user_interviews/?${stringifiedParams}`
-        : `/api/environments/${projectId}/user_interviews/`
+        ? `/v1/environments/${projectId}/user_interviews/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/user_interviews/`
 }
 
 export const userInterviewsList = async (
@@ -60,7 +60,7 @@ export const userInterviewsList = async (
 }
 
 export const getUserInterviewsCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/user_interviews/`
+    return `/v1/environments/${projectId}/user_interviews/`
 }
 
 export const userInterviewsCreate = async (
@@ -85,7 +85,7 @@ export const userInterviewsCreate = async (
 }
 
 export const getUserInterviewsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/user_interviews/${id}/`
+    return `/v1/environments/${projectId}/user_interviews/${id}/`
 }
 
 export const userInterviewsRetrieve = async (
@@ -100,7 +100,7 @@ export const userInterviewsRetrieve = async (
 }
 
 export const getUserInterviewsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/user_interviews/${id}/`
+    return `/v1/environments/${projectId}/user_interviews/${id}/`
 }
 
 export const userInterviewsUpdate = async (
@@ -126,7 +126,7 @@ export const userInterviewsUpdate = async (
 }
 
 export const getUserInterviewsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/user_interviews/${id}/`
+    return `/v1/environments/${projectId}/user_interviews/${id}/`
 }
 
 export const userInterviewsPartialUpdate = async (
@@ -154,7 +154,7 @@ export const userInterviewsPartialUpdate = async (
 }
 
 export const getUserInterviewsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/user_interviews/${id}/`
+    return `/v1/environments/${projectId}/user_interviews/${id}/`
 }
 
 export const userInterviewsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {

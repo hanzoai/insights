@@ -23,7 +23,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/login/precheck': { sso_enforcement: null, saml_available: false },
+                '/v1/login/precheck': { sso_enforcement: null, saml_available: false },
             },
         }),
     ],
@@ -73,7 +73,7 @@ export const CloudWithGoogleLoginEnforcement: StoryFn = () => {
             },
         },
         post: {
-            '/api/login/precheck': { sso_enforcement: 'google-oauth2', saml_available: false },
+            '/v1/login/precheck': { sso_enforcement: 'google-oauth2', saml_available: false },
         },
     })
 

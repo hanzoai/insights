@@ -27,7 +27,7 @@ describe('taxonomicFilterLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': (res) => {
+                '/v1/projects/:team/event_definitions': (res) => {
                     const search = res.url.searchParams.get('search')
                     const results = search
                         ? mockEventDefinitions.filter((e) => e.name.includes(search))
@@ -40,7 +40,7 @@ describe('taxonomicFilterLogic', () => {
                         },
                     ]
                 },
-                '/api/environments/:team/sessions/property_definitions': (res) => {
+                '/v1/environments/:team/sessions/property_definitions': (res) => {
                     const search = res.url.searchParams.get('search')
                     const results = search
                         ? mockSessionPropertyDefinitions.filter((e) => e.name.includes(search))
@@ -221,7 +221,7 @@ describe('taxonomicFilterLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': (res) => {
+                    '/v1/projects/:team/event_definitions': (res) => {
                         const search = res.url.searchParams.get('search')
                         const results = search
                             ? eventsWithPageview.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()))

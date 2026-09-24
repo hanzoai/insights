@@ -66,12 +66,12 @@ export const definitionPopoverLogic = kea<definitionPopoverLogicType>([
                         if (values.isAction) {
                             // Action Definitions
                             const _action = definition as ActionType
-                            definition = await api.update(`api/projects/@current/actions/${_action.id}`, _action)
+                            definition = await api.update(`v1/projects/@current/actions/${_action.id}`, _action)
                             actionsModel.findMounted()?.actions.updateAction(definition as ActionType)
                         } else if (values.isEvent) {
                             // Event Definitions
                             const _event = definition as EventDefinition
-                            definition = await api.update(`api/projects/@current/event_definitions/${_event.id}`, {
+                            definition = await api.update(`v1/projects/@current/event_definitions/${_event.id}`, {
                                 ..._event,
                                 owner: _event.owner?.id ?? null,
                                 verified: !!_event.verified,
@@ -83,7 +83,7 @@ export const definitionPopoverLogic = kea<definitionPopoverLogicType>([
                             // Event Property Definitions
                             const _eventProperty = definition as PropertyDefinition
                             definition = await api.update(
-                                `api/projects/@current/property_definitions/${_eventProperty.id}`,
+                                `v1/projects/@current/property_definitions/${_eventProperty.id}`,
                                 _eventProperty
                             )
                             updatePropertyDefinitions({
@@ -92,7 +92,7 @@ export const definitionPopoverLogic = kea<definitionPopoverLogicType>([
                         } else if (values.type === TaxonomicFilterGroupType.Cohorts) {
                             // Cohort
                             const _cohort = definition as CohortType
-                            definition = await api.update(`api/projects/@current/cohorts/${_cohort.id}`, _cohort)
+                            definition = await api.update(`v1/projects/@current/cohorts/${_cohort.id}`, _cohort)
                             cohortsModel.findMounted()?.actions.updateCohort(definition as CohortType)
                         }
                     } catch (error: any) {

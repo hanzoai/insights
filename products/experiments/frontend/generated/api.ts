@@ -48,8 +48,8 @@ export const getExperimentHoldoutsListUrl = (projectId: string, params?: Experim
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/experiment_holdouts/?${stringifiedParams}`
-        : `/api/projects/${projectId}/experiment_holdouts/`
+        ? `/v1/projects/${projectId}/experiment_holdouts/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/experiment_holdouts/`
 }
 
 export const experimentHoldoutsList = async (
@@ -64,7 +64,7 @@ export const experimentHoldoutsList = async (
 }
 
 export const getExperimentHoldoutsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiment_holdouts/`
+    return `/v1/projects/${projectId}/experiment_holdouts/`
 }
 
 export const experimentHoldoutsCreate = async (
@@ -81,7 +81,7 @@ export const experimentHoldoutsCreate = async (
 }
 
 export const getExperimentHoldoutsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_holdouts/${id}/`
+    return `/v1/projects/${projectId}/experiment_holdouts/${id}/`
 }
 
 export const experimentHoldoutsRetrieve = async (
@@ -96,7 +96,7 @@ export const experimentHoldoutsRetrieve = async (
 }
 
 export const getExperimentHoldoutsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_holdouts/${id}/`
+    return `/v1/projects/${projectId}/experiment_holdouts/${id}/`
 }
 
 export const experimentHoldoutsUpdate = async (
@@ -114,7 +114,7 @@ export const experimentHoldoutsUpdate = async (
 }
 
 export const getExperimentHoldoutsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_holdouts/${id}/`
+    return `/v1/projects/${projectId}/experiment_holdouts/${id}/`
 }
 
 export const experimentHoldoutsPartialUpdate = async (
@@ -132,7 +132,7 @@ export const experimentHoldoutsPartialUpdate = async (
 }
 
 export const getExperimentHoldoutsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiment_holdouts/${id}/`
+    return `/v1/projects/${projectId}/experiment_holdouts/${id}/`
 }
 
 export const experimentHoldoutsDestroy = async (
@@ -158,8 +158,8 @@ export const getExperimentsListUrl = (projectId: string, params?: ExperimentsLis
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/experiments/?${stringifiedParams}`
-        : `/api/projects/${projectId}/experiments/`
+        ? `/v1/projects/${projectId}/experiments/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/experiments/`
 }
 
 export const experimentsList = async (
@@ -174,7 +174,7 @@ export const experimentsList = async (
 }
 
 export const getExperimentsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/`
+    return `/v1/projects/${projectId}/experiments/`
 }
 
 export const experimentsCreate = async (
@@ -191,7 +191,7 @@ export const experimentsCreate = async (
 }
 
 export const getExperimentsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/`
+    return `/v1/projects/${projectId}/experiments/${id}/`
 }
 
 export const experimentsRetrieve = async (
@@ -206,7 +206,7 @@ export const experimentsRetrieve = async (
 }
 
 export const getExperimentsUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/`
+    return `/v1/projects/${projectId}/experiments/${id}/`
 }
 
 export const experimentsUpdate = async (
@@ -224,7 +224,7 @@ export const experimentsUpdate = async (
 }
 
 export const getExperimentsPartialUpdateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/`
+    return `/v1/projects/${projectId}/experiments/${id}/`
 }
 
 export const experimentsPartialUpdate = async (
@@ -245,7 +245,7 @@ export const experimentsPartialUpdate = async (
  * Hard delete of this model is not allowed. Use a patch API call to set "deleted" to true
  */
 export const getExperimentsDestroyUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/`
+    return `/v1/projects/${projectId}/experiments/${id}/`
 }
 
 export const experimentsDestroy = async (projectId: string, id: number, options?: RequestInit): Promise<unknown> => {
@@ -256,7 +256,7 @@ export const experimentsDestroy = async (projectId: string, id: number, options?
 }
 
 export const getExperimentsCreateExposureCohortForExperimentCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/create_exposure_cohort_for_experiment/`
+    return `/v1/projects/${projectId}/experiments/${id}/create_exposure_cohort_for_experiment/`
 }
 
 export const experimentsCreateExposureCohortForExperimentCreate = async (
@@ -274,7 +274,7 @@ export const experimentsCreateExposureCohortForExperimentCreate = async (
 }
 
 export const getExperimentsDuplicateCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/duplicate/`
+    return `/v1/projects/${projectId}/experiments/${id}/duplicate/`
 }
 
 export const experimentsDuplicateCreate = async (
@@ -299,7 +299,7 @@ Request body:
 - fingerprint (required): The fingerprint of the metric configuration
  */
 export const getExperimentsRecalculateTimeseriesCreateUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/recalculate_timeseries/`
+    return `/v1/projects/${projectId}/experiments/${id}/recalculate_timeseries/`
 }
 
 export const experimentsRecalculateTimeseriesCreate = async (
@@ -325,7 +325,7 @@ Query parameters:
 - fingerprint (required): The fingerprint of the metric configuration
  */
 export const getExperimentsTimeseriesResultsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/experiments/${id}/timeseries_results/`
+    return `/v1/projects/${projectId}/experiments/${id}/timeseries_results/`
 }
 
 export const experimentsTimeseriesResultsRetrieve = async (
@@ -357,7 +357,7 @@ Query parameters:
 - has_evaluation_tags: Filter by presence of evaluation tags ("true" or "false")
  */
 export const getExperimentsEligibleFeatureFlagsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/eligible_feature_flags/`
+    return `/v1/projects/${projectId}/experiments/eligible_feature_flags/`
 }
 
 export const experimentsEligibleFeatureFlagsRetrieve = async (
@@ -371,7 +371,7 @@ export const experimentsEligibleFeatureFlagsRetrieve = async (
 }
 
 export const getExperimentsRequiresFlagImplementationRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/requires_flag_implementation/`
+    return `/v1/projects/${projectId}/experiments/requires_flag_implementation/`
 }
 
 export const experimentsRequiresFlagImplementationRetrieve = async (
@@ -388,7 +388,7 @@ export const experimentsRequiresFlagImplementationRetrieve = async (
  * Get experimentation velocity statistics.
  */
 export const getExperimentsStatsRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/experiments/stats/`
+    return `/v1/projects/${projectId}/experiments/stats/`
 }
 
 export const experimentsStatsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {

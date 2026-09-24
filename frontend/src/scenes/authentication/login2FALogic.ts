@@ -72,7 +72,7 @@ export const login2FALogic = kea<login2FALogicType>([
                     try {
                         // Step 1: Get authentication options from server
                         const beginResponse =
-                            await api.create<PublicKeyCredentialRequestOptionsJSON>('api/login/2fa/passkey/begin/')
+                            await api.create<PublicKeyCredentialRequestOptionsJSON>('v1/login/2fa/passkey/begin/')
 
                         // Step 2: Use SimpleWebAuthn to get assertion from authenticator
                         const assertion = await startAuthentication({
@@ -86,7 +86,7 @@ export const login2FALogic = kea<login2FALogicType>([
                         })
 
                         // Step 3: Send assertion to server to complete 2FA
-                        await api.create<LoginTokenResponse>('api/login/token', {
+                        await api.create<LoginTokenResponse>('v1/login/token', {
                             credential_id: assertion.id,
                             response: assertion.response,
                         })
@@ -105,7 +105,7 @@ export const login2FALogic = kea<login2FALogicType>([
                 checkPasskeysAvailable: async () => {
                     try {
                         // Get available 2FA methods
-                        const methods = await api.get<TwoFAMethodsResponse>('api/login/2fa/passkey/methods/')
+                        const methods = await api.get<TwoFAMethodsResponse>('v1/login/2fa/passkey/methods/')
                         // Store TOTP availability for UI
                         actions.setTotpAvailable(methods.has_totp)
                         return methods.has_passkeys
@@ -127,7 +127,7 @@ export const login2FALogic = kea<login2FALogicType>([
             submit: async ({ token }, breakpoint) => {
                 breakpoint()
                 try {
-                    await api.create<LoginTokenResponse>('api/login/token', { token })
+                    await api.create<LoginTokenResponse>('v1/login/token', { token })
                 } catch (e: unknown) {
                     if (e instanceof ApiError) {
                         actions.setGeneralError(e.code || 'unknown_error', e.detail || 'An error occurred')

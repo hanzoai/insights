@@ -21,8 +21,8 @@ const Template = (args: { instanceConfigured?: boolean; integrated?: boolean }):
 
     useStorybookMocks({
         get: {
-            '/api/projects/:id/integrations': { results: integrated ? [mockIntegration] : [] },
-            '/api/instance_settings': {
+            '/v1/projects/:id/integrations': { results: integrated ? [mockIntegration] : [] },
+            '/v1/instance_settings': {
                 results: instanceConfigured
                     ? [
                           {

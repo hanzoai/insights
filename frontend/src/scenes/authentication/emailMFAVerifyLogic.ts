@@ -55,7 +55,7 @@ export const emailMFAVerifyLogic = kea<emailMFAVerifyLogicType>([
                 verifyAndLogin: async () => {
                     try {
                         // Validate token AND log in (single endpoint)
-                        const response = await api.create<any>('api/login/email-mfa', {
+                        const response = await api.create<any>('v1/login/email-mfa', {
                             email: values.email,
                             token: values.token,
                         })

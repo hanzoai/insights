@@ -100,7 +100,7 @@ export const metalyticsLogic = kea<metalyticsLogicType>([
                 actions.loadViewCount()
                 actions.loadUsersLast30days()
 
-                await api.create('/api/projects/@current/metalytics/', {
+                await api.create('/v1/projects/@current/metalytics/', {
                     metric_name: 'viewed',
                     instance_id: instanceId,
                 })

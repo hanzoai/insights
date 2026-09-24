@@ -94,7 +94,7 @@ const debugCHQueriesLogic = kea<debugCHQueriesLogicType>([
                     if (props.insightId) {
                         params.append('insight_id', props.insightId)
                     }
-                    return await api.get(`api/debug_ch_queries/?${params.toString()}`)
+                    return await api.get(`v1/debug_ch_queries/?${params.toString()}`)
                 },
             },
         ],

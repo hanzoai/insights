@@ -23,7 +23,7 @@ describe('stripMarkdown', () => {
 
         // Relative links get prefixed with origin
         ['[docs](/docs/guide)', `docs (${window.location.origin}/docs/guide)`],
-        ['[api](api/v1)', `api (${window.location.origin}/api/v1)`],
+        ['[guide](guide/v1)', `guide (${window.location.origin}/guide/v1)`],
 
         // Bold/italic/code stripped
         ['**bold** and *italic*', 'bold and italic'],

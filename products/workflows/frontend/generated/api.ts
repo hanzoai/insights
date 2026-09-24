@@ -46,8 +46,8 @@ export const getMessagingCategoriesListUrl = (projectId: string, params?: Messag
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/messaging_categories/?${stringifiedParams}`
-        : `/api/environments/${projectId}/messaging_categories/`
+        ? `/v1/environments/${projectId}/messaging_categories/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/messaging_categories/`
 }
 
 export const messagingCategoriesList = async (
@@ -62,7 +62,7 @@ export const messagingCategoriesList = async (
 }
 
 export const getMessagingCategoriesCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/messaging_categories/`
+    return `/v1/environments/${projectId}/messaging_categories/`
 }
 
 export const messagingCategoriesCreate = async (
@@ -82,7 +82,7 @@ export const messagingCategoriesCreate = async (
  * Import subscription topics and globally unsubscribed users from Customer.io API
  */
 export const getMessagingCategoriesImportFromCustomerioCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/messaging_categories/import_from_customerio/`
+    return `/v1/environments/${projectId}/messaging_categories/import_from_customerio/`
 }
 
 export const messagingCategoriesImportFromCustomerioCreate = async (
@@ -103,7 +103,7 @@ export const messagingCategoriesImportFromCustomerioCreate = async (
 Expected CSV columns: id, email, cio_subscription_preferences
  */
 export const getMessagingCategoriesImportPreferencesCsvCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/messaging_categories/import_preferences_csv/`
+    return `/v1/environments/${projectId}/messaging_categories/import_preferences_csv/`
 }
 
 export const messagingCategoriesImportPreferencesCsvCreate = async (
@@ -138,7 +138,7 @@ export const messagingCategoriesImportPreferencesCsvCreate = async (
  * Generate an unsubscribe link for the current user's email address
  */
 export const getMessagingPreferencesGenerateLinkCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/messaging_preferences/generate_link/`
+    return `/v1/environments/${projectId}/messaging_preferences/generate_link/`
 }
 
 export const messagingPreferencesGenerateLinkCreate = async (
@@ -155,7 +155,7 @@ export const messagingPreferencesGenerateLinkCreate = async (
  * Get opt-outs filtered by category or overall opt-outs if no category specified
  */
 export const getMessagingPreferencesOptOutsRetrieveUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/messaging_preferences/opt_outs/`
+    return `/v1/environments/${projectId}/messaging_preferences/opt_outs/`
 }
 
 export const messagingPreferencesOptOutsRetrieve = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -177,8 +177,8 @@ export const getMessagingTemplatesListUrl = (projectId: string, params?: Messagi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/environments/${projectId}/messaging_templates/?${stringifiedParams}`
-        : `/api/environments/${projectId}/messaging_templates/`
+        ? `/v1/environments/${projectId}/messaging_templates/?${stringifiedParams}`
+        : `/v1/environments/${projectId}/messaging_templates/`
 }
 
 export const messagingTemplatesList = async (
@@ -193,7 +193,7 @@ export const messagingTemplatesList = async (
 }
 
 export const getMessagingTemplatesCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/messaging_templates/`
+    return `/v1/environments/${projectId}/messaging_templates/`
 }
 
 export const messagingTemplatesCreate = async (

@@ -199,12 +199,12 @@ export const experimentsTabLogic = kea<experimentsTabLogicType>([
                 try {
                     if (selectedExperimentId && selectedExperimentId !== 'new') {
                         response = await api.update(
-                            `${apiHost}/api/projects/@current/web_experiments/${selectedExperimentId}/?temporary_token=${temporaryToken}`,
+                            `${apiHost}/v1/projects/@current/web_experiments/${selectedExperimentId}/?temporary_token=${temporaryToken}`,
                             experimentToSave
                         )
                     } else {
                         response = await api.create(
-                            `${apiHost}/api/projects/@current/web_experiments/?temporary_token=${temporaryToken}`,
+                            `${apiHost}/v1/projects/@current/web_experiments/?temporary_token=${temporaryToken}`,
                             experimentToSave
                         )
                     }

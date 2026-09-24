@@ -182,7 +182,7 @@ export const customerIOImportLogic = kea<customerIOImportLogicType>([
 
             try {
                 const response = await fetch(
-                    '/api/environments/@current/messaging_categories/import_preferences_csv/',
+                    '/v1/environments/@current/messaging_categories/import_preferences_csv/',
                     {
                         method: 'POST',
                         body: formData,

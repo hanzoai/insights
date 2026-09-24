@@ -66,7 +66,7 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
                         groups: getGroups(values.insights),
                     }
                     const response = await toolbarFetch(
-                        `/api/projects/@current/feature_flags/my_flags${encodeParams(params, '?')}`
+                        `/v1/projects/@current/feature_flags/my_flags${encodeParams(params, '?')}`
                     )
 
                     breakpoint()
@@ -302,7 +302,7 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
             loadFlagsForDistinctId: async ({ distinctId }, breakpoint) => {
                 const params = { distinct_id: distinctId }
                 const response = await toolbarFetch(
-                    `/api/projects/@current/feature_flags/evaluation_reasons${encodeParams(params, '?')}`
+                    `/v1/projects/@current/feature_flags/evaluation_reasons${encodeParams(params, '?')}`
                 )
                 breakpoint()
 

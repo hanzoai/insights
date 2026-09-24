@@ -47,15 +47,15 @@ describe('addToDashboardModalLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': {
+                '/v1/environments/:team_id/insights/': {
                     results: [MOCK_INSIGHT],
                 },
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/': {
                     results: [],
                 },
             },
             patch: {
-                '/api/environments/:team_id/insights/:id': async (req) => {
+                '/v1/environments/:team_id/insights/:id': async (req) => {
                     const payload = await req.json()
                     return [200, { ...MOCK_INSIGHT, ...payload }]
                 },

@@ -38,7 +38,7 @@ export type environmentsFileSystemLinkCreateResponseSuccess = environmentsFileSy
 export type environmentsFileSystemLinkCreateResponse = environmentsFileSystemLinkCreateResponseSuccess
 
 export const getEnvironmentsFileSystemLinkCreateUrl = (projectId: string, id: string) => {
-    return `/api/environments/${projectId}/file_system/${id}/link/`
+    return `/v1/environments/${projectId}/file_system/${id}/link/`
 }
 
 export const environmentsFileSystemLinkCreate = async (
@@ -68,7 +68,7 @@ export type environmentsIntegrationsLinkedinAdsAccountsRetrieveResponse =
     environmentsIntegrationsLinkedinAdsAccountsRetrieveResponseSuccess
 
 export const getEnvironmentsIntegrationsLinkedinAdsAccountsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/environments/${projectId}/integrations/${id}/linkedin_ads_accounts/`
+    return `/v1/environments/${projectId}/integrations/${id}/linkedin_ads_accounts/`
 }
 
 export const environmentsIntegrationsLinkedinAdsAccountsRetrieve = async (
@@ -98,7 +98,7 @@ export type environmentsIntegrationsLinkedinAdsConversionRulesRetrieveResponse =
     environmentsIntegrationsLinkedinAdsConversionRulesRetrieveResponseSuccess
 
 export const getEnvironmentsIntegrationsLinkedinAdsConversionRulesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/environments/${projectId}/integrations/${id}/linkedin_ads_conversion_rules/`
+    return `/v1/environments/${projectId}/integrations/${id}/linkedin_ads_conversion_rules/`
 }
 
 export const environmentsIntegrationsLinkedinAdsConversionRulesRetrieve = async (
@@ -131,7 +131,7 @@ export type environmentsMessagingPreferencesGenerateLinkCreateResponse =
     environmentsMessagingPreferencesGenerateLinkCreateResponseSuccess
 
 export const getEnvironmentsMessagingPreferencesGenerateLinkCreateUrl = (projectId: string) => {
-    return `/api/environments/${projectId}/messaging_preferences/generate_link/`
+    return `/v1/environments/${projectId}/messaging_preferences/generate_link/`
 }
 
 export const environmentsMessagingPreferencesGenerateLinkCreate = async (
@@ -158,7 +158,7 @@ export type fileSystemLinkCreateResponseSuccess = fileSystemLinkCreateResponse20
 export type fileSystemLinkCreateResponse = fileSystemLinkCreateResponseSuccess
 
 export const getFileSystemLinkCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/file_system/${id}/link/`
+    return `/v1/projects/${projectId}/file_system/${id}/link/`
 }
 
 export const fileSystemLinkCreate = async (
@@ -187,7 +187,7 @@ export type integrationsLinkedinAdsAccountsRetrieveResponseSuccess =
 export type integrationsLinkedinAdsAccountsRetrieveResponse = integrationsLinkedinAdsAccountsRetrieveResponseSuccess
 
 export const getIntegrationsLinkedinAdsAccountsRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/linkedin_ads_accounts/`
+    return `/v1/projects/${projectId}/integrations/${id}/linkedin_ads_accounts/`
 }
 
 export const integrationsLinkedinAdsAccountsRetrieve = async (
@@ -217,7 +217,7 @@ export type integrationsLinkedinAdsConversionRulesRetrieveResponse =
     integrationsLinkedinAdsConversionRulesRetrieveResponseSuccess
 
 export const getIntegrationsLinkedinAdsConversionRulesRetrieveUrl = (projectId: string, id: number) => {
-    return `/api/projects/${projectId}/integrations/${id}/linkedin_ads_conversion_rules/`
+    return `/v1/projects/${projectId}/integrations/${id}/linkedin_ads_conversion_rules/`
 }
 
 export const integrationsLinkedinAdsConversionRulesRetrieve = async (

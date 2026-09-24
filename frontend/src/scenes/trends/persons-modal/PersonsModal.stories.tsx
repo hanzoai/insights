@@ -17,7 +17,7 @@ export const WithResults: StoryFn = () => {
     useStorybookMocks({
         get: {
             [EXAMPLE_PERSONS_RESPONSE.initial]: EXAMPLE_PERSONS_RESPONSE,
-            [`/api/projects/:team_id/persons/${EXAMPLE_PERSONS_RESPONSE.results[0].people[0].uuid}/properties_timeline/`]:
+            [`/v1/projects/:team_id/persons/${EXAMPLE_PERSONS_RESPONSE.results[0].people[0].uuid}/properties_timeline/`]:
                 {
                     points: [
                         {
@@ -75,7 +75,7 @@ export const WithResults: StoryFn = () => {
 export const Empty: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/persons/trends/*': {
+            '/v1/projects/:team_id/persons/trends/*': {
                 results: [
                     {
                         people: [],
@@ -88,7 +88,7 @@ export const Empty: StoryFn = () => {
 
     return (
         <div className="flex max-h-200">
-            <PersonsModalComponent title="Hello!" url="/api/projects/1/persons/trends/" inline />
+            <PersonsModalComponent title="Hello!" url="/v1/projects/1/persons/trends/" inline />
         </div>
     )
 }
@@ -96,7 +96,7 @@ export const Empty: StoryFn = () => {
 export const TimeoutError: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/persons/trends/*': (_, __, ctx) => [
+            '/v1/projects/:team_id/persons/trends/*': (_, __, ctx) => [
                 ctx.delay(200),
                 ctx.status(512),
                 ctx.json({
@@ -109,7 +109,7 @@ export const TimeoutError: StoryFn = () => {
 
     return (
         <div className="flex max-h-200">
-            <PersonsModalComponent title="Hello!" url="/api/projects/1/persons/trends/" inline />
+            <PersonsModalComponent title="Hello!" url="/v1/projects/1/persons/trends/" inline />
         </div>
     )
 }
@@ -117,7 +117,7 @@ export const TimeoutError: StoryFn = () => {
 export const ServerError: StoryFn = () => {
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/persons/trends/*': (_, __, ctx) => [
+            '/v1/projects/:team_id/persons/trends/*': (_, __, ctx) => [
                 ctx.delay(200),
                 ctx.status(500),
                 ctx.json({
@@ -130,7 +130,7 @@ export const ServerError: StoryFn = () => {
 
     return (
         <div className="flex max-h-200">
-            <PersonsModalComponent title="Hello!" url="/api/projects/1/persons/trends/" inline />
+            <PersonsModalComponent title="Hello!" url="/v1/projects/1/persons/trends/" inline />
         </div>
     )
 }

@@ -176,7 +176,7 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
                     const { type, aggregation } = values.heatmapFilters
 
                     // toolbar fetch collapses queryparams but this URL has multiple with the same name
-                    const apiURL = `/api/heatmap/${encodeParams(
+                    const apiURL = `/v1/heatmap/${encodeParams(
                         {
                             type,
                             date_from,
@@ -227,7 +227,7 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
                     const { date_from, date_to, filter_test_accounts } = values.commonFilters
                     const { type } = values.heatmapFilters
 
-                    const apiURL = `/api/heatmap/events/${encodeParams(
+                    const apiURL = `/v1/heatmap/events/${encodeParams(
                         {
                             type,
                             date_from,
@@ -417,7 +417,7 @@ export const heatmapDataLogic = kea<heatmapDataLogicType>([
             const { type } = values.heatmapFilters
             const nextOffset = currentEvents.results.length
 
-            const apiURL = `/api/heatmap/events/${encodeParams(
+            const apiURL = `/v1/heatmap/events/${encodeParams(
                 {
                     type,
                     date_from,

@@ -19,8 +19,8 @@ const meta: Meta<typeof Query> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/events': events,
-                '/api/environments/:team_id/persons': persons,
+                '/v1/environments/:team_id/events': events,
+                '/v1/environments/:team_id/persons': persons,
             },
         }),
     ],

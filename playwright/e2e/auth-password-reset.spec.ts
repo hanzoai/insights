@@ -57,7 +57,7 @@ test.describe('Password Reset', () => {
 
         // Intercept the password reset complete request to check response
         const responsePromise = page.waitForResponse(
-            (response) => response.url().includes('/api/reset/e2e_test_user') && response.request().method() === 'POST'
+            (response) => response.url().includes('/v1/reset/e2e_test_user') && response.request().method() === 'POST'
         )
 
         await page.click('button[type=submit]')

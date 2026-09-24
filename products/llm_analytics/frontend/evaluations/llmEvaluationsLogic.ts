@@ -95,7 +95,7 @@ export const llmEvaluationsLogic = kea<llmEvaluationsLogicType>([
                     return
                 }
 
-                const response = await api.get(`/api/environments/${teamId}/evaluations/`)
+                const response = await api.get(`/v1/environments/${teamId}/evaluations/`)
                 actions.loadEvaluationsSuccess(response.results)
             } catch (error) {
                 console.error('Failed to load evaluations:', error)
@@ -110,7 +110,7 @@ export const llmEvaluationsLogic = kea<llmEvaluationsLogicType>([
                     return
                 }
 
-                const response = await api.create(`/api/environments/${teamId}/evaluations/`, evaluation)
+                const response = await api.create(`/v1/environments/${teamId}/evaluations/`, evaluation)
                 actions.createEvaluationSuccess(response)
 
                 // Trigger global tracking stuff for quick start + intent
@@ -131,7 +131,7 @@ export const llmEvaluationsLogic = kea<llmEvaluationsLogicType>([
                     return
                 }
 
-                const response = await api.update(`/api/environments/${teamId}/evaluations/${id}/`, evaluation)
+                const response = await api.update(`/v1/environments/${teamId}/evaluations/${id}/`, evaluation)
                 actions.updateEvaluationSuccess(id, response)
             } catch (error) {
                 console.error('Failed to update evaluation:', error)
@@ -144,7 +144,7 @@ export const llmEvaluationsLogic = kea<llmEvaluationsLogicType>([
                 if (!teamId) {
                     return
                 }
-                await api.update(`/api/environments/${teamId}/evaluations/${id}/`, { deleted: true })
+                await api.update(`/v1/environments/${teamId}/evaluations/${id}/`, { deleted: true })
                 actions.deleteEvaluationSuccess(id)
             } catch (error) {
                 console.error('Failed to delete evaluation:', error)
@@ -174,7 +174,7 @@ export const llmEvaluationsLogic = kea<llmEvaluationsLogicType>([
                     return
                 }
 
-                const response = await api.create(`/api/environments/${teamId}/evaluations/`, duplicate)
+                const response = await api.create(`/v1/environments/${teamId}/evaluations/`, duplicate)
                 actions.duplicateEvaluationSuccess(response)
             } catch (error) {
                 console.error('Failed to duplicate evaluation:', error)
@@ -193,7 +193,7 @@ export const llmEvaluationsLogic = kea<llmEvaluationsLogicType>([
                     return
                 }
 
-                await api.update(`/api/environments/${teamId}/evaluations/${id}/`, {
+                await api.update(`/v1/environments/${teamId}/evaluations/${id}/`, {
                     enabled: !evaluation.enabled,
                 })
                 actions.toggleEvaluationEnabledSuccess(id)

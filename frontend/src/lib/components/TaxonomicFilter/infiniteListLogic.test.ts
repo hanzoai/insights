@@ -22,7 +22,7 @@ describe('infiniteListLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': (req) => {
+                '/v1/projects/:team/event_definitions': (req) => {
                     const search = req.url.searchParams.get('search')
                     const limit = Number(req.url.searchParams.get('limit'))
                     const offset = Number(req.url.searchParams.get('offset'))
@@ -39,7 +39,7 @@ describe('infiniteListLogic', () => {
                         },
                     ]
                 },
-                '/api/projects/:team/property_definitions': (req) => {
+                '/v1/projects/:team/property_definitions': (req) => {
                     const search = req.url.searchParams.get('search')
                     let results = search
                         ? mockEventPropertyDefinitions.filter((e) => e.name.includes(search))

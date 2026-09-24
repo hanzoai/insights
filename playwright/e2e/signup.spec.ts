@@ -5,7 +5,7 @@ import { expect, test } from '../utils/playwright-test-base'
 const VALID_PASSWORD = 'Str0ng-Pass-123%'
 
 const ensureExistingUser = async (request: APIRequestContext, email: string): Promise<void> => {
-    await request.post('/api/signup/', {
+    await request.post('/v1/signup/', {
         data: {
             first_name: 'Test',
             email,
@@ -90,7 +90,7 @@ test.describe('Signup', () => {
     test.skip('Can create user account with first name, last name and organization name', async ({ page }) => {
         let signupRequestBody: string | null = null
 
-        await page.route('/api/signup/', async (route) => {
+        await page.route('/v1/signup/', async (route) => {
             signupRequestBody = route.request().postData()
             await route.continue()
         })
@@ -118,7 +118,7 @@ test.describe('Signup', () => {
         let signupRequestBody: string | null = null
         const email = `new_user+generic_error_test_${Math.floor(Math.random() * 10000)}@hanzo.ai`
 
-        await page.route('/api/signup/', async (route) => {
+        await page.route('/v1/signup/', async (route) => {
             signupRequestBody = route.request().postData()
             await route.continue()
         })
@@ -132,7 +132,7 @@ test.describe('Signup', () => {
         await expect(page.locator('[data-attr=signup-role-at-organization]')).toContainText('Engineering')
 
         // Wait for the signup request to complete
-        const signupPromise = page.waitForResponse('/api/signup/')
+        const signupPromise = page.waitForResponse('/v1/signup/')
         await page.locator('[data-attr=signup-submit]').click()
         await signupPromise
 
@@ -155,7 +155,7 @@ test.describe('Signup', () => {
         await page.locator('[data-attr=signup-role-at-organization]').click()
         await page.locator('.Popover li:first-child').click()
         await expect(page.locator('[data-attr=signup-role-at-organization]')).toContainText('Engineering')
-        const retrySignupPromise = page.waitForResponse('/api/signup/')
+        const retrySignupPromise = page.waitForResponse('/v1/signup/')
         await page.locator('[data-attr=signup-submit]').click()
         await retrySignupPromise
 
@@ -165,7 +165,7 @@ test.describe('Signup', () => {
     test('Can create user account with just a first name', async ({ page }) => {
         let signupRequestBody: string | null = null
 
-        await page.route('/api/signup/', async (route) => {
+        await page.route('/v1/signup/', async (route) => {
             signupRequestBody = route.request().postData()
             await route.continue()
         })
@@ -179,7 +179,7 @@ test.describe('Signup', () => {
         await expect(page.locator('[data-attr=signup-role-at-organization]')).toContainText('Engineering')
 
         // Wait for the signup request to complete
-        const signupPromise = page.waitForResponse('/api/signup/')
+        const signupPromise = page.waitForResponse('/v1/signup/')
         await page.locator('[data-attr=signup-submit]').click()
         await signupPromise
 

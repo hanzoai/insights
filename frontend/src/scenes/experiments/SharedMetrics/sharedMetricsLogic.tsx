@@ -15,7 +15,7 @@ export const sharedMetricsLogic = kea<sharedMetricsLogicType>([
             [] as SharedMetric[],
             {
                 loadSharedMetrics: async () => {
-                    const response = await api.get('api/projects/@current/experiment_saved_metrics')
+                    const response = await api.get('v1/projects/@current/experiment_saved_metrics')
                     return response.results as SharedMetric[]
                 },
             },

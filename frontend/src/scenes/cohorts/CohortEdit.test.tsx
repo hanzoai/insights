@@ -17,15 +17,15 @@ describe('cohortEditLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/cohorts': [mockCohort],
-                '/api/projects/:team/cohorts/:id': mockCohort,
+                '/v1/projects/:team/cohorts': [mockCohort],
+                '/v1/projects/:team/cohorts/:id': mockCohort,
             },
             post: {
-                '/api/projects/:team/cohorts/': mockCohort,
-                '/api/projects/:team/cohorts/:id': mockCohort,
+                '/v1/projects/:team/cohorts/': mockCohort,
+                '/v1/projects/:team/cohorts/:id': mockCohort,
             },
             patch: {
-                '/api/projects/:team/cohorts/:id': mockCohort,
+                '/v1/projects/:team/cohorts/:id': mockCohort,
             },
         })
         initKeaTests()
@@ -193,7 +193,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team/cohorts/${cohortId}`]: {
+                    [`/v1/projects/:team/cohorts/${cohortId}`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -221,7 +221,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team/cohorts/${cohortId}`]: {
+                    [`/v1/projects/:team/cohorts/${cohortId}`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -249,7 +249,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team/cohorts/${cohortId}`]: {
+                    [`/v1/projects/:team/cohorts/${cohortId}`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -276,7 +276,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team/cohorts/${cohortId}`]: {
+                    [`/v1/projects/:team/cohorts/${cohortId}`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,

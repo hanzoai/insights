@@ -23,18 +23,18 @@ describe('insightSceneLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/trend/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/': {
+                '/v1/environments/:team_id/insights/trend/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/': {
                     results: [{ id: 42, short_id: Insight42, result: ['result from api'] }],
                 },
             },
             post: {
-                '/api/environments/:team_id/insights/funnel/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/': (req) => [
+                '/v1/environments/:team_id/insights/funnel/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/': (req) => [
                     200,
                     { id: 12, short_id: Insight12, ...(req.body as any) },
                 ],
-                '/api/environments/:team_id/query/upgrade/': { query: {} },
+                '/v1/environments/:team_id/query/upgrade/': { query: {} },
             },
         })
         initKeaTests()
@@ -104,10 +104,10 @@ describe('insightSceneLogic', () => {
             .mockReturnValue([200, { results: [{ id: 42, short_id: Insight42, result: ['result from api'] }] }])
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': insightApiCall,
+                '/v1/environments/:team_id/insights/': insightApiCall,
             },
             post: {
-                '/api/environments/:team_id/query/upgrade/': { query: {} },
+                '/v1/environments/:team_id/query/upgrade/': { query: {} },
             },
         })
 

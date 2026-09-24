@@ -29,7 +29,7 @@ const Template = ({ cloud, ...props }: PayGateMiniProps & { cloud?: boolean }): 
                 is_debug: cloud !== undefined ? cloud : true,
                 realm: Realm.Cloud,
             },
-            '/api/billing/': {
+            '/v1/billing/': {
                 ...billingJson,
             },
         },
@@ -75,7 +75,7 @@ export const PayGateMiniAddon = (): JSX.Element => {
 export const PayGateMiniLimitFeatureOther = (): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/users/@me': () => [
+            '/v1/users/@me': () => [
                 200,
                 {
                     ...meCurrent,
@@ -98,7 +98,7 @@ export const PayGateMiniLimitFeatureOther = (): JSX.Element => {
 export const PayGateMiniLimitFeatureProjects = (): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/users/@me': () => [
+            '/v1/users/@me': () => [
                 200,
                 {
                     ...meCurrent,
@@ -122,7 +122,7 @@ export const PayGateMiniLimitFeatureProjects = (): JSX.Element => {
 export const PayGateMiniFree = (): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/billing/': {
+            '/v1/billing/': {
                 ...billingUnsubscribedJson,
             },
         },

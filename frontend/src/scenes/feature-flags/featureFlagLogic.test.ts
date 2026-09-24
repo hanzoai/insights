@@ -43,11 +43,11 @@ describe('featureFlagLogic', () => {
 
         useMocks({
             get: {
-                [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
+                [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/`]: () => [
                     200,
                     MOCK_FEATURE_FLAG,
                 ],
-                [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/status`]: () => [
+                [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${MOCK_FEATURE_FLAG.id}/status`]: () => [
                     200,
                     MOCK_FEATURE_FLAG_STATUS,
                 ],
@@ -219,15 +219,15 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithExperiment.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithExperiment.id}/`]: () => [
                         200,
                         flagWithExperiment,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithExperiment.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithExperiment.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/experiments/${MOCK_EXPERIMENT.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/experiments/${MOCK_EXPERIMENT.id}/`]: () => [
                         200,
                         MOCK_EXPERIMENT,
                     ],
@@ -261,11 +261,11 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithoutExperiment.id}/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithoutExperiment.id}/`]: () => [
                         200,
                         flagWithoutExperiment,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithoutExperiment.id}/status`]:
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flagWithoutExperiment.id}/status`]:
                         () => [200, MOCK_FEATURE_FLAG_STATUS],
                 },
             })
@@ -296,12 +296,12 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
                         200,
                         MOCK_DEPENDENT_FLAGS,
                     ],
@@ -328,12 +328,12 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
                         200,
                         MOCK_DEPENDENT_FLAGS,
                     ],
@@ -357,12 +357,12 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
                         200,
                         [],
                     ],
@@ -386,12 +386,12 @@ describe('featureFlagLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/`]: () => [200, flag],
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/status`]: () => [
                         200,
                         MOCK_FEATURE_FLAG_STATUS,
                     ],
-                    [`/api/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
+                    [`/v1/projects/${MOCK_DEFAULT_PROJECT.id}/feature_flags/${flag.id}/dependent_flags/`]: () => [
                         500,
                         { error: 'Internal server error' },
                     ],

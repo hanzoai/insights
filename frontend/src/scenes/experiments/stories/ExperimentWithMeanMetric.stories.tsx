@@ -22,14 +22,14 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                [`/api/projects/:team_id/experiments/${EXPERIMENT_WITH_MEAN_METRIC.id}/`]: EXPERIMENT_WITH_MEAN_METRIC,
-                [`/api/projects/:team_id/experiment_holdouts`]: [],
-                [`/api/projects/:team_id/experiment_saved_metrics/`]: [],
-                [`/api/projects/:team_id/feature_flags/${EXPERIMENT_WITH_MEAN_METRIC.feature_flag.id}/`]: {},
-                [`/api/projects/:team_id/feature_flags/${EXPERIMENT_WITH_MEAN_METRIC.feature_flag.id}/status/`]: {},
+                [`/v1/projects/:team_id/experiments/${EXPERIMENT_WITH_MEAN_METRIC.id}/`]: EXPERIMENT_WITH_MEAN_METRIC,
+                [`/v1/projects/:team_id/experiment_holdouts`]: [],
+                [`/v1/projects/:team_id/experiment_saved_metrics/`]: [],
+                [`/v1/projects/:team_id/feature_flags/${EXPERIMENT_WITH_MEAN_METRIC.feature_flag.id}/`]: {},
+                [`/v1/projects/:team_id/feature_flags/${EXPERIMENT_WITH_MEAN_METRIC.feature_flag.id}/status/`]: {},
             },
             post: {
-                '/api/environments/:team_id/query': (req, res, ctx) => {
+                '/v1/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
 
                     if (body.query.kind === NodeKind.ExperimentExposureQuery) {

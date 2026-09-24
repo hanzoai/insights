@@ -10,7 +10,7 @@ const meta: Meta<typeof JSSnippet> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/organizations/@current/proxy_records': [],
+                '/v1/organizations/@current/proxy_records': [],
             },
         }),
     ],

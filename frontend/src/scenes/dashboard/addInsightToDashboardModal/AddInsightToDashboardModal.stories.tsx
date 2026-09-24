@@ -48,12 +48,12 @@ const meta: Meta<typeof AddInsightToDashboardModal> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/dashboards/': require('../__mocks__/dashboards.json'),
-                [`/api/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
-                '/api/environments/:team_id/insights/': mockInsightsList,
+                '/v1/environments/:team_id/dashboards/': require('../__mocks__/dashboards.json'),
+                [`/v1/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
+                '/v1/environments/:team_id/insights/': mockInsightsList,
             },
             post: {
-                '/api/environments/:team_id/insights/cancel/': [201],
+                '/v1/environments/:team_id/insights/cancel/': [201],
             },
         }),
     ],
@@ -88,12 +88,12 @@ export const Empty: StoryFn = () => <ModalStory />
 Empty.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/dashboards/': require('../__mocks__/dashboards.json'),
-            [`/api/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
-            '/api/environments/:team_id/insights/': { results: [], count: 0, next: null, previous: null },
+            '/v1/environments/:team_id/dashboards/': require('../__mocks__/dashboards.json'),
+            [`/v1/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
+            '/v1/environments/:team_id/insights/': { results: [], count: 0, next: null, previous: null },
         },
         post: {
-            '/api/environments/:team_id/insights/cancel/': [201],
+            '/v1/environments/:team_id/insights/cancel/': [201],
         },
     }),
 ]

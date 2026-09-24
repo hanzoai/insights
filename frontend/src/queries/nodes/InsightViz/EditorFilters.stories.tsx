@@ -25,12 +25,12 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/persons/retention': sampleRetentionPeopleResponse,
-                '/api/environments/:team_id/persons/properties': samplePersonProperties,
-                '/api/projects/:team_id/groups_types': [],
+                '/v1/environments/:team_id/persons/retention': sampleRetentionPeopleResponse,
+                '/v1/environments/:team_id/persons/properties': samplePersonProperties,
+                '/v1/projects/:team_id/groups_types': [],
             },
             post: {
-                '/api/projects/:team_id/cohorts/': { id: 1 },
+                '/v1/projects/:team_id/cohorts/': { id: 1 },
             },
         }),
     ],

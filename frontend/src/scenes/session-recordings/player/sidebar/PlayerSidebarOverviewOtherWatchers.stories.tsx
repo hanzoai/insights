@@ -48,7 +48,7 @@ export function Default(): JSX.Element {
 Default.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': {
+            '/v1/environments/:team_id/session_recordings/:id': {
                 id: 'test-session-id',
                 session_id: 'test-session-id',
                 distinct_id: 'test-user',
@@ -85,7 +85,7 @@ export function Expanded(): JSX.Element {
 Expanded.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': {
+            '/v1/environments/:team_id/session_recordings/:id': {
                 id: 'test-session-id',
                 session_id: 'test-session-id',
                 distinct_id: 'test-user',
@@ -122,7 +122,7 @@ export function WithMultipleViewers(): JSX.Element {
 WithMultipleViewers.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': {
+            '/v1/environments/:team_id/session_recordings/:id': {
                 id: 'test-session-id',
                 session_id: 'test-session-id',
                 distinct_id: 'test-user',
@@ -166,7 +166,7 @@ export function NoOtherWatchers(): JSX.Element {
 NoOtherWatchers.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': {
+            '/v1/environments/:team_id/session_recordings/:id': {
                 id: 'test-session-id',
                 session_id: 'test-session-id',
                 distinct_id: 'test-user',

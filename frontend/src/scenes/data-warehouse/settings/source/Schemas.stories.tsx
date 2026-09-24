@@ -29,7 +29,7 @@ export default meta
 const Template: StoryFn<typeof Schemas> = (props) => {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/external_data_sources/:id': () => {
+            '/v1/environments/:team_id/external_data_sources/:id': () => {
                 return [200, externalDataSourceResponseMock]
             },
         },

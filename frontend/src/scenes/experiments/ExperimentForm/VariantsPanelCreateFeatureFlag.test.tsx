@@ -46,7 +46,7 @@ describe('VariantsPanelCreateFeatureFlag', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/@current/feature_flags/': (req) => {
+                '/v1/projects/@current/feature_flags/': (req) => {
                     const url = new URL(req.url)
                     const search = url.searchParams.get('search')
 
@@ -63,7 +63,7 @@ describe('VariantsPanelCreateFeatureFlag', () => {
 
                     return [200, { results: [], count: 0 }]
                 },
-                '/api/projects/@current/experiments': () => [200, { results: [], count: 0 }],
+                '/v1/projects/@current/experiments': () => [200, { results: [], count: 0 }],
             },
         })
         initKeaTests()

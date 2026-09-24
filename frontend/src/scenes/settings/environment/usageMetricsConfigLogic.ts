@@ -100,7 +100,7 @@ export const usageMetricsConfigLogic = kea<usageMetricsConfigLogicType>([
             (s) => [s.currentProjectId],
             // Defaulting group type index to 0 as we want to make this group-agnostic.
             // Backend model/endpoint will be refactored
-            (currentProjectId) => `/api/projects/${currentProjectId}/groups_types/0/metrics`,
+            (currentProjectId) => `/v1/projects/${currentProjectId}/groups_types/0/metrics`,
         ],
     }),
 

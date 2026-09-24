@@ -110,7 +110,7 @@ export const roleAccessControlLogic = kea<roleAccessControlLogicType>([
             {
                 loadResourceAccessControls: async () => {
                     const response = await api.get<AccessControlResponseType>(
-                        'api/projects/@current/resource_access_controls'
+                        'v1/projects/@current/resource_access_controls'
                     )
                     return response
                 },

@@ -140,7 +140,7 @@ export function SharingModalContent({
 
     const apiQueryUrl =
         insight?.query && currentProjectId
-            ? new URL(`api/projects/${currentProjectId}/query/`, siteUrl).toString()
+            ? new URL(`v1/projects/${currentProjectId}/query/`, siteUrl).toString()
             : null
     const apiQuerySnippet = apiQueryUrl
         ? createApiQuerySnippet({

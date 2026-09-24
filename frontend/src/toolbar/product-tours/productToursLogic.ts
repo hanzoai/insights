@@ -186,7 +186,7 @@ export const productToursLogic = kea<productToursLogicType>([
             [] as ProductTour[],
             {
                 loadTours: async () => {
-                    const response = await toolbarFetch('/api/projects/@current/product_tours/')
+                    const response = await toolbarFetch('/v1/projects/@current/product_tours/')
                     if (!response.ok) {
                         return []
                     }
@@ -335,7 +335,7 @@ export const productToursLogic = kea<productToursLogicType>([
                     return
                 }
                 const response = await toolbarFetch(
-                    `/api/projects/@current/product_tours/${formValues.id}/draft/`,
+                    `/v1/projects/@current/product_tours/${formValues.id}/draft/`,
                     'PATCH',
                     buildDraftPayload(formValues, values.tours)
                 )
@@ -598,8 +598,8 @@ export const productToursLogic = kea<productToursLogicType>([
             const isUpdate = !!tourForm.id
             const payload = { ...buildDraftPayload(tourForm, tours), creation_context: 'toolbar' }
             const url = isUpdate
-                ? `/api/projects/@current/product_tours/${tourForm.id}/draft/`
-                : '/api/projects/@current/product_tours/'
+                ? `/v1/projects/@current/product_tours/${tourForm.id}/draft/`
+                : '/v1/projects/@current/product_tours/'
             const method = isUpdate ? 'PATCH' : 'POST'
             try {
                 const response = await toolbarFetch(url, method, payload)
@@ -729,7 +729,7 @@ export const productToursLogic = kea<productToursLogicType>([
             }
         },
         deleteTour: async ({ id }) => {
-            const response = await toolbarFetch(`/api/projects/@current/product_tours/${id}/`, 'DELETE')
+            const response = await toolbarFetch(`/v1/projects/@current/product_tours/${id}/`, 'DELETE')
             if (response.ok) {
                 toast.success('Tour deleted')
                 actions.loadTours()

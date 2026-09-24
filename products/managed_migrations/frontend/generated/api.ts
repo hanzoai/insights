@@ -47,8 +47,8 @@ export const getManagedMigrationsListUrl = (projectId: string, params?: ManagedM
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/managed_migrations/?${stringifiedParams}`
-        : `/api/projects/${projectId}/managed_migrations/`
+        ? `/v1/projects/${projectId}/managed_migrations/?${stringifiedParams}`
+        : `/v1/projects/${projectId}/managed_migrations/`
 }
 
 export const managedMigrationsList = async (
@@ -66,7 +66,7 @@ export const managedMigrationsList = async (
  * Create a new managed migration/batch import.
  */
 export const getManagedMigrationsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/managed_migrations/`
+    return `/v1/projects/${projectId}/managed_migrations/`
 }
 
 export const managedMigrationsCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
@@ -80,7 +80,7 @@ export const managedMigrationsCreate = async (projectId: string, options?: Reque
  * Viewset for BatchImport model
  */
 export const getManagedMigrationsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/`
 }
 
 export const managedMigrationsRetrieve = async (
@@ -98,7 +98,7 @@ export const managedMigrationsRetrieve = async (
  * Viewset for BatchImport model
  */
 export const getManagedMigrationsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/`
 }
 
 export const managedMigrationsUpdate = async (
@@ -119,7 +119,7 @@ export const managedMigrationsUpdate = async (
  * Viewset for BatchImport model
  */
 export const getManagedMigrationsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/`
 }
 
 export const managedMigrationsPartialUpdate = async (
@@ -140,7 +140,7 @@ export const managedMigrationsPartialUpdate = async (
  * Viewset for BatchImport model
  */
 export const getManagedMigrationsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/`
 }
 
 export const managedMigrationsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
@@ -154,7 +154,7 @@ export const managedMigrationsDestroy = async (projectId: string, id: string, op
  * Pause a running batch import.
  */
 export const getManagedMigrationsPauseCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/pause/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/pause/`
 }
 
 export const managedMigrationsPauseCreate = async (
@@ -175,7 +175,7 @@ export const managedMigrationsPauseCreate = async (
  * Resume a paused batch import.
  */
 export const getManagedMigrationsResumeCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/managed_migrations/${id}/resume/`
+    return `/v1/projects/${projectId}/managed_migrations/${id}/resume/`
 }
 
 export const managedMigrationsResumeCreate = async (
