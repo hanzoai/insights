@@ -69,9 +69,9 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         mock_get_session_recording.return_value = SessionRecording(session_id=session_id, team=self.team, deleted=False)
 
         if source is not None:
-            url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source={source}"
+            url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source={source}"
         else:
-            url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/"
+            url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/"
 
         response = self.client.get(url)
         assert response.status_code == expected_status, (
@@ -112,7 +112,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         )
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=1"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=1"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -149,7 +149,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         mock_get_session_recording.return_value = SessionRecording(session_id=session_id, team=self.team, deleted=False)
         mock_list_blocks.return_value = [MagicMock(url="http://test.com/block0")]
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key={start_key}&end_blob_key={end_key}"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key={start_key}&end_blob_key={end_key}"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
@@ -174,7 +174,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
 
         mock_get_session_recording.return_value = SessionRecording(session_id=session_id, team=self.team, deleted=False)
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key={start_key}&end_blob_key={end_key}"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key={start_key}&end_blob_key={end_key}"
         response = self.client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Blob keys must be integers" in response.json()["detail"]
@@ -193,7 +193,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
 
         mock_get_session_recording.return_value = SessionRecording(session_id=session_id, team=self.team, deleted=False)
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=12&end_blob_key=113"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=12&end_blob_key=113"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -223,7 +223,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
             scoped_teams=[self.team.pk],
         )
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=12&end_blob_key=33"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=12&end_blob_key=33"
 
         response = self.client.get(url, headers={"authorization": f"Bearer {personal_api_key}"})
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
@@ -243,7 +243,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
 
         mock_get_session_recording.return_value = SessionRecording(session_id=session_id, team=self.team, deleted=False)
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&blob_key=0&start_blob_key=1"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&blob_key=0&start_blob_key=1"
 
         # Attempting to provide both blob_key and start_blob_key
         response = self.client.get(url)
@@ -273,7 +273,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         ]
         mock_list_blocks.return_value = mock_blocks
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=3"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=3"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -307,7 +307,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
             full_recording_v2_path="s3://the_bucket/the_lts_path/the_session_uuid?range=0-3456",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{session_id}/snapshots")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{session_id}/snapshots")
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()
 
@@ -362,7 +362,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/{session_id}/snapshots?source=blob_v2_lts&blob_key=/the_lts_path/the_session_uuid"
+            f"/v1/projects/{self.team.id}/session_recordings/{session_id}/snapshots?source=blob_v2_lts&blob_key=/the_lts_path/the_session_uuid"
         )
         assert response.status_code == status.HTTP_200_OK, response.content
         assert (
@@ -408,7 +408,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         mock_client_instance.download_file_decompressed.return_value = '{"timestamp": 9999, "type": "session_b_data"}'
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/{session_a}/snapshots"
+            f"/v1/projects/{self.team.id}/session_recordings/{session_a}/snapshots"
             f"?source=blob_v2_lts&blob_key=lts_path/session_b_uuid"
         )
 
@@ -461,7 +461,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
         decompress_param = f"&decompress={str(decompress).lower()}"
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=1{decompress_param}"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=1{decompress_param}"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -495,7 +495,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         mock_storage.fetch_compressed_block = AsyncMock()
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=0"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=0"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -545,7 +545,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         )
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=2&decompress=false"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=2&decompress=false"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -619,7 +619,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         )
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=1"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=1"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -677,7 +677,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
         decompress_param = f"&decompress={str(decompress).lower()}"
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=1{decompress_param}"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=1{decompress_param}"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -711,7 +711,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         mock_storage.fetch_compressed_block = AsyncMock()
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=0"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=0"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -761,7 +761,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         )
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=2&decompress=false"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=2&decompress=false"
 
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -827,7 +827,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, DatastoreTestMixin, QueryMat
         )
         mock_encrypted_block_storage.return_value.__aenter__.return_value = mock_storage
 
-        url = f"/api/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=0"
+        url = f"/v1/projects/{self.team.pk}/session_recordings/{session_id}/snapshots/?source=blob_v2&start_blob_key=0&end_blob_key=0"
         response = self.client.get(url)
 
         assert response.status_code == status.HTTP_410_GONE

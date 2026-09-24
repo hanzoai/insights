@@ -20,7 +20,7 @@ class TestMessageCategoryAPI(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization)
         MessageCategory.objects.create(team=other_team, name="Team 2 Category", key="team2_cat")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_categories/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_categories/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 1)
@@ -31,14 +31,14 @@ class TestMessageCategoryAPI(APIBaseTest):
         Tests GET /messaging_categories/:id works as expected.
         """
         category = MessageCategory.objects.create(team=self.team, name="My Category", key="my_cat")
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_categories/{category.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_categories/{category.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["name"], "My Category")
 
         # Test getting a category from another team
         other_team = Team.objects.create(organization=self.organization)
         other_category = MessageCategory.objects.create(team=other_team, name="Other Category", key="other_cat")
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_categories/{other_category.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_categories/{other_category.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_message_category(self):
@@ -49,7 +49,7 @@ class TestMessageCategoryAPI(APIBaseTest):
 
         # PATCH
         patch_response = self.client.patch(
-            f"/api/environments/{self.team.id}/messaging_categories/{category.id}/", {"name": "Patched Name"}
+            f"/v1/environments/{self.team.id}/messaging_categories/{category.id}/", {"name": "Patched Name"}
         )
         self.assertEqual(patch_response.status_code, status.HTTP_200_OK)
         category.refresh_from_db()
@@ -57,7 +57,7 @@ class TestMessageCategoryAPI(APIBaseTest):
 
         # PUT
         put_response = self.client.put(
-            f"/api/environments/{self.team.id}/messaging_categories/{category.id}/",
+            f"/v1/environments/{self.team.id}/messaging_categories/{category.id}/",
             {"name": "Put Name", "key": "initial_key", "category_type": "marketing"},
         )
         self.assertEqual(put_response.status_code, status.HTTP_200_OK)
@@ -66,7 +66,7 @@ class TestMessageCategoryAPI(APIBaseTest):
 
         # Test PATCH without key field - should work
         patch_no_key_response = self.client.patch(
-            f"/api/environments/{self.team.id}/messaging_categories/{category.id}/", {"name": "Patched Without Key"}
+            f"/v1/environments/{self.team.id}/messaging_categories/{category.id}/", {"name": "Patched Without Key"}
         )
         self.assertEqual(patch_no_key_response.status_code, status.HTTP_200_OK)
         category.refresh_from_db()
@@ -81,7 +81,7 @@ class TestMessageCategoryAPI(APIBaseTest):
 
         # Attempt to change key via PATCH
         patch_response = self.client.patch(
-            f"/api/environments/{self.team.id}/messaging_categories/{category.id}/",
+            f"/v1/environments/{self.team.id}/messaging_categories/{category.id}/",
             {"name": "Updated Name", "key": "new_key"},
         )
         # The request should fail and the key should not change
@@ -93,7 +93,7 @@ class TestMessageCategoryAPI(APIBaseTest):
 
         # Attempt to change key via PUT
         put_response = self.client.put(
-            f"/api/environments/{self.team.id}/messaging_categories/{category.id}/",
+            f"/v1/environments/{self.team.id}/messaging_categories/{category.id}/",
             {"name": "Put Updated Name", "key": "another_new_key", "category_type": "marketing"},
         )
         # The request should fail and the key should not change
@@ -108,7 +108,7 @@ class TestMessageCategoryAPI(APIBaseTest):
         Tests that creating a category automatically sets team_id and created_by.
         """
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_categories/",
+            f"/v1/environments/{self.team.id}/messaging_categories/",
             {"name": "New Category", "key": "new_cat", "category_type": "marketing"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -127,7 +127,7 @@ class TestMessageCategoryAPI(APIBaseTest):
 
         # Attempt to create with the same key for the same team
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_categories/",
+            f"/v1/environments/{self.team.id}/messaging_categories/",
             {"name": "Category 2", "key": "duplicate-key", "category_type": "marketing"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -137,7 +137,7 @@ class TestMessageCategoryAPI(APIBaseTest):
         # Verify it's possible to create with the same key for a different team
         other_team = Team.objects.create(organization=self.organization)
         response = self.client.post(
-            f"/api/environments/{other_team.id}/messaging_categories/",
+            f"/v1/environments/{other_team.id}/messaging_categories/",
             {"name": "Category 3", "key": "duplicate-key", "category_type": "marketing"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -147,13 +147,13 @@ class TestMessageCategoryAPI(APIBaseTest):
         Tests that DELETE /messaging_categories/:id is forbidden.
         """
         category = MessageCategory.objects.create(team=self.team, name="To Delete", key="to_delete")
-        response = self.client.delete(f"/api/environments/{self.team.id}/messaging_categories/{category.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/messaging_categories/{category.id}/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_import_preferences_csv_missing_file(self):
         """Test CSV import fails when file is missing"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
+            f"/v1/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
             {},
             format="multipart",
         )
@@ -171,7 +171,7 @@ class TestMessageCategoryAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
+            f"/v1/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
             {"csv_file": txt_file},
             format="multipart",
         )
@@ -194,7 +194,7 @@ class TestMessageCategoryAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
+            f"/v1/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
             {"csv_file": csv_file},
             format="multipart",
         )
@@ -219,7 +219,7 @@ class TestMessageCategoryAPI(APIBaseTest):
             )
 
             response = self.client.post(
-                f"/api/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
+                f"/v1/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
                 {"csv_file": csv_file},
                 format="multipart",
             )
@@ -234,7 +234,7 @@ class TestMessageCategoryAPI(APIBaseTest):
 
         # Test API import endpoint
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_categories/import_from_customerio/",
+            f"/v1/environments/{self.team.id}/messaging_categories/import_from_customerio/",
             {"app_api_key": "test_key"},
             format="json",
         )
@@ -247,7 +247,7 @@ class TestMessageCategoryAPI(APIBaseTest):
             content_type="text/csv",
         )
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
+            f"/v1/environments/{self.team.id}/messaging_categories/import_preferences_csv/",
             {"csv_file": csv_file},
             format="multipart",
         )

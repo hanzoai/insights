@@ -76,7 +76,7 @@ default_cookie_options = {
     "samesite": "Strict",
 }
 
-cookie_api_paths_to_ignore = {"api", "flags", "scim"}
+cookie_api_paths_to_ignore = {"v1", "flags", "scim"}
 
 
 class AllowIPMiddleware:
@@ -228,7 +228,7 @@ class AutoProjectMiddleware:
 
             elif (
                 len(path_parts) >= 3
-                and path_parts[0] == "api"
+                and path_parts[0] == "v1"
                 and path_parts[1] == "project"
                 and path_parts[2].isdigit()
             ):
@@ -358,7 +358,7 @@ class CHQueries:
         try:
             response: HttpResponse = self.get_response(request)
 
-            if "api/" in request.path and "capture" not in request.path:
+            if request.path.startswith("/v1/") and "capture" not in request.path:
                 statsd.incr(
                     "http_api_request_response",
                     tags={"id": route_id, "status_code": response.status_code},
@@ -391,7 +391,7 @@ class QueryTimeCountingMiddleware:
     def __call__(self, request: HttpRequest):
         if not (
             settings.CAPTURE_TIME_TO_SEE_DATA
-            and "api" in request.path
+            and request.path.startswith("/v1/")
             and any(key in request.path for key in self.ALLOW_LIST_ROUTES)
         ):
             return self.get_response(request)
@@ -646,14 +646,14 @@ class AutoLogoutImpersonateMiddleware:
 
         if session_is_expired:
             # TRICKY: We need to handle different cases here:
-            # 1. For /api requests we want to respond with a code that will force the UI to redirect to the logout page (401)
+            # 1. For /v1 requests we want to respond with a code that will force the UI to redirect to the logout page (401)
             # 2. For /admin requests we want to restore the original login and continue to the intended page
             # 3. For any other endpoint we want to restore the original login and redirect to /admin/
 
             if request.path.startswith("/static/"):
                 # Skip static files
                 pass
-            elif request.path.startswith("/api/"):
+            elif request.path.startswith("/v1/"):
                 return HttpResponse(
                     "Impersonation session has expired. Please log in again.",
                     status=401,
@@ -830,7 +830,7 @@ class ActiveOrganizationMiddleware:
     Middleware to verify that the current authenticated session is attached to an active organization (is_active = None or True)
     """
 
-    _IGNORED_PATHS = ("/logout", "/api", "/admin")
+    _IGNORED_PATHS = ("/logout", "/v1", "/admin")
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -875,12 +875,12 @@ IMPERSONATION_SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS", "TRACE"})
 # Supports both prefix strings and compiled regex patterns.
 READ_ONLY_IMPERSONATION_ALLOWLISTED_PATHS: list[str | re.Pattern] = [
     # These endpoints use POST but are read-only
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/query/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/insights/viewed/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/metalytics/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/endpoints/[^/]+/run/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/endpoints/last_execution_times/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/persons/batch_by_distinct_ids/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/query/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/insights/viewed/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/metalytics/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/endpoints/[^/]+/run/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/endpoints/last_execution_times/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/persons/batch_by_distinct_ids/?$"),
     # Allow upgrading from read-only to read-write impersonation
     "/admin/impersonation/upgrade/",
 ]
@@ -936,12 +936,12 @@ class ImpersonationReadOnlyMiddleware:
         """
         Allow switching organizations.
 
-        Switching occurs via a PATCH to /api/users/@me/ that only contains `set_current_organization`.
+        Switching occurs via a PATCH to /v1/users/@me/ that only contains `set_current_organization`.
         """
         if request.method != "PATCH":
             return False
 
-        if request.path not in ("/api/users/@me/", "/api/users/@me"):
+        if request.path not in ("/v1/users/@me/", "/v1/users/@me"):
             return False
 
         try:
@@ -952,8 +952,8 @@ class ImpersonationReadOnlyMiddleware:
 
 
 IMPERSONATION_BLOCKED_PATHS: list[str] = [
-    "/api/users/",
-    "/api/personal_api_keys/",
+    "/v1/users/",
+    "/v1/personal_api_keys/",
 ]
 
 
@@ -997,12 +997,12 @@ class ImpersonationBlockedPathsMiddleware:
         """
         Allow switching organizations.
 
-        Switching occurs via a PATCH to /api/users/@me/ that only contains `set_current_organization`.
+        Switching occurs via a PATCH to /v1/users/@me/ that only contains `set_current_organization`.
         """
         if request.method != "PATCH":
             return False
 
-        if request.path not in ("/api/users/@me/", "/api/users/@me"):
+        if request.path not in ("/v1/users/@me/", "/v1/users/@me"):
             return False
 
         try:
@@ -1023,22 +1023,3 @@ def impersonated_session_logout(request: HttpRequest) -> HttpResponse:
     impersonated_user_pk = request.user.pk
     restore_original_login(request)
     return redirect(f"/admin/insights/user/{impersonated_user_pk}/change/")
-
-
-class V1InsightsRewriteMiddleware:
-    """
-    Rewrites /v1/insights/* requests to /api/* so the existing Django URL
-    patterns handle them without duplication.  Allows the service to be
-    addressed via the standard /<version>/<service>/<path> convention.
-    """
-
-    PREFIX = "/v1/insights/"
-
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request: HttpRequest) -> HttpResponse:
-        if request.path.startswith(self.PREFIX):
-            request.path = "/api/" + request.path[len(self.PREFIX) :]
-            request.path_info = request.path
-        return self.get_response(request)

@@ -25,7 +25,7 @@ class TestDemoSignupAPI(APIBaseTest):
 
         # Password not needed
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "email": "charlie@tech-r-us.com",
                 "first_name": "Charlie",
@@ -59,7 +59,7 @@ class TestDemoSignupAPI(APIBaseTest):
         # first_name and organization_name aren't used when logging in
         # In demo, the signup endpoint functions as login if the email already exists
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "email": "charlie@tech-r-us.com",
                 "first_name": "X",
@@ -94,7 +94,7 @@ class TestDemoSignupAPI(APIBaseTest):
 
         # Staff sign up for demo securely via Google, which should grant is_staff privileges
         response = self.client.post(
-            "/api/social_signup/",
+            "/v1/social_signup/",
             {
                 "first_name": "Charlie",
                 "email": "charlie@tech-r-us.com",
@@ -136,7 +136,7 @@ class TestDemoSignupAPI(APIBaseTest):
 
         # Staff log into demo securely via Google, which should grant is_staff privileges
         response = self.client.post(
-            "/api/social_signup/",
+            "/v1/social_signup/",
             {
                 "first_name": "X",
                 "email": "charlie@tech-r-us.com",

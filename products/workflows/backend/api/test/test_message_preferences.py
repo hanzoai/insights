@@ -202,7 +202,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
 
     def test_opt_outs_no_category_no_opt_outs(self):
         """Test opt_outs endpoint with no category and no recipients opted out"""
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["count"], 0)
@@ -228,7 +228,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
             preferences={str(self.category.id): PreferenceStatus.OPTED_OUT.value},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["count"], 2)
@@ -261,7 +261,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/", {"category_key": self.category.key}
+            f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/", {"category_key": self.category.key}
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -277,7 +277,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
     def test_opt_outs_with_nonexistent_category(self):
         """Test opt_outs endpoint with a category that doesn't exist"""
         response = self.client.get(
-            f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/",
             {"category_key": "nonexistent_category"},
         )
         self.assertEqual(response.status_code, 404)
@@ -292,7 +292,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
             preferences={ALL_MESSAGE_PREFERENCE_CATEGORY_ID: PreferenceStatus.OPTED_OUT.value},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["count"], 1)
@@ -327,7 +327,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
             preferences={ALL_MESSAGE_PREFERENCE_CATEGORY_ID: PreferenceStatus.OPTED_OUT.value},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["count"], 1)

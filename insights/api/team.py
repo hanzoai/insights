@@ -1477,7 +1477,7 @@ class RootTeamViewSet(TeamViewSet):
     destroy=extend_schema(deprecated=True),
 )
 class ProjectEnvironmentsViewSet(TeamViewSet):
-    """Deprecated: use /api/environments/{id}/ instead."""
+    """Deprecated: use /v1/environments/{id}/ instead."""
 
     def initial(self, request: request.Request, *args, **kwargs) -> None:
         raise exceptions.PermissionDenied(
@@ -1552,7 +1552,7 @@ class PremiumMultiEnvironmentPermission(BasePermission):
             project = view.project
         except KeyError:  # KeyError occurs when "project_id" is not in parents_query_dict
             raise exceptions.ValidationError(
-                "Environments must be created under a specific project. Send the POST request to /api/projects/<project_id>/environments/ instead."
+                "Environments must be created under a specific project. Send the POST request to /v1/projects/<project_id>/environments/ instead."
             )
 
         if request.data.get("is_demo"):

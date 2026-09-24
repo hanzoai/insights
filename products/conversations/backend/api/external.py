@@ -67,8 +67,8 @@ class ExternalTicketUpdateSerializer(serializers.Serializer):
 
 class ExternalTicketView(APIView):
     """
-    GET /api/conversations/external/ticket/<ticket_id>  — Fetch ticket data
-    PATCH /api/conversations/external/ticket/<ticket_id> — Update ticket fields
+    GET /v1/conversations/external/ticket/<ticket_id>  — Fetch ticket data
+    PATCH /v1/conversations/external/ticket/<ticket_id> — Update ticket fields
 
     Authenticated via Bearer token (team api_token) in Authorization header.
     """

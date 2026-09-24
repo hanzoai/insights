@@ -161,7 +161,7 @@ math_help_text = """How to aggregate results, shown as \"counted by\" in the int
 - `dau`: count by unique users. Despite the name, if you select the `interval` to be weekly or monthly, this will show weekly or monthly active users respectively
 - `weekly_active`: rolling average of users of the last 7 days.
 - `monthly_active`: rolling average of users of the last month.
-- `unique_group`: count by group. Requires `math_group_type_index` to be sent. You can get the index by hitting `/api/projects/@current/groups_types/`.
+- `unique_group`: count by group. Requires `math_group_type_index` to be sent. You can get the index by hitting `/v1/projects/@current/groups_types/`.
 
 All of the below are property aggregations, and require `math_property` to be sent with an event property.
 - `sum`: sum of a numeric property.
@@ -201,8 +201,8 @@ class FilterActionSerializer(serializers.Serializer):
 _endpoint_product_mapping: dict[tuple[str, str], str] = {}
 
 # Prefix used to identify deprecated environment duplicates in postprocessing.
-# Only env paths that duplicate a /api/projects/ path get this prefix (via {environment_id}).
-_DEPRECATED_ENV_PREFIX = "/api/environments/{environment_id}/"
+# Only env paths that duplicate a /v1/projects/ path get this prefix (via {environment_id}).
+_DEPRECATED_ENV_PREFIX = "/v1/environments/{environment_id}/"
 
 
 def _get_product_from_module(module: str) -> str | None:
@@ -215,8 +215,8 @@ def _get_product_from_module(module: str) -> str | None:
 
 
 def _extract_env_suffix(path: str) -> str | None:
-    """Extract the resource suffix from an /api/environments/ path, or None if not an env path."""
-    prefix = "/api/environments/{parent_lookup_team_id}/"
+    """Extract the resource suffix from an /v1/environments/ path, or None if not an env path."""
+    prefix = "/v1/environments/{parent_lookup_team_id}/"
     if path.startswith(prefix):
         return path[len(prefix) :]
     return None
@@ -227,8 +227,8 @@ def preprocess_exclude_path_format(endpoints, **kwargs):
     preprocessing hook that filters out {format} suffixed paths, in case
     format_suffix_patterns is used and {format} path params are unwanted.
 
-    Also tracks endpoints registered under both /api/environments/ and
-    /api/projects/ (via register_grandfathered_environment_nested_viewset),
+    Also tracks endpoints registered under both /v1/environments/ and
+    /v1/projects/ (via register_grandfathered_environment_nested_viewset),
     so that environment duplicates can be marked deprecated in postprocessing.
     """
     # For frontend type generation, include INTERNAL views if they have explicit tags
@@ -238,10 +238,10 @@ def preprocess_exclude_path_format(endpoints, **kwargs):
     _endpoint_product_mapping.clear()
 
     # Pass 1: collect all included endpoints and build a set of suffixes that
-    # exist under /api/projects/ so we can identify /api/environments/ duplicates.
+    # exist under /v1/projects/ so we can identify /v1/environments/ duplicates.
     included: list[tuple[str, str, str, Any]] = []
     projects_suffixes: set[tuple[str, str]] = set()
-    projects_prefix = "/api/projects/{parent_lookup_team_id}/"
+    projects_prefix = "/v1/projects/{parent_lookup_team_id}/"
 
     for path, path_regex, method, callback in endpoints:
         if getattr(callback.cls, "param_derived_from_user_current_team", None):
@@ -393,7 +393,7 @@ def custom_postprocessing_hook(result, generator, request, public):
                         "name": "project_id",
                         "required": True,
                         "schema": {"type": "string"},
-                        "description": "Project ID of the project you're trying to access. To find the ID of the project, make a call to /api/projects/.",
+                        "description": "Project ID of the project you're trying to access. To find the ID of the project, make a call to /v1/projects/.",
                     }
                     if param["name"] == "project_id"
                     else {
@@ -401,7 +401,7 @@ def custom_postprocessing_hook(result, generator, request, public):
                         "name": "environment_id",
                         "required": True,
                         "schema": {"type": "string"},
-                        "description": "Deprecated. Use /api/projects/{project_id}/ instead.",
+                        "description": "Deprecated. Use /v1/projects/{project_id}/ instead.",
                     }
                     if param["name"] == "environment_id"
                     else param

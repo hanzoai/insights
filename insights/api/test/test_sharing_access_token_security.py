@@ -26,7 +26,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
         # Ensure we're not authenticated for all sharing token security tests
         self.client.logout()
         # Verify that we're actually logged out by testing access to a protected endpoint
-        response = self.client.get(f"/api/environments/{self.team.id}/insights/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/insights/")
         self.assertIn(
             response.status_code,
             [401, 403],
@@ -73,7 +73,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
 
         # Test 1: Should be able to access insight that IS on the dashboard
         response = self.client.get(
-            f"/api/environments/{self.team.id}/insights/{insight_on_dashboard.id}/",
+            f"/v1/environments/{self.team.id}/insights/{insight_on_dashboard.id}/",
             {"sharing_access_token": sharing_config.access_token},  # type: ignore[arg-type]
         )
         assert response.status_code == 200, (
@@ -82,7 +82,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
 
         # Test 2: Should NOT be able to access insight that is NOT on the dashboard
         response = self.client.get(
-            f"/api/environments/{self.team.id}/insights/{insight_not_on_dashboard.id}/",
+            f"/v1/environments/{self.team.id}/insights/{insight_not_on_dashboard.id}/",
             {"sharing_access_token": sharing_config.access_token},  # type: ignore[arg-type]
         )
         assert response.status_code in [
@@ -123,7 +123,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
         }
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/insights/{insight.id}/",
+            f"/v1/environments/{self.team.id}/insights/{insight.id}/",
             {
                 "sharing_access_token": sharing_config.access_token,
                 "filters_override": json.dumps(malicious_filters),
@@ -197,7 +197,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
         }
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/insights/{insight.id}/",
+            f"/v1/environments/{self.team.id}/insights/{insight.id}/",
             {
                 "sharing_access_token": sharing_config.access_token,
                 "variables_override": json.dumps(malicious_variables),
@@ -249,7 +249,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
 
         # Try to access the other team's insight - should fail
         response = self.client.get(
-            f"/api/environments/{other_team.id}/insights/{other_insight.id}/",
+            f"/v1/environments/{other_team.id}/insights/{other_insight.id}/",
             {"sharing_access_token": sharing_config.access_token},  # type: ignore[arg-type]
         )
 
@@ -291,7 +291,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
 
         # List insights using sharing access token
         response = self.client.get(
-            f"/api/environments/{self.team.id}/insights/",
+            f"/v1/environments/{self.team.id}/insights/",
             {"sharing_access_token": sharing_config.access_token},  # type: ignore[arg-type]
         )
 
@@ -317,7 +317,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
 
         # Test 1: Try to create an insight using sharing access token as query param - should fail
         response = self.client.post(
-            f"/api/environments/{self.team.id}/insights/?sharing_access_token={sharing_config.access_token}",
+            f"/v1/environments/{self.team.id}/insights/?sharing_access_token={sharing_config.access_token}",
             {
                 "name": "Malicious Insight",
                 "query": {"kind": "TrendsQuery", "series": [{"event": "malicious_event"}]},
@@ -329,7 +329,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
 
         # Test 2: Try to create an insight using sharing access token in body - should fail
         response = self.client.post(
-            f"/api/environments/{self.team.id}/insights/",
+            f"/v1/environments/{self.team.id}/insights/",
             {
                 "name": "Malicious Insight",
                 "query": {"kind": "TrendsQuery", "series": [{"event": "malicious_event"}]},
@@ -342,7 +342,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
 
         # Test 3: Try to update the dashboard using sharing access token as query param - should fail
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/?sharing_access_token={sharing_config.access_token}",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/?sharing_access_token={sharing_config.access_token}",
             {"name": "Hacked Dashboard"},
         )
         assert response.status_code in [401, 403], (
@@ -351,7 +351,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
 
         # Test 4: Try to update the dashboard using sharing access token in body - should fail
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/",
             {"name": "Hacked Dashboard", "sharing_access_token": sharing_config.access_token},
         )
         assert response.status_code in [401, 403], (

@@ -15,7 +15,7 @@ class TestHeatmapsAPI(APIBaseTest):
     @patch("insights.tasks.heatmap_screenshot.generate_heatmap_screenshot.delay")
     def test_generate_creates_saved_with_target_widths(self, mock_task):
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/",
+            f"/v1/environments/{self.team.id}/saved/",
             {"url": "https://example.com", "widths": [768, 1024]},
         )
         self.assertEqual(resp.status_code, 201)
@@ -28,7 +28,7 @@ class TestHeatmapsAPI(APIBaseTest):
 
     def test_content_returns_202_until_snapshot_exists(self):
         saved = SavedHeatmap.objects.create(team=self.team, url="https://example.com", created_by=self.user)
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024")
         self.assertEqual(r.status_code, 202)
 
     def test_content_returns_snapshot_bytes_and_defaults_width(self):
@@ -39,7 +39,7 @@ class TestHeatmapsAPI(APIBaseTest):
             status=SavedHeatmap.Status.COMPLETED,
         )
         HeatmapSnapshot.objects.create(heatmap=saved, width=1024, content=b"jpegdata1024")
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r["Content-Type"], "image/jpeg")
         self.assertTrue(r["Content-Disposition"].endswith('1024.jpg"'))
@@ -55,7 +55,7 @@ class TestHeatmapsAPI(APIBaseTest):
         HeatmapSnapshot.objects.create(heatmap=saved, width=768, content=b"jpeg768")
         HeatmapSnapshot.objects.create(heatmap=saved, width=1024, content=b"jpeg1024")
         # Request 800 should pick 768 (closest)
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=800")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=800")
         self.assertEqual(r.status_code, 200)
         self.assertIn('768.jpg"', r["Content-Disposition"])
         self.assertEqual(r.content, b"jpeg768")
@@ -63,7 +63,7 @@ class TestHeatmapsAPI(APIBaseTest):
     def test_saved_list_excludes_deleted_and_includes_created_by(self):
         SavedHeatmap.objects.create(team=self.team, url="https://a.example", created_by=self.user)
         SavedHeatmap.objects.create(team=self.team, url="https://b.example", created_by=self.user, deleted=True)
-        r = self.client.get(f"/api/environments/{self.team.id}/saved/")
+        r = self.client.get(f"/v1/environments/{self.team.id}/saved/")
         self.assertEqual(r.status_code, 200)
         urls = [x["url"] for x in r.data["results"]]
         self.assertIn("https://a.example", urls)
@@ -77,5 +77,5 @@ class TestHeatmapsAPI(APIBaseTest):
             organization=self.organization, initiating_user=self.user, name="Other Team"
         )
         other = SavedHeatmap.objects.create(team=other_team, url="https://example.com")
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{other.id}/content/")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{other.id}/content/")
         self.assertEqual(r.status_code, 404)

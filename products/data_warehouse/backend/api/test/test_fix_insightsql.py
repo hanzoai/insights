@@ -11,7 +11,7 @@ class TestFixInsightsQL(APIBaseTest):
             mock.patch.object(InsightsQLQueryFixerTool, "_parse_output", return_value="select timestamp from events"),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/fix_insightsql/",
+                f"/v1/environments/{self.team.id}/fix_insightsql/",
                 {"query": "select timestam from events", "error": "Unable to resolve field: timestam"},
             )
 
@@ -38,7 +38,7 @@ class TestFixInsightsQL(APIBaseTest):
             mock.patch.object(InsightsQLQueryFixerTool, "__init__", capture_tool_init(InsightsQLQueryFixerTool.__init__)),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/fix_insightsql/",
+                f"/v1/environments/{self.team.id}/fix_insightsql/",
                 {"query": query, "error": error},
             )
 

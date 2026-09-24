@@ -60,7 +60,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
             verified_at=timezone.now(),
         )
 
-        response = self.client.post("/api/login/precheck", {"email": "any_user_name_here@witw.app"})
+        response = self.client.post("/v1/login/precheck", {"email": "any_user_name_here@witw.app"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(), {"sso_enforcement": None, "saml_available": False, "webauthn_credentials": []}
@@ -76,7 +76,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
         )
         User.objects.create_and_join(self.organization, "spain@witw.app", self.CONFIG_PASSWORD)
 
-        response = self.client.post("/api/login/precheck", {"email": "spain@witw.app"})
+        response = self.client.post("/v1/login/precheck", {"email": "spain@witw.app"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(), {"sso_enforcement": None, "saml_available": False, "webauthn_credentials": []}
@@ -97,7 +97,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
             verified=True,
         )
 
-        response = self.client.post("/api/login/precheck", {"email": "passkey_user@hanzo.ai"})
+        response = self.client.post("/v1/login/precheck", {"email": "passkey_user@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
@@ -122,14 +122,14 @@ class TestLoginPrecheckAPI(APIBaseTest):
             verified=False,
         )
 
-        response = self.client.post("/api/login/precheck", {"email": "unverified_passkey@hanzo.ai"})
+        response = self.client.post("/v1/login/precheck", {"email": "unverified_passkey@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
         self.assertEqual(response_data["webauthn_credentials"], [])
 
     def test_login_precheck_returns_empty_webauthn_credentials_for_unknown_user(self):
-        response = self.client.post("/api/login/precheck", {"email": "nonexistent@hanzo.ai"})
+        response = self.client.post("/v1/login/precheck", {"email": "nonexistent@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
@@ -160,7 +160,7 @@ class TestLoginPrecheckAPI(APIBaseTest):
             verified=True,
         )
 
-        response = self.client.post("/api/login/precheck", {"email": "multi_passkey@hanzo.ai"})
+        response = self.client.post("/v1/login/precheck", {"email": "multi_passkey@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
 
@@ -180,12 +180,12 @@ class TestLoginAPI(APIBaseTest):
     def test_user_logs_in_with_email_and_password(self, mock_capture, mock_identify):
         self.user.is_email_verified = True
         self.user.save()
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"success": True})
 
         # Test that we're actually logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], self.user.email)
 
@@ -209,11 +209,11 @@ class TestLoginAPI(APIBaseTest):
         self.user.is_email_verified = False
         self.user.save()
         self.assertEqual(self.user.is_email_verified, False)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Test that we're not logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         mock_is_email_available.assert_called_once()
@@ -230,12 +230,12 @@ class TestLoginAPI(APIBaseTest):
         self.user.is_email_verified = False
         self.user.save()
         self.assertEqual(self.user.is_email_verified, False)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"success": True})
 
         # Test that we're actually logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], self.user.email)
 
@@ -251,11 +251,11 @@ class TestLoginAPI(APIBaseTest):
         """When email verification was added, existing users were set to is_email_verified=null.
         If someone is null they should still be allowed to log in until we explicitly decide to lock them out."""
         self.assertEqual(self.user.is_email_verified, None)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Test that we are logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_is_email_available.assert_called_once()
         # Assert the email was sent.
@@ -266,12 +266,12 @@ class TestLoginAPI(APIBaseTest):
         invalid_passwords = ["1234", "abcdefgh", "testpassword1234", "😈😈😈"]
 
         for password in invalid_passwords:
-            response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": password})
+            response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": password})
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(response.json(), self.ERROR_INVALID_CREDENTIALS)
 
             # Assert user is not logged in
-            response = self.client.get("/api/users/@me/")
+            response = self.client.get("/v1/users/@me/")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertNotIn("email", response.json())
 
@@ -281,14 +281,14 @@ class TestLoginAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_user_cant_login_with_incorrect_email(self, mock_capture):
         response = self.client.post(
-            "/api/login",
+            "/v1/login",
             {"email": "user2@hanzo.ai", "password": self.CONFIG_PASSWORD},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), self.ERROR_INVALID_CREDENTIALS)
 
         # Assert user is not logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertNotIn("email", response.json())
 
@@ -302,7 +302,7 @@ class TestLoginAPI(APIBaseTest):
             body = {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD}
             body.pop(attribute)
 
-            response = self.client.post("/api/login/", body)
+            response = self.client.post("/v1/login/", body)
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(
                 response.json(),
@@ -315,7 +315,7 @@ class TestLoginAPI(APIBaseTest):
             )
 
             # Assert user is not logged in
-            response = self.client.get("/api/users/@me/")
+            response = self.client.get("/v1/users/@me/")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_login_endpoint_is_protected_against_brute_force_attempts(self):
@@ -325,17 +325,17 @@ class TestLoginAPI(APIBaseTest):
         with self.settings(AXES_ENABLED=True, AXES_FAILURE_LIMIT=3):
             for _ in range(0, 2):
                 response = self.client.post(
-                    "/api/login",
+                    "/v1/login",
                     {"email": "new_user@hanzo.ai", "password": "invalid"},
                 )
                 self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
                 self.assertEqual(response.json(), self.ERROR_INVALID_CREDENTIALS)
 
                 # Assert user is not logged in
-                response = self.client.get("/api/users/@me/")
+                response = self.client.get("/v1/users/@me/")
                 self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-            response = self.client.post("/api/login", {"email": "new_user@hanzo.ai", "password": "invalid"})
+            response = self.client.post("/v1/login", {"email": "new_user@hanzo.ai", "password": "invalid"})
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             self.assertEqual(
                 response.json(),
@@ -355,14 +355,14 @@ class TestLoginAPI(APIBaseTest):
             # Lock out IP 1.1.1.1 with 3 failed attempts
             for _ in range(3):
                 self.client.post(
-                    "/api/login",
+                    "/v1/login",
                     {"email": "locktest@hanzo.ai", "password": "invalid"},
                     REMOTE_ADDR="1.1.1.1",
                 )
 
             # Verify IP 1.1.1.1 is locked (403 even with correct credentials)
             response = self.client.post(
-                "/api/login",
+                "/v1/login",
                 {"email": "locktest@hanzo.ai", "password": "87654321"},
                 REMOTE_ADDR="1.1.1.1",
             )
@@ -371,7 +371,7 @@ class TestLoginAPI(APIBaseTest):
 
             # Verify different IP 2.2.2.2 can still attempt login (not locked)
             response = self.client.post(
-                "/api/login",
+                "/v1/login",
                 {"email": "locktest@hanzo.ai", "password": "87654321"},
                 REMOTE_ADDR="2.2.2.2",
             )
@@ -389,7 +389,7 @@ class TestTwoFactorAPI(APIBaseTest):
     def test_login_2fa_enabled(self):
         device = self.user.totpdevice_set.create(name="default", key=random_hex(), digits=6)  # type: ignore
 
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
             response.json(),
@@ -402,20 +402,20 @@ class TestTwoFactorAPI(APIBaseTest):
         )
 
         # Assert user is not logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertNotIn("email", response.json())
 
-        response = self.client.post("/api/login/token", {"token": totp_str(device.bin_key)})
+        response = self.client.post("/v1/login/token", {"token": totp_str(device.bin_key)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], self.user.email)
 
         # Test remembering cookie
         self.client.post("/logout", follow=True)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_2fa_expired(self):
@@ -423,7 +423,7 @@ class TestTwoFactorAPI(APIBaseTest):
 
         with freeze_time("2023-01-01T10:00:00"):
             response = self.client.post(
-                "/api/login",
+                "/v1/login",
                 {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD},
             )
             assert response.status_code == status.HTTP_401_UNAUTHORIZED, response.json()
@@ -438,7 +438,7 @@ class TestTwoFactorAPI(APIBaseTest):
             )
 
         with freeze_time("2023-01-01T10:30:00"):
-            response = self.client.post("/api/login/token", {"token": "abcdefg"})
+            response = self.client.post("/v1/login/token", {"token": "abcdefg"})
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(
                 response.json(),
@@ -450,18 +450,18 @@ class TestTwoFactorAPI(APIBaseTest):
                 },
             )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED, response.json()
 
     def test_2fa_throttling(self):
         self.user.totpdevice_set.create(name="default", key=random_hex(), digits=6)  # type: ignore
-        self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(
-            self.client.post("/api/login/token", {"token": "abcdefg"}).json()["code"],
+            self.client.post("/v1/login/token", {"token": "abcdefg"}).json()["code"],
             "2fa_invalid",
         )
         self.assertEqual(
-            self.client.post("/api/login/token", {"token": "abcdefg"}).json()["code"],
+            self.client.post("/v1/login/token", {"token": "abcdefg"}).json()["code"],
             "2fa_too_many_attempts",
         )
 
@@ -473,16 +473,16 @@ class TestTwoFactorAPI(APIBaseTest):
         static_device.token_set.create(token="123456")
 
         # First authenticate with username/password
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Then authenticate with backup code
-        response = self.client.post("/api/login/token", {"token": "123456"})
+        response = self.client.post("/v1/login/token", {"token": "123456"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Verify we're logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], self.user.email)
 
@@ -500,10 +500,10 @@ class TestTwoFactorAPI(APIBaseTest):
         static_device.token_set.create(token="123456")
 
         # First authenticate with username/password
-        self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
 
         # Use backup code once
-        response = self.client.post("/api/login/token", {"token": "123456"})
+        response = self.client.post("/v1/login/token", {"token": "123456"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Verify email was triggered
@@ -516,8 +516,8 @@ class TestTwoFactorAPI(APIBaseTest):
         time.sleep(2)
 
         # Try to authenticate again with same backup code
-        self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
-        response = self.client.post("/api/login/token", {"token": "123456"})
+        self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login/token", {"token": "123456"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["code"], "2fa_invalid")
 
@@ -529,11 +529,11 @@ class TestTwoFactorAPI(APIBaseTest):
         static_device.token_set.create(token="123456")
 
         # First authenticate with username/password
-        self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
 
         # Trigger TOTP throttling with invalid attempts
-        self.client.post("/api/login/token", {"token": "000000"})
-        self.client.post("/api/login/token", {"token": "000000"})
+        self.client.post("/v1/login/token", {"token": "000000"})
+        self.client.post("/v1/login/token", {"token": "000000"})
 
         # Wait for throttling to expire
         import time
@@ -541,7 +541,7 @@ class TestTwoFactorAPI(APIBaseTest):
         time.sleep(2)
 
         # Backup code should still work
-        response = self.client.post("/api/login/token", {"token": "123456"})
+        response = self.client.post("/v1/login/token", {"token": "123456"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Verify email was triggered
@@ -562,18 +562,18 @@ class TestTwoFactorAPI(APIBaseTest):
             verified=True,
         )
 
-        response = self.client.post("/api/login/2fa/passkey/begin/")
+        response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("No pending 2FA session", response.json()["error"])
 
     def test_passkey_2fa_begin_requires_passkeys(self):
         """Test that passkey 2FA begin fails if user has no passkeys"""
         # First authenticate with username/password to create session
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Try to begin passkey 2FA without passkeys
-        response = self.client.post("/api/login/2fa/passkey/begin/")
+        response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("No passkeys found", response.json()["error"])
 
@@ -597,12 +597,12 @@ class TestTwoFactorAPI(APIBaseTest):
         self.user.save()
 
         # Login should succeed without requiring 2FA
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"success": True})
 
         # Verify we're logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], self.user.email)
 
@@ -629,12 +629,12 @@ class TestTwoFactorAPI(APIBaseTest):
         from django_otp.plugins.otp_totp.models import TOTPDevice
 
         TOTPDevice.objects.create(user=self.user, name="default", key=random_hex(), digits=6)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Try to begin passkey 2FA - should fail because passkeys are disabled for 2FA
-        response = self.client.post("/api/login/2fa/passkey/begin/")
+        response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Passkeys are not enabled for 2FA", response.json()["error"])
 
@@ -661,12 +661,12 @@ class TestTwoFactorAPI(APIBaseTest):
 
         # First authenticate with username/password to create session
         # When user has passkeys enabled for 2FA, login requires 2FA
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Begin passkey 2FA
-        response = self.client.post("/api/login/2fa/passkey/begin/")
+        response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -686,12 +686,12 @@ class TestTwoFactorAPI(APIBaseTest):
         # User with no 2FA - need to create a pending 2FA session first
         # Simulate login that requires 2FA
         TOTPDevice.objects.create(user=self.user, name="default", key=random_hex(), digits=6)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Now check methods - should show TOTP but no passkeys
-        response = self.client.get("/api/login/2fa/passkey/methods/")
+        response = self.client.get("/v1/login/2fa/passkey/methods/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertTrue(data["has_totp"])
@@ -714,11 +714,11 @@ class TestTwoFactorAPI(APIBaseTest):
         self.user.save()
 
         # Create new 2FA session
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
-        response = self.client.get("/api/login/2fa/passkey/methods/")
+        response = self.client.get("/v1/login/2fa/passkey/methods/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertFalse(data["has_totp"])
@@ -728,11 +728,11 @@ class TestTwoFactorAPI(APIBaseTest):
         TOTPDevice.objects.create(user=self.user, name="default", key=random_hex(), digits=6)
 
         # Create new 2FA session
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
-        response = self.client.get("/api/login/2fa/passkey/methods/")
+        response = self.client.get("/v1/login/2fa/passkey/methods/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertTrue(data["has_totp"])
@@ -740,7 +740,7 @@ class TestTwoFactorAPI(APIBaseTest):
 
     def test_passkey_2fa_methods_endpoint_requires_session(self):
         """Test that methods endpoint requires a pending 2FA session"""
-        response = self.client.get("/api/login/2fa/passkey/methods/")
+        response = self.client.get("/v1/login/2fa/passkey/methods/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("No pending 2FA session", response.json()["error"])
 
@@ -767,12 +767,12 @@ class TestTwoFactorAPI(APIBaseTest):
 
         # First authenticate with username/password to create session
         # When user has passkeys enabled for 2FA, login requires 2FA
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Begin passkey 2FA to get challenge
-        begin_response = self.client.post("/api/login/2fa/passkey/begin/")
+        begin_response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(begin_response.status_code, status.HTTP_200_OK)
 
         # Mock verification
@@ -780,7 +780,7 @@ class TestTwoFactorAPI(APIBaseTest):
 
         # Complete passkey 2FA
         response = self.client.post(
-            "/api/login/token",
+            "/v1/login/token",
             {
                 "credential_id": bytes_to_base64url(credential.credential_id),
                 "response": {
@@ -795,7 +795,7 @@ class TestTwoFactorAPI(APIBaseTest):
         self.assertTrue(response.json()["success"])
 
         # Verify we're logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], self.user.email)
 
@@ -825,13 +825,13 @@ class TestTwoFactorAPI(APIBaseTest):
 
         # First authenticate with username/password to create session
         # When user has passkeys enabled for 2FA, login requires 2FA
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Try to complete passkey 2FA without beginning (no challenge)
         response = self.client.post(
-            "/api/login/token",
+            "/v1/login/token",
             {
                 "credential_id": bytes_to_base64url(credential.credential_id),
                 "response": {
@@ -868,17 +868,17 @@ class TestTwoFactorAPI(APIBaseTest):
 
         # First authenticate with username/password to create session
         # When user has passkeys enabled for 2FA, login requires 2FA
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Begin passkey 2FA to get challenge
-        begin_response = self.client.post("/api/login/2fa/passkey/begin/")
+        begin_response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(begin_response.status_code, status.HTTP_200_OK)
 
         # Try to complete with invalid credential ID
         response = self.client.post(
-            "/api/login/token",
+            "/v1/login/token",
             {
                 "credential_id": bytes_to_base64url(b"invalid-credential-id"),
                 "response": {
@@ -908,11 +908,11 @@ class TestTwoFactorAPI(APIBaseTest):
         )
 
         # First authenticate with username/password to create session
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Begin passkey 2FA to get challenge
-        begin_response = self.client.post("/api/login/2fa/passkey/begin/")
+        begin_response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(begin_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("No passkeys found", begin_response.json()["error"])
 
@@ -951,12 +951,12 @@ class TestTwoFactorAPI(APIBaseTest):
 
         # First authenticate with username/password to create session
         # When user has passkeys enabled for 2FA, login requires 2FA
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Begin passkey 2FA
-        begin_response = self.client.post("/api/login/2fa/passkey/begin/")
+        begin_response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(begin_response.status_code, status.HTTP_200_OK)
         data = begin_response.json()
         self.assertEqual(len(data["allowCredentials"]), 2)
@@ -966,7 +966,7 @@ class TestTwoFactorAPI(APIBaseTest):
 
         # Complete with first credential
         response = self.client.post(
-            "/api/login/token",
+            "/v1/login/token",
             {
                 "credential_id": bytes_to_base64url(credential1.credential_id),
                 "response": {
@@ -1026,12 +1026,12 @@ class TestTwoFactorAPI(APIBaseTest):
 
         # First authenticate with username/password to create session
         # When user has passkeys enabled for 2FA, login requires 2FA
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Begin passkey 2FA
-        begin_response = self.client.post("/api/login/2fa/passkey/begin/")
+        begin_response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(begin_response.status_code, status.HTTP_200_OK)
         data = begin_response.json()
 
@@ -1077,17 +1077,17 @@ class TestTwoFactorAPI(APIBaseTest):
         )
 
         # First authenticate with username/password to create session
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["code"], "2fa_required")
 
         # Begin passkey 2FA to get challenge
-        begin_response = self.client.post("/api/login/2fa/passkey/begin/")
+        begin_response = self.client.post("/v1/login/2fa/passkey/begin/")
         self.assertEqual(begin_response.status_code, status.HTTP_200_OK)
 
         # Try to complete with the other user's credential ID
         response = self.client.post(
-            "/api/login/token",
+            "/v1/login/token",
             {
                 "credential_id": bytes_to_base64url(other_credential.credential_id),
                 "response": {
@@ -1119,7 +1119,7 @@ class TestPasswordResetAPI(APIBaseTest):
         set_instance_setting("EMAIL_HOST", "localhost")
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
-            response = self.client.post("/api/reset/", {"email": self.CONFIG_EMAIL})
+            response = self.client.post("/v1/reset/", {"email": self.CONFIG_EMAIL})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response.content.decode(), "")
         self.assertEqual(response.headers["Content-Length"], "0")
@@ -1171,7 +1171,7 @@ class TestPasswordResetAPI(APIBaseTest):
         )
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
-            response = self.client.post("/api/reset/", {"email": self.CONFIG_EMAIL})
+            response = self.client.post("/v1/reset/", {"email": self.CONFIG_EMAIL})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         self.assertSetEqual({",".join(outmail.to) for outmail in mail.outbox}, {self.CONFIG_EMAIL})
@@ -1201,7 +1201,7 @@ class TestPasswordResetAPI(APIBaseTest):
         set_instance_setting("EMAIL_HOST", "localhost")
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
-            response = self.client.post("/api/reset/", {"email": "i_dont_exist@hanzo.ai"})
+            response = self.client.post("/v1/reset/", {"email": "i_dont_exist@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # No emails should be sent
@@ -1209,7 +1209,7 @@ class TestPasswordResetAPI(APIBaseTest):
 
     def test_cant_reset_if_email_is_not_configured(self):
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            response = self.client.post("/api/reset/", {"email": "i_dont_exist@hanzo.ai"})
+            response = self.client.post("/v1/reset/", {"email": "i_dont_exist@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1226,7 +1226,7 @@ class TestPasswordResetAPI(APIBaseTest):
 
         for i in range(7):
             with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
-                response = self.client.post("/api/reset/", {"email": self.CONFIG_EMAIL})
+                response = self.client.post("/v1/reset/", {"email": self.CONFIG_EMAIL})
             if i < 6:
                 self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
             else:
@@ -1246,7 +1246,7 @@ class TestPasswordResetAPI(APIBaseTest):
         for email in ["email@hanzo.ai", "other-email@hanzo.ai"]:
             for i in range(7):
                 with self.settings(CELERY_TASK_ALWAYS_EAGER=True, SITE_URL="https://my.insights.net"):
-                    response = self.client.post("/api/reset/", {"email": email})
+                    response = self.client.post("/v1/reset/", {"email": email})
                 if i < 6:
                     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
                 else:
@@ -1261,13 +1261,13 @@ class TestPasswordResetAPI(APIBaseTest):
 
     def test_can_validate_token(self):
         token = password_reset_token_generator.make_token(self.user)
-        response = self.client.get(f"/api/reset/{self.user.uuid}/?token={token}")
+        response = self.client.get(f"/v1/reset/{self.user.uuid}/?token={token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.content.decode(), "")
         self.assertEqual(response.headers["Content-Length"], "0")
 
     def test_cant_validate_token_without_a_token(self):
-        response = self.client.get(f"/api/reset/{self.user.uuid}/")
+        response = self.client.get(f"/v1/reset/{self.user.uuid}/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1292,7 +1292,7 @@ class TestPasswordResetAPI(APIBaseTest):
             self.user.uuid,
             expired_token,
         ]:
-            response = self.client.get(f"/api/reset/{self.user.uuid}/?token={token}")
+            response = self.client.get(f"/v1/reset/{self.user.uuid}/?token={token}")
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(
                 response.json(),
@@ -1314,12 +1314,12 @@ class TestPasswordResetAPI(APIBaseTest):
         self.user.requested_password_reset_at = datetime.now()
         self.user.save()
         token = password_reset_token_generator.make_token(self.user)
-        response = self.client.post(f"/api/reset/{self.user.uuid}/", {"token": token, "password": VALID_TEST_PASSWORD})
+        response = self.client.post(f"/v1/reset/{self.user.uuid}/", {"token": token, "password": VALID_TEST_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.content.decode(), f'{{"success":true,"email":"{self.user.email}"}}')
 
         # assert the user DOES NOT get logged in automatically
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # check password was changed
@@ -1330,11 +1330,11 @@ class TestPasswordResetAPI(APIBaseTest):
 
         # old password is gone
         self.client.logout()
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # new password can be used immediately
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": VALID_TEST_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": VALID_TEST_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # assert events were captured
@@ -1361,7 +1361,7 @@ class TestPasswordResetAPI(APIBaseTest):
 
     def test_cant_set_short_password(self):
         token = password_reset_token_generator.make_token(self.user)
-        response = self.client.post(f"/api/reset/{self.user.uuid}/", {"token": token, "password": "123"})
+        response = self.client.post(f"/v1/reset/{self.user.uuid}/", {"token": token, "password": "123"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1374,7 +1374,7 @@ class TestPasswordResetAPI(APIBaseTest):
         )
 
         # user remains logged out
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # password was not changed
@@ -1383,7 +1383,7 @@ class TestPasswordResetAPI(APIBaseTest):
         self.assertFalse(self.user.check_password("123"))
 
     def test_cant_reset_password_with_no_token(self):
-        response = self.client.post(f"/api/reset/{self.user.uuid}/", {"password": "a12345678"})
+        response = self.client.post(f"/v1/reset/{self.user.uuid}/", {"password": "a12345678"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1396,7 +1396,7 @@ class TestPasswordResetAPI(APIBaseTest):
         )
 
         # user remains logged out
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # password was not changed
@@ -1418,7 +1418,7 @@ class TestPasswordResetAPI(APIBaseTest):
             expired_token,
         ]:
             response = self.client.post(
-                f"/api/reset/{self.user.uuid}/",
+                f"/v1/reset/{self.user.uuid}/",
                 {"token": token, "password": "a12345678"},
             )
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1433,7 +1433,7 @@ class TestPasswordResetAPI(APIBaseTest):
             )
 
             # user remains logged out
-            response = self.client.get("/api/users/@me/")
+            response = self.client.get("/v1/users/@me/")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
             # password was not changed
@@ -1444,7 +1444,7 @@ class TestPasswordResetAPI(APIBaseTest):
     def test_cant_reset_password_with_invalid_user_id(self):
         token = password_reset_token_generator.make_token(self.user)
 
-        response = self.client.post(f"/api/reset/{uuid.uuid4()}/", {"token": token, "password": "a12345678"})
+        response = self.client.post(f"/v1/reset/{uuid.uuid4()}/", {"token": token, "password": "a12345678"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1457,7 +1457,7 @@ class TestPasswordResetAPI(APIBaseTest):
         )
 
         # user remains logged out
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # password was not changed
@@ -1469,12 +1469,12 @@ class TestPasswordResetAPI(APIBaseTest):
         self.ensure_url_patterns_loaded()
 
         with self.settings(E2E_TESTING=True):
-            response = self.client.get("/api/reset/e2e_test_user/?token=e2e_test_token")
+            response = self.client.get("/v1/reset/e2e_test_user/?token=e2e_test_token")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.settings(E2E_TESTING=True):
             response = self.client.post(
-                "/api/reset/e2e_test_user/",
+                "/v1/reset/e2e_test_user/",
                 {"token": "e2e_test_token", "password": "a12345678"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1494,7 +1494,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2021-08-25T22:10:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1516,7 +1516,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2022-08-25T22:00:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1538,7 +1538,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2021-08-26T22:00:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1555,7 +1555,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2022-08-25T22:00:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1577,7 +1577,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2021-08-25T21:14:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1598,7 +1598,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2021-08-24T21:14:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1613,15 +1613,15 @@ class TestTimeSensitivePermissions(APIBaseTest):
         self.organization_membership.save()
         now = datetime.now()
         with freeze_time(now):
-            res = self.client.patch("/api/organizations/@current", {"name": "new name"})
+            res = self.client.patch("/v1/organizations/@current", {"name": "new name"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE - 100)):
-            res = self.client.patch("/api/organizations/@current", {"name": "new name"})
+            res = self.client.patch("/v1/organizations/@current", {"name": "new name"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch("/api/organizations/@current", {"name": "new name"})
+            res = self.client.patch("/v1/organizations/@current", {"name": "new name"})
             assert res.status_code == 403
             assert res.json() == {
                 "type": "authentication_error",
@@ -1630,21 +1630,21 @@ class TestTimeSensitivePermissions(APIBaseTest):
                 "attr": None,
             }
 
-            res = self.client.get("/api/organizations/@current")
+            res = self.client.get("/v1/organizations/@current")
             assert res.status_code == 200
 
     def test_user_after_timeout_modifications_require_reauthentication(self):
         now = datetime.now()
         with freeze_time(now):
-            res = self.client.patch("/api/users/@me", {"first_name": "new name"})
+            res = self.client.patch("/v1/users/@me", {"first_name": "new name"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE - 100)):
-            res = self.client.patch("/api/users/@me", {"first_name": "new name"})
+            res = self.client.patch("/v1/users/@me", {"first_name": "new name"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch("/api/users/@me", {"first_name": "new name"})
+            res = self.client.patch("/v1/users/@me", {"first_name": "new name"})
             assert res.status_code == 403
             assert res.json() == {
                 "type": "authentication_error",
@@ -1653,21 +1653,21 @@ class TestTimeSensitivePermissions(APIBaseTest):
                 "attr": None,
             }
 
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
 
     def test_user_can_update_theme_without_recent_authentication(self):
         now = datetime.now()
         with freeze_time(now):
-            res = self.client.patch("/api/users/@me", {"theme_mode": "dark"})
+            res = self.client.patch("/v1/users/@me", {"theme_mode": "dark"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch("/api/users/@me", {"theme_mode": "light"})
+            res = self.client.patch("/v1/users/@me", {"theme_mode": "light"})
             assert res.status_code == 200
 
             res = self.client.patch(
-                "/api/users/@me",
+                "/v1/users/@me",
                 {"theme_mode": "system", "first_name": "still protected"},
             )
             assert res.status_code == 403
@@ -1680,14 +1680,14 @@ class TestTimeSensitivePermissions(APIBaseTest):
         now = datetime.now()
         with freeze_time(now):
             res = self.client.patch(
-                "/api/users/@me",
+                "/v1/users/@me",
                 {"set_current_organization": str(new_org.id)},
             )
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
             res = self.client.patch(
-                "/api/users/@me",
+                "/v1/users/@me",
                 {"set_current_organization": str(self.organization.id)},
             )
             assert res.status_code == 200
@@ -1702,7 +1702,7 @@ class TestTimeSensitivePermissions(APIBaseTest):
     def test_user_can_update_non_sensitive_fields_without_recent_authentication(self, _name, payload):
         now = datetime.now()
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch("/api/users/@me", payload, format="json")
+            res = self.client.patch("/v1/users/@me", payload, format="json")
             assert res.status_code != 403, f"Field update should not require re-authentication, got: {res.json()}"
 
     def test_user_can_update_scene_personalisation_without_recent_authentication(self):
@@ -1712,7 +1712,7 @@ class TestTimeSensitivePermissions(APIBaseTest):
         now = datetime.now()
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
             res = self.client.post(
-                "/api/users/@me/scene_personalisation",
+                "/v1/users/@me/scene_personalisation",
                 {"scene": "Person", "dashboard": dashboard.id},
                 format="json",
             )

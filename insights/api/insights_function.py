@@ -463,7 +463,7 @@ class InsightsFunctionViewSet(
         if not query:
             return Response([])
 
-        icons = CDPIconsService().list_icons(query, icon_url_base="/api/projects/@current/insights_functions/icon/?id=")
+        icons = CDPIconsService().list_icons(query, icon_url_base="/v1/projects/@current/insights_functions/icon/?id=")
 
         return Response(icons)
 

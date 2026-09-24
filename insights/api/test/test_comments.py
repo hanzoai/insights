@@ -23,13 +23,13 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         payload.update(data)
 
         return self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             payload,
         ).json()
 
     def test_creates_comment_with_validation_errors(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "This is a comment",
             },
@@ -44,7 +44,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
 
     def test_creates_comment_successfully(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "This is a comment",
                 "scope": "Notebook",
@@ -68,12 +68,12 @@ class TestComments(APIBaseTest, QueryMatchingTest):
 
     def test_updates_content_and_increments_version(self) -> None:
         existing = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {"content": "This is a comment", "scope": "Notebook"},
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/comments/{existing.json()['id']}",
+            f"/v1/projects/{self.team.id}/comments/{existing.json()['id']}",
             {
                 "content": "This is an edited comment",
             },
@@ -95,7 +95,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         }
 
     def test_empty_comments_list(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/comments")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "next": None,
@@ -106,7 +106,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
     def test_lists_comments(self) -> None:
         self._create_comment({"content": "comment 1"})
         self._create_comment({"content": "comment 2"})
-        response = self.client.get(f"/api/projects/{self.team.id}/comments")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments")
         assert len(response.json()["results"]) == 2
 
         assert response.json()["results"][0]["content"] == "comment 2"
@@ -117,12 +117,12 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         self._create_comment({"content": "comment notebook-2", "scope": "Notebook", "item_id": "2"})
         self._create_comment({"content": "comment dashboard-1", "scope": "Dashboard", "item_id": "1"})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/comments?scope=Notebook")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments?scope=Notebook")
         assert len(response.json()["results"]) == 2
         assert response.json()["results"][0]["content"] == "comment notebook-2"
         assert response.json()["results"][1]["content"] == "comment notebook-1"
 
-        response = self.client.get(f"/api/projects/{self.team.id}/comments?scope=Notebook&item_id=2")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments?scope=Notebook&item_id=2")
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["content"] == "comment notebook-2"
 
@@ -133,8 +133,8 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         self._create_comment({"content": "comment elsewhere"})
 
         for url in [
-            f"/api/projects/{self.team.id}/comments/{initial_comment['id']}/thread",
-            f"/api/projects/{self.team.id}/comments/?source_comment={initial_comment['id']}",
+            f"/v1/projects/{self.team.id}/comments/{initial_comment['id']}/thread",
+            f"/v1/projects/{self.team.id}/comments/?source_comment={initial_comment['id']}",
         ]:
             response = self.client.get(url)
             assert len(response.json()["results"]) == 2
@@ -168,7 +168,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         for comment_data in comments_to_create:
             self._create_comment(comment_data)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/comments/count{query_params}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments/count{query_params}")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"count": expected_count}
 
@@ -243,14 +243,14 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         for comment_data in comments_to_create:
             self._create_comment(comment_data)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/comments/count{query_params}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments/count{query_params}")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"count": expected_count}
 
     def test_creates_llm_trace_comment_successfully(self) -> None:
         trace_id = "test-trace-123"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "This trace has high latency",
                 "scope": "LLMTrace",
@@ -271,10 +271,10 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         self._create_comment({"content": "Trace 1 comment", "scope": "LLMTrace", "item_id": trace_id_1})
         self._create_comment({"content": "Trace 2 comment", "scope": "LLMTrace", "item_id": trace_id_2})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/comments?scope=LLMTrace")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments?scope=LLMTrace")
         assert len(response.json()["results"]) == 2
 
-        response = self.client.get(f"/api/projects/{self.team.id}/comments?scope=LLMTrace&item_id={trace_id_1}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments?scope=LLMTrace&item_id={trace_id_1}")
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["content"] == "Trace 1 comment"
 
@@ -288,7 +288,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         mentioned_user = User.objects.create_and_join(self.organization, "mentioned@hanzo.ai", None)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "",
                 "scope": "Notebook",
@@ -323,14 +323,14 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         mentioned_user = User.objects.create_and_join(self.organization, "mentioned_update@hanzo.ai", None)
 
         existing = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {"content": "Original comment", "scope": "Notebook"},
         )
 
         mock_send_email.reset_mock()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/comments/{existing.json()['id']}",
+            f"/v1/projects/{self.team.id}/comments/{existing.json()['id']}",
             {
                 "content": "",
                 "rich_content": {
@@ -364,7 +364,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         mentioned_user_2 = User.objects.create_and_join(self.organization, "explicit_user2@hanzo.ai", None)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "",
                 "scope": "Notebook",
@@ -396,7 +396,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         mentioned_user = User.objects.create_and_join(self.organization, "duplicate@hanzo.ai", None)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "",
                 "scope": "Notebook",
@@ -434,7 +434,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         valid_user = User.objects.create_and_join(self.organization, "valid@hanzo.ai", None)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "",
                 "scope": "Notebook",
@@ -467,7 +467,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         mentioned_user = User.objects.create_and_join(self.organization, "slug_test@hanzo.ai", None)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "",
                 "scope": "Replay",
@@ -498,7 +498,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         mentioned_user = User.objects.create_and_join(self.organization, "no_slug@hanzo.ai", None)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "",
                 "scope": "Replay",
@@ -527,7 +527,7 @@ class TestComments(APIBaseTest, QueryMatchingTest):
 
         # Soft delete by setting deleted=True without providing content
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/comments/{existing['id']}",
+            f"/v1/projects/{self.team.id}/comments/{existing['id']}",
             {"deleted": True},
         )
 
@@ -541,24 +541,24 @@ class TestComments(APIBaseTest, QueryMatchingTest):
         comment_to_delete = self._create_comment({"content": "comment 2"})
 
         # Verify both exist
-        response = self.client.get(f"/api/projects/{self.team.id}/comments")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments")
         assert len(response.json()["results"]) == 2
 
         # Soft delete
         self.client.patch(
-            f"/api/projects/{self.team.id}/comments/{comment_to_delete['id']}",
+            f"/v1/projects/{self.team.id}/comments/{comment_to_delete['id']}",
             {"deleted": True},
         )
 
         # Verify deleted comment is excluded from list
-        response = self.client.get(f"/api/projects/{self.team.id}/comments")
+        response = self.client.get(f"/v1/projects/{self.team.id}/comments")
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["content"] == "comment 1"
 
     def test_hard_delete_returns_method_not_allowed(self) -> None:
         existing = self._create_comment({"content": "This is a comment"})
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/comments/{existing['id']}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/comments/{existing['id']}")
 
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
@@ -576,7 +576,7 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "Check this out",
                 "scope": "Notebook",
@@ -607,14 +607,14 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         )
 
         existing = self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {"content": "Original", "scope": "Notebook"},
         )
 
         mock_produce_event.reset_mock()
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/comments/{existing.json()['id']}",
+            f"/v1/projects/{self.team.id}/comments/{existing.json()['id']}",
             {"content": "Updated", "mentions": [mentioned_user.id]},
         )
 
@@ -628,7 +628,7 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         self, mock_send_email: mock.MagicMock, mock_produce_event: mock.MagicMock
     ) -> None:
         self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "I mention myself",
                 "scope": "Notebook",
@@ -650,7 +650,7 @@ class TestDiscussionMentionInternalEvents(APIBaseTest, QueryMatchingTest):
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/comments",
+            f"/v1/projects/{self.team.id}/comments",
             {
                 "content": "Test content",
                 "scope": "Insight",

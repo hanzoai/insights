@@ -28,7 +28,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         )
 
     def test_list_message_templates(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_templates/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_templates/")
         assert response.status_code == status.HTTP_200_OK
 
         response_data = response.json()
@@ -42,7 +42,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         assert template["type"] == "email"
 
     def test_retrieve_message_template(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_templates/{self.message_template.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_templates/{self.message_template.id}/")
         assert response.status_code == status.HTTP_200_OK
 
         template = response.json()
@@ -53,28 +53,28 @@ class TestMessageTemplatesAPI(APIBaseTest):
         assert template["type"] == "email"
 
     def test_cannot_access_other_teams_templates(self):
-        response = self.client.get(f"/api/environments/{self.other_team.id}/messaging_templates/")
+        response = self.client.get(f"/v1/environments/{self.other_team.id}/messaging_templates/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/messaging_templates/{self.other_team_template.id}/"
+            f"/v1/environments/{self.team.id}/messaging_templates/{self.other_team_template.id}/"
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_authentication_required(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_templates/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_templates/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_delete_operation_not_allowed(self):
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/messaging_templates/{self.message_template.id}/"
+            f"/v1/environments/{self.team.id}/messaging_templates/{self.message_template.id}/"
         )
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
     def test_create_email_template_without_subject_fails(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_templates/",
+            f"/v1/environments/{self.team.id}/messaging_templates/",
             data={
                 "name": "No Subject Template",
                 "content": {"email": {"html": "<p>Hello</p>"}},
@@ -86,7 +86,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
 
     def test_create_email_template_with_subject_succeeds(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_templates/",
+            f"/v1/environments/{self.team.id}/messaging_templates/",
             data={
                 "name": "Valid Template",
                 "content": {"email": {"subject": "Hello", "html": "<p>Hello</p>"}},
@@ -100,7 +100,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
 
     def test_create_email_template_without_email_content_succeeds(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_templates/",
+            f"/v1/environments/{self.team.id}/messaging_templates/",
             data={
                 "name": "No Email Content",
                 "type": "email",

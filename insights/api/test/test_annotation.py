@@ -26,14 +26,14 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         # Annotation creation is not reported to Insights because it has no created_by!
         mock_capture.assert_not_called()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/annotations/").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/annotations/").json()
         assert len(response["results"]) == 1
         assert response["results"][0]["content"] == "hello world!"
 
     @patch("insights.api.annotation.report_user_action")
     def test_retrieving_annotation_is_not_n_plus_1(self, _mock_capture: MagicMock) -> None:
         with self.assertNumQueries(FuzzyInt(9, 10)), snapshot_postgres_queries_context(self):
-            response = self.client.get(f"/api/projects/{self.team.id}/annotations/").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/annotations/").json()
             assert len(response["results"]) == 0
 
         Annotation.objects.create(
@@ -45,7 +45,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         )
 
         with self.assertNumQueries(FuzzyInt(9, 10)), snapshot_postgres_queries_context(self):
-            response = self.client.get(f"/api/projects/{self.team.id}/annotations/").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/annotations/").json()
             assert len(response["results"]) == 1
 
         Annotation.objects.create(
@@ -57,7 +57,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         )
 
         with self.assertNumQueries(FuzzyInt(9, 10)), snapshot_postgres_queries_context(self):
-            response = self.client.get(f"/api/projects/{self.team.id}/annotations/").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/annotations/").json()
             assert len(response["results"]) == 2
 
     def test_org_scoped_annotations_are_returned_between_projects(self) -> None:
@@ -70,7 +70,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
             scope=Annotation.Scope.ORGANIZATION,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/annotations/").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/annotations/").json()
 
         assert len(response["results"]) == 1
         assert response["results"][0]["content"] == "Cross-project annotation!"
@@ -90,12 +90,12 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
             scope=Annotation.Scope.ORGANIZATION,
         )
 
-        response_1 = self.client.get(f"/api/projects/{separate_team.id}/annotations/")
+        response_1 = self.client.get(f"/v1/projects/{separate_team.id}/annotations/")
 
         assert response_1.status_code == 403
         assert response_1.json() == self.permission_denied_response("You don't have access to the project.")
 
-        response_2 = self.client.get(f"/api/projects/{self.team.id}/annotations/")
+        response_2 = self.client.get(f"/v1/projects/{self.team.id}/annotations/")
 
         assert response_2.status_code == 200
         assert response_2.json()["results"] == []
@@ -107,7 +107,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         self.client.force_login(self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Marketing campaign",
                 "scope": "organization",
@@ -134,7 +134,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
     @patch("insights.api.annotation.report_user_action")
     def test_can_create_annotations_as_a_bot(self, mock_capture: MagicMock) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Marketing campaign",
                 "scope": "organization",
@@ -148,7 +148,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         instance = Annotation.objects.get(pk=response.json()["id"])
         assert instance.creation_type == "GIT"
 
-        get_created_response = self.client.get(f"/api/projects/{self.team.id}/annotations/{instance.id}/")
+        get_created_response = self.client.get(f"/v1/projects/{self.team.id}/annotations/{instance.id}/")
         assert get_created_response.json()["creation_type"] == "GIT"
 
     @patch("insights.api.annotation.report_user_action")
@@ -164,7 +164,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         self.client.force_login(self.user)
 
         response = self.client.patch(
-            f"/api/projects/{second_team.id}/annotations/{test_annotation.pk}/",
+            f"/v1/projects/{second_team.id}/annotations/{test_annotation.pk}/",
             {"scope": Annotation.Scope.PROJECT},
         )
         test_annotation.refresh_from_db()
@@ -187,7 +187,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/annotations/{test_annotation.pk}/",
+            f"/v1/projects/{self.team.id}/annotations/{test_annotation.pk}/",
             {"content": "Updated text", "scope": "organization"},
         )
         test_annotation.refresh_from_db()
@@ -204,7 +204,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         self.client.force_login(new_user)
 
         with patch("insights.api.team.report_user_action"):
-            response = self.client.delete(f"/api/projects/{self.team.id}/annotations/{instance.pk}/")
+            response = self.client.delete(f"/v1/projects/{self.team.id}/annotations/{instance.pk}/")
 
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
         assert Annotation.objects.filter(pk=instance.pk).exists()
@@ -248,7 +248,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         )
 
         scope_query_param = f"?scope={scope}" if scope else ""
-        response = self.client.get(f"/api/projects/{self.team.id}/annotations/{scope_query_param}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/annotations/{scope_query_param}")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert len(response.json()["results"]) == expected_result_count
         if expected_result_count == 1:
@@ -286,7 +286,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
 
         # Query with a date range filter (simulating session replay time range)
         response = self.client.get(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "date_from": session_start.isoformat(),
                 "date_to": session_end.isoformat(),
@@ -306,7 +306,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
 
     def test_filter_annotations_400_for_invalid_scope(self) -> None:
         response = self.client.get(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {"scope": "invalid_scope"},
         )
         assert response.status_code == 400
@@ -314,7 +314,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
 
     def test_create_annotations_400_for_recording_scope(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {"scope": "recording"},
         )
         assert response.status_code == 400
@@ -331,7 +331,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         self, date_from: str, date_to: str, error_message: str
     ) -> None:
         response = self.client.get(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {"date_from": date_from, "date_to": date_to},
         )
         assert response.status_code == 400
@@ -341,7 +341,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="Test Dashboard")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Dashboard annotation",
                 "scope": "dashboard",
@@ -356,7 +356,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
 
     def test_creating_annotation_with_nonexistent_dashboard_returns_400(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Dashboard annotation",
                 "scope": "dashboard",
@@ -373,7 +373,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         other_dashboard = Dashboard.objects.create(team=other_team, name="Other Dashboard")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Dashboard annotation",
                 "scope": "dashboard",
@@ -390,7 +390,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         other_dashboard = Dashboard.objects.create(team=other_team, name="Other Org Dashboard")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Dashboard annotation",
                 "scope": "dashboard",
@@ -413,7 +413,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         other_dashboard = Dashboard.objects.create(team=other_team, name="Other Dashboard")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/annotations/{annotation.id}/",
+            f"/v1/projects/{self.team.id}/annotations/{annotation.id}/",
             {"dashboard_id": other_dashboard.id},
         )
 
@@ -431,7 +431,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         other_dashboard = Dashboard.objects.create(team=other_team, name="Other Org Dashboard")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/annotations/{annotation.id}/",
+            f"/v1/projects/{self.team.id}/annotations/{annotation.id}/",
             {"dashboard_id": other_dashboard.id},
         )
 
@@ -443,7 +443,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         other_insight = Insight.objects.create(team=other_team, name="Other Insight")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Insight annotation",
                 "scope": "dashboard_item",
@@ -467,7 +467,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         other_insight = Insight.objects.create(team=other_team, name="Other Insight")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/annotations/{annotation.id}/",
+            f"/v1/projects/{self.team.id}/annotations/{annotation.id}/",
             {"dashboard_item": other_insight.id},
         )
 
@@ -477,7 +477,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
 
     def test_creating_annotation_with_nonexistent_insight_returns_400(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Insight annotation",
                 "scope": "dashboard_item",
@@ -494,7 +494,7 @@ class TestAnnotation(APIBaseTest, QueryMatchingTest):
         insight = Insight.objects.create(team=self.team, name="My Insight")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/annotations/",
+            f"/v1/projects/{self.team.id}/annotations/",
             {
                 "content": "Insight annotation",
                 "scope": "dashboard_item",

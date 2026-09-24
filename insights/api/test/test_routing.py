@@ -58,7 +58,7 @@ scoped_test_organizations_router.register(
 
 
 urlpatterns = [
-    path("api/", include(test_router.urls)),
+    path("v1/", include(test_router.urls)),
 ]
 
 
@@ -81,17 +81,17 @@ class TestTeamAndOrgViewSetMixin(APIBaseTest):
         self.current_team_annotation = Annotation.objects.create(team=self.team, organization=self.organization)
 
     def test_environment_nested_filtering(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/foos/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 1)  # Just current_team_annotation
 
     def test_project_nested_filtering(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/foos/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 2)  # Both current_team_annotation and other_team_annotation
 
     def test_organization_nested_filtering(self):
-        response = self.client.get(f"/api/organizations/{self.organization.id}/foos/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 3)  # All except other_org_annotation
 
@@ -176,7 +176,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         annotation = Annotation.objects.create(team=self.team, organization=self.organization, content="Test note")
 
         response = self.client.get(
-            f"/api/scoped_environments/{self.team.id}/scoped_foos/",
+            f"/v1/scoped_environments/{self.team.id}/scoped_foos/",
             headers={"authorization": f"Bearer {self.access_token.token}"},
         )
 
@@ -194,7 +194,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         Annotation.objects.create(team=other_team, organization=other_org)
 
         response = self.client.get(
-            f"/api/scoped_environments/{other_team.id}/scoped_foos/",
+            f"/v1/scoped_environments/{other_team.id}/scoped_foos/",
             headers={"authorization": f"Bearer {self.access_token.token}"},
         )
 
@@ -206,7 +206,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         Annotation.objects.create(team=self.team, organization=self.organization)
 
         response = self.client.get(
-            f"/api/scoped_organizations/{self.organization.id}/scoped_foos/",
+            f"/v1/scoped_organizations/{self.organization.id}/scoped_foos/",
             headers={"authorization": f"Bearer {self.access_token.token}"},
         )
 
@@ -224,7 +224,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/scoped_environments/{self.team.id}/scoped_foos/",
+            f"/v1/scoped_environments/{self.team.id}/scoped_foos/",
             headers={"authorization": f"Bearer {expired_token.token}"},
         )
 
@@ -234,18 +234,18 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         """Test that OAuth authentication is part of the authentication chain"""
         # First, verify session auth works
         Annotation.objects.create(team=self.team, organization=self.organization)
-        response = self.client.get(f"/api/scoped_environments/{self.team.id}/scoped_foos/")
+        response = self.client.get(f"/v1/scoped_environments/{self.team.id}/scoped_foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 1)
 
         # Logout and verify OAuth token works
         self.client.logout()
-        response = self.client.get(f"/api/scoped_environments/{self.team.id}/scoped_foos/")
+        response = self.client.get(f"/v1/scoped_environments/{self.team.id}/scoped_foos/")
         self.assertEqual(response.status_code, 401)
 
         # Now use OAuth token
         response = self.client.get(
-            f"/api/scoped_environments/{self.team.id}/scoped_foos/",
+            f"/v1/scoped_environments/{self.team.id}/scoped_foos/",
             headers={"authorization": f"Bearer {self.access_token.token}"},
         )
         self.assertEqual(response.status_code, 200)

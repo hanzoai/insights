@@ -18,7 +18,7 @@ class TestTextReprAPI(APIBaseTest):
     def test_unauthenticated_user_cannot_access_text_repr(self):
         """Should require authentication to access text repr endpoints."""
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/text_repr/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/text_repr/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_stringify_generation_event(self):
@@ -37,7 +37,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -75,7 +75,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -114,7 +114,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -133,7 +133,7 @@ class TestTextReprAPI(APIBaseTest):
         request_data: dict[str, Any] = {"data": {}}
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -146,7 +146,7 @@ class TestTextReprAPI(APIBaseTest):
         request_data = {"event_type": "$ai_generation"}
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -166,7 +166,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -189,7 +189,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -211,7 +211,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -235,7 +235,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -261,7 +261,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -298,7 +298,7 @@ class TestTextReprAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -324,7 +324,7 @@ class TestTextReprAPI(APIBaseTest):
 
         # Try to access other team's endpoint
         response = self.client.post(
-            f"/api/environments/{other_team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{other_team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -366,7 +366,7 @@ class TestProviderFormats(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -406,7 +406,7 @@ class TestProviderFormats(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -433,7 +433,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -444,7 +444,7 @@ class TestEdgeCases(APIBaseTest):
     def test_malformed_json(self):
         """Should handle malformed JSON gracefully."""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             "not json",
             content_type="application/json",
         )
@@ -469,7 +469,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -500,7 +500,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -519,7 +519,7 @@ class TestEdgeCases(APIBaseTest):
         request_data["options"] = {"truncated": False}  # Disable internal truncation to test max_length
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -543,7 +543,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -569,7 +569,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -594,7 +594,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -642,7 +642,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -686,7 +686,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -729,7 +729,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -766,7 +766,7 @@ class TestEdgeCases(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -800,7 +800,7 @@ class TestCachingBehavior(APIBaseTest):
 
         # First request - should generate and cache
         response1 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -821,7 +821,7 @@ class TestCachingBehavior(APIBaseTest):
 
         # Second identical request - should use cache and return same result
         response2 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -848,7 +848,7 @@ class TestCachingBehavior(APIBaseTest):
         # Request with truncated=True
         request1 = {**base_request, "options": {"truncated": True}}
         response1 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request1,
             format="json",
         )
@@ -858,7 +858,7 @@ class TestCachingBehavior(APIBaseTest):
         # Request with truncated=False - should NOT use cache from request1
         request2 = {**base_request, "options": {"truncated": False}}
         response2 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request2,
             format="json",
         )
@@ -896,7 +896,7 @@ class TestCachingBehavior(APIBaseTest):
         }
 
         response1 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request1,
             format="json",
         )
@@ -913,7 +913,7 @@ class TestCachingBehavior(APIBaseTest):
         }
 
         response2 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request2,
             format="json",
         )
@@ -950,7 +950,7 @@ class TestCachingBehavior(APIBaseTest):
 
         # Request from first team
         response1 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request_data,
             format="json",
         )
@@ -989,7 +989,7 @@ class TestCachingBehavior(APIBaseTest):
         }
 
         response1 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request1,
             format="json",
         )
@@ -1008,7 +1008,7 @@ class TestCachingBehavior(APIBaseTest):
         }
 
         response2 = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/text_repr/",
+            f"/v1/environments/{self.team.id}/llm_analytics/text_repr/",
             request2,
             format="json",
         )

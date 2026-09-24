@@ -153,7 +153,7 @@ class ExternalWebAnalyticsViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, vi
                 description="Example paginated response with breakdown data",
                 response_only=True,
                 value={
-                    "next": f"{settings.SITE_URL}/api/web_analytics/breakdown?offset=2&limit=2",
+                    "next": f"{settings.SITE_URL}/v1/web_analytics/breakdown?offset=2&limit=2",
                     "results": [
                         {"breakdown_value": "/home", "visitors": 8500, "views": 12000, "sessions": 9200},
                         {"breakdown_value": "/about", "visitors": 2100, "views": 2800, "sessions": 2300},

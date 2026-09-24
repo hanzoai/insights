@@ -81,7 +81,7 @@ class Lifecycle:
             persons_url.append(
                 {
                     "filter": extra_params,
-                    "url": f"api/person/lifecycle/?{urllib.parse.urlencode(parsed_params)}&cache_invalidation_key={cache_invalidation_key}",
+                    "url": f"v1/person/lifecycle/?{urllib.parse.urlencode(parsed_params)}&cache_invalidation_key={cache_invalidation_key}",
                 }
             )
         return persons_url

@@ -396,7 +396,7 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
     def validate_query_runner_access(self, user: "User") -> bool:
         # LogsQuery is registered in get_query_runner solely for server-side CSV export
         # (via ExportedAsset + Celery, which runs without a user context and skips this check).
-        # Block all user-initiated queries via the generic /api/projects/:id/query/ endpoint
+        # Block all user-initiated queries via the generic /v1/projects/:id/query/ endpoint
         # until the LogsQuery schema is stable and ready to be a public API.
         from insights.rbac.user_access_control import UserAccessControlError
 

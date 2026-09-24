@@ -102,7 +102,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self.create_task("Task 1")
         self.create_task("Task 2")
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -121,7 +121,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
         # Task2 has no runs
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -149,7 +149,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_retrieve_task(self):
         task = self.create_task("Test Task")
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -171,7 +171,7 @@ class TestTaskAPI(BaseTaskAPITest):
             status=TaskRun.Status.IN_PROGRESS,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -183,7 +183,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_retrieve_task_without_runs(self):
         task = self.create_task("Test Task")
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -192,7 +192,7 @@ class TestTaskAPI(BaseTaskAPITest):
 
     def test_create_task(self):
         response = self.client.post(
-            "/api/projects/@current/tasks/",
+            "/v1/projects/@current/tasks/",
             {
                 "title": "New Task",
                 "description": "New Description",
@@ -212,7 +212,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task("Original Task")
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/",
             {"title": "Updated Task"},
             format="json",
         )
@@ -222,7 +222,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_delete_task(self):
         task = self.create_task("Task to Delete")
 
-        response = self.client.delete(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.delete(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         task.refresh_from_db()
@@ -233,7 +233,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_run_endpoint_triggers_workflow(self, mock_workflow):
         task = self.create_task()
 
-        response = self.client.post(f"/api/projects/@current/tasks/{task.id}/run/")
+        response = self.client.post(f"/v1/projects/@current/tasks/{task.id}/run/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -282,7 +282,7 @@ class TestTaskAPI(BaseTaskAPITest):
             )
             tasks.append(task)
 
-        response = self.client.get(f"/api/projects/@current/tasks/?{filter_param}={filter_value}")
+        response = self.client.get(f"/v1/projects/@current/tasks/?{filter_param}={filter_value}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -296,7 +296,7 @@ class TestTaskAPI(BaseTaskAPITest):
     def test_delete_task_soft_deletes(self):
         task = self.create_task("Task to delete")
 
-        response = self.client.delete(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.delete(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         task.refresh_from_db()
@@ -308,7 +308,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task2 = self.create_task("Deleted Task")
         task2.soft_delete()
 
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -319,7 +319,7 @@ class TestTaskAPI(BaseTaskAPITest):
         task = self.create_task("Deleted Task")
         task.soft_delete()
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @parameterized.expand(
@@ -359,7 +359,7 @@ class TestTaskAPI(BaseTaskAPITest):
             ),
         ]
 
-        url = "/api/projects/@current/tasks/"
+        url = "/v1/projects/@current/tasks/"
         if filter_user is not None:
             user = users[filter_user]
             assert user is not None
@@ -384,7 +384,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "completed"},
             format="json",
         )
@@ -405,7 +405,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "failed", "error_message": "Something went wrong"},
             format="json",
         )
@@ -426,7 +426,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "cancelled"},
             format="json",
         )
@@ -442,7 +442,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.QUEUED)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "in_progress"},
             format="json",
         )
@@ -456,7 +456,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.COMPLETED)
 
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/",
             {"status": "completed"},
             format="json",
         )
@@ -479,7 +479,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
             status=TaskRun.Status.COMPLETED,
         )
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -500,7 +500,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         # Add some logs to S3
         run.append_log([{"type": "info", "message": "Test log output"}])
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -518,7 +518,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run1 = TaskRun.objects.create(task=task1, team=self.team, status=TaskRun.Status.QUEUED)
         _run2 = TaskRun.objects.create(task=task2, team=self.team, status=TaskRun.Status.QUEUED)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task1.id}/runs/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task1.id}/runs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -531,7 +531,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         run2 = TaskRun.objects.create(task=task2, team=self.team, status=TaskRun.Status.QUEUED)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task1.id}/runs/{run2.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task1.id}/runs/{run2.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_append_log_entries(self):
@@ -539,7 +539,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {
                 "entries": [
                     {"type": "info", "message": "Starting task"},
@@ -575,7 +575,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         # Add first batch
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {"entries": [{"type": "info", "message": "Initial entry"}]},
             format="json",
         )
@@ -583,7 +583,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         # Add second batch
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {"entries": [{"type": "success", "message": "Task completed"}]},
             format="json",
         )
@@ -607,7 +607,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/",
             {"entries": []},
             format="json",
         )
@@ -631,7 +631,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         }
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             payload,
             format="json",
         )
@@ -652,7 +652,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/",
             {"artifacts": []},
             format="json",
         )
@@ -677,7 +677,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/presign/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/presign/",
             {"storage_path": "tasks/artifacts/team_1/task_2/run_3/plan.md"},
             format="json",
         )
@@ -691,7 +691,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS, artifacts=[])
 
         response = self.client.post(
-            f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/presign/",
+            f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/artifacts/presign/",
             {"storage_path": "unknown"},
             format="json",
         )
@@ -705,7 +705,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -732,7 +732,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         public_key = get_sandbox_jwt_public_key()
@@ -754,7 +754,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
 
-        response = self.client.get(f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/connection_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         public_key = get_sandbox_jwt_public_key()
@@ -780,7 +780,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
         other_run = TaskRun.objects.create(task=other_task, team=other_team, status=TaskRun.Status.IN_PROGRESS)
 
         response = self.client.get(
-            f"/api/projects/@current/tasks/{other_task.id}/runs/{other_run.id}/connection_token/"
+            f"/v1/projects/@current/tasks/{other_task.id}/runs/{other_run.id}/connection_token/"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -823,7 +823,7 @@ class TestTaskRunSessionLogsAPI(BaseTaskAPITest):
         object_storage.write(run.log_url, content.encode("utf-8"))
 
     def _events_url(self, task, run):
-        return f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/session_logs/"
+        return f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/session_logs/"
 
     def test_session_logs_returns_all_entries_unfiltered(self):
         task = self.create_task()
@@ -1040,19 +1040,19 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
 
         endpoints = [
             # TaskViewSet endpoints
-            ("/api/projects/@current/tasks/", "GET"),
-            (f"/api/projects/@current/tasks/{task.id}/", "GET"),
-            ("/api/projects/@current/tasks/", "POST"),
-            (f"/api/projects/@current/tasks/{task.id}/", "PATCH"),
-            (f"/api/projects/@current/tasks/{task.id}/", "DELETE"),
-            (f"/api/projects/@current/tasks/{task.id}/run/", "POST"),
+            ("/v1/projects/@current/tasks/", "GET"),
+            (f"/v1/projects/@current/tasks/{task.id}/", "GET"),
+            ("/v1/projects/@current/tasks/", "POST"),
+            (f"/v1/projects/@current/tasks/{task.id}/", "PATCH"),
+            (f"/v1/projects/@current/tasks/{task.id}/", "DELETE"),
+            (f"/v1/projects/@current/tasks/{task.id}/run/", "POST"),
             # TaskRunViewSet endpoints
-            (f"/api/projects/@current/tasks/{task.id}/runs/", "GET"),
-            (f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/", "GET"),
-            (f"/api/projects/@current/tasks/{task.id}/runs/", "POST"),
-            (f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/", "PATCH"),
-            (f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/", "PATCH"),
-            (f"/api/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/", "POST"),
+            (f"/v1/projects/@current/tasks/{task.id}/runs/", "GET"),
+            (f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/", "GET"),
+            (f"/v1/projects/@current/tasks/{task.id}/runs/", "POST"),
+            (f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/", "PATCH"),
+            (f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/set_output/", "PATCH"),
+            (f"/v1/projects/@current/tasks/{task.id}/runs/{run.id}/append_log/", "POST"),
         ]
 
         for url, method in endpoints:
@@ -1065,8 +1065,8 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         self.client.force_authenticate(None)
 
         endpoints = [
-            ("/api/projects/@current/tasks/", "GET"),
-            (f"/api/projects/@current/tasks/{task.id}/", "GET"),
+            ("/v1/projects/@current/tasks/", "GET"),
+            (f"/v1/projects/@current/tasks/{task.id}/", "GET"),
         ]
 
         for url, method in endpoints:
@@ -1083,17 +1083,17 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         )
 
         # Try to access other team's task
-        response = self.client.get(f"/api/projects/@current/tasks/{other_task.id}/")
+        response = self.client.get(f"/v1/projects/@current/tasks/{other_task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Try to update other team's task
         response = self.client.patch(
-            f"/api/projects/@current/tasks/{other_task.id}/", {"title": "Hacked Title"}, format="json"
+            f"/v1/projects/@current/tasks/{other_task.id}/", {"title": "Hacked Title"}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Try to delete other team's task
-        response = self.client.delete(f"/api/projects/@current/tasks/{other_task.id}/")
+        response = self.client.delete(f"/v1/projects/@current/tasks/{other_task.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_endpoints_only_return_team_resources(self):
@@ -1109,7 +1109,7 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         )
 
         # List tasks should only return my team's tasks
-        response = self.client.get("/api/projects/@current/tasks/")
+        response = self.client.get("/v1/projects/@current/tasks/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         task_ids = [t["id"] for t in response.json()["results"]]
         self.assertIn(str(my_task.id), task_ids)
@@ -1117,28 +1117,28 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
 
     @parameterized.expand(
         [
-            ("task:read", "GET", "/api/projects/@current/tasks/", True),
-            ("task:read", "GET", f"/api/projects/@current/tasks/{{task_id}}/", True),
-            ("task:read", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/", True),
-            ("task:read", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
-            ("task:read", "POST", "/api/projects/@current/tasks/", False),
-            ("task:read", "PATCH", f"/api/projects/@current/tasks/{{task_id}}/", False),
-            ("task:read", "DELETE", f"/api/projects/@current/tasks/{{task_id}}/", False),
-            ("task:read", "POST", f"/api/projects/@current/tasks/{{task_id}}/run/", False),
-            ("task:write", "GET", "/api/projects/@current/tasks/", True),
-            ("task:write", "POST", "/api/projects/@current/tasks/", True),
-            ("task:write", "PATCH", f"/api/projects/@current/tasks/{{task_id}}/", True),
-            ("task:write", "DELETE", f"/api/projects/@current/tasks/{{task_id}}/", True),
-            ("task:write", "POST", f"/api/projects/@current/tasks/{{task_id}}/run/", True),
-            ("task:write", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/", True),
-            ("task:write", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
-            ("other_scope:read", "GET", "/api/projects/@current/tasks/", False),
-            ("other_scope:write", "POST", "/api/projects/@current/tasks/", False),
-            ("*", "GET", "/api/projects/@current/tasks/", True),
-            ("*", "POST", "/api/projects/@current/tasks/", True),
-            ("*", "POST", f"/api/projects/@current/tasks/{{task_id}}/run/", True),
-            ("*", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/", True),
-            ("*", "GET", f"/api/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
+            ("task:read", "GET", "/v1/projects/@current/tasks/", True),
+            ("task:read", "GET", f"/v1/projects/@current/tasks/{{task_id}}/", True),
+            ("task:read", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/", True),
+            ("task:read", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
+            ("task:read", "POST", "/v1/projects/@current/tasks/", False),
+            ("task:read", "PATCH", f"/v1/projects/@current/tasks/{{task_id}}/", False),
+            ("task:read", "DELETE", f"/v1/projects/@current/tasks/{{task_id}}/", False),
+            ("task:read", "POST", f"/v1/projects/@current/tasks/{{task_id}}/run/", False),
+            ("task:write", "GET", "/v1/projects/@current/tasks/", True),
+            ("task:write", "POST", "/v1/projects/@current/tasks/", True),
+            ("task:write", "PATCH", f"/v1/projects/@current/tasks/{{task_id}}/", True),
+            ("task:write", "DELETE", f"/v1/projects/@current/tasks/{{task_id}}/", True),
+            ("task:write", "POST", f"/v1/projects/@current/tasks/{{task_id}}/run/", True),
+            ("task:write", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/", True),
+            ("task:write", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
+            ("other_scope:read", "GET", "/v1/projects/@current/tasks/", False),
+            ("other_scope:write", "POST", "/v1/projects/@current/tasks/", False),
+            ("*", "GET", "/v1/projects/@current/tasks/", True),
+            ("*", "POST", "/v1/projects/@current/tasks/", True),
+            ("*", "POST", f"/v1/projects/@current/tasks/{{task_id}}/run/", True),
+            ("*", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/", True),
+            ("*", "GET", f"/v1/projects/@current/tasks/{{task_id}}/runs/{{run_id}}/", True),
         ]
     )
     def test_scoped_api_key_permissions(self, scope, method, url_template, should_have_access):
@@ -1159,7 +1159,7 @@ class TestTasksAPIPermissions(BaseTaskAPITest):
         self.client.force_authenticate(None)
 
         data = {}
-        if method == "POST" and url == "/api/projects/@current/tasks/":
+        if method == "POST" and url == "/v1/projects/@current/tasks/":
             data = {
                 "title": "New Task",
                 "description": "Description",
@@ -1226,7 +1226,7 @@ class TestTaskRepositoryReadinessAPI(BaseTaskAPITest):
         }
 
         response = self.client.get(
-            "/api/projects/@current/tasks/repository_readiness/",
+            "/v1/projects/@current/tasks/repository_readiness/",
             {
                 "repository": "insights/insights",
                 "window_days": "7",
@@ -1239,5 +1239,5 @@ class TestTaskRepositoryReadinessAPI(BaseTaskAPITest):
         mock_compute.assert_called_once()
 
     def test_repository_readiness_requires_repository(self):
-        response = self.client.get("/api/projects/@current/tasks/repository_readiness/")
+        response = self.client.get("/v1/projects/@current/tasks/repository_readiness/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

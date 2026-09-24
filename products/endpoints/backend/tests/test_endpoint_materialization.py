@@ -80,7 +80,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/", updated_data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/", updated_data, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -120,7 +120,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization with 24-hour frequency
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_24HOUR,
@@ -135,7 +135,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Update to 12-hour frequency
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_12HOUR,
@@ -151,7 +151,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Update to 1-hour frequency
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_1HOUR,
@@ -177,7 +177,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_24HOUR,
@@ -192,7 +192,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Disable materialization
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": False},
             format="json",
         )
@@ -224,7 +224,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_24HOUR,
@@ -258,7 +258,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_12HOUR,
@@ -297,7 +297,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_12HOUR,
@@ -343,7 +343,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_12HOUR,
@@ -381,7 +381,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_12HOUR,
@@ -407,7 +407,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         # Before materialization
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertFalse(response_data["is_materialized"])
@@ -416,7 +416,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # After materialization
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_12HOUR,
@@ -424,7 +424,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             format="json",
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertTrue(response_data["is_materialized"])
@@ -445,7 +445,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Before materialization - should show can_materialize
         response = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -456,7 +456,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_6HOUR,
@@ -466,7 +466,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # After materialization - should show full status
         response = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -503,7 +503,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_24HOUR,
@@ -538,7 +538,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock_execute.return_value = old_cached_response
 
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {},
                 format="json",
             )
@@ -546,7 +546,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             self.assertEqual(mock_execute.call_count, 2, "Old cache should be detected as stale and refreshed")
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": updated_query},
             format="json",
         )
@@ -583,7 +583,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock_execute.side_effect = [new_cached_response, fresh_response]
 
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {},
                 format="json",
             )
@@ -628,7 +628,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # filters_override is no longer allowed - should be rejected
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
             {
                 "filters_override": {
                     "properties": [{"type": "event", "key": "$lib", "operator": "exact", "value": "$web"}]
@@ -683,7 +683,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock.patch.object(EndpointViewSet, "_execute_inline_endpoint", return_value=Response({})) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {},
                 format="json",
             )
@@ -735,7 +735,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock.patch.object(EndpointViewSet, "_execute_inline_endpoint", return_value=Response({})) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {},
                 format="json",
             )
@@ -785,7 +785,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock.patch.object(EndpointViewSet, "_execute_inline_endpoint", return_value=Response({})) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"refresh": "force"},
                 format="json",
             )
@@ -835,7 +835,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock.patch.object(EndpointViewSet, "_execute_inline_endpoint", return_value=Response({})) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"refresh": "direct"},
                 format="json",
             )
@@ -856,7 +856,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
             {"refresh": "direct"},
             format="json",
         )
@@ -899,7 +899,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_12HOUR,
@@ -941,7 +941,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         # Must provide the breakdown variable (required for security - prevents data leakage)
         with mock.patch.object(EndpointViewSet, "_execute_query_and_respond", return_value=Response({})) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"variables": {"$browser": "Chrome"}},
                 format="json",
             )
@@ -995,7 +995,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "sync_frequency": DataWarehouseSyncInterval.FIELD_12HOUR,
@@ -1036,7 +1036,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         # Execute with variable filter
         with mock.patch.object(EndpointViewSet, "_execute_query_and_respond", return_value=Response({})) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"variables": {"event_name": "$pageview"}},
                 format="json",
             )

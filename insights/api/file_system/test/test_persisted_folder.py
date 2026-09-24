@@ -35,7 +35,7 @@ class TestPersistedFolderAPI(_Base):
     def test_create_and_upsert(self) -> None:
         # 1️⃣  First POST → creates
         rsp = self.client.post(
-            f"/api/projects/{self.team.id}/persisted_folder/",
+            f"/v1/projects/{self.team.id}/persisted_folder/",
             {"type": "home", "path": "Root/Home", "protocol": "products://"},
             format="json",
         )
@@ -46,7 +46,7 @@ class TestPersistedFolderAPI(_Base):
 
         # 2️⃣  Second POST with same (team,user,type) → updates existing row
         rsp2 = self.client.post(
-            f"/api/projects/{self.team.id}/persisted_folder/",
+            f"/v1/projects/{self.team.id}/persisted_folder/",
             {"type": "home", "path": "Root/Home/V2", "protocol": "products://"},
             format="json",
         )
@@ -60,7 +60,7 @@ class TestPersistedFolderAPI(_Base):
         PersistedFolder.objects.create(team=self.team, user=self.user, type="home", path="A", protocol="products://")
         PersistedFolder.objects.create(team=self.team, user=self.user_2, type="home", path="B", protocol="products://")
 
-        rsp = self.client.get(f"/api/projects/{self.team.id}/persisted_folder/")
+        rsp = self.client.get(f"/v1/projects/{self.team.id}/persisted_folder/")
         self.assertEqual(rsp.status_code, status.HTTP_200_OK)
         self.assertEqual(len(rsp.data["results"]), 1)
         self.assertEqual(rsp.data["results"][0]["path"], "A")

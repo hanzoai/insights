@@ -71,7 +71,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization via API
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "sync_frequency": DataWarehouseSyncInterval.FIELD_24HOUR},
             format="json",
         )
@@ -119,7 +119,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -146,7 +146,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"event_name": "$pageleave"}},
             format="json",
         )
@@ -175,7 +175,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"nonexistent_var": "value"}},
             format="json",
         )
@@ -193,7 +193,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"query_override": {"query": "SELECT 2"}},
             format="json",
         )
@@ -211,7 +211,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"filters_override": {"date_from": "2026-01-01"}},
             format="json",
         )
@@ -233,7 +233,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -256,7 +256,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # First, get results without date filter to establish baseline (all 10 events)
         response_no_filter = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"refresh": "force"},
             format="json",
         )
@@ -265,7 +265,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Now with date_from filter - should have fewer results (days 5-10 only, not 1-10)
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"date_from": "2026-01-05", "date_to": "2026-01-10"}, "debug": True, "refresh": "force"},
             format="json",
         )
@@ -294,7 +294,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # With date_to filter - should limit to days 1-5 only
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"date_from": "2026-01-01", "date_to": "2026-01-05"}, "debug": True, "refresh": "force"},
             format="json",
         )
@@ -319,7 +319,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"unknown_var": "value"}},
             format="json",
         )
@@ -337,7 +337,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"query_override": {"interval": "hour"}},
             format="json",
         )
@@ -362,7 +362,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Get baseline without date filter (all 10 events)
         response_baseline = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"refresh": "force"},
             format="json",
         )
@@ -371,7 +371,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Use filters_override to filter by date - should have fewer results (days 5-10)
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"filters_override": {"date_from": "2026-01-05", "date_to": "2026-01-10"}, "refresh": "force"},
             format="json",
         )
@@ -390,7 +390,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"filters_override": {"date_from": "2026-01-01"}},
             format="json",
         )
@@ -414,7 +414,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         # filters_override uses date_from 2026-01-08 (days 8-10), variables uses 2026-01-02 (days 2-10)
         # If filters_override wins, we should have fewer results
         response_filters = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {
                 "filters_override": {"date_from": "2026-01-08"},
                 "variables": {"date_from": "2026-01-02"},
@@ -427,7 +427,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Use only variables with same date to verify
         response_vars = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"date_from": "2026-01-08"}, "refresh": "force"},
             format="json",
         )
@@ -464,7 +464,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         # Execute with variable filter - should filter materialized table by event_name
         with mock.patch.object(EndpointViewSet, "_execute_query_and_respond", return_value=Response({})) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"variables": {"event_name": "$pageleave"}},
                 format="json",
             )
@@ -499,7 +499,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch.object(EndpointViewSet, "_execute_query_and_respond", return_value=Response({})) as mock_exec:
             self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"variables": {"event_name": "$pageview"}},
                 format="json",
             )
@@ -533,7 +533,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Try to filter by a variable that wasn't materialized
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"not_materialized": "value"}},
             format="json",
         )
@@ -563,7 +563,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Omitting the variable should fail - not return all data
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {},  # No variables provided
             format="json",
         )
@@ -607,7 +607,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Provide only one variable — should fail listing the missing one
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"event_name": "$pageview"}},
             format="json",
         )
@@ -651,7 +651,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # No variables at all — should fail listing all required
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {},
             format="json",
         )
@@ -690,7 +690,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
             mock.patch.object(EndpointViewSet, "_execute_inline_endpoint", return_value=Response({})) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"variables": {"event_name": "$pageview"}, "refresh": "direct"},
                 format="json",
             )
@@ -734,7 +734,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch.object(EndpointViewSet, "_execute_query_and_respond", return_value=Response({})) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"variables": {"event_name": "$pageleave", "browser": "Safari"}},
                 format="json",
             )
@@ -789,7 +789,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch.object(EndpointViewSet, "_execute_query_and_respond", return_value=Response({})) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"variables": {"start_date": "2026-01-05", "end_date": "2026-01-08"}},
                 format="json",
             )
@@ -823,7 +823,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         # Filter by breakdown using actual property name
         with mock.patch.object(EndpointViewSet, "_execute_query_and_respond", return_value=Response({})) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"variables": {"$browser": "Chrome"}},
                 format="json",
             )
@@ -847,7 +847,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         self._materialize_endpoint(endpoint)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"date_from": "2026-01-05", "date_to": "2026-01-08"}},
             format="json",
         )
@@ -870,7 +870,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Try to filter by a property that wasn't in the breakdown
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"$os": "Mac"}},
             format="json",
         )
@@ -893,7 +893,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Omitting the breakdown variable should fail - not return all breakdown values
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {},  # No variables provided
             format="json",
         )
@@ -918,7 +918,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         # Using filters_override instead of variables should work (backwards compat)
         with mock.patch.object(EndpointViewSet, "_execute_query_and_respond", return_value=Response({})) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"filters_override": {"properties": [{"key": "$browser", "value": "Chrome", "type": "event"}]}},
                 format="json",
             )
@@ -943,7 +943,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
             mock.patch.object(EndpointViewSet, "_execute_inline_endpoint", return_value=Response({})) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"refresh": "direct"},
                 format="json",
             )
@@ -992,7 +992,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Enabling materialization should succeed for multiple equality variables
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "sync_frequency": DataWarehouseSyncInterval.FIELD_24HOUR},
             format="json",
         )
@@ -1022,7 +1022,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # But enabling materialization should fail
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "sync_frequency": DataWarehouseSyncInterval.FIELD_24HOUR},
             format="json",
         )
@@ -1044,7 +1044,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1060,7 +1060,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1086,7 +1086,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Breakdown variable should be accepted (not rejected as unknown)
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"variables": {"$browser": "Chrome"}, "debug": True},
             format="json",
         )
@@ -1121,7 +1121,7 @@ class TestEndpointExecution(DatastoreTestMixin, APIBaseTest):
 
         # Filter by both breakdown and date - should be accepted (not rejected)
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {
                 "variables": {
                     "$browser": "Chrome",

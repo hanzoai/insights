@@ -12,7 +12,7 @@ class TestTaggedItemSerializerMixin(APIBaseTest):
         tag = Tag.objects.create(name="random", team_id=self.team.id)
         dashboard.tagged_items.create(tag_id=tag.id)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["tags"], ["random"])
@@ -20,7 +20,7 @@ class TestTaggedItemSerializerMixin(APIBaseTest):
 
     def test_create_with_tags(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {"name": "Default", "pinned": "true", "tags": ["random", "hello"]},
         )
 
@@ -34,7 +34,7 @@ class TestTaggedItemSerializerMixin(APIBaseTest):
         dashboard.tagged_items.create(tag_id=tag.id)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}",
             {
                 "name": "dashboard new name",
                 "creation_mode": "duplicate",
@@ -52,7 +52,7 @@ class TestTaggedItemSerializerMixin(APIBaseTest):
         dashboard.tagged_items.create(tag_id=tag.id)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}",
             {
                 "name": "dashboard new name",
             },
@@ -71,7 +71,7 @@ class TestTaggedItemSerializerMixin(APIBaseTest):
         self.assertEqual(TaggedItem.objects.all().count(), 1)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}",
             {"name": "dashboard new name", "tags": []},
         )
 
@@ -88,6 +88,6 @@ class TestTaggedItemSerializerMixin(APIBaseTest):
         tag2 = Tag.objects.create(name="insight tag", team_id=self.team.id)
         insight.tagged_items.create(tag_id=tag2.id)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/tags")
+        response = self.client.get(f"/v1/projects/{self.team.id}/tags")
         assert response.status_code == status.HTTP_200_OK
         assert sorted(response.json()) == ["dashboard tag", "insight tag"]

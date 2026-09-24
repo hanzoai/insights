@@ -18,7 +18,7 @@ from insights.utils import encode_get_request_params
 
 
 def get_stickiness(client: Client, team: Team, request: dict[str, Any]):
-    return client.get(f"/api/projects/{team.pk}/insights/trend/", data=request)
+    return client.get(f"/v1/projects/{team.pk}/insights/trend/", data=request)
 
 
 def get_stickiness_ok(client: Client, team: Team, request: dict[str, Any]):
@@ -33,7 +33,7 @@ def get_stickiness_time_series_ok(client: Client, team: Team, request: dict[str,
 
 
 def get_stickiness_people(client: Client, team_id: int, request: dict[str, Any]):
-    return client.get("/api/person/stickiness/", data=request)
+    return client.get("/v1/person/stickiness/", data=request)
 
 
 def get_stickiness_people_ok(client: Client, team_id: int, request: dict[str, Any]):

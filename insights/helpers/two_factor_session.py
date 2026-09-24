@@ -59,26 +59,26 @@ TWO_FACTOR_ENFORCEMENT_FROM_DATE = datetime.datetime(2025, 9, day=22, hour=13)
 TWO_FACTOR_VERIFIED_SESSION_KEY = "two_factor_verified"
 
 WHITELISTED_PATHS = [
-    "/api/users/@me/two_factor_start_setup/",
-    "/api/users/@me/two_factor_validate/",
-    "/api/users/@me/two_factor_status/",
-    "/api/users/@me/two_factor_backup_codes/",
-    "/api/users/@me/two_factor_disable/",
+    "/v1/users/@me/two_factor_start_setup/",
+    "/v1/users/@me/two_factor_validate/",
+    "/v1/users/@me/two_factor_status/",
+    "/v1/users/@me/two_factor_backup_codes/",
+    "/v1/users/@me/two_factor_disable/",
     "/logout/",
-    "/api/logout/",
-    "/api/login/",
-    "/api/login/token/",
-    "/api/login/email-mfa/",
-    "/api/users/@me/",
+    "/v1/logout/",
+    "/v1/login/",
+    "/v1/login/token/",
+    "/v1/login/email-mfa/",
+    "/v1/users/@me/",
     "/healthz",
 ]
 
 WHITELISTED_PREFIXES = [
     "/static/",
     "/uploaded_media/",
-    "/api/instance_status",
-    "/api/signup",
-    "/api/social_signup",
+    "/v1/instance_status",
+    "/v1/signup",
+    "/v1/social_signup",
     "/login/google-oauth2",
     "/login/github",
     "/login/gitlab",
@@ -87,7 +87,7 @@ WHITELISTED_PREFIXES = [
     "/complete/github",
     "/complete/gitlab",
     "/complete/saml",
-    "/api/saml/metadata",
+    "/v1/saml/metadata",
 ]
 
 

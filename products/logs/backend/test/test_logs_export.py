@@ -18,7 +18,7 @@ class TestLogsExportEndpoint(APIBaseTest):
     @patch("products.logs.backend.api.export_asset")
     def test_export_creates_asset_with_correct_context(self, mock_export_asset):
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/logs/export/",
+            f"/v1/projects/{self.team.pk}/logs/export/",
             data={
                 "query": _minimal_query_data(),
                 "columns": ["timestamp", "body"],
@@ -69,7 +69,7 @@ class TestLogsExportEndpoint(APIBaseTest):
         query_data["dateRange"] = date_range
 
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/logs/export/",
+            f"/v1/projects/{self.team.pk}/logs/export/",
             data={"query": query_data},
             format="json",
         )
@@ -84,7 +84,7 @@ class TestLogsExportEndpoint(APIBaseTest):
     @patch("products.logs.backend.api.export_asset")
     def test_export_creates_asset_successfully(self, mock_export_asset):
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/logs/export/",
+            f"/v1/projects/{self.team.pk}/logs/export/",
             data={"query": _minimal_query_data()},
             format="json",
         )
@@ -92,7 +92,7 @@ class TestLogsExportEndpoint(APIBaseTest):
 
     def test_export_rejects_missing_query(self):
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/logs/export/",
+            f"/v1/projects/{self.team.pk}/logs/export/",
             data={"format": "csv"},
             format="json",
         )

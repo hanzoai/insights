@@ -56,9 +56,9 @@ class TestCohort(TestExportMixin, DatastoreTestMixin, APIBaseTest, QueryMatching
             team_id = self.team.id
 
         if flag_id:
-            url = f"/api/projects/{team_id}/cohorts/{flag_id}/activity"
+            url = f"/v1/projects/{team_id}/cohorts/{flag_id}/activity"
         else:
-            url = f"/api/projects/{team_id}/cohorts/activity"
+            url = f"/v1/projects/{team_id}/cohorts/activity"
 
         activity = self.client.get(url)
         self.assertEqual(activity.status_code, expected_status)
@@ -129,7 +129,7 @@ class TestCohort(TestExportMixin, DatastoreTestMixin, APIBaseTest, QueryMatching
 
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "whatever", "groups": [{"properties": {"team_id": "5"}}]},
         )
         self.assertEqual(response.status_code, 201, response.content)
@@ -158,7 +158,7 @@ class TestCohort(TestExportMixin, DatastoreTestMixin, APIBaseTest, QueryMatching
 
         with self.capture_queries_startswith("INSERT INTO cohortpeople") as insert_statements:
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/cohorts/{response.json()['id']}",
+                f"/v1/projects/{self.team.id}/cohorts/{response.json()['id']}",
                 data={
                     "name": "whatever2",
                     "description": "A great cohort!",
@@ -237,7 +237,7 @@ class TestCohort(TestExportMixin, DatastoreTestMixin, APIBaseTest, QueryMatching
 
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "whatever",
                 "filters": {
@@ -271,7 +271,7 @@ class TestCohort(TestExportMixin, DatastoreTestMixin, APIBaseTest, QueryMatching
 
         with self.capture_queries_startswith("INSERT INTO cohortpeople") as insert_statements:
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/cohorts/{response.json()['id']}",
+                f"/v1/projects/{self.team.id}/cohorts/{response.json()['id']}",
                 data={
                     "name": "whatever2",
                     "description": "A great cohort!",
@@ -296,28 +296,28 @@ class TestCohort(TestExportMixin, DatastoreTestMixin, APIBaseTest, QueryMatching
         Person.objects.create(team=self.team, properties={"team_id": 6})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "whatever", "groups": [{"properties": {"team_id": 5}}]},
         )
         self.assertEqual(response.status_code, 201, response.content)
 
         with self.assertNumQueries(13):
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts")
             assert len(response.json()["results"]) == 1
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "whatever", "groups": [{"properties": {"team_id": 5}}]},
         )
         self.assertEqual(response.status_code, 201, response.content)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "whatever", "groups": [{"properties": {"team_id": 5}}]},
         )
         self.assertEqual(response.status_code, 201, response.content)
 
         with self.assertNumQueries(13):
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts")
             assert len(response.json()["results"]) == 3
 
     def test_static_cohort_csv_upload_end_to_end(self):
@@ -344,7 +344,7 @@ email@example.org
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/cohorts/",
+                f"/v1/projects/{self.team.id}/cohorts/",
                 {"name": "test", "csv": csv, "is_static": True},
                 format="multipart",
             )
@@ -373,7 +373,7 @@ User ID
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/cohorts/{cohort.id}",
+                f"/v1/projects/{self.team.id}/cohorts/{cohort.id}",
                 {"name": "test", "csv": csv_update},
                 format="multipart",
             )
@@ -390,7 +390,7 @@ User ID
 
         # Test name-only update without CSV
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.id}",
             {"name": "test2"},
             format="multipart",
         )
@@ -440,7 +440,7 @@ email@example.org
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -449,7 +449,7 @@ email@example.org
         cohort = Cohort.objects.get(pk=response.json()["id"])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}",
             data={
                 "query": {
                     "kind": "ActorsQuery",
@@ -497,7 +497,7 @@ Zero User,0,zero@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_multicolumn", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -532,7 +532,7 @@ Jane Smith,25
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_fail", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -568,7 +568,7 @@ Jane Smith,{person2.uuid},jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": f"test_{person_id_column_header}", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -618,7 +618,7 @@ Jane Smith,{person2.uuid},jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_person_id_over_email", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -672,7 +672,7 @@ Jane Smith,user456,jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_distinct_id_over_email", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -698,7 +698,7 @@ Jane Smith,user456,jane@example.com
         person2 = Person.objects.create(team=self.team, distinct_ids=["user456"])
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {
                 "name": f"test_upload_with_person_ids",
                 "_create_static_person_ids": [person1.uuid, person2.uuid],
@@ -742,7 +742,7 @@ John Doe,{person1.uuid},john@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {
                 "name": f"test_csv_and_manual",
                 "csv": csv,
@@ -782,7 +782,7 @@ Jane Smith,{person2.uuid},ignore_this_too,jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_preference", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -814,7 +814,7 @@ Jane Smith,   ,jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_empty_person_ids", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -842,7 +842,7 @@ Jane Smith,25
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_fail", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -866,7 +866,7 @@ Jane Smith,25
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_empty", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -892,7 +892,7 @@ Jane Smith,25
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_no_ids", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -922,7 +922,7 @@ another_user
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_legacy", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -954,7 +954,7 @@ another_user
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_person_ids", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -987,7 +987,7 @@ Jane Smith,	user456	,jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_whitespace", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -1020,7 +1020,7 @@ Jane Smith,	user456	,jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_comma_ids", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -1053,7 +1053,7 @@ Jane Smith,	user456	,jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_quote_ids", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -1089,7 +1089,7 @@ user789
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_inconsistent", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -1124,7 +1124,7 @@ user456
 
         # Create cohort with CSV upload
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_calculating", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -1153,7 +1153,7 @@ user456
 
         # Try to create cohort with invalid CSV
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_error", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -1196,7 +1196,7 @@ email@example.org,
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -1207,7 +1207,7 @@ email@example.org,
         self.assertTrue(Cohort.objects.get(pk=response.json()["id"]).is_calculating)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{response.json()['id']}",
+            f"/v1/projects/{self.team.id}/cohorts/{response.json()['id']}",
             {
                 "is_static": False,
                 "groups": [{"properties": [{"key": "email", "value": "email@example.org"}]}],
@@ -1224,23 +1224,23 @@ email@example.org,
         Person.objects.create(team=self.team, properties={"prop": 6})
 
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "cohort1", "groups": [{"properties": {"prop": 5}}]},
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "cohort2", "groups": [{"properties": {"prop": 6}}]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts").json()
         self.assertEqual(len(response["results"]), 2)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?search=cohort1").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?search=cohort1").json()
         self.assertEqual(len(response["results"]), 1)
         self.assertEqual(response["results"][0]["name"], "cohort1")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?search=nomatch").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?search=nomatch").json()
         self.assertEqual(len(response["results"]), 0)
 
     def test_cohort_list_with_type_filter(self):
@@ -1248,28 +1248,28 @@ email@example.org,
 
         # Create dynamic cohort
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "dynamic_cohort", "groups": [{"properties": {"prop": 5}}]},
         )
 
         # Create static cohort
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "static_cohort", "is_static": True},
         )
 
         # Test no filter returns both
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts").json()
         self.assertEqual(len(response["results"]), 2)
 
         # Test static filter
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?type=static").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?type=static").json()
         self.assertEqual(len(response["results"]), 1)
         self.assertEqual(response["results"][0]["name"], "static_cohort")
         self.assertTrue(response["results"][0]["is_static"])
 
         # Test dynamic filter
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?type=dynamic").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?type=dynamic").json()
         self.assertEqual(len(response["results"]), 1)
         self.assertEqual(response["results"][0]["name"], "dynamic_cohort")
         self.assertFalse(response["results"][0]["is_static"])
@@ -1279,7 +1279,7 @@ email@example.org,
 
         # Create cohorts by self.user
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "self_user_cohort_1",
                 "groups": [{"properties": {"prop": 5}}],
@@ -1287,7 +1287,7 @@ email@example.org,
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "self_user_cohort_2",
                 "groups": [{"properties": {"prop": 5}}],
@@ -1301,24 +1301,24 @@ email@example.org,
         )
 
         # Test no filter returns all cohorts
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts").json()
         self.assertEqual(len(response["results"]), 3)
 
         # Test filter by self.user's cohorts
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?created_by_id={self.user.id}").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?created_by_id={self.user.id}").json()
         self.assertEqual(len(response["results"]), 2)
         for cohort in response["results"]:
             self.assertEqual(cohort["created_by"]["id"], self.user.id)
             self.assertEqual(cohort["name"][:-2], "self_user_cohort")
 
         # Test filter by other_user's cohorts
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?created_by_id={other_user.id}").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?created_by_id={other_user.id}").json()
         self.assertEqual(len(response["results"]), 1)
         self.assertEqual(response["results"][0]["name"], other_user_cohort.name)
 
         # Test filter by blank user (should return no cohorts)
         blank_user = User.objects.create_user(email="blank@test.com", password="password", first_name="blank")
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?created_by_id={blank_user.id}").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?created_by_id={blank_user.id}").json()
         self.assertEqual(len(response["results"]), 0)
 
     def test_cohort_list_with_combined_filters(self):
@@ -1326,29 +1326,29 @@ email@example.org,
 
         # Create dynamic cohort
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "dynamic_test", "groups": [{"properties": {"prop": 5}}]},
         )
 
         # Create static cohort
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "static_test", "is_static": True},
         )
 
         # Test combined type and search filters
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?type=dynamic&search=dynamic").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?type=dynamic&search=dynamic").json()
         self.assertEqual(len(response["results"]), 1)
         self.assertEqual(response["results"][0]["name"], "dynamic_test")
         self.assertFalse(response["results"][0]["is_static"])
 
         # Test combined filters with no matches
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?type=static&search=dynamic").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?type=static&search=dynamic").json()
         self.assertEqual(len(response["results"]), 0)
 
         # Test all filters combined
         response = self.client.get(
-            f"/api/projects/{self.team.id}/cohorts?type=static&search=static&created_by_id={self.user.id}"
+            f"/v1/projects/{self.team.id}/cohorts?type=static&search=static&created_by_id={self.user.id}"
         ).json()
         self.assertEqual(len(response["results"]), 1)
         self.assertEqual(response["results"][0]["name"], "static_test")
@@ -1396,12 +1396,12 @@ email@example.org,
         )
 
         # Test without filter
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 2)
 
         # Test with behavioral filter
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?hide_behavioral_cohorts=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?hide_behavioral_cohorts=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -1459,7 +1459,7 @@ email@example.org,
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts?hide_behavioral_cohorts=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts?hide_behavioral_cohorts=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -1473,7 +1473,7 @@ email@example.org,
         Person.objects.create(team=self.team, properties={"prop": 6})
 
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "whatever", "groups": [{"properties": {"prop": "5"}}]},
         )
 
@@ -1501,7 +1501,7 @@ email@example.org,
         )
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}",
             data={"name": "woohoo", "groups": [{"properties": {"prop": "6"}}]},
         )
         cohort.refresh_from_db()
@@ -1602,7 +1602,7 @@ email@example.org,
             person_uuids.append(str(person.uuid))
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {
                 "name": "my static cohort",
                 "is_static": True,
@@ -1650,7 +1650,7 @@ email@example.org,
             person_uuids.append(str(person.uuid))
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {
                 "name": "my large cohort",
                 "is_static": True,
@@ -1663,7 +1663,7 @@ email@example.org,
 
         # Update the cohort - this should not load all people into memory
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             {
                 "name": "renamed large cohort",
                 "description": "A cohort with many people",
@@ -1742,7 +1742,7 @@ email@example.org,
         )
         cohort.calculate_people_ch(pending_version=0)
 
-        lines = self._get_export_output(f"/api/cohort/{cohort.pk}/persons")
+        lines = self._get_export_output(f"/v1/cohort/{cohort.pk}/persons")
         headers = lines[0].split(",")
         self.assertEqual(len(lines), 3)
         self.assertEqual(lines[1].split(",")[headers.index("email")], "test@test.com")
@@ -1764,7 +1764,7 @@ email@example.org,
         )
         cohort.calculate_people_ch(pending_version=0)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 100, response)
 
         response = self.client.get(response.json()["next"])
@@ -1791,7 +1791,7 @@ email@example.org,
         cohort.calculate_people_ch(pending_version=0)
 
         response = self.client.get(
-            f"/api/cohort/{cohort.pk}/persons?properties=%s"
+            f"/v1/cohort/{cohort.pk}/persons?properties=%s"
             % (json.dumps([{"key": "$browser", "value": "Safari", "type": "person"}]))
         )
         self.assertEqual(len(response.json()["results"]), 1, response)
@@ -1822,7 +1822,7 @@ email@example.org,
         cohort.calculate_people_ch(pending_version=0)
 
         response = self.client.get(
-            f"/api/cohort/{cohort.pk}/persons?properties=%s"
+            f"/v1/cohort/{cohort.pk}/persons?properties=%s"
             % (json.dumps([{"key": "$browser", "value": "Safari", "type": "person"}]))
         )
         self.assertEqual(len(response.json()["results"]), 1, response)
@@ -1848,7 +1848,7 @@ email@example.org,
         )
         cohort.calculate_people_ch(pending_version=0)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons?search=target")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons?search=target")
         self.assertEqual(len(response.json()["results"]), 1, response)
 
     def test_filter_by_static_cohort(self):
@@ -1862,7 +1862,7 @@ email@example.org,
         cohort = Cohort.objects.create(team=self.team, groups=[], is_static=True, last_calculation=timezone.now())
         cohort.insert_users_by_list(["1", "123"])
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 2, response)
 
     @patch("django.db.transaction.on_commit", side_effect=lambda func: func())
@@ -1887,14 +1887,14 @@ email@example.org,
 
         # Cohort A
         response_a = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "cohort A", "groups": [{"properties": {"team_id": 5}}]},
         )
         self.assertEqual(get_total_calculation_calls(), 1)
 
         # Cohort B that depends on Cohort A
         response_b = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort B",
                 "groups": [
@@ -1914,7 +1914,7 @@ email@example.org,
 
         # Cohort C that depends on Cohort B
         response_c = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort C",
                 "groups": [
@@ -1934,7 +1934,7 @@ email@example.org,
 
         # Update Cohort A to depend on Cohort C
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
+            f"/v1/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
             data={
                 "name": "Cohort A, reloaded",
                 "groups": [
@@ -1962,7 +1962,7 @@ email@example.org,
 
         # Update Cohort A to depend on Cohort A itself
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
+            f"/v1/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
             data={
                 "name": "Cohort A, reloaded",
                 "groups": [
@@ -2010,14 +2010,14 @@ email@example.org,
 
         # Cohort A
         response_a = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "cohort A", "groups": [{"properties": {"team_id": 5}}]},
         )
         self.assertEqual(get_total_calculation_calls(), 1)
 
         # Cohort B that depends on Cohort A
         response_b = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort B",
                 "groups": [
@@ -2037,7 +2037,7 @@ email@example.org,
 
         # Cohort C that depends on both Cohort A & B
         response_c = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort C",
                 "groups": [
@@ -2062,7 +2062,7 @@ email@example.org,
 
         # Update Cohort C
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{response_c.json()['id']}",
+            f"/v1/projects/{self.team.id}/cohorts/{response_c.json()['id']}",
             data={
                 "name": "Cohort C, reloaded",
             },
@@ -2079,14 +2079,14 @@ email@example.org,
     ):
         # Cohort A
         response_a = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "cohort A", "groups": [{"properties": {"team_id": 5}}]},
         )
         self.assertEqual(patch_calculate_cohort.call_count, 1)
 
         # Update Cohort A to depend on an invalid cohort
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
+            f"/v1/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
             data={
                 "name": "Cohort A, reloaded",
                 "groups": [{"properties": [{"type": "cohort", "value": "99999", "key": "id"}]}],
@@ -2144,7 +2144,7 @@ email@example.org,
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "filters": {
@@ -2175,9 +2175,9 @@ email@example.org,
         cohort_id = response.json()["id"]
 
         while response.json()["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(2, len(response.json()["results"]))
 
@@ -2226,7 +2226,7 @@ email@example.org,
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "filters": {
@@ -2265,9 +2265,9 @@ email@example.org,
         cohort_id = response.json()["id"]
 
         while response.json()["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(1, len(response.json()["results"]))
 
@@ -2300,7 +2300,7 @@ email@example.org,
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "is_static": True,
@@ -2322,16 +2322,16 @@ email@example.org,
         cohort_id = response.json()["id"]
 
         while response.json()["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(1, len(response.json()["results"]))
 
     @patch("insights.api.cohort.report_user_action")
     def test_creating_update_and_calculating_with_new_cohort_query_dynamic_error(self, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "query": {
@@ -2383,7 +2383,7 @@ email@example.org,
 
         def _calc(query: str) -> int:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/cohorts",
+                f"/v1/projects/{self.team.id}/cohorts",
                 data={
                     "name": "cohort A",
                     "is_static": True,
@@ -2395,8 +2395,8 @@ email@example.org,
             )
             cohort_id = response.json()["id"]
             while response.json()["is_calculating"]:
-                response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
+                response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
             return len(response.json()["results"])
 
         # works with "actor_id"
@@ -2423,7 +2423,7 @@ email@example.org,
 
         # raises on all other cases
         query_post_response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "is_static": True,
@@ -2434,7 +2434,7 @@ email@example.org,
             },
         )
         query_get_response = self.client.get(
-            f"/api/projects/{self.team.id}/cohorts/{query_post_response.json()['id']}/"
+            f"/v1/projects/{self.team.id}/cohorts/{query_post_response.json()['id']}/"
         )
 
         self.assertEqual(query_post_response.status_code, 201)
@@ -2467,7 +2467,7 @@ email@example.org,
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "filters": {
@@ -2489,9 +2489,9 @@ email@example.org,
         cohort_id = response.json()["id"]
 
         while response.json()["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(3, len(response.json()["results"]))
 
@@ -2505,12 +2505,12 @@ email@example.org,
 
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "whatever", "groups": [{"properties": {"team_id": 5}}]},
         )
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{response.json()['id']}",
+            f"/v1/projects/{self.team.id}/cohorts/{response.json()['id']}",
             data={
                 "name": "whatever",
                 "filters": "[Slkasd=lkxcn]",
@@ -2531,11 +2531,11 @@ email@example.org,
     @patch("insights.tasks.calculate_cohort.calculate_cohort_ch.delay")
     def test_hard_delete_is_forbidden(self, patch_calculate_cohort, patch_capture):
         response_a = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "cohort A", "groups": [{"properties": {"team_id": 5}}]},
         )
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/cohorts/{response_a.json()['id']}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/cohorts/{response_a.json()['id']}")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @patch("insights.api.cohort.report_user_action")
@@ -2546,7 +2546,7 @@ email@example.org,
 
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "filters": {
@@ -2568,7 +2568,7 @@ email@example.org,
         cohort_pk = response.json()["id"]
 
         second_cohort_pk = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort XX",
                 "filters": {
@@ -2598,7 +2598,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_pk}",
             data={
                 "name": "cohort A",
                 "filters": {
@@ -2636,7 +2636,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_pk}",
             data={
                 "name": "cohort C",
                 "filters": {
@@ -2711,7 +2711,7 @@ email@example.org,
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "filters": {
@@ -2742,10 +2742,10 @@ email@example.org,
         cohort_id = response.json()["id"]
 
         while response.json()["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             data={
                 "is_static": True,
                 "name": "cohort A (static copy)",
@@ -2791,7 +2791,7 @@ email@example.org,
 
         # Duplicate static cohort as static
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             data={
                 "is_static": True,
                 "name": f"{cohort.name} (static copy)",
@@ -2852,7 +2852,7 @@ email@example.org,
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort A",
                 "filters": {
@@ -2928,7 +2928,7 @@ email@example.org,
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data=payload,
             format="json",
         )
@@ -2949,7 +2949,7 @@ email@example.org,
         )
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}",
             data={
                 "deleted": True,
             },
@@ -2958,7 +2958,7 @@ email@example.org,
         self.assertEqual(len(AsyncDeletion.objects.all()), 1)
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}",
             data={
                 "deleted": False,
             },
@@ -2969,7 +2969,7 @@ email@example.org,
     @patch("insights.api.cohort.report_user_action")
     def test_cohort_property_validation_missing_operator(self, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort missing operator",
                 "filters": {
@@ -2997,7 +2997,7 @@ email@example.org,
     def test_cohort_property_validation_missing_value(self, patch_capture):
         self.maxDiff = None
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort missing value",
                 "filters": {
@@ -3021,7 +3021,7 @@ email@example.org,
     @patch("insights.api.cohort.report_user_action")
     def test_cohort_property_validation_behavioral_filter(self, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort behavioral",
                 "filters": {
@@ -3048,7 +3048,7 @@ email@example.org,
     @patch("insights.api.cohort.report_user_action")
     def test_cohort_property_validation_nested_groups(self, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort nested groups",
                 "filters": {
@@ -3086,7 +3086,7 @@ email@example.org,
     def test_cohort_property_validation_is_set_operator(self, patch_capture):
         # Test that is_set operator doesn't require a value
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort is_set",
                 "filters": {
@@ -3104,7 +3104,7 @@ email@example.org,
     def test_cohort_property_validation_cohort_filter(self, patch_capture):
         # First create a cohort to reference
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "first cohort",
                 "filters": {
@@ -3125,7 +3125,7 @@ email@example.org,
 
         # Test cohort filter validation
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort with cohort filter",
                 "filters": {
@@ -3150,7 +3150,7 @@ email@example.org,
     def test_behavioral_filter_with_operator_and_operator_value(self, patch_capture, patch_on_commit):
         # Valid usage: operator and operator_value present
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "behavioral with operator",
                 "filters": {
@@ -3175,7 +3175,7 @@ email@example.org,
         self.assertEqual(response.status_code, 201, response.content)
         cohort_id = response.json()["id"]
         while response.json()["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
         # Should create successfully
         self.assertEqual(response.status_code, 200, response.content)
 
@@ -3183,7 +3183,7 @@ email@example.org,
     def test_behavioral_filter_missing_operator(self, patch_capture):
         # operator_value present but operator missing
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "behavioral missing operator",
                 "filters": {
@@ -3211,7 +3211,7 @@ email@example.org,
     def test_behavioral_filter_invalid_operator_value_type(self, patch_capture):
         # operator_value as a list (invalid)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "behavioral invalid operator_value",
                 "filters": {
@@ -3238,7 +3238,7 @@ email@example.org,
     def test_behavioral_filter_extra_field_forbidden(self, patch_capture):
         # Extra field not in model
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "behavioral extra field",
                 "filters": {
@@ -3266,7 +3266,7 @@ email@example.org,
     def test_behavioral_filter_seq_event_types(self, patch_capture):
         # Test with string seq_event
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "behavioral with string seq_event",
                 "filters": {
@@ -3292,7 +3292,7 @@ email@example.org,
 
         # Test with integer seq_event (action ID)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "behavioral with integer seq_event",
                 "filters": {
@@ -3318,7 +3318,7 @@ email@example.org,
 
         # Test with null seq_event
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "behavioral with null seq_event",
                 "filters": {
@@ -3344,7 +3344,7 @@ email@example.org,
 
     def test_create_cohort_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "Test Cohort in folder",
                 "groups": [{"properties": {"prop": "5"}}],
@@ -3374,7 +3374,7 @@ email@example.org,
         )
 
         delete_response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}",
             {"deleted": True},
             format="json",
         )
@@ -3387,7 +3387,7 @@ email@example.org,
         assert latest_activity.activity == "deleted"
 
         restore_response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}",
             {"deleted": False},
             format="json",
         )
@@ -3408,7 +3408,7 @@ email@example.org,
         )
 
         delete_response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}",
             {"deleted": True},
             format="json",
         )
@@ -3417,7 +3417,7 @@ email@example.org,
 
         restore_folder = "Restored/Cohorts"
         restore_response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}",
             {"deleted": False, "_create_in_folder": restore_folder},
             format="json",
         )
@@ -3465,7 +3465,7 @@ email@example.org,
             },
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data=payload,
             format="json",
         )
@@ -3494,7 +3494,7 @@ email@example.org,
         static_cohort.insert_users_by_list(["test-person-to-remove", "test-person-to-keep"])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
             {"person_id": str(personToRemove.uuid)},
             format="json",
         )
@@ -3513,7 +3513,7 @@ email@example.org,
         assert activity_entry["user"]["email"] == self.user.email
 
         # Verify only the correct person was removed
-        cohort_persons_response = self.client.get(f"/api/cohort/{static_cohort.id}/persons")
+        cohort_persons_response = self.client.get(f"/v1/cohort/{static_cohort.id}/persons")
         assert cohort_persons_response.status_code == 200
         cohort_persons = cohort_persons_response.json()["results"]
         person_uuids_in_cohort = [p["uuid"] for p in cohort_persons]
@@ -3535,7 +3535,7 @@ email@example.org,
 
         # Test missing person_id
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
             {},
             format="json",
         )
@@ -3544,7 +3544,7 @@ email@example.org,
 
         # Test non-string person_id
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
             {"person_id": 123},
             format="json",
         )
@@ -3553,7 +3553,7 @@ email@example.org,
 
         # Test person_id that is not a valid UUID
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
             {"person_id": "a"},
             format="json",
         )
@@ -3562,7 +3562,7 @@ email@example.org,
 
         # Test non-static cohort
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{dynamic_cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{dynamic_cohort.id}/remove_person_from_static_cohort",
             {"person_id": "some-uuid"},
             format="json",
         )
@@ -3578,7 +3578,7 @@ email@example.org,
         # Person does not exist at all
         not_existant_person_UUID = "12345678-1234-1234-1234-123456789abc"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
             {"person_id": not_existant_person_UUID},
             format="json",
         )
@@ -3617,7 +3617,7 @@ email@example.org,
         assert ch_count_before >= 1, "Person should be in Datastore before removal"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
             {"person_id": str(person.uuid)},
             format="json",
         )
@@ -3653,7 +3653,7 @@ email@example.org,
         flush_persons_and_events()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{static_cohort.id}/remove_person_from_static_cohort",
             {"person_id": str(person.uuid)},
             format="json",
         )
@@ -3676,12 +3676,12 @@ email@example.org,
         patch_cohort_changed.side_effect = lambda *a, **kw: calls.append(patch_cohort_changed)
 
         response_a = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "cohort A", "groups": [{"properties": {"team_id": 5}}]},
         )
 
         response_b = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
+            f"/v1/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
             data={
                 "name": "cohort A",
                 "groups": [{"properties": [{"key": "email", "value": "email@example.org"}]}],
@@ -3723,14 +3723,14 @@ email@example.org,
 
         # Cohort A
         response_a = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "cohort A", "groups": [{"properties": {"team_id": 5}}]},
         )
         self.assertEqual(get_total_calculation_calls(), 1)
 
         # Cohort B that depends on Cohort A
         response_b = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort B",
                 "groups": [
@@ -3751,7 +3751,7 @@ email@example.org,
 
         # Cohort C that depends on Cohort B
         response_c = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "cohort C",
                 "groups": [
@@ -3771,7 +3771,7 @@ email@example.org,
 
         # Update Cohort A, should trigger dependency recalculation of B, then C
         self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
+            f"/v1/projects/{self.team.id}/cohorts/{response_a.json()['id']}",
             data={
                 "name": "Cohort A, reloaded",
                 "groups": [
@@ -3804,7 +3804,7 @@ email@example.org,
     @patch("insights.tasks.calculate_cohort.calculate_cohort_ch.delay")
     def test_cannot_delete_cohort_used_in_active_feature_flag(self, patch_calculate_cohort, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -3819,7 +3819,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -3833,7 +3833,7 @@ email@example.org,
     @patch("insights.tasks.calculate_cohort.calculate_cohort_ch.delay")
     def test_cannot_delete_cohort_used_in_multiple_active_feature_flags(self, patch_calculate_cohort, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -3857,7 +3857,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -3871,13 +3871,13 @@ email@example.org,
     @patch("insights.tasks.calculate_cohort.calculate_cohort_ch.delay")
     def test_can_delete_cohort_not_used_in_feature_flags(self, patch_calculate_cohort, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -3889,7 +3889,7 @@ email@example.org,
     @patch("insights.tasks.calculate_cohort.calculate_cohort_ch.delay")
     def test_can_delete_cohort_used_in_inactive_feature_flag(self, patch_calculate_cohort, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -3904,7 +3904,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -3916,7 +3916,7 @@ email@example.org,
     @patch("insights.tasks.calculate_cohort.calculate_cohort_ch.delay")
     def test_can_delete_cohort_used_in_deleted_feature_flag(self, patch_calculate_cohort, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -3932,7 +3932,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -3944,7 +3944,7 @@ email@example.org,
     @patch("insights.tasks.calculate_cohort.calculate_cohort_ch.delay")
     def test_cannot_delete_cohort_used_in_test_account_filters(self, patch_calculate_cohort, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -3954,7 +3954,7 @@ email@example.org,
         self.team.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -3971,7 +3971,7 @@ email@example.org,
         self, patch_calculate_cohort, patch_capture
     ):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -3985,7 +3985,7 @@ email@example.org,
         team2.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -4002,7 +4002,7 @@ email@example.org,
     @patch("insights.tasks.calculate_cohort.calculate_cohort_ch.delay")
     def test_can_delete_cohort_not_used_in_test_account_filters(self, patch_calculate_cohort, patch_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -4015,7 +4015,7 @@ email@example.org,
         self.team.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -4029,7 +4029,7 @@ email@example.org,
         from insights.models.insight import Insight
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -4042,7 +4042,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -4058,7 +4058,7 @@ email@example.org,
         from insights.models.insight import Insight
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -4076,7 +4076,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -4092,7 +4092,7 @@ email@example.org,
         from insights.models.insight import Insight
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -4113,7 +4113,7 @@ email@example.org,
             )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -4138,7 +4138,7 @@ email@example.org,
         from insights.models.insight import Insight
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -4154,7 +4154,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -4168,7 +4168,7 @@ email@example.org,
         from insights.models.insight import Insight
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -4188,7 +4188,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -4204,7 +4204,7 @@ email@example.org,
         from insights.models.insight import Insight
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Test Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort_id = response.json()["id"]
@@ -4226,7 +4226,7 @@ email@example.org,
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}",
             data={"deleted": True},
         )
 
@@ -4241,14 +4241,14 @@ email@example.org,
     def test_cannot_delete_cohort_used_in_another_cohort(self, patch_calculate_cohort, patch_capture):
         # Create base cohort
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Base Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         base_cohort_id = response.json()["id"]
 
         # Create dependent cohort that references the base cohort
         dependent_response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "Dependent Cohort",
                 "filters": {
@@ -4263,7 +4263,7 @@ email@example.org,
 
         # Try to delete the base cohort
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{base_cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{base_cohort_id}",
             data={"deleted": True},
         )
 
@@ -4278,7 +4278,7 @@ email@example.org,
     def test_cannot_delete_cohort_used_in_multiple_cohorts(self, patch_calculate_cohort, patch_capture):
         # Create base cohort
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Base Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         base_cohort_id = response.json()["id"]
@@ -4286,7 +4286,7 @@ email@example.org,
         # Create multiple dependent cohorts
         for i in range(3):
             dependent_response = self.client.post(
-                f"/api/projects/{self.team.id}/cohorts",
+                f"/v1/projects/{self.team.id}/cohorts",
                 data={
                     "name": f"Dependent Cohort {i + 1}",
                     "filters": {
@@ -4301,7 +4301,7 @@ email@example.org,
 
         # Try to delete the base cohort
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{base_cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{base_cohort_id}",
             data={"deleted": True},
         )
 
@@ -4317,14 +4317,14 @@ email@example.org,
     def test_cannot_delete_cohort_used_in_nested_cohort_filters(self, patch_calculate_cohort, patch_capture):
         # Create base cohort
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Base Cohort", "groups": [{"properties": {"team_id": 5}}]},
         )
         base_cohort_id = response.json()["id"]
 
         # Create dependent cohort with nested AND/OR structure
         dependent_response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={
                 "name": "Complex Dependent Cohort",
                 "filters": {
@@ -4356,7 +4356,7 @@ email@example.org,
 
         # Try to delete the base cohort
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{base_cohort_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{base_cohort_id}",
             data={"deleted": True},
         )
 
@@ -4371,19 +4371,19 @@ email@example.org,
     def test_can_delete_cohort_not_used_in_other_cohorts(self, patch_calculate_cohort, patch_capture):
         # Create two independent cohorts
         response1 = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Cohort 1", "groups": [{"properties": {"team_id": 5}}]},
         )
         cohort1_id = response1.json()["id"]
 
         self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "Cohort 2", "groups": [{"properties": {"team_id": 6}}]},
         )
 
         # Delete cohort 1 should succeed since cohort 2 doesn't reference it
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort1_id}",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort1_id}",
             data={"deleted": True},
         )
 
@@ -4413,7 +4413,7 @@ email@example.org,
             error_code=CohortErrorCode.TIMEOUT,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.json()["last_error_message"])
@@ -4441,7 +4441,7 @@ email@example.org,
             error_code=CohortErrorCode.MEMORY_LIMIT,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         cohort_data = next(c for c in response.json()["results"] if c["id"] == cohort.id)
@@ -4469,7 +4469,7 @@ email@example.org,
             error_code=None,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.json()["last_error_message"])
@@ -4508,7 +4508,7 @@ email@example.org,
             error_code=CohortErrorCode.MEMORY_LIMIT,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("too much memory", response.json()["last_error_message"].lower())
@@ -4567,7 +4567,7 @@ class TestCalculateCohortCommand(APIBaseTest):
 def create_cohort(client: Client, team_id: int, name: str, groups: list[dict[str, Any]]):
     with patch("django.db.transaction.on_commit", side_effect=lambda func: func()):
         return client.post(
-            f"/api/projects/{team_id}/cohorts",
+            f"/v1/projects/{team_id}/cohorts",
             {"name": name, "groups": json.dumps(groups)},
         )
 
@@ -4613,7 +4613,7 @@ class TestCohortTypeIntegration(APIBaseTest):
 
         # Update only the name (unrelated to type)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.id}/",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.id}/",
             {"name": "Updated Name"},
             format="json",
         )
@@ -4627,7 +4627,7 @@ class TestCohortTypeIntegration(APIBaseTest):
         """cohort_type should remain None when not provided"""
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {
                 "name": "Test Cohort",
                 "filters": {
@@ -4684,14 +4684,14 @@ class TestCohortTypeIntegration(APIBaseTest):
         )
 
         # Test GET request
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort.id}/")
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("cohort_type", response.data)
         self.assertEqual(response.data["cohort_type"], CohortType.BEHAVIORAL)
 
         # Test LIST request
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/")
 
         self.assertEqual(response.status_code, 200)
         self.assertGreaterEqual(len(response.data["results"]), 1)
@@ -4702,7 +4702,7 @@ class TestCohortTypeIntegration(APIBaseTest):
     def test_explicit_cohort_type_validation_success(self):
         """Should accept valid explicit cohort types"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {
                 "name": "Test Cohort",
                 "cohort_type": CohortType.BEHAVIORAL,
@@ -4735,7 +4735,7 @@ class TestCohortTypeIntegration(APIBaseTest):
     def test_explicit_cohort_type_validation_failure(self):
         """Should reject mismatched explicit cohort types"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {
                 "name": "Test Cohort",
                 "cohort_type": CohortType.PERSON_PROPERTY,  # Wrong type for behavioral filters
@@ -4785,7 +4785,7 @@ class TestCohortTypeIntegration(APIBaseTest):
 
         # Invalid update - wrong type for existing filters
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.id}/",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.id}/",
             {"cohort_type": CohortType.BEHAVIORAL},  # Wrong - filters are person_property
             format="json",
         )
@@ -4795,7 +4795,7 @@ class TestCohortTypeIntegration(APIBaseTest):
 
         # Valid update - correct type for existing filters
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.id}/",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.id}/",
             {"cohort_type": CohortType.PERSON_PROPERTY},  # Correct type
             format="json",
         )
@@ -4805,7 +4805,7 @@ class TestCohortTypeIntegration(APIBaseTest):
 
         # Update both filters and type together
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.id}/",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.id}/",
             {
                 "cohort_type": CohortType.BEHAVIORAL,  # Now matches the new behavioral filters
                 "filters": {
@@ -4861,7 +4861,7 @@ jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_email_only", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -4911,7 +4911,7 @@ Jane Smith,{person2.uuid},jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_person_id_over_email", "csv": csv, "is_static": True},
             format="multipart",
         )
@@ -4965,7 +4965,7 @@ Jane Smith,user456,jane@example.com
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "test_distinct_id_over_email", "csv": csv, "is_static": True},
             format="multipart",
         )

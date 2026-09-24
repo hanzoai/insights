@@ -65,7 +65,7 @@ class TestTwoFactorReset(APIBaseTest):
         token = self._setup_2fa_reset()
         self._setup_half_auth_session()
 
-        response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/?token={token}")
+        response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/?token={token}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["success"])
@@ -75,7 +75,7 @@ class TestTwoFactorReset(APIBaseTest):
         """Test that validation fails without a token."""
         self._setup_half_auth_session()
 
-        response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/")
+        response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["error"], "Token is required.")
@@ -84,7 +84,7 @@ class TestTwoFactorReset(APIBaseTest):
         """Test that validation fails without a half-auth session."""
         token = self._setup_2fa_reset()
 
-        response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/?token={token}")
+        response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/?token={token}")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertTrue(response.json()["requires_login"])
@@ -100,7 +100,7 @@ class TestTwoFactorReset(APIBaseTest):
         session["user_authenticated_time"] = int(time.time()) - 86500  # 24 hours + 100 seconds ago
         session.save()
 
-        response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/?token={token}")
+        response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/?token={token}")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertTrue(response.json()["requires_login"])
@@ -111,7 +111,7 @@ class TestTwoFactorReset(APIBaseTest):
         self._setup_2fa_reset()
         self._setup_half_auth_session()
 
-        response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/?token=invalid_token")
+        response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/?token=invalid_token")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["error"], "This reset link is invalid or has expired.")
@@ -123,7 +123,7 @@ class TestTwoFactorReset(APIBaseTest):
         # Move time forward by more than 24 hours
         with freeze_time(timezone.now() + datetime.timedelta(hours=24, minutes=1)):
             self._setup_half_auth_session()
-            response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/?token={token}")
+            response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/?token={token}")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["error"], "This reset link is invalid or has expired.")
@@ -133,7 +133,7 @@ class TestTwoFactorReset(APIBaseTest):
         token = self._setup_2fa_reset()
         self._setup_half_auth_session()
 
-        response = self.client.get(f"/api/reset_2fa/00000000-0000-0000-0000-000000000000/?token={token}")
+        response = self.client.get(f"/v1/reset_2fa/00000000-0000-0000-0000-000000000000/?token={token}")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["error"], "This reset link is invalid or has expired.")
@@ -150,7 +150,7 @@ class TestTwoFactorReset(APIBaseTest):
         )
         self._setup_half_auth_session(user=other_user)
 
-        response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/?token={token}")
+        response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/?token={token}")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json()["error"], "This reset link is for a different account.")
@@ -167,7 +167,7 @@ class TestTwoFactorReset(APIBaseTest):
         self.assertTrue(TOTPDevice.objects.filter(user=self.user).exists())
         self.assertTrue(StaticDevice.objects.filter(user=self.user).exists())
 
-        response = self.client.post(f"/api/reset_2fa/{self.user.uuid}/", {"token": token})
+        response = self.client.post(f"/v1/reset_2fa/{self.user.uuid}/", {"token": token})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["success"])
@@ -194,7 +194,7 @@ class TestTwoFactorReset(APIBaseTest):
         token = self._setup_2fa_reset()
         self._setup_half_auth_session()
 
-        response = self.client.post(f"/api/reset_2fa/{self.user.uuid}/", {"token": token})
+        response = self.client.post(f"/v1/reset_2fa/{self.user.uuid}/", {"token": token})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -207,7 +207,7 @@ class TestTwoFactorReset(APIBaseTest):
         """Test that 2FA reset fails without a token."""
         self._setup_half_auth_session()
 
-        response = self.client.post(f"/api/reset_2fa/{self.user.uuid}/", {})
+        response = self.client.post(f"/v1/reset_2fa/{self.user.uuid}/", {})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["error"], "Token is required.")
@@ -217,7 +217,7 @@ class TestTwoFactorReset(APIBaseTest):
         self._setup_2fa_reset()
         self._setup_half_auth_session()
 
-        response = self.client.post(f"/api/reset_2fa/{self.user.uuid}/", {"token": "invalid_token"})
+        response = self.client.post(f"/v1/reset_2fa/{self.user.uuid}/", {"token": "invalid_token"})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["error"], "This reset link is invalid or has expired.")
@@ -226,7 +226,7 @@ class TestTwoFactorReset(APIBaseTest):
         """Test that unauthenticated users cannot reset 2FA."""
         token = self._setup_2fa_reset()
 
-        response = self.client.post(f"/api/reset_2fa/{self.user.uuid}/", {"token": token})
+        response = self.client.post(f"/v1/reset_2fa/{self.user.uuid}/", {"token": token})
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertTrue(response.json()["requires_login"])
@@ -244,7 +244,7 @@ class TestTwoFactorReset(APIBaseTest):
         )
         self._setup_half_auth_session(user=other_user)
 
-        response = self.client.post(f"/api/reset_2fa/{self.user.uuid}/", {"token": token})
+        response = self.client.post(f"/v1/reset_2fa/{self.user.uuid}/", {"token": token})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json()["error"], "This reset link is for a different account.")
@@ -264,11 +264,11 @@ class TestTwoFactorReset(APIBaseTest):
             self._setup_half_auth_session()
 
             # First token should be invalid now (hash value changed)
-            response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/?token={token1}")
+            response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/?token={token1}")
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
             # Second token should be valid
-            response = self.client.get(f"/api/reset_2fa/{self.user.uuid}/?token={token2}")
+            response = self.client.get(f"/v1/reset_2fa/{self.user.uuid}/?token={token2}")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -319,7 +319,7 @@ class TestTwoFactorResetWithPasskeys(APIBaseTest):
         self.assertTrue(WebauthnCredential.objects.filter(user=self.user, verified=True).exists())
         self.assertTrue(self.user.passkeys_enabled_for_2fa)
 
-        response = self.client.post(f"/api/reset_2fa/{self.user.uuid}/", {"token": token})
+        response = self.client.post(f"/v1/reset_2fa/{self.user.uuid}/", {"token": token})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -360,7 +360,7 @@ class TestTwoFactorResetLoginBypass(APIBaseTest):
     def test_login_without_reset_link_requires_2fa(self):
         """Test that normal login still requires 2FA."""
         response = self.client.post(
-            "/api/login",
+            "/v1/login",
             {"email": self.user.email, "password": self.password},
         )
 

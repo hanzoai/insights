@@ -10,7 +10,7 @@ from insights.models.feature_flag import TeamDefaultEvaluationTag
 class TestFeatureFlagDefaultEnvironments(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.feature_flag_url = "/api/projects/@current/feature_flags/"
+        self.feature_flag_url = "/v1/projects/@current/feature_flags/"
 
         # Mock FLAG_EVALUATION_TAGS feature flag to be enabled by default
         self.feature_flag_patcher = patch("hanzo_insights.feature_enabled")
@@ -176,7 +176,7 @@ class TestFeatureFlagDefaultEnvironments(APIBaseTest):
 
         # Update the flag
         response = self.client.patch(
-            f"/api/projects/@current/feature_flags/{flag.id}/",
+            f"/v1/projects/@current/feature_flags/{flag.id}/",
             {
                 "name": "Updated Name",
             },

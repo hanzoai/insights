@@ -11,7 +11,7 @@ from insights.models import WebExperiment
 class TestWebExperiment(APIBaseTest):
     def _create_web_experiment(self, name="Zero to Web Experiment"):
         return self.client.post(
-            f"/api/projects/{self.team.id}/web_experiments/",
+            f"/v1/projects/{self.team.id}/web_experiments/",
             data={
                 "name": name,
                 "variants": {
@@ -88,7 +88,7 @@ class TestWebExperiment(APIBaseTest):
         completed_web_exp.start_date = datetime.now().utcnow() - timedelta(days=2)
         completed_web_exp.end_date = datetime.now().utcnow()
         completed_web_exp.save()
-        list_response = self.client.get(f"/api/web_experiments?token={self.team.api_token}")
+        list_response = self.client.get(f"/v1/web_experiments?token={self.team.api_token}")
         assert list_response.status_code == status.HTTP_200_OK, list_response
         response_data = list_response.json()
         assert len(response_data["experiments"]) == 1
@@ -100,7 +100,7 @@ class TestWebExperiment(APIBaseTest):
         assert response.status_code == status.HTTP_201_CREATED, response_data
         experiment_id = response_data["id"]
         assert WebExperiment.objects.filter(id=experiment_id).exists()
-        del_response = self.client.delete(f"/api/projects/{self.team.id}/web_experiments/{experiment_id}")
+        del_response = self.client.delete(f"/v1/projects/{self.team.id}/web_experiments/{experiment_id}")
         assert del_response.status_code == status.HTTP_204_NO_CONTENT
         assert WebExperiment.objects.filter(id=experiment_id).exists() is False
 
@@ -120,7 +120,7 @@ class TestWebExperiment(APIBaseTest):
         feature_flag.filters = {"multivariate": {}}
         feature_flag.save()
 
-        list_response = self.client.get(f"/api/web_experiments?token={self.team.api_token}")
+        list_response = self.client.get(f"/v1/web_experiments?token={self.team.api_token}")
         assert list_response.status_code == status.HTTP_200_OK
         response_data = list_response.json()
 
@@ -134,7 +134,7 @@ class TestWebExperiment(APIBaseTest):
         feature_flag.filters = {}
         feature_flag.save()
 
-        list_response = self.client.get(f"/api/web_experiments?token={self.team.api_token}")
+        list_response = self.client.get(f"/v1/web_experiments?token={self.team.api_token}")
         assert list_response.status_code == status.HTTP_200_OK
         response_data = list_response.json()
 
@@ -162,7 +162,7 @@ class TestWebExperiment(APIBaseTest):
         deleted_experiment.save()
 
         # List experiments via API - should only show active experiment
-        list_response = self.client.get(f"/api/projects/{self.team.id}/web_experiments/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/web_experiments/")
         assert list_response.status_code == status.HTTP_200_OK
         response_data = list_response.json()
 
@@ -184,7 +184,7 @@ class TestWebExperiment(APIBaseTest):
         experiment.save()
 
         # Try to retrieve the deleted experiment via detail endpoint
-        detail_response = self.client.get(f"/api/projects/{self.team.id}/web_experiments/{experiment_id}/")
+        detail_response = self.client.get(f"/v1/projects/{self.team.id}/web_experiments/{experiment_id}/")
 
         # Should return 200 since safely_get_queryset only filters for list actions
         assert detail_response.status_code == status.HTTP_200_OK
@@ -214,7 +214,7 @@ class TestWebExperiment(APIBaseTest):
         feature_flag.save()
 
         # Call the web_experiments endpoint
-        list_response = self.client.get(f"/api/web_experiments?token={self.team.api_token}")
+        list_response = self.client.get(f"/v1/web_experiments?token={self.team.api_token}")
         assert list_response.status_code == status.HTTP_200_OK, list_response
         response_data = list_response.json()
 
@@ -260,7 +260,7 @@ class TestWebExperiment(APIBaseTest):
         feature_flag.save()
 
         # Call the web_experiments endpoint
-        list_response = self.client.get(f"/api/web_experiments?token={self.team.api_token}")
+        list_response = self.client.get(f"/v1/web_experiments?token={self.team.api_token}")
         assert list_response.status_code == status.HTTP_200_OK, list_response
         response_data = list_response.json()
 
@@ -289,7 +289,7 @@ class TestWebExperiment(APIBaseTest):
     def test_rejects_xss_in_text_field(self):
         """Test that XSS attacks in text field are rejected"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/web_experiments/",
+            f"/v1/projects/{self.team.id}/web_experiments/",
             data={
                 "name": "XSS Text Test",
                 "variants": {
@@ -318,7 +318,7 @@ class TestWebExperiment(APIBaseTest):
     def test_rejects_xss_event_handlers_in_html(self):
         """Test that event handlers in html field are rejected"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/web_experiments/",
+            f"/v1/projects/{self.team.id}/web_experiments/",
             data={
                 "name": "XSS Event Handler Test",
                 "variants": {
@@ -347,7 +347,7 @@ class TestWebExperiment(APIBaseTest):
     def test_rejects_javascript_protocol(self):
         """Test that javascript: protocol is rejected"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/web_experiments/",
+            f"/v1/projects/{self.team.id}/web_experiments/",
             data={
                 "name": "XSS JavaScript Protocol Test",
                 "variants": {
@@ -376,7 +376,7 @@ class TestWebExperiment(APIBaseTest):
     def test_rejects_iframe_tags(self):
         """Test that iframe tags are rejected"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/web_experiments/",
+            f"/v1/projects/{self.team.id}/web_experiments/",
             data={
                 "name": "XSS Iframe Test",
                 "variants": {
@@ -413,7 +413,7 @@ class TestWebExperiment(APIBaseTest):
   </div>
 </div>"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/web_experiments/",
+            f"/v1/projects/{self.team.id}/web_experiments/",
             data={
                 "name": "Safe HTML Test",
                 "variants": {

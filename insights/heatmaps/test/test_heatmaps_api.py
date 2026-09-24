@@ -72,7 +72,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             params = {}
 
         query_params = "&".join([f"{key}={value}" for key, value in params.items()])
-        response = self.client.get(f"/api/heatmap/?{query_params}")
+        response = self.client.get(f"/v1/heatmap/?{query_params}")
         assert response.status_code == expected_status_code, response.json()
 
         return response
@@ -142,7 +142,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     @freezegun.freeze_time("2025-03-31")
     @snapshot_datastore_queries
     def test_can_get_empty_response(self) -> None:
-        response = self.client.get("/api/heatmap/?date_from=2024-05-03")
+        response = self.client.get("/v1/heatmap/?date_from=2024-05-03")
         assert response.status_code == 200
         self.assertEqual(response.json(), {"results": []})
 

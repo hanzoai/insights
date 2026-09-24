@@ -301,9 +301,9 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response["tiles"][0]["insight"]["result"], None)
 
         # cache results
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{item.pk}?refresh=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{item.pk}?refresh=true").json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{item2.pk}?refresh=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{item2.pk}?refresh=true").json()
 
         # Now the dashboard has data without having to refresh
         response = self.dashboard_api.get_dashboard(dashboard.pk, query_params={"refresh": False, "use_cache": True})
@@ -646,12 +646,12 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response["tiles"][0]["insight"]["name"], "some_item")
         self.assertEqual(response["tiles"][0]["insight"]["filters"]["date_from"], "-14d")
 
-        item_response = self.client.get(f"/api/projects/{self.team.id}/insights/").json()
+        item_response = self.client.get(f"/v1/projects/{self.team.id}/insights/").json()
         self.assertEqual(item_response["results"][0]["name"], "some_item")
 
         # delete
         self.dashboard_api.soft_delete(insight_id, "insights")
-        items_response = self.client.get(f"/api/projects/{self.team.id}/insights/").json()
+        items_response = self.client.get(f"/v1/projects/{self.team.id}/insights/").json()
         self.assertEqual(len(items_response["results"]), 0)
 
         excludes_deleted_insights_response = self.dashboard_api.get_dashboard(dashboard_id)
@@ -784,14 +784,14 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         self.dashboard_api.create_insight({"filters": {"hello": "test"}})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?user=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?user=true").json()
         self.assertEqual(response["count"], 1)
 
     def test_dashboard_items_history_saved(self):
         self.dashboard_api.create_insight({"filters": {"hello": "test"}, "saved": True})
         self.dashboard_api.create_insight({"filters": {"hello": "test"}})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?user=true&saved=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?user=true&saved=true").json()
         self.assertEqual(response["count"], 1)
 
     def test_dashboard_item_layout(self):
@@ -1274,7 +1274,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         query = filter_to_query(filter_dict).model_dump()
 
         # cache insight results for trends with a -7d date from
-        response = self.client.post(f"/api/projects/{self.team.id}/query/", data={"query": query})
+        response = self.client.post(f"/v1/projects/{self.team.id}/query/", data={"query": query})
         self.assertEqual(response.status_code, 200)
         dashboard_json = self.dashboard_api.get_dashboard(dashboard.pk)
         self.assertEqual(len(dashboard_json["tiles"][0]["insight"]["result"][0]["days"]), 8)
@@ -1292,7 +1292,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         # cache results
         filter_dict["date_from"] = "-24h"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/query/",
+            f"/v1/projects/{self.team.id}/query/",
             data={"query": filter_to_query(filter_dict).model_dump()},
         )
 
@@ -1305,7 +1305,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     def test_invalid_properties(self):
         properties = "invalid_json"
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/trend/?properties={properties}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/trend/?properties={properties}")
 
         self.assertEqual(response.status_code, 400, response.content)
         self.assertDictEqual(
@@ -1342,7 +1342,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     def test_patch_api_as_form_data(self):
         dashboard = Dashboard.objects.create(team=self.team, name="dashboard", created_by=self.user)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.pk}/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.pk}/",
             data="name=replaced",
             content_type="application/x-www-form-urlencoded",
         )
@@ -1395,7 +1395,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
     def test_hard_delete_is_forbidden(self) -> None:
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
-        api_response = self.client.delete(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}")
+        api_response = self.client.delete(f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}")
         self.assertEqual(api_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.dashboard_api.get_dashboard(dashboard_id, expected_status=status.HTTP_200_OK)
 
@@ -1449,7 +1449,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         assert len(dashboard_two["tiles"]) == 0
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_one_id}/move_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_one_id}/move_tile",
             {"tile": dashboard_one["tiles"][0], "toDashboard": dashboard_two_id},
         )
         assert patch_response.status_code == status.HTTP_200_OK
@@ -1471,7 +1471,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile = dashboard["tiles"][0]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/move_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/move_tile",
             {"tile": tile, "toDashboard": other_dashboard.id},
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -1488,7 +1488,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "my dashboard"})
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": other_tile.id, "text": {"id": other_text.id, "body": "hijacked"}}]},
         )
         assert response.status_code != status.HTTP_200_OK
@@ -1524,7 +1524,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     @patch("insights.api.dashboards.dashboard.report_user_action")
     def test_create_from_template_json(self, mock_capture) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": valid_template, "creation_context": "onboarding"},
             headers={"Referer": "https://hanzo.ai/my-referer", "X-Insights-Session-Id": "my-session-id"},
         )
@@ -1566,7 +1566,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         template: dict = {**valid_template, "tiles": []}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 400, response.json()
@@ -1578,7 +1578,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 200
@@ -1626,7 +1626,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 200
@@ -1712,7 +1712,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         invalid_template = {"not a": "template"}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": invalid_template},
         )
         assert response.status_code == 400, response.json()
@@ -1914,7 +1914,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Verify we can access visible dashboards
         self.client.force_login(user2)
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboards/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboards/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         dashboard_ids = [dashboard["id"] for dashboard in response.json()["results"]]
         self.assertIn(visible_dashboard.id, dashboard_ids)
@@ -1922,14 +1922,14 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Verify we can access all dashboards as creator
         self.client.force_login(self.user)
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboards/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboards/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(visible_dashboard.id, [dashboard["id"] for dashboard in response.json()["results"]])
         self.assertIn(hidden_dashboard.id, [dashboard["id"] for dashboard in response.json()["results"]])
 
     def test_dashboard_create_in_folder(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {
                 "name": "My Foldered Dashboard",
                 "_create_in_folder": "Marketing/Website/Conversion",
@@ -2167,7 +2167,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         regular_response = self.dashboard_api.get_dashboard(dashboard_id)
 
-        sse_response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/stream_tiles/")
+        sse_response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/stream_tiles/")
         self.assertEqual(sse_response.status_code, 200)
 
         sse_content = b"".join(sse_response.streaming_content).decode("utf-8")  # type: ignore
@@ -2206,7 +2206,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     def test_create_unlisted_dashboard_creates_tags(self):
         """Test that unlisted dashboards get tags"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
+            f"/v1/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
             {"tag": "llm-analytics"},
             format="json",
         )
@@ -2226,7 +2226,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         """Test that creating duplicate unlisted dashboards returns 409"""
         # Create first dashboard
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
+            f"/v1/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
             {"tag": "llm-analytics"},
             format="json",
         )
@@ -2234,7 +2234,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Try to create duplicate
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
+            f"/v1/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
             {"tag": "llm-analytics"},
             format="json",
         )
@@ -2261,7 +2261,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         # Filter by unlisted
-        response = self.client.get(f"/api/environments/{self.team.id}/dashboards/?creation_mode=unlisted")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dashboards/?creation_mode=unlisted")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = [d["id"] for d in response.json()["results"]]
         self.assertIn(unlisted.id, ids)
@@ -2269,7 +2269,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.assertNotIn(template.id, ids)
 
         # Filter by default
-        response = self.client.get(f"/api/environments/{self.team.id}/dashboards/?creation_mode=default")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dashboards/?creation_mode=default")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = [d["id"] for d in response.json()["results"]]
         self.assertNotIn(unlisted.id, ids)

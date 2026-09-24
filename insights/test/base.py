@@ -888,7 +888,7 @@ class APIBaseTest(InsightsTestCase, ErrorResponsesMixin, DRFTestCase):
 
         token = email_mfa_token_generator.make_token(user)
 
-        response = self.client.post("/api/login/email-mfa/", {"email": email, "token": token})
+        response = self.client.post("/v1/login/email-mfa/", {"email": email, "token": token})
 
         return response
 

@@ -113,8 +113,8 @@ class TwoFactorResetViewSet(viewsets.ViewSet):
     to access these endpoints. This is verified by checking the session keys
     set during the login flow.
 
-    GET /api/reset_2fa/<user_uuid>/?token=<token> - Validate token and session state
-    POST /api/reset_2fa/<user_uuid>/ - Confirm and execute 2FA reset
+    GET /v1/reset_2fa/<user_uuid>/?token=<token> - Validate token and session state
+    POST /v1/reset_2fa/<user_uuid>/ - Confirm and execute 2FA reset
     """
 
     permission_classes = (permissions.AllowAny,)

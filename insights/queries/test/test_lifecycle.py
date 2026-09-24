@@ -528,7 +528,7 @@ class TestLifecycle(TestLifecycleBase):
         p1 = people[0]
 
         result = self.client.get(
-            "/api/person/lifecycle",
+            "/v1/person/lifecycle",
             data={
                 "date_from": "2020-01-12T00:00:00Z",
                 "date_to": "2020-01-19T00:00:00Z",
@@ -543,7 +543,7 @@ class TestLifecycle(TestLifecycleBase):
         self.assertEqual(result["results"][0]["people"][0]["uuid"], str(p1.uuid))
 
         dormant_result = self.client.get(
-            "/api/person/lifecycle",
+            "/v1/person/lifecycle",
             data={
                 "date_from": "2020-01-12T00:00:00Z",
                 "date_to": "2020-01-19T00:00:00Z",
@@ -557,7 +557,7 @@ class TestLifecycle(TestLifecycleBase):
         self.assertEqual(len(dormant_result["results"][0]["people"]), 2)
 
         dormant_result = self.client.get(
-            "/api/person/lifecycle",
+            "/v1/person/lifecycle",
             data={
                 "date_from": "2020-01-12T00:00:00Z",
                 "date_to": "2020-01-19T00:00:00Z",
@@ -583,7 +583,7 @@ class TestLifecycle(TestLifecycleBase):
                 )
         # even if set to hour 6 it should default to beginning of day and include all pageviews above
         result = self.client.get(
-            "/api/person/lifecycle",
+            "/v1/person/lifecycle",
             data={
                 "date_from": "2020-01-12T00:00:00Z",
                 "date_to": "2020-01-19T00:00:00Z",

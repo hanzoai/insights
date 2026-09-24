@@ -33,7 +33,7 @@ class TestAccessControlViewSetMixin(APIBaseTest):
 
     def test_patch_environment_saves_instead_of_500(self):
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/",
+            f"/v1/environments/{self.team.id}/",
             {"autocapture_opt_out": True},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -42,7 +42,7 @@ class TestAccessControlViewSetMixin(APIBaseTest):
 
     def test_patch_project_saves_instead_of_500(self):
         response = self.client.patch(
-            f"/api/projects/{self.team.project_id}/",
+            f"/v1/projects/{self.team.project_id}/",
             {"name": "Renamed by test"},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()

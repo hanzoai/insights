@@ -332,7 +332,7 @@ class AdvancedActivityLogsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSe
                 team=self.team,
                 export_format=format_mapping[export_format],
                 export_context={
-                    "path": f"/api/projects/{self.team_id}/advanced_activity_logs/?{urlencode(query_params)}",
+                    "path": f"/v1/projects/{self.team_id}/advanced_activity_logs/?{urlencode(query_params)}",
                     "method": "GET",
                     "filters": serializable_filters,
                     "filename": filename,

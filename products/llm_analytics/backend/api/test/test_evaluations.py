@@ -34,12 +34,12 @@ def _setup_team():
 class TestEvaluationConfigsApi(APIBaseTest):
     def test_unauthenticated_user_cannot_access_evaluation_configs(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_can_create_evaluation_config(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Test Evaluation",
                 "description": "Test Description",
@@ -89,7 +89,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
 
@@ -111,7 +111,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], "Test Evaluation")
         self.assertEqual(response.data["description"], "Test Description")
@@ -131,7 +131,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{evaluation_config.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{evaluation_config.id}/",
             {
                 "name": "Updated Name",
                 "description": "Updated Description",
@@ -158,7 +158,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_can_search_evaluation_configs(self):
@@ -184,13 +184,13 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         # Search by name
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?search=accuracy")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?search=accuracy")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Accuracy Evaluation")
 
         # Search by description
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?search=performance")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?search=performance")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Performance Evaluation")
@@ -218,13 +218,13 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         # Filter for enabled only
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?enabled=true")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?enabled=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Enabled Evaluation")
 
         # Filter for disabled only
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?enabled=false")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?enabled=false")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Disabled Evaluation")
@@ -244,18 +244,18 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         # Try to access other team's evaluation config
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/{other_evaluation.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/{other_evaluation.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # List should not include other team's evaluation configs
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
     def test_validation_requires_required_fields(self):
         # Missing name
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "evaluation_type": "llm_judge",
                 "evaluation_config": {"prompt": "Test prompt"},
@@ -268,7 +268,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
         # Missing evaluation_type
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Test Evaluation",
                 "evaluation_config": {"prompt": "Test prompt"},
@@ -281,7 +281,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
         # Empty evaluation_config should fail validation
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Test Evaluation",
                 "evaluation_type": "llm_judge",
@@ -306,17 +306,17 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         # Should not appear in list
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
         # Should not be accessible for retrieval
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_conditions_with_property_filters(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Test with Properties",
                 "evaluation_type": "llm_judge",

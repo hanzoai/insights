@@ -40,7 +40,7 @@ class TestLineage(APIBaseTest):
 
         with capture_db_queries() as context:
             response = self.client.get(
-                f"/api/environments/{self.team.id}/lineage/get_upstream/?model_id={final_query.id}"
+                f"/v1/environments/{self.team.id}/lineage/get_upstream/?model_id={final_query.id}"
             )
             self.assertEqual(response.status_code, 200)
             data = response.json()
@@ -86,7 +86,7 @@ class TestLineage(APIBaseTest):
             external_tables=["my_table"],
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/lineage/get_upstream/?model_id={saved_query.id}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/lineage/get_upstream/?model_id={saved_query.id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
@@ -122,7 +122,7 @@ class TestLineage(APIBaseTest):
             external_tables=["base_query", "postgres.supabase.events"],
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/lineage/get_upstream/?model_id={mixed_query.id}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/lineage/get_upstream/?model_id={mixed_query.id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
@@ -152,7 +152,7 @@ class TestLineage(APIBaseTest):
             external_tables=["postgres.supabase.users", "postgres.supabase.events"],
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/lineage/get_upstream/?model_id={saved_query.id}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/lineage/get_upstream/?model_id={saved_query.id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
@@ -181,7 +181,7 @@ class TestLineage(APIBaseTest):
             external_tables=[],
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/lineage/get_upstream/?model_id={saved_query.id}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/lineage/get_upstream/?model_id={saved_query.id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
 

@@ -10,7 +10,7 @@ from insights.models.feature_flag.feature_flag import FeatureFlagEvaluationTag
 class TestFeatureFlagRequireEvaluationTags(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.feature_flag_url = "/api/projects/@current/feature_flags/"
+        self.feature_flag_url = "/v1/projects/@current/feature_flags/"
 
         # Mock FLAG_EVALUATION_TAGS feature flag to be enabled by default
         self.feature_flag_patcher = patch("hanzo_insights.feature_enabled")
@@ -117,7 +117,7 @@ class TestFeatureFlagRequireEvaluationTags(APIBaseTest):
 
         # Update the flag (should succeed)
         response = self.client.patch(
-            f"/api/projects/@current/feature_flags/{flag.id}/",
+            f"/v1/projects/@current/feature_flags/{flag.id}/",
             {
                 "name": "Updated Name",
             },
@@ -188,7 +188,7 @@ class TestFeatureFlagRequireEvaluationTags(APIBaseTest):
 
         # Try to remove all evaluation tags
         response = self.client.patch(
-            f"/api/projects/@current/feature_flags/{flag.id}/",
+            f"/v1/projects/@current/feature_flags/{flag.id}/",
             {
                 "evaluation_tags": [],
             },
@@ -220,7 +220,7 @@ class TestFeatureFlagRequireEvaluationTags(APIBaseTest):
 
         # Remove one tag but keep one
         response = self.client.patch(
-            f"/api/projects/@current/feature_flags/{flag.id}/",
+            f"/v1/projects/@current/feature_flags/{flag.id}/",
             {
                 "tags": ["production"],
                 "evaluation_tags": ["production"],
@@ -255,7 +255,7 @@ class TestFeatureFlagRequireEvaluationTags(APIBaseTest):
 
         # Update the flag name (not touching evaluation tags)
         response = self.client.patch(
-            f"/api/projects/@current/feature_flags/{flag.id}/",
+            f"/v1/projects/@current/feature_flags/{flag.id}/",
             {
                 "name": "Updated Name",
             },
@@ -286,7 +286,7 @@ class TestFeatureFlagRequireEvaluationTags(APIBaseTest):
 
         # Update without sending evaluation_tags field (just update the name)
         response = self.client.patch(
-            f"/api/projects/@current/feature_flags/{flag.id}/",
+            f"/v1/projects/@current/feature_flags/{flag.id}/",
             {
                 "name": "Updated Name",
             },

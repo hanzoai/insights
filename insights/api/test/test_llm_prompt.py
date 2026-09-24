@@ -12,7 +12,7 @@ from insights.models.llm_prompt import LLMPrompt
 class TestLLMPromptAPI(APIBaseTest):
     def test_create_prompt_with_unique_name_succeeds(self, mock_feature_enabled):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={
                 "name": "my-prompt",
                 "prompt": "You are a helpful assistant.",
@@ -32,7 +32,7 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={
                 "name": "my-prompt",
                 "prompt": "Duplicate prompt",
@@ -53,7 +53,7 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/{prompt.id}/",
+            f"/v1/environments/{self.team.id}/llm_prompts/{prompt.id}/",
             data={"name": "new-name"},
             format="json",
         )
@@ -67,7 +67,7 @@ class TestLLMPromptAPI(APIBaseTest):
 
     def test_create_prompt_with_reserved_name_new_fails(self, mock_feature_enabled):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={
                 "name": "new",
                 "prompt": "Content",
@@ -81,7 +81,7 @@ class TestLLMPromptAPI(APIBaseTest):
 
     def test_create_prompt_with_reserved_name_NEW_uppercase_fails(self, mock_feature_enabled):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={
                 "name": "NEW",
                 "prompt": "Content",
@@ -103,7 +103,7 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={
                 "name": "deleted-prompt",
                 "prompt": "New content",
@@ -127,7 +127,7 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{other_team.id}/llm_prompts/",
+            f"/v1/environments/{other_team.id}/llm_prompts/",
             data={
                 "name": "shared-name",
                 "prompt": "Content for team 2",
@@ -146,7 +146,7 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/{prompt.id}/",
+            f"/v1/environments/{self.team.id}/llm_prompts/{prompt.id}/",
             data={"prompt": "Updated content"},
             format="json",
         )
@@ -164,7 +164,7 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/{prompt.id}/",
+            f"/v1/environments/{self.team.id}/llm_prompts/{prompt.id}/",
             data={"deleted": True},
             format="json",
         )
@@ -181,7 +181,7 @@ class TestLLMPromptAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/llm_prompts/{prompt.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/llm_prompts/{prompt.id}/")
 
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
@@ -201,7 +201,7 @@ class TestLLMPromptAPI(APIBaseTest):
             deleted=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/")
 
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -216,7 +216,7 @@ class TestLLMPromptAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/test-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/test-prompt/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["id"] == str(prompt.id)
@@ -231,7 +231,7 @@ class TestLLMPromptAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/test-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/test-prompt/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["id"] == str(prompt.id)
@@ -249,7 +249,7 @@ class TestLLMPromptAPI(APIBaseTest):
         api_key = self.create_personal_api_key_with_scopes(["llm_prompt:read"])
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/test-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/test-prompt/")
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json()["detail"] == "This endpoint is only available to web-authenticated users."
@@ -266,13 +266,13 @@ class TestLLMPromptAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/test-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/test-prompt/")
 
         assert response.status_code == status.HTTP_200_OK
         mock_capture_internal.assert_not_called()
 
     def test_fetch_prompt_by_name_not_found(self, mock_feature_enabled):
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/non-existent/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/non-existent/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "not found" in response.json()["detail"].lower()
@@ -286,7 +286,7 @@ class TestLLMPromptAPI(APIBaseTest):
             deleted=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/deleted-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/deleted-prompt/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -301,13 +301,13 @@ class TestLLMPromptAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/other-team-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/other-team-prompt/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_create_prompt_with_invalid_name_fails(self, mock_feature_enabled):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={
                 "name": "invalid name with spaces",
                 "prompt": "Content",
@@ -321,7 +321,7 @@ class TestLLMPromptAPI(APIBaseTest):
 
     def test_create_prompt_with_valid_name_characters(self, mock_feature_enabled):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={
                 "name": "valid-name_123",
                 "prompt": "Content",
@@ -342,6 +342,6 @@ class TestLLMPromptAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/test-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/test-prompt/")
 
         assert response.status_code == status.HTTP_403_FORBIDDEN

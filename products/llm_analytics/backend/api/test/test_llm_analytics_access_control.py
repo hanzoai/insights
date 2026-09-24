@@ -81,7 +81,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self._set_access_level(self.viewer_user, access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @parameterized.expand(
@@ -96,7 +96,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         obj = getattr(self, attr)
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/{obj.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/{obj.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # -- Viewer cannot create/update/delete --
@@ -106,7 +106,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "New Evaluation",
                 "evaluation_type": "llm_judge",
@@ -123,7 +123,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/",
+            f"/v1/environments/{self.team.id}/datasets/",
             {"name": "New Dataset"},
             format="json",
         )
@@ -134,7 +134,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{self.evaluation.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{self.evaluation.id}/",
             {"name": "Updated"},
             format="json",
         )
@@ -145,7 +145,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -156,7 +156,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Editor Evaluation",
                 "evaluation_type": "llm_judge",
@@ -173,7 +173,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/",
+            f"/v1/environments/{self.team.id}/datasets/",
             {"name": "Editor Dataset"},
             format="json",
         )
@@ -184,7 +184,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{self.evaluation.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{self.evaluation.id}/",
             {"name": "Updated by editor"},
             format="json",
         )
@@ -195,7 +195,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -212,7 +212,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self._set_access_level(self.no_access_user, access_level="none")
         self.client.force_login(self.no_access_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # -- Resource inheritance: setting llm_analytics cascades to child resources --
@@ -228,7 +228,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self._set_access_level(self.viewer_user, resource="llm_analytics", access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @parameterized.expand(
@@ -242,7 +242,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self._set_access_level(self.no_access_user, resource="llm_analytics", access_level="none")
         self.client.force_login(self.no_access_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # -- Org admin has full access without explicit permissions --
@@ -255,7 +255,7 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Admin Evaluation",
                 "evaluation_type": "llm_judge",

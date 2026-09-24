@@ -7,7 +7,7 @@ from rest_framework import status
 class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.breakdown_url = f"/api/projects/{self.team.id}/web_analytics/breakdown/"
+        self.breakdown_url = f"/v1/projects/{self.team.id}/web_analytics/breakdown/"
         self.permission_patch = patch(
             "insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS", [self.team.id]
         )
@@ -227,7 +227,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
     def test_breakdown_team_isolation(self):
         other_organization = self.create_organization_with_features([])
         other_team = self.create_team_with_organization(organization=other_organization)
-        other_url = f"/api/projects/{other_team.id}/web_analytics/breakdown/"
+        other_url = f"/v1/projects/{other_team.id}/web_analytics/breakdown/"
 
         response = self.client.get(
             other_url,

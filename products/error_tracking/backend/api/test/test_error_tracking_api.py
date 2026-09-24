@@ -68,13 +68,13 @@ class TestErrorTracking(APIBaseTest):
 
         # no fingerprint
         response = self.client.get(
-            f"/api/environments/{self.team.id}/error_tracking/issues/{deleted_issue_id}",
+            f"/v1/environments/{self.team.id}/error_tracking/issues/{deleted_issue_id}",
         )
         assert response.status_code == 404
 
         # with fingerprint hint
         response = self.client.get(
-            f"/api/environments/{self.team.id}/error_tracking/issues/{deleted_issue_id}?fingerprint={merged_fingerprint}",
+            f"/v1/environments/{self.team.id}/error_tracking/issues/{deleted_issue_id}?fingerprint={merged_fingerprint}",
         )
         assert response.status_code == 308
         assert response.json() == {"issue_id": str(merged_issue.id)}
@@ -84,7 +84,7 @@ class TestErrorTracking(APIBaseTest):
 
         # with fingerprint hint
         response = self.client.get(
-            f"/api/environments/{self.team.id}/error_tracking/issues/{issue.id}?fingerprint=fingerprint",
+            f"/v1/environments/{self.team.id}/error_tracking/issues/{issue.id}?fingerprint=fingerprint",
         )
         assert response.status_code == 200
         assert response.json().get("id") == str(issue.id)
@@ -93,7 +93,7 @@ class TestErrorTracking(APIBaseTest):
     def test_issue_fetch(self):
         issue = self.create_issue(["fingerprint"])
 
-        response = self.client.get(f"/api/environments/{self.team.id}/error_tracking/issues/{issue.id}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/error_tracking/issues/{issue.id}")
 
         assert response.status_code == 200
         assert response.json() == {
@@ -112,7 +112,7 @@ class TestErrorTracking(APIBaseTest):
         issue = self.create_issue(["fingerprint"])
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/error_tracking/issues/{issue.id}", data={"status": "resolved"}
+            f"/v1/environments/{self.team.id}/error_tracking/issues/{issue.id}", data={"status": "resolved"}
         )
         issue.refresh_from_db()
 
@@ -164,7 +164,7 @@ class TestErrorTracking(APIBaseTest):
         assert ErrorTrackingIssue.objects.count() == 2
 
         repsonse = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/issues/{issue_one.id}/merge", data={"ids": [issue_two.id]}
+            f"/v1/environments/{self.team.id}/error_tracking/issues/{issue_one.id}/merge", data={"ids": [issue_two.id]}
         )
 
         assert repsonse.status_code == 200
@@ -176,7 +176,7 @@ class TestErrorTracking(APIBaseTest):
     def test_can_start_symbol_set_upload(self) -> None:
         chunk_id = uuid7()
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/start_upload?chunk_id={chunk_id}"
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/start_upload?chunk_id={chunk_id}"
         )
         response_json = response.json()
 
@@ -191,7 +191,7 @@ class TestErrorTracking(APIBaseTest):
         )
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.pk}/finish_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.pk}/finish_upload",
             data={"content_hash": "this_is_a_content_hash"},
         )
 
@@ -206,7 +206,7 @@ class TestErrorTracking(APIBaseTest):
         )
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.pk}/finish_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.pk}/finish_upload",
             data={"content_hash": "this_is_a_content_hash"},
         )
 
@@ -221,7 +221,7 @@ class TestErrorTracking(APIBaseTest):
         )
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.pk}/finish_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.pk}/finish_upload",
             data={"content_hash": "this_is_a_content_hash"},
         )
 
@@ -242,7 +242,7 @@ class TestErrorTracking(APIBaseTest):
                 # TODO - we could have the api validate these contents before uploading, if we wanted
                 data = {"source_map": image, "minified": image}
                 response = self.client.patch(
-                    f"/api/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.id}",
+                    f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.id}",
                     data,
                     format="multipart",
                 )
@@ -256,7 +256,7 @@ class TestErrorTracking(APIBaseTest):
             fake_big_file = SimpleUploadedFile(name="large_source.js.map", content=b"", content_type="text/plain")
             data = {"source_map": fake_big_file, "minified": fake_big_file}
             response = self.client.put(
-                f"/api/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.id}",
+                f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/{symbol_set.id}",
                 data,
                 format="multipart",
             )
@@ -279,7 +279,7 @@ class TestErrorTracking(APIBaseTest):
         self.assertEqual(ErrorTrackingSymbolSet.objects.count(), 3)
 
         # it only fetches symbol sets for the specified team
-        response = self.client.get(f"/api/environments/{self.team.id}/error_tracking/symbol_sets")
+        response = self.client.get(f"/v1/environments/{self.team.id}/error_tracking/symbol_sets")
         self.assertEqual(len(response.json()["results"]), 2)
 
     def test_fetching_stack_frames(self):
@@ -299,20 +299,20 @@ class TestErrorTracking(APIBaseTest):
         self.assertEqual(ErrorTrackingStackFrame.objects.count(), 3)
 
         # it only fetches stack traces for the specified team
-        response = self.client.post(f"/api/environments/{self.team.id}/error_tracking/stack_frames/batch_get")
+        response = self.client.post(f"/v1/environments/{self.team.id}/error_tracking/stack_frames/batch_get")
         self.assertEqual(len(response.json()["results"]), 2)
 
         # fetching can be filtered by raw_ids
         data = {"raw_ids": ["raw_id"]}
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/stack_frames/batch_get", data=data
+            f"/v1/environments/{self.team.id}/error_tracking/stack_frames/batch_get", data=data
         )
         self.assertEqual(len(response.json()["results"]), 1)
 
         # fetching can be filtered by symbol set
         data = {"symbol_set": symbol_set.id}
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/stack_frames/batch_get", data=data
+            f"/v1/environments/{self.team.id}/error_tracking/stack_frames/batch_get", data=data
         )
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["symbol_set_ref"], symbol_set.ref)
@@ -322,7 +322,7 @@ class TestErrorTracking(APIBaseTest):
 
         self.assertEqual(ErrorTrackingIssueAssignment.objects.count(), 0)
         self.client.patch(
-            f"/api/environments/{self.team.id}/error_tracking/issues/{issue.id}/assign",
+            f"/v1/environments/{self.team.id}/error_tracking/issues/{issue.id}/assign",
             data={"assignee": {"id": self.user.id, "type": "user"}},
         )
         # assigns the issue
@@ -358,7 +358,7 @@ class TestErrorTracking(APIBaseTest):
         )
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/error_tracking/issues/{issue.id}/assign",
+            f"/v1/environments/{self.team.id}/error_tracking/issues/{issue.id}/assign",
             data={"assignee": None},
         )
         # deletes the assignment
@@ -366,7 +366,7 @@ class TestErrorTracking(APIBaseTest):
 
         other_team = self.create_team_with_organization(organization=self.organization)
         response = self.client.patch(
-            f"/api/environments/{other_team.id}/error_tracking/issues/{issue.id}/assign",
+            f"/v1/environments/{other_team.id}/error_tracking/issues/{issue.id}/assign",
             data={"assignee": None},
         )
         # cannot assign issues from other teams
@@ -380,7 +380,7 @@ class TestErrorTracking(APIBaseTest):
         self.assertEqual(issue_two.status, ErrorTrackingIssue.Status.ACTIVE)
 
         self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/issues/bulk",
+            f"/v1/environments/{self.team.id}/error_tracking/issues/bulk",
             data={"ids": [issue_one.id, issue_two.id], "action": "set_status", "status": "resolved"},
         )
 
@@ -399,7 +399,7 @@ class TestErrorTracking(APIBaseTest):
         role.members.set([self.user])
 
         self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/issues/bulk",
+            f"/v1/environments/{self.team.id}/error_tracking/issues/bulk",
             data={
                 "ids": [issue_one.id, issue_two.id],
                 "action": "assign",
@@ -416,7 +416,7 @@ class TestErrorTracking(APIBaseTest):
         chunk_id_one = uuid7()
         chunk_id_two = uuid7()
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={"chunk_ids": [chunk_id_one, chunk_id_two]},
         )
         response_json = response.json()
@@ -449,7 +449,7 @@ class TestErrorTracking(APIBaseTest):
         new_chunk_id = str(uuid7())
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={
                 "symbol_sets": [
                     {
@@ -491,7 +491,7 @@ class TestErrorTracking(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={"chunk_ids": [existing_chunk_id]},
         )
 
@@ -502,7 +502,7 @@ class TestErrorTracking(APIBaseTest):
         missing_release_id = str(uuid7())
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={
                 "symbol_sets": [
                     {
@@ -520,7 +520,7 @@ class TestErrorTracking(APIBaseTest):
 
     def test_bulk_start_upload_allows_no_release(self) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={
                 "symbol_sets": [
                     {
@@ -550,7 +550,7 @@ class TestErrorTracking(APIBaseTest):
         chunk_id = str(uuid7())
 
         initial_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={"chunk_ids": [chunk_id]},
             format="json",
         )
@@ -568,7 +568,7 @@ class TestErrorTracking(APIBaseTest):
         )
 
         updated_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={
                 "symbol_sets": [
                     {
@@ -609,7 +609,7 @@ class TestErrorTracking(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={
                 "symbol_sets": [
                     {
@@ -634,7 +634,7 @@ class TestErrorTracking(APIBaseTest):
         chunk_id = str(uuid7())
 
         first_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={"chunk_ids": [chunk_id]},
             format="json",
         )
@@ -645,7 +645,7 @@ class TestErrorTracking(APIBaseTest):
         initial_storage_ptr = symbol_set.storage_ptr
 
         second_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={"chunk_ids": [chunk_id]},
             format="json",
         )
@@ -682,7 +682,7 @@ class TestErrorTracking(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_start_upload",
             data={
                 "symbol_sets": [
                     {
@@ -712,7 +712,7 @@ class TestErrorTracking(APIBaseTest):
         patched_object_storage.return_value = {"ContentLength": 1000}  # 1KB
 
         self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/symbol_sets/bulk_finish_upload",
+            f"/v1/environments/{self.team.id}/error_tracking/symbol_sets/bulk_finish_upload",
             data={"content_hashes": {str(symbol_set_one.id): "hash_one", str(symbol_set_two.id): "hash_two"}},
         )
 
@@ -728,7 +728,7 @@ class TestErrorTracking(APIBaseTest):
     def _get_error_tracking_issue_activity(
         self, error_tracking_issue_id: int, expected_status: int = status.HTTP_200_OK
     ) -> dict:
-        url = f"/api/environments/{self.team.id}/error_tracking/issues/{error_tracking_issue_id}/activity"
+        url = f"/v1/environments/{self.team.id}/error_tracking/issues/{error_tracking_issue_id}/activity"
         activity = self.client.get(url)
         self.assertEqual(activity.status_code, expected_status)
         return activity.json()
@@ -742,7 +742,7 @@ class TestErrorTracking(APIBaseTest):
             metadata={"commit": "abc123"},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/error_tracking/releases/hash/{release.hash_id}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/error_tracking/releases/hash/{release.hash_id}")
         assert response.status_code == status.HTTP_200_OK
 
         response_json = response.json()
@@ -753,5 +753,5 @@ class TestErrorTracking(APIBaseTest):
         assert response_json["metadata"] == {"commit": "abc123"}
 
     def test_fetch_release_by_hash_id_not_found(self) -> None:
-        response = self.client.get(f"/api/environments/{self.team.id}/error_tracking/releases/hash/nonexistent-hash")
+        response = self.client.get(f"/v1/environments/{self.team.id}/error_tracking/releases/hash/nonexistent-hash")
         assert response.status_code == status.HTTP_404_NOT_FOUND

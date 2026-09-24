@@ -66,7 +66,7 @@ class PublicInsightsFunctionTemplateViewSet(
             # Don't include deprecated templates when listing
             queryset = queryset.exclude(status="deprecated")
 
-        if self.request.path.startswith("/api/public_insights_function_templates"):
+        if self.request.path.startswith("/v1/public_insights_function_templates"):
             queryset = queryset.exclude(status="hidden")
 
         return queryset

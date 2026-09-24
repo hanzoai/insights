@@ -20,7 +20,7 @@ from products.data_warehouse.backend.types import DataWarehouseManagedViewSetKin
 class TestSavedQuery(APIBaseTest):
     def test_create(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -50,7 +50,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_upsert(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -62,7 +62,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -76,7 +76,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_materialize_view(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -98,7 +98,7 @@ class TestSavedQuery(APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/materialize",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/materialize",
             )
 
             assert response.status_code == 200
@@ -111,7 +111,7 @@ class TestSavedQuery(APIBaseTest):
     def test_materialize_action_idempotent(self):
         """Test that the materialize action is idempotent and can be called multiple times"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -134,7 +134,7 @@ class TestSavedQuery(APIBaseTest):
         ):
             # First call to materialize
             response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/materialize",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/materialize",
             )
 
             assert response.status_code == 200
@@ -157,7 +157,7 @@ class TestSavedQuery(APIBaseTest):
         ):
             # Second call to materialize - should be idempotent
             response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/materialize",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/materialize",
             )
 
             assert response.status_code == 200
@@ -187,7 +187,7 @@ class TestSavedQuery(APIBaseTest):
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}/materialize",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}/materialize",
             )
 
             assert response.status_code == 400
@@ -196,7 +196,7 @@ class TestSavedQuery(APIBaseTest):
     def test_create_with_types(self):
         with patch.object(DataWarehouseSavedQuery, "get_columns") as mock_get_columns:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
                 {
                     "name": "event_view",
                     "query": {
@@ -225,7 +225,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_create_name_overlap_error(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "events",
                 "query": {
@@ -238,7 +238,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_create_using_placeholders(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "test_1",
                 "query": {
@@ -254,7 +254,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_create_using_placeholders_foo_variable(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "test_1",
                 "query": {
@@ -270,7 +270,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_create_using_placeholders_custom_expr(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "test_1",
                 "query": {
@@ -292,7 +292,7 @@ class TestSavedQuery(APIBaseTest):
             "products.data_warehouse.backend.data_load.saved_query_service.delete_saved_query_schedule"
         ) as mock_delete_saved_query_schedule:
             response = self.client.delete(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
             )
 
             mock_delete_saved_query_schedule.assert_called()
@@ -326,7 +326,7 @@ class TestSavedQuery(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
         )
 
         assert response.status_code == 200
@@ -346,7 +346,7 @@ class TestSavedQuery(APIBaseTest):
             )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
         )
 
         assert response.status_code == 200
@@ -367,7 +367,7 @@ class TestSavedQuery(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{query.id}",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{query.id}",
         )
 
         assert response.status_code == 404
@@ -375,7 +375,7 @@ class TestSavedQuery(APIBaseTest):
     def test_update_sync_frequency_with_existing_schedule(self):
         """Test that updating sync_frequency via PATCH only sets the interval"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -388,7 +388,7 @@ class TestSavedQuery(APIBaseTest):
         saved_query = response.json()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
             {"sync_frequency": "24hour"},
         )
 
@@ -400,7 +400,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_update_sync_frequency_to_never(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -422,7 +422,7 @@ class TestSavedQuery(APIBaseTest):
             ) as mock_pause_saved_query_schedule,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {"sync_frequency": "never"},
             )
             self.assertEqual(response.status_code, 200)
@@ -433,7 +433,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_update_with_types(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/projects/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -447,7 +447,7 @@ class TestSavedQuery(APIBaseTest):
 
         with patch.object(DataWarehouseSavedQuery, "get_columns") as mock_get_columns:
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
+                f"/v1/projects/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "name": "event_view",
                     "query": {
@@ -462,7 +462,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_delete_with_existing_schedule(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -479,7 +479,7 @@ class TestSavedQuery(APIBaseTest):
             "products.data_warehouse.backend.data_load.saved_query_service.delete_saved_query_schedule"
         ) as mock_delete_saved_query_schedule:
             response = self.client.delete(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}",
             )
 
             self.assertEqual(response.status_code, 204)
@@ -487,7 +487,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_saved_query_doesnt_exist(self):
         saved_query_1_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -500,7 +500,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_view_updated(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -512,7 +512,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(response.status_code, 201, response.content)
         saved_query_1_response = response.json()
         saved_query_1_response = self.client.patch(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/" + saved_query_1_response["id"],
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/" + saved_query_1_response["id"],
             {
                 "query": {
                     "kind": "InsightsQLQuery",
@@ -542,7 +542,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_nested_view(self):
         saved_query_1_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -554,7 +554,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(saved_query_1_response.status_code, 201, saved_query_1_response.content)
 
         saved_view_2_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "outer_event_view",
                 "query": {
@@ -567,7 +567,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_create_with_saved_query(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -585,7 +585,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_create_with_nested_saved_query(self):
         response_1 = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -597,7 +597,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(response_1.status_code, 201, response_1.content)
 
         response_2 = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view_2",
                 "query": {
@@ -628,7 +628,7 @@ class TestSavedQuery(APIBaseTest):
         """
 
         response_parent = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -639,7 +639,7 @@ class TestSavedQuery(APIBaseTest):
         )
 
         response_child = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view_2",
                 "query": {
@@ -654,7 +654,7 @@ class TestSavedQuery(APIBaseTest):
 
         saved_query_parent_id = response_parent.json()["id"]
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_parent_id}/ancestors",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_parent_id}/ancestors",
         )
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -664,7 +664,7 @@ class TestSavedQuery(APIBaseTest):
 
         saved_query_child_id = response_child.json()["id"]
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/ancestors",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/ancestors",
         )
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -673,7 +673,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(child_ancestors, sorted([saved_query_parent_id, "events", "persons"]))
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/ancestors", {"level": 1}
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/ancestors", {"level": 1}
         )
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -682,7 +682,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(child_ancestors_level_1, [saved_query_parent_id])
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/ancestors", {"level": 2}
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/ancestors", {"level": 2}
         )
         self.assertEqual(response.status_code, 200, response.content)
         child_ancestors_level_2 = response.json()["ancestors"]
@@ -690,7 +690,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(child_ancestors_level_2, sorted([saved_query_parent_id, "events", "persons"]))
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/ancestors", {"level": 10}
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/ancestors", {"level": 10}
         )
         self.assertEqual(response.status_code, 200, response.content)
         child_ancestors_level_10 = response.json()["ancestors"]
@@ -708,7 +708,7 @@ class TestSavedQuery(APIBaseTest):
         """
 
         response_parent = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -719,7 +719,7 @@ class TestSavedQuery(APIBaseTest):
         )
 
         response_child = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view_2",
                 "query": {
@@ -730,7 +730,7 @@ class TestSavedQuery(APIBaseTest):
         )
 
         response_grand_child = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view_3",
                 "query": {
@@ -748,7 +748,7 @@ class TestSavedQuery(APIBaseTest):
         saved_query_child_id = response_child.json()["id"]
         saved_query_grand_child_id = response_grand_child.json()["id"]
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_parent_id}/descendants",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_parent_id}/descendants",
         )
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -759,7 +759,7 @@ class TestSavedQuery(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_parent_id}/descendants",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_parent_id}/descendants",
             {"level": 1},
         )
 
@@ -771,7 +771,7 @@ class TestSavedQuery(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_parent_id}/descendants",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_parent_id}/descendants",
             {"level": 2},
         )
 
@@ -783,7 +783,7 @@ class TestSavedQuery(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/descendants",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_child_id}/descendants",
         )
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -791,7 +791,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(child_ancestors, [saved_query_grand_child_id])
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_grand_child_id}/descendants",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_grand_child_id}/descendants",
         )
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -801,7 +801,7 @@ class TestSavedQuery(APIBaseTest):
     def test_update_without_query_change_doesnt_call_get_columns(self):
         # First create a saved query
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -816,7 +816,7 @@ class TestSavedQuery(APIBaseTest):
         # Now update it without changing the query
         with patch.object(DataWarehouseSavedQuery, "get_columns") as mock_get_columns:
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {"name": "updated_event_view"},  # Only changing the name, not the query
             )
 
@@ -830,7 +830,7 @@ class TestSavedQuery(APIBaseTest):
     def test_update_with_query_change_calls_get_columns(self):
         # First create a saved query
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -846,7 +846,7 @@ class TestSavedQuery(APIBaseTest):
         with patch.object(DataWarehouseSavedQuery, "get_columns") as mock_get_columns:
             mock_get_columns.return_value = {}
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "query": {
                         "kind": "InsightsQLQuery",
@@ -863,7 +863,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_create_with_activity_log(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -881,7 +881,7 @@ class TestSavedQuery(APIBaseTest):
         with patch.object(DataWarehouseSavedQuery, "get_columns") as mock_get_columns:
             mock_get_columns.return_value = {}
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "query": {
                         "kind": "InsightsQLQuery",
@@ -926,7 +926,7 @@ class TestSavedQuery(APIBaseTest):
 
             # this should fail because the activity log has changed
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "query": {
                         "kind": "InsightsQLQuery",
@@ -941,7 +941,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_create_with_activity_log_existing_view(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -961,7 +961,7 @@ class TestSavedQuery(APIBaseTest):
         with patch.object(DataWarehouseSavedQuery, "get_columns") as mock_get_columns:
             mock_get_columns.return_value = {}
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "query": {
                         "kind": "InsightsQLQuery",
@@ -975,7 +975,7 @@ class TestSavedQuery(APIBaseTest):
 
     def test_revert_materialization(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -1009,7 +1009,7 @@ class TestSavedQuery(APIBaseTest):
             patch("products.data_warehouse.backend.data_load.saved_query_service.sync_connect"),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/revert_materialization",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/revert_materialization",
             )
 
             self.assertEqual(response.status_code, 200, response.content)
@@ -1040,7 +1040,7 @@ class TestSavedQuery(APIBaseTest):
             team=self.team, name="some_event_table", format="Parquet", url_pattern="s3://bucket/path"
         )
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "some_event_table",
                 "query": {
@@ -1069,7 +1069,7 @@ class TestSavedQuery(APIBaseTest):
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
                 {
                     "name": "updated_managed_view",
                     "query": {
@@ -1099,7 +1099,7 @@ class TestSavedQuery(APIBaseTest):
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
             response = self.client.delete(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}",
             )
 
             self.assertEqual(response.status_code, 400)
@@ -1125,7 +1125,7 @@ class TestSavedQuery(APIBaseTest):
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}/revert_materialization",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query.id}/revert_materialization",
             )
 
             self.assertEqual(response.status_code, 400)
@@ -1136,7 +1136,7 @@ class TestSavedQuery(APIBaseTest):
     def test_dependencies_no_dependencies(self):
         """Test dependencies endpoint returns zero counts for a view with no dependencies"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "simple_view",
                 "query": {
@@ -1150,7 +1150,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Test dependencies endpoint
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/dependencies",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/dependencies",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -1161,7 +1161,7 @@ class TestSavedQuery(APIBaseTest):
         """Test dependencies endpoint correctly counts immediate dependencies"""
         # Create parent view
         response_parent = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "parent_view",
                 "query": {
@@ -1175,7 +1175,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Create child view that depends on parent
         response_child = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "child_view",
                 "query": {
@@ -1189,7 +1189,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Create grandchild view that depends on child
         response_grandchild = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "grandchild_view",
                 "query": {
@@ -1203,7 +1203,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Test parent dependencies (should have downstream but no upstream saved queries)
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{parent_id}/dependencies",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{parent_id}/dependencies",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -1212,7 +1212,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Test child dependencies (should have both upstream and downstream)
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{child_id}/dependencies",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{child_id}/dependencies",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -1221,7 +1221,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Test grandchild dependencies (should have upstream but no downstream)
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{grandchild_id}/dependencies",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{grandchild_id}/dependencies",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -1231,7 +1231,7 @@ class TestSavedQuery(APIBaseTest):
     def test_run_history_no_runs(self):
         """Test run_history endpoint returns empty array for a view with no runs"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "view_no_runs",
                 "query": {
@@ -1245,7 +1245,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Test run_history endpoint
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/run_history",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/run_history",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -1255,7 +1255,7 @@ class TestSavedQuery(APIBaseTest):
         """Test run_history endpoint returns correct run history"""
         # Create a materialized view
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "materialized_view",
                 "query": {
@@ -1287,7 +1287,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Test run_history endpoint
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/run_history",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/run_history",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -1308,7 +1308,7 @@ class TestSavedQuery(APIBaseTest):
     def test_run_history_mixed_statuses(self):
         """Test run_history endpoint with various run statuses"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "mixed_status_view",
                 "query": {
@@ -1343,7 +1343,7 @@ class TestSavedQuery(APIBaseTest):
 
         # Test run_history endpoint
         response = self.client.get(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/run_history",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/run_history",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()

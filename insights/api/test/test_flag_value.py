@@ -15,7 +15,7 @@ class TestFlagValueViewSet(APIBaseTest):
             filters={"groups": [{"rollout_percentage": 100}]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -39,7 +39,7 @@ class TestFlagValueViewSet(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -53,7 +53,7 @@ class TestFlagValueViewSet(APIBaseTest):
 
     def test_flag_values_missing_key_parameter(self):
         """Test that missing key parameter returns 400."""
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         data = response.json()
@@ -61,7 +61,7 @@ class TestFlagValueViewSet(APIBaseTest):
 
     def test_flag_values_invalid_key_parameter(self):
         """Test that invalid key parameter returns 400."""
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values?key=invalid")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values?key=invalid")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         data = response.json()
@@ -69,7 +69,7 @@ class TestFlagValueViewSet(APIBaseTest):
 
     def test_flag_values_nonexistent_flag(self):
         """Test that nonexistent flag returns 404."""
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values?key=99999")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values?key=99999")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         data = response.json()
@@ -89,7 +89,7 @@ class TestFlagValueViewSet(APIBaseTest):
             filters={"groups": [{"rollout_percentage": 100}]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values?key={other_flag.id}")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values?key={other_flag.id}")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         data = response.json()
@@ -105,7 +105,7 @@ class TestFlagValueViewSet(APIBaseTest):
             deleted=True,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         data = response.json()
@@ -123,7 +123,7 @@ class TestFlagValueViewSet(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -148,7 +148,7 @@ class TestFlagValueViewSet(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
+        response = self.client.get(f"/v1/projects/{self.team.project_id}/flag_value/values?key={flag.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()

@@ -16,7 +16,7 @@ class TestInstanceSettings(APIBaseTest):
         self.user.save()
 
     def test_list_instance_settings(self):
-        response = self.client.get(f"/api/instance_settings/")
+        response = self.client.get(f"/v1/instance_settings/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
 
@@ -32,7 +32,7 @@ class TestInstanceSettings(APIBaseTest):
                 self.assertEqual(item["value"], "")
 
     def test_can_retrieve_setting(self):
-        response = self.client.get(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
+        response = self.client.get(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
 
@@ -46,7 +46,7 @@ class TestInstanceSettings(APIBaseTest):
         self.assertEqual(json_response["editable"], True)
 
     def test_retrieve_secret_setting(self):
-        response = self.client.get(f"/api/instance_settings/EMAIL_HOST_PASSWORD")
+        response = self.client.get(f"/v1/instance_settings/EMAIL_HOST_PASSWORD")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
 
@@ -57,7 +57,7 @@ class TestInstanceSettings(APIBaseTest):
 
         # When a value is set, the value is never exposed again
         with override_instance_config("EMAIL_HOST_PASSWORD", "this_is_a_secret_sssshhh"):
-            response = self.client.get(f"/api/instance_settings/EMAIL_HOST_PASSWORD")
+            response = self.client.get(f"/v1/instance_settings/EMAIL_HOST_PASSWORD")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
 
@@ -69,14 +69,14 @@ class TestInstanceSettings(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.get(f"/api/instance_settings/")
+        response = self.client.get(f"/v1/instance_settings/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
             self.permission_denied_response("You are not a staff user, contact your instance admin."),
         )
 
-        response = self.client.get(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
+        response = self.client.get(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -84,11 +84,11 @@ class TestInstanceSettings(APIBaseTest):
         )
 
     def test_update_setting(self):
-        response = self.client.get(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
+        response = self.client.get(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["value"], False)
 
-        response = self.client.patch(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
+        response = self.client.patch(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["value"], True)
 
@@ -99,7 +99,7 @@ class TestInstanceSettings(APIBaseTest):
         set_instance_setting("EMAIL_HOST", "localhost")
         with self.settings(SITE_URL="http://localhost:8000", CELERY_TASK_ALWAYS_EAGER=True):
             response = self.client.patch(
-                f"/api/instance_settings/EMAIL_DEFAULT_FROM",
+                f"/v1/instance_settings/EMAIL_DEFAULT_FROM",
                 {"value": "hellohello@hanzo.ai"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -116,7 +116,7 @@ class TestInstanceSettings(APIBaseTest):
 
     def test_update_integer_setting(self):
         response = self.client.patch(
-            f"/api/instance_settings/ASYNC_MIGRATIONS_ROLLBACK_TIMEOUT",
+            f"/v1/instance_settings/ASYNC_MIGRATIONS_ROLLBACK_TIMEOUT",
             {"value": 48343943943},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -124,7 +124,7 @@ class TestInstanceSettings(APIBaseTest):
         self.assertEqual(get_instance_setting("ASYNC_MIGRATIONS_ROLLBACK_TIMEOUT"), 48343943943)
 
     def test_cant_update_setting_that_is_not_overridable(self):
-        response = self.client.patch(f"/api/instance_settings/MATERIALIZED_COLUMNS_ENABLED", {"value": False})
+        response = self.client.patch(f"/v1/instance_settings/MATERIALIZED_COLUMNS_ENABLED", {"value": False})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -141,7 +141,7 @@ class TestInstanceSettings(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.get(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
+        response = self.client.get(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),

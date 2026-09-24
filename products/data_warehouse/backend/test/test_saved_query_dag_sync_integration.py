@@ -14,7 +14,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
 
     def test_create_saved_query_syncs_to_dag(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "dag_sync_create_test",
                 "query": {
@@ -38,7 +38,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
     def test_update_saved_query_syncs_to_dag(self):
         # create
         create_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "dag_sync_update_test",
                 "query": {
@@ -54,7 +54,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
 
         # update
         update_response = self.client.patch(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/",
             {
                 "name": "dag_sync_update_test_renamed",
                 "query": {
@@ -75,7 +75,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
     def test_delete_saved_query_removes_from_dag(self):
         # create
         create_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "dag_sync_delete_test",
                 "query": {
@@ -91,7 +91,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
 
         # delete
         delete_response = self.client.delete(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/"
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/"
         )
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Node.objects.filter(saved_query_id=saved_query_id).exists())
@@ -101,7 +101,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
     def test_materialize_updates_node_type(self, _mock_workflow_exists, _mock_sync_workflow):
         # create
         create_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "dag_sync_materialize_test",
                 "query": {
@@ -118,7 +118,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
 
         # materialize
         materialize_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/materialize/"
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/materialize/"
         )
         self.assertEqual(materialize_response.status_code, status.HTTP_200_OK)
         node.refresh_from_db()
@@ -128,7 +128,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
     def test_revert_materialization_updates_node_type(self, _mock_workflow_exists):
         # create materialized
         create_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "dag_sync_revert_test",
                 "query": {
@@ -153,7 +153,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
         # revert materialization
         with patch("products.data_warehouse.backend.data_load.saved_query_service.delete_saved_query_schedule"):
             revert_response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/revert_materialization/"
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/{saved_query_id}/revert_materialization/"
             )
         self.assertEqual(revert_response.status_code, status.HTTP_200_OK)
         node.refresh_from_db()
@@ -166,7 +166,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
             side_effect=Exception("DAG sync failed"),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
                 {
                     "name": "dag_sync_failure_test",
                     "query": {

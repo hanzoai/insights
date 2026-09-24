@@ -18,7 +18,7 @@ class TestUserProductListAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/user_product_list/update_by_path/",
+            f"/v1/environments/{self.team.id}/user_product_list/update_by_path/",
             {"product_path": "Product analytics", "enabled": True},
         )
 
@@ -39,7 +39,7 @@ class TestUserProductListAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/user_product_list/update_by_path/",
+            f"/v1/environments/{self.team.id}/user_product_list/update_by_path/",
             {"product_path": "Product analytics", "enabled": True},
         )
 
@@ -60,7 +60,7 @@ class TestUserProductListAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/user_product_list/update_by_path/",
+            f"/v1/environments/{self.team.id}/user_product_list/update_by_path/",
             {"product_path": "Product analytics", "enabled": False},
         )
 
@@ -90,7 +90,7 @@ class TestUserProductListAPI(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization, name="Other Team")
         UserProductList.objects.create(user=self.user, team=other_team, product_path="Surveys", enabled=True)
 
-        response = self.client.post(f"/api/environments/{self.team.id}/user_product_list/seed/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/user_product_list/seed/")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
@@ -127,7 +127,7 @@ class TestUserProductListAPI(APIBaseTest):
             reason=UserProductList.Reason.USED_BY_COLLEAGUES,
         )
 
-        response = self.client.post(f"/api/environments/{self.team.id}/user_product_list/seed/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/user_product_list/seed/")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()

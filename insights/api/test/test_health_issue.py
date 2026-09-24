@@ -9,7 +9,7 @@ from insights.models.team import Team
 
 class TestHealthIssueAPI(APIBaseTest):
     def _url(self, path: str = "") -> str:
-        return f"/api/environments/{self.team.id}/health_issues{path}"
+        return f"/v1/environments/{self.team.id}/health_issues{path}"
 
     def _create_issue(self, **kwargs) -> HealthIssue:
         defaults = {

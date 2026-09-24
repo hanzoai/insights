@@ -49,7 +49,7 @@ class TestSignupAPI(APIBaseTest):
         Organization.objects.create(name="Insights Internal Metrics", for_internal_metrics=True)
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "John",
                 "last_name": "Doe",
@@ -108,7 +108,7 @@ class TestSignupAPI(APIBaseTest):
         self.assertEqual(event_props["realm"], get_instance_realm())
 
         # Assert that the user is logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], "mascot@hanzo.ai")
 
@@ -119,7 +119,7 @@ class TestSignupAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_api_sign_up_with_ai_referral_source(self, mock_capture):
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "John",
                 "email": "mascot2@hanzo.ai",
@@ -146,7 +146,7 @@ class TestSignupAPI(APIBaseTest):
         Organization.objects.create(name="Insights Internal Metrics", for_internal_metrics=True)
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "John",
                 "last_name": "Doe",
@@ -176,7 +176,7 @@ class TestSignupAPI(APIBaseTest):
         )
 
         # Assert that the user is logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         mock_is_email_available.assert_called()
@@ -196,7 +196,7 @@ class TestSignupAPI(APIBaseTest):
         Organization.objects.create(name="Insights Internal Metrics", for_internal_metrics=True)
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "John",
                 "last_name": "Doe",
@@ -228,7 +228,7 @@ class TestSignupAPI(APIBaseTest):
         mock_verification_disabled.assert_called()
         mock_email_verifier.assert_not_called()
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @pytest.mark.skip_on_multitenancy
@@ -237,7 +237,7 @@ class TestSignupAPI(APIBaseTest):
         User.objects.create(email="fake@hanzo.ai", first_name="Jane")
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "John",
                 "email": "fake@hanzo.ai",
@@ -273,7 +273,7 @@ class TestSignupAPI(APIBaseTest):
         for email_variation in test_email_variations:
             with self.subTest(email=email_variation):
                 response = self.client.post(
-                    "/api/signup/",
+                    "/v1/signup/",
                     {
                         "first_name": "John",
                         "email": email_variation,
@@ -304,7 +304,7 @@ class TestSignupAPI(APIBaseTest):
         initial_user_count = User.objects.count()
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "Test",
                 "last_name": "User",
@@ -330,7 +330,7 @@ class TestSignupAPI(APIBaseTest):
     def test_signup_disallowed_on_self_hosted_by_default(self):
         with self.is_cloud(False), self.settings(DEBUG=False):
             response = self.client.post(
-                "/api/signup/",
+                "/v1/signup/",
                 {
                     "first_name": "Jane",
                     "email": "mascot2@hanzo.ai",
@@ -341,7 +341,7 @@ class TestSignupAPI(APIBaseTest):
             # Use a different email to ensure we're testing permission denial,
             # not email uniqueness validation
             response = self.client.post(
-                "/api/signup/",
+                "/v1/signup/",
                 {
                     "first_name": "Jane",
                     "email": "mascot3@hanzo.ai",
@@ -368,7 +368,7 @@ class TestSignupAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_signup_minimum_attrs(self, mock_capture):
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "Jane",
                 "email": "mascot2@hanzo.ai",
@@ -416,7 +416,7 @@ class TestSignupAPI(APIBaseTest):
         self.assertEqual(event_props["realm"], get_instance_realm())
 
         # Assert that the user is logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], "mascot2@hanzo.ai")
 
@@ -439,7 +439,7 @@ class TestSignupAPI(APIBaseTest):
             body.pop(attribute)
 
             # Make sure the endpoint works with and without the trailing slash
-            response = self.client.post("/api/signup", body)
+            response = self.client.post("/v1/signup", body)
             self.assertEqual(
                 response.status_code,
                 status.HTTP_400_BAD_REQUEST,
@@ -475,7 +475,7 @@ class TestSignupAPI(APIBaseTest):
             }
             body[attribute] = None
 
-            response = self.client.post("/api/signup/", body)
+            response = self.client.post("/v1/signup/", body)
             self.assertEqual(
                 response.status_code,
                 status.HTTP_400_BAD_REQUEST,
@@ -501,7 +501,7 @@ class TestSignupAPI(APIBaseTest):
         team_count: int = Team.objects.count()
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {"first_name": "Jane", "email": "failed@hanzo.ai", "password": "123"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -530,7 +530,7 @@ class TestSignupAPI(APIBaseTest):
 
         for password, detail in cases:
             res = self.client.post(
-                "/api/signup/",
+                "/v1/signup/",
                 {"first_name": "Jane", "email": "failed@hanzo.ai", "password": password},
             )
             assert res.status_code == status.HTTP_400_BAD_REQUEST, res.json()
@@ -548,7 +548,7 @@ class TestSignupAPI(APIBaseTest):
         """
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "Jane",
                 "email": "mascot75@hanzo.ai",
@@ -1038,7 +1038,7 @@ class TestSignupAPI(APIBaseTest):
 
     def test_api_sign_up_preserves_next_param(self):
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "John",
                 "email": "mascot@hanzo.ai",
@@ -1073,7 +1073,7 @@ class TestSignupAPI(APIBaseTest):
 
         for i in range(6):
             response = self.client.post(
-                "/api/signup/",
+                "/v1/signup/",
                 {
                     "first_name": f"User{i}",
                     "email": f"user{i}@example.com",
@@ -1107,7 +1107,7 @@ class TestSignupAPI(APIBaseTest):
             with patch("insights.utils.get_ip_address", return_value=ip):
                 for i in range(5):
                     response = self.client.post(
-                        "/api/signup/",
+                        "/v1/signup/",
                         {
                             "first_name": f"User{ip_suffix}_{i}",
                             "email": f"user{ip_suffix}_{i}@example.com",
@@ -1170,7 +1170,7 @@ class TestPasskeySignupAPI(APIBaseTest):
 
         # Complete signup (without password since using passkey)
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "Passkey",
                 "last_name": "User",
@@ -1230,7 +1230,7 @@ class TestPasskeySignupAPI(APIBaseTest):
         self.client.cookies["sessionid"] = session_key or ""
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "Cleanup",
                 "last_name": "Test",
@@ -1254,7 +1254,7 @@ class TestPasskeySignupAPI(APIBaseTest):
         (not using any session data).
         """
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "Password",
                 "last_name": "User",
@@ -1286,7 +1286,7 @@ class TestPasskeySignupAPI(APIBaseTest):
         count = User.objects.count()
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "No",
                 "last_name": "Password",
@@ -1314,7 +1314,7 @@ class TestPasskeySignupAPI(APIBaseTest):
         count = User.objects.count()
 
         response = self.client.post(
-            "/api/signup/",
+            "/v1/signup/",
             {
                 "first_name": "No",
                 "last_name": "Password",
@@ -1351,7 +1351,7 @@ class TestInviteSignupAPI(APIBaseTest):
             target_email="test+19@hanzo.ai", organization=self.organization
         )
 
-        response = self.client.get(f"/api/signup/{invite.id}/")
+        response = self.client.get(f"/v1/signup/{invite.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(),
@@ -1370,7 +1370,7 @@ class TestInviteSignupAPI(APIBaseTest):
             first_name="Jane",
         )
 
-        response = self.client.get(f"/api/signup/{invite.id}/")
+        response = self.client.get(f"/v1/signup/{invite.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(),
@@ -1390,7 +1390,7 @@ class TestInviteSignupAPI(APIBaseTest):
         )
 
         self.client.force_login(user)
-        response = self.client.get(f"/api/signup/{invite.id}/")
+        response = self.client.get(f"/v1/signup/{invite.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json(),
@@ -1404,7 +1404,7 @@ class TestInviteSignupAPI(APIBaseTest):
 
     def test_api_invite_sign_up_prevalidate_invalid_invite(self):
         for invalid_invite in [uuid.uuid4(), "abc", "1234"]:
-            response = self.client.get(f"/api/signup/{invalid_invite}/")
+            response = self.client.get(f"/v1/signup/{invalid_invite}/")
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(
                 response.json(),
@@ -1423,7 +1423,7 @@ class TestInviteSignupAPI(APIBaseTest):
         )
 
         self.client.force_login(user)
-        response = self.client.get(f"/api/signup/{invite.id}/")
+        response = self.client.get(f"/v1/signup/{invite.id}/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1442,7 +1442,7 @@ class TestInviteSignupAPI(APIBaseTest):
         invite.created_at = datetime(2020, 12, 1, tzinfo=ZoneInfo("UTC"))
         invite.save()
 
-        response = self.client.get(f"/api/signup/{invite.id}/")
+        response = self.client.get(f"/v1/signup/{invite.id}/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1463,7 +1463,7 @@ class TestInviteSignupAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/signup/{invite.id}/",
+            f"/v1/signup/{invite.id}/",
             {
                 "first_name": "Alice",
                 "password": VALID_TEST_PASSWORD,
@@ -1525,7 +1525,7 @@ class TestInviteSignupAPI(APIBaseTest):
         self.assertEqual(event_props["realm"], get_instance_realm())
 
         # Assert that the user is logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], "test+99@hanzo.ai")
 
@@ -1552,7 +1552,7 @@ class TestInviteSignupAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/signup/{invite.id}/",
+            f"/v1/signup/{invite.id}/",
             {"first_name": "Alice", "password": VALID_TEST_PASSWORD},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -1590,7 +1590,7 @@ class TestInviteSignupAPI(APIBaseTest):
             organization=organization,
         )
         response = self.client.post(
-            f"/api/signup/{invite.id}/",
+            f"/v1/signup/{invite.id}/",
             {"first_name": "Charlie", "password": VALID_TEST_PASSWORD},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -1620,7 +1620,7 @@ class TestInviteSignupAPI(APIBaseTest):
             private_project_access=[{"id": private_project.id, "level": "admin"}],
         )
         response = self.client.post(
-            f"/api/signup/{invite.id}/",
+            f"/v1/signup/{invite.id}/",
             {"first_name": "Charlie", "password": VALID_TEST_PASSWORD},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -1663,7 +1663,7 @@ class TestInviteSignupAPI(APIBaseTest):
         assert not Team.objects.filter(pk=private_project.pk).exists()
 
         response = self.client.post(
-            f"/api/signup/{invite.id}/",
+            f"/v1/signup/{invite.id}/",
             {"first_name": "Charlie", "password": VALID_TEST_PASSWORD},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -1684,7 +1684,7 @@ class TestInviteSignupAPI(APIBaseTest):
             SITE_URL="http://test.hanzo.ai",
         ):
             response = self.client.post(
-                f"/api/signup/{invite.id}/",
+                f"/v1/signup/{invite.id}/",
                 {
                     "first_name": "Alice",
                     "password": VALID_TEST_PASSWORD,
@@ -1705,7 +1705,7 @@ class TestInviteSignupAPI(APIBaseTest):
 
             with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
                 response = self.client.post(
-                    f"/api/signup/{invite.id}/",
+                    f"/v1/signup/{invite.id}/",
                     {
                         "first_name": "Alice",
                         "password": VALID_TEST_PASSWORD,
@@ -1736,7 +1736,7 @@ class TestInviteSignupAPI(APIBaseTest):
             SITE_URL="http://test.hanzo.ai",
         ):
             response = self.client.post(
-                f"/api/signup/{invite.id}/",
+                f"/v1/signup/{invite.id}/",
                 {
                     "first_name": "Alice",
                     "password": VALID_TEST_PASSWORD,
@@ -1764,7 +1764,7 @@ class TestInviteSignupAPI(APIBaseTest):
         count = User.objects.count()
 
         with self.is_cloud(True):
-            response = self.client.post(f"/api/signup/{invite.id}/")
+            response = self.client.post(f"/v1/signup/{invite.id}/")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
             response.json(),
@@ -1815,7 +1815,7 @@ class TestInviteSignupAPI(APIBaseTest):
         )
 
         # Assert that the user remains logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Assert that the org's distinct IDs are sent to billing
@@ -1840,7 +1840,7 @@ class TestInviteSignupAPI(APIBaseTest):
         self.client.force_login(user)
 
         response = self.client.post(
-            f"/api/signup/{invite.id}/",
+            f"/v1/signup/{invite.id}/",
             {"first_name": "Bob", "password": VALID_TEST_PASSWORD + "_new"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -1897,7 +1897,7 @@ class TestInviteSignupAPI(APIBaseTest):
             body = {"first_name": "Charlie", "password": VALID_TEST_PASSWORD}
             body.pop(attribute)
 
-            response = self.client.post(f"/api/signup/{invite.id}/", body)
+            response = self.client.post(f"/v1/signup/{invite.id}/", body)
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(
                 response.json(),
@@ -1922,7 +1922,7 @@ class TestInviteSignupAPI(APIBaseTest):
             target_email="test+799@hanzo.ai", organization=self.organization
         )
 
-        response = self.client.post(f"/api/signup/{invite.id}/", {"first_name": "Charlie", "password": "123"})
+        response = self.client.post(f"/v1/signup/{invite.id}/", {"first_name": "Charlie", "password": "123"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1944,7 +1944,7 @@ class TestInviteSignupAPI(APIBaseTest):
         org_count: int = Organization.objects.count()
 
         response = self.client.post(
-            f"/api/signup/{uuid.uuid4()}/",
+            f"/v1/signup/{uuid.uuid4()}/",
             {"first_name": "Charlie", "password": VALID_TEST_PASSWORD},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1974,7 +1974,7 @@ class TestInviteSignupAPI(APIBaseTest):
         invite.save()
 
         response = self.client.post(
-            f"/api/signup/{invite.id}/",
+            f"/v1/signup/{invite.id}/",
             {"first_name": "Charlie", "password": VALID_TEST_PASSWORD},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -2010,7 +2010,7 @@ class TestInviteSignupAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/signup/{invite.id}/",
+            f"/v1/signup/{invite.id}/",
             {
                 "first_name": "Alice",
                 "password": VALID_TEST_PASSWORD,
@@ -2047,7 +2047,7 @@ class TestInviteSignupAPI(APIBaseTest):
         session.save()
 
         response = self.client.post(
-            "/api/social_signup",
+            "/v1/social_signup",
             {
                 "organization_name": "Org test_api_social_invite_sign_up",
                 "first_name": "Max",
@@ -2087,7 +2087,7 @@ class TestInviteSignupAPI(APIBaseTest):
         session.save()
 
         response = self.client.post(
-            "/api/social_signup",
+            "/v1/social_signup",
             {
                 "organization_name": "Org test_api_social_invite_sign_up_with_verification",
                 "first_name": "Max",
@@ -2109,14 +2109,14 @@ class TestInviteSignupAPI(APIBaseTest):
             Organization.objects.filter(name="Org test_api_social_invite_sign_up_with_verification").count(),
             1,
         )
-        me_response = self.client.get("/api/users/@me/")
+        me_response = self.client.get("/v1/users/@me/")
         self.assertEqual(me_response.status_code, status.HTTP_200_OK)
 
     def test_cannot_use_social_invite_sign_up_if_social_session_is_not_active(self):
         Organization.objects.all().delete()  # Can only create organizations in fresh instances
 
         response = self.client.post(
-            "/api/social_signup",
+            "/v1/social_signup",
             {"organization_name": "Tech R Us", "first_name": "Max"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -2134,7 +2134,7 @@ class TestInviteSignupAPI(APIBaseTest):
     def test_cannot_use_social_invite_sign_up_without_required_attributes(self):
         Organization.objects.all().delete()  # Can only create organizations in fresh instances
 
-        response = self.client.post("/api/social_signup", {})
+        response = self.client.post("/v1/social_signup", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -2157,7 +2157,7 @@ class TestInviteSignupAPI(APIBaseTest):
         )
 
         # AND if the user is trying to accept the invite.
-        response = self.client.get(f"/api/signup/{invite.id}/")
+        response = self.client.get(f"/v1/signup/{invite.id}/")
 
         # THEN the request should fail
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

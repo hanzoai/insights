@@ -21,7 +21,7 @@ class TestProxyRecordAPI(APIBaseTest):
 
     def test_list_returns_max_proxy_records_from_feature(self):
         """The list endpoint should return max_proxy_records from the org's available features."""
-        response = self.client.get(f"/api/organizations/{self.organization.id}/proxy_records/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/proxy_records/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertIn("results", data)
@@ -34,7 +34,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.organization.available_product_features = []
         self.organization.save()
 
-        response = self.client.get(f"/api/organizations/{self.organization.id}/proxy_records/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/proxy_records/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["max_proxy_records"], 2)
@@ -53,7 +53,7 @@ class TestProxyRecordAPI(APIBaseTest):
         mock_sync_connect.return_value = mock_temporal
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "test.example.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -72,14 +72,14 @@ class TestProxyRecordAPI(APIBaseTest):
         # Create 2 records (the limit)
         for i in range(2):
             response = self.client.post(
-                f"/api/organizations/{self.organization.id}/proxy_records/",
+                f"/v1/organizations/{self.organization.id}/proxy_records/",
                 {"domain": f"proxy{i}.example.com"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, f"Failed to create record {i}")
 
         # The 3rd should be rejected
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "proxy2.example.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -99,7 +99,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "test.example.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -116,7 +116,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.organization_membership.save()
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "test.example.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

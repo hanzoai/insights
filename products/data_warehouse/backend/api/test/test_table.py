@@ -31,7 +31,7 @@ class TestTable(APIBaseTest):
     def test_create_columns_blocks_unsafe_url_patterns(self, _: str, url_pattern: str, expected_error: str):
         with patch.object(DataWarehouseTable, "get_columns") as patch_get_columns:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/warehouse_tables/",
+                f"/v1/projects/{self.team.id}/warehouse_tables/",
                 {
                     "name": "unsafe_table",
                     "url_pattern": url_pattern,
@@ -99,7 +99,7 @@ class TestTable(APIBaseTest):
             patch.object(DataWarehouseTable, "get_columns") as patch_get_columns,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/warehouse_tables/",
+                f"/v1/projects/{self.team.id}/warehouse_tables/",
                 {
                     "name": "unsafe_table",
                     "url_pattern": url_pattern,
@@ -125,7 +125,7 @@ class TestTable(APIBaseTest):
             columns={},
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+            f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
             {
                 "url_pattern": "https://127.0.0.1/latest/meta-data/",
             },
@@ -147,7 +147,7 @@ class TestTable(APIBaseTest):
     @patch("insights.tasks.warehouse.get_client")
     def test_create_columns(self, patch_get_columns, patch_validate_column_type, patch_get_client):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_tables/",
+            f"/v1/projects/{self.team.id}/warehouse_tables/",
             {
                 "name": "whatever",
                 "url_pattern": "https://your-org.s3.amazonaws.com/bucket/whatever.pqt",
@@ -186,7 +186,7 @@ class TestTable(APIBaseTest):
     @patch("insights.tasks.warehouse.get_client")
     def test_create_columns_invalid_schema(self, patch_get_columns, patch_validate_column_type, patch_get_client):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_tables/",
+            f"/v1/projects/{self.team.id}/warehouse_tables/",
             {
                 "name": "whatever",
                 "url_pattern": "https://your-org.s3.amazonaws.com/bucket/whatever.pqt",
@@ -218,7 +218,7 @@ class TestTable(APIBaseTest):
             code=499,
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_tables/",
+            f"/v1/projects/{self.team.id}/warehouse_tables/",
             {
                 "name": "whatever",
                 "url_pattern": "https://your-org.s3.amazonaws.com/bucket/whatever.pqt",
@@ -241,7 +241,7 @@ class TestTable(APIBaseTest):
             name="test_table", format="Parquet", team=self.team, team_id=self.team.pk, columns={"id": "Nullable(Int64)"}
         )
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {"id": "float"}}
+            f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {"id": "float"}}
         )
 
         table.refresh_from_db()
@@ -262,7 +262,7 @@ class TestTable(APIBaseTest):
             columns={"id": {"datastore": "Nullable(Int64)", "insightsql": "IntegerDatabaseField"}},
         )
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {"id": "float"}}
+            f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {"id": "float"}}
         )
 
         table.refresh_from_db()
@@ -280,7 +280,7 @@ class TestTable(APIBaseTest):
             columns=columns,
         )
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {}}
+            f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {}}
         )
 
         table.refresh_from_db()
@@ -288,7 +288,7 @@ class TestTable(APIBaseTest):
         assert response.status_code == 200
         assert table.columns == columns
 
-        response = self.client.post(f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {})
+        response = self.client.post(f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {})
 
         table.refresh_from_db()
 
@@ -308,7 +308,7 @@ class TestTable(APIBaseTest):
             external_data_source_id=source.pk,
         )
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {"id": "float"}}
+            f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema", {"updates": {"id": "float"}}
         )
 
         table.refresh_from_db()
@@ -328,7 +328,7 @@ class TestTable(APIBaseTest):
             columns=columns,
         )
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema",
+            f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema",
             {"updates": {"some_other_column": "float"}},
         )
 
@@ -349,7 +349,7 @@ class TestTable(APIBaseTest):
             columns=columns,
         )
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema",
+            f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}/update_schema",
             {"updates": {"id": "another_type"}},
         )
 
@@ -373,7 +373,7 @@ class TestTable(APIBaseTest):
     @patch("insights.tasks.warehouse.get_client")
     def test_table_name_duplicate(self, patch_get_columns, patch_validate_column_type, patch_get_client):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_tables/",
+            f"/v1/projects/{self.team.id}/warehouse_tables/",
             {
                 "name": "whatever",
                 "url_pattern": "https://your-org.s3.amazonaws.com/bucket/whatever.pqt",
@@ -392,7 +392,7 @@ class TestTable(APIBaseTest):
         assert table is not None
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_tables/",
+            f"/v1/projects/{self.team.id}/warehouse_tables/",
             {
                 "name": "whatever",
                 "url_pattern": "https://your-org.s3.amazonaws.com/bucket/whatever.pqt",
@@ -410,7 +410,7 @@ class TestTable(APIBaseTest):
         table = DataWarehouseTable.objects.create(
             name="test_table", format="Parquet", team=self.team, team_id=self.team.pk, columns={}
         )
-        response = self.client.delete(f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}")
+        response = self.client.delete(f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}")
 
         assert response.status_code == 204
 
@@ -428,7 +428,7 @@ class TestTable(APIBaseTest):
             columns={},
             external_data_source_id=source.pk,
         )
-        response = self.client.delete(f"/api/projects/{self.team.pk}/warehouse_tables/{table.id}")
+        response = self.client.delete(f"/v1/projects/{self.team.pk}/warehouse_tables/{table.id}")
 
         assert response.status_code == 400
 
@@ -439,7 +439,7 @@ class TestTable(APIBaseTest):
     def test_create_table_with_internal_bucket_url(self):
         with override_settings(DATAWAREHOUSE_BUCKET_DOMAIN="somedomain.com"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/warehouse_tables/",
+                f"/v1/projects/{self.team.id}/warehouse_tables/",
                 {
                     "name": "whatever",
                     "url_pattern": f"https://{settings.DATAWAREHOUSE_BUCKET_DOMAIN}/some/path.pqt",
@@ -455,7 +455,7 @@ class TestTable(APIBaseTest):
 
     def test_create_table_with_existing_name(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_tables/",
+            f"/v1/projects/{self.team.id}/warehouse_tables/",
             {
                 "name": "events",
                 "url_pattern": "https://your-org.s3.amazonaws.com/bucket/whatever.pqt",
@@ -477,7 +477,7 @@ class TestTable(APIBaseTest):
             name="test_table2", format="Parquet", team=self.team, team_id=self.team.pk, columns={}
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+            f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
             {
                 "name": "test_table2",
             },
@@ -490,7 +490,7 @@ class TestTable(APIBaseTest):
             name="test_table", format="Parquet", team=self.team, team_id=self.team.pk, columns={}
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+            f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
             {
                 "name": "test_table",
             },
@@ -503,7 +503,7 @@ class TestTable(APIBaseTest):
             name="test_table", format="Parquet", team=self.team, team_id=self.team.pk, columns={}
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+            f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
             {
                 "name": "test_table2",
             },
@@ -522,7 +522,7 @@ class TestTable(APIBaseTest):
         )
         with override_settings(DATAWAREHOUSE_BUCKET_DOMAIN="somedomain.com"):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+                f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
                 {"url_pattern": "https://somedomain.com/some/path.pqt"},
             )
             assert response.status_code == 400
@@ -545,7 +545,7 @@ class TestTable(APIBaseTest):
             credential=credential,
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+            f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
             {"credential": {"access_key": "  ", "access_secret": "new_secret"}},
         )
         assert response.status_code == 400
@@ -568,7 +568,7 @@ class TestTable(APIBaseTest):
             credential=credential,
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+            f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
             {"credential": {"access_key": "new_key", "access_secret": ""}},
         )
         assert response.status_code == 400
@@ -591,7 +591,7 @@ class TestTable(APIBaseTest):
             credential=credential,
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+            f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
             {"credential": {"access_key": None, "access_secret": None}},
             content_type="application/json",
         )
@@ -616,7 +616,7 @@ class TestTable(APIBaseTest):
             credential=credential,
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/warehouse_tables/{table.id}",
+            f"/v1/projects/{self.team.id}/warehouse_tables/{table.id}",
             {"credential": None},
             content_type="application/json",
         )
@@ -651,7 +651,7 @@ class TestTable(APIBaseTest):
                 DATAWAREHOUSE_BUCKET="test-warehouse-bucket",
             ):
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/warehouse_tables/file/",
+                    f"/v1/projects/{self.team.id}/warehouse_tables/file/",
                     {"file": test_file, "name": "test_csv_table", "format": "CSVWithNames"},
                     format="multipart",
                 )
@@ -680,7 +680,7 @@ class TestTable(APIBaseTest):
         test_file = SimpleUploadedFile("test_file", file_content, content_type="text/csv")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_tables/file/",
+            f"/v1/projects/{self.team.id}/warehouse_tables/file/",
             {"file": test_file, "name": "test_csv_table", "format": "CSVWithNames"},
             format="multipart",
         )
@@ -700,7 +700,7 @@ class TestTable(APIBaseTest):
         test_file = SimpleUploadedFile("test-file.csv", file_content, content_type="text/csv")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/warehouse_tables/file/",
+            f"/v1/projects/{self.team.id}/warehouse_tables/file/",
             {"file": test_file, "name": "test-table", "format": "CSVWithNames"},
             format="multipart",
         )
@@ -738,7 +738,7 @@ class TestTable(APIBaseTest):
                 DATAWAREHOUSE_BUCKET="test-warehouse-bucket",
             ):
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/warehouse_tables/file/",
+                    f"/v1/projects/{self.team.id}/warehouse_tables/file/",
                     {"file": test_file, "name": "existing_table", "format": "CSVWithNames"},
                     format="multipart",
                 )
@@ -813,7 +813,7 @@ class TestTable(APIBaseTest):
             ):
                 # Make the API request
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/warehouse_tables/file/",
+                    f"/v1/projects/{self.team.id}/warehouse_tables/file/",
                     {"file": test_file, "name": "minio_csv_table", "format": "CSVWithNames"},
                     format="multipart",
                 )

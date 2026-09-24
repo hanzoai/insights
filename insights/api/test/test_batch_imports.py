@@ -175,7 +175,7 @@ class TestBatchImportAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -194,7 +194,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_amplitude_validation_requires_at_least_one_option(self):
         """Test that Amplitude migrations require at least one of import_events or generate_identify_events"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -218,7 +218,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_mixpanel_migration_does_not_include_amplitude_specific_fields(self):
         """Test that Mixpanel migrations don't include Amplitude-specific fields in config"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "mixpanel",
                 "content_type": "mixpanel",
@@ -240,7 +240,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_amplitude_migration_includes_amplitude_specific_fields(self):
         """Test that Amplitude migrations include import_events and generate_identify_events in config"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -265,7 +265,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_amplitude_migration_with_group_identify_events(self):
         """Test that Amplitude migrations can include generate_group_identify_events in config"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -293,7 +293,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_amplitude_migration_group_identify_events_defaults_to_false(self):
         """Test that generate_group_identify_events defaults to False when not specified"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -325,7 +325,7 @@ class TestBatchImportAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -355,7 +355,7 @@ class TestBatchImportAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -376,7 +376,7 @@ class TestBatchImportAPI(APIBaseTest):
         end_date = start_date + timedelta(days=366)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "mixpanel",
                 "content_type": "mixpanel",
@@ -397,7 +397,7 @@ class TestBatchImportAPI(APIBaseTest):
         end_date = start_date + timedelta(days=300)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -417,7 +417,7 @@ class TestBatchImportAPI(APIBaseTest):
         end_date = datetime(2023, 1, 1, 0, 0, 0)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -434,7 +434,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_s3_prefix_can_be_empty_string(self):
         """Test that s3_prefix field accepts empty strings"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -455,7 +455,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_s3_prefix_can_be_omitted(self):
         """Test that s3_prefix field can be omitted from the request"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -476,7 +476,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_s3_gzip_migration_creates_correct_import_config(self):
         """Test that s3_gzip source type creates import_config with type s3_gzip"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3_gzip",
                 "content_type": "captured",
@@ -516,7 +516,7 @@ class TestBatchImportAPI(APIBaseTest):
             lease_id=lease_id,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/managed_migrations")
+        response = self.client.get(f"/v1/projects/{self.team.id}/managed_migrations")
 
         self.assertEqual(response.status_code, 200)
         results = response.json()["results"]
@@ -537,7 +537,7 @@ class TestBatchImportAPI(APIBaseTest):
             backoff_until=datetime.now(tz=UTC) + timedelta(hours=1),
         )
 
-        response = self.client.post(f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}/resume")
+        response = self.client.post(f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}/resume")
 
         self.assertEqual(response.status_code, 200)
         batch_import.refresh_from_db()

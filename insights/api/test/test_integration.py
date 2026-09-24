@@ -414,7 +414,7 @@ class TestDatabricksIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "databricks",
                 "config": {
@@ -478,7 +478,7 @@ class TestDatabricksIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "databricks",
                 "config": invalid_config,
@@ -521,7 +521,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -538,7 +538,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -556,7 +556,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -576,7 +576,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -593,7 +593,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.twilio_integration.id}/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.twilio_integration.id}/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -612,7 +612,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -629,7 +629,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -646,7 +646,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": {"installation_id": "99999"}},
             content_type="application/json",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
@@ -665,7 +665,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.delete(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -675,7 +675,7 @@ class TestIntegrationAPIKeyAccess:
     def test_session_auth_shows_all_integrations(self, client: HttpClient):
         client.force_login(self.user)
 
-        response = client.get(f"/api/environments/{self.team.pk}/integrations/")
+        response = client.get(f"/v1/environments/{self.team.pk}/integrations/")
 
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]

@@ -142,15 +142,15 @@ def authorize_and_redirect(request: HttpRequest) -> HttpResponse:
 
 
 urlpatterns = [
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("v1/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
     path(
-        "api/schema/swagger-ui/",
+        "v1/schema/swagger-ui/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
     path(
-        "api/schema/redoc/",
+        "v1/schema/redoc/",
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
@@ -165,77 +165,51 @@ urlpatterns = [
     # ee
     *ee_urlpatterns,
     # api
-    path("api/environments/<int:team_id>/progress/", progress),
-    path("api/environments/<int:team_id>/query/<str:query_uuid>/progress/", progress),
-    path("api/environments/<int:team_id>/query/<str:query_uuid>/progress", progress),
-    path("api/unsubscribe", unsubscribe.unsubscribe),
-    path("api/alerts/github", github.SecretAlert.as_view()),
-    path("api/sdk_doctor/", sdk_doctor),
-    path("api/conversations/", include("products.conversations.backend.api.urls")),
-    opt_slash_path("api/support/ensure-zendesk-organization", csrf_exempt(ensure_zendesk_organization)),
-    # ONE router, mounted twice, because the prefix is moving and a hard cutover
-    # would be a 404 for anything missed.
-    #
-    # `/v1/` is the destination: the host is already api.*, so `/api/` on the path
-    # says the same thing twice. `/api/` stays mounted while the callers move --
-    # 163 registered viewsets, ~525 call sites in the frontend, and the plugin
-    # server's IAM team-access gate keys on `/api/projects/:team_id/` paths, so
-    # they cannot all move in one commit. Nothing here is duplicated: the same
-    # router object answers both, so a route added once is served at both prefixes
-    # and they cannot drift.
-    #
-    # `/api/` comes out when the last caller is gone -- frontend, plugin server and
-    # any external key holder -- and not before.
-    # `v1/` is listed FIRST so that `api/` wins reverse(), which reads backwards
-    # until you know why. Both mounts register the same URL names.
-    # URLResolver._populate() walks `reversed(self.url_patterns)` and reverse()
-    # returns the first match it finds, so the LAST mount listed is the one
-    # reverse() answers with. Listing `api/` first — which is what "keep today's
-    # behaviour" looks like — silently made every reverse() emit `/v1/`.
-    #
-    # Resolution is unaffected by the order: both prefixes serve every route
-    # either way. Only reverse() output changes, and it must keep saying `/api/`
-    # while callers still live there — the plugin server's IAM team-access gate
-    # keys on `/api/projects/:team_id/` paths.
+    path("v1/environments/<int:team_id>/progress/", progress),
+    path("v1/environments/<int:team_id>/query/<str:query_uuid>/progress/", progress),
+    path("v1/environments/<int:team_id>/query/<str:query_uuid>/progress", progress),
+    path("v1/unsubscribe", unsubscribe.unsubscribe),
+    path("v1/alerts/github", github.SecretAlert.as_view()),
+    path("v1/sdk_doctor/", sdk_doctor),
+    path("v1/conversations/", include("products.conversations.backend.api.urls")),
+    opt_slash_path("v1/support/ensure-zendesk-organization", csrf_exempt(ensure_zendesk_organization)),
+    # Every API route lives under /v1/, the only API prefix this app serves.
     path("v1/", include(router.urls)),
-    path("api/", include(router.urls)),
-    # The assistant was built at /v1/ from the start, so it has no `api/` twin.
     path("v1/", include("products.insights_ai.backend.api.urls")),
     # Override the tf_urls QRGeneratorView to use the cache-aware version (handles session race conditions)
     path("account/two_factor/qrcode/", CacheAwareQRGeneratorView.as_view()),
     path("", include(tf_urls)),
-    opt_slash_path("api/user/prepare_toolbar_preloaded_flags", user.prepare_toolbar_preloaded_flags),
-    opt_slash_path("api/user/get_toolbar_preloaded_flags", user.get_toolbar_preloaded_flags),
-    opt_slash_path("api/user/redirect_to_site", user.redirect_to_site),
-    opt_slash_path("api/user/test_slack_webhook", user.test_slack_webhook),
-    opt_slash_path("api/early_access_features", early_access_features),
-    opt_slash_path("api/web_experiments", web_experiments),
-    opt_slash_path("api/surveys", surveys),
-    opt_slash_path("api/product_tours", product_tours),
+    opt_slash_path("v1/user/prepare_toolbar_preloaded_flags", user.prepare_toolbar_preloaded_flags),
+    opt_slash_path("v1/user/get_toolbar_preloaded_flags", user.get_toolbar_preloaded_flags),
+    opt_slash_path("v1/user/redirect_to_site", user.redirect_to_site),
+    opt_slash_path("v1/user/test_slack_webhook", user.test_slack_webhook),
+    opt_slash_path("v1/early_access_features", early_access_features),
+    opt_slash_path("v1/web_experiments", web_experiments),
+    opt_slash_path("v1/surveys", surveys),
+    opt_slash_path("v1/product_tours", product_tours),
     re_path(r"^external_surveys/(?P<survey_id>[^/]+)/?$", public_survey_page),
-    opt_slash_path("api/signup/precheck", signup.SignupEmailPrecheckViewset.as_view()),
-    opt_slash_path("api/signup", signup.SignupViewset.as_view()),
-    opt_slash_path("api/social_signup", signup.SocialSignupViewset.as_view()),
-    path("api/signup/<str:invite_id>/", signup.InviteSignupViewset.as_view()),
+    opt_slash_path("v1/signup/precheck", signup.SignupEmailPrecheckViewset.as_view()),
+    opt_slash_path("v1/signup", signup.SignupViewset.as_view()),
+    opt_slash_path("v1/social_signup", signup.SocialSignupViewset.as_view()),
+    path("v1/signup/<str:invite_id>/", signup.InviteSignupViewset.as_view()),
     path(
-        "api/reset/<str:user_uuid>/",
+        "v1/reset/<str:user_uuid>/",
         authentication.PasswordResetCompleteViewSet.as_view({"get": "retrieve", "post": "create"}),
     ),
     path(
-        "api/reset_2fa/<str:user_uuid>/",
+        "v1/reset_2fa/<str:user_uuid>/",
         two_factor_reset.TwoFactorResetViewSet.as_view({"get": "retrieve", "post": "create"}),
     ),
     opt_slash_path(
-        "api/public_insights_function_templates",
+        "v1/public_insights_function_templates",
         insights_function_template.PublicInsightsFunctionTemplateViewSet.as_view({"get": "list"}),
     ),
     opt_slash_path(
-        "api/public_insights_flow_templates",
+        "v1/public_insights_flow_templates",
         insights_flow_template.PublicInsightsFlowTemplateViewSet.as_view({"get": "list"}),
     ),
     # Test setup endpoint (only available in TEST mode)
-    path("api/setup_test/<str:test_name>/", csrf_exempt(playwright_setup.setup_test)),
-    re_path(r"^api.+", api_not_found),
+    path("v1/setup_test/<str:test_name>/", csrf_exempt(playwright_setup.setup_test)),
     # This deployment's own flag door: the signed-in user's verdict, evaluated by
     # Hanzo cloud (`/v1/flags`, the native Go engine) and relayed over the session
     # the browser already has. Registered ahead of the SPA catch-all, which would
@@ -251,10 +225,13 @@ urlpatterns = [
     # view, which answered every SDK POST with a 403 CSRF page. That reads as an
     # auth/CSRF fault and sent us hunting through trusted origins; the truth is
     # simply that the endpoint is not here. Say so, in the same JSON shape unknown
-    # /api/ paths use. csrf_exempt because the SDK posts cross-origin with an API
+    # API paths use. csrf_exempt because the SDK posts cross-origin with an API
     # key and no session token, so without it the CSRF middleware would answer 403
     # before this view could answer 404.
     opt_slash_path("flags", csrf_exempt(api_not_found)),
+    # Unknown API paths answer a JSON 404 rather than the SPA, and so does every
+    # path under `api`, which is not a prefix this app serves.
+    re_path(r"^(?:api|v1)(?:/|$)", api_not_found),
     path("authorize_and_redirect/", login_required(authorize_and_redirect)),
     path(
         "shared_dashboard/<str:access_token>",
@@ -365,8 +342,8 @@ def root(request: HttpRequest) -> HttpResponse:
     unchanged — same `home` view, same SPA.
 
     The CTAs point at surfaces that actually work. Plans deliberately leave for
-    hanzo.ai/pricing rather than this app's own billing pages: `/api/billing`
-    is not served here, so an in-app upgrade funnel would dead-end.
+    hanzo.ai/pricing rather than this app's own billing pages: billing is not
+    served here, so an in-app upgrade funnel would dead-end.
     """
     if request.user.is_authenticated:
         return home(request)

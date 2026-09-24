@@ -46,16 +46,16 @@ class TestUtils(BaseTest):
         request = lambda url: cast(Any, RequestFactory().get(url))
 
         self.assertEqual(
-            format_paginated_url(request("/api/some_url"), offset=0, page_size=10),
+            format_paginated_url(request("/v1/some_url"), offset=0, page_size=10),
             "http://testserver/api/some_url?offset=10",
         )
         self.assertEqual(
-            format_paginated_url(request("/api/some_url?offset=0"), offset=0, page_size=10),
-            "api/some_url?offset=10",
+            format_paginated_url(request("/v1/some_url?offset=0"), offset=0, page_size=10),
+            "v1/some_url?offset=10",
         )
         self.assertEqual(
             format_paginated_url(
-                request("/api/some_url?offset=0"),
+                request("/v1/some_url?offset=0"),
                 offset=0,
                 page_size=10,
                 mode=PaginationMode.previous,
@@ -64,12 +64,12 @@ class TestUtils(BaseTest):
         )
         self.assertEqual(
             format_paginated_url(
-                request("/api/some_url?offset=0"),
+                request("/v1/some_url?offset=0"),
                 offset=20,
                 page_size=10,
                 mode=PaginationMode.previous,
             ),
-            "api/some_url?offset=0",
+            "v1/some_url?offset=0",
         )
 
     def test_get_target_entity(self):

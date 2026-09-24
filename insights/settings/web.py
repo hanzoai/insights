@@ -102,7 +102,6 @@ MIDDLEWARE = [
     # ok below the above middlewares however.
     "insights.health.healthcheck_middleware",
     "insights.middleware.ShortCircuitMiddleware",
-    "insights.middleware.V1InsightsRewriteMiddleware",
     "insights.middleware.AllowIPMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -195,7 +194,7 @@ LOGIN_URL = "/login"
 LOGOUT_URL = "/logout"
 LOGIN_REDIRECT_URL = "/"
 APPEND_SLASH = False
-CORS_URLS_REGEX = r"^(/site_app/|/array/|/static/|/api/(?!early_access_features|surveys|web_experiments).*$)"
+CORS_URLS_REGEX = r"^(/site_app/|/array/|/static/|/v1/(?!early_access_features|surveys|web_experiments).*$)"
 CORS_ALLOW_HEADERS = default_headers + CORS_ALLOWED_TRACING_HEADERS
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -368,7 +367,7 @@ GZIP_POST_RESPONSE_ALLOW_LIST = get_list(
         "GZIP_POST_RESPONSE_ALLOW_LIST",
         ",".join(
             [
-                "^/?api/(environments|projects)/\\d+/query/?$",
+                "^/?v1/(environments|projects)/\\d+/query/?$",
             ]
         ),
     )
@@ -379,33 +378,33 @@ GZIP_RESPONSE_ALLOW_LIST = get_list(
         "GZIP_RESPONSE_ALLOW_LIST",
         ",".join(
             [
-                "^/?api/plugin_config/\\d+/frontend/?$",
-                "^/?api/(environments|projects)/@current/property_definitions/?$",
-                "^/?api/(environments|projects)/\\d+/event_definitions/?$",
-                "^/?api/(environments|projects)/\\d+/insights/(trend|funnel)/?$",
-                "^/?api/(environments|projects)/\\d+/insights/?$",
-                "^/?api/(environments|projects)/\\d+/insights/\\d+/?$",
-                "^/?api/(environments|projects)/\\d+/dashboards/\\d+/?$",
-                "^/?api/(environments|projects)/\\d+/dashboards/?$",
-                "^/?api/(environments|projects)/\\d+/actions/?$",
-                "^/?api/(environments|projects)/\\d+/session_recordings/?$",
-                "^/?api/(environments|projects)/\\d+/session_recordings/.*$",
-                "^/?api/(environments|projects)/\\d+/session_recording_playlists/?$",
-                "^/?api/(environments|projects)/\\d+/session_recording_playlists/.*$",
-                "^/?api/(environments|projects)/\\d+/performance_events/?$",
-                "^/?api/(environments|projects)/\\d+/performance_events/.*$",
-                "^/?api/(environments|projects)/\\d+/exports/\\d+/content/?$",
-                "^/?api/(environments|projects)/\\d+/my_notifications/?$",
-                "^/?api/(environments|projects)/\\d+/uploaded_media/?$",
+                "^/?v1/plugin_config/\\d+/frontend/?$",
+                "^/?v1/(environments|projects)/@current/property_definitions/?$",
+                "^/?v1/(environments|projects)/\\d+/event_definitions/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/(trend|funnel)/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/\\d+/?$",
+                "^/?v1/(environments|projects)/\\d+/dashboards/\\d+/?$",
+                "^/?v1/(environments|projects)/\\d+/dashboards/?$",
+                "^/?v1/(environments|projects)/\\d+/actions/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recordings/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recordings/.*$",
+                "^/?v1/(environments|projects)/\\d+/session_recording_playlists/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recording_playlists/.*$",
+                "^/?v1/(environments|projects)/\\d+/performance_events/?$",
+                "^/?v1/(environments|projects)/\\d+/performance_events/.*$",
+                "^/?v1/(environments|projects)/\\d+/exports/\\d+/content/?$",
+                "^/?v1/(environments|projects)/\\d+/my_notifications/?$",
+                "^/?v1/(environments|projects)/\\d+/uploaded_media/?$",
                 "^/uploaded_media/.*$",
-                "^/api/element/stats/?$",
-                "^/api/(environments|projects)/\\d+/groups/property_definitions/?$",
-                "^/api/(environments|projects)/\\d+/cohorts/?$",
-                "^/api/(environments|projects)/\\d+/persons/?$",
-                "^/api/organizations/@current/plugins/?$",
-                "^api/(environments|projects)/@current/feature_flags/my_flags/?$",
-                "^/?api/(environments|projects)/\\d+/query/?$",
-                "^/?api/instance_status/?$",
+                "^/v1/element/stats/?$",
+                "^/v1/(environments|projects)/\\d+/groups/property_definitions/?$",
+                "^/v1/(environments|projects)/\\d+/cohorts/?$",
+                "^/v1/(environments|projects)/\\d+/persons/?$",
+                "^/v1/organizations/@current/plugins/?$",
+                "^v1/(environments|projects)/@current/feature_flags/my_flags/?$",
+                "^/?v1/(environments|projects)/\\d+/query/?$",
+                "^/?v1/instance_status/?$",
                 "^/array/.*$",
             ]
         ),

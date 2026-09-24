@@ -29,12 +29,12 @@ class TestWidgetAPI(BaseTest):
         return {"HTTP_X_CONVERSATIONS_TOKEN": self.widget_token}
 
     def test_authentication_required(self):
-        response = self.client.post("/api/conversations/v1/widget/message", {"message": "Hello"})
+        response = self.client.post("/v1/conversations/v1/widget/message", {"message": "Hello"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_authentication_invalid_token(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hello"},
             HTTP_X_CONVERSATIONS_TOKEN="invalid_token",
         )
@@ -44,7 +44,7 @@ class TestWidgetAPI(BaseTest):
         self.team.conversations_enabled = False
         self.team.save()
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hello", "widget_session_id": self.widget_session_id, "distinct_id": self.distinct_id},
             **self._get_headers(),
         )
@@ -52,7 +52,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_creates_ticket(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Hello, I need help!",
                 "widget_session_id": self.widget_session_id,
@@ -78,7 +78,7 @@ class TestWidgetAPI(BaseTest):
             channel_source="widget",
         )
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Follow up message",
                 "widget_session_id": self.widget_session_id,
@@ -100,7 +100,7 @@ class TestWidgetAPI(BaseTest):
             session_context={"current_url": "/some-page", "replay_url": "https://insights.hanzo.ai/replay/old"},
         )
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Follow up message",
                 "widget_session_id": self.widget_session_id,
@@ -127,7 +127,7 @@ class TestWidgetAPI(BaseTest):
             channel_source="widget",
         )
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Trying to access other ticket",
                 "widget_session_id": self.widget_session_id,
@@ -140,7 +140,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_missing_widget_session_id(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hello", "distinct_id": self.distinct_id},
             **self._get_headers(),
         )
@@ -148,7 +148,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_missing_distinct_id(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hello", "widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -156,7 +156,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_empty_content(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "",
                 "widget_session_id": self.widget_session_id,
@@ -168,7 +168,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_with_traits(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Hello",
                 "widget_session_id": self.widget_session_id,
@@ -205,7 +205,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -235,7 +235,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -259,7 +259,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -275,7 +275,7 @@ class TestWidgetAPI(BaseTest):
             channel_source="widget",
         )
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -283,7 +283,7 @@ class TestWidgetAPI(BaseTest):
     def test_get_messages_ticket_not_found(self):
         fake_ticket_id = str(uuid.uuid4())
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{fake_ticket_id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{fake_ticket_id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -312,7 +312,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -338,7 +338,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&status={Status.NEW}",
+            f"/v1/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&status={Status.NEW}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -355,7 +355,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.post(
-            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}/read",
             {"widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -375,7 +375,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.post(
-            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}/read",
             {"widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -386,7 +386,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_honeypot_rejects_bot(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "I am a bot",
                 "widget_session_id": self.widget_session_id,
@@ -399,7 +399,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_invalid_widget_session_id_format(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Hello",
                 "widget_session_id": "not-a-uuid",
@@ -411,7 +411,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_message_too_long(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "x" * 6000,
                 "widget_session_id": self.widget_session_id,
@@ -443,7 +443,7 @@ class TestWidgetCacheInvalidation(BaseTest):
     def test_create_message_new_ticket_invalidates_cache(self):
         with patch("products.conversations.backend.api.widget.invalidate_unread_count_cache") as mock_invalidate:
             response = self.client.post(
-                "/api/conversations/v1/widget/message",
+                "/v1/conversations/v1/widget/message",
                 {
                     "message": "Hello, I need help!",
                     "widget_session_id": self.widget_session_id,
@@ -464,7 +464,7 @@ class TestWidgetCacheInvalidation(BaseTest):
 
         with patch("products.conversations.backend.api.widget.invalidate_unread_count_cache") as mock_invalidate:
             response = self.client.post(
-                "/api/conversations/v1/widget/message",
+                "/v1/conversations/v1/widget/message",
                 {
                     "message": "Follow up message",
                     "widget_session_id": self.widget_session_id,

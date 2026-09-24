@@ -16,7 +16,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"field": "active", "value": "false"}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "id": 6,
                 "record_id": str(feature_flag.id),
@@ -49,7 +49,7 @@ class TestScheduledChange(APIBaseTest):
         # Mock the permission check to return False
         with patch("insights.api.scheduled_change.CanEditFeatureFlag.has_object_permission", return_value=False):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/scheduled_changes/",
+                f"/v1/projects/{self.team.id}/scheduled_changes/",
                 data={
                     "record_id": str(feature_flag.id),
                     "model_name": "FeatureFlag",
@@ -76,7 +76,7 @@ class TestScheduledChange(APIBaseTest):
         # Mock the permission check to return True
         with patch("insights.api.scheduled_change.CanEditFeatureFlag.has_object_permission", return_value=True):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/scheduled_changes/",
+                f"/v1/projects/{self.team.id}/scheduled_changes/",
                 data={
                     "record_id": str(feature_flag.id),
                     "model_name": "FeatureFlag",
@@ -97,7 +97,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"operation": "update_status", "value": False}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": "999999",  # Non-existent feature flag ID
                 "model_name": "FeatureFlag",
@@ -121,7 +121,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"operation": "update_status", "value": True}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -151,7 +151,7 @@ class TestScheduledChange(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -176,7 +176,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"operation": "update_status", "value": False}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -208,7 +208,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"operation": "update_status", "value": True}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -244,7 +244,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={"model_name": "FeatureFlag", "record_id": str(feature_flag.id)},
         )
 

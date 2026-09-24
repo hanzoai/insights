@@ -82,7 +82,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
         with mock.patch.object(StripeSource, "validate_credentials", return_value=(True, None)):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
             )
         payload = response.json()
 
@@ -110,7 +110,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
         )
 
         assert response.status_code == 400
@@ -129,7 +129,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
         )
 
         assert response.status_code == 400
@@ -176,7 +176,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = await sync_to_async(self.client.post)(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
         )
         payload = response.json()
 
@@ -211,7 +211,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "full_refresh"},
             )
 
@@ -244,7 +244,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(DataWarehouseTable, "get_max_value_for_column", return_value=1),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "incremental", "incremental_field": "field", "incremental_field_type": "integer"},
             )
 
@@ -297,7 +297,7 @@ class TestUpdateExternalDataSchema:
             schedule_desc = describe_schedule(temporal, str(schema.id))
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -336,7 +336,7 @@ class TestUpdateExternalDataSchema:
         assert schedule_desc.schedule.state.paused is False
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             # here we try to mimic the payload from the frontend, which actually sends all fields, not just should_sync
             data={
                 "id": str(schema.id),
@@ -372,7 +372,7 @@ class TestUpdateExternalDataSchema:
 
         # pause the schedule
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -397,7 +397,7 @@ class TestUpdateExternalDataSchema:
 
         # now turn it back on
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -436,7 +436,7 @@ class TestUpdateExternalDataSchema:
         schema.save()
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -461,7 +461,7 @@ class TestUpdateExternalDataSchema:
         assert schema is not None
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -486,7 +486,7 @@ class TestUpdateExternalDataSchema:
         assert schema is not None
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -517,7 +517,7 @@ class TestUpdateExternalDataSchema:
         assert schema is not None
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -551,7 +551,7 @@ class TestUpdateExternalDataSchema:
         assert schema is not None
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,

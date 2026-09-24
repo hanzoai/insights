@@ -14,7 +14,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         User.objects.create_and_join(self.organization, "1@hanzo.ai", None)
         User.objects.create_and_join(self.organization, "2@hanzo.ai", None, is_active=False)
 
-        response = self.client.get("/api/organizations/@current/members/")
+        response = self.client.get("/v1/organizations/@current/members/")
         response_data = response.json()["results"]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -27,14 +27,14 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
     # def test_list_organization_members_is_not_nplus1(self):
     #     self.user.totpdevice_set.create(name="default", key=random_hex(), digits=6)  # type: ignore
     #     with self.assertNumQueries(9), snapshot_postgres_queries_context(self):
-    #         response = self.client.get("/api/organizations/@current/members/")
+    #         response = self.client.get("/v1/organizations/@current/members/")
 
     #     assert len(response.json()["results"]) == 1
 
     #     User.objects.create_and_join(self.organization, "1@hanzo.ai", None)
 
     #     with self.assertNumQueries(9), snapshot_postgres_queries_context(self):
-    #         response = self.client.get("/api/organizations/@current/members/")
+    #         response = self.client.get("/v1/organizations/@current/members/")
 
     #     assert len(response.json()["results"]) == 2
 
@@ -43,12 +43,12 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         user = User.objects.create(email="another_user@hanzo.ai")
         user.join(organization=org)
 
-        response = self.client.get(f"/api/organizations/{org.id}/members/")
+        response = self.client.get(f"/v1/organizations/{org.id}/members/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
 
         # Even though there's no retrieve for invites, permissions are validated first
-        response = self.client.get(f"/api/organizations/{org.id}/members/{user.uuid}")
+        response = self.client.get(f"/v1/organizations/{org.id}/members/{user.uuid}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
 
@@ -60,12 +60,12 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         self.assertTrue(membership_queryset.exists())
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
-        response = self.client.delete(f"/api/organizations/@current/members/{user.uuid}/")
+        response = self.client.delete(f"/v1/organizations/@current/members/{user.uuid}/")
         self.assertEqual(response.status_code, 403)
         self.assertTrue(membership_queryset.exists())
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
-        response = self.client.delete(f"/api/organizations/@current/members/{user.uuid}/")
+        response = self.client.delete(f"/v1/organizations/@current/members/{user.uuid}/")
         self.assertEqual(response.status_code, 204)
         self.assertFalse(membership_queryset.exists(), False)
 
@@ -94,7 +94,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         user = User.objects.create_and_join(self.organization, "test@x.com", None, "X")
 
         # Initially, the user has no scoped API keys
-        response = self.client.get(f"/api/organizations/@current/members/{user.uuid}/scoped_api_keys/")
+        response = self.client.get(f"/v1/organizations/@current/members/{user.uuid}/scoped_api_keys/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["has_keys"], False)
@@ -116,7 +116,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         )
 
         # Check response with one inactive key
-        response = self.client.get(f"/api/organizations/@current/members/{user.uuid}/scoped_api_keys/")
+        response = self.client.get(f"/v1/organizations/@current/members/{user.uuid}/scoped_api_keys/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["has_keys"], True)
@@ -146,7 +146,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         )
 
         # Check response with all keys (one org-scoped, one team-scoped, one global)
-        response = self.client.get(f"/api/organizations/@current/members/{user.uuid}/scoped_api_keys/")
+        response = self.client.get(f"/v1/organizations/@current/members/{user.uuid}/scoped_api_keys/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["has_keys"], True)
@@ -187,7 +187,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         )
 
         # Check response with all keys including the null scoped key
-        response = self.client.get(f"/api/organizations/@current/members/{user.uuid}/scoped_api_keys/")
+        response = self.client.get(f"/v1/organizations/@current/members/{user.uuid}/scoped_api_keys/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["keys"]), 4)
@@ -209,7 +209,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         other_user.join(organization=self.organization)
 
         # The endpoint should return empty data since the API keys are not scoped to our organization or its teams
-        response = self.client.get(f"/api/organizations/@current/members/{other_user.uuid}/scoped_api_keys/")
+        response = self.client.get(f"/v1/organizations/@current/members/{other_user.uuid}/scoped_api_keys/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["has_keys"], False)
@@ -221,7 +221,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
     def test_leave_organization(self, mock_update_billing_organization_users, mock_capture):
         membership_queryset = OrganizationMembership.objects.filter(user=self.user, organization=self.organization)
         self.assertEqual(membership_queryset.count(), 1)
-        response = self.client.delete(f"/api/organizations/@current/members/{self.user.uuid}/")
+        response = self.client.delete(f"/v1/organizations/@current/members/{self.user.uuid}/")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(membership_queryset.count(), 0)
 
@@ -253,7 +253,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         membership = OrganizationMembership.objects.create(user=user, organization=self.organization)
         self.assertEqual(membership.level, OrganizationMembership.Level.MEMBER)
         response = self.client.patch(
-            f"/api/organizations/@current/members/{user.uuid}",
+            f"/v1/organizations/@current/members/{user.uuid}",
             {"level": OrganizationMembership.Level.ADMIN},
         )
         self.assertEqual(response.status_code, 200)
@@ -295,7 +295,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         membership = OrganizationMembership.objects.create(user=user, organization=self.organization)
         self.assertEqual(membership.level, OrganizationMembership.Level.MEMBER)
         response = self.client.patch(
-            f"/api/organizations/@current/members/{user.uuid}",
+            f"/v1/organizations/@current/members/{user.uuid}",
             {"level": OrganizationMembership.Level.ADMIN},
         )
         self.assertEqual(response.status_code, 200)
@@ -313,7 +313,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         membership = OrganizationMembership.objects.create(user=user, organization=self.organization)
         self.assertEqual(membership.level, OrganizationMembership.Level.MEMBER)
         response = self.client.patch(
-            f"/api/organizations/@current/members/{user.uuid}/",
+            f"/v1/organizations/@current/members/{user.uuid}/",
             {"level": OrganizationMembership.Level.ADMIN},
         )
 
@@ -336,7 +336,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
         response = self.client.patch(
-            f"/api/organizations/@current/members/{self.user.uuid}",
+            f"/v1/organizations/@current/members/{self.user.uuid}",
             {"level": OrganizationMembership.Level.MEMBER},
         )
         self.organization_membership.refresh_from_db()
@@ -360,7 +360,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         self.organization_membership.level = OrganizationMembership.Level.OWNER
         self.organization_membership.save()
         response = self.client.patch(
-            f"/api/organizations/@current/members/{user.uuid}/",
+            f"/v1/organizations/@current/members/{user.uuid}/",
             {"level": OrganizationMembership.Level.OWNER},
         )
         self.organization_membership.refresh_from_db()
@@ -383,7 +383,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
         response = self.client.patch(
-            f"/api/organizations/@current/members/{user.uuid}/",
+            f"/v1/organizations/@current/members/{user.uuid}/",
             {"level": OrganizationMembership.Level.OWNER},
         )
         self.organization_membership.refresh_from_db()
@@ -407,7 +407,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         User.objects.create_and_join(self.organization, "another@hanzo.ai", None)
 
         # Test filtering by email
-        response = self.client.get("/api/organizations/@current/members/?email=specific@hanzo.ai")
+        response = self.client.get("/v1/organizations/@current/members/?email=specific@hanzo.ai")
         response_data = response.json()["results"]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

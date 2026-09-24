@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 class WidgetMessageView(APIView):
     """
-    POST /api/conversations/v1/widget/message
+    POST /v1/conversations/v1/widget/message
     Create a new message in a ticket (or create ticket if first message).
 
     Security: Access controlled by widget_session_id (random UUID), not distinct_id.
@@ -197,7 +197,7 @@ class WidgetMessageView(APIView):
 
 class WidgetMessagesView(APIView):
     """
-    GET /api/conversations/v1/widget/messages/<ticket_id>
+    GET /v1/conversations/v1/widget/messages/<ticket_id>
     Fetch messages for a specific ticket.
 
     Security: Access controlled by widget_session_id (random UUID), not distinct_id.
@@ -314,7 +314,7 @@ class WidgetMessagesView(APIView):
 
 class WidgetTicketsView(APIView):
     """
-    GET /api/conversations/v1/widget/tickets
+    GET /v1/conversations/v1/widget/tickets
     List all tickets for current widget_session_id (for conversation history).
 
     Security: Lists tickets by widget_session_id, not distinct_id.
@@ -390,7 +390,7 @@ class WidgetTicketsView(APIView):
 
 class WidgetMarkReadView(APIView):
     """
-    POST /api/conversations/v1/widget/messages/<ticket_id>/read
+    POST /v1/conversations/v1/widget/messages/<ticket_id>/read
     Mark all messages in a ticket as read by the customer.
 
     This resets unread_customer_count to 0.

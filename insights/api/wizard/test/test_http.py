@@ -335,7 +335,7 @@ class SetupWizardTests(APIBaseTest):
         }
     )
     def test_authenticate_requires_hash(self):
-        response = self.client.post(f"/api/wizard/authenticate", data={}, format="json")
+        response = self.client.post(f"/v1/wizard/authenticate", data={}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(
@@ -347,7 +347,7 @@ class SetupWizardTests(APIBaseTest):
     )
     def test_authenticate_invalid_hash(self):
         response = self.client.post(
-            f"/api/wizard/authenticate",
+            f"/v1/wizard/authenticate",
             data={"hash": "nonexistent", "projectId": self.team.id},
             format="json",
         )
@@ -355,7 +355,7 @@ class SetupWizardTests(APIBaseTest):
 
     def test_authenticate_missing_projectId(self):
         response = self.client.post(
-            f"/api/wizard/authenticate",
+            f"/v1/wizard/authenticate",
             data={"hash": "valid_hash"},
             format="json",
         )
@@ -363,7 +363,7 @@ class SetupWizardTests(APIBaseTest):
 
     def test_authenticate_invalid_projectId(self):
         response = self.client.post(
-            f"/api/wizard/authenticate",
+            f"/v1/wizard/authenticate",
             data={"hash": "valid_hash", "projectId": 999999},
             format="json",
         )
@@ -382,7 +382,7 @@ class SetupWizardTests(APIBaseTest):
         cache.set(cache_key, {}, SETUP_WIZARD_CACHE_TIMEOUT)
 
         response = self.client.post(
-            f"/api/wizard/authenticate",
+            f"/v1/wizard/authenticate",
             data={"hash": "valid_hash", "projectId": self.team.id},
             format="json",
         )
@@ -408,7 +408,7 @@ class SetupWizardTests(APIBaseTest):
         cache_key = f"{SETUP_WIZARD_CACHE_PREFIX}valid_hash"
         cache.set(cache_key, {}, SETUP_WIZARD_CACHE_TIMEOUT)
 
-        url = f"/api/wizard/authenticate"
+        url = f"/v1/wizard/authenticate"
         data = {"hash": "valid_hash", "projectId": self.team.id}
 
         response_1 = self.client.post(url, data=data, format="json")
@@ -435,7 +435,7 @@ class SetupWizardTests(APIBaseTest):
         cache_key = f"{SETUP_WIZARD_CACHE_PREFIX}valid_hash"
         cache.set(cache_key, {}, SETUP_WIZARD_CACHE_TIMEOUT)
 
-        url = f"/api/wizard/authenticate"
+        url = f"/v1/wizard/authenticate"
         data = {"hash": "valid_hash", "projectId": self.team.id}
 
         response = self.client.post(url, data=data, format="json")

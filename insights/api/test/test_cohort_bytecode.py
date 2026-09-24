@@ -10,7 +10,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         from insights.models.cohort.cohort import Cohort
 
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": name, "filters": filters},
             format="json",
         )
@@ -22,7 +22,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         from insights.models.cohort.cohort import Cohort
 
         resp = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}/",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/",
             {"filters": filters},
             format="json",
         )

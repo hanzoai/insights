@@ -32,7 +32,7 @@ class InsightsTestClient:
         logger.info("Creating organization '%s'", org_name)
         logger.debug("POST %s/api/organizations/", self.base_url)
 
-        response = self.session.post(f"{self.base_url}/api/organizations/", json={"name": org_name})
+        response = self.session.post(f"{self.base_url}/v1/organizations/", json={"name": org_name})
 
         logger.debug("Response status: %s", response.status_code)
         response.raise_for_status()
@@ -49,7 +49,7 @@ class InsightsTestClient:
         logger.debug("POST %s/api/organizations/%s/projects/", self.base_url, organization_id)
 
         response = self.session.post(
-            f"{self.base_url}/api/organizations/{organization_id}/projects/", json={"name": project_name}
+            f"{self.base_url}/v1/organizations/{organization_id}/projects/", json={"name": project_name}
         )
 
         logger.debug("Response status: %s", response.status_code)
@@ -71,7 +71,7 @@ class InsightsTestClient:
         while time.time() - start_time < timeout:
             try:
                 # First check if the project exists via the basic project API
-                project_response = self.session.get(f"{self.base_url}/api/projects/{project_id}/")
+                project_response = self.session.get(f"{self.base_url}/v1/projects/{project_id}/")
                 if project_response.status_code != 200:
                     logger.debug("Project %s not accessible via API, waiting...", project_id)
                     time.sleep(1)
@@ -79,7 +79,7 @@ class InsightsTestClient:
 
                 # Then try a simple InsightsQL query to see if the project is ready
                 query_response = self.session.post(
-                    f"{self.base_url}/api/environments/{project_id}/query/",
+                    f"{self.base_url}/v1/environments/{project_id}/query/",
                     json={"query": {"kind": "InsightsQLQuery", "query": "SELECT 1 LIMIT 1"}},
                 )
                 if query_response.status_code == 200:
@@ -156,7 +156,7 @@ class InsightsTestClient:
 
         logger.debug("Executing InsightsQL query: %s", query)
         response = self.session.post(
-            f"{self.base_url}/api/environments/{project_id}/query/",
+            f"{self.base_url}/v1/environments/{project_id}/query/",
             json={"refresh": "force_blocking", "query": {"kind": "InsightsQLQuery", "query": query}},
         )
 
@@ -216,7 +216,7 @@ class InsightsTestClient:
         logger.info("Deleting project %s", project_id)
         logger.debug("DELETE %s/api/environments/%s/", self.base_url, project_id)
 
-        response = self.session.delete(f"{self.base_url}/api/environments/{project_id}/")
+        response = self.session.delete(f"{self.base_url}/v1/environments/{project_id}/")
 
         logger.debug("Response status: %s", response.status_code)
         response.raise_for_status()
@@ -227,7 +227,7 @@ class InsightsTestClient:
         logger.info("Deleting organization %s", organization_id)
         logger.debug("DELETE %s/api/organizations/%s/", self.base_url, organization_id)
 
-        response = self.session.delete(f"{self.base_url}/api/organizations/{organization_id}/")
+        response = self.session.delete(f"{self.base_url}/v1/organizations/{organization_id}/")
 
         logger.debug("Response status: %s", response.status_code)
         response.raise_for_status()

@@ -117,7 +117,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
                 )
 
         event_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-01",
                 "date_to": "2020-01-31",
@@ -131,7 +131,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
 
         with freeze_time("2020-01-31 00:06:34"):
             event_response = self.client.get(
-                f"/api/projects/{self.team.id}/persons/trends/",
+                f"/v1/projects/{self.team.id}/persons/trends/",
                 data={
                     "date_from": "-30d",
                     "date_to": "2020-01-31",
@@ -170,7 +170,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
             )
 
         event_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-04",
                 "date_to": "2020-01-04",
@@ -276,7 +276,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         )
         # check solo hour
         action_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "interval": "hour",
                 "date_from": "2020-01-04 14:00:00",
@@ -286,7 +286,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
             },
         ).json()
         event_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "interval": "hour",
                 "date_from": "2020-01-04 14:00:00",
@@ -301,7 +301,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
 
         # check grouped hour
         hour_grouped_action_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "interval": "hour",
                 "date_from": "2020-01-04 16:00:00",
@@ -311,7 +311,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
             },
         ).json()
         hour_grouped_grevent_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "interval": "hour",
                 "date_from": "2020-01-04 16:00:00",
@@ -361,7 +361,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
 
         # test people
         action_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-04",
                 "date_to": "2020-01-04 23:59:59",
@@ -371,7 +371,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
             },
         ).json()
         event_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-04",
                 "date_to": "2020-01-04 23:59:59",
@@ -417,7 +417,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
 
         # test people
         action_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-03",
                 "date_to": "2020-01-04 23:59:59",
@@ -428,7 +428,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
             },
         ).json()
         event_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-03",
                 "date_to": "2020-01-04 23:59:59",
@@ -473,7 +473,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         )
         # check grouped week
         week_grouped_action_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "interval": "week",
                 "date_from": "2019-11-01",
@@ -483,7 +483,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
             },
         ).json()
         week_grouped_grevent_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "interval": "week",
                 "date_from": "2019-11-01",
@@ -532,7 +532,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         )
         # check grouped month
         month_group_action_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "interval": "month",
                 "date_from": "2019-11-01",
@@ -542,7 +542,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
             },
         ).json()
         month_group_grevent_response = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "interval": "month",
                 "date_from": "2019-11-01",
@@ -668,7 +668,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         _create_action(name="watched movie", team=self.team)
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-01",
                 "date_to": "2020-01-07",
@@ -687,7 +687,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
 
         # all people
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-01",
                 "date_to": "2020-01-07",
@@ -709,7 +709,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         _create_action(name="watched movie", team=self.team)
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-01",
                 "date_to": "2020-01-07",
@@ -729,7 +729,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         _create_action(name="watched movie", team=self.team)
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-01",
                 "date_to": "2020-01-07",
@@ -750,7 +750,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         person1, person2, person3, person4 = self._create_multiple_people()
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-01",
                 "date_to": "2020-01-07",
@@ -804,7 +804,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         )
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-10",
                 "date_to": "2020-01-10",
@@ -863,7 +863,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         )
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-10",
                 "date_to": "2020-01-10",
@@ -877,7 +877,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(len(people["results"][0]["people"]), 1)
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-10",
                 "date_to": "2020-01-10",
@@ -931,7 +931,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         )
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-8",
                 "date_to": "2020-01-12",
@@ -946,7 +946,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(len(people["results"][0]["people"]), 2)
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-08",
                 "date_to": "2020-01-12",
@@ -987,7 +987,7 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
         )
 
         people = self.client.get(
-            f"/api/projects/{self.team.id}/persons/trends/",
+            f"/v1/projects/{self.team.id}/persons/trends/",
             data={
                 "date_from": "2020-01-08",
                 "date_to": "2020-01-12",
@@ -1054,10 +1054,10 @@ class TestPersonTrends(DatastoreTestMixin, APIBaseTest):
             "include_recordings": "true",
         }
 
-        people = self.client.get(f"/api/projects/{self.team.id}/persons/trends/", data=params).json()
+        people = self.client.get(f"/v1/projects/{self.team.id}/persons/trends/", data=params).json()
         assert len(people["results"][0]["people"]) == 2
 
         params["search"] = "ben"
 
-        people = self.client.get(f"/api/projects/{self.team.id}/persons/trends/", data=params).json()
+        people = self.client.get(f"/v1/projects/{self.team.id}/persons/trends/", data=params).json()
         assert len(people["results"][0]["people"]) == 1

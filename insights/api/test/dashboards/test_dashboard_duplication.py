@@ -35,7 +35,7 @@ class TestDashboardDuplication(APIBaseTest, QueryMatchingTest):
 
     def test_duplicating_dashboard_while_duplicating_tiles(self) -> None:
         duplicated_dashboard = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {
                 "duplicate_tiles": True,
                 "use_dashboard": self.starting_dashboard["id"],
@@ -64,7 +64,7 @@ class TestDashboardDuplication(APIBaseTest, QueryMatchingTest):
 
     def test_duplicating_dashboard_without_duplicating_tiles(self) -> None:
         duplicated_dashboard = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {
                 "duplicate_tiles": False,
                 "use_dashboard": self.starting_dashboard["id"],

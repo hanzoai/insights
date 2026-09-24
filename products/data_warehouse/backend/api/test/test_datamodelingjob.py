@@ -52,7 +52,7 @@ class TestDataModelingJob(APIBaseTest):
         )
 
     def test_list_data_modeling_jobs(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/data_modeling_jobs/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/data_modeling_jobs/")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -72,7 +72,7 @@ class TestDataModelingJob(APIBaseTest):
         self.assertEqual(first_job["error"], "Something went wrong")
 
     def test_retrieve_data_modeling_job(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/data_modeling_jobs/{self.job1.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/data_modeling_jobs/{self.job1.id}/")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -89,7 +89,7 @@ class TestDataModelingJob(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={self.saved_query.id}"
+            f"/v1/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={self.saved_query.id}"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -100,7 +100,7 @@ class TestDataModelingJob(APIBaseTest):
         self.assertNotIn(str(other_job.id), [job["id"] for job in results])
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={other_saved_query.id}"
+            f"/v1/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={other_saved_query.id}"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -111,10 +111,10 @@ class TestDataModelingJob(APIBaseTest):
         self.assertEqual(results[0]["id"], str(other_job.id))
 
     def test_cannot_access_other_teams_jobs(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/data_modeling_jobs/{self.other_team_job.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/data_modeling_jobs/{self.other_team_job.id}/")
         self.assertEqual(response.status_code, 404)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/data_modeling_jobs/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/data_modeling_jobs/")
         self.assertEqual(response.status_code, 200)
 
         job_ids = [job["id"] for job in response.json()["results"]]

@@ -585,7 +585,7 @@ class TestOAuthAccessTokenAPIScopePermission(BaseTest):
         """OAuth tokens with empty scopes should not have access"""
         self.access_token.scope = ""
         self.access_token.save()
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/")
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["detail"], "OAuth token has no scopes and cannot access this resource")
 
@@ -593,29 +593,29 @@ class TestOAuthAccessTokenAPIScopePermission(BaseTest):
         """Even * scope isn't allowed for unsupported endpoints"""
         self.access_token.scope = "*"
         self.access_token.save()
-        response = self._do_request(f"/api/projects/{self.team.id}/search")
+        response = self._do_request(f"/v1/projects/{self.team.id}/search")
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["detail"], "This action does not support Personal API Key access")
 
     def test_allows_derived_scope_for_read(self):
         """OAuth token with feature_flag:read can read feature flags"""
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/")
         self.assertEqual(response.status_code, 200)
 
     def test_denies_derived_scope_for_write(self):
         """OAuth token with feature_flag:read cannot write feature flags"""
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/", method="POST")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/", method="POST")
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["detail"], "API key missing required scope 'feature_flag:write'")
 
     def test_allows_action_with_required_scopes(self):
         """OAuth token can access endpoints that match its scopes"""
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, 200)
 
     def test_forbids_action_with_other_scope(self):
         """OAuth token cannot access endpoints requiring different scopes"""
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/activity")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/activity")
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["detail"], "API key missing required scope 'activity_log:read'")
 
@@ -623,21 +623,21 @@ class TestOAuthAccessTokenAPIScopePermission(BaseTest):
         """OAuth token with multiple scopes can access all matching endpoints"""
         self.access_token.scope = "feature_flag:write activity_log:read"
         self.access_token.save()
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/activity")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/activity")
         self.assertEqual(response.status_code, 200)
 
     def test_write_scope_allows_read_operations(self):
         """OAuth token with write scope should also allow read operations"""
         self.access_token.scope = "feature_flag:write"
         self.access_token.save()
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/")
         self.assertEqual(response.status_code, 200)
 
     def test_wildcard_scope_allows_all_supported_endpoints(self):
         """OAuth token with * scope can access all supported endpoints"""
         self.access_token.scope = "*"
         self.access_token.save()
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/")
         self.assertEqual(response.status_code, 200)
 
 
@@ -681,12 +681,12 @@ class TestOAuthAccessTokenWithOrganizationScoping(BaseTest):
 
     def test_allows_access_to_scoped_org(self):
         """OAuth token scoped to an org can access that org"""
-        response = self._do_request(f"/api/organizations/{self.organization.id}/")
+        response = self._do_request(f"/v1/organizations/{self.organization.id}/")
         self.assertEqual(response.status_code, 200)
 
     def test_allows_access_to_scoped_org_teams(self):
         """OAuth token scoped to an org can access teams in that org"""
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/")
         self.assertEqual(response.status_code, 200)
 
     def test_denies_access_to_non_scoped_org_and_team(self):
@@ -695,7 +695,7 @@ class TestOAuthAccessTokenWithOrganizationScoping(BaseTest):
         other_user = User.objects.create(email="other@example.com")
         other_org, _, _ = Organization.objects.bootstrap(user=other_user)
 
-        response = self._do_request(f"/api/organizations/{other_org.id}/")
+        response = self._do_request(f"/v1/organizations/{other_org.id}/")
 
         self.assertEqual(response.status_code, 404)
 
@@ -740,7 +740,7 @@ class TestOAuthAccessTokenWithTeamScoping(BaseTest):
 
     def test_allows_access_to_scoped_team(self):
         """OAuth token scoped to a team can access that team"""
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/")
         self.assertEqual(response.status_code, 200)
 
     def test_denies_access_to_non_scoped_team(self):
@@ -749,7 +749,7 @@ class TestOAuthAccessTokenWithTeamScoping(BaseTest):
         other_user = User.objects.create(email="other@example.com")
         _, _, other_team = Organization.objects.bootstrap(user=other_user)
 
-        response = self._do_request(f"/api/projects/{other_team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{other_team.id}/feature_flags/")
         self.assertEqual(response.status_code, 403)
         self.assertIn("does not have access to the requested project", response.json()["detail"])
 
@@ -802,23 +802,23 @@ class TestOAuthAccessTokenWithBothTeamAndOrgScoping(BaseTest):
 
     def test_allows_access_to_scoped_team(self):
         """OAuth token with both org and team scopes allows access to the scoped team"""
-        response = self._do_request(f"/api/projects/{self.team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.team.id}/feature_flags/")
         self.assertEqual(response.status_code, 200)
 
     def test_denies_access_to_other_team_in_scoped_org(self):
         """OAuth token with both org and team scopes denies access to other teams in the same org"""
-        response = self._do_request(f"/api/projects/{self.team2.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.team2.id}/feature_flags/")
         # Returns 404 because the user is a member of the org but the token is scoped to a different team
         self.assertEqual(response.status_code, 404)
 
     def test_denies_access_to_team_in_non_scoped_org(self):
         """OAuth token with both org and team scopes denies access to teams in other orgs"""
-        response = self._do_request(f"/api/projects/{self.other_org_team.id}/feature_flags/")
+        response = self._do_request(f"/v1/projects/{self.other_org_team.id}/feature_flags/")
         self.assertEqual(response.status_code, 403)
 
     def test_denies_access_to_org_endpoint_when_teams_scoped(self):
         """OAuth token with scoped_teams cannot access org endpoints (current limitation)"""
-        response = self._do_request(f"/api/organizations/{self.organization.id}/")
+        response = self._do_request(f"/v1/organizations/{self.organization.id}/")
         # When scoped_teams is set, org endpoints are denied because the logic requires team-based endpoints
         self.assertEqual(response.status_code, 403)
         self.assertIn("only supported on project-based endpoints", response.json()["detail"])
@@ -860,7 +860,7 @@ class TestOAuthAccessTokenExpiration(BaseTest):
     def _do_request(self, token=None):
         token = token or self.access_token.token
         return self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/", headers={"authorization": f"Bearer {token}"}
+            f"/v1/projects/{self.team.id}/feature_flags/", headers={"authorization": f"Bearer {token}"}
         )
 
     def test_valid_token_allows_access(self):
@@ -928,7 +928,7 @@ class TestOAuthAccessTokenUserMembership(BaseTest):
     def _do_request(self, token=None):
         token = token or self.access_token.token
         return self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/", headers={"authorization": f"Bearer {token}"}
+            f"/v1/projects/{self.team.id}/feature_flags/", headers={"authorization": f"Bearer {token}"}
         )
 
     def test_token_works_with_membership(self):
@@ -971,7 +971,7 @@ class TestOAuthAccessTokenUserMembership(BaseTest):
 
         # Verify token does NOT work because user is not in that org
         response = self.client.get(
-            f"/api/projects/{other_team.id}/feature_flags/",
+            f"/v1/projects/{other_team.id}/feature_flags/",
             headers={"authorization": f"Bearer {other_team_token.token}"},
         )
         self.assertEqual(response.status_code, 403)  # Forbidden - user not in org

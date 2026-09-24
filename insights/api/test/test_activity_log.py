@@ -63,7 +63,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
         if "filters" not in data:
             data["filters"] = {"events": [{"id": "$pageview"}]}
 
-        response = self.client.post(f"/api/projects/{team_id}/insights", data=data)
+        response = self.client.post(f"/v1/projects/{team_id}/insights", data=data)
         self.assertEqual(response.status_code, expected_status)
 
         response_json = response.json()
@@ -80,20 +80,20 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
 
             frozen_time.tick(delta=timedelta(minutes=6))
             flag_one = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 _feature_flag_json_payload("one"),
             ).json()["id"]
 
             frozen_time.tick(delta=timedelta(minutes=6))
             flag_two = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 _feature_flag_json_payload("two"),
             ).json()["id"]
 
             frozen_time.tick(delta=timedelta(minutes=6))
 
             notebook_json = self.client.post(
-                f"/api/projects/{self.team.id}/notebooks/",
+                f"/v1/projects/{self.team.id}/notebooks/",
                 {"content": "print('hello world')", "name": "notebook"},
             ).json()
 
@@ -132,7 +132,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
         for created_insight_id in created_insights[:7]:
             frozen_time.tick(delta=timedelta(minutes=6))
             update_response = self.client.patch(
-                f"/api/projects/{self.team.id}/insights/{created_insight_id}",
+                f"/v1/projects/{self.team.id}/insights/{created_insight_id}",
                 {"name": f"{created_insight_id}-insight-changed-by-{the_user.id}"},
             )
             self.assertEqual(update_response.status_code, status.HTTP_200_OK)
@@ -140,7 +140,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
             frozen_time.tick(delta=timedelta(minutes=6))
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_one}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_one}",
                 {"name": f"one-edited-by-{the_user.id}"},
             ).status_code
             == status.HTTP_200_OK
@@ -149,7 +149,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
         frozen_time.tick(delta=timedelta(minutes=6))
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_two}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_two}",
                 {"name": f"two-edited-by-{the_user.id}"},
             ).status_code
             == status.HTTP_200_OK
@@ -167,7 +167,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
             frozen_time.tick(delta=timedelta(seconds=5))
             assert (
                 self.client.patch(
-                    f"/api/projects/{self.team.id}/notebooks/{notebook_short_id}",
+                    f"/v1/projects/{self.team.id}/notebooks/{notebook_short_id}",
                     {"content": typed_text, "version": notebook_version},
                 ).status_code
                 == status.HTTP_200_OK
@@ -181,13 +181,13 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
         self.team.receive_org_level_activity_logs = True
         self.team.save()
 
-        res = self.client.get(f"/api/projects/{self.team.id}/activity_log")
+        res = self.client.get(f"/v1/projects/{self.team.id}/activity_log")
 
         assert res.status_code == status.HTTP_200_OK
         assert len(res.json()["results"]) == 46
 
     def test_can_list_all_activity_filtered_by_scope(self) -> None:
-        res = self.client.get(f"/api/projects/{self.team.id}/activity_log?scope=FeatureFlag")
+        res = self.client.get(f"/v1/projects/{self.team.id}/activity_log?scope=FeatureFlag")
         assert res.status_code == status.HTTP_200_OK
         assert len(res.json()["results"]) == 6
         assert [r["scope"] for r in res.json()["results"]] == ["FeatureFlag"] * 6

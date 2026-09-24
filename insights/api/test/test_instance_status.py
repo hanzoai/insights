@@ -8,19 +8,19 @@ from rest_framework import status
 class TestInstanceStatus(APIBaseTest):
     @pytest.mark.skip_on_multitenancy
     def test_instance_status_routes(self):
-        self.assertEqual(self.client.get("/api/instance_status").status_code, status.HTTP_200_OK)
+        self.assertEqual(self.client.get("/v1/instance_status").status_code, status.HTTP_200_OK)
         self.assertEqual(
-            self.client.get("/api/instance_status/navigation").status_code,
+            self.client.get("/v1/instance_status/navigation").status_code,
             status.HTTP_200_OK,
         )
         self.assertEqual(
-            self.client.get("/api/instance_status/queries").status_code,
+            self.client.get("/v1/instance_status/queries").status_code,
             status.HTTP_200_OK,
         )
 
     def test_object_storage_when_disabled(self):
         with self.settings(OBJECT_STORAGE_ENABLED=False):
-            response = self.client.get("/api/instance_status")
+            response = self.client.get("/v1/instance_status")
         json = response.json()
 
         object_storage_metrics = [o for o in json["results"]["overview"] if o.get("key", None) == "object_storage"]
@@ -40,7 +40,7 @@ class TestInstanceStatus(APIBaseTest):
         patched_s3_client.head_bucket.return_value = False
 
         with self.settings(OBJECT_STORAGE_ENABLED=True):
-            response = self.client.get("/api/instance_status")
+            response = self.client.get("/v1/instance_status")
             json = response.json()
 
             object_storage_metrics = [o for o in json["results"]["overview"] if o.get("key", None) == "object_storage"]
@@ -65,7 +65,7 @@ class TestInstanceStatus(APIBaseTest):
         patched_s3_client.head_bucket.return_value = True
 
         with self.settings(OBJECT_STORAGE_ENABLED=True):
-            response = self.client.get("/api/instance_status")
+            response = self.client.get("/v1/instance_status")
             json = response.json()
 
             object_storage_metrics = [o for o in json["results"]["overview"] if o.get("key", None) == "object_storage"]
@@ -95,7 +95,7 @@ class TestInstanceStatus(APIBaseTest):
         for mock in mocks:
             mock.return_value = True
 
-        response = self.client.get("/api/instance_status/navigation").json()
+        response = self.client.get("/v1/instance_status/navigation").json()
         self.assertEqual(
             response,
             {
@@ -114,7 +114,7 @@ class TestInstanceStatus(APIBaseTest):
         for mock in mocks:
             mock.return_value = False
 
-        response = self.client.get("/api/instance_status/navigation").json()
+        response = self.client.get("/v1/instance_status/navigation").json()
 
         self.assertEqual(
             response,
@@ -134,7 +134,7 @@ class TestInstanceStatus(APIBaseTest):
         self.user.save()
 
         with self.is_cloud(True):
-            response = self.client.get("/api/instance_status/navigation").json()
+            response = self.client.get("/v1/instance_status/navigation").json()
 
         self.assertEqual(
             response,

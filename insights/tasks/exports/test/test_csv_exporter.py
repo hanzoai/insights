@@ -46,7 +46,7 @@ from insights.utils import absolute_uri
 TEST_PREFIX = "Test-Exports"
 
 # see GitHub issue #11204
-regression_11204 = "api/projects/6642/insights/trend/?events=%5B%7B%22id%22%3A%22product%20viewed%22%2C%22name%22%3A%22product%20viewed%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&actions=%5B%5D&display=ActionsTable&insight=TRENDS&interval=day&breakdown=productName&new_entity=%5B%5D&properties=%5B%5D&step_limit=5&funnel_filter=%7B%7D&breakdown_type=event&exclude_events=%5B%5D&path_groupings=%5B%5D&include_event_types=%5B%22%24pageview%22%5D&filter_test_accounts=false&local_path_cleaning_filters=%5B%5D&date_from=-14d&offset=50"
+regression_11204 = "v1/projects/6642/insights/trend/?events=%5B%7B%22id%22%3A%22product%20viewed%22%2C%22name%22%3A%22product%20viewed%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&actions=%5B%5D&display=ActionsTable&insight=TRENDS&interval=day&breakdown=productName&new_entity=%5B%5D&properties=%5B%5D&step_limit=5&funnel_filter=%7B%7D&breakdown_type=event&exclude_events=%5B%5D&path_groupings=%5B%5D&include_event_types=%5B%22%24pageview%22%5D&filter_test_accounts=false&local_path_cleaning_filters=%5B%5D&date_from=-14d&offset=50"
 
 
 @override_settings(SITE_URL="http://testserver")
@@ -114,7 +114,7 @@ class TestCSVExporter(APIBaseTest):
         asset = ExportedAsset(
             team=self.team,
             export_format=ExportedAsset.ExportFormat.CSV,
-            export_context={"path": "/api/literally/anything", **extra_context},
+            export_context={"path": "/v1/literally/anything", **extra_context},
         )
         asset.save()
         return asset
@@ -305,7 +305,7 @@ class TestCSVExporter(APIBaseTest):
     def test_csv_exporter_limits_breakdown_insights_correctly(
         self, mocked_request, mocked_object_storage_write, mocked_uuidt
     ) -> None:
-        path = "api/projects/1/insights/trend/?insight=TRENDS&breakdown=email&date_from=-7d"
+        path = "v1/projects/1/insights/trend/?insight=TRENDS&breakdown=email&date_from=-7d"
         exported_asset = self._create_asset({"path": path})
         mock_response = Mock()
         mock_response.status_code = 200
@@ -1560,7 +1560,7 @@ class TestCSVExporter(APIBaseTest):
             exported_asset = ExportedAsset(
                 team=self.team,
                 export_format=ExportedAsset.ExportFormat.XLSX,
-                export_context={"path": "/api/test/endpoint"},
+                export_context={"path": "/v1/test/endpoint"},
             )
             exported_asset.save()
             mocked_uuidt.return_value = "a-guid"

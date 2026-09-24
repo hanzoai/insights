@@ -21,7 +21,7 @@ class TestResourceTransferPreview(APIBaseTest):
         )
 
     def _preview_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/preview/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/preview/"
 
     def test_preview_returns_mutable_resources_only(self) -> None:
         insight = Insight.objects.create(team=self.team, name="My insight")
@@ -176,7 +176,7 @@ class TestResourceTransferTransfer(APIBaseTest):
         )
 
     def _transfer_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/transfer/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/transfer/"
 
     def test_transfer_creates_resources_in_destination(self) -> None:
         insight = Insight.objects.create(team=self.team, name="My insight")
@@ -467,7 +467,7 @@ class TestResourceTransferSearch(APIBaseTest):
         )
 
     def _search_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/search/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/search/"
 
     def test_search_returns_resources_in_target_team(self) -> None:
         Insight.objects.create(team=self.dest_team, name="Target insight A")

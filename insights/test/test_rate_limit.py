@@ -128,13 +128,13 @@ class TestUserAPI(APIBaseTest):
     def test_default_burst_rate_limit(self, rate_limit_enabled_mock, incr_mock):
         for _ in range(5):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags",
+                f"/v1/projects/{self.team.pk}/feature_flags",
                 headers={"authorization": f"Bearer {self.personal_api_key}"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/feature_flags", headers={"authorization": f"Bearer {self.personal_api_key}"}
+            f"/v1/projects/{self.team.pk}/feature_flags", headers={"authorization": f"Bearer {self.personal_api_key}"}
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
@@ -150,7 +150,7 @@ class TestUserAPI(APIBaseTest):
                 "team_id": self.team.pk,
                 "scope": "burst",
                 "rate": "5/minute",
-                "route": "/api/projects/TEAM_ID/feature_flags/",
+                "route": "/v1/projects/TEAM_ID/feature_flags/",
                 "hashed_personal_api_key": self.hashed_personal_api_key,
             },
         )
@@ -163,7 +163,7 @@ class TestUserAPI(APIBaseTest):
         for _ in range(5):
             with freeze_time(base_time):
                 response = self.client.get(
-                    f"/api/projects/{self.team.pk}/feature_flags",
+                    f"/v1/projects/{self.team.pk}/feature_flags",
                     headers={"authorization": f"Bearer {self.personal_api_key}"},
                 )
                 base_time += timedelta(seconds=61)
@@ -172,7 +172,7 @@ class TestUserAPI(APIBaseTest):
         with freeze_time(base_time):
             for _ in range(2):
                 response = self.client.get(
-                    f"/api/projects/{self.team.pk}/feature_flags",
+                    f"/v1/projects/{self.team.pk}/feature_flags",
                     headers={"authorization": f"Bearer {self.personal_api_key}"},
                 )
                 self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
@@ -186,7 +186,7 @@ class TestUserAPI(APIBaseTest):
                     "team_id": self.team.pk,
                     "scope": "sustained",
                     "rate": "5/hour",
-                    "route": "/api/projects/TEAM_ID/feature_flags/",
+                    "route": "/v1/projects/TEAM_ID/feature_flags/",
                     "hashed_personal_api_key": self.hashed_personal_api_key,
                 },
             )
@@ -198,7 +198,7 @@ class TestUserAPI(APIBaseTest):
         # Does nothing on /feature_flags endpoint
         for _ in range(10):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags",
+                f"/v1/projects/{self.team.pk}/feature_flags",
                 headers={"authorization": f"Bearer {self.personal_api_key}"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -206,13 +206,13 @@ class TestUserAPI(APIBaseTest):
 
         for _ in range(5):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/events", headers={"authorization": f"Bearer {self.personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/events", headers={"authorization": f"Bearer {self.personal_api_key}"}
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Does not actually block the request, but increments the counter
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/events", headers={"authorization": f"Bearer {self.personal_api_key}"}
+            f"/v1/projects/{self.team.pk}/events", headers={"authorization": f"Bearer {self.personal_api_key}"}
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
@@ -226,7 +226,7 @@ class TestUserAPI(APIBaseTest):
                 "team_id": self.team.pk,
                 "scope": "datastore_burst",
                 "rate": "5/minute",
-                "route": "/api/projects/TEAM_ID/events/",
+                "route": "/v1/projects/TEAM_ID/events/",
                 "hashed_personal_api_key": self.hashed_personal_api_key,
             },
         )
@@ -238,14 +238,14 @@ class TestUserAPI(APIBaseTest):
         self.client.logout()
         for _ in range(5):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags",
+                f"/v1/projects/{self.team.pk}/feature_flags",
                 headers={"authorization": f"Bearer {self.personal_api_key}"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # First user gets rate limited
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/feature_flags", headers={"authorization": f"Bearer {self.personal_api_key}"}
+            f"/v1/projects/{self.team.pk}/feature_flags", headers={"authorization": f"Bearer {self.personal_api_key}"}
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
         self.assertEqual(
@@ -258,7 +258,7 @@ class TestUserAPI(APIBaseTest):
                 "team_id": self.team.pk,
                 "scope": "burst",
                 "rate": "5/minute",
-                "route": "/api/projects/TEAM_ID/feature_flags/",
+                "route": "/v1/projects/TEAM_ID/feature_flags/",
                 "hashed_personal_api_key": self.hashed_personal_api_key,
             },
         )
@@ -273,7 +273,7 @@ class TestUserAPI(APIBaseTest):
 
         # Second user gets rate limited after a single request
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/feature_flags", headers={"authorization": f"Bearer {new_personal_api_key}"}
+            f"/v1/projects/{self.team.pk}/feature_flags", headers={"authorization": f"Bearer {new_personal_api_key}"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -287,7 +287,7 @@ class TestUserAPI(APIBaseTest):
 
         # Requests to the new team are not rate limited
         response = self.client.get(
-            f"/api/projects/{new_team.pk}/feature_flags", headers={"authorization": f"Bearer {new_personal_api_key}"}
+            f"/v1/projects/{new_team.pk}/feature_flags", headers={"authorization": f"Bearer {new_personal_api_key}"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -298,7 +298,7 @@ class TestUserAPI(APIBaseTest):
         # until it hits their specific limit
         for _ in range(5):
             response = self.client.get(
-                f"/api/projects/{new_team.pk}/feature_flags",
+                f"/v1/projects/{new_team.pk}/feature_flags",
                 headers={"authorization": f"Bearer {new_personal_api_key}"},
             )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
@@ -314,13 +314,13 @@ class TestUserAPI(APIBaseTest):
         self.client.logout()
         for _ in range(5):
             response = self.client.get(
-                f"/api/organizations/{self.organization.pk}/plugins",
+                f"/v1/organizations/{self.organization.pk}/plugins",
                 headers={"authorization": f"Bearer {self.personal_api_key}"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.get(
-            f"/api/organizations/{self.organization.pk}/plugins",
+            f"/v1/organizations/{self.organization.pk}/plugins",
             headers={"authorization": f"Bearer {self.personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
@@ -335,7 +335,7 @@ class TestUserAPI(APIBaseTest):
                 "team_id": None,
                 "scope": "burst",
                 "rate": "5/minute",
-                "route": "/api/organizations/ORG_ID/plugins/",
+                "route": "/v1/organizations/ORG_ID/plugins/",
                 "hashed_personal_api_key": self.hashed_personal_api_key,
             },
         )
@@ -348,7 +348,7 @@ class TestUserAPI(APIBaseTest):
 
         for _ in range(6):
             response = self.client.get(
-                f"/api/organizations/{self.organization.pk}/plugins",
+                f"/v1/organizations/{self.organization.pk}/plugins",
                 headers={"authorization": f"Bearer {self.personal_api_key}"},
             )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
@@ -361,12 +361,12 @@ class TestUserAPI(APIBaseTest):
 
         # if not logged in, we 401
         for _ in range(3):
-            response = self.client.get(f"/api/organizations/{self.organization.pk}/plugins")
+            response = self.client.get(f"/v1/organizations/{self.organization.pk}/plugins")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         self.client.force_login(self.user)
         # but no rate limits when logged in and not using personal API key
-        response = self.client.get(f"/api/organizations/{self.organization.pk}/plugins")
+        response = self.client.get(f"/v1/organizations/{self.organization.pk}/plugins")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             len([1 for name, args, kwargs in incr_mock.mock_calls if args[0] == "rate_limit_exceeded"]),
@@ -380,10 +380,10 @@ class TestUserAPI(APIBaseTest):
         self.client.logout()
         for _ in range(5):
             # Hitting the login endpoint because it allows for unauthenticated requests
-            response = self.client.post(f"/api/login")
+            response = self.client.post(f"/v1/login")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        response = self.client.post(f"/api/login")
+        response = self.client.post(f"/v1/login")
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS, response.content)
 
         self.assertEqual(
@@ -396,7 +396,7 @@ class TestUserAPI(APIBaseTest):
                 "team_id": None,
                 "scope": "burst",
                 "rate": "5/minute",
-                "route": "/api/login/",
+                "route": "/v1/login/",
                 "hashed_personal_api_key": None,
             },
         )
@@ -422,7 +422,7 @@ class TestUserAPI(APIBaseTest):
     @patch("insights.rate_limit.is_rate_limit_enabled", return_value=False)
     def test_does_not_rate_limit_if_rate_limit_disabled(self, rate_limit_enabled_mock, incr_mock):
         for _ in range(6):
-            response = self.client.get(f"/api/projects/{self.team.pk}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.pk}/feature_flags")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert call("rate_limit_exceeded", tags=ANY) not in incr_mock.mock_calls
 
@@ -439,7 +439,7 @@ class TestUserAPI(APIBaseTest):
                 ) as wrapped_get_instance_setting:
                     for _ in range(10):
                         self.client.get(
-                            f"/api/projects/{self.team.pk}/feature_flags",
+                            f"/v1/projects/{self.team.pk}/feature_flags",
                             headers={"authorization": f"Bearer {self.personal_api_key}"},
                         )
 
@@ -448,7 +448,7 @@ class TestUserAPI(APIBaseTest):
                     frozen_time.tick(delta=timedelta(seconds=65))
                     for _ in range(10):
                         self.client.get(
-                            f"/api/projects/{self.team.pk}/feature_flags",
+                            f"/v1/projects/{self.team.pk}/feature_flags",
                             headers={"authorization": f"Bearer {self.personal_api_key}"},
                         )
                     assert wrapped_get_instance_setting.call_count == 2
@@ -461,7 +461,7 @@ class TestUserAPI(APIBaseTest):
             with override_instance_config("RATE_LIMITING_ALLOW_LIST_TEAMS", f"{self.team.pk}"):
                 for _ in range(10):
                     response = self.client.get(
-                        f"/api/projects/{self.team.pk}/feature_flags",
+                        f"/v1/projects/{self.team.pk}/feature_flags",
                         headers={"authorization": f"Bearer {self.personal_api_key}"},
                     )
                     self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -709,35 +709,35 @@ class TestUserAPI(APIBaseTest):
         [
             # Test Django route pattern normalization
             (
-                "/api/environments/123/query/abc-123-def/progress/",
-                "api/environments/<int:team_id>/query/<str:query_uuid>/progress/",
-                "/api/environments/TEAM_ID/query/QUERY_UUID/progress/",
+                "/v1/environments/123/query/abc-123-def/progress/",
+                "v1/environments/<int:team_id>/query/<str:query_uuid>/progress/",
+                "/v1/environments/TEAM_ID/query/QUERY_UUID/progress/",
                 "Django route pattern with int and str parameters",
             ),
             (
-                "/api/projects/123/feature_flags/",
-                "^api/projects/(?P<parent_lookup_project_id>[^/.]+)/feature_flags/?$",
-                "/api/projects/TEAM_ID/feature_flags/",
+                "/v1/projects/123/feature_flags/",
+                "^v1/projects/(?P<parent_lookup_project_id>[^/.]+)/feature_flags/?$",
+                "/v1/projects/TEAM_ID/feature_flags/",
                 "Django route pattern with named regexp parameters",
             ),
             (
-                "/api/projects/123/recordings/session-recordings-id-1234",
-                "/api/projects/<team_id>/recordings/(?P<session_recording_id>[^/.]+)",
-                "/api/projects/TEAM_ID/recordings/SESSION_RECORDING_ID/",
+                "/v1/projects/123/recordings/session-recordings-id-1234",
+                "/v1/projects/<team_id>/recordings/(?P<session_recording_id>[^/.]+)",
+                "/v1/projects/TEAM_ID/recordings/SESSION_RECORDING_ID/",
                 "session recordings",
             ),
             # # Test fallback pattern for projects
             (
-                "/api/projects/123/some/endpoint",
+                "/v1/projects/123/some/endpoint",
                 None,  # resolve will raise exception
-                "/api/projects/TEAM_ID/some/endpoint",
+                "/v1/projects/TEAM_ID/some/endpoint",
                 "Fallback pattern for team/project IDs",
             ),
             # Test fallback pattern for organizations
             (
-                "/api/organizations/org-123/plugins",
+                "/v1/organizations/org-123/plugins",
                 None,  # resolve will raise exception
-                "/api/organizations/ORG_ID/plugins",
+                "/v1/organizations/ORG_ID/plugins",
                 "Fallback pattern for organization IDs",
             ),
             # Test empty/None paths

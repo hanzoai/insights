@@ -255,9 +255,9 @@ class DatastoreFunnelBase(ABC):
 
             serialized_result.update(
                 {
-                    "converted_people_url": f"{self._base_uri}api/person/funnel/?{urllib.parse.urlencode(converted_people_filter.to_params())}&cache_invalidation_key={cache_invalidation_key}",
+                    "converted_people_url": f"{self._base_uri}v1/person/funnel/?{urllib.parse.urlencode(converted_people_filter.to_params())}&cache_invalidation_key={cache_invalidation_key}",
                     "dropped_people_url": (
-                        f"{self._base_uri}api/person/funnel/?{urllib.parse.urlencode(dropped_people_filter.to_params())}&cache_invalidation_key={cache_invalidation_key}"
+                        f"{self._base_uri}v1/person/funnel/?{urllib.parse.urlencode(dropped_people_filter.to_params())}&cache_invalidation_key={cache_invalidation_key}"
                         # NOTE: If we are looking at the first step, there is no drop off,
                         # everyone converted, otherwise they would not have been
                         # included in the funnel.

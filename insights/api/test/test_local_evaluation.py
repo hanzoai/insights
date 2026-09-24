@@ -72,7 +72,7 @@ class TestFeatureFlagDependencyTransformation(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         flags = data["flags"]
@@ -143,7 +143,7 @@ class TestFeatureFlagDependencyTransformation(APIBaseTest):
         }
         flag_a.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
@@ -219,7 +219,7 @@ class TestFeatureFlagDependencyTransformation(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         flags = data["flags"]
@@ -270,7 +270,7 @@ class TestFeatureFlagDependencyTransformation(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         flags = data["flags"]
@@ -320,7 +320,7 @@ class TestFeatureFlagDependencyTransformation(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         flags = data["flags"]
@@ -369,7 +369,7 @@ class TestFeatureFlagDependencyTransformation(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         flags = data["flags"]
@@ -421,7 +421,7 @@ class TestFeatureFlagDependencyTransformation(APIBaseTest):
             )
             dependent_flags.append(flag)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         flags = data["flags"]
@@ -482,7 +482,7 @@ class TestSurveyFlagExclusionAPI(APIBaseTest):
             internal_response_sampling_flag=response_sampling_flag,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -508,7 +508,7 @@ class TestSurveyFlagExclusionAPI(APIBaseTest):
             linked_flag=user_linked_flag,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/local_evaluation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/local_evaluation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()

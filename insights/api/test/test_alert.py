@@ -33,7 +33,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 "trendsFilter": {"display": "BoldNumber"},
             },
         }
-        self.insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=self.default_insight_data).json()
+        self.insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data).json()
 
     def test_create_and_delete_alert(self) -> None:
         creation_request = {
@@ -46,7 +46,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {}}},
             "calculation_interval": "daily",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
 
         expected_alert_json = {
             "calculation_interval": "daily",
@@ -75,13 +75,13 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         assert response.status_code == status.HTTP_201_CREATED, response.content
         assert response.json() == expected_alert_json
 
-        alerts = self.client.get(f"/api/projects/{self.team.id}/alerts")
+        alerts = self.client.get(f"/v1/projects/{self.team.id}/alerts")
         assert alerts.json()["results"] == [expected_alert_json]
 
         alert_id = response.json()["id"]
-        self.client.delete(f"/api/projects/{self.team.id}/alerts/{alert_id}")
+        self.client.delete(f"/v1/projects/{self.team.id}/alerts/{alert_id}")
 
-        alerts = self.client.get(f"/api/projects/{self.team.id}/alerts")
+        alerts = self.client.get(f"/v1/projects/{self.team.id}/alerts")
         assert len(alerts.json()["results"]) == 0
 
     def test_incorrect_creation(self) -> None:
@@ -92,7 +92,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {}},
             "name": "alert name",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
         another_team = Team.objects.create(
@@ -100,7 +100,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             api_token=self.CONFIG_API_TOKEN + "2",
         )
         another_team_insight = self.client.post(
-            f"/api/projects/{another_team.id}/insights", data=self.default_insight_data
+            f"/v1/projects/{another_team.id}/insights", data=self.default_insight_data
         ).json()
         creation_request = {
             "insight": str(another_team_insight["id"]),
@@ -110,7 +110,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {}},
             "name": "alert name",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_and_list_alert(self) -> None:
@@ -122,16 +122,16 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {}}},
             "name": "alert name",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
 
-        list = self.client.get(f"/api/projects/{self.team.id}/alerts?insight={self.insight['id']}")
+        list = self.client.get(f"/v1/projects/{self.team.id}/alerts?insight={self.insight['id']}")
         assert list.status_code == status.HTTP_200_OK
         results = list.json()["results"]
         assert len(results) == 1
         assert results[0]["id"] == alert["id"]
 
         list_for_another_insight = self.client.get(
-            f"/api/projects/{self.team.id}/alerts?insight={self.insight['id'] + 1}"
+            f"/v1/projects/{self.team.id}/alerts?insight={self.insight['id'] + 1}"
         )
         assert list_for_another_insight.status_code == status.HTTP_200_OK
         assert len(list_for_another_insight.json()["results"]) == 0
@@ -148,15 +148,15 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {}}},
                 "name": "alert name",
             }
-            self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+            self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
 
-            alert_2 = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+            alert_2 = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
 
             assert alert_2["code"] == "invalid_input"
 
     def test_alert_is_deleted_on_insight_update(self) -> None:
         another_insight = self.client.post(
-            f"/api/projects/{self.team.id}/insights", data=self.default_insight_data
+            f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data
         ).json()
         creation_request = {
             "insight": another_insight["id"],
@@ -166,27 +166,27 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {}}},
             "name": "alert name",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
 
         updated_insight = deepcopy(self.default_insight_data)
         updated_insight["query"]["series"][0]["event"] = "$anotherEvent"
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{another_insight['id']}",
+            f"/v1/projects/{self.team.id}/insights/{another_insight['id']}",
             data=updated_insight,
         ).json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         # alerts should not be deleted if the new insight version supports alerts
         assert response.status_code == status.HTTP_200_OK
 
         insight_without_alert_support = deepcopy(self.default_insight_data)
         insight_without_alert_support["query"] = {"kind": "FunnelsQuery", "series": []}
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{another_insight['id']}",
+            f"/v1/projects/{self.team.id}/insights/{another_insight['id']}",
             data=insight_without_alert_support,
         ).json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_delete_alert_cleans_up_insights_functions(self) -> None:
@@ -196,7 +196,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {}}},
             "name": "alert name",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         alert_id = alert["id"]
 
         linked_insights_function = InsightsFunction.objects.create(
@@ -222,7 +222,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             },
         )
 
-        self.client.delete(f"/api/projects/{self.team.id}/alerts/{alert_id}")
+        self.client.delete(f"/v1/projects/{self.team.id}/alerts/{alert_id}")
 
         linked_insights_function.refresh_from_db()
         assert linked_insights_function.deleted is True
@@ -243,7 +243,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "state": AlertState.FIRING,
         }
 
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         assert alert["state"] == AlertState.NOT_FIRING
 
         alert = AlertConfiguration.objects.get(pk=alert["id"])
@@ -254,7 +254,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         assert firing_alert.state == AlertState.FIRING
 
         resolved_alert = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{firing_alert.id}", {"snoozed_until": datetime.now()}
+            f"/v1/projects/{self.team.id}/alerts/{firing_alert.id}", {"snoozed_until": datetime.now()}
         ).json()
         assert resolved_alert["state"] == AlertState.SNOOZED
 
@@ -269,7 +269,7 @@ class TestAlertAPIKeyAccess(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.insight = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "query": {
                     "kind": "TrendsQuery",
@@ -309,7 +309,7 @@ class TestAlertAPIKeyAccess(APIBaseTest):
         api_key = self._create_api_key(scopes)
         self.client.logout()
 
-        endpoint = f"/api/projects/{self.team.id}/alerts{endpoint_suffix}".format(alert_id=self.alert.id)
+        endpoint = f"/v1/projects/{self.team.id}/alerts{endpoint_suffix}".format(alert_id=self.alert.id)
         response = getattr(self.client, http_method)(endpoint, HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
         assert response.status_code == expected_status
@@ -328,7 +328,7 @@ class TestAlertAPIKeyAccess(APIBaseTest):
         self.client.logout()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/",
+            f"/v1/projects/{self.team.id}/alerts/",
             data={
                 "insight": self.insight["id"],
                 "subscribed_users": [self.user.id],

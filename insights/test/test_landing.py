@@ -22,12 +22,12 @@ class TestLandingPage(APIBaseTest):
 
     def test_landing_ctas_point_at_surfaces_that_work(self):
         body = Client().get("/").content.decode()
-        # Plans leave for the canonical pricing page on purpose: /api/billing is
+        # Plans leave for the canonical pricing page on purpose: /v1/billing is
         # not served by this app, so an in-app funnel would dead-end.
         assert "https://hanzo.ai/pricing" in body
         assert "https://github.com/hanzoai/insights" in body
         assert 'href="/login"' in body
-        assert "/api/billing" not in body
+        assert "/v1/billing" not in body
 
     def test_landing_ships_no_third_party_assets(self):
         """Third-party CDNs are refused in prod and fail SILENTLY — a font that

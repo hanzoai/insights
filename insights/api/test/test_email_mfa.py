@@ -32,14 +32,14 @@ class TestEmailMFAAPI(APIBaseTest):
         mock_feature_enabled,
         mock_esp_suppression,
     ):
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response_data = response.json()
         self.assertEqual(response_data["code"], "email_mfa_required")
         self.assertEqual(response_data["detail"], self.user.email)
 
         # Assert user is not logged in yet
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # Assert email task was called
@@ -63,14 +63,14 @@ class TestEmailMFAAPI(APIBaseTest):
         mock_esp_suppression,
     ):
         # Trigger email MFA
-        self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
 
         # Get the token that was generated
         token = mock_send_email.call_args[0][1]
 
         # Verify the token
         response = self.client.post(
-            "/api/login/email-mfa/",
+            "/v1/login/email-mfa/",
             {"email": self.user.email, "token": token},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -86,13 +86,13 @@ class TestEmailMFAAPI(APIBaseTest):
         self.assertTrue(remember_cookie_found, "Remember device cookie should always be set")
 
         # Assert user is now logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], self.user.email)
 
         # Logout and try to login again - should NOT require email MFA (remembered for 30 days)
         self.client.post("/logout", follow=True)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"success": True})
 
@@ -111,11 +111,11 @@ class TestEmailMFAAPI(APIBaseTest):
         mock_esp_suppression,
     ):
         # Trigger email MFA
-        self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
 
         # Try to verify with invalid token
         response = self.client.post(
-            "/api/login/email-mfa/",
+            "/v1/login/email-mfa/",
             {"email": self.user.email, "token": "invalid_token_123"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -126,7 +126,7 @@ class TestEmailMFAAPI(APIBaseTest):
             self.assertIn("invalid or has expired", response_data["detail"])
 
         # Assert user is still not logged in
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     @pytest.mark.disable_mock_email_mfa_verifier
@@ -145,13 +145,13 @@ class TestEmailMFAAPI(APIBaseTest):
     ):
         with freeze_time("2023-01-01T10:00:00"):
             # Trigger email MFA
-            self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+            self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
             token = mock_send_email.call_args[0][1]
 
         # Try to verify after 11 minutes
         with freeze_time("2023-01-01T10:11:00"):
             response = self.client.post(
-                "/api/login/email-mfa/",
+                "/v1/login/email-mfa/",
                 {"email": self.user.email, "token": token},
             )
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -177,12 +177,12 @@ class TestEmailMFAAPI(APIBaseTest):
         mock_esp_suppression,
     ):
         # Trigger email MFA
-        self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         token = mock_send_email.call_args[0][1]
 
         # Verify the token
         response = self.client.post(
-            "/api/login/email-mfa/",
+            "/v1/login/email-mfa/",
             {"email": self.user.email, "token": token},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -194,7 +194,7 @@ class TestEmailMFAAPI(APIBaseTest):
         # Clear cookies to test token invalidation
         self.client.cookies.clear()
         response = self.client.post(
-            "/api/login/email-mfa/",
+            "/v1/login/email-mfa/",
             {"email": self.user.email, "token": token},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -209,7 +209,7 @@ class TestEmailMFAAPI(APIBaseTest):
     def test_email_mfa_with_nonexistent_user(self, mock_send_email):
         # Try to verify with non-existent user
         response = self.client.post(
-            "/api/login/email-mfa/",
+            "/v1/login/email-mfa/",
             {"email": "nonexistent@hanzo.ai", "token": "some_token"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -236,7 +236,7 @@ class TestEmailMFAAPI(APIBaseTest):
         # Create TOTP device for user
         TOTPDevice.objects.create(user=self.user, name="default")
 
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
 
         # Should trigger TOTP 2FA, not email MFA
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -261,12 +261,12 @@ class TestEmailMFAAPI(APIBaseTest):
     ):
         with freeze_time("2023-01-01T10:00:00"):
             # Trigger email MFA
-            self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+            self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
             self.assertEqual(mock_send_email.call_count, 1)
 
         # Resend after 61 seconds
         with freeze_time("2023-01-01T10:01:01"):
-            response = self.client.post("/api/login/email-mfa/resend/")
+            response = self.client.post("/v1/login/email-mfa/resend/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), {"success": True, "message": "Verification email sent"})
 
@@ -289,11 +289,11 @@ class TestEmailMFAAPI(APIBaseTest):
     ):
         with freeze_time("2023-01-01T10:00:00"):
             # Trigger email MFA - this counts towards the resend throttle
-            self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+            self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
             self.assertEqual(mock_send_email.call_count, 1)
 
             # First resend immediately after should be throttled (initial send already used the 1/minute limit)
-            response = self.client.post("/api/login/email-mfa/resend/")
+            response = self.client.post("/v1/login/email-mfa/resend/")
             self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
             self.assertIn("Request was throttled", response.json()["detail"])
 
@@ -302,7 +302,7 @@ class TestEmailMFAAPI(APIBaseTest):
 
         # After 61 seconds, resend should succeed
         with freeze_time("2023-01-01T10:01:01"):
-            response = self.client.post("/api/login/email-mfa/resend/")
+            response = self.client.post("/v1/login/email-mfa/resend/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(mock_send_email.call_count, 2)
 
@@ -310,7 +310,7 @@ class TestEmailMFAAPI(APIBaseTest):
     @patch("insights.tasks.email.send_email_mfa_link")
     def test_email_mfa_resend_without_pending_verification(self, mock_send_email):
         # Try to resend without triggering MFA first
-        response = self.client.post("/api/login/email-mfa/resend/")
+        response = self.client.post("/v1/login/email-mfa/resend/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("No pending email MFA verification found", response.json()["detail"])
 
@@ -332,7 +332,7 @@ class TestEmailMFAAPI(APIBaseTest):
         mock_esp_suppression,
     ):
         # First, log in normally (triggers email MFA)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response_data = response.json()
         self.assertEqual(response_data["code"], "email_mfa_required")
@@ -342,11 +342,11 @@ class TestEmailMFAAPI(APIBaseTest):
         token = mock_send_email.call_args[0][1]
 
         # Complete the email MFA verification to log in
-        response = self.client.post("/api/login/email-mfa/", {"email": self.user.email, "token": token})
+        response = self.client.post("/v1/login/email-mfa/", {"email": self.user.email, "token": token})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # User is now logged in - verify
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # This covers the case where email MFA is enabled after users are already logged in
@@ -355,7 +355,7 @@ class TestEmailMFAAPI(APIBaseTest):
         session.save()
 
         # Now try to reauth while already logged in (should skip email MFA)
-        response = self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Email should still only have been sent once (not a second time for reauth)

@@ -5,8 +5,8 @@ This ViewSet provides AI-powered summarization of LLM traces and events using
 line-numbered text representations and LLM calls.
 
 Endpoints:
-- POST /api/projects/:id/llm_analytics/summarization/ - Summarize trace or event
-- POST /api/projects/:id/llm_analytics/summarization/batch_check/ - Check cached summaries for multiple traces
+- POST /v1/projects/:id/llm_analytics/summarization/ - Summarize trace or event
+- POST /v1/projects/:id/llm_analytics/summarization/batch_check/ - Check cached summaries for multiple traces
 """
 
 import time
@@ -358,7 +358,7 @@ The response includes the summary text and optional metadata.
         """
         Summarize a trace or event.
 
-        POST /api/projects/:id/llm_analytics/summarize/
+        POST /v1/projects/:id/llm_analytics/summarize/
         """
         self._validate_feature_access(request)
 
@@ -476,7 +476,7 @@ with their titles.
         """
         Check which traces have cached summaries.
 
-        POST /api/projects/:id/llm_analytics/summarization/batch_check/
+        POST /v1/projects/:id/llm_analytics/summarization/batch_check/
         """
         self._validate_feature_access(request)
 

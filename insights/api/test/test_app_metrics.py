@@ -49,7 +49,7 @@ class TestAppMetricsAPI(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/@current/app_metrics/{self.plugin_config.id}?category=processEvent&date_from=-7d"
+            f"/v1/projects/@current/app_metrics/{self.plugin_config.id}?category=processEvent&date_from=-7d"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -149,7 +149,7 @@ class TestAppMetricsAPI(DatastoreTestMixin, APIBaseTest):
                         status=BatchExportRun.Status.FAILED_RETRYABLE,
                     )
 
-            response = self.client.get(f"/api/projects/@current/app_metrics/{batch_export_id}?date_from=-7d")
+            response = self.client.get(f"/v1/projects/@current/app_metrics/{batch_export_id}?date_from=-7d")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(
                 response.json(),
@@ -217,7 +217,7 @@ class TestAppMetricsAPI(DatastoreTestMixin, APIBaseTest):
                         status=BatchExportRun.Status.COMPLETED,
                     )
 
-            response = self.client.get(f"/api/projects/@current/app_metrics/{batch_export_id}?date_from=-7d")
+            response = self.client.get(f"/v1/projects/@current/app_metrics/{batch_export_id}?date_from=-7d")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(
                 response.json(),
@@ -250,7 +250,7 @@ class TestAppMetricsAPI(DatastoreTestMixin, APIBaseTest):
             ),
         )
 
-        response = self.client.get(f"/api/projects/@current/app_metrics/{self.plugin_config.id}/historical_exports")
+        response = self.client.get(f"/v1/projects/@current/app_metrics/{self.plugin_config.id}/historical_exports")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -322,7 +322,7 @@ class TestAppMetricsAPI(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/@current/app_metrics/{self.plugin_config.id}/historical_exports/1234"
+            f"/v1/projects/@current/app_metrics/{self.plugin_config.id}/historical_exports/1234"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -382,7 +382,7 @@ class TestAppMetricsAPI(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/@current/app_metrics/{self.plugin_config.id}/error_details?category=exportEvents&error_type=SomeError"
+            f"/v1/projects/@current/app_metrics/{self.plugin_config.id}/error_details?category=exportEvents&error_type=SomeError"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

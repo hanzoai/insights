@@ -54,12 +54,12 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         property = PropertyDefinition.objects.create(
             team=self.team, name="timestamp_property", property_type="DateTime"
         )
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/{property.id}")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/{property.id}")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["property_type"] == "DateTime"
 
     def test_list_property_definitions(self):
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/")
         assert response.status_code == status.HTTP_200_OK
 
         assert response.json()["count"] == len(self.EXPECTED_PROPERTY_DEFINITIONS)
@@ -70,7 +70,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
 
     def test_list_property_definitions_with_excluded_properties(self):
         response = self.client.get(
-            f'/api/projects/{self.team.pk}/property_definitions/?excluded_properties=["first_visit"]'
+            f'/v1/projects/{self.team.pk}/property_definitions/?excluded_properties=["first_visit"]'
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == len(self.EXPECTED_PROPERTY_DEFINITIONS) - 1
@@ -81,14 +81,14 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         # core property that doesn't start with $
         PropertyDefinition.objects.get_or_create(team=self.team, name="utm_medium")
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?exclude_core_properties=true")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?exclude_core_properties=true")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 6
         assert len(response.json()["results"]) == 6
 
     def test_list_numerical_property_definitions(self):
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?is_numerical=true")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?is_numerical=true")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 3
 
@@ -100,7 +100,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         )
         expected_property_count = 310
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == expected_property_count
         assert len(response.json()["results"]) == 100  # Default page size
@@ -128,18 +128,18 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         team.event_properties = self.team.event_properties + [f"should_be_invisible_{i}" for i in range(0, 5)]
         team.save()
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/")
         assert response.status_code == status.HTTP_200_OK
         for item in response.json()["results"]:
             assert "should_be_invisible" not in item["name"]
 
         # Also can't fetch for a team to which the user doesn't have permissions
-        response = self.client.get(f"/api/projects/{team.pk}/property_definitions/")
+        response = self.client.get(f"/v1/projects/{team.pk}/property_definitions/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json() == self.permission_denied_response("You don't have access to the project.")
 
     def test_list_all_property_definitions_without_search(self):
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions")
         assert response.status_code == status.HTTP_200_OK
 
         assert sorted([r["name"] for r in response.json()["results"]]) == sorted(
@@ -171,7 +171,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
     def test_property_search_returns_expected_results(
         self, _name: str, search_term: str, expected_property_names: list[str]
     ) -> None:
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?search={search_term}")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?search={search_term}")
         assert response.status_code == status.HTTP_200_OK
 
         assert [prop["name"] for prop in response.json()["results"]] == expected_property_names
@@ -182,7 +182,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
     def test_property_search_with_event_filter_shows_event_association(self):
         # URL params: search=$ and event_names=["$pageview"]
         response = self.client.get(
-            "/api/projects/@current/property_definitions/?search=%24&event_names=%5B%22%24pageview%22%5D"
+            "/v1/projects/@current/property_definitions/?search=%24&event_names=%5B%22%24pageview%22%5D"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -196,7 +196,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         ]
 
     def test_is_event_property_filter(self):
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?search=firs")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?search=firs")
         assert response.status_code == status.HTTP_200_OK
         assert [r["name"] for r in response.json()["results"]] == [
             "first_visit",
@@ -207,7 +207,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         # instead it checks if the property has been seen with that event
         # previously it was necessary to _also_ send filter_by_event_names=(true or false) alongside the event name param
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/property_definitions/?event_names=%5B%22%24pageview%22%5D"
+            f"/v1/projects/{self.team.pk}/property_definitions/?event_names=%5B%22%24pageview%22%5D"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -229,7 +229,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
 
         # get any properties that have been seen with $pageview event
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/property_definitions/?event_names=%5B%22%24pageview%22%5D&filter_by_event_names=true"
+            f"/v1/projects/{self.team.pk}/property_definitions/?event_names=%5B%22%24pageview%22%5D&filter_by_event_names=true"
         )
         assert response.status_code == status.HTTP_200_OK
         assert sorted(
@@ -242,7 +242,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
 
         # can combine the filters
         response = self.client.get(
-            "/api/projects/@current/property_definitions/?search=firs&event_names=%5B%22%24pageview%22%5D&filter_by_event_names=true"
+            "/v1/projects/@current/property_definitions/?search=firs&event_names=%5B%22%24pageview%22%5D&filter_by_event_names=true"
         )
         assert response.status_code == status.HTTP_200_OK
         assert [(r["name"], r["is_seen_on_filtered_events"]) for r in response.json()["results"]] == [
@@ -326,7 +326,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
             type=PropertyDefinition.Type.PERSON,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?{query_params}")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?{query_params}")
         assert response.status_code == status.HTTP_200_OK
 
         assert [row["name"] for row in response.json()["results"]] == expected_results
@@ -373,7 +373,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
             group_type_index=2,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?{query_params}")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?{query_params}")
         assert response.status_code == status.HTTP_200_OK
         assert [row["name"] for row in response.json()["results"]] == expected_results
 
@@ -389,7 +389,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
     ) -> None:
         PropertyDefinition.objects.create(team=self.team, name="$feature/plan", property_type="String")
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?{query_params}")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?{query_params}")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == expected_count
 
@@ -401,7 +401,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         property_definition = PropertyDefinition.objects.create(
             team=self.team, name="test_property", property_type="String"
         )
-        response = self.client.delete(f"/api/projects/{self.team.pk}/property_definitions/{property_definition.id}")
+        response = self.client.delete(f"/v1/projects/{self.team.pk}/property_definitions/{property_definition.id}")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert PropertyDefinition.objects.filter(id=property_definition.id).count() == 0
         mock_capture.assert_called_once_with(
@@ -426,7 +426,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
 
     def test_event_name_filter_json_contains_int(self):
         event_name_json = json.dumps([1])
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?event_names={event_name_json}")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?event_names={event_name_json}")
         assert response.status_code == status.HTTP_200_OK
 
     @patch("insights.models.Organization.is_feature_available", return_value=False)
@@ -436,7 +436,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.pk}/property_definitions/{property_definition.id}",
+            f"/v1/projects/{self.team.pk}/property_definitions/{property_definition.id}",
             {"property_type": "Numeric"},
         )
 
@@ -455,7 +455,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.pk}/property_definitions/{property_definition.id}",
+            f"/v1/projects/{self.team.pk}/property_definitions/{property_definition.id}",
             {"property_type": "Numeric", "verified": True},  # verified field only exists in enterprise serializer
         )
 
@@ -496,7 +496,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         setup_func(self)
 
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/property_definitions/seen_together/?event_names=custom_event&event_names=$pageview&property_name=$session_id"
+            f"/v1/projects/{self.team.pk}/property_definitions/seen_together/?event_names=custom_event&event_names=$pageview&property_name=$session_id"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -516,7 +516,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization)
         PropertyDefinition.objects.create(team=other_team, name="other_team_prop", property_type="String")
 
-        response = self.client.get(f"/api/projects/{self.project.id}/property_definitions/")
+        response = self.client.get(f"/v1/projects/{self.project.id}/property_definitions/")
         assert response.status_code == status.HTTP_200_OK
 
         # Should return properties with either project_id or team_id matching
@@ -544,17 +544,17 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         )
 
         # Test retrieving legacy property
-        response = self.client.get(f"/api/projects/{self.project.id}/property_definitions/{legacy_prop.id}")
+        response = self.client.get(f"/v1/projects/{self.project.id}/property_definitions/{legacy_prop.id}")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["name"] == "legacy_team_prop"
 
         # Test retrieving newer property
-        response = self.client.get(f"/api/projects/{self.project.id}/property_definitions/{newer_prop.id}")
+        response = self.client.get(f"/v1/projects/{self.project.id}/property_definitions/{newer_prop.id}")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["name"] == "newer_prop"
 
         # Test retrieving other team's property should fail
-        response = self.client.get(f"/api/projects/{self.project.id}/property_definitions/{other_team_prop.id}")
+        response = self.client.get(f"/v1/projects/{self.project.id}/property_definitions/{other_team_prop.id}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_virtual_property_numerical_filter(self):
@@ -609,7 +609,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         ):
             # Test numerical=true filter
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/property_definitions/?type=person&is_numerical=true"
+                f"/v1/projects/{self.team.pk}/property_definitions/?type=person&is_numerical=true"
             )
             assert response.status_code == status.HTTP_200_OK
             virtual_props = [prop for prop in response.json()["results"] if prop["name"].startswith("$virt_")]
@@ -622,7 +622,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
 
             # Test numerical=false filter
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/property_definitions/?type=person&is_numerical=false"
+                f"/v1/projects/{self.team.pk}/property_definitions/?type=person&is_numerical=false"
             )
             assert response.status_code == status.HTTP_200_OK
             virtual_props = [prop for prop in response.json()["results"] if prop["name"].startswith("$virt_")]
@@ -665,7 +665,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
             ],
         ):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/property_definitions/?type=person&is_feature_flag={is_feature_flag}"
+                f"/v1/projects/{self.team.pk}/property_definitions/?type=person&is_feature_flag={is_feature_flag}"
             )
             assert response.status_code == status.HTTP_200_OK
             virtual_props = [
@@ -677,7 +677,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
 
     def test_virtual_property_hidden_filter(self):
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/property_definitions/?type=person&exclude_hidden=true"
+            f"/v1/projects/{self.team.pk}/property_definitions/?type=person&exclude_hidden=true"
         )
         assert response.status_code == status.HTTP_200_OK
         # Virtual properties should still be included when excluding hidden
@@ -695,7 +695,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         self, _name: str, search_term: str, expected_property_name: str, _search_type: str
     ) -> None:
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/property_definitions/?type=person&search={search_term}"
+            f"/v1/projects/{self.team.pk}/property_definitions/?type=person&search={search_term}"
         )
         assert response.status_code == status.HTTP_200_OK
         # Should find the virtual property
@@ -703,14 +703,14 @@ class TestPropertyDefinitionAPI(APIBaseTest):
 
     def test_virtual_property_excluded_by_name(self):
         response = self.client.get(
-            f'/api/projects/{self.team.pk}/property_definitions/?type=person&excluded_properties=["$virt_initial_channel_type"]'
+            f'/v1/projects/{self.team.pk}/property_definitions/?type=person&excluded_properties=["$virt_initial_channel_type"]'
         )
         assert response.status_code == status.HTTP_200_OK
         # Should exclude the specified virtual property
         assert not any(prop["name"] == "$virt_initial_channel_type" for prop in response.json()["results"])
 
         response = self.client.get(
-            f'/api/projects/{self.team.pk}/property_definitions/?type=group&group_type_index=0&excluded_properties=["$virt_revenue"]'
+            f'/v1/projects/{self.team.pk}/property_definitions/?type=group&group_type_index=0&excluded_properties=["$virt_revenue"]'
         )
         assert response.status_code == status.HTTP_200_OK
         # Should exclude the specified virtual property
@@ -718,7 +718,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
 
     def test_virtual_property_excluded_by_core(self):
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/property_definitions/?type=person&exclude_core_properties=true"
+            f"/v1/projects/{self.team.pk}/property_definitions/?type=person&exclude_core_properties=true"
         )
         assert response.status_code == status.HTTP_200_OK
         # Virtual properties should still be included when excluding core properties
@@ -726,7 +726,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         assert len(virtual_props) > 0
 
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/property_definitions/?type=group&group_type_index=0&exclude_core_properties=true"
+            f"/v1/projects/{self.team.pk}/property_definitions/?type=group&group_type_index=0&exclude_core_properties=true"
         )
         assert response.status_code == status.HTTP_200_OK
         # Virtual properties should still be included when excluding core properties
@@ -734,19 +734,19 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         assert len(virtual_props) > 0
 
     def test_virtual_property_type_filter(self):
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?type=person")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?type=person")
         assert response.status_code == status.HTTP_200_OK
         # Should include virtual properties when type=person
         virtual_props = [prop for prop in response.json()["results"] if prop["name"].startswith("$virt_")]
         assert len(virtual_props) > 0
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?type=group&group_type_index=0")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?type=group&group_type_index=0")
         assert response.status_code == status.HTTP_200_OK
         # Should include virtual properties when type=group
         virtual_props = [prop for prop in response.json()["results"] if prop["name"].startswith("$virt_")]
         assert len(virtual_props) > 0
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/property_definitions/?type=event")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/property_definitions/?type=event")
         assert response.status_code == status.HTTP_200_OK
         # Should not include virtual properties when type=event
         virtual_props = [prop for prop in response.json()["results"] if prop["name"].startswith("$virt_")]

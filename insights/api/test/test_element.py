@@ -140,11 +140,11 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             elements=[Element(tag_name="bla")],
         )
 
-        response = self.client.get("/api/element/values/?key=tag_name").json()
+        response = self.client.get("/v1/element/values/?key=tag_name").json()
         self.assertEqual(response[0]["name"], "a")
         self.assertEqual(len(response), 1)
 
-        response = self.client.get("/api/element/values/?key=text&value=click").json()
+        response = self.client.get("/v1/element/values/?key=text&value=click").json()
         self.assertEqual(response[0]["name"], "click here")
         self.assertEqual(len(response), 1)
 
@@ -154,16 +154,16 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_element_stats_postgres_queries_are_as_expected(self) -> None:
         self._setup_events()
 
-        self.client.get("/api/element/stats/?paginate_response=true").json()
+        self.client.get("/v1/element/stats/?paginate_response=true").json()
 
     def test_element_stats_can_filter_by_properties(self) -> None:
         self._setup_events()
 
-        response = self.client.get("/api/element/stats/?paginate_response=true").json()
+        response = self.client.get("/v1/element/stats/?paginate_response=true").json()
         assert len(response["results"]) == 3
 
         properties_filter = json.dumps([{"key": "$current_url", "value": "http://example.com/another_page"}])
-        response = self.client.get(f"/api/element/stats/?paginate_response=true&properties={properties_filter}").json()
+        response = self.client.get(f"/v1/element/stats/?paginate_response=true&properties={properties_filter}").json()
         self.assertEqual(len(response["results"]), 1)
 
     def test_element_stats_can_filter_by_insightsql(self) -> None:
@@ -176,7 +176,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 },
             ]
         )
-        response = self.client.get(f"/api/element/stats/?paginate_response=true&properties={properties_filter}").json()
+        response = self.client.get(f"/v1/element/stats/?paginate_response=true&properties={properties_filter}").json()
         self.assertEqual(len(response["results"]), 1)
 
     def test_element_stats_clamps_date_from_to_start_of_day(self) -> None:
@@ -221,7 +221,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time(query_time):
             # the UI doesn't allow you to choose time, so query should always be from start of day
-            response = self.client.get(f"/api/element/stats/?paginate_response=true&date_from={query_time}")
+            response = self.client.get(f"/v1/element/stats/?paginate_response=true&date_from={query_time}")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             response_json = response.json()
@@ -231,7 +231,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_element_stats_can_load_all_the_data(self) -> None:
         self._setup_events()
 
-        response = self.client.get(f"/api/element/stats/?paginate_response=true")
+        response = self.client.get(f"/v1/element/stats/?paginate_response=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_json = response.json()
@@ -243,7 +243,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_element_stats_can_load_only_rageclick_data(self) -> None:
         self._setup_events()
 
-        response = self.client.get(f"/api/element/stats/?paginate_response=true&include=$rageclick")
+        response = self.client.get(f"/v1/element/stats/?paginate_response=true&include=$rageclick")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_json = response.json()
@@ -257,7 +257,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_element_stats_can_load_rageclick_and_autocapture_data(self, include_params) -> None:
         self._setup_events()
 
-        response = self.client.get(f"/api/element/stats/?paginate_response=true{include_params}")
+        response = self.client.get(f"/v1/element/stats/?paginate_response=true{include_params}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_json = response.json()
@@ -269,7 +269,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_element_stats_obeys_limit_parameter(self) -> None:
         self._setup_events()
 
-        page_one_response = self.client.get(f"/api/element/stats/?paginate_response=true&limit=1")
+        page_one_response = self.client.get(f"/v1/element/stats/?paginate_response=true&limit=1")
         self.assertEqual(page_one_response.status_code, status.HTTP_200_OK)
 
         page_one_response_json = page_one_response.json()
@@ -280,7 +280,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         limit_to_one_results = page_one_response_json["results"]
         assert limit_to_one_results == [expected_autocapture_data_response_results[0]]
 
-        page_two_response = self.client.get(f"/api/element/stats/?paginate_response=true&limit=1&offset=1")
+        page_two_response = self.client.get(f"/v1/element/stats/?paginate_response=true&limit=1&offset=1")
         self.assertEqual(page_two_response.status_code, status.HTTP_200_OK)
 
         page_two_response_json = page_two_response.json()
@@ -291,7 +291,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         limit_to_one_results_page_two = page_two_response_json["results"]
         assert limit_to_one_results_page_two == [expected_autocapture_data_response_results[1]]
 
-        page_three_response = self.client.get(f"/api/element/stats/?paginate_response=true&limit=1&offset=2")
+        page_three_response = self.client.get(f"/v1/element/stats/?paginate_response=true&limit=1&offset=2")
         self.assertEqual(page_three_response.status_code, status.HTTP_200_OK)
 
         page_three_response_json = page_three_response.json()
@@ -300,15 +300,15 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert limit_to_one_results_page_three == [expected_rage_click_data_response_results[0]]
 
     def test_element_stats_does_not_allow_non_numeric_limit(self) -> None:
-        response = self.client.get(f"/api/element/stats/?limit=not-a-number")
+        response = self.client.get(f"/v1/element/stats/?limit=not-a-number")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_element_stats_does_not_allow_non_numeric_offset(self) -> None:
-        response = self.client.get(f"/api/element/stats/?limit=not-a-number")
+        response = self.client.get(f"/v1/element/stats/?limit=not-a-number")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_element_stats_does_not_allow_unexepcted_include(self) -> None:
-        response = self.client.get(f"/api/element/stats/?include=$autocapture&include=$rageclick&include=$pageview")
+        response = self.client.get(f"/v1/element/stats/?include=$autocapture&include=$rageclick&include=$pageview")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def _setup_events(self):

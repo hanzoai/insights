@@ -259,7 +259,7 @@ class InsightsClient:
 
         Uses a session with automatic retry on transient HTTP errors (5xx).
         """
-        url = f"{self.config.api_host}/api/projects/{self.config.project_id}/query/"
+        url = f"{self.config.api_host}/v1/projects/{self.config.project_id}/query/"
 
         response = self._session.post(
             url,

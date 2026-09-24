@@ -45,7 +45,7 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
         )[1]
 
         self.alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "alert name",
                 "insight": self.insight["id"],
@@ -62,13 +62,13 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
 
     def set_thresholds(self, lower: Optional[int] = None, upper: Optional[int] = None) -> None:
         self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{self.alert['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}",
             data={"threshold": {"configuration": {"type": "absolute", "bounds": {"lower": lower, "upper": upper}}}},
         )
 
     def skip_weekend(self, skip: bool) -> None:
         self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{self.alert['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}",
             data={"skip_weekend": skip},
         )
 
@@ -80,7 +80,7 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
     ) -> None:
         self.set_thresholds(lower=1)
 
-        self.client.patch(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}", data={"enabled": False})
+        self.client.patch(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}", data={"enabled": False})
 
         check_alert(self.alert["id"])
 
@@ -200,7 +200,7 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
             == AlertState.FIRING
         )
 
-        self.client.patch(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}", data={"enabled": False})
+        self.client.patch(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}", data={"enabled": False})
 
         # Check that the alert is set to inactive and checks are not triggered
         check_alert(self.alert["id"])
@@ -319,7 +319,7 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
             data={"name": "insight", "filters": {"events": [{"id": "$pageview"}], "display": "BoldNumber"}}
         )[1]
 
-        self.client.patch(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}", data={"insight": insight["id"]})
+        self.client.patch(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}", data={"insight": insight["id"]})
         self.set_thresholds(lower=1)
 
         check_alert(self.alert["id"])
@@ -446,7 +446,7 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
         )[1]
 
         alert_data = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "formula alert",
                 "insight": insight["id"],
@@ -507,7 +507,7 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
         )[1]
 
         alert_data = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "formula alert",
                 "insight": insight["id"],
@@ -568,7 +568,7 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
         )[1]
 
         alert_data = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "formula alert",
                 "insight": insight["id"],
@@ -632,7 +632,7 @@ class TestAlertChecks(APIBaseTest, DatastoreDestroyTablesMixin):
         )[1]
 
         alert_data = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "multi formula alert",
                 "insight": insight["id"],
@@ -712,7 +712,7 @@ class TestAlertSubscriptionOrgMembership(APIBaseTest):
         self.other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password")
 
         self.alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "alert name",
                 "insight": self.insight["id"],
@@ -781,7 +781,7 @@ class TestGetSubscribedUsersEmails(APIBaseTest):
         self.insight = self.dashboard_api.create_insight(data={"name": "insight", "query": query_dict})[1]
 
         self.alert_response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "alert name",
                 "insight": self.insight["id"],

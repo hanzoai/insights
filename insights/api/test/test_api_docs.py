@@ -11,7 +11,7 @@ class TestAPIDocsSchema(APIBaseTest):
     def test_can_generate_api_docs_schema(self) -> None:
         self.client.logout()
 
-        schema_response = self.client.get("/api/schema/")
+        schema_response = self.client.get("/v1/schema/")
 
         assert schema_response.status_code == 200
         # the response does have data, but mypy doesn't know that
@@ -25,7 +25,7 @@ class TestAPIDocsSchema(APIBaseTest):
         """
         self.client.logout()
 
-        self.client.get("/api/schema/")
+        self.client.get("/v1/schema/")
 
         # we log lots of warnings when generating the schema
         warnings = self._capsys.readouterr().err.split("\n")

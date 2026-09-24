@@ -1939,7 +1939,7 @@ class SurveyAPIActionSerializer(serializers.ModelSerializer):
 
 class SurveyAPISerializer(serializers.ModelSerializer):
     """
-    Serializer for the exposed /api/surveys endpoint, to be used in insights-js and for headless APIs.
+    Serializer for the exposed /v1/surveys endpoint, to be used in insights-js and for headless APIs.
     """
 
     linked_flag_key = serializers.CharField(source="linked_flag.key", read_only=True)

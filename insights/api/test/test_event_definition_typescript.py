@@ -104,7 +104,7 @@ class TestEventDefinitionTypeScriptGeneration(APIBaseTest):
 
     def _generate_typescript(self) -> str:
         """Generate TypeScript definitions by calling the actual API endpoint"""
-        response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/typescript/")
+        response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/typescript/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()["content"]
 

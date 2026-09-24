@@ -224,10 +224,10 @@ class TestSessionAuthenticationTwoFactor(TestCase):
         mock_has_passkeys.return_value = False
 
         whitelisted_paths = [
-            "/api/users/@me/two_factor_start_setup/",
-            "/api/users/@me/two_factor_validate/",
+            "/v1/users/@me/two_factor_start_setup/",
+            "/v1/users/@me/two_factor_validate/",
             "/logout/",
-            "/api/logout/",
+            "/v1/logout/",
             "/healthz",
             "/static/css/app.css",
             "/uploaded_media/file.png",
@@ -251,7 +251,7 @@ class TestSessionAuthenticationTwoFactor(TestCase):
         mock_has_passkeys.return_value = False
 
         non_whitelisted_paths = [
-            "/api/projects/1/insights/",
+            "/v1/projects/1/insights/",
             "/dashboard/123",
             "/insights/abc123",
         ]
@@ -411,7 +411,7 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         auth = SessionAuthentication()
 
         request_factory = RequestFactory()
-        http_request = request_factory.get("/api/organizations/")
+        http_request = request_factory.get("/v1/organizations/")
 
         user = Mock(is_authenticated=True, is_active=True)
         org = Mock(spec=Organization)
@@ -424,7 +424,7 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         http_request.session.save()
         self._set_session_after_enforcement_date(http_request)
 
-        request = self.factory.get("/api/organizations/")
+        request = self.factory.get("/v1/organizations/")
         request._request = http_request
 
         with (
@@ -438,21 +438,21 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
 
     def test_personal_api_key_authentication_bypasses_two_factor(self):
         auth = PersonalAPIKeyAuthentication()
-        request = self.factory.get("/api/users/@me/")
+        request = self.factory.get("/v1/users/@me/")
 
         result = auth.authenticate(request)
         self.assertIsNone(result)
 
     def test_temporary_token_authentication_bypasses_two_factor(self):
         auth = TemporaryTokenAuthentication()
-        request = self.factory.get("/api/users/@me/")
+        request = self.factory.get("/v1/users/@me/")
 
         result = auth.authenticate(request)
         self.assertIsNone(result)
 
     def test_project_secret_api_key_authentication_bypasses_two_factor(self):
         auth = ProjectSecretAPIKeyAuthentication()
-        request = self.factory.get("/api/users/@me/")
+        request = self.factory.get("/v1/users/@me/")
 
         result = auth.authenticate(request)
         self.assertIsNone(result)
@@ -462,7 +462,7 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         auth = SessionAuthentication()
 
         request_factory = RequestFactory()
-        http_request = request_factory.get("/api/organizations/")
+        http_request = request_factory.get("/v1/organizations/")
 
         user = Mock(is_authenticated=True, is_active=True, email="test@example.com")
         org = Mock(spec=Organization)
@@ -474,7 +474,7 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         middleware.process_request(http_request)
         self._set_session_after_enforcement_date(http_request)
 
-        request = self.factory.get("/api/organizations/")
+        request = self.factory.get("/v1/organizations/")
         request._request = http_request
 
         with (
@@ -497,7 +497,7 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         auth = SessionAuthentication()
 
         request_factory = RequestFactory()
-        http_request = request_factory.get("/api/organizations/")
+        http_request = request_factory.get("/v1/organizations/")
 
         user = Mock(is_authenticated=True, is_active=True)
         org = Mock(spec=Organization)
@@ -510,7 +510,7 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         http_request.session.save()
         self._set_session_after_enforcement_date(http_request)
 
-        request = self.factory.get("/api/organizations/")
+        request = self.factory.get("/v1/organizations/")
         request._request = http_request
 
         mock_is_impersonated.return_value = False
@@ -534,7 +534,7 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         auth = SessionAuthentication()
 
         request_factory = RequestFactory()
-        http_request = request_factory.get("/api/organizations/")
+        http_request = request_factory.get("/v1/organizations/")
 
         user = Mock(is_authenticated=True, is_active=True)
         org = Mock(spec=Organization)
@@ -547,7 +547,7 @@ class TestAPIAuthenticationTwoFactorBypass(TestCase):
         http_request.session.save()
         self._set_session_after_enforcement_date(http_request)
 
-        request = self.factory.get("/api/organizations/")
+        request = self.factory.get("/v1/organizations/")
         request._request = http_request
 
         mock_is_impersonated.return_value = False
@@ -587,14 +587,14 @@ class TestUserTwoFactorSessionIntegration(TestCase):
         session.save()
 
         factory = RequestFactory()
-        request = factory.post("/api/users/@me/two_factor_validate/", {"token": "123456"})
+        request = factory.post("/v1/users/@me/two_factor_validate/", {"token": "123456"})
 
         middleware = SessionMiddleware(lambda request: HttpResponse())
         middleware.process_request(request)
 
         self.assertFalse(is_two_factor_verified_in_session(request))
 
-        response = self.client.post(f"/api/users/@me/two_factor_validate/", {"token": "123456"})
+        response = self.client.post(f"/v1/users/@me/two_factor_validate/", {"token": "123456"})
         self.assertEqual(response.status_code, 200)
 
         test_request = factory.get("/")
@@ -610,14 +610,14 @@ class TestUserTwoFactorSessionIntegration(TestCase):
     @pytest.mark.no_mock_two_factor_sso_enforcement_check
     def test_doesnt_break_swagger_schema(self):
         """Test that schema generation works without session middleware errors"""
-        response = self.client.get("/api/schema/")
+        response = self.client.get("/v1/schema/")
         self.assertEqual(response.status_code, 200)
 
     def test_two_factor_viewset_invalid_session_returns_error(self):
         from rest_framework.test import APIClient
 
         client = APIClient()
-        response = client.post("/api/login/token/", {"token": "123456"})
+        response = client.post("/v1/login/token/", {"token": "123456"})
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data.get("code"), "invalid_2fa_session")
@@ -631,7 +631,7 @@ class TestUserTwoFactorSessionIntegration(TestCase):
         session["user_authenticated_time"] = time.time()
         session.save()
 
-        response = client.post("/api/login/token/", {"token": "123456"})
+        response = client.post("/v1/login/token/", {"token": "123456"})
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data.get("code"), "invalid_2fa_session")
@@ -651,8 +651,8 @@ class TestUserTwoFactorSessionIntegration(TestCase):
         session.save()
 
         for i in range(3):
-            response = client.post("/api/login/token/", {"token": "123456"})
+            response = client.post("/v1/login/token/", {"token": "123456"})
             self.assertEqual(response.status_code, 400, f"Request {i + 1} should not be throttled")
 
-        response = client.post("/api/login/token/", {"token": "123456"})
+        response = client.post("/v1/login/token/", {"token": "123456"})
         self.assertEqual(response.status_code, 429)

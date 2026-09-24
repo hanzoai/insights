@@ -27,7 +27,7 @@ class TestOAuthApplicationMetadataView(APIBaseTest):
         )
 
     def test_get_application_metadata_success(self):
-        url = f"/api/oauth_application/metadata/{self.application.client_id}/"
+        url = f"/v1/oauth_application/metadata/{self.application.client_id}/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -35,7 +35,7 @@ class TestOAuthApplicationMetadataView(APIBaseTest):
         self.assertEqual(response.data, expected_data)
 
     def test_get_application_metadata_only_exposes_public_fields(self):
-        url = f"/api/oauth_application/metadata/{self.application.client_id}/"
+        url = f"/v1/oauth_application/metadata/{self.application.client_id}/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -49,7 +49,7 @@ class TestOAuthApplicationMetadataView(APIBaseTest):
         self.assertNotIn("skip_authorization", response.data)
 
     def test_get_application_metadata_not_found(self):
-        url = f"/api/oauth_application/metadata/non_existent_client_id/"
+        url = f"/v1/oauth_application/metadata/non_existent_client_id/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -57,7 +57,7 @@ class TestOAuthApplicationMetadataView(APIBaseTest):
         self.assertEqual(response.data["detail"], "Not found.")
 
     def test_endpoint_is_publicly_accessible_even_if_client_is_authenticated(self):
-        url = f"/api/oauth_application/metadata/{self.application.client_id}/"
+        url = f"/v1/oauth_application/metadata/{self.application.client_id}/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -67,7 +67,7 @@ class TestOAuthApplicationMetadataView(APIBaseTest):
     def test_endpoint_is_publicly_accessible_with_unauthenticated_client(self):
         unauthenticated_client = APIClient()
 
-        url = f"/api/oauth_application/metadata/{self.application.client_id}/"
+        url = f"/v1/oauth_application/metadata/{self.application.client_id}/"
         response = unauthenticated_client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -52,7 +52,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions",
@@ -81,7 +81,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         trigger_action_expectation = {
             "id": "trigger_node",
@@ -118,7 +118,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         insights_flow["status"] = "active"
 
         # Check that the template is found but missing required inputs
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__template_id",
@@ -135,7 +135,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             }
         )
         insights_flow["status"] = "active"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__inputs__url",
@@ -157,7 +157,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "properties": [{"key": "event", "type": "event_metadata", "value": ["custom_event"], "operator": "exact"}]
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         insights_flow = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -213,7 +213,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, conditional_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         conditions = response.json()["actions"][1]["config"]["conditions"]
@@ -262,7 +262,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         condition = response.json()["actions"][1]["config"]["condition"]
@@ -325,7 +325,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, wait_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
         data = response.json()
@@ -340,17 +340,17 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         assert response.json()["status"] == "draft"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "active"}
+            f"/v1/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "active"}
         )
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == "active"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "draft"}
+            f"/v1/projects/{self.team.id}/insights_flows/{response.json()['id']}", {"status": "draft"}
         )
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == "draft"
@@ -391,7 +391,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, conditional_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__non_field_errors",
@@ -418,7 +418,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["trigger"]["type"] == "batch"
         assert response.json()["trigger"]["filters"]["properties"][0]["key"] == "email"
@@ -439,7 +439,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
     def test_insights_flow_batch_trigger_filters_not_dict(self):
@@ -459,7 +459,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__filters",
@@ -487,7 +487,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__0__filters__properties",
@@ -498,7 +498,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
     def test_insights_flow_user_blast_radius_requires_filters(self):
         with patch("insights.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
-            response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/user_blast_radius", {})
+            response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius", {})
 
         assert response.status_code == 400, response.json()
         assert "Missing filters" in response.json().get("detail", "")
@@ -509,7 +509,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             mock_get_user_blast_radius.return_value = (4, 10)
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/insights_flows/user_blast_radius",
                 {"filters": {"properties": []}},
             )
 
@@ -558,7 +558,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": actions,
             "billable_action_types": ["fake_type", "another_fake"],  # Client tries to override
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         # Should have only unique billable types (deduped), client override ignored
@@ -601,7 +601,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         ]
 
         insights_flow = {"name": "Test Update Billable Types", "actions": initial_actions}
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
         assert response.json()["billable_action_types"] == ["function"]
@@ -609,7 +609,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         # Update to remove function action (no billable actions left)
         updated_actions = [trigger_action]
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": updated_actions}
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"actions": updated_actions}
         )
         assert update_response.status_code == 200, update_response.json()
         assert update_response.json()["billable_action_types"] == []
@@ -639,7 +639,7 @@ class TestInsightsFlowAPI(APIBaseTest):
 
         # Try to override billable_action_types in update - should be ignored and recomputed
         override_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {
                 "actions": complex_actions,
                 "billable_action_types": ["fake_type"],  # Try to override
@@ -670,7 +670,7 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
@@ -678,7 +678,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "variables": [{"key": "first_name", "value": "Test"}],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data)
 
         assert response.status_code == 200, response.json()
         assert response.json()["insights_flow"] == flow_id
@@ -689,7 +689,7 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_post_insights_flow_batch_jobs_endpoint_nonexistent_flow(self):
         batch_job_data = {"variables": [{"key": "first_name", "value": "Test"}]}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/99999/batch_jobs", batch_job_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/99999/batch_jobs", batch_job_data)
 
         assert response.status_code == 404, response.json()
 
@@ -703,7 +703,7 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        create_response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create_response.status_code == 201, create_response.json()
         flow_id = create_response.json()["id"]
 
@@ -714,7 +714,7 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example2.com"}},
             }
         )
-        create_response_2 = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow_2)
+        create_response_2 = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow_2)
         assert create_response_2.status_code == 201, create_response_2.json()
         flow_id_2 = create_response_2.json()["id"]
 
@@ -723,17 +723,17 @@ class TestInsightsFlowAPI(APIBaseTest):
         batch_job_data_2 = {"variables": [{"key": "first_name", "value": "Test2"}]}
 
         job_response_1 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data_1
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs", batch_job_data_1
         )
         assert job_response_1.status_code == 200, job_response_1.json()
 
         job_response_2 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id_2}/batch_jobs", batch_job_data_2
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id_2}/batch_jobs", batch_job_data_2
         )
         assert job_response_2.status_code == 200, job_response_2.json()
 
         # Fetch jobs for the first flow
-        get_response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs")
+        get_response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs")
         assert get_response.status_code == 200, get_response.json()
         jobs = get_response.json()
         assert len(jobs) == 1
@@ -771,7 +771,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action_without_filter],
         }
 
-        response_without = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow_without)
+        response_without = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow_without)
         assert response_without.status_code == 201, response_without.json()
 
         # Bytecode should just check for $pageview event
@@ -798,7 +798,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action_with_filter],
         }
 
-        response_with = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow_with)
+        response_with = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow_with)
         assert response_with.status_code == 201, response_with.json()
 
         # Bytecode should be in trigger.filters.bytecode
@@ -827,7 +827,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "properties": [{"key": "event", "type": "event_metadata", "value": ["custom_event"], "operator": "exact"}]
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
 
         assert response.status_code == 201, response.json()
         flow = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -849,13 +849,13 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         insights_flow["status"] = "draft"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
 
         # Activate the draft — re-validation should compile bytecodes
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "active"},
         )
         assert response.status_code == 200, response.json()
@@ -875,7 +875,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         )
         insights_flow["status"] = "draft"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
 
         flow = InsightsFlow.objects.get(pk=response.json()["id"])
@@ -891,7 +891,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         params: dict = {"scope": "InsightsFlow", "page": 1, "limit": 20}
         if flow_id:
             params["item_id"] = flow_id
-        activity = self.client.get(f"/api/projects/{self.team.pk}/activity_log", data=params)
+        activity = self.client.get(f"/v1/projects/{self.team.pk}/activity_log", data=params)
         assert activity.status_code == status.HTTP_200_OK
         return activity.json().get("results")
 
@@ -902,7 +902,7 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         flow_id = response.json()["id"]
         flow_name = response.json()["name"]
@@ -924,13 +924,13 @@ class TestInsightsFlowAPI(APIBaseTest):
                 "inputs": {"url": {"value": "https://example.com"}},
             }
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         flow_id = response.json()["id"]
         original_name = response.json()["name"]
 
         new_name = "Updated Flow Name"
-        update_response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"name": new_name})
+        update_response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"name": new_name})
         assert update_response.status_code == status.HTTP_200_OK, update_response.json()
 
         activity = self._get_insights_flow_activity(flow_id)
@@ -972,7 +972,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         assert response.json()["status"] == "draft"
 
@@ -1001,7 +1001,7 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 400, response.json()
 
     def test_insights_flow_draft_invalid_can_be_archived(self):
@@ -1029,13 +1029,13 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
         assert response.json()["status"] == "draft"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "archived"},
         )
         assert response.status_code == 200, response.json()
@@ -1066,12 +1066,12 @@ class TestInsightsFlowAPI(APIBaseTest):
             "actions": [trigger_action, incomplete_action],
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert response.status_code == 201, response.json()
         flow_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "active"},
         )
         assert response.status_code == 400, response.json()

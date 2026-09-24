@@ -452,7 +452,7 @@ class TestGolangGeneratorAPI(APIBaseTest):
     @patch("insights.api.event_definition_generators.base.report_user_action")
     def test_golang_endpoint_success(self, mock_report):
         """Test that the golang endpoint returns valid code"""
-        response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/golang")
+        response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/golang")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -483,7 +483,7 @@ class TestGolangGeneratorAPI(APIBaseTest):
         EventDefinition.objects.create(team=self.team, project=self.project, name="$autocapture")
         EventDefinition.objects.create(team=self.team, project=self.project, name="$pageview")
 
-        response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/golang")
+        response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/golang")
 
         code = response.json()["content"]
         self.assertNotIn("Autocapture", code)
@@ -494,7 +494,7 @@ class TestGolangGeneratorAPI(APIBaseTest):
         # Delete all events to test this behaviour
         EventDefinition.objects.filter(team=self.team).delete()
 
-        response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/golang")
+        response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/golang")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -531,7 +531,7 @@ class TestGolangGeneratorAPI(APIBaseTest):
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
 
-            response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/golang")
+            response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/golang")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             go_content = response.json()["content"]
 

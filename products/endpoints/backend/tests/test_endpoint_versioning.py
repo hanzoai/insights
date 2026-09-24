@@ -25,7 +25,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
             "query": self.sample_query,
         }
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/", data, format="json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
         response_data = response.json()
@@ -57,7 +57,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Update query
         new_query = {"kind": "InsightsQLQuery", "query": "SELECT 2"}
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": new_query},
             format="json",
         )
@@ -91,7 +91,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"description": "New description", "is_active": False},
             format="json",
         )
@@ -110,7 +110,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Create endpoint via API to ensure query goes through Pydantic expansion
         query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/",
+            f"/v1/environments/{self.team.id}/endpoints/",
             {"name": "duplicate_test", "query": query},
             format="json",
         )
@@ -120,7 +120,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Submit same query
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": query},
             format="json",
         )
@@ -143,13 +143,13 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Create version 2
         new_query = {"kind": "InsightsQLQuery", "query": "SELECT 2 as v2"}
         self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": new_query},
             format="json",
         )
 
         # Run without version
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         response_data = response.json()
@@ -169,13 +169,13 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Create version 2
         new_query = {"kind": "InsightsQLQuery", "query": "SELECT 2 as v2"}
         self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": new_query},
             format="json",
         )
 
         # Run version 1 explicitly
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=1")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=1")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         response_data = response.json()
@@ -191,7 +191,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=999")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=999")
 
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
         response_data = response.json()
@@ -208,7 +208,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=abc")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=abc")
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertIn("Invalid version parameter", str(response.json()))
@@ -225,12 +225,12 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Create versions 2 and 3
         for i in range(2, 4):
             self.client.put(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"query": {"kind": "InsightsQLQuery", "query": f"SELECT {i}"}},
                 format="json",
             )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/versions/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/versions/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         versions = response.json()
@@ -248,7 +248,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         data = response.json()
@@ -269,7 +269,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Create multiple versions
         for i in range(2, 5):
             self.client.put(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"query": {"kind": "InsightsQLQuery", "query": f"SELECT {i}"}},
                 format="json",
             )
@@ -278,7 +278,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(4, EndpointVersion.objects.filter(endpoint_id=endpoint_id).count())
 
         # Delete endpoint
-        response = self.client.delete(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/")
         self.assertIn(response.status_code, [status.HTTP_204_NO_CONTENT, status.HTTP_200_OK])
 
         # Versions should be deleted too (CASCADE)
@@ -299,7 +299,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Update endpoint to create v2
         self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
@@ -319,7 +319,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Update to create v2
         self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
@@ -383,7 +383,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
             # Update query (which should create new version with its own materialization)
             new_query = {"kind": "InsightsQLQuery", "query": "SELECT * FROM events WHERE timestamp > now() - INTERVAL 1 DAY"}
             response = self.client.put(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"query": new_query},
                 format="json",
             )
@@ -437,7 +437,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Update query
         new_query = {"kind": "InsightsQLQuery", "query": "SELECT 2"}
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": new_query},
             format="json",
         )
@@ -466,7 +466,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Deactivate version via update endpoint with version param
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
             {"is_active": False},
             format="json",
         )
@@ -478,7 +478,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Reactivate version via update endpoint
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
             {"is_active": True},
             format="json",
         )
@@ -503,15 +503,15 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         self.assertTrue(version2.is_active)
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}",
             {"is_active": False},
             format="json",
         )
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
-        response_v2 = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
+        response_v2 = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
         self.assertEqual(status.HTTP_404_NOT_FOUND, response_v2.status_code)
-        response_v1 = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=1")
+        response_v1 = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=1")
         self.assertEqual(status.HTTP_404_NOT_FOUND, response_v1.status_code)
 
     def test_version_deactivate_keeps_endpoint_activated(self):
@@ -529,15 +529,15 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         self.assertTrue(version2.is_active)
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
             {"is_active": False},
             format="json",
         )
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
-        response_v2 = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
+        response_v2 = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
         self.assertEqual(status.HTTP_200_OK, response_v2.status_code)
-        response_v1 = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=1")
+        response_v1 = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/?version=1")
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response_v1.status_code)
 
     def test_inactive_version_cannot_be_executed(self):
@@ -556,7 +556,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         version.save()
 
         # Try to run the endpoint
-        response = self.client.post(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/")
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertIn("inactive", response.json()["detail"].lower())
@@ -570,7 +570,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/versions/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/versions/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         versions = response.json()
@@ -596,7 +596,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         with patch("products.data_warehouse.backend.data_load.saved_query_service.sync_saved_query_workflow"):
             # Enable materialization on v1
             response = self.client.put(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "sync_frequency": "24hour"},
                 format="json",
             )
@@ -610,7 +610,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Create v2 by changing query
         with patch("products.data_warehouse.backend.data_load.saved_query_service.sync_saved_query_workflow"):
             response = self.client.put(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
                 format="json",
             )
@@ -643,7 +643,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Create v2 by changing query
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
@@ -661,7 +661,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         # Enable materialization on v1 specifically (not the current version)
         with patch("products.data_warehouse.backend.data_load.saved_query_service.sync_saved_query_workflow"):
             response = self.client.put(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
                 {"is_materialized": True, "sync_frequency": "24hour"},
                 format="json",
             )
@@ -713,7 +713,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Create v2 by changing query
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
@@ -724,7 +724,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Disable materialization on v1 specifically
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
             {"is_materialized": False},
             format="json",
         )
@@ -754,7 +754,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Create v2 by changing query
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
@@ -765,7 +765,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Update description on v1 specifically
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
             {"description": "v1 description"},
             format="json",
         )
@@ -790,7 +790,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
 
         # Try to update with non-existent version
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=999",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=999",
             {"is_materialized": True},
             format="json",
         )
@@ -809,7 +809,7 @@ class TestEndpointVersioning(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )

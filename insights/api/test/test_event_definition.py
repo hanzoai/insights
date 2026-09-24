@@ -53,7 +53,7 @@ class TestEventDefinitionAPI(APIBaseTest):
             )
 
     def test_list_event_definitions(self):
-        response = self.client.get("/api/projects/@current/event_definitions/")
+        response = self.client.get("/v1/projects/@current/event_definitions/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == len(self.EXPECTED_EVENT_DEFINITIONS)
         assert len(response.json()["results"]) == len(self.EXPECTED_EVENT_DEFINITIONS)
@@ -67,7 +67,7 @@ class TestEventDefinitionAPI(APIBaseTest):
 
     def test_list_event_definitions_with_excluded_properties(self):
         response = self.client.get(
-            '/api/projects/@current/event_definitions/?excluded_properties=["installed_app", "purchase"]'
+            '/v1/projects/@current/event_definitions/?excluded_properties=["installed_app", "purchase"]'
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == len(self.EXPECTED_EVENT_DEFINITIONS) - 2
@@ -124,14 +124,14 @@ class TestEventDefinitionAPI(APIBaseTest):
         ]
     )
     def test_list_event_definitions_ordering(self, query_params, expected_results):
-        response = self.client.get(f"/api/projects/@current/event_definitions/?{query_params}")
+        response = self.client.get(f"/v1/projects/@current/event_definitions/?{query_params}")
         assert response.status_code == status.HTTP_200_OK
         assert [(r["name"], r["last_seen_at"]) for r in response.json()["results"]] == expected_results
 
     @patch("hanzo_insights.capture")
     def test_delete_event_definition(self, mock_capture):
         event_definition: EventDefinition = EventDefinition.objects.create(team=self.demo_team, name="test_event")
-        response = self.client.delete(f"/api/projects/@current/event_definitions/{event_definition.id}/")
+        response = self.client.delete(f"/v1/projects/@current/event_definitions/{event_definition.id}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert EventDefinition.objects.filter(id=event_definition.id).count() == 0
         mock_capture.assert_called_once_with(
@@ -158,7 +158,7 @@ class TestEventDefinitionAPI(APIBaseTest):
             [EventDefinition(team=self.demo_team, name=f"z_event_{i}") for i in range(1, 301)]
         )
 
-        response = self.client.get("/api/projects/@current/event_definitions/")
+        response = self.client.get("/v1/projects/@current/event_definitions/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 306
         assert len(response.json()["results"]) == 100  # Default page size
@@ -186,43 +186,43 @@ class TestEventDefinitionAPI(APIBaseTest):
 
         EventDefinition.objects.create(team=team, name="should_be_invisible")
 
-        response = self.client.get("/api/projects/@current/event_definitions/")
+        response = self.client.get("/v1/projects/@current/event_definitions/")
         assert response.status_code == status.HTTP_200_OK
         for item in response.json()["results"]:
             assert "should_be_invisible" not in item["name"]
 
         # Also can't fetch for a team to which the user doesn't have permissions
-        response = self.client.get(f"/api/projects/{team.pk}/event_definitions/")
+        response = self.client.get(f"/v1/projects/{team.pk}/event_definitions/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json() == self.permission_denied_response("You don't have access to the project.")
 
     def test_query_event_definitions(self):
         # Regular search
-        response = self.client.get("/api/projects/@current/event_definitions/?search=app")
+        response = self.client.get("/v1/projects/@current/event_definitions/?search=app")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 2  # rated app, installed app
 
         # Search should be case insensitive
-        response = self.client.get("/api/projects/@current/event_definitions/?search=App")
+        response = self.client.get("/v1/projects/@current/event_definitions/?search=App")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 2  # rated app, installed app
 
         # Fuzzy search 1
-        response = self.client.get("/api/projects/@current/event_definitions/?search=free tri")
+        response = self.client.get("/v1/projects/@current/event_definitions/?search=free tri")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
         for item in response.json()["results"]:
             assert item["name"] in ["entered_free_trial"]
 
         # Handles URL encoding properly
-        response = self.client.get("/api/projects/@current/event_definitions/?search=free%20tri%20")
+        response = self.client.get("/v1/projects/@current/event_definitions/?search=free%20tri%20")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
         for item in response.json()["results"]:
             assert item["name"] in ["entered_free_trial"]
 
         # Fuzzy search 2
-        response = self.client.get("/api/projects/@current/event_definitions/?search=ed mov")
+        response = self.client.get("/v1/projects/@current/event_definitions/?search=ed mov")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
         for item in response.json()["results"]:
@@ -231,18 +231,18 @@ class TestEventDefinitionAPI(APIBaseTest):
     def test_event_type_event(self):
         action = Action.objects.create(team=self.demo_team, name="action1_app")
 
-        response = self.client.get("/api/projects/@current/event_definitions/?search=app&event_type=event")
+        response = self.client.get("/v1/projects/@current/event_definitions/?search=app&event_type=event")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 2
         assert response.json()["results"][0]["name"] != action.name
 
     def test_event_type_event_custom(self):
-        response = self.client.get("/api/projects/@current/event_definitions/?event_type=event_custom")
+        response = self.client.get("/v1/projects/@current/event_definitions/?event_type=event_custom")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 5
 
     def test_event_type_event_insights(self):
-        response = self.client.get("/api/projects/@current/event_definitions/?event_type=event_insights")
+        response = self.client.get("/v1/projects/@current/event_definitions/?event_type=event_insights")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
         assert response.json()["results"][0]["name"] == "$pageview"
@@ -253,7 +253,7 @@ class TestEventDefinitionAPI(APIBaseTest):
         event_definition = EventDefinition.objects.create(team=self.demo_team, name="test_event")
 
         response = self.client.patch(
-            f"/api/projects/@current/event_definitions/{event_definition.id}",
+            f"/v1/projects/@current/event_definitions/{event_definition.id}",
             {"verified": True},  # verified field only exists in enterprise serializer
         )
 
@@ -265,7 +265,7 @@ class TestEventDefinitionAPI(APIBaseTest):
     def test_create_event_definition_basic(self):
         """Test creating a basic event definition with just a name"""
         response = self.client.post(
-            "/api/projects/@current/event_definitions/",
+            "/v1/projects/@current/event_definitions/",
             {"name": "my_custom_event"},
         )
 
@@ -293,7 +293,7 @@ class TestEventDefinitionAPI(APIBaseTest):
         EventDefinition.objects.create(team=self.demo_team, name="existing_event")
 
         response = self.client.post(
-            "/api/projects/@current/event_definitions/",
+            "/v1/projects/@current/event_definitions/",
             {"name": "existing_event"},
         )
 
@@ -302,7 +302,7 @@ class TestEventDefinitionAPI(APIBaseTest):
     def test_create_event_definition_missing_name(self):
         """Test that creating an event without a name fails"""
         response = self.client.post(
-            "/api/projects/@current/event_definitions/",
+            "/v1/projects/@current/event_definitions/",
             {},
         )
 
@@ -311,7 +311,7 @@ class TestEventDefinitionAPI(APIBaseTest):
     def test_create_event_definition_with_tags(self):
         """Test creating an event definition with tags"""
         response = self.client.post(
-            "/api/projects/@current/event_definitions/",
+            "/v1/projects/@current/event_definitions/",
             {"name": "tagged_event", "tags": ["important", "production"]},
         )
 
@@ -323,23 +323,23 @@ class TestEventDefinitionAPI(APIBaseTest):
         assert event_def is not None
 
     def test_by_name_returns_event_definition(self):
-        response = self.client.get("/api/projects/@current/event_definitions/by_name/?name=installed_app")
+        response = self.client.get("/v1/projects/@current/event_definitions/by_name/?name=installed_app")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["name"] == "installed_app"
 
     def test_by_name_not_found(self):
-        response = self.client.get("/api/projects/@current/event_definitions/by_name/?name=nonexistent")
+        response = self.client.get("/v1/projects/@current/event_definitions/by_name/?name=nonexistent")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_by_name_missing_param(self):
-        response = self.client.get("/api/projects/@current/event_definitions/by_name/")
+        response = self.client.get("/v1/projects/@current/event_definitions/by_name/")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_event_definition_cross_team_isolation(self):
         """Test that manually created events are isolated by team"""
         # Create an event in demo_team
         response1 = self.client.post(
-            "/api/projects/@current/event_definitions/",
+            "/v1/projects/@current/event_definitions/",
             {"name": "team_specific_event"},
         )
         assert response1.status_code == status.HTTP_201_CREATED

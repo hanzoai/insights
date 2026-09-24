@@ -87,7 +87,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
                     "concat(event, ' ', properties.key)",
                 ]
             )
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(
                 response,
                 response
@@ -110,7 +110,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
             )
 
             query.select = ["*", "event"]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(response["columns"], ["*", "event"])
             self.assertIn("Tuple(", response["types"][0])
             self.assertEqual(response["types"][1], "String")
@@ -119,7 +119,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
             self.assertIsInstance(response["results"][0][1], str)
 
             query.select = ["count()", "event"]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(
                 response,
                 response
@@ -134,7 +134,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
             query.select = ["count()", "event"]
             query.where = ["event == 'sign up' or like(properties.key, '%val2')"]
             query.orderBy = ["count() DESC", "event"]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(
                 response,
                 response
@@ -196,19 +196,19 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
                 ]
             )
 
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 4)
 
             query.properties = [InsightsQLPropertyFilter(type="insightsql", key="'a%sd' == 'foo'")]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 0)
 
             query.properties = [InsightsQLPropertyFilter(type="insightsql", key="'a%sd' == 'a%sd'")]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 4)
 
             query.properties = [InsightsQLPropertyFilter(type="insightsql", key="properties.key == 'test_val2'")]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 2)
 
     @also_test_with_materialized_columns(event_properties=["key", "path"])
@@ -260,7 +260,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
                     "concat(event, ' ', properties.key)",
                 ]
             )
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 4)
 
             query.properties = [
@@ -271,7 +271,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
                     operator=PropertyOperator.EXACT,
                 )
             ]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 1)
 
             query.properties = [
@@ -282,7 +282,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
                     operator=PropertyOperator.ICONTAINS,
                 )
             ]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 1)
 
     @also_test_with_materialized_columns(event_properties=["key"], person_properties=["email"])
@@ -342,14 +342,14 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
                     )
                 ],
             )
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 2)
 
     def test_safe_datastore_error_passed_through(self):
         query = {"kind": "EventsQuery", "select": ["timestamp + 'string'"]}
 
         with freeze_time("2024-10-16 22:10:29.691212"):
-            response_post = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query})
+            response_post = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query})
             self.assertEqual(response_post.status_code, status.HTTP_400_BAD_REQUEST)
 
             response = response_post.json()
@@ -367,7 +367,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
     def test_unsafe_datastore_error_is_swallowed(self, sqlparse_format_mock):
         query = {"kind": "EventsQuery", "select": ["timestamp"]}
 
-        response_post = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query})
+        response_post = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query})
         self.assertEqual(response_post.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @also_test_with_materialized_columns(event_properties=["key", "path"])
@@ -411,11 +411,11 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
 
         with freeze_time("2020-01-10 12:14:00"):
             query = EventsQuery(select=["properties.key", "count()"])
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 3)
 
             query.where = ["count() > 1"]
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 1)
 
     @snapshot_datastore_queries
@@ -458,7 +458,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
 
         with freeze_time("2020-01-10 12:14:00"):
             query = EventsQuery(select=["event", "person", "person -- P"])
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 4)
             self.assertEqual(response["results"][0][1], {"distinct_id": "4"})
             self.assertEqual(response["results"][1][1], {"distinct_id": "3"})
@@ -513,15 +513,15 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
 
         with freeze_time("2023-01-12 12:14:00"):
             query = EventsQuery(select=["event"], after="all")
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 4)
 
             query = EventsQuery(select=["event"], before="-1y", after="all")
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 3)
 
             query = EventsQuery(select=["event"], before="2022-01-01", after="-4y")
-            response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 2)
 
     @also_test_with_materialized_columns(event_properties=["key"])
@@ -565,7 +565,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
 
         with freeze_time("2020-01-10 12:14:00"):
             query = InsightsQLQuery(query="select event, distinct_id, properties.key from events order by timestamp")
-            api_response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
+            api_response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             response = CachedInsightsQLQueryResponse.model_validate(api_response)
 
             self.assertEqual(response.results and len(response.results), 4)
@@ -587,7 +587,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
                 "query": "SELECT event from events",
             },
         }
-        response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query})
+        response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_query_not_supported(self):
@@ -595,7 +595,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
             "kind": "SavedInsightNode",
             "shortId": "123",
         }
-        response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query})
+        response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["detail"], "Unsupported query kind: SavedInsightNode", response.content)
 
@@ -654,7 +654,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
     def test_query_limit_context_insights_ai(self, mock_process_query_model):
         mock_process_query_model.return_value = {"results": []}
         self.client.post(
-            f"/api/environments/{self.team.id}/query/",
+            f"/v1/environments/{self.team.id}/query/",
             {
                 "query": {"kind": "InsightsQLQuery", "query": "select 1"},
                 "limit_context": "insights_ai",
@@ -667,7 +667,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
     def test_query_limit_context_default(self, mock_process_query_model):
         mock_process_query_model.return_value = {"results": []}
         self.client.post(
-            f"/api/environments/{self.team.id}/query/",
+            f"/v1/environments/{self.team.id}/query/",
             {
                 "query": {"kind": "InsightsQLQuery", "query": "select 1"},
             },
@@ -678,7 +678,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
 
     def test_query_limit_context_invalid_value(self):
         api_response = self.client.post(
-            f"/api/environments/{self.team.id}/query/",
+            f"/v1/environments/{self.team.id}/query/",
             {
                 "query": {"kind": "InsightsQLQuery", "query": "select 1"},
                 "limit_context": "export",
@@ -766,7 +766,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(response.columns, ["event"])
 
     def test_invalid_query_kind(self):
-        api_response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": {"kind": "Tomato Soup"}})
+        api_response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": {"kind": "Tomato Soup"}})
         self.assertEqual(api_response.status_code, 400)
         self.assertEqual(api_response.json()["code"], "parse_error")
         self.assertIn("1 validation error for QueryRequest", api_response.json()["detail"], api_response.content)
@@ -777,11 +777,11 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
         )
 
     def test_missing_query(self):
-        api_response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": {}})
+        api_response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": {}})
         self.assertEqual(api_response.status_code, 400)
 
     def test_missing_body(self):
-        api_response = self.client.post(f"/api/environments/{self.team.id}/query/")
+        api_response = self.client.post(f"/v1/environments/{self.team.id}/query/")
         self.assertEqual(api_response.status_code, 400)
 
     @snapshot_datastore_queries
@@ -824,7 +824,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
 
         with freeze_time("2020-01-10 12:14:00"):
             self.client.post(
-                f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+                f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
                 {
                     "name": "event_view",
                     "query": {
@@ -834,7 +834,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
                 },
             )
             query = InsightsQLQuery(query="select event, distinct_id, key from event_view")
-            api_response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()})
+            api_response = self.client.post(f"/v1/environments/{self.team.id}/query/", {"query": query.dict()})
             response = CachedInsightsQLQueryResponse.model_validate(api_response.json())
 
             self.assertEqual(api_response.status_code, 200)
@@ -876,7 +876,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
         with freeze_time("2020-01-10 12:14:00"):
             query = InsightsQLQuery(query="select * from events")
             api_response = self.client.post(
-                f"/api/environments/{self.team.id}/query/", {"query": query.dict(), "refresh": "force_async"}
+                f"/v1/environments/{self.team.id}/query/", {"query": query.dict(), "refresh": "force_async"}
             )
 
             self.assertEqual(api_response.status_code, 202)  # This means "Accepted" (for processing)
@@ -1023,7 +1023,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
         variable_override_value = "helloooooo"
 
         api_response = self.client.post(
-            f"/api/environments/{self.team.id}/query/",
+            f"/v1/environments/{self.team.id}/query/",
             {
                 "query": {
                     "kind": "InsightsQLQuery",
@@ -1065,7 +1065,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
         )
 
         self.client.post(
-            f"/api/environments/{self.team.id}/query/",
+            f"/v1/environments/{self.team.id}/query/",
             {
                 "query": {
                     "kind": "RetentionQuery",
@@ -1112,13 +1112,13 @@ class TestQueryRetrieve(APIBaseTest):
                 "results": ["result1", "result2"],
             }
         ).encode()
-        response = self.client.get(f"/api/environments/{self.team.id}/query/{self.valid_query_id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/query/{self.valid_query_id}/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["query_status"]["complete"], True, response.content)
 
     def test_with_invalid_query_id(self):
         self.redis_client_mock.get.return_value = None
-        response = self.client.get(f"/api/environments/{self.team.id}/query/{self.invalid_query_id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/query/{self.invalid_query_id}/")
         self.assertEqual(response.status_code, 404)
 
     def test_completed_query(self):
@@ -1130,7 +1130,7 @@ class TestQueryRetrieve(APIBaseTest):
                 "results": ["result1", "result2"],
             }
         ).encode()
-        response = self.client.get(f"/api/environments/{self.team.id}/query/{self.valid_query_id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/query/{self.valid_query_id}/")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["query_status"]["complete"])
 
@@ -1142,7 +1142,7 @@ class TestQueryRetrieve(APIBaseTest):
                 "complete": False,
             }
         ).encode()
-        response = self.client.get(f"/api/environments/{self.team.id}/query/{self.valid_query_id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/query/{self.valid_query_id}/")
         self.assertEqual(response.status_code, 202)
         self.assertFalse(response.json()["query_status"]["complete"])
 
@@ -1155,7 +1155,7 @@ class TestQueryRetrieve(APIBaseTest):
                 "error_message": None,
             }
         ).encode()
-        response = self.client.get(f"/api/environments/{self.team.id}/query/{self.valid_query_id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/query/{self.valid_query_id}/")
         self.assertEqual(response.status_code, 500)
         self.assertTrue(response.json()["query_status"]["error"])
 
@@ -1168,7 +1168,7 @@ class TestQueryRetrieve(APIBaseTest):
                 "error_message": "Try changing the time range",
             }
         ).encode()
-        response = self.client.get(f"/api/environments/{self.team.id}/query/{self.valid_query_id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/query/{self.valid_query_id}/")
         self.assertEqual(response.status_code, 400)
         self.assertTrue(response.json()["query_status"]["error"])
 
@@ -1181,7 +1181,7 @@ class TestQueryRetrieve(APIBaseTest):
                 "error_message": "Query failed",
             }
         ).encode()
-        response = self.client.delete(f"/api/environments/{self.team.id}/query/{self.valid_query_id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/query/{self.valid_query_id}/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.redis_client_mock.delete.call_count, 2)
 
@@ -1190,7 +1190,7 @@ class TestQueryDraftSql(APIBaseTest):
     @patch("insights.insightsql.ai.hit_openai", return_value=("SELECT 1", 21, 37))
     def test_draft_sql(self, hit_openai_mock):
         response = self.client.get(
-            f"/api/environments/{self.team.id}/query/draft_sql/", {"prompt": "I need the number 1"}
+            f"/v1/environments/{self.team.id}/query/draft_sql/", {"prompt": "I need the number 1"}
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"sql": "SELECT 1"})
@@ -1201,7 +1201,7 @@ class TestQueryUpgrade(APIBaseTest):
     def test_upgrades_valid_query(self):
         query = {"kind": "RetentionQuery", "retentionFilter": {"period": "Day", "totalIntervals": 7, "showMean": True}}
 
-        response = self.client.post(f"/api/environments/{self.team.id}/query/upgrade/", {"query": query})
+        response = self.client.post(f"/v1/environments/{self.team.id}/query/upgrade/", {"query": query})
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(

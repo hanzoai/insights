@@ -19,7 +19,7 @@ class TestEarlyAccessFeature(APIBaseTest):
 
     def test_can_create_early_access_feature(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -44,7 +44,7 @@ class TestEarlyAccessFeature(APIBaseTest):
 
     def test_promote_to_beta(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -59,7 +59,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         feature_id = response_data["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/early_access_feature/{feature_id}",
+            f"/v1/projects/{self.team.id}/early_access_feature/{feature_id}",
             data={
                 "stage": EarlyAccessFeature.Stage.BETA,
             },
@@ -73,7 +73,7 @@ class TestEarlyAccessFeature(APIBaseTest):
 
     def test_archive(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -89,7 +89,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         feature_id = response_data["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/early_access_feature/{feature_id}",
+            f"/v1/projects/{self.team.id}/early_access_feature/{feature_id}",
             data={
                 "stage": EarlyAccessFeature.Stage.ARCHIVED,
             },
@@ -103,7 +103,7 @@ class TestEarlyAccessFeature(APIBaseTest):
 
     def test_update_doesnt_remove_super_condition(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -119,7 +119,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         feature_id = response_data["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/early_access_feature/{feature_id}",
+            f"/v1/projects/{self.team.id}/early_access_feature/{feature_id}",
             data={
                 "description": "Something else!",
             },
@@ -149,7 +149,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -200,7 +200,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -227,7 +227,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -268,7 +268,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -282,7 +282,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         assert response.status_code == status.HTTP_201_CREATED, response_data
 
         response = self.client.delete(
-            f"/api/projects/{self.team.id}/early_access_feature/{response_data['id']}/",
+            f"/v1/projects/{self.team.id}/early_access_feature/{response_data['id']}/",
             format="json",
         )
 
@@ -318,7 +318,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -332,7 +332,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         assert response.status_code == status.HTTP_201_CREATED, response_data
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{existing_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{existing_flag.id}/",
             data={
                 "deleted": True,
             },
@@ -359,7 +359,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -407,7 +407,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -436,7 +436,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -448,7 +448,7 @@ class TestEarlyAccessFeature(APIBaseTest):
 
         # Request for new feature with same flag id should fail
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Another feature",
                 "description": 'Boondoogle your hicks AGAIN with one click. Just click "bazinga"!',
@@ -475,7 +475,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/early_access_feature/{feature.id}",
+            f"/v1/projects/{self.team.id}/early_access_feature/{feature.id}",
             data={
                 "name": "Mouse-up counter",
                 "description": "Oops, we made a mistake, it actually only counts mouse-up events.",
@@ -499,7 +499,7 @@ class TestEarlyAccessFeature(APIBaseTest):
             stage="beta",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/early_access_feature/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/early_access_feature/")
         response_data = response.json()
 
         assert response.status_code == status.HTTP_200_OK, response_data
@@ -524,7 +524,7 @@ class TestEarlyAccessFeature(APIBaseTest):
     def test_can_create_early_access_feature_with_payload(self):
         payload = {"key": "value", "nested": {"inner": "data", "number": 42}}
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Feature with payload",
                 "description": "A feature with a custom payload",
@@ -542,7 +542,7 @@ class TestEarlyAccessFeature(APIBaseTest):
 
     def test_can_create_early_access_feature_without_payload_defaults_to_empty_dict(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Feature without payload",
                 "description": "A feature without a payload",
@@ -569,7 +569,7 @@ class TestEarlyAccessFeature(APIBaseTest):
 
         new_payload = {"new": "payload", "updated": True, "count": 123}
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/early_access_feature/{feature.id}",
+            f"/v1/projects/{self.team.id}/early_access_feature/{feature.id}",
             data={"payload": new_payload},
             format="json",
         )
@@ -590,7 +590,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/early_access_feature/{feature.id}",
+            f"/v1/projects/{self.team.id}/early_access_feature/{feature.id}",
             data={"payload": {}},
             format="json",
         )
@@ -616,7 +616,7 @@ class TestEarlyAccessFeature(APIBaseTest):
             stage="beta",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/early_access_feature/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/early_access_feature/")
         response_data = response.json()
 
         assert response.status_code == status.HTTP_200_OK, response_data
@@ -628,7 +628,7 @@ class TestEarlyAccessFeature(APIBaseTest):
     @patch("insights.api.feature_flag.report_user_action")
     def test_creation_context_is_set_to_early_access_features(self, mock_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -659,7 +659,7 @@ class TestEarlyAccessFeature(APIBaseTest):
     @patch("insights.tasks.early_access_feature.send_events_for_early_access_feature_stage_change.delay")
     def test_send_events_for_early_access_feature_stage_change_fires_on_stage_change(self, mock_celery_task):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "CeleryTestFeature",
                 "description": "Test firing celery task",
@@ -670,7 +670,7 @@ class TestEarlyAccessFeature(APIBaseTest):
         feature_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/early_access_feature/{feature_id}",
+            f"/v1/projects/{self.team.id}/early_access_feature/{feature_id}",
             data={"stage": EarlyAccessFeature.Stage.BETA},
             format="json",
         )
@@ -683,7 +683,7 @@ class TestEarlyAccessFeature(APIBaseTest):
 
     def test_create_early_access_feature_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={
                 "name": "Hick bondoogling",
                 "description": 'Boondoogle your hicks with one click. Just click "bazinga"!',
@@ -728,7 +728,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         ip="127.0.0.1",
     ):
         return self.client.get(
-            f"/api/early_access_features/",
+            f"/v1/early_access_features/",
             data={"token": token or self.team.api_token},
             headers={"origin": origin},
             REMOTE_ADDR=ip,
@@ -985,7 +985,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
         self.client.logout()
 
         with self.assertNumQueries(0):
-            response = self.client.get(f"/api/early_access_features/")
+            response = self.client.get(f"/v1/early_access_features/")
             self.assertEqual(response.status_code, 401)
             self.assertEqual(
                 response.json()["detail"],

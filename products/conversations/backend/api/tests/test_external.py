@@ -25,7 +25,7 @@ class TestExternalTicketAPI(BaseTest):
             channel_source="widget",
             status=Status.NEW,
         )
-        self.url = f"/api/conversations/external/ticket/{self.ticket.id}"
+        self.url = f"/v1/conversations/external/ticket/{self.ticket.id}"
 
     def _auth_headers(self, token=None):
         return {"HTTP_AUTHORIZATION": f"Bearer {token or self.team.api_token}"}
@@ -80,7 +80,7 @@ class TestExternalTicketAPI(BaseTest):
         self.assertIn("updated_at", data)
 
     def test_get_ticket_not_found(self):
-        url = f"/api/conversations/external/ticket/{uuid.uuid4()}"
+        url = f"/v1/conversations/external/ticket/{uuid.uuid4()}"
         response = self.client.get(url, **self._auth_headers())
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -140,7 +140,7 @@ class TestExternalTicketAPI(BaseTest):
         self.assertEqual(self.ticket.status, "new")
 
     def test_patch_ticket_not_found(self):
-        url = f"/api/conversations/external/ticket/{uuid.uuid4()}"
+        url = f"/v1/conversations/external/ticket/{uuid.uuid4()}"
         response = self.client.patch(
             url, {"status": "resolved"}, content_type="application/json", **self._auth_headers()
         )
@@ -172,7 +172,7 @@ class TestExternalTicketAPI(BaseTest):
     # -- URL validation ---------------------------------------------------
 
     def test_invalid_uuid_in_url_returns_404(self):
-        response = self.client.get("/api/conversations/external/ticket/not-a-uuid", **self._auth_headers())
+        response = self.client.get("/v1/conversations/external/ticket/not-a-uuid", **self._auth_headers())
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # -- HTTP methods not allowed -----------------------------------------

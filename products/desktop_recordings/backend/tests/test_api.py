@@ -22,7 +22,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
                 mock_client.return_value = mock_instance
 
                 response = self.client.post(
-                    f"/api/environments/{self.team.id}/desktop_recordings/",
+                    f"/v1/environments/{self.team.id}/desktop_recordings/",
                     {"platform": "zoom"},
                     format="json",
                 )
@@ -50,7 +50,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
 
         with patch("insights.settings.integrations.RECALL_AI_API_KEY", ""):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/desktop_recordings/",
+                f"/v1/environments/{self.team.id}/desktop_recordings/",
                 {"platform": "zoom"},
                 format="json",
             )
@@ -70,7 +70,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
 
         # First upload
         response1 = self.client.post(
-            f"/api/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
+            f"/v1/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
             {"segments": [{"text": "First segment", "timestamp": 0.0}]},
             format="json",
         )
@@ -78,7 +78,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
 
         # Second upload - should append new segments
         response2 = self.client.post(
-            f"/api/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
+            f"/v1/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
             {"segments": [{"text": "Second segment", "timestamp": 1.0}]},
             format="json",
         )
@@ -110,7 +110,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
             status=DesktopRecording.Status.READY,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/desktop_recordings/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/desktop_recordings/")
 
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -129,7 +129,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
 
         # Missing required 'text' field should fail
         response = self.client.post(
-            f"/api/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
+            f"/v1/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
             {"segments": [{"timestamp": 0.0}]},
             format="json",
         )
@@ -148,7 +148,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
 
         # First upload with None timestamp
         response1 = self.client.post(
-            f"/api/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
+            f"/v1/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
             {"segments": [{"text": "First segment", "timestamp": None}]},
             format="json",
         )
@@ -156,7 +156,7 @@ class TestDesktopRecordingAPI(APIBaseTest):
 
         # Second upload with None timestamp - should add (not deduplicate)
         response2 = self.client.post(
-            f"/api/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
+            f"/v1/environments/{self.team.id}/desktop_recordings/{recording.id}/append_segments/",
             {"segments": [{"text": "Second segment", "timestamp": None}]},
             format="json",
         )

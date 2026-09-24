@@ -13,7 +13,7 @@ from products.customer_analytics.backend.models import CustomerJourney, Customer
 class TestCustomerProfileConfigViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.endpoint_base = f"/api/environments/{self.team.id}/customer_profile_configs/"
+        self.endpoint_base = f"/v1/environments/{self.team.id}/customer_profile_configs/"
         self.valid_data = {
             "scope": "person",
             "content": [{"type": "ph-node-foo", "index": 0}],
@@ -201,7 +201,7 @@ class TestCustomerProfileConfigViewSet(APIBaseTest):
 class TestCustomerJourneyViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.endpoint_base = f"/api/environments/{self.team.id}/customer_journeys/"
+        self.endpoint_base = f"/v1/environments/{self.team.id}/customer_journeys/"
         self.insight = Insight.objects.create(team=self.team)
 
     def _create_journey(self, **kwargs):

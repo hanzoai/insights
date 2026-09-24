@@ -12,7 +12,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
 
     def test_create_column_configuration(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"context_key": "survey:123", "columns": ["*", "person", "timestamp"]},
         )
 
@@ -26,7 +26,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
 
     def test_create_column_configuration_empty_objects_filters(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"context_key": "survey:123", "columns": ["*", "person", "timestamp"], "filters": {}},
         )
 
@@ -45,7 +45,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {
                 "name": "Dupe",
                 "context_key": "dupe-key",
@@ -64,7 +64,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
         assert config.columns == ["*", "person", "timestamp"], "Old config should not change columns"
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {
                 "name": "Dupe",
                 "context_key": "dupe-key",
@@ -86,7 +86,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {
                 "name": "Dupe",
                 "context_key": "dupe-key",
@@ -115,7 +115,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/column_configurations/", {"context_key": "context-key"}
+            f"/v1/environments/{self.team.id}/column_configurations/", {"context_key": "context-key"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -133,7 +133,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/column_configurations/{str(another_config.id)}", {"name": "New name"}
+            f"/v1/environments/{self.team.id}/column_configurations/{str(another_config.id)}", {"name": "New name"}
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -149,7 +149,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/column_configurations/{str(another_config.id)}"
+            f"/v1/environments/{self.team.id}/column_configurations/{str(another_config.id)}"
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -157,13 +157,13 @@ class TestColumnConfigurationAPI(APIBaseTest):
 
     def test_update_via_patch(self):
         create_response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"context_key": "survey:123", "columns": ["*", "person"]},
         )
         config_id = create_response.json()["id"]
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/column_configurations/{config_id}/",
+            f"/v1/environments/{self.team.id}/column_configurations/{config_id}/",
             {"columns": ["*", "timestamp"]},
         )
 
@@ -179,7 +179,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
             ColumnConfiguration.objects.create(team=self.team, context_key=context, columns=["*", "person"])
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/column_configurations/", {"context_key": "survey:123"}
+            f"/v1/environments/{self.team.id}/column_configurations/", {"context_key": "survey:123"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -192,7 +192,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/column_configurations/", {"context_key": "people-list"}
+            f"/v1/environments/{self.team.id}/column_configurations/", {"context_key": "people-list"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -203,7 +203,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
 
     def test_missing_context_key(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"columns": ["*", "person"]},
         )
 
@@ -212,7 +212,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
 
     def test_missing_columns(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"context_key": "survey:123"},
         )
 
@@ -221,7 +221,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
 
     def test_empty_columns_list(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"context_key": "survey:123", "columns": []},
         )
 
@@ -230,7 +230,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
 
     def test_non_string_columns(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"context_key": "survey:123", "columns": ["*", 123, "person"]},
         )
 
@@ -239,7 +239,7 @@ class TestColumnConfigurationAPI(APIBaseTest):
 
     def test_too_many_columns(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"context_key": "survey:123", "columns": [f"col_{i}" for i in range(101)]},
         )
 
@@ -250,11 +250,11 @@ class TestColumnConfigurationAPI(APIBaseTest):
         other_team = self.organization.teams.create(name="Other Team")
 
         self.client.post(
-            f"/api/environments/{self.team.id}/column_configurations/",
+            f"/v1/environments/{self.team.id}/column_configurations/",
             {"context_key": "survey:123", "columns": ["*", "person"]},
         )
 
-        response = self.client.get(f"/api/environments/{other_team.id}/column_configurations/")
+        response = self.client.get(f"/v1/environments/{other_team.id}/column_configurations/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 0

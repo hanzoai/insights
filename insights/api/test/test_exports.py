@@ -110,7 +110,7 @@ class TestExports(APIBaseTest):
         self.dashboard.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {"export_format": "image/png", "dashboard": self.dashboard.id},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -139,7 +139,7 @@ class TestExports(APIBaseTest):
     def test_can_create_export_with_ttl(self, mock_exporter_task) -> None:
         one_week_from_now = datetime.now() + timedelta(weeks=1)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "image/png",
                 "dashboard": self.dashboard.id,
@@ -180,11 +180,11 @@ class TestExports(APIBaseTest):
         mock_exporter_task.get.side_effect = requests.exceptions.MissingSchema("why is this raised?")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "text/csv",
                 "export_context": {
-                    "path": f"api/projects/{self.team.id}/insights/trend/?insight=TRENDS&events=%5B%7B%22id%22%3A%22search%20filtered%22%2C%22name%22%3A%22search%20filtered%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&actions=%5B%5D&display=ActionsTable&interval=day&breakdown=filters&new_entity=%5B%5D&properties=%5B%5D&breakdown_type=event&filter_test_accounts=false&date_from=-14d"
+                    "path": f"v1/projects/{self.team.id}/insights/trend/?insight=TRENDS&events=%5B%7B%22id%22%3A%22search%20filtered%22%2C%22name%22%3A%22search%20filtered%22%2C%22type%22%3A%22events%22%2C%22order%22%3A0%7D%5D&actions=%5B%5D&display=ActionsTable&interval=day&breakdown=filters&new_entity=%5B%5D&properties=%5B%5D&breakdown_type=event&filter_test_accounts=false&date_from=-14d"
                 },
             },
         )
@@ -201,7 +201,7 @@ class TestExports(APIBaseTest):
     @freeze_time("2021-08-25T22:09:14.252Z")
     def test_can_create_new_valid_export_insight(self, mock_exporter_task, mock_export_to_png) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {"export_format": "image/png", "insight": self.insight.id},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -276,7 +276,7 @@ class TestExports(APIBaseTest):
             mock_calculate.assert_called_once()
 
     def test_errors_if_missing_related_instance(self) -> None:
-        response = self.client.post(f"/api/projects/{self.team.id}/exports", {"export_format": "image/png"})
+        response = self.client.post(f"/v1/projects/{self.team.id}/exports", {"export_format": "image/png"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -289,7 +289,7 @@ class TestExports(APIBaseTest):
         )
 
     def test_errors_if_bad_format(self) -> None:
-        response = self.client.post(f"/api/projects/{self.team.id}/exports", {"export_format": "not/allowed"})
+        response = self.client.post(f"/v1/projects/{self.team.id}/exports", {"export_format": "not/allowed"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -305,7 +305,7 @@ class TestExports(APIBaseTest):
     def test_will_respond_even_if_task_timesout(self, mock_exporter_task) -> None:
         mock_exporter_task.export_asset.delay.return_value.get.side_effect = celery.exceptions.TimeoutError("timed out")
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {"export_format": "image/png", "insight": self.insight.id},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -314,7 +314,7 @@ class TestExports(APIBaseTest):
     def test_will_error_if_export_unsupported(self, mock_exporter_task) -> None:
         mock_exporter_task.export_asset.delay.return_value.get.side_effect = NotImplementedError("not implemented")
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {"export_format": "image/jpeg", "insight": self.insight.id},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -330,7 +330,7 @@ class TestExports(APIBaseTest):
 
     def test_will_error_if_dashboard_missing(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {"export_format": "application/pdf", "dashboard": 54321},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -362,7 +362,7 @@ class TestExports(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {"export_format": "application/pdf", "dashboard": other_dashboard.id},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -396,7 +396,7 @@ class TestExports(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {"export_format": "application/pdf", "insight": other_insight.id},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -454,13 +454,13 @@ class TestExports(APIBaseTest):
             patched_request.side_effect = requests_side_effect
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/exports",
+                f"/v1/projects/{self.team.id}/exports",
                 {
                     "export_format": "text/csv",
                     "export_context": {
                         "path": "&".join(
                             [
-                                f"/api/projects/{self.team.id}/events?orderBy=%5B%22-timestamp%22%5D",
+                                f"/v1/projects/{self.team.id}/events?orderBy=%5B%22-timestamp%22%5D",
                                 "properties=%5B%7B%22key%22%3A%22%24browser%22%2C%22value%22%3A%5B%22Safari%22%5D%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22event%22%7D%5D",
                                 f"after={after}",
                             ]
@@ -482,7 +482,7 @@ class TestExports(APIBaseTest):
             attempt_count = 0
             while attempt_count < 10 and not download_response:
                 download_response = self.client.get(
-                    f"/api/projects/{self.team.id}/exports/{instance['id']}/content?download=true"
+                    f"/v1/projects/{self.team.id}/exports/{instance['id']}/content?download=true"
                 )
                 attempt_count += 1
 
@@ -504,7 +504,7 @@ class TestExports(APIBaseTest):
                     self.assertIn("Safari", line)
 
     def _get_insight_activity(self, insight_id: int, expected_status: int = status.HTTP_200_OK):
-        url = f"/api/projects/{self.team.id}/insights/{insight_id}/activity"
+        url = f"/v1/projects/{self.team.id}/insights/{insight_id}/activity"
         activity = self.client.get(url)
         self.assertEqual(activity.status_code, expected_status)
         return activity.json()
@@ -518,7 +518,7 @@ class TestExports(APIBaseTest):
         self.assertEqual(activity, expected)
 
     def test_can_list_exports(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/exports")
+        response = self.client.get(f"/v1/projects/{self.team.id}/exports")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
 
@@ -531,7 +531,7 @@ class TestExports(APIBaseTest):
             team=self.team, dashboard_id=self.dashboard.id, export_format="image/png", created_by=None
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/exports")
+        response = self.client.get(f"/v1/projects/{self.team.id}/exports")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 2)
 
@@ -581,7 +581,7 @@ class TestExports(APIBaseTest):
             exception=None,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/exports")
+        response = self.client.get(f"/v1/projects/{self.team.id}/exports")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -622,7 +622,7 @@ class TestExports(APIBaseTest):
                 exception=None,
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/exports/{stuck_export.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/exports/{stuck_export.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         result = response.json()
@@ -651,7 +651,7 @@ class TestExports(APIBaseTest):
             team=self.team, insight_id=self.insight.id, export_format="text/csv", created_by=self.user
         )
 
-        url = f"/api/projects/{self.team.id}/exports"
+        url = f"/v1/projects/{self.team.id}/exports"
         if export_format:
             url += f"?export_format={export_format}"
 
@@ -705,7 +705,7 @@ class TestExports(APIBaseTest):
         else:
             payload = {"export_format": export_format, "dashboard": self.dashboard.id}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/exports", payload)
+        response = self.client.post(f"/v1/projects/{self.team.id}/exports", payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
 
@@ -736,7 +736,7 @@ class TestExports(APIBaseTest):
 
         # The 10th video export should succeed
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "video/mp4",
                 "export_context": {
@@ -749,7 +749,7 @@ class TestExports(APIBaseTest):
 
         # The 11th video export should fail with limit exceeded error
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "video/mp4",
                 "export_context": {
@@ -779,7 +779,7 @@ class TestExports(APIBaseTest):
 
         # Full video export should fail
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "video/mp4",
                 "export_context": {
@@ -792,7 +792,7 @@ class TestExports(APIBaseTest):
 
         # But clip export (screenshot mode) should succeed
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "video/mp4",
                 "export_context": {
@@ -807,7 +807,7 @@ class TestExports(APIBaseTest):
 
         # Other video formats should also succeed
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "video/webm",
                 "export_context": {
@@ -835,7 +835,7 @@ class TestExports(APIBaseTest):
 
         # Should fail in January
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "video/mp4",
                 "export_context": {
@@ -850,7 +850,7 @@ class TestExports(APIBaseTest):
         with freeze_time("2024-02-01T12:00:00Z"):
             # Should succeed in February (limit reset)
             response = self.client.post(
-                f"/api/projects/{self.team.id}/exports",
+                f"/v1/projects/{self.team.id}/exports",
                 {
                     "export_format": "video/mp4",
                     "export_context": {
@@ -872,7 +872,7 @@ class TestExports(APIBaseTest):
         # Create 2 video exports (should succeed)
         for i in range(2):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/exports",
+                f"/v1/projects/{self.team.id}/exports",
                 {
                     "export_format": "video/mp4",
                     "export_context": {
@@ -885,7 +885,7 @@ class TestExports(APIBaseTest):
 
         # The 3rd export should succeed (at the custom limit)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "video/mp4",
                 "export_context": {
@@ -898,7 +898,7 @@ class TestExports(APIBaseTest):
 
         # The 4th export should fail with the custom limit in error message
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {
                 "export_format": "video/mp4",
                 "export_context": {
@@ -921,7 +921,7 @@ class TestExports(APIBaseTest):
         mock_export_direct.side_effect = QueryError("Unknown table 'nonexistent_table'")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/exports",
+            f"/v1/projects/{self.team.id}/exports",
             {"export_format": "image/png", "insight": self.insight.id},
         )
 
@@ -957,7 +957,7 @@ class TestExportMixin(APIBaseTest):
                 patched_request.side_effect = requests_side_effect
 
                 response = self.client.post(
-                    f"/api/projects/{self.team.pk}/exports/",
+                    f"/v1/projects/{self.team.pk}/exports/",
                     {
                         "export_context": {
                             "path": path,
@@ -966,7 +966,7 @@ class TestExportMixin(APIBaseTest):
                     },
                 )
                 download_response = self.client.get(
-                    f"/api/projects/{self.team.id}/exports/{response.json()['id']}/content?download=true"
+                    f"/v1/projects/{self.team.id}/exports/{response.json()['id']}/content?download=true"
                 )
                 return [str(x) for x in download_response.content.splitlines()]
 

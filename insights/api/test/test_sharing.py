@@ -124,7 +124,7 @@ class TestSharing(APIBaseTest):
         assert SharingConfiguration.objects.count() == 0
 
         # First get the initial config (not saved yet)
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing")
         assert SharingConfiguration.objects.count() == 0
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -142,12 +142,12 @@ class TestSharing(APIBaseTest):
     def test_does_not_change_token_when_toggling_enabled_state(self, patched_exporter_task: Mock):
         assert SharingConfiguration.objects.count() == 0
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
         initial_data = response.json()
         assert SharingConfiguration.objects.count() == 1
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing")
         assert response.json() == {
             "access_token": initial_data["access_token"],
             "created_at": "2022-01-01T00:00:00Z",
@@ -158,7 +158,7 @@ class TestSharing(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": False},
         )
         assert response.json() == {
@@ -173,14 +173,14 @@ class TestSharing(APIBaseTest):
     @patch("insights.api.exports.exporter.export_asset.delay")
     def test_can_edit_enabled_state(self, patched_exporter_task: Mock):
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
         data = response.json()
         assert response.status_code == status.HTTP_200_OK
         assert data["enabled"]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}")
 
         assert response.json()["is_shared"]
         assert ActivityLog.objects.filter(scope="SharingConfiguration").count() == 0
@@ -190,7 +190,7 @@ class TestSharing(APIBaseTest):
         assert ActivityLog.objects.filter(scope="SharingConfiguration").count() == 0
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{self.insight.id}/sharing",
+            f"/v1/projects/{self.team.id}/insights/{self.insight.id}/sharing",
             {"enabled": True},
         )
         data = response.json()
@@ -198,7 +198,7 @@ class TestSharing(APIBaseTest):
         assert data["enabled"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{self.insight.id}/sharing",
+            f"/v1/projects/{self.team.id}/insights/{self.insight.id}/sharing",
             {"enabled": False},
         )
         data = response.json()
@@ -217,7 +217,7 @@ class TestSharing(APIBaseTest):
         assert ExportedAsset.objects.count() == 0
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
 
@@ -229,7 +229,7 @@ class TestSharing(APIBaseTest):
     @patch("insights.api.exports.exporter.export_asset.delay")
     def test_should_update_to_match_existing_dashboard_sharing_token(self, patched_exporter_task: Mock):
         dashboard = Dashboard.objects.create(team=self.team, name="example dashboard", created_by=self.user)
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}/sharing")
         initial_token = response.json()["access_token"]
         assert initial_token
         assert not response.json()["enabled"]
@@ -238,7 +238,7 @@ class TestSharing(APIBaseTest):
         dashboard.is_shared = True
         dashboard.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}/sharing")
         data = response.json()
         assert data["access_token"] == "my_test_token"
         assert data["enabled"]
@@ -247,7 +247,7 @@ class TestSharing(APIBaseTest):
         dashboard.is_shared = False
         dashboard.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}/sharing")
         data = response.json()
         assert data["access_token"] == "my_test_token"
         assert data["enabled"]
@@ -263,7 +263,7 @@ class TestSharing(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}/sharing",
             {"enabled": True},
         )
 
@@ -279,12 +279,12 @@ class TestSharing(APIBaseTest):
             is_shared=True,
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}/sharing",
             {"enabled": True},
         )
         response = self.client.get(f"/shared_dashboard/my_test_token")
         assert response.status_code == 200
-        response = self.client.patch(f"/api/projects/{self.team.id}/dashboards/{dashboard.id}", {"deleted": True})
+        response = self.client.patch(f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}", {"deleted": True})
         assert response.status_code == 200
         response = self.client.get(f"/shared_dashboard/my_test_token")
         assert response.status_code == 404
@@ -340,7 +340,7 @@ class TestSharing(APIBaseTest):
         assert ExportedAsset.objects.count() == 0
 
         share_response = self.client.patch(
-            f"/api/projects/{self.team.id}/{type}/{target.pk}/sharing",
+            f"/v1/projects/{self.team.id}/{type}/{target.pk}/sharing",
             {"enabled": True},
         )
         access_token = share_response.json()["access_token"]
@@ -364,7 +364,7 @@ class TestSharing(APIBaseTest):
         target = self.insight if type == "insights" else self.dashboard
 
         share_response = self.client.patch(
-            f"/api/projects/{self.team.id}/{type}/{target.pk}/sharing",
+            f"/v1/projects/{self.team.id}/{type}/{target.pk}/sharing",
             {"enabled": True},
         )
         access_token = share_response.json()["access_token"]
@@ -406,7 +406,7 @@ class TestSharing(APIBaseTest):
         time_in_the_past = now() - timedelta(days=181)
         with freeze_time(time_in_the_past):
             share_response = self.client.patch(
-                f"/api/projects/{self.team.id}/{type}/{target.pk}/sharing",
+                f"/v1/projects/{self.team.id}/{type}/{target.pk}/sharing",
                 {"enabled": True},
             )
             # enabling creates an asset with expires_after set to 180 days from creation
@@ -432,7 +432,7 @@ class TestSharing(APIBaseTest):
     def test_can_refresh_sharing_access_token_for_dashboard(self, patched_exporter_task: Mock):
         # Enable sharing
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
         initial_data = response.json()
@@ -440,7 +440,7 @@ class TestSharing(APIBaseTest):
         assert initial_token
 
         # Refresh the token
-        response = self.client.post(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing/refresh/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing/refresh/")
         assert response.status_code == status.HTTP_200_OK
         refreshed_data = response.json()
 
@@ -449,14 +449,14 @@ class TestSharing(APIBaseTest):
         assert refreshed_data["enabled"] is True
 
         # Verify the token persists
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing")
         assert response.json()["access_token"] == refreshed_data["access_token"]
 
     @patch("insights.api.exports.exporter.export_asset.delay")
     def test_can_refresh_sharing_access_token_for_insight(self, patched_exporter_task: Mock):
         # First enable sharing
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{self.insight.id}/sharing",
+            f"/v1/projects/{self.team.id}/insights/{self.insight.id}/sharing",
             {"enabled": True},
         )
         initial_data = response.json()
@@ -464,7 +464,7 @@ class TestSharing(APIBaseTest):
         assert initial_token
 
         # Refresh the token
-        response = self.client.post(f"/api/projects/{self.team.id}/insights/{self.insight.id}/sharing/refresh/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights/{self.insight.id}/sharing/refresh/")
         assert response.status_code == status.HTTP_200_OK
         refreshed_data = response.json()
 
@@ -484,13 +484,13 @@ class TestSharing(APIBaseTest):
     def test_refresh_token_grace_period(self, patched_exporter_task: Mock):
         # Enable sharing
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
         initial_token = response.json()["access_token"]
 
         # Refresh the token
-        response = self.client.post(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing/refresh/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing/refresh/")
         assert response.status_code == status.HTTP_200_OK
         new_token = response.json()["access_token"]
         assert new_token != initial_token
@@ -553,13 +553,13 @@ class TestSharing(APIBaseTest):
 
         # Enable sharing
         self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
         original_config = SharingConfiguration.objects.get(dashboard=self.dashboard, expires_at__isnull=True)
 
         # Refresh the token
-        response = self.client.post(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing/refresh/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing/refresh/")
         assert response.status_code == status.HTTP_200_OK
         new_token = response.json()["access_token"]
 
@@ -577,7 +577,7 @@ class TestSharing(APIBaseTest):
     def test_sharing_configuration_settings_field_defaults(self, patched_exporter_task: Mock):
         """Test that settings field defaults to empty dict"""
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -590,7 +590,7 @@ class TestSharing(APIBaseTest):
         """Test that settings field can be updated"""
         # First enable sharing
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -598,7 +598,7 @@ class TestSharing(APIBaseTest):
         # Update settings
         settings_data = {"whitelabel": True, "customSetting": "value"}
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"settings": settings_data},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -608,7 +608,7 @@ class TestSharing(APIBaseTest):
         }
 
         # Verify settings persists
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing")
         assert response.json()["settings"] == {
             "whitelabel": True,
         }
@@ -629,14 +629,14 @@ class TestSharing(APIBaseTest):
             "customOption": "test2",
         }
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True, "settings": settings_data_with_custom_option},
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["settings"] == settings_data
 
         # Refresh the token
-        response = self.client.post(f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing/refresh/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing/refresh/")
         assert response.status_code == status.HTTP_200_OK
 
         # Settings should be preserved
@@ -655,7 +655,7 @@ class TestSharing(APIBaseTest):
     #     self.client.force_login(self.user)
 
     #     response = self.client.patch(
-    #         f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+    #         f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
     #         {"enabled": True},
     #     )
     #     access_token = response.json()["access_token"]
@@ -685,7 +685,7 @@ class TestSharing(APIBaseTest):
     #     self.client.force_login(self.user)
 
     #     response = self.client.patch(
-    #         f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+    #         f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
     #         {"enabled": True},
     #     )
 
@@ -716,7 +716,7 @@ class TestSharing(APIBaseTest):
 
     #     settings_data = {"whitelabel": True, "noHeader": True, "legend": True, "detailed": True, "showInspector": True}
     #     response = self.client.patch(
-    #         f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+    #         f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
     #         {"enabled": True, "settings": settings_data},
     #     )
     #     access_token = response.json()["access_token"]
@@ -747,7 +747,7 @@ class TestSharing(APIBaseTest):
     #     # Create sharing configuration with specific settings (whitelabel=True, noHeader=False)
     #     settings_data = {"whitelabel": True, "noHeader": False, "legend": True}
     #     response = self.client.patch(
-    #         f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+    #         f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
     #         {"enabled": True, "settings": settings_data},
     #     )
     #     access_token = response.json()["access_token"]
@@ -785,14 +785,14 @@ class TestSharing(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/{type}/{target.pk}/sharing",
+            f"/v1/projects/{self.team.id}/{type}/{target.pk}/sharing",
             {"enabled": True, "settings": settings_data_with_custom_option},
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["settings"] == settings_data
 
         # Verify settings persists
-        response = self.client.get(f"/api/projects/{self.team.id}/{type}/{target.pk}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/{type}/{target.pk}/sharing")
         assert response.json()["settings"] == settings_data
 
     def test_sharing_configuration_model_settings_default(self):
@@ -860,7 +860,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True, "settings": valid_settings},
         )
 
@@ -874,7 +874,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
         partial_settings = {"whitelabel": True, "legend": True}
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True, "settings": partial_settings},
         )
 
@@ -899,7 +899,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True, "settings": settings_with_unknown},
         )
 
@@ -917,7 +917,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
     def test_null_settings_are_accepted(self, patched_exporter_task: Mock):
         """Test that null settings are accepted"""
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True, "settings": None},
         )
 
@@ -929,7 +929,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
     def test_empty_settings_get_defaults(self, patched_exporter_task: Mock):
         """Test that empty settings dictionary gets filled with defaults"""
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True, "settings": {}},
         )
 
@@ -942,7 +942,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
     def test_invalid_settings_type_rejected(self):
         """Test that invalid settings type is rejected"""
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True, "settings": "invalid string"},
         )
 
@@ -963,7 +963,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
 
         with patch("insights.api.exports.exporter.export_asset.delay"):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/insights/{insight.id}/sharing",
+                f"/v1/projects/{self.team.id}/insights/{insight.id}/sharing",
                 {"enabled": True, "settings": valid_settings},
             )
 
@@ -985,7 +985,7 @@ class TestSharingConfigurationSerializerValidation(APIBaseTest):
         self.organization.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
+            f"/v1/projects/{self.team.id}/dashboards/{self.dashboard.id}/sharing",
             {"enabled": True},
         )
         assert response.status_code == status.HTTP_200_OK

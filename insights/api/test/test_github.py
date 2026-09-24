@@ -226,7 +226,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         mock_verify.return_value = None  # Signature verification passes
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(self.valid_payload),
             content_type="application/json",
             headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "test_signature"},
@@ -246,7 +246,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
     def test_secret_alert_missing_headers(self):
         """Test that missing headers are rejected."""
         response = self.client.post(
-            "/api/alerts/github", data=json.dumps(self.valid_payload), content_type="application/json"
+            "/v1/alerts/github", data=json.dumps(self.valid_payload), content_type="application/json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -260,7 +260,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         mock_verify.side_effect = SignatureVerificationError("Invalid signature")
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(self.valid_payload),
             content_type="application/json",
             headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "invalid_signature"},
@@ -279,7 +279,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         # This test doesn't mock verify_github_signature, so it actually tests the full flow
         # The signature will fail, but we're testing that we don't get RawPostDataException
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(self.valid_payload),
             content_type="application/json",
             headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "invalid_signature"},
@@ -294,7 +294,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         """Test that the endpoint accepts application/json content type (not 415 error)."""
         # Test without signature headers first to verify content type is accepted
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(self.valid_payload),
             content_type="application/json",
         )
@@ -323,7 +323,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with the token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -362,7 +362,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with a non-existent token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -400,7 +400,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with the token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -443,7 +443,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with the token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -477,7 +477,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with the token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -519,7 +519,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with the backup token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -606,7 +606,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         self.team.save()
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -644,7 +644,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         ]
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(payload),
             content_type="application/json",
             headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "test_sig"},
@@ -672,7 +672,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         ]
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -701,7 +701,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         token = "hix_unknown_token_1234567890"
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -730,7 +730,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         token = "hix_unknown_token_1234567890"
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -769,7 +769,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         self.team.save()
 
         self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -808,7 +808,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         ]
 
         self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -841,7 +841,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         token = "hix_nonexistent_token_1234567890"
 
         self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -904,7 +904,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         access_token_id = access_token.id
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -946,7 +946,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -980,7 +980,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1005,7 +1005,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1061,7 +1061,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         grant_id = grant.id
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1123,7 +1123,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         grant_id = grant.id
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1163,7 +1163,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1225,7 +1225,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
 
         # Leak the access token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1296,7 +1296,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
 
         # Leak the refresh token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {

@@ -42,18 +42,18 @@ from products.early_access_features.backend.models import EarlyAccessFeature
 
 def team_api_test_factory():
     class TestTeamAPI(APIBaseTest, QueryMatchingTest):
-        """Tests for /api/environments/."""
+        """Tests for /v1/environments/."""
 
         def _assert_activity_log(self, expected: list[dict], team_id: int | None = None) -> None:
             if not team_id:
                 team_id = self.team.pk
 
-            starting_log_response = self.client.get(f"/api/environments/{team_id}/activity")
+            starting_log_response = self.client.get(f"/v1/environments/{team_id}/activity")
             assert starting_log_response.status_code == 200, starting_log_response.json()
             assert starting_log_response.json()["results"] == expected
 
         def _assert_organization_activity_log(self, expected: list[dict]) -> None:
-            starting_log_response = self.client.get(f"/api/organizations/{self.organization.pk}/activity")
+            starting_log_response = self.client.get(f"/v1/organizations/{self.organization.pk}/activity")
             assert starting_log_response.status_code == 200, starting_log_response.json()
             assert starting_log_response.json()["results"] == expected
 
@@ -61,7 +61,7 @@ def team_api_test_factory():
             self._assert_activity_log([])
 
         def test_list_teams(self):
-            response = self.client.get("/api/environments/")
+            response = self.client.get("/v1/environments/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             # Listing endpoint always uses the simplified serializer
@@ -77,7 +77,7 @@ def team_api_test_factory():
             self.assertNotIn("event_properties_numerical", response_data["results"][0])
 
         def test_retrieve_team(self):
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             response_data = response.json()
@@ -101,7 +101,7 @@ def team_api_test_factory():
         def test_retrieve_team_has_group_types(self):
             other_team = Team.objects.create(organization=self.organization, project=self.project)
 
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             response_data = response.json()
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response_data)
@@ -118,7 +118,7 @@ def team_api_test_factory():
                 project=self.project, team=other_team, group_type="place", group_type_index=1
             )
 
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             response_data = response.json()
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response_data)
@@ -160,7 +160,7 @@ def team_api_test_factory():
             org = Organization.objects.create(name="New Org")
             team = Team.objects.create(organization=org, name="Default project")
 
-            response = self.client.get(f"/api/environments/{team.pk}/")
+            response = self.client.get(f"/v1/environments/{team.pk}/")
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
             self.assertEqual(response.json(), self.not_found_response())
 
@@ -168,7 +168,7 @@ def team_api_test_factory():
         def test_update_team_timezone(self):
             self._assert_activity_log_is_empty()
 
-            response = self.client.patch("/api/environments/@current/", {"timezone": "Europe/Lisbon"})
+            response = self.client.patch("/v1/environments/@current/", {"timezone": "Europe/Lisbon"})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             response_data = response.json()
@@ -210,7 +210,7 @@ def team_api_test_factory():
 
         def test_update_test_filter_default_checked(self):
             response = self.client.patch(
-                "/api/environments/@current/", {"test_account_filters_default_checked": "true"}
+                "/v1/environments/@current/", {"test_account_filters_default_checked": "true"}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -221,7 +221,7 @@ def team_api_test_factory():
             self.assertEqual(self.team.test_account_filters_default_checked, True)
 
         def test_retrieve_receive_org_level_activity_logs(self):
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             response_data = response.json()
@@ -231,7 +231,7 @@ def team_api_test_factory():
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
             self.organization_membership.save()
 
-            response = self.client.patch("/api/environments/@current/", {"receive_org_level_activity_logs": True})
+            response = self.client.patch("/v1/environments/@current/", {"receive_org_level_activity_logs": True})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             response_data = response.json()
@@ -249,7 +249,7 @@ def team_api_test_factory():
             )
             self.client.force_login(member_user)
 
-            response = self.client.patch("/api/environments/@current/", {"receive_org_level_activity_logs": True})
+            response = self.client.patch("/v1/environments/@current/", {"receive_org_level_activity_logs": True})
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             self.assertEqual(
                 response.json(),
@@ -273,7 +273,7 @@ def team_api_test_factory():
             )
             self.client.force_login(admin_user)
 
-            response = self.client.patch("/api/environments/@current/", {"receive_org_level_activity_logs": True})
+            response = self.client.patch("/v1/environments/@current/", {"receive_org_level_activity_logs": True})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             response_data = response.json()
@@ -283,7 +283,7 @@ def team_api_test_factory():
             self.assertEqual(self.team.receive_org_level_activity_logs, True)
 
         def test_cannot_set_invalid_timezone_for_team(self):
-            response = self.client.patch("/api/environments/@current/", {"timezone": "America/I_Dont_Exist"})
+            response = self.client.patch("/v1/environments/@current/", {"timezone": "America/I_Dont_Exist"})
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(
                 response.json(),
@@ -318,7 +318,7 @@ def team_api_test_factory():
         ):
             """Test that slack_incoming_webhook rejects internal/private IPs (CVE-2025-1521)."""
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/",
+                f"/v1/environments/{self.team.id}/",
                 {"slack_incoming_webhook": webhook_url},
             )
             if should_succeed:
@@ -334,7 +334,7 @@ def team_api_test_factory():
             org = Organization.objects.create(name="New Org")
             team = Team.objects.create(organization=org, name="Default project")
 
-            response = self.client.patch(f"/api/environments/{team.pk}/", {"timezone": "Africa/Accra"})
+            response = self.client.patch(f"/v1/environments/{team.pk}/", {"timezone": "Africa/Accra"})
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
             self.assertEqual(response.json(), self.not_found_response())
 
@@ -343,7 +343,7 @@ def team_api_test_factory():
 
         def test_filter_permission(self):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/",
+                f"/v1/environments/{self.team.id}/",
                 {"test_account_filters": [{"key": "$current_url", "value": "test"}]},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -362,14 +362,14 @@ def team_api_test_factory():
 
             team: Team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
 
-            response = self.client.delete(f"/api/environments/{team.id}")
+            response = self.client.delete(f"/v1/environments/{team.id}")
             assert response.status_code == 204
 
             # activity log is queried in the context of the team
             # and the team was deleted, so we can't (for now) view a deleted team activity via the API
             # even though the activity log is recorded
 
-            deleted_team_activity_response = self.client.get(f"/api/environments/{team.id}/activity")
+            deleted_team_activity_response = self.client.get(f"/v1/environments/{team.id}/activity")
             assert deleted_team_activity_response.status_code == status.HTTP_404_NOT_FOUND
 
             # we can't query by API but can prove the log was recorded
@@ -462,7 +462,7 @@ def team_api_test_factory():
 
             self.assertEqual(Team.objects.filter(organization=self.organization).count(), 2)
 
-            response = self.client.delete(f"/api/environments/{team.id}")
+            response = self.client.delete(f"/v1/environments/{team.id}")
 
             self.assertEqual(response.status_code, 204)
             # Team deletion happens async in the (mocked) Celery task, so team still exists
@@ -552,7 +552,7 @@ def team_api_test_factory():
             with snapshot_postgres_queries_context(
                 self, custom_query_matcher=lambda query: "DELETE" in query and "insights_person" in query
             ):
-                response = self.client.delete(f"/api/environments/{team.id}")
+                response = self.client.delete(f"/v1/environments/{team.id}")
             self.assertEqual(response.status_code, 204)
 
         def test_delete_batch_exports(self):
@@ -582,7 +582,7 @@ def team_api_test_factory():
 
             with start_test_worker(temporal):
                 response = self.client.post(
-                    f"/api/environments/{team.id}/batch_exports",
+                    f"/v1/environments/{team.id}/batch_exports",
                     json.dumps(batch_export_data),
                     content_type="application/json",
                 )
@@ -591,10 +591,10 @@ def team_api_test_factory():
                 batch_export = response.json()
                 batch_export_id = batch_export["id"]
 
-                response = self.client.delete(f"/api/environments/{team.id}")
+                response = self.client.delete(f"/v1/environments/{team.id}")
                 assert response.status_code == 204, response.json()
 
-                response = self.client.get(f"/api/environments/{team.id}/batch_exports/{batch_export_id}")
+                response = self.client.get(f"/v1/environments/{team.id}/batch_exports/{batch_export_id}")
                 assert response.status_code == 404, response.json()
 
                 with self.assertRaises(RPCError):
@@ -628,7 +628,7 @@ def team_api_test_factory():
 
             with start_test_worker(temporal):
                 response = self.client.post(
-                    f"/api/environments/{team.id}/batch_exports",
+                    f"/v1/environments/{team.id}/batch_exports",
                     json.dumps(batch_export_data),
                     content_type="application/json",
                 )
@@ -638,7 +638,7 @@ def team_api_test_factory():
                 batch_export_id = batch_export["id"]
 
                 # Delete the batch export first (this soft-deletes it and removes the Temporal schedule)
-                response = self.client.delete(f"/api/environments/{team.id}/batch_exports/{batch_export_id}")
+                response = self.client.delete(f"/v1/environments/{team.id}/batch_exports/{batch_export_id}")
                 assert response.status_code == 204
 
                 # Verify the schedule is gone
@@ -646,7 +646,7 @@ def team_api_test_factory():
                     describe_schedule(temporal, batch_export_id)
 
                 # Now delete the team - this should succeed
-                response = self.client.delete(f"/api/environments/{team.id}")
+                response = self.client.delete(f"/v1/environments/{team.id}")
                 assert response.status_code == 204
 
         @freeze_time("2022-02-08")
@@ -659,7 +659,7 @@ def team_api_test_factory():
             self.team.api_token = "xyz"
             self.team.save()
 
-            response = self.client.patch(f"/api/environments/{self.team.id}/reset_token/")
+            response = self.client.patch(f"/v1/environments/{self.team.id}/reset_token/")
             response_data = response.json()
 
             self.team.refresh_from_db()
@@ -702,7 +702,7 @@ def team_api_test_factory():
             self.team.api_token = "xyz"
             self.team.save()
 
-            response = self.client.patch(f"/api/environments/{self.team.id}/reset_token/")
+            response = self.client.patch(f"/v1/environments/{self.team.id}/reset_token/")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         @freeze_time("2022-02-08")
@@ -719,7 +719,7 @@ def team_api_test_factory():
             self.team.secret_api_token_backup = None
             self.team.save()
 
-            response = self.client.patch(f"/api/environments/{self.team.id}/rotate_secret_token/")
+            response = self.client.patch(f"/v1/environments/{self.team.id}/rotate_secret_token/")
             response_data = response.json()
 
             self.team.refresh_from_db()
@@ -775,7 +775,7 @@ def team_api_test_factory():
             self.team.secret_api_token_backup = None
             self.team.save()
 
-            response = self.client.patch(f"/api/environments/{self.team.id}/rotate_secret_token/")
+            response = self.client.patch(f"/v1/environments/{self.team.id}/rotate_secret_token/")
             response_data = response.json()
 
             self.team.refresh_from_db()
@@ -837,7 +837,7 @@ def team_api_test_factory():
             self.team.secret_api_token_backup = "his_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
-            response = self.client.patch(f"/api/environments/{self.team.id}/rotate_secret_token/")
+            response = self.client.patch(f"/v1/environments/{self.team.id}/rotate_secret_token/")
             response_data = response.json()
 
             self.team.refresh_from_db()
@@ -895,7 +895,7 @@ def team_api_test_factory():
             self.team.secret_api_token_backup = "his_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
-            response = self.client.patch(f"/api/environments/{self.team.id}/delete_secret_token_backup/")
+            response = self.client.patch(f"/v1/environments/{self.team.id}/delete_secret_token_backup/")
             response_data = response.json()
 
             self.team.refresh_from_db()
@@ -938,7 +938,7 @@ def team_api_test_factory():
             self.team.secret_api_token_backup = None
             self.team.save()
 
-            response = self.client.patch(f"/api/environments/{self.team.id}/rotate_secret_token/")
+            response = self.client.patch(f"/v1/environments/{self.team.id}/rotate_secret_token/")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             # Make sure it's unchanged
             self.assertEqual(self.team.secret_api_token, "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
@@ -949,7 +949,7 @@ def team_api_test_factory():
             self.team.secret_api_token_backup = "his_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             self.team.save()
 
-            response = self.client.patch(f"/api/environments/{self.team.id}/delete_secret_token_backup/")
+            response = self.client.patch(f"/v1/environments/{self.team.id}/delete_secret_token_backup/")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             # Make sure it's unchanged
             self.assertEqual(self.team.secret_api_token, "his_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C")
@@ -959,7 +959,7 @@ def team_api_test_factory():
             d = Dashboard.objects.create(name="Test", team=self.team)
 
             # Can set it
-            response = self.client.patch("/api/environments/@current/", {"primary_dashboard": d.id})
+            response = self.client.patch("/v1/environments/@current/", {"primary_dashboard": d.id})
             response_data = response.json()
 
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -973,7 +973,7 @@ def team_api_test_factory():
             team_2 = Team.objects.create(organization=self.organization, name="Default project")
             d = Dashboard.objects.create(name="Test", team=team_2)
 
-            response = self.client.patch("/api/environments/@current/", {"primary_dashboard": d.id})
+            response = self.client.patch("/v1/environments/@current/", {"primary_dashboard": d.id})
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(
                 response.json(),
@@ -983,18 +983,18 @@ def team_api_test_factory():
         def test_is_generating_demo_data(self):
             cache_key = f"is_generating_demo_data_{self.team.pk}"
             cache.set(cache_key, "True")
-            response = self.client.get(f"/api/environments/{self.team.id}/is_generating_demo_data/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/is_generating_demo_data/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), {"is_generating_demo_data": True})
             cache.delete(cache_key)
-            response = self.client.get(f"/api/environments/{self.team.id}/is_generating_demo_data/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/is_generating_demo_data/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), {"is_generating_demo_data": False})
 
         @freeze_time("2022-02-08")
         def test_team_float_config_can_be_serialized_to_activity_log(self):
             # regression test since this isn't true by default
-            response = self.client.patch(f"/api/environments/@current/", {"session_recording_sample_rate": 0.4})
+            response = self.client.patch(f"/v1/environments/@current/", {"session_recording_sample_rate": 0.4})
             assert response.status_code == status.HTTP_200_OK
             self._assert_activity_log(
                 [
@@ -1027,27 +1027,27 @@ def team_api_test_factory():
             )
 
         def test_turn_on_exception_autocapture(self):
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             assert response.json()["autocapture_exceptions_opt_in"] is None
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"autocapture_exceptions_opt_in": "Welwyn Garden City"},
             )
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert response.json()["detail"] == "Must be a valid boolean."
 
-            response = self.client.patch("/api/environments/@current/", {"autocapture_exceptions_opt_in": True})
+            response = self.client.patch("/v1/environments/@current/", {"autocapture_exceptions_opt_in": True})
             assert response.status_code == status.HTTP_200_OK
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             assert response.json()["autocapture_exceptions_opt_in"] is True
 
         def test_configure_exception_autocapture_event_dropping(self):
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             assert response.json()["autocapture_exceptions_errors_to_ignore"] is None
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"autocapture_exceptions_errors_to_ignore": {"wat": "am i"}},
             )
             assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1056,7 +1056,7 @@ def team_api_test_factory():
             )
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"autocapture_exceptions_errors_to_ignore": [1, False]},
             )
             assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1066,16 +1066,16 @@ def team_api_test_factory():
             )
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"autocapture_exceptions_errors_to_ignore": ["wat am i"]},
             )
             assert response.status_code == status.HTTP_200_OK
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             assert response.json()["autocapture_exceptions_errors_to_ignore"] == ["wat am i"]
 
         def test_configure_exception_autocapture_event_dropping_only_allows_simple_config(self):
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"autocapture_exceptions_errors_to_ignore": ["abc" * 300]},
             )
             assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1116,7 +1116,7 @@ def team_api_test_factory():
             self, _name: str, provided_value: str, expected_code: str, expected_error: str
         ) -> None:
             response = self.client.patch(
-                "/api/environments/@current/", {"session_recording_sample_rate": provided_value}
+                "/v1/environments/@current/", {"session_recording_sample_rate": provided_value}
             )
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert response.json() == {
@@ -1153,7 +1153,7 @@ def team_api_test_factory():
             self, _name: str, provided_value: str, expected_code: str, expected_error: str
         ) -> None:
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"session_recording_minimum_duration_milliseconds": provided_value},
             )
             assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1266,7 +1266,7 @@ def team_api_test_factory():
             self, _name: str, provided_value: str, expected_code: str, expected_error: str
         ) -> None:
             response = self.client.patch(
-                "/api/environments/@current/", {"session_recording_network_payload_capture_config": provided_value}
+                "/v1/environments/@current/", {"session_recording_network_payload_capture_config": provided_value}
             )
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert response.json() == {
@@ -1279,28 +1279,28 @@ def team_api_test_factory():
         def test_can_set_and_unset_session_recording_network_payload_capture_config(self) -> None:
             # can set just one
             first_patch_response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"session_recording_network_payload_capture_config": {"recordHeaders": True}},
             )
             assert first_patch_response.status_code == status.HTTP_200_OK
-            get_response = self.client.get("/api/environments/@current/")
+            get_response = self.client.get("/v1/environments/@current/")
             assert get_response.json()["session_recording_network_payload_capture_config"] == {"recordHeaders": True}
 
             # can set the other
             first_patch_response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"session_recording_network_payload_capture_config": {"recordBody": False}},
             )
             assert first_patch_response.status_code == status.HTTP_200_OK
-            get_response = self.client.get("/api/environments/@current/")
+            get_response = self.client.get("/v1/environments/@current/")
             assert get_response.json()["session_recording_network_payload_capture_config"] == {"recordBody": False}
 
             # can unset both
             response = self.client.patch(
-                "/api/environments/@current/", {"session_recording_network_payload_capture_config": None}
+                "/v1/environments/@current/", {"session_recording_network_payload_capture_config": None}
             )
             assert response.status_code == status.HTTP_200_OK
-            second_get_response = self.client.get("/api/environments/@current/")
+            second_get_response = self.client.get("/v1/environments/@current/")
             assert second_get_response.json()["session_recording_network_payload_capture_config"] is None
 
         def test_can_set_and_unset_survey_settings(self):
@@ -1433,7 +1433,7 @@ def team_api_test_factory():
         def test_modifiers_are_merged_on_patch(self) -> None:
             # Set initial modifiers with personsOnEventsMode
             response = self.client.patch(
-                f"/api/environments/{self.team.id}",
+                f"/v1/environments/{self.team.id}",
                 {"modifiers": {"personsOnEventsMode": "person_id_override_properties_on_events"}},
             )
             assert response.status_code == status.HTTP_200_OK
@@ -1441,7 +1441,7 @@ def team_api_test_factory():
 
             # Patch with customChannelTypeRules - should preserve personsOnEventsMode
             response = self.client.patch(
-                f"/api/environments/{self.team.id}",
+                f"/v1/environments/{self.team.id}",
                 {
                     "modifiers": {
                         "customChannelTypeRules": [
@@ -1458,7 +1458,7 @@ def team_api_test_factory():
 
             # Patch with a different personsOnEventsMode - should update it while keeping customChannelTypeRules
             response = self.client.patch(
-                f"/api/environments/{self.team.id}",
+                f"/v1/environments/{self.team.id}",
                 {"modifiers": {"personsOnEventsMode": "person_id_override_properties_joined"}},
             )
             assert response.status_code == status.HTTP_200_OK
@@ -1483,7 +1483,7 @@ def team_api_test_factory():
         )
         def test_modifiers_bounceRateDurationSeconds_validation(self, value: Any, should_succeed: bool) -> None:
             response = self.client.patch(
-                f"/api/environments/{self.team.id}",
+                f"/v1/environments/{self.team.id}",
                 {"modifiers": {"bounceRateDurationSeconds": value}},
             )
 
@@ -1495,7 +1495,7 @@ def team_api_test_factory():
 
         def test_modifiers_rejects_nested_objects(self) -> None:
             response = self.client.patch(
-                f"/api/environments/{self.team.id}",
+                f"/v1/environments/{self.team.id}",
                 {"modifiers": {"bounceRateDurationSeconds": {"nested": "object"}}},
             )
 
@@ -1503,7 +1503,7 @@ def team_api_test_factory():
 
         def test_modifiers_rejects_unknown_keys(self) -> None:
             response = self.client.patch(
-                f"/api/environments/{self.team.id}",
+                f"/v1/environments/{self.team.id}",
                 {"modifiers": {"unknownField": True}},
             )
 
@@ -1513,7 +1513,7 @@ def team_api_test_factory():
         @freeze_time("2024-01-01T00:00:00Z")
         def test_can_add_product_intent(self, mock_report_user_action: MagicMock) -> None:
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/add_product_intent/",
+                f"/v1/environments/{self.team.id}/add_product_intent/",
                 {"product_type": "product_analytics", "intent_context": "onboarding product selected - primary"},
                 headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
             )
@@ -1557,7 +1557,7 @@ def team_api_test_factory():
             # change the time of the existing intent
             with freeze_time("2024-01-02T00:00:00Z"):
                 response = self.client.patch(
-                    f"/api/environments/{self.team.id}/add_product_intent/",
+                    f"/v1/environments/{self.team.id}/add_product_intent/",
                     {"product_type": "product_analytics"},
                     headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
                 )
@@ -1597,7 +1597,7 @@ def team_api_test_factory():
             assert product_intent.onboarding_completed_at is None
             with freeze_time("2024-01-05T00:00:00Z"):
                 response = self.client.patch(
-                    f"/api/environments/{self.team.id}/complete_product_onboarding/",
+                    f"/v1/environments/{self.team.id}/complete_product_onboarding/",
                     {"product_type": "product_analytics"},
                     headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
                 )
@@ -1652,7 +1652,7 @@ def team_api_test_factory():
             assert product_intent.onboarding_completed_at is None
             with freeze_time("2024-01-05T00:00:00Z"):
                 response = self.client.patch(
-                    f"/api/environments/{self.team.id}/complete_product_onboarding/",
+                    f"/v1/environments/{self.team.id}/complete_product_onboarding/",
                     {"product_type": "product_analytics"},
                     headers={"Referer": "https://insightstest.com/my-url", "X-Insights-Session-Id": "test_session_id"},
                 )
@@ -1687,7 +1687,7 @@ def team_api_test_factory():
         def test_cant_change_organization_if_not_admin_of_target_org(self):
             other_org, _ = self._create_other_org_and_team(OrganizationMembership.Level.MEMBER)
             res = self.client.post(
-                f"/api/projects/{self.team.project.id}/change_organization/", {"organization_id": other_org.id}
+                f"/v1/projects/{self.team.project.id}/change_organization/", {"organization_id": other_org.id}
             )
 
             assert res.status_code == status.HTTP_400_BAD_REQUEST
@@ -1701,7 +1701,7 @@ def team_api_test_factory():
             self.organization_membership.level = OrganizationMembership.Level.MEMBER
             self.organization_membership.save()
             res = self.client.post(
-                f"/api/projects/{self.team.project.id}/change_organization/", {"organization_id": other_org.id}
+                f"/v1/projects/{self.team.project.id}/change_organization/", {"organization_id": other_org.id}
             )
 
             assert res.status_code == status.HTTP_400_BAD_REQUEST
@@ -1715,7 +1715,7 @@ def team_api_test_factory():
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
             self.organization_membership.save()
             res = self.client.post(
-                f"/api/projects/{self.team.project.id}/change_organization/", {"organization_id": other_org.id}
+                f"/v1/projects/{self.team.project.id}/change_organization/", {"organization_id": other_org.id}
             )
 
             assert res.status_code == status.HTTP_200_OK, res.json()
@@ -1733,7 +1733,7 @@ def team_api_test_factory():
             return self._assert_config_is("survey_config", expected)
 
         def _assert_config_is(self, config_name, expected: dict[str, Any] | None) -> HttpResponse:
-            get_response = self.client.get("/api/environments/@current/")
+            get_response = self.client.get("/v1/environments/@current/")
             assert get_response.status_code == status.HTTP_200_OK, get_response.json()
             assert get_response.json()[config_name] == expected
 
@@ -1743,7 +1743,7 @@ def team_api_test_factory():
             self, config_name, config: dict[str, Any] | None, expected_status: int = status.HTTP_200_OK
         ) -> HttpResponse:
             patch_response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {config_name: config},
             )
             assert patch_response.status_code == expected_status, patch_response.json()
@@ -1756,7 +1756,7 @@ def team_api_test_factory():
             return self._patch_config("session_replay_config", config, expected_status)
 
         def _assert_linked_flag_config(self, expected_config: dict | None) -> HttpResponse:
-            response = self.client.get("/api/environments/@current/")
+            response = self.client.get("/v1/environments/@current/")
             assert response.status_code == status.HTTP_200_OK
             assert response.json()["session_recording_linked_flag"] == expected_config
             return response
@@ -1764,7 +1764,7 @@ def team_api_test_factory():
         def _patch_linked_flag_config(
             self, config: dict | None, expected_status: int = status.HTTP_200_OK
         ) -> HttpResponse:
-            response = self.client.patch("/api/environments/@current/", {"session_recording_linked_flag": config})
+            response = self.client.patch("/v1/environments/@current/", {"session_recording_linked_flag": config})
             assert response.status_code == expected_status, response.json()
             return response
 
@@ -1775,7 +1775,7 @@ def team_api_test_factory():
             self.organization_membership.save()
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"name": "Updated Name", "access_control": False},
             )
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1798,7 +1798,7 @@ def team_api_test_factory():
             self.organization_membership.save()
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"access_control": True},
             )
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1821,7 +1821,7 @@ def team_api_test_factory():
             self.organization_membership.save()
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"timezone": "Europe/London", "access_control": True},
             )
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1873,7 +1873,7 @@ def team_api_test_factory():
                 setattr(self.team, field_name, setup_data)
                 self.team.save()
 
-            response = self.client.patch("/api/environments/@current/", {field_name: input_data})
+            response = self.client.patch("/v1/environments/@current/", {field_name: input_data})
 
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -1893,7 +1893,7 @@ def team_api_test_factory():
 
         def test_conversations_settings_filters_null_widget_domains(self):
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"conversations_settings": {"widget_domains": ["https://example.com", None, "https://test.com", None]}},
             )
             assert response.status_code == status.HTTP_200_OK
@@ -1904,11 +1904,11 @@ def team_api_test_factory():
 
         def test_conversations_settings_merges_with_existing(self):
             self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"conversations_settings": {"widget_greeting_text": "Hello!"}},
             )
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"conversations_settings": {"widget_color": "#ff0000"}},
             )
             assert response.status_code == status.HTTP_200_OK
@@ -1918,7 +1918,7 @@ def team_api_test_factory():
 
         def test_conversations_widget_position_setting(self):
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"conversations_settings": {"widget_position": "top_left"}},
             )
             assert response.status_code == status.HTTP_200_OK
@@ -1926,7 +1926,7 @@ def team_api_test_factory():
 
         def test_conversations_identification_settings(self):
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {
                     "conversations_settings": {
                         "widget_require_email": True,
@@ -1950,7 +1950,7 @@ def team_api_test_factory():
             self.team.conversations_settings = None
             self.team.save()
 
-            response = self.client.patch("/api/environments/@current/", {"conversations_enabled": True})
+            response = self.client.patch("/v1/environments/@current/", {"conversations_enabled": True})
             assert response.status_code == status.HTTP_200_OK
             settings = response.json()["conversations_settings"]
             assert settings is not None
@@ -1962,7 +1962,7 @@ def team_api_test_factory():
             self.team.conversations_settings = {"widget_public_token": "existing_token_123"}
             self.team.save()
 
-            response = self.client.patch("/api/environments/@current/", {"conversations_enabled": True})
+            response = self.client.patch("/v1/environments/@current/", {"conversations_enabled": True})
             assert response.status_code == status.HTTP_200_OK
             assert response.json()["conversations_settings"]["widget_public_token"] == "existing_token_123"
 
@@ -1971,7 +1971,7 @@ def team_api_test_factory():
             self.team.conversations_settings = {"widget_public_token": "some_token", "widget_color": "#123456"}
             self.team.save()
 
-            response = self.client.patch("/api/environments/@current/", {"conversations_enabled": False})
+            response = self.client.patch("/v1/environments/@current/", {"conversations_enabled": False})
             assert response.status_code == status.HTTP_200_OK
             settings = response.json()["conversations_settings"]
             assert settings["widget_public_token"] is None
@@ -1983,7 +1983,7 @@ def team_api_test_factory():
             self.team.conversations_settings = {"widget_color": "#123456"}
             self.team.save()
 
-            response = self.client.post(f"/api/environments/{self.team.id}/generate_conversations_public_token/")
+            response = self.client.post(f"/v1/environments/{self.team.id}/generate_conversations_public_token/")
             assert response.status_code == status.HTTP_200_OK
             settings = response.json()["conversations_settings"]
             assert settings["widget_public_token"] is not None
@@ -1991,14 +1991,14 @@ def team_api_test_factory():
             assert settings["widget_color"] == "#123456"
 
         def test_generate_conversations_public_token_requires_admin(self):
-            response = self.client.post(f"/api/environments/{self.team.id}/generate_conversations_public_token/")
+            response = self.client.post(f"/v1/environments/{self.team.id}/generate_conversations_public_token/")
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
         def test_logs_settings_retention_24_hour_restriction(self):
             # Set initial retention - first update doesn't set retention_last_updated
             with freeze_time("2025-01-01T00:00:00Z"):
                 response = self.client.patch(
-                    "/api/environments/@current/",
+                    "/v1/environments/@current/",
                     {"logs_settings": {"retention_days": 16}},
                 )
                 assert response.status_code == status.HTTP_200_OK
@@ -2007,7 +2007,7 @@ def team_api_test_factory():
             # update retention, should set retention_last_updated
             with freeze_time("2025-01-01T00:00:00Z"):
                 response = self.client.patch(
-                    "/api/environments/@current/",
+                    "/v1/environments/@current/",
                     {"logs_settings": {"retention_days": 15}},
                 )
                 assert response.status_code == status.HTTP_200_OK
@@ -2016,7 +2016,7 @@ def team_api_test_factory():
             # Try to update retention within 24 hours - should fail
             with freeze_time("2025-01-01T12:00:00Z"):
                 response = self.client.patch(
-                    "/api/environments/@current/",
+                    "/v1/environments/@current/",
                     {"logs_settings": {"retention_days": 20}},
                 )
                 assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -2025,7 +2025,7 @@ def team_api_test_factory():
             # Try to update retention after 24 hours - should succeed
             with freeze_time("2025-01-02T00:00:01Z"):
                 response = self.client.patch(
-                    "/api/environments/@current/",
+                    "/v1/environments/@current/",
                     {"logs_settings": {"retention_days": 20}},
                 )
                 assert response.status_code == status.HTTP_200_OK
@@ -2034,14 +2034,14 @@ def team_api_test_factory():
             # Set initial retention
             with freeze_time("2025-01-01T00:00:00Z"):
                 response = self.client.patch(
-                    "/api/environments/@current/",
+                    "/v1/environments/@current/",
                     {"logs_settings": {"retention_days": 16}},
                 )
                 assert response.status_code == status.HTTP_200_OK
 
             with freeze_time("2025-01-01T00:00:00Z"):
                 response = self.client.patch(
-                    "/api/environments/@current/",
+                    "/v1/environments/@current/",
                     {"logs_settings": {"retention_days": 15}},
                 )
                 assert response.status_code == status.HTTP_200_OK
@@ -2049,7 +2049,7 @@ def team_api_test_factory():
             # Change other settings within 24 hours - should succeed
             with freeze_time("2025-01-01T12:00:00Z"):
                 response = self.client.patch(
-                    "/api/environments/@current/",
+                    "/v1/environments/@current/",
                     {
                         "logs_settings": {
                             "retention_days": 15,  # Same retention
@@ -2062,7 +2062,7 @@ def team_api_test_factory():
             # Change retention after 24 hours - should succeed
             with freeze_time("2025-01-02T00:00:01Z"):
                 response = self.client.patch(
-                    "/api/environments/@current/",
+                    "/v1/environments/@current/",
                     {
                         "logs_settings": {
                             "retention_days": 16,
@@ -2076,7 +2076,7 @@ def team_api_test_factory():
             api_key = self.create_personal_api_key_with_scopes(["project:read"])
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"timezone": "Europe/Lisbon"},
                 headers={"authorization": f"Bearer {api_key}"},
             )
@@ -2093,7 +2093,7 @@ def team_api_test_factory():
             api_key = self.create_personal_api_key_with_scopes(["project:write"])
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
                 headers={"authorization": f"Bearer {api_key}"},
             )
@@ -2108,7 +2108,7 @@ def team_api_test_factory():
         def _get_model_for_name_field(self):
             """Returns the model whose 'name' field is updated by the current endpoint.
 
-            /api/environments/ updates Team.name, /api/projects/ updates Project.name.
+            /v1/environments/ updates Team.name, /v1/projects/ updates Project.name.
             This allows tests to work correctly when inherited by TestProjectAPI.
             """
             if isinstance(self.client, EnvironmentToProjectRewriteClient):
@@ -2122,7 +2122,7 @@ def team_api_test_factory():
             original_name = model.name
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"name": "New Team Name"},
                 headers={"authorization": f"Bearer {api_key}"},
             )
@@ -2139,7 +2139,7 @@ def team_api_test_factory():
             model = self._get_model_for_name_field()
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"name": "New Team Name"},
                 headers={"authorization": f"Bearer {api_key}"},
             )
@@ -2159,7 +2159,7 @@ def team_api_test_factory():
             self.organization_membership.save()
 
             response = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
             )
 
@@ -2175,9 +2175,9 @@ def team_api_test_factory():
 
 class EnvironmentToProjectRewriteClient(test.APIClient):
     """
-    This client rewrites all requests to the /api/environments/ endpoint ("proper" environments endpoint)
-    to /api/projects/ (previously known as the "team" endpoint). Allows us to test for backwards compatibility of
-    the /api/projects/ endpoint - for use in `test_project.py`.
+    This client rewrites all requests to the /v1/environments/ endpoint ("proper" environments endpoint)
+    to /v1/projects/ (previously known as the "team" endpoint). Allows us to test for backwards compatibility of
+    the /v1/projects/ endpoint - for use in `test_project.py`.
     """
 
     def generic(
@@ -2191,8 +2191,8 @@ class EnvironmentToProjectRewriteClient(test.APIClient):
         headers=None,
         **extra,
     ):
-        path = path.replace("/api/projects/@current/environments/", "/api/projects/").replace(
-            "/api/environments/", "/api/projects/"
+        path = path.replace("/v1/projects/@current/environments/", "/v1/projects/").replace(
+            "/v1/environments/", "/v1/projects/"
         )
         return super().generic(method, path, data, content_type, secure, headers=headers, **extra)
 
@@ -2229,7 +2229,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
             scoped_teams=[other_team_in_project.id],
         )
 
-        response = self.client.get("/api/environments/", headers={"authorization": f"Bearer {personal_api_key}"})
+        response = self.client.get("/v1/environments/", headers={"authorization": f"Bearer {personal_api_key}"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -2249,7 +2249,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
             scoped_organizations=[other_org.id],
         )
 
-        response = self.client.get("/api/environments/", headers={"authorization": f"Bearer {personal_api_key}"})
+        response = self.client.get("/v1/environments/", headers={"authorization": f"Bearer {personal_api_key}"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -2290,7 +2290,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
             scoped_teams=[other_team_in_project.id],
         )
 
-        response = self.client.get("/api/environments/", headers={"authorization": f"Bearer {access_token.token}"})
+        response = self.client.get("/v1/environments/", headers={"authorization": f"Bearer {access_token.token}"})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -2322,7 +2322,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
             scoped_organizations=[str(other_org.id)],
         )
 
-        response = self.client.get("/api/environments/", headers={"authorization": f"Bearer {access_token.token}"})
+        response = self.client.get("/v1/environments/", headers={"authorization": f"Bearer {access_token.token}"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -2376,7 +2376,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         )
 
         response = self.client.patch(
-            "/api/environments/@current/",
+            "/v1/environments/@current/",
             {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2411,7 +2411,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         )
 
         response = self.client.patch(
-            "/api/environments/@current/",
+            "/v1/environments/@current/",
             {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -2434,7 +2434,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         self.organization.save()
 
         response = self.client.patch(
-            "/api/environments/@current/",
+            "/v1/environments/@current/",
             {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2468,7 +2468,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         )
 
         response = self.client.patch(
-            "/api/environments/@current/",
+            "/v1/environments/@current/",
             {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2502,7 +2502,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         )
 
         response = self.client.patch(
-            "/api/environments/@current/",
+            "/v1/environments/@current/",
             {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -2525,7 +2525,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         self.organization.save()
 
         response = self.client.patch(
-            "/api/environments/@current/",
+            "/v1/environments/@current/",
             {"timezone": "Europe/Lisbon", "session_recording_opt_in": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2537,7 +2537,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
 
     @freeze_time("2025-01-01T00:00:00Z")
     def test_settings_as_of_requires_at_param(self):
-        response = self.client.get("/api/environments/@current/settings_as_of/")
+        response = self.client.get("/v1/environments/@current/settings_as_of/")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         # Response may contain either a DRF detail or field-specific error
         payload = response.json()
@@ -2551,12 +2551,12 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
 
         # Change timezone at T1
         with freeze_time("2025-01-02T00:00:00Z"):
-            patch_response = self.client.patch("/api/environments/@current/", {"timezone": "Europe/Lisbon"})
+            patch_response = self.client.patch("/v1/environments/@current/", {"timezone": "Europe/Lisbon"})
             assert patch_response.status_code == status.HTTP_200_OK, patch_response.json()
 
         # Query snapshot as of T0 + 12h - expect UTC
         response = self.client.get(
-            "/api/environments/@current/settings_as_of/?at=2025-01-01T12:00:00Z"
+            "/v1/environments/@current/settings_as_of/?at=2025-01-01T12:00:00Z"
             "&scope=timezone&scope=session_recording_sample_rate"
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -2570,13 +2570,13 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
         # Set some configs over time to create activity
         with freeze_time("2025-02-01T00:00:00Z"):
             # Set opt_in true
-            r1 = self.client.patch("/api/environments/@current/", {"session_recording_opt_in": True})
+            r1 = self.client.patch("/v1/environments/@current/", {"session_recording_opt_in": True})
             assert r1.status_code == status.HTTP_200_OK
 
         with freeze_time("2025-02-02T00:00:00Z"):
             # Set sample rate and masking config
             r2 = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {
                     "session_recording_sample_rate": 0.5,
                     "session_recording_masking_config": {"maskAllInputs": True},
@@ -2586,7 +2586,7 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
 
         # Snapshot as of between the two changes - should include first change, not the second
         response = self.client.get(
-            "/api/environments/@current/settings_as_of/?at=2025-02-01T12:00:00Z"
+            "/v1/environments/@current/settings_as_of/?at=2025-02-01T12:00:00Z"
             "&scope=session_recording_opt_in&scope=session_recording_sample_rate&scope=session_recording_masking_config"
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -2600,13 +2600,13 @@ class TestTeamAPI(team_api_test_factory()):  # type: ignore
     def test_settings_as_of_scope_only_includes_requested_keys(self):
         with freeze_time("2025-03-01T00:00:00Z"):
             r = self.client.patch(
-                "/api/environments/@current/",
+                "/v1/environments/@current/",
                 {"timezone": "Europe/London", "session_recording_opt_in": False},
             )
             assert r.status_code == status.HTTP_200_OK
 
         # Ask only for timezone key
-        response = self.client.get("/api/environments/@current/settings_as_of/?at=2025-03-01T00:00:01Z&scope=timezone")
+        response = self.client.get("/v1/environments/@current/settings_as_of/?at=2025-03-01T00:00:01Z&scope=timezone")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert sorted(data.keys()) == ["timezone"]

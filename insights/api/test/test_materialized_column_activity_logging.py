@@ -31,7 +31,7 @@ class TestMaterializedColumnActivityLogging(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 
@@ -67,7 +67,7 @@ class TestMaterializedColumnActivityLogging(APIBaseTest):
             state=MaterializedColumnSlotState.READY,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/materialized_column_slots/{slot.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/materialized_column_slots/{slot.id}/")
 
         assert response.status_code == 204
 
@@ -225,7 +225,7 @@ class TestMaterializedColumnActivityLogging(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/{slot.id}/retry_backfill/"
+            f"/v1/environments/{self.team.id}/materialized_column_slots/{slot.id}/retry_backfill/"
         )
 
         assert response.status_code == 200
@@ -268,7 +268,7 @@ class TestMaterializedColumnActivityLogging(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 

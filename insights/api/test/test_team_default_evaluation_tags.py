@@ -12,7 +12,7 @@ class TestTeamDefaultEvaluationTags(APIBaseTest):
         # Make user an admin for DELETE operations
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
-        self.url = f"/api/environments/{self.team.id}/default_evaluation_tags/"
+        self.url = f"/v1/environments/{self.team.id}/default_evaluation_tags/"
 
     def test_get_empty_default_evaluation_tags(self):
         """Test getting default evaluation tags when none exist"""
@@ -117,7 +117,7 @@ class TestTeamDefaultEvaluationTags(APIBaseTest):
 
         # Create another team and try to access/modify tags
         other_team = Team.objects.create(organization=self.organization, name="Other Team")
-        other_url = f"/api/environments/{other_team.id}/default_evaluation_tags/"
+        other_url = f"/v1/environments/{other_team.id}/default_evaluation_tags/"
 
         # Verify other team has no tags
         response2 = self.client.get(other_url)

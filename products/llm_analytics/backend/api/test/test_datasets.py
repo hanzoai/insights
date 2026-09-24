@@ -34,12 +34,12 @@ def _setup_team():
 class TestDatasetsApi(APIBaseTest):
     def test_unauthenticated_user_cannot_access_datasets(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_can_create_dataset(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/",
+            f"/v1/environments/{self.team.id}/datasets/",
             {"name": "Test Dataset", "description": "Test Description", "metadata": {"key": "value"}},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -56,7 +56,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Dataset 1", team=self.team, created_by=self.user)
         Dataset.objects.create(name="Dataset 2", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
 
@@ -73,7 +73,7 @@ class TestDatasetsApi(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/{dataset.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/{dataset.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], "Test Dataset")
         self.assertEqual(response.data["description"], "Test Description")
@@ -83,7 +83,7 @@ class TestDatasetsApi(APIBaseTest):
         dataset = Dataset.objects.create(name="Original Name", team=self.team, created_by=self.user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/datasets/{dataset.id}/",
+            f"/v1/environments/{self.team.id}/datasets/{dataset.id}/",
             {"name": "Updated Name", "description": "Updated Description"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -95,45 +95,45 @@ class TestDatasetsApi(APIBaseTest):
     def test_delete_method_returns_405(self):
         dataset = Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/datasets/{dataset.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/datasets/{dataset.id}/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_can_soft_delete_dataset_with_patch(self):
         dataset = Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
 
-        response = self.client.patch(f"/api/environments/{self.team.id}/datasets/{dataset.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/environments/{self.team.id}/datasets/{dataset.id}/", {"deleted": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         dataset.refresh_from_db()
         self.assertTrue(dataset.deleted)
 
         # Verify soft-deleted dataset is not returned in list
-        list_response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
         self.assertEqual(len(list_response.data["results"]), 0)
 
     def test_can_undelete_dataset_with_patch(self):
         dataset = Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
 
         # First soft delete the dataset
-        response = self.client.patch(f"/api/environments/{self.team.id}/datasets/{dataset.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/environments/{self.team.id}/datasets/{dataset.id}/", {"deleted": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         dataset.refresh_from_db()
         self.assertTrue(dataset.deleted)
 
         # Verify it's not in the list
-        list_response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
         self.assertEqual(len(list_response.data["results"]), 0)
 
         # Now undelete it
-        response = self.client.patch(f"/api/environments/{self.team.id}/datasets/{dataset.id}/", {"deleted": False})
+        response = self.client.patch(f"/v1/environments/{self.team.id}/datasets/{dataset.id}/", {"deleted": False})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         dataset.refresh_from_db()
         self.assertFalse(dataset.deleted)
 
         # Verify it's back in the list
-        list_response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
         self.assertEqual(len(list_response.data["results"]), 1)
         self.assertEqual(list_response.data["results"][0]["id"], str(dataset.id))
 
@@ -141,16 +141,16 @@ class TestDatasetsApi(APIBaseTest):
         dataset = Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
 
         # Soft delete the dataset
-        response = self.client.patch(f"/api/environments/{self.team.id}/datasets/{dataset.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/environments/{self.team.id}/datasets/{dataset.id}/", {"deleted": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Should not be able to retrieve via GET
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/{dataset.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/{dataset.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # But should be able to update it via PATCH (which allows undeleting)
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/datasets/{dataset.id}/", {"name": "Updated Name"}
+            f"/v1/environments/{self.team.id}/datasets/{dataset.id}/", {"name": "Updated Name"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -162,12 +162,12 @@ class TestDatasetsApi(APIBaseTest):
         another_team = _setup_team()
 
         response = self.client.post(
-            f"/api/environments/{another_team.id}/datasets/", {"name": "Test Dataset", "team": another_team.id}
+            f"/v1/environments/{another_team.id}/datasets/", {"name": "Test Dataset", "team": another_team.id}
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/", {"name": "Test Dataset", "team": another_team.id}
+            f"/v1/environments/{self.team.id}/datasets/", {"name": "Test Dataset", "team": another_team.id}
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["team"], self.team.id)
@@ -180,17 +180,17 @@ class TestDatasetsApi(APIBaseTest):
         )
 
         # Test GET
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/{another_dataset.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/{another_dataset.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Test PATCH
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/datasets/{another_dataset.id}/", {"name": "Hacked Name"}
+            f"/v1/environments/{self.team.id}/datasets/{another_dataset.id}/", {"name": "Hacked Name"}
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Test LIST
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
@@ -202,7 +202,7 @@ class TestDatasetsApi(APIBaseTest):
         another_user = self._create_user("another@example.com")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/",
+            f"/v1/environments/{self.team.id}/datasets/",
             {
                 "name": "Test Dataset",
                 "description": "Test Description",
@@ -221,7 +221,7 @@ class TestDatasetsApi(APIBaseTest):
         another_team = Team.objects.create(name="Another Team", organization=self.organization)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/datasets/{dataset.id}/",
+            f"/v1/environments/{self.team.id}/datasets/{dataset.id}/",
             {
                 "name": "Updated Name",
                 "created_by": another_user.id,
@@ -239,12 +239,12 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Older", team=self.team, created_by=self.user)
 
         create_response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/",
+            f"/v1/environments/{self.team.id}/datasets/",
             {"name": "Newest"},
         )
         self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
 
-        list_response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(list_response.data.get("results", [])), 1)
         self.assertEqual(list_response.data["results"][0]["name"], "Newest")
@@ -255,7 +255,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Second", team=self.team, created_by=self.user)
         Dataset.objects.create(name="Third", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"order_by": "-created_at"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"order_by": "-created_at"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 3)
@@ -270,7 +270,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Second", team=self.team, created_by=self.user)
         Dataset.objects.create(name="Third", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"order_by": "created_at"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"order_by": "created_at"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 3)
@@ -294,7 +294,7 @@ class TestDatasetsApi(APIBaseTest):
         second.description = "Updated second"
         second.save()
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"order_by": "-updated_at"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"order_by": "-updated_at"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 3)
@@ -317,7 +317,7 @@ class TestDatasetsApi(APIBaseTest):
         first.description = "Updated first"
         first.save()
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"order_by": "updated_at"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"order_by": "updated_at"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 3)
@@ -328,14 +328,14 @@ class TestDatasetsApi(APIBaseTest):
         self.assertEqual(results[2]["name"], "First")
 
     def test_invalid_filter_raises(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"order_by": "invalid_field"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"order_by": "invalid_field"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_no_order_by_defaults_to_created_at_desc(self):
         Dataset.objects.create(name="First", team=self.team, created_by=self.user)
         Dataset.objects.create(name="Second", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 2)
@@ -349,7 +349,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
         Dataset.objects.create(name="Validation Data", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"search": "training"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"search": "training"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 1)
@@ -364,7 +364,7 @@ class TestDatasetsApi(APIBaseTest):
         )
         Dataset.objects.create(name="Dataset C", description="Production dataset", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"search": "training"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"search": "training"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 1)
@@ -384,7 +384,7 @@ class TestDatasetsApi(APIBaseTest):
             name="Dataset 3", metadata={"category": "validation"}, team=self.team, created_by=self.user
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"search": "production"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"search": "production"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 1)
@@ -395,13 +395,13 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="test dataset", team=self.team, created_by=self.user)
 
         # Test uppercase search
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"search": "TRAINING"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"search": "TRAINING"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Training Dataset")
 
         # Test lowercase search
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"search": "test"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"search": "test"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "test dataset")
@@ -411,7 +411,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Training Data V2", team=self.team, created_by=self.user)
         Dataset.objects.create(name="Validation Set", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"search": "training"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"search": "training"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
         self.assertEqual(len(results), 2)
@@ -424,7 +424,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Training Dataset", team=self.team, created_by=self.user)
         Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"search": "nonexistent"})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"search": "nonexistent"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
@@ -432,7 +432,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Dataset 1", team=self.team, created_by=self.user)
         Dataset.objects.create(name="Dataset 2", team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"search": ""})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"search": ""})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
 
@@ -442,7 +442,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/datasets/", {"search": "training", "order_by": "-created_at"}
+            f"/v1/environments/{self.team.id}/datasets/", {"search": "training", "order_by": "-created_at"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
@@ -458,7 +458,7 @@ class TestDatasetsApi(APIBaseTest):
         Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/datasets/", {"search": "training", "order_by": "created_at"}
+            f"/v1/environments/{self.team.id}/datasets/", {"search": "training", "order_by": "created_at"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
@@ -478,7 +478,7 @@ class TestDatasetsApi(APIBaseTest):
         first.save()
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/datasets/", {"search": "training", "order_by": "-updated_at"}
+            f"/v1/environments/{self.team.id}/datasets/", {"search": "training", "order_by": "-updated_at"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.data["results"]
@@ -494,14 +494,14 @@ class TestDatasetsApi(APIBaseTest):
         item3 = Dataset.objects.create(name="Test Dataset", team=self.team, created_by=self.user)
 
         # Test filtering by a single id
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"id__in": str(item1.id)})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"id__in": str(item1.id)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["id"], str(item1.id))
 
         # Test filtering by multiple ids
         response = self.client.get(
-            f"/api/environments/{self.team.id}/datasets/", {"id__in": ",".join([str(item1.id), str(item3.id)])}
+            f"/v1/environments/{self.team.id}/datasets/", {"id__in": ",".join([str(item1.id), str(item3.id)])}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
@@ -510,7 +510,7 @@ class TestDatasetsApi(APIBaseTest):
 
         # Test that non-existent ids return empty results
         fake_id = uuid4()
-        response = self.client.get(f"/api/environments/{self.team.id}/datasets/", {"id__in": str(fake_id)})
+        response = self.client.get(f"/v1/environments/{self.team.id}/datasets/", {"id__in": str(fake_id)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
@@ -522,7 +522,7 @@ class TestDatasetItemsApi(APIBaseTest):
 
     def test_can_create_dataset_item(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {
                 "dataset": str(self.dataset.id),
                 "input": {"prompt": "Hello"},
@@ -545,7 +545,7 @@ class TestDatasetItemsApi(APIBaseTest):
         DatasetItem.objects.create(dataset=self.dataset, team=self.team, created_by=self.user)
         DatasetItem.objects.create(dataset=self.dataset, team=self.team, created_by=self.user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
 
@@ -559,7 +559,7 @@ class TestDatasetItemsApi(APIBaseTest):
             metadata={"m": 3},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/{item.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/{item.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["dataset"], self.dataset.id)
         self.assertEqual(response.data["input"], {"a": 1})
@@ -572,7 +572,7 @@ class TestDatasetItemsApi(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/dataset_items/{item.id}/",
+            f"/v1/environments/{self.team.id}/dataset_items/{item.id}/",
             {"input": {"x": 10}, "output": {"y": 20}, "metadata": {"z": 30}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -585,44 +585,44 @@ class TestDatasetItemsApi(APIBaseTest):
     def test_delete_method_returns_405(self):
         item = DatasetItem.objects.create(dataset=self.dataset, team=self.team, created_by=self.user)
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/dataset_items/{item.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/dataset_items/{item.id}/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_can_soft_delete_dataset_item_with_patch(self):
         item = DatasetItem.objects.create(dataset=self.dataset, team=self.team, created_by=self.user)
 
-        response = self.client.patch(f"/api/environments/{self.team.id}/dataset_items/{item.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/environments/{self.team.id}/dataset_items/{item.id}/", {"deleted": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         item.refresh_from_db()
         self.assertTrue(item.deleted)
 
-        list_response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/")
         self.assertEqual(len(list_response.data["results"]), 0)
 
     def test_can_undelete_dataset_item_with_patch(self):
         item = DatasetItem.objects.create(dataset=self.dataset, team=self.team, created_by=self.user)
 
         # First soft delete the item
-        response = self.client.patch(f"/api/environments/{self.team.id}/dataset_items/{item.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/environments/{self.team.id}/dataset_items/{item.id}/", {"deleted": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         item.refresh_from_db()
         self.assertTrue(item.deleted)
 
         # Verify it's not in the list
-        list_response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/")
         self.assertEqual(len(list_response.data["results"]), 0)
 
         # Now undelete it
-        response = self.client.patch(f"/api/environments/{self.team.id}/dataset_items/{item.id}/", {"deleted": False})
+        response = self.client.patch(f"/v1/environments/{self.team.id}/dataset_items/{item.id}/", {"deleted": False})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         item.refresh_from_db()
         self.assertFalse(item.deleted)
 
         # Verify it's back in the list
-        list_response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/")
         self.assertEqual(len(list_response.data["results"]), 1)
         self.assertEqual(list_response.data["results"][0]["id"], str(item.id))
 
@@ -636,16 +636,16 @@ class TestDatasetItemsApi(APIBaseTest):
         )
 
         # Soft delete the item
-        response = self.client.patch(f"/api/environments/{self.team.id}/dataset_items/{item.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/environments/{self.team.id}/dataset_items/{item.id}/", {"deleted": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Should not be able to retrieve via GET
-        response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/{item.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/{item.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # But should be able to update it via PATCH (which allows undeleting)
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/dataset_items/{item.id}/", {"input": {"prompt": "updated"}}
+            f"/v1/environments/{self.team.id}/dataset_items/{item.id}/", {"input": {"prompt": "updated"}}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -658,7 +658,7 @@ class TestDatasetItemsApi(APIBaseTest):
 
         # Note: We still create items against the user's current team dataset
         response = self.client.post(
-            f"/api/environments/{another_team.id}/dataset_items/",
+            f"/v1/environments/{another_team.id}/dataset_items/",
             {
                 "dataset": str(self.dataset.id),
                 "input": {"prompt": "Hi"},
@@ -667,7 +667,7 @@ class TestDatasetItemsApi(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {
                 "dataset": str(self.dataset.id),
                 "input": {"prompt": "Hi"},
@@ -684,18 +684,18 @@ class TestDatasetItemsApi(APIBaseTest):
         another_item = DatasetItem.objects.create(dataset=another_dataset, team=another_team, created_by=another_user)
 
         # Test GET
-        response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/{another_item.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/{another_item.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Test PATCH
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/dataset_items/{another_item.id}/",
+            f"/v1/environments/{self.team.id}/dataset_items/{another_item.id}/",
             {"metadata": {"hack": True}},
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Test LIST
-        response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
@@ -706,7 +706,7 @@ class TestDatasetItemsApi(APIBaseTest):
     def test_post_ignores_created_by(self):
         another_user = self._create_user("another@example.com")
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {
                 "dataset": str(self.dataset.id),
                 "input": {"q": 1},
@@ -724,7 +724,7 @@ class TestDatasetItemsApi(APIBaseTest):
         another_team = Team.objects.create(name="Another Team", organization=self.organization)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/dataset_items/{item.id}/",
+            f"/v1/environments/{self.team.id}/dataset_items/{item.id}/",
             {
                 "created_by": another_user.id,
                 "team": another_team.id,
@@ -743,7 +743,7 @@ class TestDatasetItemsApi(APIBaseTest):
         DatasetItem.objects.create(dataset=dataset_b, team=self.team, created_by=self.user)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {"dataset": str(self.dataset.id)},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -754,13 +754,13 @@ class TestDatasetItemsApi(APIBaseTest):
         DatasetItem.objects.create(dataset=self.dataset, team=self.team, created_by=self.user)
 
         create_response = self.client.post(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {"dataset": str(self.dataset.id), "input": {"n": "new"}},
         )
         self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
         created_id = create_response.data["id"]
 
-        list_response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/")
+        list_response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/")
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(list_response.data.get("results", [])), 1)
         self.assertEqual(list_response.data["results"][0]["id"], created_id)

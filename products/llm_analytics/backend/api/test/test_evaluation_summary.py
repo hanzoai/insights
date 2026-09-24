@@ -38,7 +38,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
 
     def test_unauthenticated_user_cannot_access_endpoint(self):
         self.client.logout()
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_ai_consent_required(self):
@@ -46,7 +46,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "filter": "all",
@@ -62,7 +62,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {},
             format="json",
         )
@@ -76,7 +76,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
 
         fake_id = str(uuid.uuid4())
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": fake_id,
                 "filter": "all",
@@ -95,7 +95,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         mock_fetch_runs.return_value = []
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "filter": "all",
@@ -151,7 +151,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         mock_async_to_sync.return_value = lambda *args, **kwargs: mock_summary
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "filter": "all",
@@ -211,7 +211,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         mock_async_to_sync.return_value = lambda *args, **kwargs: mock_summary
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "filter": "pass",
@@ -256,7 +256,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         gen_id_2 = str(uuid.uuid4())
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "filter": "all",
@@ -308,7 +308,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         mock_async_to_sync.return_value = lambda *args, **kwargs: mock_summary
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "filter": "na",
@@ -331,7 +331,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         generation_ids = [str(uuid.uuid4()) for _ in range(EVALUATION_SUMMARY_MAX_RUNS + 1)]
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "generation_ids": generation_ids,
@@ -358,7 +358,7 @@ class TestEvaluationSummaryAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_summary/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_summary/",
             {
                 "evaluation_id": str(other_evaluation.id),
                 "filter": "all",

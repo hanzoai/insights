@@ -19,11 +19,11 @@ class TestWebAuthnRegistration(APIBaseTest):
 
     def test_registration_begin_requires_authentication(self):
         self.client.logout()
-        response = self.client.post("/api/webauthn/register/begin/")
+        response = self.client.post("/v1/webauthn/register/begin/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_registration_begin_returns_options(self):
-        response = self.client.post("/api/webauthn/register/begin/")
+        response = self.client.post("/v1/webauthn/register/begin/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -50,7 +50,7 @@ class TestWebAuthnRegistration(APIBaseTest):
             verified=True,
         )
 
-        response = self.client.post("/api/webauthn/register/begin/")
+        response = self.client.post("/v1/webauthn/register/begin/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -72,7 +72,7 @@ class TestWebAuthnRegistration(APIBaseTest):
             sso_enforcement="saml",
         )
 
-        response = self.client.post("/api/webauthn/register/begin/")
+        response = self.client.post("/v1/webauthn/register/begin/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("requires SSO", response.json().get("detail", ""))
 
@@ -96,19 +96,19 @@ class TestWebAuthnRegistration(APIBaseTest):
         session[WEBAUTHN_REGISTRATION_CHALLENGE_KEY] = "dummy"
         session.save()
 
-        response = self.client.post("/api/webauthn/register/complete/", {}, format="json")
+        response = self.client.post("/v1/webauthn/register/complete/", {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("requires SSO", response.json().get("detail", ""))
 
     def test_registration_complete_without_challenge_fails(self):
-        response = self.client.post("/api/webauthn/register/complete/", {})
+        response = self.client.post("/v1/webauthn/register/complete/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("error", response.json())
 
     @patch("insights.api.webauthn.decode_credential_public_key")
     @patch("insights.api.webauthn.verify_passkey_registration_response")
     def test_registration_complete_stores_unverified_credential(self, mock_verify, mock_decode):
-        begin_response = self.client.post("/api/webauthn/register/begin/")
+        begin_response = self.client.post("/v1/webauthn/register/begin/")
         self.assertEqual(begin_response.status_code, status.HTTP_200_OK)
 
         mock_verify.return_value = MagicMock(
@@ -119,7 +119,7 @@ class TestWebAuthnRegistration(APIBaseTest):
         mock_decode.return_value = MagicMock(alg=-7)
 
         complete_response = self.client.post(
-            "/api/webauthn/register/complete/",
+            "/v1/webauthn/register/complete/",
             {
                 "id": "base64url-encoded-id",
                 "rawId": "base64url-encoded-raw-id",
@@ -164,7 +164,7 @@ class TestWebAuthnLogin(APIBaseTest):
         )
 
     def test_login_begin_returns_options(self):
-        response = self.client.post("/api/webauthn/login/begin/")
+        response = self.client.post("/v1/webauthn/login/begin/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -175,14 +175,14 @@ class TestWebAuthnLogin(APIBaseTest):
         self.assertEqual(data["userVerification"], "required")
 
     def test_login_complete_without_challenge_fails(self):
-        response = self.client.post("/api/webauthn/login/complete/", {})
+        response = self.client.post("/v1/webauthn/login/complete/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_complete_without_user_handle_fails(self):
-        self.client.post("/api/webauthn/login/begin/")
+        self.client.post("/v1/webauthn/login/begin/")
 
         response = self.client.post(
-            "/api/webauthn/login/complete/",
+            "/v1/webauthn/login/complete/",
             {
                 "id": "some-id",
                 "rawId": "some-raw-id",
@@ -204,7 +204,7 @@ class TestWebAuthnLogin(APIBaseTest):
 
         from insights.api.webauthn import user_uuid_to_handle
 
-        self.client.post("/api/webauthn/login/begin/")
+        self.client.post("/v1/webauthn/login/begin/")
 
         mock_verify.return_value = MagicMock(new_sign_count=1)
 
@@ -212,7 +212,7 @@ class TestWebAuthnLogin(APIBaseTest):
         user_handle = user_uuid_to_handle(self.user.uuid)
 
         response = self.client.post(
-            "/api/webauthn/login/complete/",
+            "/v1/webauthn/login/complete/",
             {
                 "id": bytes_to_base64url(self.credential.credential_id),
                 "rawId": bytes_to_base64url(self.credential.credential_id),
@@ -229,7 +229,7 @@ class TestWebAuthnLogin(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["success"])
 
-        me_response = self.client.get("/api/users/@me/")
+        me_response = self.client.get("/v1/users/@me/")
         self.assertEqual(me_response.status_code, status.HTTP_200_OK)
         self.assertEqual(me_response.json()["email"], self.user.email)
 
@@ -242,12 +242,12 @@ class TestWebAuthnLogin(APIBaseTest):
         self.credential.verified = False
         self.credential.save()
 
-        self.client.post("/api/webauthn/login/begin/")
+        self.client.post("/v1/webauthn/login/begin/")
 
         user_handle = user_uuid_to_handle(self.user.uuid)
 
         response = self.client.post(
-            "/api/webauthn/login/complete/",
+            "/v1/webauthn/login/complete/",
             {
                 "id": bytes_to_base64url(self.credential.credential_id),
                 "rawId": bytes_to_base64url(self.credential.credential_id),
@@ -283,7 +283,7 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
 
     def test_list_credentials_requires_auth(self):
         self.client.logout()
-        response = self.client.get("/api/webauthn/credentials/")
+        response = self.client.get("/v1/webauthn/credentials/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list_credentials_returns_all(self):
@@ -298,7 +298,7 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
             verified=False,
         )
 
-        response = self.client.get("/api/webauthn/credentials/")
+        response = self.client.get("/v1/webauthn/credentials/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         credentials = response.json()
@@ -317,7 +317,7 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
             verified=True,
         )
 
-        response = self.client.get("/api/webauthn/credentials/")
+        response = self.client.get("/v1/webauthn/credentials/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         credentials = response.json()
@@ -326,14 +326,14 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
 
     @patch("insights.api.webauthn.send_passkey_removed_email")
     def test_delete_credential(self, mock_send_email):
-        response = self.client.delete(f"/api/webauthn/credentials/{self.credential.pk}/")
+        response = self.client.delete(f"/v1/webauthn/credentials/{self.credential.pk}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         mock_send_email.delay.assert_called_once_with(self.user.id)
         self.assertFalse(WebauthnCredential.objects.filter(pk=self.credential.pk).exists())
 
     def test_delete_nonexistent_credential(self):
-        response = self.client.delete(f"/api/webauthn/credentials/{uuid.uuid4()}/")
+        response = self.client.delete(f"/v1/webauthn/credentials/{uuid.uuid4()}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_other_users_credential_fails(self):
@@ -349,12 +349,12 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
             verified=True,
         )
 
-        response = self.client.delete(f"/api/webauthn/credentials/{other_credential.pk}/")
+        response = self.client.delete(f"/v1/webauthn/credentials/{other_credential.pk}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_rename_credential(self):
         response = self.client.patch(
-            f"/api/webauthn/credentials/{self.credential.pk}/",
+            f"/v1/webauthn/credentials/{self.credential.pk}/",
             {"label": "Renamed Passkey"},
             format="json",
         )
@@ -378,13 +378,13 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
             verified=False,
         )
 
-        verify_begin_response = self.client.post(f"/api/webauthn/credentials/{unverified_credential.pk}/verify/")
+        verify_begin_response = self.client.post(f"/v1/webauthn/credentials/{unverified_credential.pk}/verify/")
         self.assertEqual(verify_begin_response.status_code, status.HTTP_200_OK)
 
         mock_verify.return_value = MagicMock(new_sign_count=1)
 
         verify_complete_response = self.client.post(
-            f"/api/webauthn/credentials/{unverified_credential.pk}/verify_complete/",
+            f"/v1/webauthn/credentials/{unverified_credential.pk}/verify_complete/",
             {},
             format="json",
         )
@@ -401,7 +401,7 @@ class TestWebAuthnCredentialManagement(APIBaseTest):
     )
     def test_rename_with_invalid_label(self, name, label, expected_error):
         response = self.client.patch(
-            f"/api/webauthn/credentials/{self.credential.pk}/",
+            f"/v1/webauthn/credentials/{self.credential.pk}/",
             {"label": label},
             format="json",
         )

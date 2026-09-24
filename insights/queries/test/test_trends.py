@@ -90,7 +90,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
             data["properties"] = json.dumps(data["properties"])
         with self.settings(DEBUG=True):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/persons/trends/",
+                f"/v1/projects/{self.team.id}/persons/trends/",
                 data={**data, ENTITY_TYPE: entity.type, ENTITY_ID: entity.id},
                 content_type="application/json",
             ).json()

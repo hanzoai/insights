@@ -47,7 +47,7 @@ class TestCachedByFiltersDecorator(APIBaseTest):
         super().setUp()
 
     def test_returns_fresh_result(self) -> None:
-        response = self.client.get(f"/api/dummy").json()
+        response = self.client.get(f"/v1/dummy").json()
 
         assert response["result"] == "bla"
         assert response["is_cached"] is False
@@ -55,9 +55,9 @@ class TestCachedByFiltersDecorator(APIBaseTest):
 
     def test_returns_cached_result(self) -> None:
         # Prime the cache
-        self.client.get(f"/api/dummy").json()
+        self.client.get(f"/v1/dummy").json()
 
-        response = self.client.get(f"/api/dummy").json()
+        response = self.client.get(f"/v1/dummy").json()
 
         assert response["result"] == "bla"
         assert response["is_cached"] is True
@@ -66,13 +66,13 @@ class TestCachedByFiltersDecorator(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization)
 
         # Prime the cache
-        self.client.get(f"/api/dummy").json()
+        self.client.get(f"/v1/dummy").json()
 
         # Now switch to the other team - cache should be different
         DummyViewSet.team = other_team
 
-        response_for_other_team_initial = self.client.get(f"/api/dummy").json()
-        response_for_other_team_repeated = self.client.get(f"/api/dummy").json()
+        response_for_other_team_initial = self.client.get(f"/v1/dummy").json()
+        response_for_other_team_repeated = self.client.get(f"/v1/dummy").json()
 
         assert response_for_other_team_initial["result"] == "bla"
         assert response_for_other_team_initial["is_cached"] is False
@@ -81,29 +81,29 @@ class TestCachedByFiltersDecorator(APIBaseTest):
 
     def test_cache_bypass_with_refresh_param(self) -> None:
         # Prime the cache
-        self.client.get(f"/api/dummy").json()
+        self.client.get(f"/v1/dummy").json()
 
-        response = self.client.get(f"/api/dummy", data={"refresh": "true"}).json()
+        response = self.client.get(f"/v1/dummy", data={"refresh": "true"}).json()
 
         assert response["is_cached"] is False
 
     def test_cache_bypass_with_invalidation_key_param(self) -> None:
         # Prime the cache
-        self.client.get(f"/api/dummy").json()
+        self.client.get(f"/v1/dummy").json()
 
-        response = self.client.get(f"/api/dummy", data={"cache_invalidation_key": "abc"}).json()
+        response = self.client.get(f"/v1/dummy", data={"cache_invalidation_key": "abc"}).json()
 
         assert response["is_cached"] is False
 
     def test_discards_stale_response(self) -> None:
         with freeze_time("2023-02-08T12:05:23Z"):
             # Prime the cache
-            self.client.get(f"/api/dummy").json()
+            self.client.get(f"/v1/dummy").json()
 
         with freeze_time("2023-02-10T12:00:00Z"):
             # we don't need to add filters, since -7d with a
             # daily interval is the default
-            response = self.client.get(f"/api/dummy").json()
+            response = self.client.get(f"/v1/dummy").json()
             assert response["is_cached"] is False
 
 
@@ -282,7 +282,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_allows_non_impersonated_session(self, mock_is_impersonated):
         mock_is_impersonated.return_value = False
 
-        response = self.client.get("/api/impersonation-test/blocked_action/")
+        response = self.client.get("/v1/impersonation-test/blocked_action/")
 
         assert response.status_code == 200
         assert response.json()["status"] == "success"
@@ -291,7 +291,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_blocks_impersonated_session(self, mock_is_impersonated):
         mock_is_impersonated.return_value = True
 
-        response = self.client.get("/api/impersonation-test/blocked_action/")
+        response = self.client.get("/v1/impersonation-test/blocked_action/")
 
         assert response.status_code == 403
         assert response.json()["detail"] == "Impersonated sessions cannot perform this action."
@@ -300,7 +300,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_custom_error_message(self, mock_is_impersonated):
         mock_is_impersonated.return_value = True
 
-        response = self.client.get("/api/impersonation-test/blocked_with_custom_message/")
+        response = self.client.get("/v1/impersonation-test/blocked_with_custom_message/")
 
         assert response.status_code == 403
         assert response.json()["detail"] == "Custom error message."
@@ -309,7 +309,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_allowed_methods_get_is_allowed(self, mock_is_impersonated):
         mock_is_impersonated.return_value = True
 
-        response = self.client.get("/api/impersonation-test/partially_blocked/")
+        response = self.client.get("/v1/impersonation-test/partially_blocked/")
 
         assert response.status_code == 200
         assert response.json()["status"] == "success"
@@ -319,7 +319,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_allowed_methods_post_is_blocked(self, mock_is_impersonated):
         mock_is_impersonated.return_value = True
 
-        response = self.client.post("/api/impersonation-test/partially_blocked/")
+        response = self.client.post("/v1/impersonation-test/partially_blocked/")
 
         assert response.status_code == 403
         assert response.json()["detail"] == "Impersonated sessions cannot perform this action."
@@ -328,8 +328,8 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_non_impersonated_can_use_all_methods(self, mock_is_impersonated):
         mock_is_impersonated.return_value = False
 
-        get_response = self.client.get("/api/impersonation-test/partially_blocked/")
-        post_response = self.client.post("/api/impersonation-test/partially_blocked/")
+        get_response = self.client.get("/v1/impersonation-test/partially_blocked/")
+        post_response = self.client.post("/v1/impersonation-test/partially_blocked/")
 
         assert get_response.status_code == 200
         assert post_response.status_code == 200

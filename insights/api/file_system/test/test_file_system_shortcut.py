@@ -7,7 +7,7 @@ from insights.models.file_system.file_system_shortcut import FileSystemShortcut
 
 class TestFileSystemShortcutAPI(APIBaseTest):
     def test_list_shortcuts_initially_empty(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response_data = response.json()
         self.assertEqual(response_data["count"], 0)
@@ -15,7 +15,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
 
     def test_create_shortcut(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system_shortcut/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/",
             {"path": "Document.txt", "type": "doc-file"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
@@ -32,7 +32,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
             type="test-type",
             user=self.user,
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
         response_data = response.json()
@@ -46,7 +46,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         )
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/",
+            f"/v1/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/",
             {"path": "newfile.txt", "type": "new-type"},
         )
         self.assertEqual(update_response.status_code, status.HTTP_200_OK, update_response.json())
@@ -60,7 +60,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
 
     def test_delete_shortcut(self):
         shortcut_obj = FileSystemShortcut.objects.create(team=self.team, path="file.txt", type="temp", user=self.user)
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system_shortcut/{shortcut_obj.pk}/")
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(FileSystemShortcut.objects.filter(pk=shortcut_obj.pk).exists())
 
@@ -71,7 +71,7 @@ class TestFileSystemShortcutAPI(APIBaseTest):
         FileSystemShortcut.objects.create(team=self.team, path="file-tim.txt", type="temp", user=user1)
         FileSystemShortcut.objects.create(team=self.team, path="file-tom.txt", type="temp", user=user2)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system_shortcut/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system_shortcut/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response_data = response.json()
         self.assertEqual(response_data["count"], 1)

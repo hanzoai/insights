@@ -35,11 +35,11 @@ def _setup_team():
 class TestEvaluationConfigViewSet(APIBaseTest):
     def test_unauthenticated_user_cannot_access_config(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_can_get_evaluation_config(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertIn("trial_eval_limit", response.data)
@@ -54,7 +54,7 @@ class TestEvaluationConfigViewSet(APIBaseTest):
     def test_get_creates_config_if_missing(self):
         self.assertEqual(EvaluationConfig.objects.filter(team=self.team).count(), 0)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(EvaluationConfig.objects.filter(team=self.team).count(), 1)
@@ -62,7 +62,7 @@ class TestEvaluationConfigViewSet(APIBaseTest):
     def test_get_returns_existing_config(self):
         EvaluationConfig.objects.create(team=self.team, trial_evals_used=50)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["trial_evals_used"], 50)
         self.assertEqual(response.data["trial_evals_remaining"], 50)
@@ -78,7 +78,7 @@ class TestEvaluationConfigViewSet(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
             {"key_id": str(key.id)},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -99,7 +99,7 @@ class TestEvaluationConfigViewSet(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
             {"key_id": str(key.id)},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -116,7 +116,7 @@ class TestEvaluationConfigViewSet(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
             {"key_id": str(key.id)},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -124,7 +124,7 @@ class TestEvaluationConfigViewSet(APIBaseTest):
 
     def test_cannot_set_nonexistent_key_as_active(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
             {"key_id": str(uuid4())},
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -141,14 +141,14 @@ class TestEvaluationConfigViewSet(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
             {"key_id": str(other_key.id)},
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_set_active_key_requires_key_id(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
             {},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -157,14 +157,14 @@ class TestEvaluationConfigViewSet(APIBaseTest):
     def test_trial_evals_remaining_calculated_correctly(self):
         EvaluationConfig.objects.create(team=self.team, trial_eval_limit=100, trial_evals_used=75)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["trial_evals_remaining"], 25)
 
     def test_trial_evals_remaining_never_negative(self):
         EvaluationConfig.objects.create(team=self.team, trial_eval_limit=100, trial_evals_used=150)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["trial_evals_remaining"], 0)
 
@@ -187,14 +187,14 @@ class TestEvaluationConfigViewSet(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
             {"key_id": str(key1.id)},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["active_provider_key"]["id"], str(key1.id))
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
+            f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/set_active_key/",
             {"key_id": str(key2.id)},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -214,7 +214,7 @@ class TestEvaluationConfigViewSet(APIBaseTest):
         )
         EvaluationConfig.objects.create(team=self.team, active_provider_key=key)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/evaluation_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/evaluation_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         active_key = response.data["active_provider_key"]

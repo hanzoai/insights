@@ -112,7 +112,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         """Test that templates are created with correct function actions"""
         insights_flow_data = self._create_insights_flow_data(custom_inputs={"url": {"value": "https://custom.example.com"}})
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201, response.json()
 
         template = InsightsFlowTemplate.objects.get(pk=response.json()["id"])
@@ -161,7 +161,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
             "scope": "team",
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201, response.json()
 
         template = InsightsFlowTemplate.objects.get(pk=response.json()["id"])
@@ -176,7 +176,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         """Test that team_id and created_by are set from context"""
         insights_flow_data = self._create_insights_flow_data()
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201, response.json()
 
         template = InsightsFlowTemplate.objects.get(pk=response.json()["id"])
@@ -214,7 +214,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
             "scope": "team",
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 400, response.json()
         assert response.json() == {
             "attr": "actions__1__template_id",
@@ -227,7 +227,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         """Test that scope field can be set to team but not global (global templates are code-only)"""
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "team"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201, response.json()
 
         template = InsightsFlowTemplate.objects.get(pk=response.json()["id"])
@@ -237,7 +237,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         self.user.is_staff = True
         self.user.save()
         insights_flow_data["scope"] = "global"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 403
         assert "global workflow templates are stored in code" in response.json()["detail"].lower()
 
@@ -246,7 +246,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["image_url"] = "https://example.com/image.png"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201, response.json()
 
         template = InsightsFlowTemplate.objects.get(pk=response.json()["id"])
@@ -255,14 +255,14 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
     def test_template_tags_field(self):
         """Test that tags field can be set, updated, and defaults to empty list"""
         insights_flow_data = self._create_insights_flow_data()
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201, response.json()
         assert response.json()["tags"] == []
         template = InsightsFlowTemplate.objects.get(pk=response.json()["id"])
         assert template.tags == []
 
         insights_flow_data["tags"] = ["ingestion", "batch"]
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201, response.json()
         assert response.json()["tags"] == ["ingestion", "batch"]
 
@@ -272,7 +272,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         template_id = response.json()["id"]
         update_data = self._create_insights_flow_data()
         update_data["tags"] = ["updated-tag"]
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
+        response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
         assert response.status_code == 200
         assert response.json()["tags"] == ["updated-tag"]
         template.refresh_from_db()
@@ -282,7 +282,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         """Test that listing templates returns file-based global templates and team templates from DB"""
         team_template_data = self._create_insights_flow_data()
         team_template_data["scope"] = "team"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", team_template_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", team_template_data)
         assert response.status_code == 201
         team_template_id = response.json()["id"]
 
@@ -302,7 +302,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flow_templates")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flow_templates")
         assert response.status_code == 200
 
         template_ids = [t["id"] for t in response.json()["results"]]
@@ -323,7 +323,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
 
         other_team = Team.objects.create(organization=self.organization, name="Other Team")
 
-        response = self.client.get(f"/api/projects/{other_team.id}/insights_flow_templates")
+        response = self.client.get(f"/v1/projects/{other_team.id}/insights_flow_templates")
         assert response.status_code == 200
 
         template_ids = [t["id"] for t in response.json()["results"]]
@@ -341,7 +341,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flow_templates/{other_team_template.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flow_templates/{other_team_template.id}")
         assert response.status_code == 404
 
     def test_cannot_update_other_team_template(self):
@@ -360,7 +360,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         update_data["name"] = "Updated Name"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flow_templates/{other_team_template.id}", update_data
+            f"/v1/projects/{self.team.id}/insights_flow_templates/{other_team_template.id}", update_data
         )
         assert response.status_code == 404
 
@@ -376,7 +376,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/insights_flow_templates/{other_team_template.id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/insights_flow_templates/{other_team_template.id}")
         assert response.status_code == 404
 
         assert InsightsFlowTemplate.objects.filter(id=other_team_template.id).exists()
@@ -384,21 +384,21 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
     def test_can_read_update_delete_own_team_template(self):
         """Test that users can read, update, and delete their own team templates"""
         template_data = self._create_insights_flow_data()
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", template_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", template_data)
         assert response.status_code == 201
         template_id = response.json()["id"]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}")
         assert response.status_code == 200
         assert response.json()["id"] == template_id
 
         update_data = self._create_insights_flow_data()
         update_data["name"] = "Updated Template Name"
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
+        response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
         assert response.status_code == 200
         assert response.json()["name"] == "Updated Template Name"
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}")
         assert response.status_code == 204
 
         assert not InsightsFlowTemplate.objects.filter(id=template_id).exists()
@@ -408,7 +408,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "global"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 403
         assert "global workflow templates are stored in code" in response.json()["detail"].lower()
 
@@ -416,7 +416,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         """Test that users cannot update a team template to global scope"""
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "team"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201
         template_id = response.json()["id"]
 
@@ -424,7 +424,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         update_data["scope"] = "global"
         update_data["name"] = "Updated Name"
 
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
+        response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
         assert response.status_code == 403
         assert "global workflow templates are stored in code" in response.json()["detail"].lower()
 
@@ -432,7 +432,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         """Test that updating a team template to global scope is blocked"""
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "team"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201
         template_id = response.json()["id"]
 
@@ -443,7 +443,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         update_data["scope"] = "global"
         update_data["name"] = "Updated Name"
 
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
+        response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
         assert response.status_code == 403
         assert "global workflow templates are stored in code" in response.json()["detail"].lower()
 
@@ -458,7 +458,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
 
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "global"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 403
         assert "global workflow templates are stored in code" in response.json()["detail"].lower()
 
@@ -468,7 +468,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
 
         # Log out to test unauthenticated access
         self.client.logout()
-        response = self.client.get("/api/public_insights_flow_templates/")
+        response = self.client.get("/v1/public_insights_flow_templates/")
 
         assert response.status_code == status.HTTP_200_OK, response.json()
 
@@ -492,7 +492,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         file_template_ids = {t["id"] for t in file_templates}
         file_template_names = {t["name"] for t in file_templates}
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flow_templates")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flow_templates")
         assert response.status_code == 200
 
         api_results = response.json()["results"]
@@ -525,7 +525,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         template_name = file_templates[0]["name"]
 
         # Retrieve it via the API
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}")
         assert response.status_code == 200, f"Failed to retrieve template {template_id}"
 
         retrieved = response.json()
@@ -545,11 +545,11 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         # Try to update - returns 404 because file-based templates aren't in the DB queryset
         update_data = {"name": "Updated Template Name", "description": "Updated description"}
 
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
+        response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}", update_data)
         assert response.status_code == 404
 
         # Try to delete - also returns 404 for the same reason
-        response = self.client.delete(f"/api/projects/{self.team.id}/insights_flow_templates/{template_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/insights_flow_templates/{template_id}")
         assert response.status_code == 404
 
     def test_org_scoped_template_visible_to_other_teams_in_same_org(self):
@@ -565,7 +565,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
 
         other_team = Team.objects.create(organization=self.organization, name="Other Team")
 
-        response = self.client.get(f"/api/projects/{other_team.id}/insights_flow_templates")
+        response = self.client.get(f"/v1/projects/{other_team.id}/insights_flow_templates")
         assert response.status_code == 200
 
         template_ids = [t["id"] for t in response.json()["results"]]
@@ -587,7 +587,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         other_user = User.objects.create_and_join(other_org, "other-org-user@hanzo.ai", "testpassword12345")
         self.client.force_login(other_user)
 
-        response = self.client.get(f"/api/projects/{other_org_team.id}/insights_flow_templates")
+        response = self.client.get(f"/v1/projects/{other_org_team.id}/insights_flow_templates")
         assert response.status_code == 200
 
         assert not any(t["scope"] == "organization" for t in response.json()["results"]), (
@@ -598,7 +598,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         """Test that a user in Org B cannot update an org-scoped template from Org A"""
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "organization"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201
         template_id = response.json()["id"]
 
@@ -610,7 +610,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         update_data = self._create_insights_flow_data()
         update_data["name"] = "Hijacked Name"
         response = self.client.patch(
-            f"/api/projects/{other_org_team.id}/insights_flow_templates/{template_id}",
+            f"/v1/projects/{other_org_team.id}/insights_flow_templates/{template_id}",
             update_data,
         )
         assert response.status_code == 404
@@ -622,7 +622,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         """Test that a user on Team B can update Team A's org-scoped template within the same org"""
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "organization"
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201
         template_id = response.json()["id"]
 
@@ -631,7 +631,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         update_data = self._create_insights_flow_data()
         update_data["name"] = "Updated By Other Team"
         response = self.client.patch(
-            f"/api/projects/{other_team.id}/insights_flow_templates/{template_id}",
+            f"/v1/projects/{other_team.id}/insights_flow_templates/{template_id}",
             update_data,
         )
         assert response.status_code == 200
@@ -644,7 +644,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "organization"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201, response.json()
 
         template = InsightsFlowTemplate.objects.get(pk=response.json()["id"])
@@ -655,11 +655,11 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         insights_flow_data = self._create_insights_flow_data()
         insights_flow_data["scope"] = "organization"
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flow_templates", insights_flow_data)
         assert response.status_code == 201
         template_id = response.json()["id"]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flow_templates")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flow_templates")
         assert response.status_code == 200
 
         template_ids = [t["id"] for t in response.json()["results"]]

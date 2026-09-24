@@ -36,7 +36,7 @@ class WebAnalyticsDataFactory:
 
         query_string = "&".join([f"{k}={v}" for k, v in clean_params.items()])
 
-        return f"{base_url}/api/projects/{team_id}/external_web_analytics/{endpoint}/?{query_string}"
+        return f"{base_url}/v1/projects/{team_id}/external_web_analytics/{endpoint}/?{query_string}"
 
     def generate_trends_data(self, request_data: dict[str, Any], request: Request, team_id: int) -> dict[str, Any]:
         date_from = request_data["date_from"]

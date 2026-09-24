@@ -92,7 +92,7 @@ class EndpointsUsageQueryRunner(AnalyticsQueryRunner[EAR], ABC):
                 name="match",
                 args=[
                     ast.Field(chain=["query_log", "endpoint"]),
-                    ast.Constant(value=r"^/api/(environments|projects)/[0-9]+/endpoints/[^/]+/run/?$"),
+                    ast.Constant(value=r"^/v1/(environments|projects)/[0-9]+/endpoints/[^/]+/run/?$"),
                 ],
             )
         )

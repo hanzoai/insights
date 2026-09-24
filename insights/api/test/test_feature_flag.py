@@ -86,7 +86,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
     def test_cant_create_flag_with_more_than_max_values(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {
                 "name": "Beta feature",
                 "key": "beta-x",
@@ -136,7 +136,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         count = FeatureFlag.objects.count()
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {"name": "Beta feature", "key": "red_button"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -165,7 +165,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         count = FeatureFlag.objects.count()
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {"name": "Beta feature", "key": key},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -186,7 +186,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         count = FeatureFlag.objects.count()
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {"name": "Beta feature", "key": key},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -217,7 +217,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         for operator in invalid_operators:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags",
+                f"/v1/projects/{self.team.id}/feature_flags",
                 {
                     "name": "Beta feature",
                     "key": "beta-x",
@@ -253,7 +253,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Test that a string value is still acceptable
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {
                 "name": "Beta feature",
                 "key": "beta-x",
@@ -287,7 +287,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         count = FeatureFlag.objects.count()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {
                 "name": "Beta feature",
                 "key": f"beta-person-{operator}",
@@ -330,7 +330,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     )
     def test_cant_create_flag_with_unknown_operator(self, operator: str) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {
                 "name": "Beta feature",
                 "key": "beta-unknown-op",
@@ -375,7 +375,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_can_create_flag_with_valid_operator(self, operator: str) -> None:
         value = "" if operator == "is_set" else "2025-01-01" if "date" in operator else "test"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {
                 "name": f"Flag with {operator}",
                 "key": f"flag-valid-op-{operator}",
@@ -406,7 +406,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             filters={"groups": [{"rollout_percentage": 100, "properties": []}]},
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {
                 "name": "Dependent flag",
                 "key": "dependent-flag",
@@ -439,7 +439,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         cohort = Cohort.objects.create(team=self.team, name="test cohort", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags",
+            f"/v1/projects/{self.team.id}/feature_flags",
             {
                 "name": f"Cohort feature {operator}",
                 "key": f"cohort-feature-{operator}",
@@ -473,7 +473,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             created_by=self.user,
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{another_feature_flag.pk}",
+            f"/v1/projects/{self.team.id}/feature_flags/{another_feature_flag.pk}",
             {"name": "Beta feature", "key": "red_button"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -491,7 +491,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Try updating the existing one
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{existing_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{existing_flag.id}/",
             {"name": "Beta feature 3", "key": "red_button"},
         )
         self.assertEqual(response.status_code, 200)
@@ -501,7 +501,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     @patch("insights.api.feature_flag.report_user_action")
     def test_group_type_index_feature_flag(self, mock_capture):
         feature_flag = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             data={
                 "name": "Beta feature",
                 "key": "beta-feature",
@@ -536,7 +536,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     @patch("insights.api.feature_flag.report_user_action")
     def test_create_feature_flag(self, mock_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -593,7 +593,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     @patch("insights.api.feature_flag.report_user_action")
     def test_create_minimal_feature_flag(self, mock_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "omega-feature"},
             format="json",
         )
@@ -631,7 +631,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.client.logout()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "api-created-feature"},
             format="json",
             headers={"authorization": f"Bearer {personal_api_key}"},
@@ -661,7 +661,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_create_feature_flag_with_analytics_dashboards(self, mock_capture):
         dashboard = Dashboard.objects.create(team=self.team, name="private dashboard", created_by=self.user)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "key": "feature-with-analytics-dashboards",
                 "analytics_dashboards": [dashboard.pk],
@@ -681,7 +681,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         other_dashboard = Dashboard.objects.create(team=other_team, name="other team dashboard", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "key": "flag-with-other-dashboard",
                 "analytics_dashboards": [other_dashboard.pk],
@@ -709,7 +709,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         other_dashboard = Dashboard.objects.create(team=other_team, name="other team dashboard", created_by=self.user)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.pk}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.pk}/",
             {"analytics_dashboards": [other_dashboard.pk]},
             format="json",
         )
@@ -735,7 +735,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Test with "server"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "server-side-flag", "evaluation_runtime": "server"},
             format="json",
         )
@@ -747,7 +747,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Test with "client"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "client-side-flag", "evaluation_runtime": "client"},
             format="json",
         )
@@ -756,7 +756,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Test with "all"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "all-flag", "evaluation_runtime": "all"},
             format="json",
         )
@@ -765,7 +765,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Test default value (should be "all")
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "default-flag"},
             format="json",
         )
@@ -776,7 +776,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_update_feature_flag_evaluation_runtime(self, mock_capture):
         # Create a flag with default evaluation_runtime
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "flag-to-update"},
             format="json",
         )
@@ -786,7 +786,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Update to "server"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
             {"evaluation_runtime": "server"},
             format="json",
         )
@@ -800,7 +800,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     @patch("insights.api.feature_flag.report_user_action")
     def test_create_multivariate_feature_flag(self, mock_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Multivariate feature",
                 "key": "multivariate-feature",
@@ -860,7 +860,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     )
     def test_cant_create_multivariate_feature_flag_with_variant_rollout_not_100(self, _name, third_variant_rollout):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Multivariate feature",
                 "key": "multivariate-feature",
@@ -899,7 +899,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_cant_update_multivariate_feature_flag_with_variant_rollout_not_100(self):
         # Create initial flag
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Multivariate feature",
                 "key": "multivariate-feature",
@@ -920,7 +920,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Try to update with invalid percentages
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag_id}",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag_id}",
             {
                 "filters": {
                     "groups": [{"properties": [], "rollout_percentage": None}],
@@ -956,7 +956,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
     def test_cant_create_feature_flag_without_key(self):
         count = FeatureFlag.objects.count()
-        response = self.client.post(f"/api/projects/{self.team.id}/feature_flags/", format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/feature_flags/", format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -971,7 +971,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
     def test_cant_create_multivariate_feature_flag_with_invalid_variant_overrides(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Multivariate feature",
                 "key": "multivariate-feature",
@@ -1015,7 +1015,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
     def test_cant_update_multivariate_feature_flag_with_invalid_variant_overrides(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Multivariate feature",
                 "key": "multivariate-feature",
@@ -1055,7 +1055,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         feature_flag_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag_id}",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag_id}",
             {
                 "filters": {
                     "groups": [
@@ -1099,7 +1099,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_updating_feature_flag(self, mock_capture):
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -1109,7 +1109,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {
                     "name": "Updated name",
                     "filters": {
@@ -1235,7 +1235,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # And the unchanged fields are not updated
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {
                     "name": "original name",
                     "key": "a-feature-flag-that-is-updated",
@@ -1266,7 +1266,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {
                     "name": "Updated name",
                 },
@@ -1284,7 +1284,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             # Create flag with original user
             original_user = self.user
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -1299,7 +1299,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             self.assertNotEqual(original_user, different_user)
 
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {"name": "Updated name"},
                 format="json",
             )
@@ -1317,7 +1317,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             # Create flag with original user: version 0
             original_user = self.user
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -1338,7 +1338,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
             # Successfully update the feature flag with the different user. This will increment the version
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {"name": "Updated name", "version": original_version},
                 format="json",
             )
@@ -1356,7 +1356,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             # This should fail because the version has been incremented and the user is
             # trying to update the name
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 data={
                     "name": "Another Updated name",
                     "version": original_version,
@@ -1384,7 +1384,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             # The different user refreshes and tries to update again
             self.client.force_login(different_user)
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 data={"name": "Another Updated name", "version": updated_version},
                 format="json",
             )
@@ -1401,7 +1401,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             # Create flag with original user: version 0
             original_user = self.user
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {
                     "name": "original name",
                     "key": "a-feature-flag-that-is-updated",
@@ -1438,7 +1438,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
             # Successfully update the feature flag with the different user. This will increment the version
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {"name": "Updated name", "version": original_version},
                 format="json",
             )
@@ -1450,7 +1450,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             # However, the user is changing a field that wasn't changed by the other user
             # This should succeed
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 data={
                     "name": "Updated name",
                     "filters": {
@@ -1507,7 +1507,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_updating_feature_flag_does_not_fail_when_version_not_in_request(self, mock_capture):
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 data={"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -1517,7 +1517,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 data={"name": "Updated name"},
                 format="json",
             )
@@ -1525,7 +1525,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             self.assertEqual(response.json()["version"], 2)
 
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 data={"name": "Yet another updated name"},
                 format="json",
             )
@@ -1559,7 +1559,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.client.logout()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/my-remote-config-flag/remote_config",
+            f"/v1/projects/{self.team.id}/feature_flags/my-remote-config-flag/remote_config",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1585,7 +1585,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
         self.client.logout()
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/my-remote-config-flag/remote_config",
+            f"/v1/projects/{self.team.id}/feature_flags/my-remote-config-flag/remote_config",
             headers={"authorization": f"Bearer {self.team.secret_api_token}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1623,7 +1623,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Try to access other team's flag using this team's secret key + other team's project_api_key in body
         response = self.client.get(
-            f"/api/projects/{other_team.id}/feature_flags/other-team-flag/remote_config?token={other_team.api_token}",
+            f"/v1/projects/{other_team.id}/feature_flags/other-team-flag/remote_config?token={other_team.api_token}",
             headers={"authorization": f"Bearer {self.team.secret_api_token}"},
         )
 
@@ -1650,7 +1650,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Try to access the other team's flag using its numeric ID from our project endpoint
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/{other_flag.pk}/remote_config")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/{other_flag.pk}/remote_config")
 
         # Should return 404 because the flag doesn't belong to this project
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -1675,13 +1675,13 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Try to access the other team's flag using its key from our project endpoint
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/unique-other-flag-key/remote_config")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/unique-other-flag-key/remote_config")
 
         # Should return 404 because the flag doesn't belong to this project
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_remote_config_returns_not_found_for_unknown_flag(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/nonexistent_key/remote_config")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/nonexistent_key/remote_config")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_conflicting_changes(self):
@@ -1787,7 +1787,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_updating_feature_flag_treats_null_version_as_zero(self, mock_capture):
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 data={"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -1799,7 +1799,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 data={"name": "Updated name", "version": 0},
                 format="json",
             )
@@ -1813,7 +1813,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_updating_feature_flag_key(self, mock_capture):
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -1847,7 +1847,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
             # Update the feature flag key
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {
                     "key": "a-new-feature-flag-key",
                     "filters": {
@@ -1993,7 +1993,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_updating_feature_flag_key_does_not_update_insight_with_changed_description(self, mock_capture):
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -2029,7 +2029,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
             # Update the feature flag key
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {
                     "key": "a-new-feature-flag-key",
                     "filters": {
@@ -2082,7 +2082,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_updating_feature_flag_key_does_not_update_insight_with_changed_filter(self, mock_capture):
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -2120,7 +2120,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
             # Update the feature flag key
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {
                     "key": "a-new-feature-flag-key",
                     "filters": {
@@ -2172,7 +2172,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_updating_feature_flag_key_does_not_update_insight_with_removed_filter(self, mock_capture):
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "original name", "key": "a-feature-flag-that-is-updated"},
                 format="json",
             )
@@ -2209,7 +2209,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
             # Update the feature flag key
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {
                     "key": "a-new-feature-flag-key",
                     "filters": {
@@ -2263,7 +2263,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         instance = FeatureFlag.objects.create(team=self.team, created_by=self.user, key="potato")
         self.client.force_login(new_user)
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/feature_flags/{instance.pk}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/feature_flags/{instance.pk}/")
 
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertTrue(FeatureFlag.objects.filter(pk=instance.pk).exists())
@@ -2279,7 +2279,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             create_response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "feature flag with activity", "key": "feature_with_activity"},
             )
 
@@ -2289,7 +2289,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             update_response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {
                     "name": "feature flag with activity",
                     "filters": {"groups": [{"properties": [], "rollout_percentage": 74}]},
@@ -2365,7 +2365,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         with freeze_time("2021-08-25T22:09:14.252Z") as frozen_datetime:
             create_response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "feature flag with activity", "key": "feature_with_activity"},
             )
 
@@ -2375,7 +2375,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             update_response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {
                     "name": "feature flag with activity",
                     "filters": {"groups": [{"properties": [], "rollout_percentage": 74}]},
@@ -2387,7 +2387,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             frozen_datetime.tick(delta=timedelta(minutes=10))
 
             second_create_response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": "a second feature flag", "key": "flag-two"},
             )
 
@@ -2477,7 +2477,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # create the flag
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"name": "feature flag with activity", "key": "feature_with_activity"},
         )
         self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
@@ -2494,7 +2494,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # update the flag
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
             {
                 "name": "feature flag with activity",
                 "filters": {"groups": [{"properties": [], "rollout_percentage": 74}]},
@@ -2591,13 +2591,13 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_paging_all_feature_flag_activity(self):
         for x in range(15):
             create_response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 {"name": f"feature flag {x}", "key": f"{x}"},
             )
             self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
 
         # check the first page of data
-        url = f"/api/projects/{self.team.id}/feature_flags/activity"
+        url = f"/v1/projects/{self.team.id}/feature_flags/activity"
         first_page_response = self.client.get(url)
         self.assertEqual(first_page_response.status_code, status.HTTP_200_OK)
         first_page_json = first_page_response.json()
@@ -2628,20 +2628,20 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
     def test_paging_specific_feature_flag_activity(self):
-        create_response = self.client.post(f"/api/projects/{self.team.id}/feature_flags/", {"name": "ff", "key": "0"})
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/feature_flags/", {"name": "ff", "key": "0"})
         self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
         flag_id = create_response.json()["id"]
 
         for x in range(1, 15):
             update_response = self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
                 {"key": str(x)},
                 format="json",
             )
             self.assertEqual(update_response.status_code, status.HTTP_200_OK)
 
         # check the first page of data
-        url = f"/api/projects/{self.team.id}/feature_flags/{flag_id}/activity"
+        url = f"/v1/projects/{self.team.id}/feature_flags/{flag_id}/activity"
         first_page_response = self.client.get(url)
         self.assertEqual(first_page_response.status_code, status.HTTP_200_OK)
         first_page_json = first_page_response.json()
@@ -2680,14 +2680,14 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         assert self.team is not None
         self.assertNotEqual(user.team.id, self.team.id)
 
-        response_team_1 = self.client.get(f"/api/projects/@current/feature_flags")
-        response_team_1_token = self.client.get(f"/api/projects/@current/feature_flags?token={user.team.api_token}")
-        response_team_2 = self.client.get(f"/api/projects/@current/feature_flags?token={self.team.api_token}")
+        response_team_1 = self.client.get(f"/v1/projects/@current/feature_flags")
+        response_team_1_token = self.client.get(f"/v1/projects/@current/feature_flags?token={user.team.api_token}")
+        response_team_2 = self.client.get(f"/v1/projects/@current/feature_flags?token={self.team.api_token}")
 
         self.assertEqual(response_team_1.json(), response_team_1_token.json())
         self.assertNotEqual(response_team_1.json(), response_team_2.json())
 
-        response_invalid_token = self.client.get(f"/api/projects/@current/feature_flags?token=invalid")
+        response_invalid_token = self.client.get(f"/v1/projects/@current/feature_flags?token=invalid")
         self.assertEqual(response_invalid_token.status_code, 401)
 
     def test_soft_delete_flag_renames_key_and_allows_reuse(self):
@@ -2697,14 +2697,14 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         exp.deleted = True
         exp.save()
         # Soft-delete flag: should rename key
-        response = self.client.patch(f"/api/projects/{self.team.id}/feature_flags/{flag.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/", {"deleted": True})
         assert response.status_code == 200
         flag.refresh_from_db()
         assert flag.deleted is True
         assert flag.key == f"flag1:deleted:{flag.id}"
         # Should now be able to create a new flag with the original key
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"name": "Flag1", "key": "flag1"},
         )
         assert response.status_code == 201
@@ -2713,7 +2713,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_soft_delete_flag_blocked_with_active_experiment(self):
         flag = FeatureFlag.objects.create(team=self.team, created_by=self.user, key="flag2")
         exp = Experiment.objects.create(team=self.team, created_by=self.user, feature_flag=flag)
-        response = self.client.patch(f"/api/projects/{self.team.id}/feature_flags/{flag.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/", {"deleted": True})
         assert response.status_code == 400
         assert (
             response.json()["detail"]
@@ -2726,7 +2726,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.team.session_recording_linked_flag = {"id": flag.id, "key": flag.key}
         self.team.save()
 
-        response = self.client.patch(f"/api/projects/{self.team.id}/feature_flags/{flag.id}/", {"deleted": True})
+        response = self.client.patch(f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/", {"deleted": True})
         assert response.status_code == 400
         assert (
             response.json()["detail"]
@@ -2737,7 +2737,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         flag = FeatureFlag.objects.create(team=self.team, created_by=self.user, key="replay-flag")
 
         # Initially should be False
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/{flag.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/")
         assert response.status_code == 200
         assert response.json()["is_used_in_replay_settings"] is False
 
@@ -2746,13 +2746,13 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.team.save()
 
         # Now should be True
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/{flag.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/")
         assert response.status_code == 200
         assert response.json()["is_used_in_replay_settings"] is True
 
     def test_getting_flags_is_not_nplus1(self) -> None:
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             data={
                 "name": f"flag",
                 "key": f"flag_0",
@@ -2762,12 +2762,12 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         ).json()
 
         with self.assertNumQueries(FuzzyInt(19, 20)):
-            response = self.client.get(f"/api/projects/{self.team.id}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         for i in range(1, 5):
             self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 data={
                     "name": f"flag",
                     "key": f"flag_{i}",
@@ -2777,14 +2777,14 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             ).json()
 
         with self.assertNumQueries(FuzzyInt(19, 20)):
-            response = self.client.get(f"/api/projects/{self.team.id}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_getting_flags_with_no_creator(self) -> None:
         FeatureFlag.objects.all().delete()
 
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             data={
                 "name": f"flag",
                 "key": f"flag_0",
@@ -2801,7 +2801,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         with self.assertNumQueries(FuzzyInt(19, 20)):
-            response = self.client.get(f"/api/projects/{self.team.id}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(len(response.json()["results"]), 2)
             sorted_results = sorted(response.json()["results"], key=lambda x: x["key"])
@@ -2842,7 +2842,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # With the fix, this should be ~18-20 queries
         # Without the fix, this was ~24 queries (base queries + N+1 for surveys)
         with self.assertNumQueries(FuzzyInt(17, 22)):
-            response = self.client.get(f"/api/projects/{self.team.id}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(len(response.json()["results"]), 5)
 
@@ -2869,7 +2869,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # Without the fix: This was ~48 queries (18 base + 30 N+1 queries)
         # The fix reduced 48 queries down to ~20 queries - a 60% reduction!
         with self.assertNumQueries(FuzzyInt(17, 24)):
-            response = self.client.get(f"/api/projects/{self.team.id}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(len(response.json()["results"]), 30)
 
@@ -2920,7 +2920,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Should not cause extra queries for the targeting flags
         with self.assertNumQueries(FuzzyInt(15, 22)):
-            response = self.client.get(f"/api/projects/{self.team.id}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             # Should include main_flag but not targeting flags (they're filtered out)
             results = response.json()["results"]
@@ -2932,7 +2932,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     @patch("insights.api.feature_flag.report_user_action")
     def test_create_feature_flag_usage_dashboard(self, mock_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -3071,7 +3071,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         instance.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_id}/enrich_usage_dashboard",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_id}/enrich_usage_dashboard",
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3311,7 +3311,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     @patch("insights.api.feature_flag.report_user_action")
     def test_dashboard_enrichment_fails_if_already_enriched(self, mock_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -3329,14 +3329,14 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         instance.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_id}/enrich_usage_dashboard",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_id}/enrich_usage_dashboard",
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # now try enriching again
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_id}/enrich_usage_dashboard",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_id}/enrich_usage_dashboard",
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -3348,7 +3348,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     @patch("insights.api.feature_flag.report_user_action")
     def test_dashboard_enrichment_fails_if_no_enriched_data(self, mock_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -3362,7 +3362,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(instance.key, "alpha-feature")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_id}/enrich_usage_dashboard",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_id}/enrich_usage_dashboard",
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -3538,7 +3538,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             created_by=self.user,
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -3567,7 +3567,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             # for only those referenced by flags, instead of loading all cohorts.
 
             response = self.client.get(
-                f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts",
+                f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts",
                 headers={"authorization": f"Bearer {personal_api_key}"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3605,7 +3605,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -3652,7 +3652,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.client.logout()
 
         response = self.client.get(
-            f"/api/feature_flag/local_evaluation?token={self.team.api_token}",
+            f"/v1/feature_flag/local_evaluation?token={self.team.api_token}",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3717,7 +3717,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -3762,7 +3762,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         PersonalAPIKey.objects.create(label="X", user=self.user, secure_value=hash_key_value(personal_api_key))
 
         response = self.client.get(
-            f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts",
+            f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3886,7 +3886,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -3922,7 +3922,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature-2",
@@ -3948,7 +3948,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         PersonalAPIKey.objects.create(label="X", user=self.user, secure_value=hash_key_value(personal_api_key))
 
         response = self.client.get(
-            f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts",
+            f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -4109,16 +4109,16 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         with freeze_time("2022-05-07 12:23:07"):
             # missing API key
-            response = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}")
+            response = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
-            response = self.client.get(f"/api/feature_flag/local_evaluation")
+            response = self.client.get(f"/v1/feature_flag/local_evaluation")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
             response = self.client.get(
-                f"/api/feature_flag/local_evaluation?token={self.team.api_token}",
+                f"/v1/feature_flag/local_evaluation?token={self.team.api_token}",
                 headers={"authorization": f"Bearer {personal_api_key}"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -4129,7 +4129,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
             for _ in range(5):
                 response = self.client.get(
-                    f"/api/feature_flag/local_evaluation?token={self.team.api_token}",
+                    f"/v1/feature_flag/local_evaluation?token={self.team.api_token}",
                     headers={"authorization": f"Bearer {personal_api_key}"},
                 )
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -4169,7 +4169,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         PersonalAPIKey.objects.create(label="X", user=self.user, secure_value=hash_key_value(personal_api_key))
 
         # request made while logged in, via client cookie auth
-        response = self.client.get(f"/api/feature_flag?token={self.team.api_token}")
+        response = self.client.get(f"/v1/feature_flag?token={self.team.api_token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
 
@@ -4181,16 +4181,16 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         with freeze_time("2022-05-07 12:23:07"):
             # missing API key
-            response = self.client.get(f"/api/feature_flag?token={self.team.api_token}")
+            response = self.client.get(f"/v1/feature_flag?token={self.team.api_token}")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
-            response = self.client.get(f"/api/feature_flag/")
+            response = self.client.get(f"/v1/feature_flag/")
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{self.team.pk}"), {})
 
             response = self.client.get(
-                f"/api/feature_flag/?token={self.team.api_token}",
+                f"/v1/feature_flag/?token={self.team.api_token}",
                 headers={"authorization": f"Bearer {personal_api_key}"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -4201,14 +4201,14 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
             for _ in range(4):
                 response = self.client.get(
-                    f"/api/feature_flag/?token={self.team.api_token}",
+                    f"/v1/feature_flag/?token={self.team.api_token}",
                     headers={"authorization": f"Bearer {personal_api_key}"},
                 )
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             # local evaluation still works
             response = self.client.get(
-                f"/api/feature_flag/local_evaluation?token={self.team.api_token}",
+                f"/v1/feature_flag/local_evaluation?token={self.team.api_token}",
                 headers={"authorization": f"Bearer {personal_api_key}"},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -4294,7 +4294,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Multivariate feature",
                 "key": "multivariate-feature",
@@ -4327,7 +4327,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Multivariate feature",
                 "key": "multivariate-feature",
@@ -4363,7 +4363,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Multivariate feature",
                 "key": "multivariate-feature",
@@ -4492,7 +4492,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
         flag_id = cohort_request.json()["id"]
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_id}",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_id}",
             {
                 "name": "Updated name",
                 "filters": {
@@ -4665,7 +4665,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_validation_empty_groups(self):
         """Test that creating a flag with empty groups raises validation error"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Empty groups flag",
                 "key": "empty-groups-flag",
@@ -4687,7 +4687,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_validation_groups_with_empty_properties_allowed(self):
         """Test that creating a flag with groups having empty properties but valid rollout is allowed"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Valid flag with empty properties",
                 "key": "valid-empty-properties",
@@ -4710,7 +4710,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Now try to update it with empty groups (this should be allowed)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {"filters": {"groups": []}},
             format="json",
         )
@@ -4729,7 +4729,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             team_id = self.team.id
 
         create_response = self.client.post(
-            f"/api/projects/{team_id}/feature_flags/",
+            f"/v1/projects/{team_id}/feature_flags/",
             data={
                 "name": name,
                 "key": name,
@@ -4750,9 +4750,9 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             team_id = self.team.id
 
         if flag_id:
-            url = f"/api/projects/{team_id}/feature_flags/{flag_id}/activity"
+            url = f"/v1/projects/{team_id}/feature_flags/{flag_id}/activity"
         else:
-            url = f"/api/projects/{team_id}/feature_flags/activity"
+            url = f"/v1/projects/{team_id}/feature_flags/activity"
 
         activity = self.client.get(url)
         self.assertEqual(activity.status_code, expected_status)
@@ -4781,7 +4781,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{another_feature_flag.pk}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{another_feature_flag.pk}/",
             data="active=False&name=replaced",
             content_type="application/x-www-form-urlencoded",
         )
@@ -4800,7 +4800,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
     def test_feature_flag_threshold(self):
         feature_flag = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             data={
                 "name": "Beta feature",
                 "key": "beta-feature",
@@ -4837,7 +4837,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_get_flags_dont_return_survey_targeting_flags(self):
         FeatureFlag.objects.create(team=self.team, created_by=self.user, key="red_button")
         survey = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks power users survey",
                 "type": "popover",
@@ -4869,7 +4869,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
         assert FeatureFlag.objects.filter(id=survey.json()["targeting_flag"]["id"]).exists()
 
-        flags_list = self.client.get(f"/api/projects/@current/feature_flags")
+        flags_list = self.client.get(f"/v1/projects/@current/feature_flags")
         response = flags_list.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["id"] is not survey.json()["targeting_flag"]["id"]
@@ -4890,7 +4890,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             internal_targeting_flag=internal_flag,
         )
 
-        flags_list = self.client.get("/api/projects/@current/feature_flags")
+        flags_list = self.client.get("/v1/projects/@current/feature_flags")
         response = flags_list.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == "red_button"
@@ -4903,7 +4903,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         FeatureFlag.objects.create(team=self.team, created_by=self.user, key="green_button", active=False)
 
         filtered_flags_list = self.client.get(
-            f"/api/projects/@current/feature_flags?created_by_id={self.user.id}&active=false"
+            f"/v1/projects/@current/feature_flags?created_by_id={self.user.id}&active=false"
         )
         response = filtered_flags_list.json()
         assert len(response["results"]) == 1
@@ -4924,17 +4924,17 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             filters={"multivariate": {"variants": [{"foo": "bar"}]}},
         )
 
-        filtered_flags_list_boolean = self.client.get(f"/api/projects/@current/feature_flags?type=boolean")
+        filtered_flags_list_boolean = self.client.get(f"/v1/projects/@current/feature_flags?type=boolean")
         response = filtered_flags_list_boolean.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == feature_flag.key
 
-        filtered_flags_list_multivariant = self.client.get(f"/api/projects/@current/feature_flags?type=multivariant")
+        filtered_flags_list_multivariant = self.client.get(f"/v1/projects/@current/feature_flags?type=multivariant")
         response = filtered_flags_list_multivariant.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == "purple_button"
 
-        filtered_flags_list_experiment = self.client.get(f"/api/projects/@current/feature_flags?type=experiment")
+        filtered_flags_list_experiment = self.client.get(f"/v1/projects/@current/feature_flags?type=experiment")
         response = filtered_flags_list_experiment.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == feature_flag.key
@@ -4949,7 +4949,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Test searching by flag key
-        filtered_flags_list = self.client.get(f"/api/projects/@current/feature_flags?active=true&search=search_term")
+        filtered_flags_list = self.client.get(f"/v1/projects/@current/feature_flags?active=true&search=search_term")
         response = filtered_flags_list.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == "blue_search_term_button"
@@ -4966,7 +4966,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             deleted=False,
         )
 
-        filtered_by_experiment = self.client.get(f"/api/projects/@current/feature_flags?search=unique_experiment_name")
+        filtered_by_experiment = self.client.get(f"/v1/projects/@current/feature_flags?search=unique_experiment_name")
         response = filtered_by_experiment.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == "experiment_flag"
@@ -4986,7 +4986,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             deleted=True,
         )
 
-        filtered_deleted = self.client.get(f"/api/projects/@current/feature_flags?search=deleted_unique_experiment")
+        filtered_deleted = self.client.get(f"/v1/projects/@current/feature_flags?search=deleted_unique_experiment")
         response = filtered_deleted.json()
         assert len(response["results"]) == 0
 
@@ -5088,7 +5088,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         multi_group_flag.save()
 
         # Test filtering by stale status
-        filtered_flags_list = self.client.get(f"/api/projects/@current/feature_flags?active=STALE")
+        filtered_flags_list = self.client.get(f"/v1/projects/@current/feature_flags?active=STALE")
         response = filtered_flags_list.json()
 
         assert len(response["results"]) == 1
@@ -5135,7 +5135,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         active_flag.save()
 
         # Test filtering by stale status
-        filtered_flags_list = self.client.get(f"/api/projects/@current/feature_flags?active=STALE")
+        filtered_flags_list = self.client.get(f"/v1/projects/@current/feature_flags?active=STALE")
         response = filtered_flags_list.json()
 
         assert len(response["results"]) == 1
@@ -5218,7 +5218,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         with_props_flag.save()
 
         # Test filtering by stale status
-        filtered_flags_list = self.client.get(f"/api/projects/@current/feature_flags?active=STALE")
+        filtered_flags_list = self.client.get(f"/v1/projects/@current/feature_flags?active=STALE")
         response = filtered_flags_list.json()
 
         assert len(response["results"]) == 1
@@ -5256,7 +5256,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             last_called_at=datetime.now(UTC) - timedelta(days=1),
         )
 
-        filtered_flags_list = self.client.get("/api/projects/@current/feature_flags?active=STALE")
+        filtered_flags_list = self.client.get("/v1/projects/@current/feature_flags?active=STALE")
         response = filtered_flags_list.json()
 
         assert len(response["results"]) == 1
@@ -5285,19 +5285,19 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Test filtering by server environment
-        filtered_flags_list = self.client.get(f"/api/projects/@current/feature_flags?evaluation_runtime=server")
+        filtered_flags_list = self.client.get(f"/v1/projects/@current/feature_flags?evaluation_runtime=server")
         response = filtered_flags_list.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == "server_flag"
 
         # Test filtering by client environment
-        filtered_flags_list = self.client.get(f"/api/projects/@current/feature_flags?evaluation_runtime=client")
+        filtered_flags_list = self.client.get(f"/v1/projects/@current/feature_flags?evaluation_runtime=client")
         response = filtered_flags_list.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == "client_flag"
 
         # Test filtering by both environment
-        filtered_flags_list = self.client.get(f"/api/projects/@current/feature_flags?evaluation_runtime=both")
+        filtered_flags_list = self.client.get(f"/v1/projects/@current/feature_flags?evaluation_runtime=both")
         response = filtered_flags_list.json()
         assert len(response["results"]) == 1
         assert response["results"][0]["key"] == "both_flag"
@@ -5308,7 +5308,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         FeatureFlag.objects.all().delete()
 
         feature_flag = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             data={
                 "name": "Beta feature",
                 "key": "beta-feature",
@@ -5329,7 +5329,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(flags[0].name, "Beta feature")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag['id']}",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag['id']}",
             {"name": "XYZ", "key": "red_button"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -5343,7 +5343,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(flags[0].name, "XYZ")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag['id']}",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag['id']}",
             {"deleted": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -5363,14 +5363,14 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         for _ in range(5):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags",
+                f"/v1/projects/{self.team.pk}/feature_flags",
                 headers={"authorization": f"Bearer {personal_api_key}"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Call to flags gets rate limited
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/feature_flags",
+            f"/v1/projects/{self.team.pk}/feature_flags",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
@@ -5384,7 +5384,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
                 "team_id": self.team.pk,
                 "scope": "burst",
                 "rate": "5/minute",
-                "route": "/api/projects/TEAM_ID/feature_flags/",
+                "route": "/v1/projects/TEAM_ID/feature_flags/",
                 "hashed_personal_api_key": hash_key_value(personal_api_key),
             },
         )
@@ -5394,7 +5394,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # but not call to local evaluation
         for _ in range(7):
             response = self.client.get(
-                f"/api/feature_flag/local_evaluation",
+                f"/v1/feature_flag/local_evaluation",
                 headers={"authorization": f"Bearer {personal_api_key}"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -5416,7 +5416,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             feature_flag=another_feature_flag, dashboard_id=dashboard.pk
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk))
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_json = response.json()
@@ -5440,13 +5440,13 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
         dashboard = Dashboard.objects.create(team=self.team, name="private dashboard", created_by=self.user)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk),
+            f"/v1/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk),
             {"analytics_dashboards": [dashboard.pk]},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk))
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_json = response.json()
@@ -5463,14 +5463,14 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
         dashboard = Dashboard.objects.create(team=self.team, name="private dashboard", created_by=self.user)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk),
+            f"/v1/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk),
             {"analytics_dashboards": [dashboard.pk]},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk),
+            f"/v1/projects/{self.team.id}/feature_flags/" + str(another_feature_flag.pk),
             {"analytics_dashboards": [dashboard.pk]},
         )
 
@@ -5520,7 +5520,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             ),
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/{flag.id}/create_static_cohort_for_flag",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/create_static_cohort_for_flag",
                 {},
                 format="json",
             )
@@ -5535,7 +5535,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
         self.assertEqual(cohort.count, 1)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 1, response)
 
     def test_cant_update_early_access_flag_with_group(self):
@@ -5566,7 +5566,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             }
         }
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag.id}/",
             update_data,
             format="json",
         )
@@ -5596,7 +5596,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # Only snapshot flag evaluation queries
         with snapshot_postgres_queries_context(self, custom_query_matcher=lambda query: "insights_person" in query):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags",
+                f"/v1/projects/{self.team.id}/feature_flags",
                 {
                     "name": "Beta feature",
                     "key": "beta-x",
@@ -5654,7 +5654,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         with snapshot_postgres_queries_context(self, custom_query_matcher=lambda query: "insights_group" in query):
             # Test group flag with invalid regex
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags",
+                f"/v1/projects/{self.team.id}/feature_flags",
                 {
                     "name": "Beta feature",
                     "key": "beta-x",
@@ -5695,7 +5695,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
             groups=[{"properties": [{"key": "email", "value": "@hanzo.ai", "type": "person"}]}],
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Alpha feature",
                 "key": "alpha-feature",
@@ -5709,7 +5709,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Get the flag
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/{response.json()['id']}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{response.json()['id']}/",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -5724,7 +5724,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
     def test_create_feature_flag_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             data={
                 "key": "my-test-flag-in-folder",
                 "name": "Test Flag in Folder",
@@ -5773,7 +5773,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Update the feature flag key
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag.id}",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag.id}",
             {"key": "new-key"},
             format="json",
         )
@@ -5803,7 +5803,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Initially, experiment_set should be empty
-        response = self.client.get(f"/api/projects/@current/feature_flags/{feature_flag.id}")
+        response = self.client.get(f"/v1/projects/@current/feature_flags/{feature_flag.id}")
         assert response.status_code == 200
         assert response.json()["experiment_set"] == []
 
@@ -5817,7 +5817,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # experiment_set should now include the experiment ID
-        response = self.client.get(f"/api/projects/@current/feature_flags/{feature_flag.id}")
+        response = self.client.get(f"/v1/projects/@current/feature_flags/{feature_flag.id}")
         assert response.status_code == 200
         assert response.json()["experiment_set"] == [experiment.id]
 
@@ -5831,7 +5831,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # experiment_set should include both experiments
-        response = self.client.get(f"/api/projects/@current/feature_flags/{feature_flag.id}")
+        response = self.client.get(f"/v1/projects/@current/feature_flags/{feature_flag.id}")
         assert response.status_code == 200
         assert response.json()["experiment_set"] == [experiment.id, experiment2.id]
 
@@ -5842,7 +5842,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         experiment2.save()
 
         # experiment_set should now be empty again
-        response = self.client.get(f"/api/projects/@current/feature_flags/{feature_flag.id}")
+        response = self.client.get(f"/v1/projects/@current/feature_flags/{feature_flag.id}")
         assert response.status_code == 200
         assert response.json()["experiment_set"] == []
 
@@ -5854,7 +5854,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         flag3 = FeatureFlag.objects.create(key="test-flag-3", name="Test Flag 3", team=self.team, created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {"ids": [flag1.id, flag2.id, flag3.id]},
             format="json",
         )
@@ -5871,7 +5871,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_bulk_keys_empty_list(self):
         """Test that empty ID list returns empty keys object"""
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {"ids": []},
             format="json",
         )
@@ -5883,7 +5883,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_bulk_keys_invalid_ids(self):
         """Test that invalid IDs (non-integers) return error"""
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {"ids": ["invalid", "not-a-number"]},
             format="json",
         )
@@ -5898,7 +5898,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         flag1 = FeatureFlag.objects.create(key="test-flag-1", name="Test Flag 1", team=self.team, created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {"ids": [flag1.id, "invalid", 99999]},  # valid ID, invalid string, non-existent ID
             format="json",
         )
@@ -5913,7 +5913,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_bulk_keys_nonexistent_ids(self):
         """Test that non-existent flag IDs are filtered out"""
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {"ids": [99999, 88888]},  # Non-existent IDs
             format="json",
         )
@@ -5943,7 +5943,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {"ids": [flag1.id, flag2.id]},
             format="json",
         )
@@ -5966,7 +5966,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {"ids": [flag1.id, flag2.id]},
             format="json",
         )
@@ -5980,7 +5980,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     def test_bulk_keys_no_ids_param(self):
         """Test that missing 'ids' parameter returns empty keys object"""
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {},  # No 'ids' parameter
             format="json",
         )
@@ -5994,7 +5994,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         flag1 = FeatureFlag.objects.create(key="test-flag-1", name="Test Flag 1", team=self.team, created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/@current/feature_flags/bulk_keys/",
+            f"/v1/projects/@current/feature_flags/bulk_keys/",
             {"ids": [str(flag1.id)]},  # String ID instead of integer
             format="json",
         )
@@ -6027,7 +6027,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # First request should miss cache and populate it
         self.client.logout()
         response = self.client.get(
-            f"/api/feature_flag/local_evaluation",
+            f"/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -6070,7 +6070,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # Test cache for send_cohorts=true
         self.client.logout()
         response = self.client.get(
-            f"/api/feature_flag/local_evaluation?send_cohorts",
+            f"/v1/feature_flag/local_evaluation?send_cohorts",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -6103,7 +6103,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # Populate cache
         self.client.logout()
         response = self.client.get(
-            f"/api/feature_flag/local_evaluation",
+            f"/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -6158,11 +6158,11 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # Populate both cache variants
         self.client.logout()
         response1 = self.client.get(
-            f"/api/feature_flag/local_evaluation",
+            f"/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         response2 = self.client.get(
-            f"/api/feature_flag/local_evaluation?send_cohorts",
+            f"/v1/feature_flag/local_evaluation?send_cohorts",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
 
@@ -6176,11 +6176,11 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # Make new requests to get potentially updated cache
         self.client.logout()
         updated_response1 = self.client.get(
-            f"/api/feature_flag/local_evaluation",
+            f"/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         updated_response2 = self.client.get(
-            f"/api/feature_flag/local_evaluation?send_cohorts",
+            f"/v1/feature_flag/local_evaluation?send_cohorts",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
 
@@ -6212,7 +6212,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Test the local evaluation endpoint
-        response = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}")
+        response = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -6246,7 +6246,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Test with send_cohorts parameter
-        response = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts")
+        response = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -6286,7 +6286,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Basic test that local evaluation endpoint works
-        response = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}")
+        response = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -6324,7 +6324,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Get response with send_cohorts (should NOT transform filters)
-        response = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts")
+        response = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
@@ -6369,7 +6369,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
 
         # Get response without send_cohorts (should transform filters)
-        response = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}")
+        response = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
@@ -6414,8 +6414,8 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         flags_without_cohorts_hypercache.clear_cache(self.team)
 
         # Populate both cache variants using use_cache parameter
-        response1 = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}")
-        response2 = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts")
+        response1 = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}")
+        response2 = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts")
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
 
@@ -6431,9 +6431,9 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(flag_keys_2, {"test-flag-1", "test-flag-2"})
 
         # Verify caches are populated by checking we get the same data on subsequent calls
-        cached_response1 = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}")
+        cached_response1 = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}")
         cached_response2 = self.client.get(
-            f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts"
+            f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts"
         )
         self.assertEqual(cached_response1.json(), data1)
         self.assertEqual(cached_response2.json(), data2)
@@ -6442,9 +6442,9 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         flag1.delete()
 
         # Get responses again - they should reflect the deletion (meaning cache was invalidated)
-        updated_response1 = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}")
+        updated_response1 = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}")
         updated_response2 = self.client.get(
-            f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts"
+            f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts"
         )
 
         # Verify only one flag remains in both responses
@@ -6492,7 +6492,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         flags_without_cohorts_hypercache.clear_cache(self.team)
 
         # Populate cache with cohorts using use_cache parameter
-        response = self.client.get(f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts")
+        response = self.client.get(f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
@@ -6502,7 +6502,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Verify cache is populated by checking we get the same data on subsequent calls
         cached_response = self.client.get(
-            f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts"
+            f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts"
         )
         self.assertEqual(cached_response.json(), data)
 
@@ -6511,7 +6511,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Get response again - cohort should be gone from the response
         updated_response = self.client.get(
-            f"/api/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts"
+            f"/v1/feature_flag/local_evaluation?token={self.team.api_token}&send_cohorts"
         )
         updated_data = updated_response.json()
 
@@ -6524,7 +6524,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
     @patch("insights.api.feature_flag.report_user_action")
     def test_create_feature_flag_without_usage_dashboard(self, mock_capture):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "no-usage-dashboard", "_should_create_usage_dashboard": False},
             format="json",
         )
@@ -6555,7 +6555,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         self.client.logout()
         response = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -6586,7 +6586,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # First request to get the ETag
         response1 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
@@ -6594,7 +6594,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Second request with If-None-Match header
         response2 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={
                 "authorization": f"Bearer {personal_api_key}",
                 "If-None-Match": etag,
@@ -6624,7 +6624,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Request with non-matching ETag
         response = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={
                 "authorization": f"Bearer {personal_api_key}",
                 "If-None-Match": '"wrong-etag"',
@@ -6656,7 +6656,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # First request to get the initial ETag
         response1 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
@@ -6668,7 +6668,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Second request should have a different ETag
         response2 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
@@ -6709,7 +6709,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Request with send_cohorts
         response1 = self.client.get(
-            "/api/feature_flag/local_evaluation?send_cohorts",
+            "/v1/feature_flag/local_evaluation?send_cohorts",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
@@ -6717,7 +6717,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Second request with same ETag should return 304
         response2 = self.client.get(
-            "/api/feature_flag/local_evaluation?send_cohorts",
+            "/v1/feature_flag/local_evaluation?send_cohorts",
             headers={
                 "authorization": f"Bearer {personal_api_key}",
                 "If-None-Match": etag_with_cohorts,
@@ -6727,7 +6727,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Request without send_cohorts should have different ETag
         response3 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response3.status_code, status.HTTP_200_OK)
@@ -6757,7 +6757,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # First request to get the ETag
         response1 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
@@ -6765,7 +6765,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Second request with matching ETag should return 304 with empty body
         response2 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={
                 "authorization": f"Bearer {personal_api_key}",
                 "If-None-Match": etag,
@@ -6800,7 +6800,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Get initial ETag
         response1 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         etag = response1.headers["ETag"]
@@ -6809,7 +6809,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Client sends ETag (transformed based on test case) - should match
         response2 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={
                 "authorization": f"Bearer {personal_api_key}",
                 "If-None-Match": transform_etag(etag),
@@ -6838,7 +6838,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
 
         # Get initial ETag
         response1 = self.client.get(
-            "/api/feature_flag/local_evaluation",
+            "/v1/feature_flag/local_evaluation",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
         etag = response1.headers["ETag"]
@@ -6846,7 +6846,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # Make 5 sequential requests with same ETag - all should return 304
         for i in range(5):
             response = self.client.get(
-                "/api/feature_flag/local_evaluation",
+                "/v1/feature_flag/local_evaluation",
                 headers={
                     "authorization": f"Bearer {personal_api_key}",
                     "If-None-Match": etag,
@@ -6896,7 +6896,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # don't even try inserting anything, because invalid flag, so None instead of 0
         self.assertEqual(cohort.count, None)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 0, response)
 
     def test_creating_static_cohort_with_inactive_flag(self):
@@ -6934,7 +6934,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # don't even try inserting anything, because invalid flag, so None instead of 0
         self.assertEqual(cohort.count, None)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 0, response)
 
     @freeze_time("2021-01-01")
@@ -6984,7 +6984,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # don't even try inserting anything, because invalid flag, so None instead of 0
         self.assertEqual(cohort.count, None)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 0, response)
 
     def test_creating_static_cohort_with_no_person_distinct_ids(self):
@@ -7016,7 +7016,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # don't even try inserting anything, because invalid flag, so None instead of 0
         self.assertEqual(cohort.count, None)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 0, response)
 
     def test_creating_static_cohort_with_non_existing_flag(self):
@@ -7034,7 +7034,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         # don't even try inserting anything, because invalid flag, so None instead of 0
         self.assertEqual(cohort.count, None)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 0, response)
 
     @patch("insights.tasks.feature_flags.update_team_flags_cache")
@@ -7096,7 +7096,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(cohort.name, "some cohort")
         self.assertEqual(cohort.count, 1)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 1, response)
 
     @patch("insights.tasks.feature_flags.update_team_flags_cache")
@@ -7154,7 +7154,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(cohort.name, "some cohort")
         self.assertEqual(cohort.count, 3)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 3, response)
 
         # if the batch is big enough, it's fewer queries
@@ -7165,7 +7165,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(cohort.name, "some cohort")
         self.assertEqual(cohort.count, 3)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 3, response)
 
     @patch("insights.tasks.feature_flags.update_team_flags_cache")
@@ -7245,7 +7245,7 @@ class TestCohortGenerationForFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(cohort.name, "some cohort")
         self.assertEqual(cohort.count, 1)
 
-        response = self.client.get(f"/api/cohort/{cohort.pk}/persons")
+        response = self.client.get(f"/v1/cohort/{cohort.pk}/persons")
         self.assertEqual(len(response.json()["results"]), 1, response)
 
         cohort2 = Cohort.objects.create(
@@ -7386,7 +7386,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7417,7 +7417,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7440,7 +7440,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
     def test_user_blast_radius_with_zero_users(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7470,7 +7470,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7500,7 +7500,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {"condition": {"properties": [], "rollout_percentage": 100}},
         )
 
@@ -7543,7 +7543,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [{"key": "id", "type": "cohort", "value": cohort1.pk}],
@@ -7562,7 +7562,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+                f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
                 {
                     "condition": {
                         "properties": [{"key": "id", "type": "cohort", "value": cohort1.pk}],
@@ -7636,7 +7636,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+                f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
                 {
                     "condition": {
                         "properties": [
@@ -7688,7 +7688,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7711,7 +7711,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+                f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
                 {
                     "condition": {
                         "properties": [
@@ -7746,7 +7746,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7786,7 +7786,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7832,7 +7832,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [],
@@ -7871,7 +7871,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7930,7 +7930,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test filtering by exact group key match
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7955,7 +7955,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test filtering by group key pattern
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -7997,7 +7997,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8057,7 +8057,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8109,7 +8109,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8172,7 +8172,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [{"key": "id", "type": "cohort", "value": cohort.id}],
@@ -8209,7 +8209,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8264,7 +8264,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test with unsupported operator (e.g., 'gt' - greater than)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8315,7 +8315,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test EXACT with list of values (should match any value in the list)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8369,7 +8369,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test IS_NOT with list of values (should exclude all values in the list)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8414,7 +8414,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test ICONTAINS with list of values (should raise validation error)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8459,7 +8459,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_eq
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8481,7 +8481,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_gt
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8503,7 +8503,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_gte
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8525,7 +8525,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_lt
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8547,7 +8547,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_lte
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8569,7 +8569,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_tilde (~1.2.3 means >=1.2.3 <1.3.0)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8591,7 +8591,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_caret (^1.2.3 means >=1.2.3 <2.0.0)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8613,7 +8613,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_wildcard (1.2.* means >=1.2.0 <1.3.0)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8635,7 +8635,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_wildcard with major version (1.* means >=1.0.0 <2.0.0)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8677,7 +8677,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test ^0.2.3 means >=0.2.3 <0.3.0 (not <1.0.0)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8699,7 +8699,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test ^0.0.3 means >=0.0.3 <0.0.4 (not <1.0.0 or <0.1.0)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8747,7 +8747,7 @@ class TestBlastRadius(DatastoreTestMixin, APIBaseTest):
 
         # Test semver_gte on group property
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/user_blast_radius",
+            f"/v1/projects/{self.team.id}/feature_flags/user_blast_radius",
             {
                 "condition": {
                     "properties": [
@@ -8787,7 +8787,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
     @pytest.mark.ee
     def test_create_feature_flag_with_evaluation_tags(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Flag with evaluation tags",
                 "key": "flag-with-eval-tags",
@@ -8826,7 +8826,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
 
         # Add initial tags and evaluation tags
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {
                 "tags": ["app", "marketing"],
                 "evaluation_tags": ["app"],
@@ -8845,7 +8845,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
 
         # Update evaluation tags
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {
                 "tags": ["app", "marketing", "docs"],
                 "evaluation_tags": ["marketing", "docs"],
@@ -8872,7 +8872,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
 
         # Add initial tags and evaluation tags
         self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {
                 "tags": ["app", "marketing"],
                 "evaluation_tags": ["app", "marketing"],
@@ -8886,7 +8886,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
 
         # Remove all evaluation tags but keep regular tags
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {
                 "tags": ["app", "marketing"],
                 "evaluation_tags": [],
@@ -8933,7 +8933,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
         """Test that evaluation_tags must be a subset of tags"""
         # Valid case: evaluation_tags is subset of tags
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Valid evaluation tags",
                 "key": "valid-eval-tags",
@@ -8947,7 +8947,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
 
         # Invalid case: evaluation_tags contains tag not in tags
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Invalid evaluation tags",
                 "key": "invalid-eval-tags",
@@ -8963,7 +8963,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
 
         # Edge case: empty tags but non-empty evaluation_tags
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "No tags but has evaluation tags",
                 "key": "no-tags-eval-tags",
@@ -8984,7 +8984,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
 
         # Create a flag with evaluation tags
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "Flag with evaluation tags",
                 "key": "flag-with-eval-tags-disabled",
@@ -9001,13 +9001,13 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
         self.assertEqual(len(flag.evaluation_tags.all()), 0)  # No evaluation tags created
 
         # Verify evaluation tags are hidden in API response (due to feature flag being disabled)
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/{flag.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["evaluation_tags"], [])  # Hidden due to feature flag
 
         # Test that evaluation tags can't be created when feature flag is disabled
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {
                 "name": "Updated flag with disabled feature flag",
                 "evaluation_tags": ["web", "mobile"],  # Should be ignored
@@ -9024,7 +9024,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
         self.mock_feature_enabled.return_value = True
 
         # Verify evaluation tags are still empty (feature flag was disabled during creation)
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/{flag.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["evaluation_tags"], [])  # Still empty because none were created
 
@@ -9086,7 +9086,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
 
         # Update flag with evaluation tags via API
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {
                 "tags": ["app", "docs"],
                 "evaluation_tags": ["app"],
@@ -9124,7 +9124,7 @@ class TestFeatureFlagStatus(APIBaseTest, DatastoreTestMixin):
         expected_reason: Optional[str] = None,
     ):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag_id}/status",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag_id}/status",
         )
         self.assertEqual(
             response.status_code,
@@ -9720,7 +9720,7 @@ class TestFeatureFlagStatus(APIBaseTest, DatastoreTestMixin):
         )
 
         # Test filtering by STALE status
-        response = self.client.get("/api/projects/@current/feature_flags?active=STALE")
+        response = self.client.get("/v1/projects/@current/feature_flags?active=STALE")
         results = response.json()["results"]
 
         assert len(results) == 2
@@ -9748,7 +9748,7 @@ class TestFeatureFlagMatchingIds(APIBaseTest):
             )
             flags.append(flag)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/matching_ids/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/matching_ids/")
 
         assert response.status_code == 200
         data = response.json()
@@ -9776,7 +9776,7 @@ class TestFeatureFlagMatchingIds(APIBaseTest):
             filters={"groups": [{"rollout_percentage": 50, "properties": []}]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/matching_ids/?search=test_feature")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/matching_ids/?search=test_feature")
 
         assert response.status_code == 200
         data = response.json()
@@ -9799,7 +9799,7 @@ class TestFeatureFlagMatchingIds(APIBaseTest):
             filters={"groups": [{"rollout_percentage": 50, "properties": []}]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/matching_ids/?active=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/matching_ids/?active=true")
 
         assert response.status_code == 200
         data = response.json()
@@ -9821,7 +9821,7 @@ class TestFeatureFlagMatchingIds(APIBaseTest):
             filters={"groups": [{"rollout_percentage": 50, "properties": []}]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/matching_ids/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/matching_ids/")
 
         assert response.status_code == 200
         data = response.json()
@@ -9846,7 +9846,7 @@ class TestFeatureFlagMatchingIds(APIBaseTest):
             filters={"groups": [{"rollout_percentage": 50, "properties": []}]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/matching_ids/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/matching_ids/")
 
         assert response.status_code == 200
         data = response.json()
@@ -9875,7 +9875,7 @@ class TestFeatureFlagMatchingIds(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/feature_flags/matching_ids/?type=boolean")
+        response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags/matching_ids/?type=boolean")
 
         assert response.status_code == 200
         data = response.json()
@@ -9913,7 +9913,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"filters": {"search": "test_feature"}},
         )
 
@@ -9949,7 +9949,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"filters": {"active": "false"}},
         )
 
@@ -9978,7 +9978,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
             flags.append(flag)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"ids": [f.id for f in flags]},
         )
 
@@ -10003,7 +10003,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"ids": [flag.id]},
         )
 
@@ -10020,7 +10020,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
     def test_bulk_delete_requires_filters_or_ids(self):
         """Test validation error when neither filters nor ids provided."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {},
         )
 
@@ -10037,7 +10037,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"filters": {"search": "test"}, "ids": [flag.id]},
         )
 
@@ -10065,7 +10065,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
 
         # Try to delete the other team's flag from our team's endpoint
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"ids": [my_flag.id, other_flag.id]},
         )
 
@@ -10108,7 +10108,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"filters": {"type": "boolean"}},
         )
 
@@ -10163,7 +10163,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {
                 "ids": [
                     fully_rolled_out.id,
@@ -10217,7 +10217,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"ids": [base_flag.id]},
         )
 
@@ -10244,7 +10244,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         exp.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"ids": [flag.id]},
         )
 
@@ -10260,7 +10260,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
     def test_bulk_delete_rejects_unknown_filter_keys(self):
         """Test that unknown filter keys are rejected to prevent accidental mass deletion."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"filters": {"invalid_key": "value", "another_bad_key": "test"}},
         )
 
@@ -10289,7 +10289,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         ActivityLog.objects.filter(team_id=self.team.id, scope="FeatureFlag").delete()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"ids": [f.id for f in flags]},
         )
 
@@ -10323,7 +10323,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"ids": [f.id for f in flags]},
         )
 
@@ -10353,7 +10353,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         with patch("insights.api.feature_flag.transaction.on_commit", side_effect=lambda fn: fn()):
             with patch("insights.models.feature_flag.feature_flag.set_feature_flags_for_team_in_cache") as mock_cache:
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+                    f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
                     {"ids": [f.id for f in flags]},
                 )
 
@@ -10385,7 +10385,7 @@ class TestFeatureFlagBulkDelete(APIBaseTest):
         exp.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/bulk_delete/",
+            f"/v1/projects/{self.team.id}/feature_flags/bulk_delete/",
             {"ids": [normal_flag.id, flag_with_deleted_exp.id]},
         )
 

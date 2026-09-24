@@ -17,7 +17,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @patch("insights.api.action.report_user_action")
     def test_create_action(self, patch_capture, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={
                 "name": "user signed up",
                 "steps": [
@@ -91,7 +91,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_create_action_generates_bytecode(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={
                 "name": "user signed up",
                 "steps": [
@@ -118,7 +118,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             {"name": "user signed up"},
             headers={"origin": "http://testserver"},
         )
@@ -147,7 +147,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         action.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.pk}/",
+            f"/v1/projects/{self.team.id}/actions/{action.pk}/",
             data={
                 "name": "user signed up 2",
                 "steps": [
@@ -233,13 +233,13 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with self.assertNumQueries(FuzzyInt(9, 11)):
             # Django session,  user,  team,  org membership, instance setting,  org,
             # count, action
-            self.client.get(f"/api/projects/{self.team.id}/actions/")
+            self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
     def test_update_action_remove_all_steps(self, *args):
         action = Action.objects.create(name="user signed up", team=self.team, steps_json=[{"text": "sign me up!"}])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.pk}/",
+            f"/v1/projects/{self.team.id}/actions/{action.pk}/",
             data={"name": "user signed up 2", "steps": []},
             headers={"origin": "http://testserver"},
         )
@@ -254,7 +254,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # FIXME: BaseTest is using Django client to perform calls to a DRF endpoint.
         # Django HttpResponse does not have an attribute `data`. Better use rest_framework.test.APIClient.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={"name": "user signed up"},
             headers={"origin": "https://evilwebsite.com"},
         )
@@ -264,14 +264,14 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.user.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/?temporary_token=token123",
+            f"/v1/projects/{self.team.id}/actions/?temporary_token=token123",
             data={"name": "user signed up"},
             headers={"origin": "https://somewebsite.com"},
         )
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/?temporary_token=token123",
+            f"/v1/projects/{self.team.id}/actions/?temporary_token=token123",
             data={"name": "user signed up and post to slack", "post_to_slack": True},
             headers={"origin": "https://somewebsite.com"},
         )
@@ -279,26 +279,26 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.json()["post_to_slack"], True)
 
         list_response = self.client.get(
-            f"/api/projects/{self.team.id}/actions/", headers={"origin": "https://evilwebsite.com"}
+            f"/v1/projects/{self.team.id}/actions/", headers={"origin": "https://evilwebsite.com"}
         )
         self.assertEqual(list_response.status_code, 401)
 
         detail_response = self.client.get(
-            f"/api/projects/{self.team.id}/actions/{response.json()['id']}/",
+            f"/v1/projects/{self.team.id}/actions/{response.json()['id']}/",
             headers={"origin": "https://evilwebsite.com"},
         )
         self.assertEqual(detail_response.status_code, 401)
 
         self.client.logout()
         list_response = self.client.get(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={"temporary_token": "token123"},
             headers={"origin": "https://somewebsite.com"},
         )
         self.assertEqual(list_response.status_code, 200)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/?temporary_token=token123",
+            f"/v1/projects/{self.team.id}/actions/?temporary_token=token123",
             data={"name": "user signed up 22"},
             headers={"origin": "https://somewebsite.com"},
         )
@@ -307,7 +307,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     # This case happens when someone is running behind a proxy, but hasn't set `IS_BEHIND_PROXY`
     def test_http_to_https(self, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={"name": "user signed up again"},
             headers={"origin": "https://testserver/"},
         )
@@ -316,7 +316,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @patch("hanzo_insights.capture")
     def test_create_action_event_with_space(self, patch_capture, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={"name": "test event", "steps": [{"event": "test_event "}]},
             headers={"origin": "http://testserver"},
         )
@@ -327,11 +327,11 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @freeze_time("2021-12-12")
     def test_listing_actions_is_not_nplus1(self) -> None:
         # Pre-query to cache things like instance settings
-        self.client.get(f"/api/projects/{self.team.id}/actions/")
+        self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
         # No actions yet, so no tags prefetch query
         with self.assertNumQueries(9), snapshot_postgres_queries_context(self):
-            self.client.get(f"/api/projects/{self.team.id}/actions/")
+            self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
         Action.objects.create(
             team=self.team,
@@ -341,7 +341,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # With actions, there's an extra tags prefetch query
         with self.assertNumQueries(10), snapshot_postgres_queries_context(self):
-            self.client.get(f"/api/projects/{self.team.id}/actions/")
+            self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
         Action.objects.create(
             team=self.team,
@@ -350,14 +350,14 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         with self.assertNumQueries(10), snapshot_postgres_queries_context(self):
-            self.client.get(f"/api/projects/{self.team.id}/actions/")
+            self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
     def test_get_tags_returns_list(self):
         action = Action.objects.create(team=self.team, name="bla")
         tag = Tag.objects.create(name="random", team_id=self.team.id)
         action.tagged_items.create(tag_id=tag.id)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["tags"], ["random"])
@@ -365,7 +365,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_create_action_with_tags(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             {"name": "Default", "tags": ["random", "hello"]},
         )
 
@@ -379,7 +379,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         action.tagged_items.create(tag_id=tag.id)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.id}",
+            f"/v1/projects/{self.team.id}/actions/{action.id}",
             {
                 "name": "action new name",
                 "tags": ["random", "hello"],
@@ -396,7 +396,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         action.tagged_items.create(tag_id=tag.id)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.id}",
+            f"/v1/projects/{self.team.id}/actions/{action.id}",
             {"name": "action new name", "description": "Internal system metrics."},
         )
 
@@ -412,7 +412,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(Action.objects.all().count(), 1)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.id}",
+            f"/v1/projects/{self.team.id}/actions/{action.id}",
             {
                 "name": "action new name",
                 "description": "Internal system metrics.",
@@ -426,7 +426,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_hard_deletion_is_forbidden(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={
                 "name": "user signed up",
                 "steps": [
@@ -443,7 +443,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        deletion_response = self.client.delete(f"/api/projects/{self.team.id}/actions/{response.json()['id']}")
+        deletion_response = self.client.delete(f"/v1/projects/{self.team.id}/actions/{response.json()['id']}")
         self.assertEqual(deletion_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_create_action_in_specific_folder(self):
@@ -453,7 +453,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         """
         # 1. Create an Action, passing `_create_in_folder`
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={
                 "name": "user signed up in folder",
                 "_create_in_folder": "Special Folder/Actions",

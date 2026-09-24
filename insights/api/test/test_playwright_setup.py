@@ -13,7 +13,7 @@ class TestPlaywrightSetup(APIBaseTest):
     def test_endpoint_blocked_in_production(self):
         """Test that the endpoint is blocked when not in test/debug/CI modes"""
         with override_settings(TEST=False, DEBUG=False, CI=False, E2E_TESTING=False):
-            response = self.client.post("/api/setup_test/organization_with_team/", {})
+            response = self.client.post("/v1/setup_test/organization_with_team/", {})
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @override_settings(TEST=True)
@@ -21,7 +21,7 @@ class TestPlaywrightSetup(APIBaseTest):
         """Test the organization_with_team setup function"""
         payload = {"organization_name": "Test Org API"}
 
-        response = self.client.post("/api/setup_test/organization_with_team/", payload, format="json")
+        response = self.client.post("/v1/setup_test/organization_with_team/", payload, format="json")
 
         # Check response structure
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -69,7 +69,7 @@ class TestPlaywrightSetup(APIBaseTest):
     def test_endpoint_allowed_in_debug_mode(self):
         """Test that the endpoint works in DEBUG mode"""
         payload = {"organization_name": "Debug Org"}
-        response = self.client.post("/api/setup_test/organization_with_team/", payload, format="json")
+        response = self.client.post("/v1/setup_test/organization_with_team/", payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_endpoint_allowed_in_e2e_mode(self):
@@ -78,13 +78,13 @@ class TestPlaywrightSetup(APIBaseTest):
 
         with override_settings(E2E_TESTING=True):
             payload = {"organization_name": "E2E Org"}
-            response = self.client.post("/api/setup_test/organization_with_team/", payload, format="json")
+            response = self.client.post("/v1/setup_test/organization_with_team/", payload, format="json")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @override_settings(TEST=True)
     def test_unknown_setup_function(self):
         """Test handling of unknown setup function"""
-        response = self.client.post("/api/setup_test/nonexistent_setup/", {}, format="json")
+        response = self.client.post("/v1/setup_test/nonexistent_setup/", {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         data = response.json()
         self.assertIn("not found", data["error"])
@@ -94,7 +94,7 @@ class TestPlaywrightSetup(APIBaseTest):
     @override_settings(TEST=True)
     def test_setup_with_defaults(self):
         """Test setup function with default parameters (empty payload)"""
-        response = self.client.post("/api/setup_test/organization_with_team/", {}, format="json")
+        response = self.client.post("/v1/setup_test/organization_with_team/", {}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
