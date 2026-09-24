@@ -73,7 +73,7 @@ def populate_plugin_capabilities_on_workers(plugin_id: str):
 def create_script_invocation_test(team_id: int, insights_function_id: str, payload: dict) -> requests.Response:
     logger.info(f"Creating script invocation test for custom function {insights_function_id} on workers")
     return requests.post(
-        CDP_API_URL + f"/api/projects/{team_id}/insights_functions/{insights_function_id}/invocations",
+        CDP_API_URL + f"/v1/projects/{team_id}/insights_functions/{insights_function_id}/invocations",
         json=payload,
         headers=get_internal_api_headers(),
     )
@@ -82,7 +82,7 @@ def create_script_invocation_test(team_id: int, insights_function_id: str, paylo
 def create_insights_flow_invocation_test(team_id: int, insights_flow_id: str, payload: dict) -> requests.Response:
     logger.info(f"Creating insights flow invocation test for flow {insights_flow_id} on workers")
     return requests.post(
-        CDP_API_URL + f"/api/projects/{team_id}/insights_flows/{insights_flow_id}/invocations",
+        CDP_API_URL + f"/v1/projects/{team_id}/insights_flows/{insights_flow_id}/invocations",
         json=payload,
         headers=get_internal_api_headers(),
     )
@@ -90,14 +90,14 @@ def create_insights_flow_invocation_test(team_id: int, insights_flow_id: str, pa
 
 def get_insights_function_status(team_id: int, insights_function_id: UUIDT) -> requests.Response:
     return requests.get(
-        CDP_API_URL + f"/api/projects/{team_id}/insights_functions/{insights_function_id}/status",
+        CDP_API_URL + f"/v1/projects/{team_id}/insights_functions/{insights_function_id}/status",
         headers=get_internal_api_headers(),
     )
 
 
 def patch_insights_function_status(team_id: int, insights_function_id: UUIDT, state: int) -> requests.Response:
     return requests.patch(
-        CDP_API_URL + f"/api/projects/{team_id}/insights_functions/{insights_function_id}/status",
+        CDP_API_URL + f"/v1/projects/{team_id}/insights_functions/{insights_function_id}/status",
         json={"state": state},
         headers=get_internal_api_headers(),
     )
@@ -106,7 +106,7 @@ def patch_insights_function_status(team_id: int, insights_function_id: UUIDT, st
 def generate_messaging_preferences_token(team_id: int, identifier: str) -> str:
     payload = {"team_id": team_id, "identifier": identifier}
     response = requests.post(
-        CDP_API_URL + "/api/messaging/generate_preferences_token",
+        CDP_API_URL + "/v1/messaging/generate_preferences_token",
         json=payload,
         headers=get_internal_api_headers(),
     )
@@ -117,14 +117,14 @@ def generate_messaging_preferences_token(team_id: int, identifier: str) -> str:
 
 def validate_messaging_preferences_token(token: str) -> requests.Response:
     return requests.get(
-        CDP_API_URL + f"/api/messaging/validate_preferences_token/{token}",
+        CDP_API_URL + f"/v1/messaging/validate_preferences_token/{token}",
         headers=get_internal_api_headers(),
     )
 
 
 def get_insights_function_templates() -> requests.Response:
     return requests.get(
-        CDP_API_URL + "/api/insights_function_templates",
+        CDP_API_URL + "/v1/insights_function_templates",
         headers=get_internal_api_headers(),
     )
 
@@ -133,7 +133,7 @@ def create_batch_insights_flow_job_invocation(
     team_id: int, insights_flow_id: UUIDT, batch_job_id: UUIDT
 ) -> requests.Response:
     return requests.post(
-        CDP_API_URL + f"/api/projects/{team_id}/insights_flows/{insights_flow_id}/batch_invocations/{batch_job_id}",
+        CDP_API_URL + f"/v1/projects/{team_id}/insights_flows/{insights_flow_id}/batch_invocations/{batch_job_id}",
         headers=get_internal_api_headers(),
     )
 

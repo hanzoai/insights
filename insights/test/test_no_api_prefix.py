@@ -37,8 +37,6 @@ SKIP_DIRS = {"node_modules", "dist", "migrations", "__pycache__", ".venv"}
 # them: file -> (the service, the text that names the route, or None for every
 # match in the file).
 OTHER_SERVICES: dict[str, tuple[str, str | None]] = {
-    "insights/plugins/plugin_server_api.py": ("insights-plugin CDP API", None),
-    "insights/storage/recordings/block_storage.py": ("insights-plugin recording API", None),
     "insights/tasks/commerce_billing.py": ("commerce usage API", None),
     "insights/cdp/templates/customerio/template_customerio.py": ("Customer.io", None),
     "products/desktop_recordings/backend/services/recall_client.py": ("Recall.ai", None),

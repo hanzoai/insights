@@ -54,7 +54,7 @@ class TestFetchBlockBytes:
 
         assert result == b"compressed-data"
         mock_session.get.assert_called_once_with(
-            "http://localhost:6740/api/projects/1/recordings/session-123/block",
+            "http://localhost:6740/v1/projects/1/recordings/session-123/block",
             params={"key": "key", "start": 0, "end": 100},
         )
 
@@ -246,7 +246,7 @@ class TestDeleteRecording:
         result = await client.delete_recording("session-123", 1)
 
         assert result is True
-        mock_session.delete.assert_called_once_with("http://localhost:6740/api/projects/1/recordings/session-123")
+        mock_session.delete.assert_called_once_with("http://localhost:6740/v1/projects/1/recordings/session-123")
 
     @pytest.mark.asyncio
     async def test_not_found_raises_error(self, client, mock_session):
@@ -304,7 +304,7 @@ class TestBulkDeleteRecordings:
 
         assert result == []
         mock_session.post.assert_called_once_with(
-            "http://localhost:6740/api/projects/1/recordings/bulk_delete",
+            "http://localhost:6740/v1/projects/1/recordings/bulk_delete",
             json={"session_ids": ["s1", "s2"]},
         )
 

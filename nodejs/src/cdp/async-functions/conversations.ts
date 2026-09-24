@@ -20,7 +20,7 @@ registerAsyncFunction('insightsGetTicket', {
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.hub.SITE_URL}/api/conversations/external/ticket/${ticketId}`,
+            url: `${context.hub.SITE_URL}/v1/conversations/external/ticket/${ticketId}`,
             method: 'GET',
             headers: { Authorization: `Bearer ${team.api_token}` },
         })
@@ -73,7 +73,7 @@ registerAsyncFunction('insightsUpdateTicket', {
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.hub.SITE_URL}/api/conversations/external/ticket/${ticketId}`,
+            url: `${context.hub.SITE_URL}/v1/conversations/external/ticket/${ticketId}`,
             method: 'PATCH',
             body: JSON.stringify(updates),
             headers: {

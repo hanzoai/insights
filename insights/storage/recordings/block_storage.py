@@ -194,7 +194,7 @@ class EncryptedBlockStorage:
             BlockFetchError: If the block is not found or other fetch errors occur.
         """
         key, start, end = self._parse_block_url(block_url)
-        url = f"{self.base_url}/api/projects/{team_id}/recordings/{session_id}/block"
+        url = f"{self.base_url}/v1/projects/{team_id}/recordings/{session_id}/block"
 
         try:
             async with self.session.get(url, params={"key": key, "start": start, "end": end}) as response:
@@ -261,7 +261,7 @@ class EncryptedBlockStorage:
             RecordingDeletedError: If the recording has already been deleted.
             BlockFetchError: If the recording key is not found or other errors occur.
         """
-        url = f"{self.base_url}/api/projects/{team_id}/recordings/{session_id}"
+        url = f"{self.base_url}/v1/projects/{team_id}/recordings/{session_id}"
 
         try:
             async with self.session.delete(url) as response:
@@ -288,7 +288,7 @@ class EncryptedBlockStorage:
 
         Returns list of session IDs that failed to delete.
         """
-        url = f"{self.base_url}/api/projects/{team_id}/recordings/bulk_delete"
+        url = f"{self.base_url}/v1/projects/{team_id}/recordings/bulk_delete"
 
         try:
             async with self.session.post(url, json={"session_ids": session_ids}) as response:
