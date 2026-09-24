@@ -414,7 +414,12 @@ def get_context_for_template(
         context["js_insights_host"] = settings.TELEMETRY_HOST
         context["js_insights_ui_host"] = settings.TELEMETRY_HOST
 
-    elif settings.SELF_CAPTURE:
+    elif settings.SELF_CAPTURE and settings.DEBUG:
+        # Only DEBUG resolves this instance's own project key
+        # (initialize_self_capture_api_token). Outside it the client still holds
+        # the upstream placeholder from InsightsConfig.ready(), which no team here
+        # owns, so the browser SDK would fetch /array/<placeholder>/config.js and
+        # /flags/ and get a 404 for each.
         if hanzo_insights.api_key:
             context["js_insights_api_key"] = hanzo_insights.api_key
             context["js_insights_host"] = ""  # Becomes location.origin in the frontend
