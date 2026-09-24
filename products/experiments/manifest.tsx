@@ -37,7 +37,7 @@ export const manifest: ProductManifest = {
     //
     // Its REST layer (EnterpriseExperimentsViewSet + the experiments / experiment_holdouts /
     // experiment_saved_metrics router registrations) was deleted with ee/ in 203fdd70b8 and never
-    // re-registered, so /api/projects/:id/experiments, .../stats/ and .../eligible_feature_flags/
+    // re-registered, so /v1/projects/:id/experiments, .../stats/ and .../eligible_feature_flags/
     // all 404. Navigation must not offer a product that cannot answer, and "New experiment" must
     // not open a create flow whose save is guaranteed to fail.
     //

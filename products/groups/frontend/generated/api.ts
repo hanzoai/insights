@@ -38,7 +38,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 /**
- * List all groups of a specific group type. You must pass ?group_type_index= in the URL. To get a list of valid group types, call /api/:project_id/groups_types/
+ * List all groups of a specific group type. You must pass ?group_type_index= in the URL. To get a list of valid group types, call /v1/:project_id/groups_types/
  */
 export const getGroupsListUrl = (projectId: string, params: GroupsListParams) => {
     const normalizedParams = new URLSearchParams()

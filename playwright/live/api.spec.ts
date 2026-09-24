@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
  * The API surface a signed-in user's session actually depends on.
  *
  * smoke.spec.ts opens scenes and catches anything that breaks while a scene
- * loads. That misses endpoints no scene calls on mount -- `POST /api/projects/:id/fn/`
+ * loads. That misses endpoints no scene calls on mount -- `POST /v1/projects/:id/fn/`
  * answered 500 in production for every request because of an unbound name, and
  * no amount of scene-mounting would have found it.
  *

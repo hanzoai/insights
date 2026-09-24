@@ -95,7 +95,7 @@ export const lineageGetUpstreamRetrieve = async (projectId: string, options?: Re
 
 /**
  * Get all views associated with a specific managed viewset.
-GET /api/environments/{team_id}/managed_viewsets/{kind}/
+GET /v1/environments/{team_id}/managed_viewsets/{kind}/
  */
 export const getManagedViewsetsRetrieveUrl = (projectId: string, kind: 'revenue_analytics') => {
     return `/v1/environments/${projectId}/managed_viewsets/${kind}/`
@@ -114,7 +114,7 @@ export const managedViewsetsRetrieve = async (
 
 /**
  * Enable or disable a managed viewset by kind.
-PUT /api/environments/{team_id}/managed_viewsets/{kind}/ with body {"enabled": true/false}
+PUT /v1/environments/{team_id}/managed_viewsets/{kind}/ with body {"enabled": true/false}
  */
 export const getManagedViewsetsUpdateUrl = (projectId: string, kind: 'revenue_analytics') => {
     return `/v1/environments/${projectId}/managed_viewsets/${kind}/`

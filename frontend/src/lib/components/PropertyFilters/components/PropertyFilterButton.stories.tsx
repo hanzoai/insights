@@ -111,8 +111,8 @@ const operatorVariantFilters = [
     },
     { key: '$current_url', operator: PropertyOperator.IContains, type: PropertyFilterType.Event, value: 'checkout' },
     { key: '$current_url', operator: PropertyOperator.NotIContains, type: PropertyFilterType.Event, value: 'checkout' },
-    { key: '$pathname', operator: PropertyOperator.Regex, type: PropertyFilterType.Event, value: '^/api/v[0-9]+' },
-    { key: '$pathname', operator: PropertyOperator.NotRegex, type: PropertyFilterType.Event, value: '^/api/v[0-9]+' },
+    { key: '$pathname', operator: PropertyOperator.Regex, type: PropertyFilterType.Event, value: '^/v1/v[0-9]+' },
+    { key: '$pathname', operator: PropertyOperator.NotRegex, type: PropertyFilterType.Event, value: '^/v1/v[0-9]+' },
     { key: '$session_duration', operator: PropertyOperator.GreaterThan, type: PropertyFilterType.Event, value: 42 },
     {
         key: '$session_duration',

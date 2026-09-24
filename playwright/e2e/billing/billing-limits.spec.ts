@@ -14,7 +14,7 @@ async function setupBillingRoutes(page: Page, handlers: BillingRouteHandlers): P
     let billingContent = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
     let isInitialized = false
 
-    await page.route('**/api/billing/', async (route) => {
+    await page.route('**/v1/billing/', async (route) => {
         const method = route.request().method()
 
         if (method === 'GET') {

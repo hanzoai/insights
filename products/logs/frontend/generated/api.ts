@@ -13,7 +13,7 @@ import type { ExplainRequestApi, PaginatedPluginLogEntryListApi, PluginConfigsLo
 /**
  * Explain a log entry using AI.
 
-POST /api/environments/:id/logs/explainLogWithAI/
+POST /v1/environments/:id/logs/explainLogWithAI/
  */
 export const getLogsExplainLogWithAICreateUrl = (projectId: string) => {
     return `/v1/environments/${projectId}/logs/explainLogWithAI/`

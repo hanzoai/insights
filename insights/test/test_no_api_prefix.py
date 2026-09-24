@@ -33,17 +33,21 @@ SOURCES = {
 
 SKIP_DIRS = {"node_modules", "dist", "migrations", "__pycache__", ".venv"}
 
-# Other services' routes, which this app addresses as their owners serve them.
-OTHER_SERVICES = {
-    "insights/plugins/plugin_server_api.py": "insights-plugin CDP API",
-    "insights/storage/recordings/block_storage.py": "insights-plugin recording API",
-    "insights/tasks/commerce_billing.py": "commerce usage API",
-    "insights/cdp/templates/customerio/template_customerio.py": "Customer.io",
-    "products/desktop_recordings/backend/services/recall_client.py": "Recall.ai",
-    "products/error_tracking/backend/api/git_provider_file_link_resolver.py": "GitLab",
-    "insights/models/integration.py": "GitLab",
-    "insights/temporal/data_imports/sources/zendesk/zendesk.py": "Zendesk",
-    "insights/temporal/data_imports/sources/zendesk/settings.py": "Zendesk",
+# Other services' /api/ routes, which this app addresses as their owners serve
+# them: file -> (the service, the text that names the route, or None for every
+# match in the file).
+OTHER_SERVICES: dict[str, tuple[str, str | None]] = {
+    "insights/plugins/plugin_server_api.py": ("insights-plugin CDP API", None),
+    "insights/storage/recordings/block_storage.py": ("insights-plugin recording API", None),
+    "insights/tasks/commerce_billing.py": ("commerce usage API", None),
+    "insights/cdp/templates/customerio/template_customerio.py": ("Customer.io", None),
+    "products/desktop_recordings/backend/services/recall_client.py": ("Recall.ai", None),
+    "products/error_tracking/backend/api/git_provider_file_link_resolver.py": ("GitLab", None),
+    "insights/models/integration.py": ("GitLab", None),
+    "insights/temporal/data_imports/sources/zendesk/zendesk.py": ("Zendesk", None),
+    "insights/temporal/data_imports/sources/zendesk/settings.py": ("Zendesk", None),
+    "products/customer_analytics/frontend/queries/ZendeskTicketsQuery.tsx": ("Zendesk", "replace('/api/v2', '')"),
+    "frontend/src/scenes/feature-flags/FeatureFlagCodeOptions.tsx": ("hanzo.ai docs", "${DOC_BASE_URL}api/flags"),
 }
 
 
@@ -89,13 +93,16 @@ class TestNoApiPrefix(SimpleTestCase):
         calls = []
         for path in _source_files():
             rel = path.relative_to(ROOT).as_posix()
-            if rel in OTHER_SERVICES or rel == "insights/test/test_no_api_prefix.py":
+            if rel == "insights/test/test_no_api_prefix.py":
+                continue
+            _service, needle = OTHER_SERVICES.get(rel, ("", ""))
+            if needle is None:
                 continue
             try:
                 text = path.read_text()
             except UnicodeDecodeError:
                 continue
             for n, line in enumerate(text.splitlines(), 1):
-                if CALL.search(line):
+                if CALL.search(line) and not (needle and needle in line):
                     calls.append(f"{rel}:{n}: {line.strip()[:120]}")
         assert calls == [], "\n".join(calls[:50])

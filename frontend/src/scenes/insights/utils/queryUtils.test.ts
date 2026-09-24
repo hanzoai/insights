@@ -108,7 +108,7 @@ describe('validateQuery', () => {
         const trendsQuery = {
             kind: NodeKind.TrendsQuery,
             series: [{ kind: NodeKind.EventsNode, event: '$pageview' }],
-            properties: [{ type: 'event', key: 'url', operator: 'regex', value: '^/api/.*' }],
+            properties: [{ type: 'event', key: 'url', operator: 'regex', value: '^/v1/.*' }],
         }
         expect(validateQuery(trendsQuery)).toBe(true)
     })

@@ -65,7 +65,7 @@ describe('featureFlagLogic', () => {
         return get
     }
 
-    it('asks this deployment for the verdict, at /v1/flags/ and never under /api/', async () => {
+    it('asks this deployment for the verdict, at /v1/flags/', async () => {
         const get = await useMountedFlags(REAL_VERDICT)
 
         expect(flagRequests(get)).toEqual(['v1/flags/'])
