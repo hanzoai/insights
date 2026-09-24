@@ -1,5 +1,4 @@
-import { actions, afterMount, connect, kea, listeners, path, selectors } from 'kea'
-import { loaders } from 'kea-loaders'
+import { connect, kea, path, reducers, selectors } from 'kea'
 
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'
 
@@ -54,19 +53,12 @@ export interface IncidentIoSummary {
 // Normalized status for display
 export type NormalizedStatus = 'operational' | 'degraded_performance' | 'partial_outage' | 'major_outage'
 
-// Where the status DATA comes from: our own API, which serves the summary as
-// JSON. It used to be a status-page domain left over from the upstream project —
-// one Hanzo does not own and that resolves nowhere, so anyone could have
-// registered it and answered this fetch inside a logged-in admin session. Our one
-// API front door is api.hanzo.ai, and no path here carries an /api/ prefix.
-export const STATUS_SUMMARY_URL = 'https://api.hanzo.ai/v1/summary'
+// There is no incident feed to read: api.hanzo.ai serves no status summary, and
+// polling an address that answers 404 only put an error in every console. With
+// no summary the widgets report nothing beyond a superpowers drill.
 
-// Where a HUMAN goes to read about an incident: a plain HTML page. This is a
-// different thing from the JSON endpoint above and must never be conflated with
-// it — one is for the side panel, one is for a person.
+// Where a HUMAN goes to read about an incident: a plain HTML page.
 export const STATUS_PAGE_URL = 'https://status.hanzo.ai'
-
-export const REFRESH_INTERVAL = 60 * 1000 * 5 // 5 minutes
 
 // The API returns the incidents that apply to THIS platform, so the client
 // renders what it is given.
@@ -126,31 +118,9 @@ export const sidePanelStatusIncidentIoLogic = kea<sidePanelStatusIncidentIoLogic
         values: [superpowersLogic, ['fakeStatusOverride', 'superpowersEnabled']],
     })),
 
-    actions({
-        setPageVisibility: (visible: boolean) => ({ visible }),
+    reducers({
+        summary: [null as IncidentIoSummary | null, {}],
     }),
-
-    loaders(() => ({
-        summary: [
-            null as IncidentIoSummary | null,
-            {
-                loadSummary: async (): Promise<IncidentIoSummary | null> => {
-                    const response = await fetch(STATUS_SUMMARY_URL)
-                    // An error response is still JSON. This read used to parse a
-                    // 503 body -- {"status":503,"error":"..."} -- call it a
-                    // summary, and hand the navigation an object with no
-                    // ongoing_incidents, which took the whole product down. It
-                    // survived review because the endpoint sent no CORS header,
-                    // so fetch threw and this failed gracefully; the day the
-                    // header was added, a status outage became a product outage.
-                    if (!response.ok) {
-                        throw new Error(`status summary unavailable: ${response.status}`)
-                    }
-                    return await response.json()
-                },
-            },
-        ],
-    })),
 
     selectors({
         rawStatus: [
@@ -191,32 +161,5 @@ export const sidePanelStatusIncidentIoLogic = kea<sidePanelStatusIncidentIoLogic
                 return 'All systems operational'
             },
         ],
-    }),
-
-    listeners(({ actions, cache }) => ({
-        loadSummarySuccess: () => {
-            cache.disposables.add(() => {
-                const timerId = setTimeout(() => actions.loadSummary(), REFRESH_INTERVAL)
-                return () => clearTimeout(timerId)
-            }, 'refreshTimeout')
-        },
-        setPageVisibility: ({ visible }) => {
-            if (visible) {
-                actions.loadSummary()
-            } else {
-                cache.disposables.dispose('refreshTimeout')
-            }
-        },
-    })),
-
-    afterMount(({ actions, cache }) => {
-        actions.loadSummary()
-        cache.disposables.add(() => {
-            const onVisibilityChange = (): void => {
-                actions.setPageVisibility(document.visibilityState === 'visible')
-            }
-            document.addEventListener('visibilitychange', onVisibilityChange)
-            return () => document.removeEventListener('visibilitychange', onVisibilityChange)
-        }, 'visibilityListener')
     }),
 ])

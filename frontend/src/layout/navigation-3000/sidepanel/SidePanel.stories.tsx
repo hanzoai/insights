@@ -8,13 +8,10 @@ import { App } from 'scenes/App'
 import { urls } from 'scenes/urls'
 
 import { mswDecorator, useStorybookMocks } from '~/mocks/browser'
-import * as incidentIoStatusPageCritical from '~/mocks/fixtures/_incident_io_status_page_critical.json'
-import * as incidentIoStatusPageWarning from '~/mocks/fixtures/_incident_io_status_page_warning.json'
 import organizationCurrent from '~/mocks/fixtures/api/organizations/@current/@current.json'
 import { SidePanelTab } from '~/types'
 
 import { sidePanelDocsLogic } from './panels/sidePanelDocsLogic'
-import { STATUS_SUMMARY_URL } from './panels/sidePanelStatusIncidentIoLogic'
 import { sidePanelStateLogic } from './sidePanelStateLogic'
 
 const meta: Meta = {
@@ -133,33 +130,4 @@ export const SidePanelSupportWithEmail: StoryFn = () => {
     })
 
     return <BaseTemplate panel={SidePanelTab.Support} />
-}
-
-export const SidePanelStatusWarning: StoryFn = () => {
-    const { closeSidePanel } = useActions(sidePanelStateLogic)
-    useOnMountEffect(() => closeSidePanel())
-    const summary = Object.assign({}, incidentIoStatusPageWarning)
-
-    useStorybookMocks({
-        get: {
-            [STATUS_SUMMARY_URL]: summary,
-        },
-    })
-
-    return <App />
-}
-
-export const SidePanelStatusCritical: StoryFn = () => {
-    const { closeSidePanel } = useActions(sidePanelStateLogic)
-    useOnMountEffect(() => closeSidePanel())
-
-    const summary = Object.assign({}, incidentIoStatusPageCritical)
-
-    useStorybookMocks({
-        get: {
-            [STATUS_SUMMARY_URL]: summary,
-        },
-    })
-
-    return <App />
 }

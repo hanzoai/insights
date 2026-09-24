@@ -14,7 +14,6 @@ import {
 
 import { ResponseComposition, RestContext, RestRequest } from 'msw'
 
-import { STATUS_SUMMARY_URL } from '~/layout/navigation-3000/sidepanel/panels/sidePanelStatusIncidentIoLogic'
 import sdkVersions from '~/mocks/fixtures/api/sdk_versions.json'
 import teamSdkVersions from '~/mocks/fixtures/api/team_sdk_versions.json'
 import { SharingConfigurationType } from '~/types'
@@ -23,7 +22,6 @@ import { getAvailableProductFeatures } from './features'
 import { billingJson } from './fixtures/_billing'
 import _insightsFunctionTemplatesDestinations from './fixtures/_insightsFunctionTemplatesDestinations.json'
 import _insightsFunctionTemplatesTransformations from './fixtures/_insightsFunctionTemplatesTransformations.json'
-import * as incidentIoStatusPageAllOK from './fixtures/_incident_io_status_page_all_ok.json'
 import { MockSignature, Mocks, mocksToHandlers } from './utils'
 
 export const EMPTY_PAGINATED_RESPONSE = { count: 0, results: [] as any[], next: null, previous: null }
@@ -177,7 +175,6 @@ export const defaultMocks: Mocks = {
 
         '/api/billing/spend/': { results: [] },
         '/api/billing/usage/': { results: [] },
-        [STATUS_SUMMARY_URL]: incidentIoStatusPageAllOK,
         '/api/projects/:team_id/insights_function_templates': insightsFunctionTemplatesMock,
         '/api/projects/:team_id/insights_function_templates/:id': insightsFunctionTemplateRetrieveMock,
         '/api/projects/:team_id/insights_functions': EMPTY_PAGINATED_RESPONSE,
