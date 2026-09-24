@@ -8,6 +8,7 @@ import { ActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'
 import { dayjs } from 'lib/dayjs'
 import { apiStatusLogic } from 'lib/logic/apiStatusLogic'
 import { humanFriendlyDuration, objectClean, toParams } from 'lib/utils'
+import { isSameOrigin } from 'lib/utils/apiHost'
 import { CohortCalculationHistoryResponse } from 'scenes/cohorts/cohortCalculationHistorySceneLogic'
 import { EventSchema } from 'scenes/data-management/events/eventDefinitionSchemaLogic'
 import { SchemaPropertyGroup } from 'scenes/data-management/schema/schemaManagementLogic'
@@ -5689,12 +5690,15 @@ const api = {
         // If an external signal is provided, forward its abort to our controller
         signal?.addEventListener('abort', () => abortController.abort())
 
+        // The CSRF token and session id are for Django. Another origin (the
+        // livestream) reads neither, and its preflight does not allow them.
+        const django = isSameOrigin(url)
         await fetchEventSource(url, {
             method,
             headers: {
                 ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}),
-                'X-CSRFToken': getCookie('insights_csrftoken') || '',
-                ...(getSessionId() ? { 'X-INSIGHTS-SESSION-ID': getSessionId() } : {}),
+                ...(django ? { 'X-CSRFToken': getCookie('insights_csrftoken') || '' } : {}),
+                ...(django && getSessionId() ? { 'X-INSIGHTS-SESSION-ID': getSessionId() } : {}),
                 ...objectClean(headers ?? {}),
             },
             body: data !== undefined ? JSON.stringify(data) : undefined,
