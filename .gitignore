@@ -243,3 +243,9 @@ common/insightsql_parser/*.so
 .turbo/
 coverage/
 .venv/
+
+# Agent instruction files are symlinks to LLM.md, local only.
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+QWEN.md
