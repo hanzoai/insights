@@ -142,7 +142,7 @@ services:
             - ./docker/datastore/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
             - ./docker/datastore/config.d/dev-memory.xml:/etc/clickhouse-server/config.d/dev-memory.xml
             - ./docker/datastore/users-dev.xml:/etc/clickhouse-server/users.xml
-            - ./docker/datastore/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
+            - ./insights/user_scripts/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
             - ./insights/user_scripts:/var/lib/datastore/user_scripts
         extra_hosts:
             - 'host.docker.internal:host-gateway'

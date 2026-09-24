@@ -12,7 +12,7 @@
 
 For revertible cloud deploys:
 
-1. Develop using the binary files at the top level of `user_scripts` (see section above), with schema defined in `docker/datastore/user_defined_function.xml`
+1. Develop using the binary files at the top level of `user_scripts` (see section above), with schema defined in `user_scripts/user_defined_function.xml`
 2. If you've made any changes to UDFs, when ready to deploy, increment the version in `insights/udf_versioner.py` and run it
 3. Overwrite `user_defined_function.xml` in the `insights-cloud-infra` repo (us, eu, and dev) with `user_scripts/latest_user_defined_function.xml` and deploy it
    - Verify that CH knows about the UDF by running `SELECT aggregate_funnel_vXX()`. The error message is different for functions that CH doesn't know about, and for invalid arguments.
