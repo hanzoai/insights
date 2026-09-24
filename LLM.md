@@ -39,8 +39,8 @@ imports; they are inert (not in INSTALLED_APPS).
 
 ## Production runs the 1.52.x release line, not main
 
-insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.166`
-(`sha256:7d08d95d…`), built from tag `v1.52.166`: the 1.52.68 tree (`02e23ec`,
+insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.168`
+(`sha256:de2921dc…`), built from tag `v1.52.168`: the 1.52.68 tree (`02e23ec`,
 kept on GitHub under `refs/dr-backup/*`) plus the commits tagged on top of it.
 Main can't deploy there yet. Its product apps carry the upstream migration graph
 (~1000 migrations), while the prod DB was built from 1.52.68's squashed graph, and
@@ -52,7 +52,7 @@ a 429 means the org's build slots are full, retry), pinned by tag and digest in
 universe `charts/app/values/hanzo/insights-{web,worker}.yaml`. The PreSync migrate
 Job must report "No migrations to apply" or apply the new ones cleanly.
 
-What 1.52.166 carries beyond 1.52.165:
+What 1.52.166–168 carry beyond 1.52.165:
 - `insights 0005_ingestion_plugin_schema`: the tables and columns the main-built
   plugin needs (`feature_flags_teamfeatureflagsconfig`,
   `insights_eventfilterconfig`, `is_deleted` on `insights_person` and
@@ -75,7 +75,19 @@ What 1.52.166 carries beyond 1.52.165:
   `services/mcp`.
 - The browser SDK gets a self-capture key only in DEBUG. Outside it the page
   carried upstream's placeholder key and 404'd on `/array/<key>/config.js` and
-  `/flags/`; universe sets `SELF_CAPTURE=0`.
+  `/flags/`; universe sets `SELF_CAPTURE=0`. With no key, the app's opted-out
+  stub (`fake_token`) and the toolbar's client both run with
+  `advanced_disable_flags`, so neither loads remote config nor asks `/flags/`.
+- The funnel UDFs (`aggregate_funnel_array` and kin) ship with their config in
+  `insights/user_scripts` (the config moved there from `docker/datastore`).
+  universe `charts/app/values/hanzo/datastore.yaml` copies both out of the insights
+  image pinned for insights-web with an init container, so funnels and the functions
+  they call are one version. A funnel query without them answers 400
+  "Function ... does not exist". Bumping the insights pin should bump that init
+  image too; changing it restarts datastore-0 (~22s), so pause cloud's warehouse
+  durables on EVENT first (`$JS.API.CONSUMER.PAUSE.EVENT.<name>`, never
+  event-insights): they Nak without delay and give up after 8 deliveries, which
+  a restart exhausts.
 - No calls to endpoints nothing serves: billing loads only on a cloud
   deployment, and the status summary poll (`api.hanzo.ai/v1/summary`) is gone.
 
