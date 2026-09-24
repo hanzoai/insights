@@ -39,17 +39,53 @@ imports; they are inert (not in INSTALLED_APPS).
 
 ## Production runs the 1.52.x release line, not main
 
-insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.165`,
-built from tag `v1.52.165`: the 1.52.68 tree (`02e23ec`, kept on GitHub under
-`refs/dr-backup/*`) plus three commits (livestream host from `LIVESTREAM_HOST`,
-chart plugin pinned to commit `625b3bf`, Django-only stream headers). Main can't
-deploy there yet. Its product apps carry the upstream migration graph (~1000
-migrations), while the prod DB was built from 1.52.68's squashed graph, and those
-tables already exist. A patch for prod is a commit on top of the release tag, a new
-`v1.52.N` tag, and a build through the door
+insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.166`
+(`sha256:7d08d95d…`), built from tag `v1.52.166`: the 1.52.68 tree (`02e23ec`,
+kept on GitHub under `refs/dr-backup/*`) plus the commits tagged on top of it.
+Main can't deploy there yet. Its product apps carry the upstream migration graph
+(~1000 migrations), while the prod DB was built from 1.52.68's squashed graph, and
+those tables already exist. A patch for prod is a commit on top of the latest
+`v1.52.N` tag, a new `v1.52.N+1` tag (no branch), and a build through the door
 (`hanzo build create --repo https://github.com/hanzoai/insights --ref v1.52.N
---image ghcr.io/hanzoai/insights:1.52.N --dockerfile Dockerfile --platforms linux/amd64`).
-The chart's PreSync migrate Job must report "No migrations to apply".
+--image ghcr.io/hanzoai/insights:1.52.N --dockerfile Dockerfile --platforms linux/amd64`;
+a 429 means the org's build slots are full, retry), pinned by tag and digest in
+universe `charts/app/values/hanzo/insights-{web,worker}.yaml`. The PreSync migrate
+Job must report "No migrations to apply" or apply the new ones cleanly.
+
+What 1.52.166 carries beyond 1.52.165:
+- `insights 0005_ingestion_plugin_schema`: the tables and columns the main-built
+  plugin needs (`feature_flags_teamfeatureflagsconfig`,
+  `insights_eventfilterconfig`, `is_deleted` on `insights_person` and
+  `insights_persondistinctid`), all `IF NOT EXISTS`, so prod's hand-made copy
+  applied as a no-op and a fresh database gets the same schema.
+- Sign-in binds a new org's first team to its cloud project key
+  (`iam_org_pipeline._bind_cloud_project`): while no team of the org has a `pk-`
+  api_token, it asks cloud `GET /v1/projects` with the user's IAM access token from
+  that sign-in and `X-Org-Id`, and takes the oldest project's key and name. Only
+  that org's projects count, a key another org's team holds is never moved, and a
+  cloud that does not answer never fails the sign-in. The insights service token
+  cannot do this: its owner is `hanzo`, and cloud ignores its `X-Org-Id`.
+- The API is `/v1/` only. `/api/` answers the JSON 404 (`^(?:api|v1)(?:/|$)`),
+  and `insights/test/test_no_api_prefix.py` fails if a route begins with `api`
+  or source names an `/api/` path on this app. Other services' `/api/` routes
+  are listed there by file. Still on `/api/`: the insights-plugin's own routes
+  (recording and CDP APIs, and its `SITE_URL/api/conversations` calls), the
+  SDK's `/api/surveys`, `/api/early_access_features`, `/api/web_experiments`,
+  `/api/product_tours` (hanzoai/insights-js), and the generated client in
+  `services/mcp`.
+- The browser SDK gets a self-capture key only in DEBUG. Outside it the page
+  carried upstream's placeholder key and 404'd on `/array/<key>/config.js` and
+  `/flags/`; universe sets `SELF_CAPTURE=0`.
+- No calls to endpoints nothing serves: billing loads only on a cloud
+  deployment, and the status summary poll (`api.hanzo.ai/v1/summary`) is gone.
+
+Events reach the UI through cloud's bridge: `/v1/event` admitted with a project
+`pk-` key → `event-insights` consumer → Kafka `events_plugin_ingestion` →
+insights-ingestion → `insights.events` for the team whose api_token is that key;
+the Live tab reads the same topic through insights-livestream. Main's datastore
+migrations 0224/0228 re-point `event_mv` at `event.fact`. Never apply them to
+this datastore: `event_mv` would project the same events a second time beside
+the bridge. Drop the projection before moving prod to main.
 
 Realtime views call `https://live.hanzo.ai` (`/events`, `/stats`). Cloudflare
 rewrites every `*.hanzo.ai` CORS answer to a fixed `Access-Control-Allow-Headers`
@@ -57,11 +93,8 @@ list, so a cross-origin request may carry only headers on that list. The
 livestream sends SSE headers at connect and a `:` comment every 30s, which keeps
 the edge's 100s idle cut (524) away. A Playwright context with any `route()`
 answers CORS preflights itself, so it hides preflight failures. Verify CORS
-with no routes installed.
-
-Events: the UI reads `insights.events` (fed only by Kafka `kafka_events_json`),
-and the Live tab reads the livestream topic. Cloud `/v1/event` writes
-`event.fact`, which neither reads, so both views are empty until a bridge lands.
+with no routes installed. To test Live, open the stream first and post after it
+answers; an event sent before the subscription exists is never replayed.
 
 ## Django → Go observability map (both planes live)
 
