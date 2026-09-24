@@ -302,6 +302,11 @@ export const billingLogic = kea<billingLogicType>([
             null as BillingType | null,
             {
                 loadBilling: async () => {
+                    // Billing is served only by a cloud deployment. Anywhere else
+                    // there is no billing endpoint to ask, so there is no billing.
+                    if (!values.preflight?.cloud) {
+                        return null
+                    }
                     // Note: this is a temporary flag to skip forecasting in the billing page
                     // for customers running into performance issues until we have a more permanent fix
                     // of splitting the billing and forecasting data.
