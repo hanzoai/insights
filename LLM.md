@@ -37,6 +37,32 @@ are the shipping gates and both are green; the tsc debt is tracked for a
 follow-up pass. The prune's closure keeps 21 upstream products the new core
 imports; they are inert (not in INSTALLED_APPS).
 
+## Production runs the 1.52.x release line, not main
+
+insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.165`,
+built from tag `v1.52.165`: the 1.52.68 tree (`02e23ec`, kept on GitHub under
+`refs/dr-backup/*`) plus three commits (livestream host from `LIVESTREAM_HOST`,
+chart plugin pinned to commit `625b3bf`, Django-only stream headers). Main can't
+deploy there yet. Its product apps carry the upstream migration graph (~1000
+migrations), while the prod DB was built from 1.52.68's squashed graph, and those
+tables already exist. A patch for prod is a commit on top of the release tag, a new
+`v1.52.N` tag, and a build through the door
+(`hanzo build create --repo https://github.com/hanzoai/insights --ref v1.52.N
+--image ghcr.io/hanzoai/insights:1.52.N --dockerfile Dockerfile --platforms linux/amd64`).
+The chart's PreSync migrate Job must report "No migrations to apply".
+
+Realtime views call `https://live.hanzo.ai` (`/events`, `/stats`). Cloudflare
+rewrites every `*.hanzo.ai` CORS answer to a fixed `Access-Control-Allow-Headers`
+list, so a cross-origin request may carry only headers on that list. The
+livestream sends SSE headers at connect and a `:` comment every 30s, which keeps
+the edge's 100s idle cut (524) away. A Playwright context with any `route()`
+answers CORS preflights itself, so it hides preflight failures. Verify CORS
+with no routes installed.
+
+Events: the UI reads `insights.events` (fed only by Kafka `kafka_events_json`),
+and the Live tab reads the livestream topic. Cloud `/v1/event` writes
+`event.fact`, which neither reads, so both views are empty until a bridge lands.
+
 ## Django → Go observability map (both planes live)
 
 | Django surface                                                                                                                            | Go replacement                                                                   | Status                                                                                                                                      |
@@ -909,3 +935,23 @@ URL answered 200 or 404 depending which pod took it (measured 200x7 / 404x8), an
 before a deploy broke afterwards. A missing asset now answers an honest 404 rather than falling
 through to the SPA catch-all, which is `login_required` and 302'd to the IdP — that is what made
 the browser report "Expected a JavaScript module but the server responded with MIME type text/html".
+
+## AWS ingestion: cloud bridge -> plugin-server (2026-09-24)
+
+On AWS, `insights.events` is fed by the plugin-server, not by the event-plane
+MVs (0224/0228 are not applied there; do not apply them beside this, or events
+land twice). Cloud's `/v1/event` produces capture-shaped messages to
+`events_plugin_ingestion` (hanzo-inc/cloud apps/event/bridge.go);
+`insights-ingestion` (universe values `insights-ingestion.yaml`, same image as
+insights-plugin, `PLUGIN_SERVER_MODE=ingestion-v2` — the enum VALUE, hyphenated)
+resolves the team by `token` == `Team.api_token` == the cloud project's pk- key,
+and emits `datastore_events_json`. Livestream reads `events_plugin_ingestion`,
+because it parses capture's envelope (`data` + `token`).
+
+Schema skew: the plugin image is built from main; the AWS web runs the 1.52.x
+lineage, whose DB lacked what the plugin reads. Added by hand, additive and
+IF NOT EXISTS: `feature_flags_teamfeatureflagsconfig`,
+`insights_eventfilterconfig`, and `is_deleted` on `insights_person` /
+`insights_persondistinctid` (persons_migrations 20260727000002). A main-line
+web migrating this DB must fake feature_flags 0008, which is a plain
+CreateModel.
