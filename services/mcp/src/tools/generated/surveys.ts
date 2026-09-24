@@ -136,7 +136,7 @@ const surveyCreate = (): ToolBase<
             }
             const result = await context.api.request<Schemas.SurveySerializerCreateUpdateOnly>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/surveys/${result.id}`)
@@ -152,7 +152,7 @@ const surveyDelete = (): ToolBase<typeof SurveyDeleteSchema, Schemas.SurveySeria
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SurveySerializerCreateUpdateOnly>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/`,
             body: { archived: true },
         })
         return result
@@ -169,7 +169,7 @@ const surveyGet = (): ToolBase<typeof SurveyGetSchema, WithInsightsUrl<Schemas.S
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Survey>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/`,
             })
             return await withInsightsUrl(context, result, `/surveys/${result.id}`)
         },
@@ -185,7 +185,7 @@ const surveyLaunch = (): ToolBase<typeof SurveyLaunchSchema, WithInsightsUrl<Sch
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Survey>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/launch/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/launch/`,
             })
             return await withInsightsUrl(context, result, `/surveys/${result.id}`)
         },
@@ -203,7 +203,7 @@ const surveyStats = (): ToolBase<typeof SurveyStatsSchema, WithInsightsUrl<Schem
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.SurveyStatsResponse>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/stats/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/stats/`,
                 query: {
                     date_from: params.date_from,
                     date_to: params.date_to,
@@ -224,7 +224,7 @@ const surveyStop = (): ToolBase<typeof SurveyStopSchema, WithInsightsUrl<Schemas
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Survey>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/stop/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/stop/`,
             })
             return await withInsightsUrl(context, result, `/surveys/${result.id}`)
         },
@@ -336,7 +336,7 @@ const surveyUpdate = (): ToolBase<
             }
             const result = await context.api.request<Schemas.SurveySerializerCreateUpdateOnly>({
                 method: 'PATCH',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/surveys/${result.id}`)
@@ -353,7 +353,7 @@ const surveysGetAll = (): ToolBase<typeof SurveysGetAllSchema, WithInsightsUrl<S
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.PaginatedSurveyList>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/`,
                 query: {
                     archived: params.archived,
                     ids: Array.isArray(params.ids) ? params.ids.join(',') || undefined : params.ids,
@@ -386,7 +386,7 @@ const surveysGlobalStats = (): ToolBase<typeof SurveysGlobalStatsSchema, Schemas
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.SurveyGlobalStatsResponse>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/stats/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/stats/`,
                 query: {
                     date_from: params.date_from,
                     date_to: params.date_to,
@@ -408,7 +408,7 @@ const surveysResponsesList = (): ToolBase<typeof SurveysResponsesListSchema, Sch
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.SurveyResponsesList>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/responses/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/responses/`,
                 query: {
                     exclude_archived: params.exclude_archived,
                     limit: params.limit,
@@ -439,7 +439,7 @@ const surveysSummarizeResponsesCreate = (): ToolBase<typeof SurveysSummarizeResp
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/summarize_responses/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/surveys/${encodeURIComponent(String(params.id))}/summarize_responses/`,
             body,
             query: {
                 question_id: params.question_id,

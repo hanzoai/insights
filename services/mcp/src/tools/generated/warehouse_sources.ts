@@ -56,7 +56,7 @@ const dataWarehouseSourceConnectLink = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SourceConnectLink>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/connect_link/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/connect_link/`,
             query: {
                 source_type: params.source_type,
             },
@@ -92,7 +92,7 @@ const dataWarehouseSourceSetup = (): ToolBase<typeof DataWarehouseSourceSetupSch
         }
         const result = await context.api.request<Schemas.SourceSetupResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/setup/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/setup/`,
             body,
         })
         return result
@@ -111,7 +111,7 @@ const dataWarehouseStoredCredentialsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SourceCredential[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/stored_credentials/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/stored_credentials/`,
             query: {
                 search: params.search,
                 source_type: params.source_type,
@@ -130,7 +130,7 @@ const externalDataSchemasCancel = (): ToolBase<typeof ExternalDataSchemasCancelS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/cancel/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/cancel/`,
         })
         return result
     },
@@ -145,7 +145,7 @@ const externalDataSchemasDeleteData = (): ToolBase<typeof ExternalDataSchemasDel
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/delete_data/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/delete_data/`,
         })
         return result
     },
@@ -202,7 +202,7 @@ const externalDataSchemasIncrementalFieldsCreate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/incremental_fields/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/incremental_fields/`,
             body,
         })
         return result
@@ -221,7 +221,7 @@ const externalDataSchemasList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedExternalDataSchemaList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -289,7 +289,7 @@ const externalDataSchemasPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ExternalDataSchema>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -344,7 +344,7 @@ const externalDataSchemasReload = (): ToolBase<typeof ExternalDataSchemasReloadS
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/reload/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/reload/`,
             body,
         })
         return result
@@ -399,7 +399,7 @@ const externalDataSchemasResync = (): ToolBase<typeof ExternalDataSchemasResyncS
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/resync/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/resync/`,
             body,
         })
         return result
@@ -418,7 +418,7 @@ const externalDataSchemasRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ExternalDataSchema>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -442,7 +442,7 @@ const externalDataSourcesCheckCdcPrerequisitesCreate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/check_cdc_prerequisites/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/check_cdc_prerequisites/`,
             body,
         })
         return result
@@ -462,7 +462,7 @@ const externalDataSourcesConnectionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ExternalDataSourceConnectionOption[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/connections/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/connections/`,
         })
         return await withInsightsUrl(context, result, '/data-management/sources')
     },
@@ -503,7 +503,7 @@ const externalDataSourcesCreate = (): ToolBase<
         body['created_via'] = 'mcp'
         const result = await context.api.request<Schemas.ExternalDataSourceCreateResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/`,
             body,
         })
         return result
@@ -552,7 +552,7 @@ const externalDataSourcesCreateWebhookCreate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/create_webhook/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/create_webhook/`,
             body,
         })
         return result
@@ -601,7 +601,7 @@ const externalDataSourcesDeleteWebhookCreate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/delete_webhook/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/delete_webhook/`,
             body,
         })
         return result
@@ -617,7 +617,7 @@ const externalDataSourcesDestroy = (): ToolBase<typeof ExternalDataSourcesDestro
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -635,7 +635,7 @@ const externalDataSourcesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedExternalDataSourceSerializersList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -710,7 +710,7 @@ const externalDataSourcesPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ExternalDataSourceSerializers>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -741,7 +741,7 @@ const externalDataSourcesRefreshSchemas = (): ToolBase<typeof ExternalDataSource
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/refresh_schemas/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/refresh_schemas/`,
             body,
         })
         return result
@@ -772,7 +772,7 @@ const externalDataSourcesReload = (): ToolBase<typeof ExternalDataSourcesReloadS
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/reload/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/reload/`,
             body,
         })
         return result
@@ -788,7 +788,7 @@ const externalDataSourcesRepairCdcCreate = (): ToolBase<typeof ExternalDataSourc
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/repair_cdc/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/repair_cdc/`,
         })
         return result
     },
@@ -806,7 +806,7 @@ const externalDataSourcesRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ExternalDataSourceSerializers>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = omitResponseFields(result, [
             'schemas.*.table.columns',
@@ -858,7 +858,7 @@ const externalDataSourcesUpdateWebhookInputsCreate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/update_webhook_inputs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/update_webhook_inputs/`,
             body,
         })
         return result
@@ -879,7 +879,7 @@ const externalDataSourcesWebhookInfoRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/webhook_info/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/webhook_info/`,
         })
         return result
     },
@@ -902,7 +902,7 @@ const externalDataSourcesWizard = (): ToolBase<typeof ExternalDataSourcesWizardS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/wizard/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/wizard/`,
             query: {
                 source_type: params.source_type,
             },

@@ -36,7 +36,7 @@ const projectGet = (): ToolBase<typeof ProjectGetSchema, Schemas.ProjectBackward
         }
         const result = await context.api.request<Schemas.ProjectBackwardCompat>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/projects/${encodeURIComponent(String(id))}/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/projects/${encodeURIComponent(String(id))}/`,
         })
         const filtered = omitResponseFields(result, [
             'secret_api_token',
@@ -270,7 +270,7 @@ const projectSettingsUpdate = (): ToolBase<typeof ProjectSettingsUpdateSchema, S
         }
         const result = await context.api.request<Schemas.ProjectBackwardCompat>({
             method: 'PATCH',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/projects/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/projects/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -287,7 +287,7 @@ const userGet = (): ToolBase<typeof UserGetSchema, Schemas.User> => ({
     handler: async (context: Context, params: z.infer<typeof UserGetSchema>) => {
         const result = await context.api.request<Schemas.User>({
             method: 'GET',
-            path: `/api/users/${encodeURIComponent(String(params.uuid))}/`,
+            path: `/v1/users/${encodeURIComponent(String(params.uuid))}/`,
         })
         const filtered = pickResponseFields(result, [
             'id',
@@ -403,7 +403,7 @@ const userSettingsUpdate = (): ToolBase<typeof UserSettingsUpdateSchema, Schemas
         }
         const result = await context.api.request<Schemas.User>({
             method: 'PATCH',
-            path: `/api/users/${encodeURIComponent(String(params.uuid))}/`,
+            path: `/v1/users/${encodeURIComponent(String(params.uuid))}/`,
             body,
         })
         return result

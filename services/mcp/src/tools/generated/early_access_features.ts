@@ -44,7 +44,7 @@ const earlyAccessFeatureCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EarlyAccessFeatureSerializerCreateOnly>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/early_access_feature/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/early_access_feature/`,
             body,
         })
         return await withInsightsUrl(context, result, `/early_access_features/${result.id}`)
@@ -60,7 +60,7 @@ const earlyAccessFeatureDestroy = (): ToolBase<typeof EarlyAccessFeatureDestroyS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/early_access_feature/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/early_access_feature/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -78,7 +78,7 @@ const earlyAccessFeatureList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedEarlyAccessFeatureList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/early_access_feature/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/early_access_feature/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -115,7 +115,7 @@ const earlyAccessFeaturePartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EarlyAccessFeature>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/early_access_feature/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/early_access_feature/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/early_access_features/${result.id}`)
@@ -134,7 +134,7 @@ const earlyAccessFeatureRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EarlyAccessFeature>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/early_access_feature/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/early_access_feature/${encodeURIComponent(String(params.id))}/`,
         })
         return await withInsightsUrl(context, result, `/early_access_features/${result.id}`)
     },

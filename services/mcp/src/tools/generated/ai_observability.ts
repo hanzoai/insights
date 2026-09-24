@@ -119,7 +119,7 @@ const llmaClusteringConfigGet = (): ToolBase<typeof LlmaClusteringConfigGetSchem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ClusteringConfig>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_config/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_config/`,
         })
         return result
     },
@@ -141,7 +141,7 @@ const llmaClusteringConfigSetEventFilters = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ClusteringConfig>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_config/set_event_filters/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_config/set_event_filters/`,
             body,
         })
         return result
@@ -170,7 +170,7 @@ const llmaClusteringJobCreate = (): ToolBase<typeof LlmaClusteringJobCreateSchem
         }
         const result = await context.api.request<Schemas.ClusteringJob>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/`,
             body,
         })
         return result
@@ -186,7 +186,7 @@ const llmaClusteringJobDelete = (): ToolBase<typeof LlmaClusteringJobDeleteSchem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -201,7 +201,7 @@ const llmaClusteringJobGet = (): ToolBase<typeof LlmaClusteringJobGetSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ClusteringJob>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -216,7 +216,7 @@ const llmaClusteringJobList = (): ToolBase<typeof LlmaClusteringJobListSchema, S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedClusteringJobList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -250,7 +250,7 @@ const llmaClusteringJobUpdate = (): ToolBase<typeof LlmaClusteringJobUpdateSchem
         }
         const result = await context.api.request<Schemas.ClusteringJob>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/clustering_jobs/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -269,7 +269,7 @@ const llmaDatasetArchive = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DatasetRead>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/archive/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/archive/`,
         })
         return withInformationalResponse(
             await withInsightsUrl(context, result, `/ai-evals/datasets/${result.id}`),
@@ -301,7 +301,7 @@ const llmaDatasetCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DatasetRead>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/datasets/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/datasets/`,
             body,
         })
         return withInformationalResponse(
@@ -324,7 +324,7 @@ const llmaDatasetGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DatasetRead>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/`,
         })
         return withInformationalResponse(
             await withInsightsUrl(context, result, `/ai-evals/datasets/${result.id}`),
@@ -352,7 +352,7 @@ const llmaDatasetItemArchive = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DatasetItemRead>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/archive/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/archive/`,
             body,
         })
         return withInformationalResponse(
@@ -403,7 +403,7 @@ const llmaDatasetItemCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DatasetItemRead>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dataset_items/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dataset_items/`,
             body,
         })
         return withInformationalResponse(
@@ -428,7 +428,7 @@ const llmaDatasetItemGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DatasetItemRead>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/`,
             query: {
                 revision: params.revision,
             },
@@ -453,7 +453,7 @@ const llmaDatasetItemList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDatasetItemReadList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dataset_items/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dataset_items/`,
             query: {
                 archived: params.archived,
                 dataset: params.dataset,
@@ -507,7 +507,7 @@ const llmaDatasetItemRestore = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DatasetItemRead>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/restore/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/restore/`,
             body,
         })
         return withInformationalResponse(
@@ -545,7 +545,7 @@ const llmaDatasetItemUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DatasetItemRead>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/`,
             body,
         })
         return withInformationalResponse(
@@ -570,7 +570,7 @@ const llmaDatasetItemVersionList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDatasetItemReadList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/versions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dataset_items/${encodeURIComponent(String(params.dataset_item_id))}/versions/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -612,7 +612,7 @@ const llmaDatasetList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDatasetReadList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/datasets/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/datasets/`,
             query: {
                 archived: params.archived,
                 id__in: Array.isArray(params.id__in) ? params.id__in.join(',') || undefined : params.id__in,
@@ -657,7 +657,7 @@ const llmaDatasetRestore = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DatasetRead>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/restore/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/restore/`,
         })
         return withInformationalResponse(
             await withInsightsUrl(context, result, `/ai-evals/datasets/${result.id}`),
@@ -681,7 +681,7 @@ const llmaDatasetRevisionList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDatasetRevisionReadList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/revisions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/revisions/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -725,7 +725,7 @@ const llmaDatasetUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DatasetRead>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/datasets/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return withInformationalResponse(
@@ -746,7 +746,7 @@ const llmaEvaluationConfigGet = (): ToolBase<typeof LlmaEvaluationConfigGetSchem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EvaluationConfig>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_config/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_config/`,
         })
         return result
     },
@@ -768,7 +768,7 @@ const llmaEvaluationConfigSetActiveKey = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EvaluationConfig>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_config/set_active_key/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_config/set_active_key/`,
             body,
         })
         return result
@@ -824,7 +824,7 @@ const llmaEvaluationCreate = (): ToolBase<typeof LlmaEvaluationCreateSchema, Sch
         }
         const result = await context.api.request<Schemas.Evaluation>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluations/`,
             body,
         })
         return result
@@ -840,7 +840,7 @@ const llmaEvaluationDelete = (): ToolBase<typeof LlmaEvaluationDeleteSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Evaluation>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluations/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -863,7 +863,7 @@ const llmaEvaluationDirectoryCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EvaluationDirectory>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/`,
             body,
         })
         return result
@@ -879,7 +879,7 @@ const llmaEvaluationDirectoryDelete = (): ToolBase<typeof LlmaEvaluationDirector
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -897,7 +897,7 @@ const llmaEvaluationDirectoryGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EvaluationDirectory>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -916,7 +916,7 @@ const llmaEvaluationDirectoryList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EvaluationDirectory[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/`,
         })
         return result
     },
@@ -940,7 +940,7 @@ const llmaEvaluationDirectoryUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EvaluationDirectory>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluation_directories/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -956,7 +956,7 @@ const llmaEvaluationGet = (): ToolBase<typeof LlmaEvaluationGetSchema, Schemas.E
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Evaluation>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluations/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -974,7 +974,7 @@ const llmaEvaluationJudgeModels = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LLMModelsListResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/models/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/models/`,
             query: {
                 key_id: params.key_id,
                 provider: params.provider,
@@ -993,7 +993,7 @@ const llmaEvaluationList = (): ToolBase<typeof LlmaEvaluationListSchema, Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedEvaluationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluations/`,
             query: {
                 directory_id: params.directory_id,
                 directory_id__isnull: params.directory_id__isnull,
@@ -1050,7 +1050,7 @@ const llmaEvaluationReportCreate = (): ToolBase<typeof LlmaEvaluationReportCreat
         }
         const result = await context.api.request<Schemas.EvaluationReport>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/`,
             body,
         })
         return result
@@ -1066,7 +1066,7 @@ const llmaEvaluationReportGenerate = (): ToolBase<typeof LlmaEvaluationReportGen
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/${encodeURIComponent(String(params.id))}/generate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/${encodeURIComponent(String(params.id))}/generate/`,
         })
         return result
     },
@@ -1081,7 +1081,7 @@ const llmaEvaluationReportGet = (): ToolBase<typeof LlmaEvaluationReportGetSchem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EvaluationReport>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1099,7 +1099,7 @@ const llmaEvaluationReportList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedEvaluationReportList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/`,
             query: {
                 evaluation: params.evaluation,
                 limit: params.limit,
@@ -1124,7 +1124,7 @@ const llmaEvaluationReportRunList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedEvaluationReportRunList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/${encodeURIComponent(String(params.id))}/runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/${encodeURIComponent(String(params.id))}/runs/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -1176,7 +1176,7 @@ const llmaEvaluationReportUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EvaluationReportUpdate>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_reports/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -1208,7 +1208,7 @@ const llmaEvaluationRun = (): ToolBase<typeof LlmaEvaluationRunSchema, unknown> 
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluation_runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluation_runs/`,
             body,
         })
         return result
@@ -1240,7 +1240,7 @@ const llmaEvaluationSummaryCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EvaluationSummaryResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_summary/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/evaluation_summary/`,
             body,
         })
         return result
@@ -1275,7 +1275,7 @@ const llmaEvaluationTestScript = (): ToolBase<typeof LlmaEvaluationTestScriptSch
         }
         const result = await context.api.request<Schemas.TestScriptResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluations/test_script/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluations/test_script/`,
             body,
         })
         return result
@@ -1333,7 +1333,7 @@ const llmaEvaluationUpdate = (): ToolBase<typeof LlmaEvaluationUpdateSchema, Sch
         }
         const result = await context.api.request<Schemas.Evaluation>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/evaluations/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -1348,7 +1348,7 @@ const llmaPersonalSpend = (): ToolBase<typeof LlmaPersonalSpendSchema, Schemas.P
     handler: async (context: Context, params: z.infer<typeof LlmaPersonalSpendSchema>) => {
         const result = await context.api.request<Schemas.PersonalSpendAnalysisResponse[]>({
             method: 'GET',
-            path: `/api/llm_analytics/@me/spend/`,
+            path: `/v1/llm_analytics/@me/spend/`,
             query: {
                 bucket_minutes: params.bucket_minutes,
                 date_from: params.date_from,
@@ -1384,7 +1384,7 @@ const llmaPromptCreate = (): ToolBase<typeof LlmaPromptCreateSchema, Schemas.LLM
         }
         const result = await context.api.request<Schemas.LLMPrompt>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_prompts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_prompts/`,
             body,
         })
         return result
@@ -1406,7 +1406,7 @@ const llmaPromptDuplicate = (): ToolBase<typeof LlmaPromptDuplicateSchema, Schem
         }
         const result = await context.api.request<Schemas.LLMPrompt>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/duplicate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/duplicate/`,
             body,
         })
         return result
@@ -1424,7 +1424,7 @@ const llmaPromptGet = (): ToolBase<typeof LlmaPromptGetSchema, Schemas.LLMPrompt
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LLMPromptPublic>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/`,
             query: {
                 content: params.content,
                 label: params.label,
@@ -1444,7 +1444,7 @@ const llmaPromptLabelDelete = (): ToolBase<typeof LlmaPromptLabelDeleteSchema, u
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/labels/${encodeURIComponent(String(params.label_name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/labels/${encodeURIComponent(String(params.label_name))}/`,
         })
         return result
     },
@@ -1465,7 +1465,7 @@ const llmaPromptLabelSet = (): ToolBase<typeof LlmaPromptLabelSetSchema, Schemas
         }
         const result = await context.api.request<Schemas.LLMPromptLabel>({
             method: 'PUT',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/labels/${encodeURIComponent(String(params.label_name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/labels/${encodeURIComponent(String(params.label_name))}/`,
             body,
         })
         return result
@@ -1491,7 +1491,7 @@ const llmaPromptList = (): ToolBase<
             }
         >({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_prompts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_prompts/`,
             query: parsedParams,
         })
         return result
@@ -1525,7 +1525,7 @@ const llmaPromptUpdate = (): ToolBase<typeof LlmaPromptUpdateSchema, Schemas.LLM
         }
         const result = await context.api.request<Schemas.LLMPrompt>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_prompts/name/${encodeURIComponent(String(params.prompt_name))}/`,
             body,
         })
         return result
@@ -1541,7 +1541,7 @@ const llmaProviderKeyGet = (): ToolBase<typeof LlmaProviderKeyGetSchema, Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LLMProviderKey>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/provider_keys/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/provider_keys/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1559,7 +1559,7 @@ const llmaProviderKeyList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedLLMProviderKeyList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/provider_keys/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/provider_keys/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -1585,7 +1585,7 @@ const llmaReviewQueueCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ReviewQueue>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/`,
             body,
         })
         return await withInsightsUrl(context, result, `/ai-observability/reviews?queue_id=${result.id}`)
@@ -1601,7 +1601,7 @@ const llmaReviewQueueDelete = (): ToolBase<typeof LlmaReviewQueueDeleteSchema, u
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1616,7 +1616,7 @@ const llmaReviewQueueGet = (): ToolBase<typeof LlmaReviewQueueGetSchema, WithIns
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReviewQueue>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/${encodeURIComponent(String(params.id))}/`,
         })
         return await withInsightsUrl(context, result, `/ai-observability/reviews?queue_id=${result.id}`)
     },
@@ -1641,7 +1641,7 @@ const llmaReviewQueueItemCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ReviewQueueItem>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/`,
             body,
         })
         return await withInsightsUrl(context, result, `/ai-observability/traces/${result.trace_id}`)
@@ -1657,7 +1657,7 @@ const llmaReviewQueueItemDelete = (): ToolBase<typeof LlmaReviewQueueItemDeleteS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1675,7 +1675,7 @@ const llmaReviewQueueItemGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReviewQueueItem>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/${encodeURIComponent(String(params.id))}/`,
         })
         return await withInsightsUrl(context, result, `/ai-observability/traces/${result.trace_id}`)
     },
@@ -1693,7 +1693,7 @@ const llmaReviewQueueItemList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedReviewQueueItemList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -1737,7 +1737,7 @@ const llmaReviewQueueItemUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ReviewQueueItem>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queue_items/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/ai-observability/traces/${result.trace_id}`)
@@ -1756,7 +1756,7 @@ const llmaReviewQueueList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedReviewQueueList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/`,
             query: {
                 limit: params.limit,
                 name: params.name,
@@ -1798,7 +1798,7 @@ const llmaReviewQueueUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ReviewQueue>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/review_queues/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/ai-observability/reviews?queue_id=${result.id}`)
@@ -1832,7 +1832,7 @@ const llmaScoreDefinitionCreate = (): ToolBase<typeof LlmaScoreDefinitionCreateS
         }
         const result = await context.api.request<Schemas.ScoreDefinition>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/`,
             body,
         })
         return result
@@ -1848,7 +1848,7 @@ const llmaScoreDefinitionGet = (): ToolBase<typeof LlmaScoreDefinitionGetSchema,
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScoreDefinition>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1866,7 +1866,7 @@ const llmaScoreDefinitionList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedScoreDefinitionList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/`,
             query: {
                 archived: params.archived,
                 kind: params.kind,
@@ -1903,7 +1903,7 @@ const llmaScoreDefinitionNewVersion = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ScoreDefinition>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/${encodeURIComponent(String(params.id))}/new_version/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/${encodeURIComponent(String(params.id))}/new_version/`,
             body,
         })
         return result
@@ -1931,7 +1931,7 @@ const llmaScoreDefinitionUpdate = (): ToolBase<typeof LlmaScoreDefinitionUpdateS
         }
         const result = await context.api.request<Schemas.ScoreDefinition>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/score_definitions/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -1975,7 +1975,7 @@ const llmaSummarizationCreate = (): ToolBase<typeof LlmaSummarizationCreateSchem
         }
         const result = await context.api.request<Schemas.SummarizeResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/summarization/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/summarization/`,
             body,
         })
         return result
@@ -2013,7 +2013,7 @@ const llmaTaggerCreate = (): ToolBase<typeof LlmaTaggerCreateSchema, WithInsight
         }
         const result = await context.api.request<Schemas.Tagger>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/taggers/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/taggers/`,
             body,
         })
         return await withInsightsUrl(context, result, `/ai-evals/taggers/${result.id}`)
@@ -2029,7 +2029,7 @@ const llmaTaggerList = (): ToolBase<typeof LlmaTaggerListSchema, WithInsightsUrl
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedTaggerList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/taggers/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/taggers/`,
             query: {
                 enabled: params.enabled,
                 id__in: Array.isArray(params.id__in) ? params.id__in.join(',') || undefined : params.id__in,
@@ -2071,7 +2071,7 @@ const llmaTaggerTestScript = (): ToolBase<typeof LlmaTaggerTestScriptSchema, Sch
         }
         const result = await context.api.request<Schemas.TestScriptTaggerResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/taggers/test_script/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/taggers/test_script/`,
             body,
         })
         return result
@@ -2103,7 +2103,7 @@ const llmaTraceReviewCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.TraceReview>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/`,
             body,
         })
         return await withInsightsUrl(context, result, `/ai-observability/traces/${result.trace_id}`)
@@ -2119,7 +2119,7 @@ const llmaTraceReviewDelete = (): ToolBase<typeof LlmaTraceReviewDeleteSchema, u
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -2134,7 +2134,7 @@ const llmaTraceReviewGet = (): ToolBase<typeof LlmaTraceReviewGetSchema, WithIns
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.TraceReview>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/${encodeURIComponent(String(params.id))}/`,
         })
         return await withInsightsUrl(context, result, `/ai-observability/traces/${result.trace_id}`)
     },
@@ -2152,7 +2152,7 @@ const llmaTraceReviewList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedTraceReviewList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/`,
             query: {
                 definition_id: params.definition_id,
                 definition_id__in: params.definition_id__in,
@@ -2206,7 +2206,7 @@ const llmaTraceReviewUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.TraceReview>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_analytics/trace_reviews/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/ai-observability/traces/${result.trace_id}`)

@@ -28,7 +28,7 @@ const canvasBuildsRetrieve = (): ToolBase<typeof CanvasBuildsRetrieveSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.CanvasBuildsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/builds/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/builds/`,
         })
         return result
     },
@@ -57,7 +57,7 @@ const canvasCreate = (): ToolBase<typeof CanvasCreateSchema, Schemas.Canvas> => 
         }
         const result = await context.api.request<Schemas.Canvas>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/canvases/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/canvases/`,
             body,
         })
         return result
@@ -88,7 +88,7 @@ const canvasEditCreate = (): ToolBase<typeof CanvasEditCreateSchema, Schemas.Can
         }
         const result = await context.api.request<Schemas.CanvasSourcePublishResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/edit/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/edit/`,
             body,
         })
         return result
@@ -106,7 +106,7 @@ const canvasList = (): ToolBase<typeof CanvasListSchema, Schemas.PaginatedCanvas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedCanvasList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/canvases/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/canvases/`,
             query: {
                 channel: params.channel,
                 limit: params.limit,
@@ -141,7 +141,7 @@ const canvasPublishCreate = (): ToolBase<typeof CanvasPublishCreateSchema, Schem
         }
         const result = await context.api.request<Schemas.CanvasSourcePublishResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/publish/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/publish/`,
             body,
         })
         return result
@@ -159,7 +159,7 @@ const canvasSourceRetrieve = (): ToolBase<typeof CanvasSourceRetrieveSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.CanvasSourceResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/source/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/source/`,
             query: {
                 version_id: params.version_id,
             },
@@ -183,7 +183,7 @@ const canvasValidateCreate = (): ToolBase<typeof CanvasValidateCreateSchema, Sch
         }
         const result = await context.api.request<Schemas.CanvasValidateResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/validate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/canvases/${encodeURIComponent(String(params.id))}/validate/`,
             body,
         })
         return result

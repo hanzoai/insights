@@ -49,7 +49,7 @@ const actionCreate = (): ToolBase<typeof ActionCreateSchema, WithInsightsUrl<Sch
             }
             const result = await context.api.request<Schemas.Action>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/actions/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/actions/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/data-management/actions/${result.id}`)
@@ -65,7 +65,7 @@ const actionDelete = (): ToolBase<typeof ActionDeleteSchema, Schemas.Action> => 
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Action>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/actions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/actions/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -84,7 +84,7 @@ const actionGet = (): ToolBase<typeof ActionGetSchema, WithInsightsUrl<Schemas.A
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Action>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/actions/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/actions/${encodeURIComponent(String(params.id))}/`,
             })
             return await withInsightsUrl(context, result, `/data-management/actions/${result.id}`)
         },
@@ -124,7 +124,7 @@ const actionUpdate = (): ToolBase<typeof ActionUpdateSchema, WithInsightsUrl<Sch
             }
             const result = await context.api.request<Schemas.Action>({
                 method: 'PATCH',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/actions/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/actions/${encodeURIComponent(String(params.id))}/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/data-management/actions/${result.id}`)
@@ -141,7 +141,7 @@ const actionsGetAll = (): ToolBase<typeof ActionsGetAllSchema, WithInsightsUrl<S
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.PaginatedActionList>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/actions/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/actions/`,
                 query: {
                     created_by: params.created_by,
                     limit: params.limit,

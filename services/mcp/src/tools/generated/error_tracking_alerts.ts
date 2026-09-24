@@ -69,7 +69,7 @@ const errorTrackingAlertsCreate = (): ToolBase<typeof ErrorTrackingAlertsCreateS
         }
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/`,
             body,
         })
         return result
@@ -85,7 +85,7 @@ const errorTrackingAlertsDelete = (): ToolBase<typeof ErrorTrackingAlertsDeleteS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -104,7 +104,7 @@ const errorTrackingAlertsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedInsightsFunctionMinimalList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/`,
             query: {
                 created_at: params.created_at,
                 created_by: params.created_by,
@@ -200,7 +200,7 @@ const errorTrackingAlertsPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result

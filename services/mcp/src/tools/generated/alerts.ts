@@ -70,7 +70,7 @@ const alertCreate = (): ToolBase<typeof AlertCreateSchema, WithInsightsUrl<Schem
         }
         const result = await context.api.request<Schemas.Alert>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/alerts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/alerts/`,
             body,
         })
         return await withInsightsUrl(context, result, `/alerts?alert_type=insights&alert_id=${result.id}`)
@@ -86,7 +86,7 @@ const alertDelete = (): ToolBase<typeof AlertDeleteSchema, unknown> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/alerts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/alerts/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -101,7 +101,7 @@ const alertGet = (): ToolBase<typeof AlertGetSchema, WithInsightsUrl<Schemas.Ale
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Alert>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/alerts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/alerts/${encodeURIComponent(String(params.id))}/`,
             query: {
                 checks_date_from: params.checks_date_from,
                 checks_date_to: params.checks_date_to,
@@ -138,7 +138,7 @@ const alertSimulate = (): ToolBase<typeof AlertSimulateSchema, Schemas.AlertSimu
         }
         const result = await context.api.request<Schemas.AlertSimulateResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/alerts/simulate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/alerts/simulate/`,
             body,
         })
         return result
@@ -200,7 +200,7 @@ const alertUpdate = (): ToolBase<typeof AlertUpdateSchema, WithInsightsUrl<Schem
         }
         const result = await context.api.request<Schemas.Alert>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/alerts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/alerts/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/alerts?alert_type=insights&alert_id=${result.id}`)
@@ -216,7 +216,7 @@ const alertsList = (): ToolBase<typeof AlertsListSchema, WithInsightsUrl<Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedAlertList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/alerts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/alerts/`,
             query: {
                 created_by: params.created_by,
                 insight_id: params.insight_id,

@@ -36,7 +36,7 @@ const visualReviewReposList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedRepoList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/repos/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/repos/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -55,7 +55,7 @@ const visualReviewReposRetrieve = (): ToolBase<typeof VisualReviewReposRetrieveS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Repo>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/repos/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/repos/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -76,7 +76,7 @@ const visualReviewRunsApproveCreate = (): ToolBase<typeof VisualReviewRunsApprov
         }
         const result = await context.api.request<Schemas.Run>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/approve/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/approve/`,
             body,
         })
         return result
@@ -96,7 +96,7 @@ const visualReviewRunsCountsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReviewStateCounts>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/counts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/counts/`,
         })
         return result
     },
@@ -126,7 +126,7 @@ const visualReviewRunsFinalizeCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.FinalizeResult>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/finalize/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/finalize/`,
             body,
         })
         return result
@@ -145,7 +145,7 @@ const visualReviewRunsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedRunList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/`,
             query: {
                 branch: params.branch,
                 commit_sha: params.commit_sha,
@@ -180,7 +180,7 @@ const visualReviewRunsRetrieve = (): ToolBase<typeof VisualReviewRunsRetrieveSch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Run>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/`,
         })
         return await withInsightsUrl(context, result, `/visual_review/runs/${result.id}`)
     },
@@ -200,7 +200,7 @@ const visualReviewRunsSnapshotHistoryList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedSnapshotHistoryEntryList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/snapshot-history/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/snapshot-history/`,
             query: {
                 identifier: params.identifier,
                 limit: params.limit,
@@ -226,7 +226,7 @@ const visualReviewRunsSnapshotsList = (): ToolBase<
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.PaginatedSnapshotList>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/snapshots/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/snapshots/`,
                 query: {
                     include_quarantined: params.include_quarantined,
                     limit: params.limit,
@@ -252,7 +252,7 @@ const visualReviewRunsTolerateCreate = (): ToolBase<typeof VisualReviewRunsToler
         }
         const result = await context.api.request<Schemas.Snapshot>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/tolerate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/tolerate/`,
             body,
         })
         return result
@@ -273,7 +273,7 @@ const visualReviewRunsToleratedHashesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedToleratedHashEntryList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/tolerated-hashes/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/visual_review/runs/${encodeURIComponent(String(params.id))}/tolerated-hashes/`,
             query: {
                 identifier: params.identifier,
                 limit: params.limit,

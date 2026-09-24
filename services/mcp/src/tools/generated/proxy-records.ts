@@ -25,7 +25,7 @@ const proxyCreate = (): ToolBase<typeof ProxyCreateSchema, Schemas.ProxyRecord> 
         }
         const result = await context.api.request<Schemas.ProxyRecord>({
             method: 'POST',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/proxy_records/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/proxy_records/`,
             body,
         })
         return result
@@ -41,7 +41,7 @@ const proxyDelete = (): ToolBase<typeof ProxyDeleteSchema, unknown> => ({
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/proxy_records/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/proxy_records/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -56,7 +56,7 @@ const proxyDiagnose = (): ToolBase<typeof ProxyDiagnoseSchema, Schemas.Diagnosti
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.DiagnosticReport>({
             method: 'POST',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/proxy_records/${encodeURIComponent(String(params.id))}/diagnose/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/proxy_records/${encodeURIComponent(String(params.id))}/diagnose/`,
         })
         return result
     },
@@ -71,7 +71,7 @@ const proxyGet = (): ToolBase<typeof ProxyGetSchema, Schemas.ProxyRecord> => ({
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.ProxyRecord>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/proxy_records/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/proxy_records/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -87,7 +87,7 @@ const proxyList = (): ToolBase<typeof ProxyListSchema, WithInsightsUrl<Schemas.P
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.ProxyRecordListResponse[]>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/proxy_records/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/proxy_records/`,
         })
         return await withInsightsUrl(context, result, '/settings/organization-proxy')
     },
@@ -102,7 +102,7 @@ const proxyRetry = (): ToolBase<typeof ProxyRetrySchema, Schemas.ProxyRecord> =>
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.ProxyRecord>({
             method: 'POST',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/proxy_records/${encodeURIComponent(String(params.id))}/retry/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/proxy_records/${encodeURIComponent(String(params.id))}/retry/`,
         })
         return result
     },

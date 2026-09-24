@@ -25341,7 +25341,7 @@ export namespace Schemas {
       is_active: boolean;
       /** How fresh the data is, in seconds. One of: 900, 1800, 3600, 21600, 43200, 86400, 604800. */
       data_freshness_seconds: number;
-      /** Relative API path to execute this endpoint (e.g. /api/projects/{team_id}/endpoints/{name}/run). */
+      /** Relative API path to execute this endpoint (e.g. /v1/projects/{team_id}/endpoints/{name}/run). */
       endpoint_path: string;
       /**
          * Absolute URL to execute this endpoint.
@@ -25476,7 +25476,7 @@ export namespace Schemas {
       is_active: boolean;
       /** How fresh the data is, in seconds. One of: 900, 1800, 3600, 21600, 43200, 86400, 604800. */
       data_freshness_seconds: number;
-      /** Relative API path to execute this endpoint (e.g. /api/projects/{team_id}/endpoints/{name}/run). */
+      /** Relative API path to execute this endpoint (e.g. /v1/projects/{team_id}/endpoints/{name}/run). */
       endpoint_path: string;
       /**
          * Absolute URL to execute this endpoint.
@@ -44273,7 +44273,7 @@ export namespace Schemas {
     } as const;
 
     /**
-     * Request body for POST /api/users/{id}/onboarding/skip/.
+     * Request body for POST /v1/users/{id}/onboarding/skip/.
      *
      * Source of truth for OpenAPI / generated TS / zod / MCP — bind this serializer at
      * runtime so the contract clients believe is enforced (length cap, choice validation,
@@ -50327,7 +50327,7 @@ export namespace Schemas {
       /** Real-time notification types that currently have a live dispatch site. Drives the in-app notifications settings UI. Read-only. */
       readonly active_realtime_notification_types: readonly string[];
       readonly pending_invites: readonly PendingInvite[];
-      /** True if the user has at least one Personal API Key or passkey and has not yet acknowledged their existing credentials. Used to gate a one-shot review screen on first post-provisioning login. Becomes False once the user POSTs to `/api/users/@me/credentials_review_complete/`. Read-only. */
+      /** True if the user has at least one Personal API Key or passkey and has not yet acknowledged their existing credentials. Used to gate a one-shot review screen on first post-provisioning login. Becomes False once the user POSTs to `/v1/users/@me/credentials_review_complete/`. Read-only. */
       readonly requires_credential_review: boolean;
     }
 
@@ -50739,7 +50739,7 @@ export namespace Schemas {
     }
 
     /**
-     * Serializer for the exposed /api/web_experiments endpoint, to be used in insights-js and for headless APIs.
+     * Serializer for the exposed /v1/web_experiments endpoint, to be used in insights-js and for headless APIs.
      */
     export interface WebExperimentsAPI {
       readonly id: number;
@@ -58379,7 +58379,7 @@ export namespace Schemas {
       /** Real-time notification types that currently have a live dispatch site. Drives the in-app notifications settings UI. Read-only. */
       readonly active_realtime_notification_types?: readonly string[];
       readonly pending_invites?: readonly PendingInvite[];
-      /** True if the user has at least one Personal API Key or passkey and has not yet acknowledged their existing credentials. Used to gate a one-shot review screen on first post-provisioning login. Becomes False once the user POSTs to `/api/users/@me/credentials_review_complete/`. Read-only. */
+      /** True if the user has at least one Personal API Key or passkey and has not yet acknowledged their existing credentials. Used to gate a one-shot review screen on first post-provisioning login. Becomes False once the user POSTs to `/v1/users/@me/credentials_review_complete/`. Read-only. */
       readonly requires_credential_review?: boolean;
     }
 
@@ -58586,7 +58586,7 @@ export namespace Schemas {
     }
 
     /**
-     * Serializer for the exposed /api/web_experiments endpoint, to be used in insights-js and for headless APIs.
+     * Serializer for the exposed /v1/web_experiments endpoint, to be used in insights-js and for headless APIs.
      */
     export interface PatchedWebExperimentsAPI {
       readonly id?: number;
@@ -64658,7 +64658,7 @@ export namespace Schemas {
     }
 
     /**
-     * Response body for GET /api/projects/:id/signals/reports/:id/signals/.
+     * Response body for GET /v1/projects/:id/signals/reports/:id/signals/.
      */
     export interface ReportSignalsResponse {
       /** The report these signals were clustered into. */
@@ -72923,14 +72923,14 @@ export namespace Schemas {
      * Request body for the presence beacon and beacon-leave endpoints.
      *
      * `device_id` is the UUID of the caller's `UserPushToken` row, which the
-     * client received when it registered for push via `/api/users/@me/push_tokens/`.
+     * client received when it registered for push via `/v1/users/@me/push_tokens/`.
      * The client is expected to use the same identifier on the beacon and leave
      * calls; if the user has unregistered the underlying push token, the value
      * won't resolve and the call returns 404 — at which point pushes were
      * already not going there anyway.
      */
     export interface TaskPresenceBeaconRequest {
-      /** UUID of the caller's UserPushToken (returned by `/api/users/@me/push_tokens/` on register). */
+      /** UUID of the caller's UserPushToken (returned by `/v1/users/@me/push_tokens/` on register). */
       device_id: string;
     }
 

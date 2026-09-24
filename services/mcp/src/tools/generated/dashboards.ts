@@ -88,7 +88,7 @@ const dashboardCreate = (): ToolBase<typeof DashboardCreateSchema, WithInsightsU
         }
         const result = await context.api.request<Schemas.Dashboard>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/`,
             body,
             query: {
                 include_dashboards: params.include_dashboards,
@@ -161,7 +161,7 @@ const dashboardCreateTextTile = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DashboardTile>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/create_text_tile/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/create_text_tile/`,
             body,
         })
         return await withInsightsUrl(context, result, `/dashboard/${params.id}`)
@@ -179,7 +179,7 @@ const dashboardDelete = (): ToolBase<typeof DashboardDeleteSchema, Schemas.Dashb
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Dashboard>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -201,7 +201,7 @@ const dashboardDeleteTile = (): ToolBase<typeof DashboardDeleteTileSchema, unkno
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/delete_tile/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/delete_tile/`,
             body,
         })
         return await withInsightsUrl(context, result, `/dashboard/${params.id}`)
@@ -233,7 +233,7 @@ const dashboardGet = (): ToolBase<typeof DashboardGetSchema, WithInsightsUrl<Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Dashboard>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/`,
             query: {
                 filters_override: params.filters_override,
                 include_dashboards: params.include_dashboards,
@@ -309,7 +309,7 @@ const dashboardInsightsRun = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.RunInsightsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/run_insights/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/run_insights/`,
             query: {
                 filters_override: params.filters_override,
                 output_format: params.output_format,
@@ -339,7 +339,7 @@ const dashboardReorderTiles = (): ToolBase<typeof DashboardReorderTilesSchema, W
         }
         const result = await context.api.request<Schemas.Dashboard>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/reorder_tiles/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/reorder_tiles/`,
             body,
         })
         return await withInsightsUrl(context, result, `/dashboard/${result.id}`)
@@ -358,7 +358,7 @@ const dashboardTemplatesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDashboardTemplateList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboard_templates/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboard_templates/`,
             query: {
                 is_featured: params.is_featured,
                 limit: params.limit,
@@ -400,7 +400,7 @@ const dashboardTemplatesRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DashboardTemplate>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboard_templates/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboard_templates/${encodeURIComponent(String(params.id))}/`,
         })
         return withInformationalResponse(
             result,
@@ -428,7 +428,7 @@ const dashboardTileCopy = (): ToolBase<typeof DashboardTileCopySchema, WithInsig
         }
         const result = await context.api.request<Schemas.Dashboard>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/copy_tile/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/copy_tile/`,
             body,
         })
         return await withInsightsUrl(context, result, `/dashboard/${result.id}`)
@@ -487,7 +487,7 @@ const dashboardUpdate = (): ToolBase<typeof DashboardUpdateSchema, WithInsightsU
         }
         const result = await context.api.request<Schemas.Dashboard>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/`,
             body,
             query: {
                 include_dashboards: params.include_dashboards,
@@ -561,7 +561,7 @@ const dashboardUpdateTextTile = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DashboardTile>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/update_text_tile/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/update_text_tile/`,
             body,
         })
         return await withInsightsUrl(context, result, `/dashboard/${params.id}`)
@@ -581,7 +581,7 @@ const dashboardWidgetCatalogList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.WidgetCatalogResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/widget_catalog/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/widget_catalog/`,
         })
         return result
     },
@@ -605,7 +605,7 @@ const dashboardWidgetsBatchAdd = (): ToolBase<
         }
         const result = await context.api.request<Schemas.AddDashboardWidgetsBatchResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/widgets/batch/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/widgets/batch/`,
             body,
         })
         return await withInsightsUrl(context, result, `/dashboard/${params.id}`)
@@ -630,7 +630,7 @@ const dashboardWidgetsBatchUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.UpdateDashboardWidgetsBatchResponse>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/widgets/batch_update/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/widgets/batch_update/`,
             body,
         })
         return await withInsightsUrl(context, result, `/dashboard/${params.id}`)
@@ -651,7 +651,7 @@ const dashboardWidgetsRun = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.RunWidgetsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/run_widgets/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/run_widgets/`,
             query: {
                 tile_ids: params.tile_ids,
             },
@@ -675,7 +675,7 @@ const dashboardsGetAll = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDashboardBasicList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/`,
             query: {
                 folder: params.folder,
                 limit: params.limit,
@@ -717,7 +717,7 @@ const dashboardsMoveTilePartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.Dashboard>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/move_tile/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/dashboards/${encodeURIComponent(String(params.id))}/move_tile/`,
             body,
         })
         return await withInsightsUrl(context, result, `/dashboard/${result.id}`)

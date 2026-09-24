@@ -21,7 +21,7 @@ const cdpFunctionTemplatesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedInsightsFunctionTemplateList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_function_templates/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_function_templates/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -62,7 +62,7 @@ const cdpFunctionTemplatesRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.InsightsFunctionTemplate>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_function_templates/${encodeURIComponent(String(params.template_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_function_templates/${encodeURIComponent(String(params.template_id))}/`,
         })
         return result
     },

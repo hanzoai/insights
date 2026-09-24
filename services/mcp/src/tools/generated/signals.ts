@@ -92,7 +92,7 @@ const inboxReportArtefactsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.SignalReportArtefactWriteResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/`,
             body,
         })
         return await withInsightsUrl(context, result, `/inbox/${result.report_id}`)
@@ -108,7 +108,7 @@ const inboxReportArtefactsDelete = (): ToolBase<typeof InboxReportArtefactsDelet
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -128,7 +128,7 @@ const inboxReportArtefactsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedSignalReportArtefactList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -150,7 +150,7 @@ const inboxReportArtefactsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalReportArtefact>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/${encodeURIComponent(String(params.id))}/`,
         })
         return await withInsightsUrl(context, result, `/inbox/${params.report_id}`)
     },
@@ -174,7 +174,7 @@ const inboxReportArtefactsUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.SignalReportArtefactWriteResponse>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.report_id))}/artefacts/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -209,7 +209,7 @@ const inboxReportsBulkSetState = (): ToolBase<
         }
         const result = await context.api.request<Schemas.SignalReportBulkStateResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/bulk-state/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/bulk-state/`,
             body,
         })
         return result
@@ -228,7 +228,7 @@ const inboxReportsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedSignalReportList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/`,
             query: {
                 has_implementation_pr: params.has_implementation_pr,
                 include_all_statuses: params.include_all_statuses,
@@ -297,7 +297,7 @@ const inboxReportsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalReport>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.id))}/`,
         })
         return withAgentNote(
             await withInsightsUrl(context, result, `/inbox/${result.id}`),
@@ -330,7 +330,7 @@ const inboxReportsSetState = (): ToolBase<typeof InboxReportsSetStateSchema, Wit
         }
         const result = await context.api.request<Schemas.SignalReport>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.id))}/state/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.id))}/state/`,
             body,
         })
         return await withInsightsUrl(context, result, `/inbox/${result.id}`)
@@ -355,7 +355,7 @@ const inboxReportsUpdate = (): ToolBase<typeof InboxReportsUpdateSchema, WithIns
         }
         const result = await context.api.request<Schemas.SignalReport>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/reports/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/inbox/${result.id}`)
@@ -384,7 +384,7 @@ const inboxSourceConfigsCreate = (): ToolBase<typeof InboxSourceConfigsCreateSch
         }
         const result = await context.api.request<Schemas.SignalSourceConfig>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/`,
             body,
         })
         return result
@@ -403,7 +403,7 @@ const inboxSourceConfigsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedSignalSourceConfigList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -454,7 +454,7 @@ const inboxSourceConfigsPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.SignalSourceConfig>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -473,7 +473,7 @@ const inboxSourceConfigsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalSourceConfig>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -503,7 +503,7 @@ const inboxSourceConfigsUpdate = (): ToolBase<typeof InboxSourceConfigsUpdateSch
         }
         const result = await context.api.request<Schemas.SignalSourceConfig>({
             method: 'PUT',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/source_configs/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -550,7 +550,7 @@ const scoutConfigCreate = (): ToolBase<typeof ScoutConfigCreateSchema, Schemas.S
         }
         const result = await context.api.request<Schemas.SignalScoutConfig>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/`,
             body,
         })
         return result
@@ -566,7 +566,7 @@ const scoutConfigDelete = (): ToolBase<typeof ScoutConfigDeleteSchema, unknown> 
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -581,7 +581,7 @@ const scoutConfigList = (): ToolBase<typeof ScoutConfigListSchema, WithInsightsU
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutConfig[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/`,
             query: {
                 tags: params.tags,
             },
@@ -600,7 +600,7 @@ const scoutConfigSync = (): ToolBase<typeof ScoutConfigSyncSchema, WithInsightsU
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutConfig[]>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/sync/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/sync/`,
         })
         return await withInsightsUrl(context, result, '/inbox')
     },
@@ -645,7 +645,7 @@ const scoutConfigUpdate = (): ToolBase<typeof ScoutConfigUpdateSchema, WithInsig
         }
         const result = await context.api.request<Schemas.SignalScoutConfig>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/inbox/${result.id}`)
@@ -717,7 +717,7 @@ const scoutCreateExecute = (): ToolBase<typeof ScoutCreateSchemaExecute, Schemas
         }
         const result = await context.api.request<Schemas.SignalScoutCreateResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/`,
             body,
         })
         return result
@@ -754,7 +754,7 @@ const scoutEditReport = (): ToolBase<typeof ScoutEditReportSchema, Schemas.EditR
         }
         const result = await context.api.request<Schemas.EditReportResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/edit-report/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/edit-report/`,
             body,
         })
         return result
@@ -806,7 +806,7 @@ const scoutEmitReport = (): ToolBase<typeof ScoutEmitReportSchema, Schemas.EmitR
         }
         const result = await context.api.request<Schemas.EmitReportResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emit-report/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emit-report/`,
             body,
         })
         return result
@@ -855,7 +855,7 @@ const scoutEmitSignal = (): ToolBase<typeof ScoutEmitSignalSchema, Schemas.EmitF
         }
         const result = await context.api.request<Schemas.EmitFindingResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emit-signal/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emit-signal/`,
             body,
         })
         return result
@@ -871,7 +871,7 @@ const scoutMembersList = (): ToolBase<typeof ScoutMembersListSchema, WithInsight
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScoutMember[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/members/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/members/`,
             query: {
                 search: params.search,
             },
@@ -890,7 +890,7 @@ const scoutMetadataGet = (): ToolBase<typeof ScoutMetadataGetSchema, Schemas.Sco
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScoutMetadata>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/metadata/current/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/metadata/current/`,
         })
         return result
     },
@@ -915,7 +915,7 @@ const scoutNotesCreate = (): ToolBase<typeof ScoutNotesCreateSchema, Schemas.Sco
         }
         const result = await context.api.request<Schemas.ScoutNote>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/notes/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/notes/`,
             body,
         })
         return result
@@ -931,7 +931,7 @@ const scoutNotesDelete = (): ToolBase<typeof ScoutNotesDeleteSchema, unknown> =>
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/notes/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/notes/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -949,7 +949,7 @@ const scoutNotesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScoutNote[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/notes/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/notes/`,
             query: {
                 content_max_chars: params.content_max_chars,
                 date_from: params.date_from,
@@ -977,7 +977,7 @@ const scoutProjectProfileGet = (): ToolBase<typeof ScoutProjectProfileGetSchema,
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ProjectProfile>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/project_profile/current/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/project_profile/current/`,
             query: {
                 force_refresh: params.force_refresh,
             },
@@ -1001,7 +1001,7 @@ const scoutRecordOutput = (): ToolBase<typeof ScoutRecordOutputSchema, Schemas.R
         }
         const result = await context.api.request<Schemas.RecordStructuredOutputResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/record-output/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/record-output/`,
             body,
         })
         return result
@@ -1017,7 +1017,7 @@ const scoutRunNow = (): ToolBase<typeof ScoutRunNowSchema, unknown> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/run/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/run/`,
         })
         return result
     },
@@ -1035,7 +1035,7 @@ const scoutRunsEmissionReports = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScoutEmissionReportLink[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emissions/reports/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emissions/reports/`,
         })
         return await withInsightsUrl(context, result, '/inbox')
     },
@@ -1053,7 +1053,7 @@ const scoutRunsEmissionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutEmission[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emissions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emissions/`,
         })
         return await withInsightsUrl(context, result, '/inbox')
     },
@@ -1068,7 +1068,7 @@ const scoutRunsList = (): ToolBase<typeof ScoutRunsListSchema, WithInsightsUrl<S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutRunSummary[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -1095,7 +1095,7 @@ const scoutRunsRecentEmissions = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutEmission[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/emissions/recent/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/emissions/recent/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -1116,7 +1116,7 @@ const scoutRunsRetrieve = (): ToolBase<typeof ScoutRunsRetrieveSchema, Schemas.S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutRunDetail>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/`,
         })
         return result
     },
@@ -1135,7 +1135,7 @@ const scoutScratchpadForget = (): ToolBase<typeof ScoutScratchpadForgetSchema, S
         }
         const result = await context.api.request<Schemas.ForgetResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/forget/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/forget/`,
             body,
         })
         return result
@@ -1161,7 +1161,7 @@ const scoutScratchpadRemember = (): ToolBase<typeof ScoutScratchpadRememberSchem
         }
         const result = await context.api.request<Schemas.ScratchpadEntry>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/`,
             body,
         })
         return result
@@ -1180,7 +1180,7 @@ const scoutScratchpadSearch = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScratchpadEntry[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/`,
             query: {
                 content_max_chars: params.content_max_chars,
                 date_from: params.date_from,
@@ -1235,7 +1235,7 @@ const signalsScoutConfigCreate = (): ToolBase<typeof SignalsScoutConfigCreateSch
         }
         const result = await context.api.request<Schemas.SignalScoutConfig>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/`,
             body,
         })
         return result
@@ -1251,7 +1251,7 @@ const signalsScoutConfigDelete = (): ToolBase<typeof SignalsScoutConfigDeleteSch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1269,7 +1269,7 @@ const signalsScoutConfigList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutConfig[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/`,
             query: {
                 tags: params.tags,
             },
@@ -1291,7 +1291,7 @@ const signalsScoutConfigSync = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutConfig[]>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/sync/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/sync/`,
         })
         return await withInsightsUrl(context, result, '/inbox')
     },
@@ -1339,7 +1339,7 @@ const signalsScoutConfigUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.SignalScoutConfig>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/inbox/${result.id}`)
@@ -1376,7 +1376,7 @@ const signalsScoutEditReport = (): ToolBase<typeof SignalsScoutEditReportSchema,
         }
         const result = await context.api.request<Schemas.EditReportResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/edit-report/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/edit-report/`,
             body,
         })
         return result
@@ -1428,7 +1428,7 @@ const signalsScoutEmitReport = (): ToolBase<typeof SignalsScoutEmitReportSchema,
         }
         const result = await context.api.request<Schemas.EmitReportResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emit-report/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emit-report/`,
             body,
         })
         return result
@@ -1477,7 +1477,7 @@ const signalsScoutEmitSignal = (): ToolBase<typeof SignalsScoutEmitSignalSchema,
         }
         const result = await context.api.request<Schemas.EmitFindingResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emit-signal/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emit-signal/`,
             body,
         })
         return result
@@ -1496,7 +1496,7 @@ const signalsScoutMembersList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScoutMember[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/members/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/members/`,
             query: {
                 search: params.search,
             },
@@ -1517,7 +1517,7 @@ const signalsScoutProjectProfileGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ProjectProfile>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/project_profile/current/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/project_profile/current/`,
             query: {
                 force_refresh: params.force_refresh,
             },
@@ -1535,7 +1535,7 @@ const signalsScoutRunNow = (): ToolBase<typeof SignalsScoutRunNowSchema, unknown
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/run/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/configs/${encodeURIComponent(String(params.id))}/run/`,
         })
         return result
     },
@@ -1553,7 +1553,7 @@ const signalsScoutRunsEmissionReports = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScoutEmissionReportLink[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emissions/reports/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emissions/reports/`,
         })
         return await withInsightsUrl(context, result, '/inbox')
     },
@@ -1571,7 +1571,7 @@ const signalsScoutRunsEmissionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutEmission[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emissions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/emissions/`,
         })
         return await withInsightsUrl(context, result, '/inbox')
     },
@@ -1589,7 +1589,7 @@ const signalsScoutRunsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutRunSummary[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -1616,7 +1616,7 @@ const signalsScoutRunsRecentEmissions = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutEmission[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/emissions/recent/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/emissions/recent/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -1637,7 +1637,7 @@ const signalsScoutRunsRetrieve = (): ToolBase<typeof SignalsScoutRunsRetrieveSch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SignalScoutRunDetail>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/runs/${encodeURIComponent(String(params.run_id))}/`,
         })
         return result
     },
@@ -1659,7 +1659,7 @@ const signalsScoutScratchpadForget = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ForgetResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/forget/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/forget/`,
             body,
         })
         return result
@@ -1688,7 +1688,7 @@ const signalsScoutScratchpadRemember = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ScratchpadEntry>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/`,
             body,
         })
         return result
@@ -1707,7 +1707,7 @@ const signalsScoutScratchpadSearch = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScratchpadEntry[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/signals/scout/scratchpad/`,
             query: {
                 content_max_chars: params.content_max_chars,
                 date_from: params.date_from,

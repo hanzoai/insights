@@ -57,7 +57,7 @@ const advancedActivityLogsFilters = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AvailableFiltersResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/advanced_activity_logs/available_filters/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/advanced_activity_logs/available_filters/`,
         })
         return result
     },
@@ -101,7 +101,7 @@ const advancedActivityLogsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedActivityLogList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/advanced_activity_logs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/advanced_activity_logs/`,
             query: {
                 activities: params.activities,
                 clients: params.clients,
@@ -159,7 +159,7 @@ const approvalPoliciesList = (): ToolBase<typeof ApprovalPoliciesListSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedApprovalPolicyList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/approval_policies/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/approval_policies/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -178,7 +178,7 @@ const approvalPolicyGet = (): ToolBase<typeof ApprovalPolicyGetSchema, Schemas.A
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ApprovalPolicy>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/approval_policies/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/approval_policies/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -196,7 +196,7 @@ const changeRequestGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ChangeRequest>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/change_requests/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/change_requests/${encodeURIComponent(String(params.id))}/`,
         })
         return withInformationalResponse(
             result,
@@ -271,7 +271,7 @@ const changeRequestsApproveExecute = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ChangeRequestDecisionResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/change_requests/${encodeURIComponent(String(params.id))}/approve/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/change_requests/${encodeURIComponent(String(params.id))}/approve/`,
             body,
         })
         const filtered = pickResponseFields(result, [
@@ -306,7 +306,7 @@ const changeRequestsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedChangeRequestList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/change_requests/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/change_requests/`,
             query: {
                 action_key: params.action_key,
                 limit: params.limit,
@@ -406,7 +406,7 @@ const changeRequestsRejectExecute = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ChangeRequestDecisionResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/change_requests/${encodeURIComponent(String(params.id))}/reject/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/change_requests/${encodeURIComponent(String(params.id))}/reject/`,
             body,
         })
         const filtered = pickResponseFields(result, [
@@ -434,7 +434,7 @@ const commentCount = (): ToolBase<typeof CommentCountSchema, unknown> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/comments/count/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/comments/count/`,
         })
         return result
     },
@@ -449,7 +449,7 @@ const commentGet = (): ToolBase<typeof CommentGetSchema, Schemas.Comment> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Comment>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/comments/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/comments/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -464,7 +464,7 @@ const commentThread = (): ToolBase<typeof CommentThreadSchema, unknown> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/comments/${encodeURIComponent(String(params.id))}/thread/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/comments/${encodeURIComponent(String(params.id))}/thread/`,
         })
         return result
     },
@@ -479,7 +479,7 @@ const commentsList = (): ToolBase<typeof CommentsListSchema, Schemas.PaginatedCo
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedCommentList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/comments/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/comments/`,
             query: {
                 completed: params.completed,
                 cursor: params.cursor,
@@ -510,7 +510,7 @@ const orgMemberGetGithubLogin = (): ToolBase<
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.OrganizationMemberGithubLogin>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/members/${encodeURIComponent(String(params.user__uuid))}/github_login/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/members/${encodeURIComponent(String(params.user__uuid))}/github_login/`,
         })
         return result
     },
@@ -525,7 +525,7 @@ const orgMembersList = (): ToolBase<typeof OrgMembersListSchema, Schemas.Paginat
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.PaginatedOrganizationMemberList>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/members/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/members/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -624,7 +624,7 @@ const organizationEnforce2faExecute = (): ToolBase<
         }
         const result = await context.api.request<Schemas.Organization>({
             method: 'PATCH',
-            path: `/api/organizations/${encodeURIComponent(String(id))}/`,
+            path: `/v1/organizations/${encodeURIComponent(String(id))}/`,
             body,
         })
         const filtered = pickResponseFields(result, ['enforce_2fa']) as typeof result
@@ -646,7 +646,7 @@ const organizationGet = (): ToolBase<typeof OrganizationGetSchema, Schemas.Organ
         }
         const result = await context.api.request<Schemas.Organization>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(id))}/`,
+            path: `/v1/organizations/${encodeURIComponent(String(id))}/`,
         })
         const filtered = pickResponseFields(result, [
             'id',
@@ -677,7 +677,7 @@ const organizationsList = (): ToolBase<
     handler: async (context: Context, params: z.infer<typeof OrganizationsListSchema>) => {
         const result = await context.api.request<Schemas.PaginatedOrganizationList>({
             method: 'GET',
-            path: `/api/organizations/`,
+            path: `/v1/organizations/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -702,7 +702,7 @@ const roleGet = (): ToolBase<typeof RoleGetSchema, Schemas.Role> => ({
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.Role>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/roles/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/roles/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -719,7 +719,7 @@ const roleMembersList = (): ToolBase<typeof RoleMembersListSchema, Schemas.Pagin
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.PaginatedRoleMembershipList>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/roles/${encodeURIComponent(String(params.role_id))}/role_memberships/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/roles/${encodeURIComponent(String(params.role_id))}/role_memberships/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -738,7 +738,7 @@ const rolesList = (): ToolBase<typeof RolesListSchema, Schemas.PaginatedRoleList
         const orgId = await context.stateManager.getOrgID()
         const result = await context.api.request<Schemas.PaginatedRoleList>({
             method: 'GET',
-            path: `/api/organizations/${encodeURIComponent(String(orgId))}/roles/`,
+            path: `/v1/organizations/${encodeURIComponent(String(orgId))}/roles/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -760,7 +760,7 @@ const userHomeSettingsGet = (): ToolBase<typeof UserHomeSettingsGetSchema, Schem
     handler: async (context: Context, params: z.infer<typeof UserHomeSettingsGetSchema>) => {
         const result = await context.api.request<Schemas.PinnedSceneTabs>({
             method: 'GET',
-            path: `/api/user_home_settings/${encodeURIComponent(String(params.uuid))}/`,
+            path: `/v1/user_home_settings/${encodeURIComponent(String(params.uuid))}/`,
         })
         return result
     },
@@ -787,7 +787,7 @@ const userHomeSettingsUpdate = (): ToolBase<typeof UserHomeSettingsUpdateSchema,
         }
         const result = await context.api.request<Schemas.PinnedSceneTabs>({
             method: 'PATCH',
-            path: `/api/user_home_settings/${encodeURIComponent(String(params.uuid))}/`,
+            path: `/v1/user_home_settings/${encodeURIComponent(String(params.uuid))}/`,
             body,
         })
         return result

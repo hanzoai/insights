@@ -70,7 +70,7 @@ const logsAlertsCreate = (): ToolBase<typeof LogsAlertsCreateSchema, Schemas.Log
         }
         const result = await context.api.request<Schemas.LogsAlertConfiguration>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/`,
             body,
         })
         const filtered = pickResponseFields(result, [
@@ -145,7 +145,7 @@ const logsAlertsDestinationsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.LogsAlertDestinationResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/destinations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/destinations/`,
             body,
         })
         const filtered = pickResponseFields(result, ['insights_function_ids']) as typeof result
@@ -168,7 +168,7 @@ const logsAlertsDestinationsDeleteCreate = (): ToolBase<typeof LogsAlertsDestina
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/destinations/delete/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/destinations/delete/`,
             body,
         })
         return result
@@ -184,7 +184,7 @@ const logsAlertsDestroy = (): ToolBase<typeof LogsAlertsDestroySchema, unknown> 
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -204,7 +204,7 @@ const logsAlertsEventsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedLogsAlertEventList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/events/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/events/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -242,7 +242,7 @@ const logsAlertsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedLogsAlertConfigurationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/`,
             query: {
                 created_by: params.created_by,
                 limit: params.limit,
@@ -311,7 +311,7 @@ const logsAlertsPartialUpdate = (): ToolBase<typeof LogsAlertsPartialUpdateSchem
         }
         const result = await context.api.request<Schemas.LogsAlertConfiguration>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         const filtered = pickResponseFields(result, [
@@ -349,7 +349,7 @@ const logsAlertsRetrieve = (): ToolBase<typeof LogsAlertsRetrieveSchema, Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LogsAlertConfiguration>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = pickResponseFields(result, [
             'id',
@@ -417,7 +417,7 @@ const logsAlertsSimulateCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.LogsAlertSimulateResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/alerts/simulate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/alerts/simulate/`,
             body,
         })
         const filtered = pickResponseFields(result, [
@@ -441,7 +441,7 @@ const logsAttributeValuesList = (): ToolBase<typeof LogsAttributeValuesListSchem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas._LogsValuesResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/values/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/values/`,
             query: {
                 attribute_type: params.attribute_type,
                 dateRange: params.dateRange,
@@ -465,7 +465,7 @@ const logsAttributesList = (): ToolBase<typeof LogsAttributesListSchema, Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas._LogsAttributesResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/attributes/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/attributes/`,
             query: {
                 attribute_type: params.attribute_type,
                 dateRange: params.dateRange,
@@ -495,7 +495,7 @@ const logsCount = (): ToolBase<typeof LogsCountSchema, Schemas._LogsCountRespons
         }
         const result = await context.api.request<Schemas._LogsCountResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/count/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/count/`,
             body,
         })
         const filtered = pickResponseFields(result, ['count']) as typeof result
@@ -516,7 +516,7 @@ const logsCountRanges = (): ToolBase<typeof LogsCountRangesSchema, Schemas._Logs
         }
         const result = await context.api.request<Schemas._LogsCountRangesResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/count-ranges/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/count-ranges/`,
             body,
         })
         const filtered = pickResponseFields(result, ['ranges', 'interval']) as typeof result
@@ -537,7 +537,7 @@ const logsFacetValuesCreate = (): ToolBase<typeof LogsFacetValuesCreateSchema, S
         }
         const result = await context.api.request<Schemas._LogsFacetValuesResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/facet_values/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/facet_values/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results']) as typeof result
@@ -558,7 +558,7 @@ const logsPatterns = (): ToolBase<typeof LogsPatternsSchema, Schemas._LogsPatter
         }
         const result = await context.api.request<Schemas._LogsPatternsResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/patterns/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/patterns/`,
             body,
         })
         const filtered = omitResponseFields(result, [
@@ -588,7 +588,7 @@ const logsPatternsDiff = (): ToolBase<typeof LogsPatternsDiffSchema, Schemas._Lo
         }
         const result = await context.api.request<Schemas._LogsPatternsDiffResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/patterns_diff/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/patterns_diff/`,
             body,
         })
         const filtered = omitResponseFields(result, [
@@ -614,7 +614,7 @@ const logsServicesCreate = (): ToolBase<typeof LogsServicesCreateSchema, Schemas
         }
         const result = await context.api.request<Schemas._LogsServicesResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/services/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/services/`,
             body,
         })
         const filtered = pickResponseFields(result, ['services', 'sparkline']) as typeof result
@@ -635,7 +635,7 @@ const logsSparklineQuery = (): ToolBase<typeof LogsSparklineQuerySchema, Schemas
         }
         const result = await context.api.request<Schemas._LogsSparklineResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/sparkline/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/sparkline/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results']) as typeof result
@@ -656,7 +656,7 @@ const queryLogs = (): ToolBase<typeof QueryLogsSchema, Schemas._LogsQueryRespons
         }
         const result = await context.api.request<Schemas._LogsQueryResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/logs/query/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/logs/query/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results']) as typeof result

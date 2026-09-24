@@ -29,7 +29,7 @@ const mcpAnalyticsIntentClustersRecompute = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/intent_clusters/recompute/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/intent_clusters/recompute/`,
         })
         return result
     },
@@ -47,7 +47,7 @@ const mcpAnalyticsIntentClustersRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.MCPIntentClusterSnapshot[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/intent_clusters/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/intent_clusters/`,
             query: {
                 tool: params.tool,
             },
@@ -70,7 +70,7 @@ const mcpAnalyticsSessionsGenerateIntent = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.MCPSessionIntent>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/sessions/${encodeURIComponent(String(params.id))}/generate_intent/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/sessions/${encodeURIComponent(String(params.id))}/generate_intent/`,
             query: {
                 date_from: params.date_from,
             },
@@ -91,7 +91,7 @@ const mcpAnalyticsSessionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedMCPSessionList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/sessions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/sessions/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -119,7 +119,7 @@ const mcpAnalyticsSessionsToolCalls = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedMCPToolCallList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/sessions/${encodeURIComponent(String(params.id))}/tool_calls/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/sessions/${encodeURIComponent(String(params.id))}/tool_calls/`,
             query: {
                 date_from: params.date_from,
                 limit: params.limit,
@@ -159,7 +159,7 @@ const mcpFeedbackSubmit = (): ToolBase<typeof McpFeedbackSubmitSchema, Schemas.M
         }
         const result = await context.api.request<Schemas.MCPAnalyticsSubmission>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/feedback/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/feedback/`,
             body,
         })
         return result
@@ -198,7 +198,7 @@ const mcpMissingCapabilityReport = (): ToolBase<
         }
         const result = await context.api.request<Schemas.MCPAnalyticsSubmission>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/missing_capabilities/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_analytics/missing_capabilities/`,
             body,
         })
         return result

@@ -55,7 +55,7 @@ const reminderCreate = (): ToolBase<typeof ReminderCreateSchema, Schemas.Reminde
         }
         const result = await context.api.request<Schemas.Reminder>({
             method: 'POST',
-            path: `/api/reminders/`,
+            path: `/v1/reminders/`,
             body,
         })
         return result
@@ -70,7 +70,7 @@ const reminderDelete = (): ToolBase<typeof ReminderDeleteSchema, Schemas.Reminde
     handler: async (context: Context, params: z.infer<typeof ReminderDeleteSchema>) => {
         const result = await context.api.request<Schemas.Reminder>({
             method: 'PATCH',
-            path: `/api/reminders/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/reminders/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -85,7 +85,7 @@ const reminderGet = (): ToolBase<typeof ReminderGetSchema, Schemas.Reminder> => 
     handler: async (context: Context, params: z.infer<typeof ReminderGetSchema>) => {
         const result = await context.api.request<Schemas.Reminder>({
             method: 'GET',
-            path: `/api/reminders/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/reminders/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -133,7 +133,7 @@ const reminderUpdate = (): ToolBase<typeof ReminderUpdateSchema, Schemas.Reminde
         }
         const result = await context.api.request<Schemas.Reminder>({
             method: 'PATCH',
-            path: `/api/reminders/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/reminders/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -148,7 +148,7 @@ const remindersList = (): ToolBase<typeof RemindersListSchema, WithInsightsUrl<S
     handler: async (context: Context, params: z.infer<typeof RemindersListSchema>) => {
         const result = await context.api.request<Schemas.PaginatedReminderList>({
             method: 'GET',
-            path: `/api/reminders/`,
+            path: `/v1/reminders/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,

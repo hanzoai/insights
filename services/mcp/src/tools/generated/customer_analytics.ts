@@ -100,7 +100,7 @@ const accountRelationshipDefinitionsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.AccountRelationshipDefinition>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/`,
             body,
         })
         return result
@@ -121,7 +121,7 @@ const accountRelationshipDefinitionsDestroy = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -139,7 +139,7 @@ const accountRelationshipDefinitionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedAccountRelationshipDefinitionList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -173,7 +173,7 @@ const accountRelationshipDefinitionsPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.AccountRelationshipDefinition>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -194,7 +194,7 @@ const accountRelationshipDefinitionsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AccountRelationshipDefinition>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/account_relationship_definitions/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -232,7 +232,7 @@ const accountsCreate = (): ToolBase<typeof AccountsCreateSchema, Schemas.Account
         }
         const result = await context.api.request<Schemas.Account>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/`,
             body,
         })
         return result
@@ -260,7 +260,7 @@ const accountsCustomPropertyValuesCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.CustomPropertyValue>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/custom_property_values/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/custom_property_values/`,
             body,
         })
         return result
@@ -279,7 +279,7 @@ const accountsCustomPropertyValuesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.CustomPropertyValue[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/custom_property_values/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/custom_property_values/`,
         })
         return await withInsightsUrl(context, result, '/customer_analytics')
     },
@@ -294,7 +294,7 @@ const accountsDestroy = (): ToolBase<typeof AccountsDestroySchema, unknown> => (
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -313,7 +313,7 @@ const accountsList = (): ToolBase<typeof AccountsListSchema, WithInsightsUrl<Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedAccountList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/`,
             query: {
                 all_roles_unassigned: params.all_roles_unassigned,
                 limit: params.limit,
@@ -348,7 +348,7 @@ const accountsNotebooksCreate = (): ToolBase<typeof AccountsNotebooksCreateSchem
         }
         const result = await context.api.request<Schemas.AccountNotebook>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/notebooks/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/notebooks/`,
             body,
         })
         return result
@@ -364,7 +364,7 @@ const accountsNotebooksDestroy = (): ToolBase<typeof AccountsNotebooksDestroySch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
         })
         return result
     },
@@ -384,7 +384,7 @@ const accountsNotebooksList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedAccountNotebookList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/notebooks/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/notebooks/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -405,7 +405,7 @@ const accountsNotebooksRetrieve = (): ToolBase<typeof AccountsNotebooksRetrieveS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AccountNotebook>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
         })
         return result
     },
@@ -445,7 +445,7 @@ const accountsPartialUpdate = (): ToolBase<typeof AccountsPartialUpdateSchema, S
         }
         const result = await context.api.request<Schemas.Account>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -473,7 +473,7 @@ const accountsRelationshipsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.AccountRelationship>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/relationships/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/relationships/`,
             body,
         })
         return result
@@ -492,7 +492,7 @@ const accountsRelationshipsEndCreate = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AccountRelationship>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/relationships/${encodeURIComponent(String(params.id))}/end/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/relationships/${encodeURIComponent(String(params.id))}/end/`,
         })
         return result
     },
@@ -512,7 +512,7 @@ const accountsRelationshipsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AccountRelationship[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/relationships/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.account_id))}/relationships/`,
             query: {
                 include_history: params.include_history,
             },
@@ -530,7 +530,7 @@ const accountsRetrieve = (): ToolBase<typeof AccountsRetrieveSchema, Schemas.Acc
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Account>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -550,7 +550,7 @@ const accountsSummariesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedAccountChannelSummaryList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.id))}/summaries/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/accounts/${encodeURIComponent(String(params.id))}/summaries/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -573,7 +573,7 @@ const announcementsChannelsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AnnouncementChannel[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/announcements/channels/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/announcements/channels/`,
         })
         return result
     },
@@ -635,7 +635,7 @@ const announcementsCreateExecute = (): ToolBase<typeof AnnouncementsCreateSchema
         }
         const result = await context.api.request<Schemas.Announcement>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/announcements/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/announcements/`,
             body,
         })
         return result
@@ -654,7 +654,7 @@ const announcementsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedAnnouncementList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/announcements/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/announcements/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -677,7 +677,7 @@ const announcementsRetrieve = (): ToolBase<typeof AnnouncementsRetrieveSchema, S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Announcement>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/announcements/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/announcements/${encodeURIComponent(String(params.short_id))}/`,
         })
         return result
     },
@@ -717,7 +717,7 @@ const customPropertyDefinitionsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.CustomPropertyDefinition>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/`,
             body,
         })
         return result
@@ -733,7 +733,7 @@ const customPropertyDefinitionsDestroy = (): ToolBase<typeof CustomPropertyDefin
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -751,7 +751,7 @@ const customPropertyDefinitionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedCustomPropertyDefinitionList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -797,7 +797,7 @@ const customPropertyDefinitionsPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.CustomPropertyDefinition>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -816,7 +816,7 @@ const customPropertyDefinitionsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.CustomPropertyDefinition>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_definitions/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -831,7 +831,7 @@ const customPropertySourcesBackfill = (): ToolBase<typeof CustomPropertySourcesB
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/backfill/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/backfill/`,
         })
         return result
     },
@@ -874,7 +874,7 @@ const customPropertySourcesCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.CustomPropertySource>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/`,
             body,
         })
         return result
@@ -890,7 +890,7 @@ const customPropertySourcesDestroy = (): ToolBase<typeof CustomPropertySourcesDe
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -908,7 +908,7 @@ const customPropertySourcesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedCustomPropertySourceList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -942,7 +942,7 @@ const customPropertySourcesPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.CustomPropertySource>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -961,7 +961,7 @@ const customPropertySourcesRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.CustomPropertySource>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -981,7 +981,7 @@ const customPropertySourcesRunsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedCustomPropertySyncRunList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/runs/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -1000,7 +1000,7 @@ const customPropertySourcesSync = (): ToolBase<typeof CustomPropertySourcesSyncS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/sync/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/custom_property_sources/${encodeURIComponent(String(params.id))}/sync/`,
         })
         return result
     },
@@ -1021,7 +1021,7 @@ const eventStreamsAddAccount = (): ToolBase<typeof EventStreamsAddAccountSchema,
         }
         const result = await context.api.request<Schemas.EventStream>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/add_account/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/add_account/`,
             body,
         })
         return result
@@ -1053,7 +1053,7 @@ const eventStreamsCreate = (): ToolBase<typeof EventStreamsCreateSchema, Schemas
         }
         const result = await context.api.request<Schemas.EventStream>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/event_streams/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/event_streams/`,
             body,
         })
         return result
@@ -1069,7 +1069,7 @@ const eventStreamsDestroy = (): ToolBase<typeof EventStreamsDestroySchema, unkno
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1085,7 +1085,7 @@ const eventStreamsList = (): ToolBase<typeof EventStreamsListSchema, Schemas.Eve
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EventStream[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/event_streams/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/event_streams/`,
         })
         return result
     },
@@ -1118,7 +1118,7 @@ const eventStreamsPartialUpdate = (): ToolBase<typeof EventStreamsPartialUpdateS
         }
         const result = await context.api.request<Schemas.EventStream>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -1140,7 +1140,7 @@ const eventStreamsRemoveAccount = (): ToolBase<typeof EventStreamsRemoveAccountS
         }
         const result = await context.api.request<Schemas.EventStream>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/remove_account/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/remove_account/`,
             body,
         })
         return result
@@ -1159,7 +1159,7 @@ const eventStreamsSendTestMessage = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EventStreamTestMessage>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/send_test_message/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/event_streams/${encodeURIComponent(String(params.id))}/send_test_message/`,
         })
         return result
     },
@@ -1206,7 +1206,7 @@ const usageMetricsCreate = (): ToolBase<typeof UsageMetricsCreateSchema, Schemas
         }
         const result = await context.api.request<Schemas.GroupUsageMetric>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/`,
             body,
         })
         return result
@@ -1226,7 +1226,7 @@ const usageMetricsDestroy = (): ToolBase<typeof UsageMetricsDestroySchema, unkno
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1250,7 +1250,7 @@ const usageMetricsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedGroupUsageMetricList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -1301,7 +1301,7 @@ const usageMetricsPartialUpdate = (): ToolBase<typeof UsageMetricsPartialUpdateS
         }
         const result = await context.api.request<Schemas.GroupUsageMetric>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -1321,7 +1321,7 @@ const usageMetricsRetrieve = (): ToolBase<typeof UsageMetricsRetrieveSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.GroupUsageMetric>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/groups_types/${encodeURIComponent(String(params.group_type_index))}/metrics/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },

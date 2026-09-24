@@ -51,7 +51,7 @@ const batchExportCreate = (): ToolBase<typeof BatchExportCreateSchema, Schemas.B
         }
         const result = await context.api.request<Schemas.BatchExport>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/batch_exports/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/batch_exports/`,
             body,
         })
         return result
@@ -67,7 +67,7 @@ const batchExportDelete = (): ToolBase<typeof BatchExportDeleteSchema, unknown> 
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/batch_exports/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/batch_exports/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -82,7 +82,7 @@ const batchExportGet = (): ToolBase<typeof BatchExportGetSchema, Schemas.BatchEx
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.BatchExport>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/batch_exports/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/batch_exports/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -124,7 +124,7 @@ const batchExportUpdate = (): ToolBase<typeof BatchExportUpdateSchema, Schemas.B
         }
         const result = await context.api.request<Schemas.BatchExport>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/batch_exports/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/batch_exports/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -143,7 +143,7 @@ const batchExportsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedBatchExportList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/batch_exports/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/batch_exports/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -206,7 +206,7 @@ const fileDownloadBatchExportsCancelCreate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/file_download_batch_exports/${encodeURIComponent(String(params.id))}/cancel/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/file_download_batch_exports/${encodeURIComponent(String(params.id))}/cancel/`,
             body,
         })
         return result
@@ -244,7 +244,7 @@ const fileDownloadBatchExportsCreate = (): ToolBase<typeof FileDownloadBatchExpo
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/file_download_batch_exports/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/file_download_batch_exports/`,
             body,
         })
         return result
@@ -263,7 +263,7 @@ const fileDownloadBatchExportsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.RetrieveFileDownloadResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/file_download_batch_exports/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/file_download_batch_exports/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },

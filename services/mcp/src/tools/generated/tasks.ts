@@ -49,7 +49,7 @@ const channelCreate = (): ToolBase<typeof ChannelCreateSchema, Schemas.ChannelDT
         }
         const result = await context.api.request<Schemas.ChannelDTO>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/task_channels/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/task_channels/`,
             body,
         })
         return result
@@ -70,7 +70,7 @@ const channelInstructionsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ChannelInstructionsDTO>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/task_channels/${encodeURIComponent(String(params.id))}/instructions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/task_channels/${encodeURIComponent(String(params.id))}/instructions/`,
         })
         return result
     },
@@ -85,7 +85,7 @@ const channelList = (): ToolBase<typeof ChannelListSchema, Schemas.PaginatedChan
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedChannelDTOList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/task_channels/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/task_channels/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -106,7 +106,7 @@ const channelRetrieve = (): ToolBase<typeof ChannelRetrieveSchema, Schemas.Chann
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ChannelDTO>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/task_channels/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/task_channels/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -213,7 +213,7 @@ const loopsCreateExecute = (): ToolBase<typeof LoopsCreateSchemaExecute, Schemas
         }
         const result = await context.api.request<Schemas.LoopDTO>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/loops/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/loops/`,
             body,
         })
         return result
@@ -229,7 +229,7 @@ const loopsDestroy = (): ToolBase<typeof LoopsDestroySchema, unknown> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -244,7 +244,7 @@ const loopsList = (): ToolBase<typeof LoopsListSchema, WithInsightsUrl<Schemas.P
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedLoopDTOList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/loops/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/loops/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -317,7 +317,7 @@ const loopsPartialUpdate = (): ToolBase<typeof LoopsPartialUpdateSchema, Schemas
         }
         const result = await context.api.request<Schemas.LoopDTO>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -342,7 +342,7 @@ const loopsPreviewCreate = (): ToolBase<typeof LoopsPreviewCreateSchema, Schemas
         }
         const result = await context.api.request<Schemas.LoopPreviewDTO>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/preview/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/preview/`,
             body,
         })
         return result
@@ -358,7 +358,7 @@ const loopsRetrieve = (): ToolBase<typeof LoopsRetrieveSchema, WithInsightsUrl<S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LoopDTO>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/`,
         })
         return await withInsightsUrl(context, result, `/tasks/${result.id}`)
     },
@@ -373,7 +373,7 @@ const loopsRunCreate = (): ToolBase<typeof LoopsRunCreateSchema, Schemas.LoopFir
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LoopFireResult>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/run/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/run/`,
         })
         return result
     },
@@ -390,7 +390,7 @@ const loopsRunsRetrieve = (): ToolBase<typeof LoopsRunsRetrieveSchema, WithInsig
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LoopRunPage>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/loops/${encodeURIComponent(String(params.id))}/runs/`,
             query: {
                 cursor: params.cursor,
                 limit: params.limit,
@@ -457,7 +457,7 @@ const tasksCreate = (): ToolBase<typeof TasksCreateSchema, WithInsightsUrl<Schem
         }
         const result = await context.api.request<Schemas.TaskDetailDTO>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tasks/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tasks/`,
             body,
         })
         const filtered = pickResponseFields(result, [
@@ -484,7 +484,7 @@ const tasksList = (): ToolBase<typeof TasksListSchema, WithInsightsUrl<Schemas.P
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedTaskDetailDTOList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tasks/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tasks/`,
             query: {
                 all_team_tasks: params.all_team_tasks,
                 archived: params.archived,
@@ -539,7 +539,7 @@ const tasksRetrieve = (): ToolBase<typeof TasksRetrieveSchema, WithInsightsUrl<S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.TaskDetailDTO>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tasks/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tasks/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = omitResponseFields(result, [
             'latest_run.log_url',
@@ -562,7 +562,7 @@ const tasksRunsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedTaskRunDetailDTOList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tasks/${encodeURIComponent(String(params.task_id))}/runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tasks/${encodeURIComponent(String(params.task_id))}/runs/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -599,7 +599,7 @@ const tasksRunsRetrieve = (): ToolBase<typeof TasksRunsRetrieveSchema, Schemas.T
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.TaskRunDetailDTO>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tasks/${encodeURIComponent(String(params.task_id))}/runs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tasks/${encodeURIComponent(String(params.task_id))}/runs/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = omitResponseFields(result, [
             'log_url',
@@ -626,7 +626,7 @@ const tasksRunsSessionLogsRetrieve = (): ToolBase<typeof TasksRunsSessionLogsRet
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tasks/${encodeURIComponent(String(params.task_id))}/runs/${encodeURIComponent(String(params.id))}/session_logs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tasks/${encodeURIComponent(String(params.task_id))}/runs/${encodeURIComponent(String(params.id))}/session_logs/`,
             query: {
                 after: params.after,
                 event_types: params.event_types,

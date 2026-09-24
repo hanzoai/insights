@@ -38,7 +38,7 @@ const sessionRecordingBulkDelete = (): ToolBase<
         }
         const result = await context.api.request<Schemas.SessionRecordingBulkDeleteResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/session_recordings/bulk_delete/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/session_recordings/bulk_delete/`,
             body,
         })
         return result
@@ -54,7 +54,7 @@ const sessionRecordingDelete = (): ToolBase<typeof SessionRecordingDeleteSchema,
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/session_recordings/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/session_recordings/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -70,7 +70,7 @@ const sessionRecordingGet = (): ToolBase<typeof SessionRecordingGetSchema, WithI
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.SessionRecording>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/session_recordings/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/session_recordings/${encodeURIComponent(String(params.id))}/`,
             })
             const filtered = omitResponseFields(result, ['person.properties']) as typeof result
             return await withInsightsUrl(context, filtered, `/replay/${filtered.id}`)
@@ -111,7 +111,7 @@ const sessionRecordingPlaylistCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.SessionRecordingPlaylist>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/session_recording_playlists/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/session_recording_playlists/`,
             body,
         })
         return result
@@ -130,7 +130,7 @@ const sessionRecordingPlaylistGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SessionRecordingPlaylist>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/session_recording_playlists/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/session_recording_playlists/${encodeURIComponent(String(params.short_id))}/`,
         })
         return result
     },
@@ -169,7 +169,7 @@ const sessionRecordingPlaylistUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.SessionRecordingPlaylist>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/session_recording_playlists/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/session_recording_playlists/${encodeURIComponent(String(params.short_id))}/`,
             body,
         })
         return result
@@ -188,7 +188,7 @@ const sessionRecordingPlaylistsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedSessionRecordingPlaylistList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/session_recording_playlists/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/session_recording_playlists/`,
             query: {
                 created_by: params.created_by,
                 limit: params.limit,
@@ -212,7 +212,7 @@ const sessionRecordingSummariesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedSingleSessionSummaryMinimalList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/single_session_summaries/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/single_session_summaries/`,
             query: {
                 created_by: params.created_by,
                 date_from: params.date_from,
@@ -243,7 +243,7 @@ const sessionRecordingSummaryGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SingleSessionSummary>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/single_session_summaries/${encodeURIComponent(String(params.session_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/single_session_summaries/${encodeURIComponent(String(params.session_id))}/`,
         })
         return await withInsightsUrl(context, result, `/replay/${result.session_id}`)
     },

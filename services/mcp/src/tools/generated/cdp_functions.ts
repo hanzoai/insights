@@ -91,7 +91,7 @@ const cdpFunctionsCreate = (): ToolBase<typeof CdpFunctionsCreateSchema, Schemas
         }
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/`,
             body,
         })
         const filtered = omitResponseFields(result, ['inputs.*.value', 'mappings.*.inputs.*.value']) as typeof result
@@ -108,7 +108,7 @@ const cdpFunctionsDelete = (): ToolBase<typeof CdpFunctionsDeleteSchema, Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -124,7 +124,7 @@ const cdpFunctionsDiscardDraft = (): ToolBase<typeof CdpFunctionsDiscardDraftSch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/discard_draft/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/discard_draft/`,
         })
         return result
     },
@@ -139,7 +139,7 @@ const cdpFunctionsGetRevision = (): ToolBase<typeof CdpFunctionsGetRevisionSchem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.InsightsFunctionRevision>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/revisions/${encodeURIComponent(String(params.version))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/revisions/${encodeURIComponent(String(params.version))}/`,
         })
         return result
     },
@@ -178,7 +178,7 @@ const cdpFunctionsInvocationsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.InsightsFunctionInvocation>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/invocations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/invocations/`,
             body,
         })
         return result
@@ -197,7 +197,7 @@ const cdpFunctionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedInsightsFunctionMinimalList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/`,
             query: {
                 created_at: params.created_at,
                 created_by: params.created_by,
@@ -247,7 +247,7 @@ const cdpFunctionsListRevisions = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedInsightsFunctionRevisionBasicList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/revisions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/revisions/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -268,7 +268,7 @@ const cdpFunctionsLogsRetrieve = (): ToolBase<typeof CdpFunctionsLogsRetrieveSch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/logs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/logs/`,
             query: {
                 after: params.after,
                 before: params.before,
@@ -296,7 +296,7 @@ const cdpFunctionsMetricsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AppMetricsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/metrics/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/metrics/`,
             query: {
                 after: params.after,
                 before: params.before,
@@ -369,7 +369,7 @@ const cdpFunctionsPartialUpdate = (): ToolBase<typeof CdpFunctionsPartialUpdateS
         }
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         const filtered = omitResponseFields(result, ['inputs.*.value', 'mappings.*.inputs.*.value']) as typeof result
@@ -395,7 +395,7 @@ const cdpFunctionsPublish = (): ToolBase<typeof CdpFunctionsPublishSchema, Schem
         }
         const result = await context.api.request<Schemas.InsightsFunctionPublishResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/publish/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/publish/`,
             body,
         })
         return result
@@ -418,7 +418,7 @@ const cdpFunctionsRearrangePartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.InsightsFunction[]>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/rearrange/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/rearrange/`,
             body,
         })
         return result
@@ -440,7 +440,7 @@ const cdpFunctionsRestoreRevision = (): ToolBase<typeof CdpFunctionsRestoreRevis
         }
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/revisions/${encodeURIComponent(String(params.version))}/restore/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/revisions/${encodeURIComponent(String(params.version))}/restore/`,
             body,
         })
         return result
@@ -456,7 +456,7 @@ const cdpFunctionsRetrieve = (): ToolBase<typeof CdpFunctionsRetrieveSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.InsightsFunction>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_functions/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },

@@ -62,7 +62,7 @@ const endpointCreate = (): ToolBase<typeof EndpointCreateSchema, WithInsightsUrl
         }
         const result = await context.api.request<Schemas.EndpointResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/`,
             body,
         })
         return await withInsightsUrl(context, result, `/endpoints/${result.name}`)
@@ -78,7 +78,7 @@ const endpointDelete = (): ToolBase<typeof EndpointDeleteSchema, Schemas.Endpoin
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EndpointResponse>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/`,
             body: { deleted: true },
         })
         return result
@@ -94,7 +94,7 @@ const endpointGet = (): ToolBase<typeof EndpointGetSchema, WithInsightsUrl<Schem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EndpointVersionResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/`,
         })
         return await withInsightsUrl(context, result, `/endpoints/${result.name}`)
     },
@@ -111,7 +111,7 @@ const endpointLogs = (): ToolBase<typeof EndpointLogsSchema, unknown> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/logs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/logs/`,
             query: {
                 after: params.after,
                 before: params.before,
@@ -138,7 +138,7 @@ const endpointMaterializationConditions = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EndpointMaterializationConditions>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/materialization_conditions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/materialization_conditions/`,
         })
         return result
     },
@@ -156,7 +156,7 @@ const endpointMaterializationStatus = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.EndpointMaterialization>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/materialization_status/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/materialization_status/`,
         })
         return await withInsightsUrl(context, result, `/endpoints/${result.name}`)
     },
@@ -180,7 +180,7 @@ const endpointMaterializationSuggestion = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EndpointMaterializationSuggestion>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/materialization_suggestion/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/materialization_suggestion/`,
             body,
         })
         return await withInsightsUrl(context, result, `/endpoints/${params.name}`)
@@ -198,7 +198,7 @@ const endpointOpenapiSpec = (): ToolBase<typeof EndpointOpenapiSpecSchema, unkno
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/openapi.json/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/openapi.json/`,
             query: {
                 version: params.version,
             },
@@ -237,7 +237,7 @@ const endpointRun = (): ToolBase<typeof EndpointRunSchema, WithInsightsUrl<Schem
         }
         const result = await context.api.request<Schemas.EndpointRunResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/run/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/run/`,
             body,
         })
         return await withInsightsUrl(context, result, `/endpoints/${result.name}`)
@@ -283,7 +283,7 @@ const endpointUpdate = (): ToolBase<typeof EndpointUpdateSchema, WithInsightsUrl
         }
         const result = await context.api.request<Schemas.EndpointResponse>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/endpoints/${result.name}`)
@@ -304,7 +304,7 @@ const endpointVersions = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedEndpointVersionResponseList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/versions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/versions/`,
             query: {
                 created_by: params.created_by,
                 is_active: params.is_active,
@@ -337,7 +337,7 @@ const endpointsGetAll = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedEndpointResponseList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/`,
             query: {
                 created_by: params.created_by,
                 is_active: params.is_active,
@@ -374,7 +374,7 @@ const endpointsLastExecutionTimes = (): ToolBase<
         }
         const result = await context.api.request<Schemas.QueryStatusResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/last_execution_times/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/last_execution_times/`,
             body,
         })
         return result
@@ -399,7 +399,7 @@ const endpointsMaterializationPreview = (): ToolBase<typeof EndpointsMaterializa
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/materialization_preview/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/endpoints/${encodeURIComponent(String(params.name))}/materialization_preview/`,
             body,
         })
         return await withInsightsUrl(context, result, `/endpoints/${params.name}`)

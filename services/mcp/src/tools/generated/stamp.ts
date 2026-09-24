@@ -46,7 +46,7 @@ const stampDigestChannelsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DigestChannel>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/digest_channels/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/digest_channels/`,
             body,
         })
         return result
@@ -62,7 +62,7 @@ const stampDigestChannelsDelete = (): ToolBase<typeof StampDigestChannelsDeleteS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/digest_channels/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/digest_channels/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -80,7 +80,7 @@ const stampDigestChannelsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDigestChannelList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/digest_channels/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/digest_channels/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -102,7 +102,7 @@ const stampDigestRunsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDigestRunList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/digest_runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/digest_runs/`,
             query: {
                 digest_channel: params.digest_channel,
                 limit: params.limit,
@@ -122,7 +122,7 @@ const stampPullRequestsGet = (): ToolBase<typeof StampPullRequestsGetSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.StampPullRequest>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/pull_requests/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/pull_requests/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -140,7 +140,7 @@ const stampPullRequestsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedStampPullRequestList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/pull_requests/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/pull_requests/`,
             query: {
                 limit: params.limit,
                 merged: params.merged,
@@ -161,7 +161,7 @@ const stampRepoConfigsDelete = (): ToolBase<typeof StampRepoConfigsDeleteSchema,
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/repo_configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/repo_configs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -176,7 +176,7 @@ const stampRepoConfigsGet = (): ToolBase<typeof StampRepoConfigsGetSchema, Schem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.StampRepoConfig>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/repo_configs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/repo_configs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -194,7 +194,7 @@ const stampRepoConfigsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedStampRepoConfigList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/repo_configs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/repo_configs/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -213,7 +213,7 @@ const stampReviewRunsGet = (): ToolBase<typeof StampReviewRunsGetSchema, Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReviewRun>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/review_runs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/review_runs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -231,7 +231,7 @@ const stampReviewRunsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedReviewRunList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/stamp/review_runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/stamp/review_runs/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,

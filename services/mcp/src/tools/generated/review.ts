@@ -19,7 +19,7 @@ const reviewReviewsGet = (): ToolBase<typeof ReviewReviewsGetSchema, Schemas.Rev
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReviewDetail>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/review/reviews/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/review/reviews/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -37,7 +37,7 @@ const reviewReviewsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReviewRecentReviewsPage>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/review/reviews/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/review/reviews/`,
             query: {
                 limit: params.limit,
                 scope: params.scope,
@@ -60,7 +60,7 @@ const reviewReviewsTrigger = (): ToolBase<typeof ReviewReviewsTriggerSchema, Sch
         }
         const result = await context.api.request<Schemas.ReviewTriggerResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/review/reviews/trigger/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/review/reviews/trigger/`,
             body,
         })
         return result

@@ -41,7 +41,7 @@ const streamlitAppsCreate = (): ToolBase<typeof StreamlitAppsCreateSchema, WithI
         }
         const result = await context.api.request<Schemas.AppContract>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/`,
             body,
         })
         return await withInsightsUrl(context, result, `/streamlit-apps/${result.short_id}`)
@@ -57,7 +57,7 @@ const streamlitAppsDelete = (): ToolBase<typeof StreamlitAppsDeleteSchema, unkno
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/`,
         })
         return result
     },
@@ -72,7 +72,7 @@ const streamlitAppsGet = (): ToolBase<typeof StreamlitAppsGetSchema, WithInsight
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AppContract>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/`,
         })
         return await withInsightsUrl(context, result, `/streamlit-apps/${result.short_id}`)
     },
@@ -90,7 +90,7 @@ const streamlitAppsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedAppSummaryContractList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -130,7 +130,7 @@ const streamlitAppsSetSource = (): ToolBase<typeof StreamlitAppsSetSourceSchema,
         }
         const result = await context.api.request<Schemas.AppVersionContract>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/create_version_from_source/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/create_version_from_source/`,
             body,
         })
         return result
@@ -146,7 +146,7 @@ const streamlitAppsStart = (): ToolBase<typeof StreamlitAppsStartSchema, WithIns
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AppContract>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/start/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/start/`,
         })
         return await withInsightsUrl(context, result, `/streamlit-apps/${result.short_id}`)
     },
@@ -161,7 +161,7 @@ const streamlitAppsStatus = (): ToolBase<typeof StreamlitAppsStatusSchema, Schem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.StreamlitAppStatus>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/status/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/status/`,
         })
         return result
     },
@@ -176,7 +176,7 @@ const streamlitAppsStop = (): ToolBase<typeof StreamlitAppsStopSchema, WithInsig
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AppContract>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/stop/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/stop/`,
         })
         return await withInsightsUrl(context, result, `/streamlit-apps/${result.short_id}`)
     },
@@ -206,7 +206,7 @@ const streamlitAppsUpdate = (): ToolBase<typeof StreamlitAppsUpdateSchema, WithI
         }
         const result = await context.api.request<Schemas.AppContract>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/streamlit-apps/${result.short_id}`)
@@ -225,7 +225,7 @@ const streamlitAppsVersions = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.StreamlitAppVersionList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/versions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/streamlit_apps/${encodeURIComponent(String(params.short_id))}/versions/`,
         })
         return await withInsightsUrl(context, result, '/streamlit-apps')
     },

@@ -45,7 +45,7 @@ const workflowsCreateEmailTemplate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.MessageTemplate>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/messaging_templates/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/messaging_templates/`,
             body,
         })
         const filtered = omitResponseFields(result, ['content', 'created_by']) as typeof result
@@ -65,7 +65,7 @@ const workflowsGetEmailTemplate = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.MessageTemplate>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/messaging_templates/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/messaging_templates/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = omitResponseFields(result, ['content.email.html', 'created_by']) as typeof result
         return await withInsightsUrl(context, filtered, `/workflows/library/templates/${filtered.id}`)
@@ -84,7 +84,7 @@ const workflowsListEmailTemplates = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedMessageTemplateList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/messaging_templates/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/messaging_templates/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -123,7 +123,7 @@ const workflowsPatchEmailTemplate = (): ToolBase<
         const { id, ...body } = parsedParams
         const result = await context.api.request<Schemas.MessageTemplate>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/messaging_templates/${encodeURIComponent(String(id))}/design/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/messaging_templates/${encodeURIComponent(String(id))}/design/`,
             body,
         })
         const filtered = omitResponseFields(result, ['content', 'created_by']) as typeof result
@@ -144,7 +144,7 @@ const workflowsShowEmailTemplate = (): ToolBase<
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.MessageTemplate>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/messaging_templates/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/messaging_templates/${encodeURIComponent(String(params.id))}/`,
             })
             const filtered = omitResponseFields(result, ['content.email.design', 'created_by']) as typeof result
             return await withInsightsUrl(context, filtered, `/workflows/library/templates/${filtered.id}`)
@@ -184,7 +184,7 @@ const workflowsUpdateEmailTemplate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.MessageTemplate>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/messaging_templates/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/messaging_templates/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         const filtered = omitResponseFields(result, ['content', 'created_by']) as typeof result

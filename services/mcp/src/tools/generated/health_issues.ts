@@ -15,7 +15,7 @@ const healthIssuesGet = (): ToolBase<typeof HealthIssuesGetSchema, Schemas.Healt
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.HealthIssueDetail>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/health_issues/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/health_issues/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -33,7 +33,7 @@ const healthIssuesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedHealthIssueList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/health_issues/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/health_issues/`,
             query: {
                 dismissed: params.dismissed,
                 kind: params.kind,
@@ -57,7 +57,7 @@ const healthIssuesSummary = (): ToolBase<typeof HealthIssuesSummarySchema, Schem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.HealthIssueSummary>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/health_issues/summary/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/health_issues/summary/`,
         })
         return result
     },

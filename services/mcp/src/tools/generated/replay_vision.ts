@@ -90,7 +90,7 @@ const visionActionsCreate = (): ToolBase<typeof VisionActionsCreateSchema, Schem
         }
         const result = await context.api.request<Schemas.VisionAction>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/actions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/actions/`,
             body,
         })
         return result
@@ -106,7 +106,7 @@ const visionActionsDelete = (): ToolBase<typeof VisionActionsDeleteSchema, unkno
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -124,7 +124,7 @@ const visionActionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedVisionActionList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/actions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/actions/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -144,7 +144,7 @@ const visionActionsRetrieve = (): ToolBase<typeof VisionActionsRetrieveSchema, S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.VisionAction>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -164,7 +164,7 @@ const visionActionsRunsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedVisionActionRunListList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.vision_action_id))}/runs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.vision_action_id))}/runs/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -183,7 +183,7 @@ const visionActionsRunsRetrieve = (): ToolBase<typeof VisionActionsRunsRetrieveS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.VisionActionRun>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.vision_action_id))}/runs/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.vision_action_id))}/runs/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -234,7 +234,7 @@ const visionActionsUpdate = (): ToolBase<typeof VisionActionsUpdateSchema, Schem
         }
         const result = await context.api.request<Schemas.VisionAction>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/actions/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -262,7 +262,7 @@ const visionObservationsLabelCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ReplayObservationLabel>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/observations/${encodeURIComponent(String(params.id))}/label/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/observations/${encodeURIComponent(String(params.id))}/label/`,
             body,
         })
         return result
@@ -278,7 +278,7 @@ const visionObservationsLabelDestroy = (): ToolBase<typeof VisionObservationsLab
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/observations/${encodeURIComponent(String(params.id))}/label/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/observations/${encodeURIComponent(String(params.id))}/label/`,
         })
         return result
     },
@@ -296,7 +296,7 @@ const visionObservationsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedReplayObservationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/observations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/observations/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -336,7 +336,7 @@ const visionObservationsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReplayObservation>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/observations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/observations/${encodeURIComponent(String(params.id))}/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -367,7 +367,7 @@ const visionQuotaRetrieve = (): ToolBase<typeof VisionQuotaRetrieveSchema, Schem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.VisionQuota>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/quota/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/quota/`,
         })
         return result
     },
@@ -400,7 +400,7 @@ const visionScannersAffectedCohortCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.AffectedCohortResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/affected_cohort/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/affected_cohort/`,
             body,
         })
         return result
@@ -450,7 +450,7 @@ const visionScannersCreate = (): ToolBase<typeof VisionScannersCreateSchema, Sch
         }
         const result = await context.api.request<Schemas.ReplayScanner>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/`,
             body,
         })
         return result
@@ -466,7 +466,7 @@ const visionScannersDelete = (): ToolBase<typeof VisionScannersDeleteSchema, unk
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -500,7 +500,7 @@ const visionScannersEstimateCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.EstimateResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/estimate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/estimate/`,
             body,
         })
         return result
@@ -516,7 +516,7 @@ const visionScannersGet = (): ToolBase<typeof VisionScannersGetSchema, Schemas.R
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReplayScanner>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -536,7 +536,7 @@ const visionScannersImpactRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScannerImpact>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/impact/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/impact/`,
             query: {
                 max_score: params.max_score,
                 min_score: params.min_score,
@@ -573,7 +573,7 @@ const visionScannersInlineScanCreate = (): ToolBase<typeof VisionScannersInlineS
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/inline_scan/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/inline_scan/`,
             body,
         })
         return result
@@ -592,7 +592,7 @@ const visionScannersList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedReplayScannerList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/`,
             query: {
                 created_by: params.created_by,
                 emits_signals: params.emits_signals,
@@ -622,7 +622,7 @@ const visionScannersObservationsGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReplayObservation>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/observations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/observations/${encodeURIComponent(String(params.id))}/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -657,7 +657,7 @@ const visionScannersObservationsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedReplayObservationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/observations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/observations/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -705,7 +705,7 @@ const visionScannersObservationsStats = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ObservationStats>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/observations/stats/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/observations/stats/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -741,7 +741,7 @@ const visionScannersPromptSuggestionsApply = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ReplayScannerPromptSuggestion>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/prompt_suggestions/${encodeURIComponent(String(params.id))}/apply/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/prompt_suggestions/${encodeURIComponent(String(params.id))}/apply/`,
             body,
         })
         return result
@@ -762,7 +762,7 @@ const visionScannersPromptSuggestionsCurrent = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.CurrentPromptSuggestion>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/prompt_suggestions/current/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/prompt_suggestions/current/`,
         })
         return result
     },
@@ -782,7 +782,7 @@ const visionScannersPromptSuggestionsDismiss = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReplayScannerPromptSuggestion>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/prompt_suggestions/${encodeURIComponent(String(params.id))}/dismiss/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/prompt_suggestions/${encodeURIComponent(String(params.id))}/dismiss/`,
         })
         return result
     },
@@ -802,7 +802,7 @@ const visionScannersPromptSuggestionsGenerate = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ReplayScannerPromptSuggestion>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/prompt_suggestions/generate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.scanner_id))}/prompt_suggestions/generate/`,
         })
         return result
     },
@@ -826,7 +826,7 @@ const visionScannersScanSession = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ObserveAlreadyScanned>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/observe/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/observe/`,
             body,
         })
         return result
@@ -878,7 +878,7 @@ const visionScannersUpdate = (): ToolBase<typeof VisionScannersUpdateSchema, Sch
         }
         const result = await context.api.request<Schemas.ReplayScanner>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/vision/scanners/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result

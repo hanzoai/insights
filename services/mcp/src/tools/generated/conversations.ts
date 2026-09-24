@@ -37,7 +37,7 @@ const conversationsTicketsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedTicketList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/`,
             query: {
                 ai_triage_result: params.ai_triage_result,
                 assignee: params.assignee,
@@ -97,7 +97,7 @@ const conversationsTicketsMessagesRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedTicketMessageList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/messages/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/messages/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -116,7 +116,7 @@ const conversationsTicketsNotesDestroy = (): ToolBase<typeof ConversationsTicket
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/notes/${encodeURIComponent(String(params.message_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/notes/${encodeURIComponent(String(params.message_id))}/`,
         })
         return result
     },
@@ -143,7 +143,7 @@ const conversationsTicketsNotesPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.TicketMessage>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/notes/${encodeURIComponent(String(params.message_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/notes/${encodeURIComponent(String(params.message_id))}/`,
             body,
         })
         return result
@@ -174,7 +174,7 @@ const conversationsTicketsReplyCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.TicketMessage>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/reply/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/reply/`,
             body,
         })
         return result
@@ -193,7 +193,7 @@ const conversationsTicketsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Ticket>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = pickResponseFields(result, [
             'id',
@@ -256,7 +256,7 @@ const conversationsTicketsUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.Ticket>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/conversations/tickets/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/support/tickets/${result.id}`)
@@ -275,7 +275,7 @@ const conversationsViewsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedTicketViewList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/conversations/views/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/conversations/views/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,

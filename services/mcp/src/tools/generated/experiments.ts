@@ -66,7 +66,7 @@ const experimentActivity = (): ToolBase<typeof ExperimentActivitySchema, Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ActivityLogPaginatedResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/activity/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/activity/`,
             query: {
                 limit: params.limit,
                 page: params.page,
@@ -92,7 +92,7 @@ const experimentArchive = (): ToolBase<typeof ExperimentArchiveSchema, WithInsig
             }
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/archive/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/archive/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
@@ -133,7 +133,7 @@ const experimentCalculateRunningTime = (): ToolBase<
         }
         const result = await context.api.request<Schemas.RunningTimeCalculationResult>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/calculate_running_time/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/calculate_running_time/`,
             body,
         })
         return result
@@ -164,7 +164,7 @@ const experimentCopyToProject = (): ToolBase<typeof ExperimentCopyToProjectSchem
         }
         const result = await context.api.request<Schemas.Experiment>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/copy_to_project/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/copy_to_project/`,
             body,
         })
         const filtered = pickResponseFields(result, [
@@ -254,7 +254,7 @@ const experimentCreate = (): ToolBase<typeof ExperimentCreateSchema, WithInsight
             }
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/`,
                 body,
             })
             const filtered = pickResponseFields(result, [
@@ -310,7 +310,7 @@ const experimentCreateFromPrompt = (): ToolBase<
             }
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/create_from_prompt/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/create_from_prompt/`,
                 body,
             })
             const filtered = pickResponseFields(result, [
@@ -345,7 +345,7 @@ const experimentDelete = (): ToolBase<typeof ExperimentDeleteSchema, Schemas.Exp
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Experiment>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         const filtered = pickResponseFields(result, ['id', 'name', 'deleted']) as typeof result
@@ -403,7 +403,7 @@ const experimentDuplicate = (): ToolBase<typeof ExperimentDuplicateSchema, unkno
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/duplicate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/duplicate/`,
             body,
         })
         return result
@@ -438,7 +438,7 @@ const experimentEnd = (): ToolBase<typeof ExperimentEndSchema, WithInsightsUrl<S
             }
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/end/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/end/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
@@ -460,7 +460,7 @@ const experimentFreezeExposure = (): ToolBase<
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/freeze_exposure/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/freeze_exposure/`,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
         },
@@ -478,7 +478,7 @@ const experimentGet = (): ToolBase<typeof ExperimentGetSchema, WithInsightsUrl<S
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/`,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
         },
@@ -507,7 +507,7 @@ const experimentHoldoutsCreate = (): ToolBase<typeof ExperimentHoldoutsCreateSch
         }
         const result = await context.api.request<Schemas.ExperimentHoldout>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/`,
             body,
         })
         return result
@@ -525,7 +525,7 @@ const experimentHoldoutsDestroy = (): ToolBase<typeof ExperimentHoldoutsDestroyS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -543,7 +543,7 @@ const experimentHoldoutsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedExperimentHoldoutList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -588,7 +588,7 @@ const experimentHoldoutsPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ExperimentHoldout>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -609,7 +609,7 @@ const experimentHoldoutsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ExperimentHoldout>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_holdouts/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -627,7 +627,7 @@ const experimentLaunch = (): ToolBase<typeof ExperimentLaunchSchema, WithInsight
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/launch/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/launch/`,
             })
             const filtered = pickResponseFields(result, [
                 'id',
@@ -670,7 +670,7 @@ const experimentList = (): ToolBase<
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.PaginatedExperimentBasicList>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/`,
                 query: {
                     archived: params.archived,
                     created_by_id: params.created_by_id,
@@ -732,7 +732,7 @@ const experimentMetricsRecalculationCreate = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ExperimentMetricsRecalculation>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/metrics_recalculation/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/metrics_recalculation/`,
         })
         return await withInsightsUrl(context, result, `/experiments/${params.id}`)
     },
@@ -752,7 +752,7 @@ const experimentMetricsRecalculationLatestRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ExperimentMetricsRecalculation>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/metrics_recalculation/latest/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/metrics_recalculation/latest/`,
         })
         return await withInsightsUrl(context, result, `/experiments/${params.id}`)
     },
@@ -772,7 +772,7 @@ const experimentMetricsRecalculationRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ExperimentMetricsRecalculation>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/metrics_recalculation/${encodeURIComponent(String(params.recalculation_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/metrics_recalculation/${encodeURIComponent(String(params.recalculation_id))}/`,
         })
         return await withInsightsUrl(context, result, `/experiments/${params.id}`)
     },
@@ -790,7 +790,7 @@ const experimentPause = (): ToolBase<typeof ExperimentPauseSchema, WithInsightsU
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/pause/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/pause/`,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
         },
@@ -806,7 +806,7 @@ const experimentPromptTemplates = (): ToolBase<typeof ExperimentPromptTemplatesS
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/prompt_templates/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/prompt_templates/`,
         })
         return result
     },
@@ -824,7 +824,7 @@ const experimentReset = (): ToolBase<typeof ExperimentResetSchema, WithInsightsU
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/reset/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/reset/`,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
         },
@@ -842,7 +842,7 @@ const experimentResume = (): ToolBase<typeof ExperimentResumeSchema, WithInsight
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/resume/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/resume/`,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
         },
@@ -873,7 +873,7 @@ const experimentSavedMetricsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ExperimentSavedMetric>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/`,
             body,
         })
         return result
@@ -891,7 +891,7 @@ const experimentSavedMetricsDestroy = (): ToolBase<typeof ExperimentSavedMetrics
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -915,7 +915,7 @@ const experimentSavedMetricsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedExperimentSavedMetricList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/`,
             query: {
                 event: params.event,
                 limit: params.limit,
@@ -960,7 +960,7 @@ const experimentSavedMetricsPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ExperimentSavedMetric>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -981,7 +981,7 @@ const experimentSavedMetricsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ExperimentSavedMetric>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiment_saved_metrics/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -1021,7 +1021,7 @@ const experimentShipVariant = (): ToolBase<typeof ExperimentShipVariantSchema, W
             }
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/ship_variant/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/ship_variant/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
@@ -1038,7 +1038,7 @@ const experimentStats = (): ToolBase<typeof ExperimentStatsSchema, unknown> => (
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/stats/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/stats/`,
         })
         return result
     },
@@ -1056,7 +1056,7 @@ const experimentTimeseriesResults = (): ToolBase<typeof ExperimentTimeseriesResu
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<unknown>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/timeseries_results/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/timeseries_results/`,
                 query: {
                     fingerprint: params.fingerprint,
                     metric_uuid: params.metric_uuid,
@@ -1078,7 +1078,7 @@ const experimentUnarchive = (): ToolBase<typeof ExperimentUnarchiveSchema, WithI
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/unarchive/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/unarchive/`,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
         },
@@ -1099,7 +1099,7 @@ const experimentUnfreezeExposure = (): ToolBase<
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/unfreeze_exposure/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/unfreeze_exposure/`,
             })
             return await withInsightsUrl(context, result, `/experiments/${result.id}`)
         },
@@ -1196,7 +1196,7 @@ const experimentUpdate = (): ToolBase<typeof ExperimentUpdateSchema, WithInsight
             }
             const result = await context.api.request<Schemas.Experiment>({
                 method: 'PATCH',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/experiments/${encodeURIComponent(String(params.id))}/`,
                 body,
             })
             const filtered = pickResponseFields(result, [

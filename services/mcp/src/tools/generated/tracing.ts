@@ -37,7 +37,7 @@ const apmAttributeBreakdown = (): ToolBase<
         }
         const result = await context.api.request<Schemas._TracingAttributeBreakdownResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/attribute-breakdown/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/attribute-breakdown/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results', 'compare']) as typeof result
@@ -54,7 +54,7 @@ const apmAttributeValuesList = (): ToolBase<typeof ApmAttributeValuesListSchema,
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/values/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/values/`,
             query: {
                 attribute_type: params.attribute_type,
                 key: params.key,
@@ -77,7 +77,7 @@ const apmAttributesList = (): ToolBase<typeof ApmAttributesListSchema, Schemas._
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas._TracingAttributesResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/attributes/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/attributes/`,
             query: {
                 attribute_type: params.attribute_type,
                 limit: params.limit,
@@ -100,7 +100,7 @@ const apmServicesList = (): ToolBase<typeof ApmServicesListSchema, unknown> => (
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/service-names/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/service-names/`,
             query: {
                 dateRange: params.dateRange,
                 search: params.search,
@@ -124,7 +124,7 @@ const apmSpansAggregate = (): ToolBase<typeof ApmSpansAggregateSchema, Schemas._
         }
         const result = await context.api.request<Schemas._TracingAggregationResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/aggregate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/aggregate/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results', 'compare', 'has_more', 'next_offset']) as typeof result
@@ -145,7 +145,7 @@ const apmSpansCount = (): ToolBase<typeof ApmSpansCountSchema, Schemas._TracingC
         }
         const result = await context.api.request<Schemas._TracingCountResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/count/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/count/`,
             body,
         })
         const filtered = pickResponseFields(result, ['count']) as typeof result
@@ -166,7 +166,7 @@ const apmSpansDurationHistogram = (): ToolBase<typeof ApmSpansDurationHistogramS
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/duration-histogram/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/duration-histogram/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results']) as typeof result
@@ -190,7 +190,7 @@ const apmSpansLatencyHeatmap = (): ToolBase<
         }
         const result = await context.api.request<Schemas._TracingLatencyHeatmapResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/latency-heatmap/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/latency-heatmap/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results']) as typeof result
@@ -211,7 +211,7 @@ const apmSpansSparkline = (): ToolBase<typeof ApmSpansSparklineSchema, unknown> 
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/sparkline/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/sparkline/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results']) as typeof result
@@ -232,7 +232,7 @@ const apmSpansTree = (): ToolBase<typeof ApmSpansTreeSchema, unknown> => ({
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/tree/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/tree/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results', 'compare']) as typeof result
@@ -262,7 +262,7 @@ const apmTraceGet = (): ToolBase<typeof ApmTraceGetSchema, unknown> =>
             }
             const result = await context.api.request<unknown>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/trace/${encodeURIComponent(String(params.trace_id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/trace/${encodeURIComponent(String(params.trace_id))}/`,
                 body,
             })
             const filtered = pickResponseFields(result, ['results']) as typeof result
@@ -284,7 +284,7 @@ const queryApmSpans = (): ToolBase<typeof QueryApmSpansSchema, unknown> =>
             }
             const result = await context.api.request<unknown>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/tracing/spans/query/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/tracing/spans/query/`,
                 body,
             })
             const filtered = pickResponseFields(result, ['results']) as typeof result

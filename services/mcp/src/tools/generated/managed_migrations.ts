@@ -20,7 +20,7 @@ const managedMigrationsSupportGet = (): ToolBase<
     handler: async (context: Context, params: z.infer<typeof ManagedMigrationsSupportGetSchema>) => {
         const result = await context.api.request<Schemas.BatchImportSupportDetail>({
             method: 'GET',
-            path: `/api/managed_migrations_support/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/managed_migrations_support/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -37,7 +37,7 @@ const managedMigrationsSupportList = (): ToolBase<
     handler: async (context: Context, params: z.infer<typeof ManagedMigrationsSupportListSchema>) => {
         const result = await context.api.request<Schemas.PaginatedBatchImportSupportListList>({
             method: 'GET',
-            path: `/api/managed_migrations_support/`,
+            path: `/v1/managed_migrations_support/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,

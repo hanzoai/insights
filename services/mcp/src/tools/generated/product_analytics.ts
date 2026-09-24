@@ -177,7 +177,7 @@ const elementsStatsRetrieve = (): ToolBase<typeof ElementsStatsRetrieveSchema, S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ElementStatsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/elements/stats/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/elements/stats/`,
             query: {
                 data_attributes: params.data_attributes,
                 date_from: params.date_from,
@@ -235,7 +235,7 @@ const insightCreate = (): ToolBase<typeof InsightCreateSchema, WithInsightsUrl<S
         }
         const result = await context.api.request<Schemas.Insight>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights/`,
             body,
         })
         const filtered = omitResponseFields(result, [
@@ -263,7 +263,7 @@ const insightDelete = (): ToolBase<typeof InsightDeleteSchema, Schemas.Insight> 
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Insight>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -297,7 +297,7 @@ const insightGet = (): ToolBase<typeof InsightGetSchema, WithInsightsUrl<Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Insight>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights/${encodeURIComponent(String(params.id))}/`,
             query: {
                 filters_override: params.filters_override,
                 include_dashboards: params.include_dashboards,
@@ -361,7 +361,7 @@ const insightUpdate = (): ToolBase<typeof InsightUpdateSchema, WithInsightsUrl<S
         }
         const result = await context.api.request<Schemas.Insight>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         const filtered = omitResponseFields(result, [
@@ -391,7 +391,7 @@ const insightsActivityRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ActivityLogPaginatedResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights/${encodeURIComponent(String(params.id))}/activity/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights/${encodeURIComponent(String(params.id))}/activity/`,
             query: {
                 limit: params.limit,
                 page: params.page,
@@ -424,7 +424,7 @@ const insightsAllActivityRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ActivityLogPaginatedResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights/activity/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights/activity/`,
             query: {
                 limit: params.limit,
                 page: params.page,
@@ -457,7 +457,7 @@ const insightsList = (): ToolBase<typeof InsightsListSchema, WithInsightsUrl<Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedInsightList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights/`,
             query: {
                 created_by: params.created_by,
                 created_date_from: params.created_date_from,
@@ -525,7 +525,7 @@ const insightsTrendingRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedTrendingInsightList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights/trending/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights/trending/`,
             query: {
                 days: params.days,
                 include_dashboards: params.include_dashboards,

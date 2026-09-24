@@ -27,7 +27,7 @@ const heatmapsEvents = (): ToolBase<typeof HeatmapsEventsSchema, Schemas.Heatmap
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.HeatmapEventsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/heatmaps/events/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/heatmaps/events/`,
             query: {
                 aggregation: params.aggregation,
                 cohort_ids: params.cohort_ids,
@@ -58,7 +58,7 @@ const heatmapsList = (): ToolBase<typeof HeatmapsListSchema, WithInsightsUrl<Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.HeatmapsResponse[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/heatmaps/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/heatmaps/`,
             query: {
                 aggregation: params.aggregation,
                 cohort_ids: params.cohort_ids,
@@ -107,7 +107,7 @@ const heatmapsSavedCreate = (): ToolBase<typeof HeatmapsSavedCreateSchema, Schem
         }
         const result = await context.api.request<Schemas.HeatmapScreenshotResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/saved/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/saved/`,
             body,
         })
         return result
@@ -123,7 +123,7 @@ const heatmapsSavedGet = (): ToolBase<typeof HeatmapsSavedGetSchema, Schemas.Hea
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.HeatmapScreenshotResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/saved/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/saved/${encodeURIComponent(String(params.short_id))}/`,
         })
         return result
     },
@@ -141,7 +141,7 @@ const heatmapsSavedList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SavedHeatmapListResponse[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/saved/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/saved/`,
             query: {
                 created_by: params.created_by,
                 limit: params.limit,
@@ -168,7 +168,7 @@ const heatmapsSavedRegenerate = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.HeatmapScreenshotResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/saved/${encodeURIComponent(String(params.short_id))}/regenerate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/saved/${encodeURIComponent(String(params.short_id))}/regenerate/`,
         })
         return result
     },
@@ -207,7 +207,7 @@ const heatmapsSavedUpdate = (): ToolBase<typeof HeatmapsSavedUpdateSchema, Schem
         }
         const result = await context.api.request<Schemas.HeatmapScreenshotResponse>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/saved/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/saved/${encodeURIComponent(String(params.short_id))}/`,
             body,
         })
         return result
@@ -228,7 +228,7 @@ const webAnalyticsPathCleaningSuggestionsApply = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ApplyPathCleaningSuggestionResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/web_analytics_path_cleaning_suggestions/${encodeURIComponent(String(params.id))}/apply/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/web_analytics_path_cleaning_suggestions/${encodeURIComponent(String(params.id))}/apply/`,
         })
         return result
     },
@@ -247,7 +247,7 @@ const webAnalyticsPathCleaningSuggestionsGenerate = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.GeneratePathCleaningSuggestionResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/web_analytics_path_cleaning_suggestions/generate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/web_analytics_path_cleaning_suggestions/generate/`,
         })
         return result
     },
@@ -262,7 +262,7 @@ const webAnalyticsWeeklyDigest = (): ToolBase<typeof WebAnalyticsWeeklyDigestSch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.WeeklyDigestResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/web_analytics/weekly_digest/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/web_analytics/weekly_digest/`,
             query: {
                 compare: params.compare,
                 days: params.days,

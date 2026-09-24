@@ -57,7 +57,7 @@ const savedQueryColumnAnnotationsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DataWarehouseSavedQueryColumnAnnotation>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/saved_query_column_annotations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/saved_query_column_annotations/`,
             body,
         })
         return result
@@ -76,7 +76,7 @@ const savedQueryColumnAnnotationsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDataWarehouseSavedQueryColumnAnnotationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/saved_query_column_annotations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/saved_query_column_annotations/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -109,7 +109,7 @@ const sqlVariablesCreate = (): ToolBase<typeof SqlVariablesCreateSchema, Schemas
         }
         const result = await context.api.request<Schemas.InsightVariable>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insight_variables/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insight_variables/`,
             body,
         })
         return result
@@ -125,7 +125,7 @@ const sqlVariablesDelete = (): ToolBase<typeof SqlVariablesDeleteSchema, unknown
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insight_variables/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insight_variables/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -155,7 +155,7 @@ const sqlVariablesUpdate = (): ToolBase<typeof SqlVariablesUpdateSchema, Schemas
         }
         const result = await context.api.request<Schemas.InsightVariable>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insight_variables/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insight_variables/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -197,7 +197,7 @@ const viewCreate = (): ToolBase<typeof ViewCreateSchema, WithInsightsUrl<Schemas
         }
         const result = await context.api.request<Schemas.DataWarehouseSavedQuery>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/`,
             body,
         })
         return await withInsightsUrl(context, result, `/sql?open_view=${result.id}`)
@@ -213,7 +213,7 @@ const viewDelete = (): ToolBase<typeof ViewDeleteSchema, Schemas.DataWarehouseSa
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DataWarehouseSavedQuery>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -229,7 +229,7 @@ const viewGet = (): ToolBase<typeof ViewGetSchema, WithInsightsUrl<Schemas.DataW
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DataWarehouseSavedQuery>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/`,
         })
         return await withInsightsUrl(context, result, `/sql?open_view=${result.id}`)
     },
@@ -247,7 +247,7 @@ const viewList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedDataWarehouseSavedQueryMinimalList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/`,
             query: {
                 page: params.page,
                 search: params.search,
@@ -281,7 +281,7 @@ const viewMaterialize = (): ToolBase<typeof ViewMaterializeSchema, unknown> => (
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/materialize/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/materialize/`,
             body,
         })
         return await withInsightsUrl(context, result, `/sql?open_view=${params.id}`)
@@ -330,7 +330,7 @@ const viewRun = (): ToolBase<typeof ViewRunSchema, WithInsightsUrl<Schemas.DataW
         }
         const result = await context.api.request<Schemas.DataWarehouseSavedQuery>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/run/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/run/`,
             body,
         })
         return await withInsightsUrl(context, result, `/sql?open_view=${result.id}`)
@@ -346,7 +346,7 @@ const viewRunHistory = (): ToolBase<typeof ViewRunHistorySchema, WithInsightsUrl
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DataWarehouseSavedQuery>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/run_history/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/run_history/`,
         })
         return await withInsightsUrl(context, result, `/sql?open_view=${result.id}`)
     },
@@ -397,7 +397,7 @@ const viewUnmaterialize = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DataWarehouseSavedQuery>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/revert_materialization/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/revert_materialization/`,
             body,
         })
         return await withInsightsUrl(context, result, `/sql?open_view=${result.id}`)
@@ -447,7 +447,7 @@ const viewUpdate = (): ToolBase<typeof ViewUpdateSchema, WithInsightsUrl<Schemas
         }
         const result = await context.api.request<Schemas.DataWarehouseSavedQuery>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_saved_queries/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/sql?open_view=${result.id}`)
@@ -480,7 +480,7 @@ const warehouseColumnAnnotationsCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.WarehouseColumnAnnotation>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_column_annotations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_column_annotations/`,
             body,
         })
         return result
@@ -499,7 +499,7 @@ const warehouseColumnAnnotationsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedWarehouseColumnAnnotationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_column_annotations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_column_annotations/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -534,7 +534,7 @@ const warehouseColumnAnnotationsPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.WarehouseColumnAnnotation>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_column_annotations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_column_annotations/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -550,7 +550,7 @@ const warehouseTablesRefreshSchemaCreate = (): ToolBase<typeof WarehouseTablesRe
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/warehouse_tables/${encodeURIComponent(String(params.id))}/refresh_schema/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/warehouse_tables/${encodeURIComponent(String(params.id))}/refresh_schema/`,
         })
         return result
     },

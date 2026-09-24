@@ -113,7 +113,7 @@ describe('experiment-copy-to-project', () => {
 
             expect(requestMock).toHaveBeenCalledWith({
                 method: 'POST',
-                path: '/api/projects/2/experiments/123/copy_to_project/',
+                path: '/v1/projects/2/experiments/123/copy_to_project/',
                 body: {
                     target_team_id: 42,
                     feature_flag_key: 'my-flag',

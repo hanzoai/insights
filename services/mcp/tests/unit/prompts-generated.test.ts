@@ -74,7 +74,7 @@ describe('Generated llma-prompt-* tools', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'GET',
-            path: '/api/projects/17/llm_prompts/',
+            path: '/v1/projects/17/llm_prompts/',
             query: { search: 'checkout', content: 'none' },
         })
         expect(result).toEqual(paginated)
@@ -88,7 +88,7 @@ describe('Generated llma-prompt-* tools', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'GET',
-            path: '/api/projects/17/llm_prompts/',
+            path: '/v1/projects/17/llm_prompts/',
             query: { search: 'checkout', content: 'preview' },
         })
     })
@@ -102,7 +102,7 @@ describe('Generated llma-prompt-* tools', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'GET',
-            path: '/api/projects/17/llm_prompts/name/checkout_prompt/',
+            path: '/v1/projects/17/llm_prompts/name/checkout_prompt/',
             query: { version: 2 },
         })
     })
@@ -115,7 +115,7 @@ describe('Generated llma-prompt-* tools', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'POST',
-            path: '/api/projects/17/llm_prompts/',
+            path: '/v1/projects/17/llm_prompts/',
             body: { name: 'new_prompt', prompt: { text: 'hello' } },
         })
     })
@@ -128,7 +128,7 @@ describe('Generated llma-prompt-* tools', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'PATCH',
-            path: '/api/projects/17/llm_prompts/name/new_prompt/',
+            path: '/v1/projects/17/llm_prompts/name/new_prompt/',
             body: { prompt: { text: 'v2' }, base_version: 1 },
         })
     })
@@ -150,7 +150,7 @@ describe('Generated llma-prompt-* tools', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'POST',
-            path: '/api/projects/17/llm_prompts/name/original_prompt/duplicate/',
+            path: '/v1/projects/17/llm_prompts/name/original_prompt/duplicate/',
             body: { new_name: 'copy_of_prompt' },
         })
         expect(result).toEqual(response)

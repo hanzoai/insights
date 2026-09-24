@@ -30,7 +30,7 @@ const engineeringAnalyticsBrokenTests = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.BrokenTestsResult>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/broken_tests/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/broken_tests/`,
             query: {
                 repo: params.repo,
                 source_id: params.source_id,
@@ -52,7 +52,7 @@ const engineeringAnalyticsCiFailureLogs = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.CIFailureLogs>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/ci_failure_logs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/ci_failure_logs/`,
             query: {
                 pr_number: params.pr_number,
                 repo: params.repo,
@@ -75,7 +75,7 @@ const engineeringAnalyticsFlakyTests = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.FlakyTestList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/flaky_tests/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/flaky_tests/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -99,7 +99,7 @@ const engineeringAnalyticsPrCost = (): ToolBase<typeof EngineeringAnalyticsPrCos
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PRCostSummary>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/pr_cost/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/pr_cost/`,
             query: {
                 pr_number: params.pr_number,
                 repo: params.repo,
@@ -122,7 +122,7 @@ const engineeringAnalyticsRunFailureLogs = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.RunFailureLogs>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/run_failure_logs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/run_failure_logs/`,
             query: {
                 repo: params.repo,
                 run_id: params.run_id,
@@ -146,7 +146,7 @@ const engineeringAnalyticsSources = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.GitHubSource[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/sources/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/sources/`,
         })
         return await withInsightsUrl(context, result, '/engineering-analytics')
     },
@@ -164,7 +164,7 @@ const engineeringAnalyticsTeamCiHealth = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.TeamCIHealthList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/team_ci_health/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/team_ci_health/`,
             query: {
                 date_from: params.date_from,
                 date_to: params.date_to,
@@ -189,7 +189,7 @@ const engineeringAnalyticsWorkflowJobs = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.WorkflowJob[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/workflow_jobs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/workflow_jobs/`,
             query: {
                 repo: params.repo,
                 run_attempt: params.run_attempt,
@@ -213,7 +213,7 @@ const engineeringAnalyticsWorkflowRunnerCosts = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.WorkflowRunnerCost[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/workflow_runner_costs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/workflow_runner_costs/`,
             query: {
                 branch: params.branch,
                 date_from: params.date_from,
@@ -236,7 +236,7 @@ const prLifecycle = (): ToolBase<typeof PrLifecycleSchema, Schemas.PRLifecycle> 
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PRLifecycle>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/pr_lifecycle/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/pr_lifecycle/`,
             query: {
                 pr_number: params.pr_number,
                 repo: params.repo,
@@ -260,7 +260,7 @@ const pullRequests = (): ToolBase<typeof PullRequestsSchema, WithInsightsUrl<Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PullRequestList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/pull_requests/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/pull_requests/`,
             query: {
                 author: params.author,
                 date_from: params.date_from,
@@ -291,7 +291,7 @@ const workflowHealth = (): ToolBase<typeof WorkflowHealthSchema, WithInsightsUrl
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.WorkflowHealthItem[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/workflow_health/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/engineering_analytics/workflow_health/`,
             query: {
                 branch: params.branch,
                 date_from: params.date_from,

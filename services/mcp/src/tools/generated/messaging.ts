@@ -24,7 +24,7 @@ const optOutsAdd = (): ToolBase<typeof OptOutsAddSchema, Schemas.BulkAddOptOutsR
         }
         const result = await context.api.request<Schemas.BulkAddOptOutsResult>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/messaging_preferences/bulk_add_opt_outs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/messaging_preferences/bulk_add_opt_outs/`,
             body,
         })
         return result
@@ -40,7 +40,7 @@ const optOutsList = (): ToolBase<typeof OptOutsListSchema, Schemas.PaginatedOptO
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedOptOuts>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/messaging_preferences/opt_outs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/messaging_preferences/opt_outs/`,
             query: {
                 category_key: params.category_key,
                 page: params.page,

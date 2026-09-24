@@ -85,7 +85,7 @@ const dataCatalogCertificationCertifyExecute = (): ToolBase<
         const projectId = __scopeProjectId
         const result = await context.api.request<Schemas.DataCatalogCertification>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/certifications/${encodeURIComponent(String(params.id))}/certify/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/certifications/${encodeURIComponent(String(params.id))}/certify/`,
         })
         return result
     },
@@ -151,7 +151,7 @@ const dataCatalogCertificationDeprecateExecute = (): ToolBase<
         const projectId = __scopeProjectId
         const result = await context.api.request<Schemas.DataCatalogCertification>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/certifications/${encodeURIComponent(String(params.id))}/deprecate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/certifications/${encodeURIComponent(String(params.id))}/deprecate/`,
         })
         return result
     },
@@ -188,7 +188,7 @@ const dataCatalogCertificationPropose = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DataCatalogCertification>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/certifications/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/certifications/`,
             body,
         })
         return result
@@ -250,7 +250,7 @@ const dataCatalogMetricApproveExecute = (): ToolBase<
         const projectId = __scopeProjectId
         const result = await context.api.request<Schemas.DataCatalogMetric>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/${encodeURIComponent(String(params.name))}/approve/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/${encodeURIComponent(String(params.name))}/approve/`,
         })
         return result
     },
@@ -294,7 +294,7 @@ const dataCatalogMetricCreate = (): ToolBase<typeof DataCatalogMetricCreateSchem
         body['created_source'] = 'ai_generated'
         const result = await context.api.request<Schemas.DataCatalogMetric>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/`,
             body,
         })
         return result
@@ -325,7 +325,7 @@ const dataCatalogMetricRun = (): ToolBase<typeof DataCatalogMetricRunSchema, Sch
         }
         const result = await context.api.request<Schemas.DataCatalogMetricRun>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/${encodeURIComponent(String(params.name))}/run/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/${encodeURIComponent(String(params.name))}/run/`,
             body,
             query: {
                 refresh: params.refresh,
@@ -375,7 +375,7 @@ const dataCatalogMetricUpdate = (): ToolBase<typeof DataCatalogMetricUpdateSchem
         body['created_source'] = 'ai_generated'
         const result = await context.api.request<Schemas.DataCatalogMetric>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/${encodeURIComponent(String(params.name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/${encodeURIComponent(String(params.name))}/`,
             body,
         })
         return result
@@ -396,7 +396,7 @@ const dataCatalogMetricsRefreshFromInsightCreate = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.DataCatalogMetric>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/${encodeURIComponent(String(params.name))}/refresh_from_insight/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/metrics/${encodeURIComponent(String(params.name))}/refresh_from_insight/`,
         })
         return result
     },
@@ -462,7 +462,7 @@ const dataCatalogRelationshipAcceptExecute = (): ToolBase<
         const projectId = __scopeProjectId
         const result = await context.api.request<Schemas.DataCatalogRelationshipProposal>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/relationship_proposals/${encodeURIComponent(String(params.id))}/accept/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/relationship_proposals/${encodeURIComponent(String(params.id))}/accept/`,
         })
         return result
     },
@@ -508,7 +508,7 @@ const dataCatalogRelationshipPropose = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DataCatalogRelationshipProposal>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/relationship_proposals/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/relationship_proposals/`,
             body,
         })
         return result
@@ -579,7 +579,7 @@ const dataCatalogRelationshipRejectExecute = (): ToolBase<
         }
         const result = await context.api.request<Schemas.DataCatalogRelationshipProposal>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/data_catalog/relationship_proposals/${encodeURIComponent(String(params.id))}/reject/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/data_catalog/relationship_proposals/${encodeURIComponent(String(params.id))}/reject/`,
             body,
         })
         return result

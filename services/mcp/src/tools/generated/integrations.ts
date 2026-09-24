@@ -33,7 +33,7 @@ const integrationDelete = (): ToolBase<typeof IntegrationDeleteSchema, unknown> 
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -48,7 +48,7 @@ const integrationGet = (): ToolBase<typeof IntegrationGetSchema, Schemas.Integra
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.IntegrationConfig>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = pickResponseFields(result, [
             'id',
@@ -76,7 +76,7 @@ const integrationsChannelsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SlackChannelsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/channels/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/channels/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -101,7 +101,7 @@ const integrationsGithubReposRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.GitHubReposResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/github_repos/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/github_repos/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -124,7 +124,7 @@ const integrationsJiraProjectsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.JiraProjectsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/jira_projects/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/jira_projects/`,
         })
         return result
     },
@@ -142,7 +142,7 @@ const integrationsLinearTeamsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LinearTeamsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/linear_teams/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/integrations/${encodeURIComponent(String(params.id))}/linear_teams/`,
         })
         return result
     },
@@ -160,7 +160,7 @@ const integrationsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedIntegrationConfigList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/integrations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/integrations/`,
             query: {
                 kind: params.kind,
                 limit: params.limit,
@@ -247,7 +247,7 @@ const insightsConnectionForwardExecute = (): ToolBase<
         }
         const result = await context.api.request<Schemas.InsightsConnectionForwardResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/insights_connections/${encodeURIComponent(String(params.id))}/forward/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/insights_connections/${encodeURIComponent(String(params.id))}/forward/`,
             body,
         })
         return result

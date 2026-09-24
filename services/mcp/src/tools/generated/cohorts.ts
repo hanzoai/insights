@@ -36,7 +36,7 @@ const cohortsAddPersonsToStaticCohortPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/cohorts/${encodeURIComponent(String(params.id))}/add_persons_to_static_cohort/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/cohorts/${encodeURIComponent(String(params.id))}/add_persons_to_static_cohort/`,
             body,
         })
         return result
@@ -72,7 +72,7 @@ const cohortsCreate = (): ToolBase<typeof CohortsCreateSchema, WithInsightsUrl<S
             }
             const result = await context.api.request<Schemas.Cohort>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/cohorts/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/cohorts/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/cohorts/${result.id}`)
@@ -98,7 +98,7 @@ const cohortsList = (): ToolBase<typeof CohortsListSchema, WithInsightsUrl<Schem
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.PaginatedCohortList>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/cohorts/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/cohorts/`,
                 query: {
                     basic: params.basic,
                     hide_behavioral_cohorts: params.hide_behavioral_cohorts,
@@ -160,7 +160,7 @@ const cohortsPartialUpdate = (): ToolBase<typeof CohortsPartialUpdateSchema, Wit
             }
             const result = await context.api.request<Schemas.Cohort>({
                 method: 'PATCH',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/cohorts/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/cohorts/${encodeURIComponent(String(params.id))}/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/cohorts/${result.id}`)
@@ -179,7 +179,7 @@ const cohortsRetrieve = (): ToolBase<typeof CohortsRetrieveSchema, WithInsightsU
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.Cohort>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/cohorts/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/cohorts/${encodeURIComponent(String(params.id))}/`,
             })
             const filtered = omitResponseFields(result, [
                 'filters.properties.values.*.values.*.bytecode',
@@ -211,7 +211,7 @@ const cohortsRmPersonFromStaticCohortPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/cohorts/${encodeURIComponent(String(params.id))}/remove_person_from_static_cohort/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/cohorts/${encodeURIComponent(String(params.id))}/remove_person_from_static_cohort/`,
             body,
         })
         return result

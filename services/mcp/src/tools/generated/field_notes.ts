@@ -20,7 +20,7 @@ const fieldNotesGet = (): ToolBase<typeof FieldNotesGetSchema, Schemas.FieldNote
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.FieldNote>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/field_notes/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/field_notes/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -35,7 +35,7 @@ const fieldNotesList = (): ToolBase<typeof FieldNotesListSchema, WithInsightsUrl
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedFieldNoteList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/field_notes/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/field_notes/`,
             query: {
                 field_note_status: params.field_note_status,
                 host: params.host,
@@ -114,7 +114,7 @@ const fieldNotesPartialUpdate = (): ToolBase<typeof FieldNotesPartialUpdateSchem
         }
         const result = await context.api.request<Schemas.FieldNote>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/field_notes/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/field_notes/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result

@@ -58,7 +58,7 @@ const errorTrackingAssignmentRulesCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ErrorTrackingAssignmentRule>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/assignment_rules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/assignment_rules/`,
             body,
         })
         return result
@@ -77,7 +77,7 @@ const errorTrackingAssignmentRulesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedErrorTrackingAssignmentRuleList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/assignment_rules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/assignment_rules/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -103,7 +103,7 @@ const errorTrackingBypassRulesCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ErrorTrackingBypassRule>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/bypass_rules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/bypass_rules/`,
             body,
         })
         return result
@@ -122,7 +122,7 @@ const errorTrackingBypassRulesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedErrorTrackingBypassRuleList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/bypass_rules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/bypass_rules/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -147,7 +147,7 @@ const errorTrackingBypassRulesUpdate = (): ToolBase<typeof ErrorTrackingBypassRu
         }
         const result = await context.api.request<unknown>({
             method: 'PUT',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/bypass_rules/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/bypass_rules/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -176,7 +176,7 @@ const errorTrackingExternalReferencesCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ErrorTrackingExternalReferenceResult>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/external_references/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/external_references/`,
             body,
         })
         return result
@@ -205,7 +205,7 @@ const errorTrackingGroupingRulesCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ErrorTrackingGroupingRule>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/grouping_rules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/grouping_rules/`,
             body,
         })
         return result
@@ -225,7 +225,7 @@ const errorTrackingGroupingRulesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ErrorTrackingGroupingRuleListResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/grouping_rules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/grouping_rules/`,
         })
         return result
     },
@@ -246,7 +246,7 @@ const errorTrackingGroupingRulesUpdate = (): ToolBase<typeof ErrorTrackingGroupi
         }
         const result = await context.api.request<unknown>({
             method: 'PUT',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/grouping_rules/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/grouping_rules/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -271,7 +271,7 @@ const errorTrackingIssuesMergeCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ErrorTrackingIssueMergeResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/issues/${encodeURIComponent(String(params.id))}/merge/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/issues/${encodeURIComponent(String(params.id))}/merge/`,
             body,
         })
         return result
@@ -303,7 +303,7 @@ const errorTrackingIssuesPartialUpdate = (): ToolBase<
             }
             const result = await context.api.request<Schemas.ErrorTrackingIssueRead>({
                 method: 'PATCH',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/issues/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/issues/${encodeURIComponent(String(params.id))}/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/error_tracking/${result.id}`)
@@ -328,7 +328,7 @@ const errorTrackingIssuesSplitCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ErrorTrackingIssueSplitResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/issues/${encodeURIComponent(String(params.id))}/split/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/issues/${encodeURIComponent(String(params.id))}/split/`,
             body,
         })
         return result
@@ -347,7 +347,7 @@ const errorTrackingRecommendationsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedErrorTrackingRecommendationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/recommendations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/recommendations/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -370,7 +370,7 @@ const errorTrackingSettingsGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ErrorTrackingSettings>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/settings/retrieve_settings/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/settings/retrieve_settings/`,
         })
         return result
     },
@@ -401,7 +401,7 @@ const errorTrackingSettingsUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ErrorTrackingSettings>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/settings/update_settings/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/settings/update_settings/`,
             body,
         })
         return result
@@ -427,7 +427,7 @@ const errorTrackingSuppressionRulesCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.ErrorTrackingSuppressionRule>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/suppression_rules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/suppression_rules/`,
             body,
         })
         return result
@@ -446,7 +446,7 @@ const errorTrackingSuppressionRulesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedErrorTrackingSuppressionRuleList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/suppression_rules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/suppression_rules/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -477,7 +477,7 @@ const errorTrackingSuppressionRulesUpdate = (): ToolBase<
         }
         const result = await context.api.request<unknown>({
             method: 'PUT',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/suppression_rules/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/suppression_rules/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -498,7 +498,7 @@ const errorTrackingSymbolSetsDownloadRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas._SymbolSetDownloadResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/symbol_sets/${encodeURIComponent(String(params.id))}/download/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/symbol_sets/${encodeURIComponent(String(params.id))}/download/`,
         })
         return result
     },
@@ -516,7 +516,7 @@ const errorTrackingSymbolSetsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedErrorTrackingSymbolSetList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/symbol_sets/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/symbol_sets/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -556,7 +556,7 @@ const errorTrackingSymbolSetsRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ErrorTrackingSymbolSet>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/symbol_sets/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/symbol_sets/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = pickResponseFields(result, [
             'id',
@@ -600,7 +600,7 @@ const queryErrorTrackingIssue = (): ToolBase<
             }
             const result = await context.api.request<Schemas.ErrorTrackingIssueDetail>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/query/issue/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/query/issue/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/error_tracking/${params.issueId}`)
@@ -651,7 +651,7 @@ const queryErrorTrackingIssueEvents = (): ToolBase<
             }
             const result = await context.api.request<Schemas.ErrorTrackingIssueEventsResponse>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/query/issue_events/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/query/issue_events/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/error_tracking/${params.issueId}`)
@@ -726,7 +726,7 @@ const queryErrorTrackingIssuesList = (): ToolBase<
             }
             const result = await context.api.request<Schemas.ErrorTrackingIssuesListResponse>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/error_tracking/query/issues/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/error_tracking/query/issues/`,
                 body,
             })
             const filtered = {

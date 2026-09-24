@@ -26,7 +26,7 @@ const characterizeMetricAnomaly = (): ToolBase<
         }
         const result = await context.api.request<Schemas._MetricAnomalyReport>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/metrics/characterize/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/metrics/characterize/`,
             body,
         })
         return result
@@ -42,7 +42,7 @@ const metricNamesList = (): ToolBase<typeof MetricNamesListSchema, Schemas._Metr
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas._MetricNamesResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/metrics/values/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/metrics/values/`,
             query: {
                 limit: params.limit,
                 value: params.value,
@@ -66,7 +66,7 @@ const queryMetrics = (): ToolBase<typeof QueryMetricsSchema, Schemas._MetricQuer
         }
         const result = await context.api.request<Schemas._MetricQueryResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/metrics/query/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/metrics/query/`,
             body,
         })
         const filtered = pickResponseFields(result, ['results']) as typeof result

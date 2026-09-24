@@ -21,7 +21,7 @@ const mcpConnectionToolsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedMCPServerInstallationToolList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_server_installations/${encodeURIComponent(String(params.id))}/tools/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_server_installations/${encodeURIComponent(String(params.id))}/tools/`,
         })
         return await withInsightsUrl(context, result, '/settings/mcp-servers')
     },
@@ -39,7 +39,7 @@ const mcpConnectionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedMCPServerInstallationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/mcp_server_installations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/mcp_server_installations/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,

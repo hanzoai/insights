@@ -88,7 +88,7 @@ const subscriptionsCreate = (): ToolBase<typeof SubscriptionsCreateSchema, Schem
         }
         const result = await context.api.request<Schemas.Subscription>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/subscriptions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/subscriptions/`,
             body,
         })
         return result
@@ -106,7 +106,7 @@ const subscriptionsDelete = (): ToolBase<typeof SubscriptionsDeleteSchema, Schem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Subscription>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         const filtered = omitResponseFields(result, ['invite_message']) as typeof result
@@ -128,7 +128,7 @@ const subscriptionsDeliveriesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedSubscriptionDeliveryList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.subscription_id))}/deliveries/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.subscription_id))}/deliveries/`,
             query: {
                 cursor: params.cursor,
                 status: params.status,
@@ -162,7 +162,7 @@ const subscriptionsDeliveriesRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.SubscriptionDelivery>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.subscription_id))}/deliveries/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.subscription_id))}/deliveries/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = omitResponseFields(result, [
             'content_snapshot',
@@ -186,7 +186,7 @@ const subscriptionsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedSubscriptionList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/subscriptions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/subscriptions/`,
             query: {
                 created_by: params.created_by,
                 dashboard: params.dashboard,
@@ -287,7 +287,7 @@ const subscriptionsPartialUpdate = (): ToolBase<typeof SubscriptionsPartialUpdat
         }
         const result = await context.api.request<Schemas.Subscription>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -303,7 +303,7 @@ const subscriptionsRetrieve = (): ToolBase<typeof SubscriptionsRetrieveSchema, S
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Subscription>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = omitResponseFields(result, ['invite_message']) as typeof result
         return filtered
@@ -319,7 +319,7 @@ const subscriptionsTestDeliveryCreate = (): ToolBase<typeof SubscriptionsTestDel
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.id))}/test-delivery/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/subscriptions/${encodeURIComponent(String(params.id))}/test-delivery/`,
         })
         return result
     },

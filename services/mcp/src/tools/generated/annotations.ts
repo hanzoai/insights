@@ -44,7 +44,7 @@ const annotationCreate = (): ToolBase<typeof AnnotationCreateSchema, Schemas.Ann
         }
         const result = await context.api.request<Schemas.Annotation>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/annotations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/annotations/`,
             body,
         })
         return result
@@ -60,7 +60,7 @@ const annotationDelete = (): ToolBase<typeof AnnotationDeleteSchema, Schemas.Ann
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Annotation>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/annotations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/annotations/${encodeURIComponent(String(params.id))}/`,
             body: { deleted: true },
         })
         return result
@@ -78,7 +78,7 @@ const annotationRetrieve = (): ToolBase<typeof AnnotationRetrieveSchema, Schemas
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Annotation>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/annotations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/annotations/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -101,7 +101,7 @@ const annotationsList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedAnnotationList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/annotations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/annotations/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -154,7 +154,7 @@ const annotationsPartialUpdate = (): ToolBase<typeof AnnotationsPartialUpdateSch
         }
         const result = await context.api.request<Schemas.Annotation>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/annotations/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/annotations/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result

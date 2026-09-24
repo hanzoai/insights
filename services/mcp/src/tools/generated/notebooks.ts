@@ -50,7 +50,7 @@ const notebooksConfigureCompute = (): ToolBase<
         }
         const result = await context.api.request<Schemas.NotebookKernelConfigResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/kernel/config/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/kernel/config/`,
             body,
         })
         return result
@@ -82,7 +82,7 @@ const notebooksCreate = (): ToolBase<typeof NotebooksCreateSchema, WithInsightsU
         }
         const result = await context.api.request<Schemas.Notebook>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/`,
             body,
         })
         return await withInsightsUrl(context, result, `/notebooks/${result.short_id}`)
@@ -98,7 +98,7 @@ const notebooksDestroy = (): ToolBase<typeof NotebooksDestroySchema, Schemas.Not
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Notebook>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
             body: { deleted: true },
         })
         return result
@@ -117,7 +117,7 @@ const notebooksGet = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.NotebookSQLV2StateResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/sql_v2/state/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/sql_v2/state/`,
         })
         return withInformationalResponse(
             await withInsightsUrl(context, result, `/notebooks/${result.notebook_id}`),
@@ -139,7 +139,7 @@ const notebooksList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedNotebookMinimalList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/`,
             query: {
                 contains: params.contains,
                 created_by: params.created_by,
@@ -166,7 +166,7 @@ const notebooksListFrames = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.NotebookKernelStatusResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/kernel/status/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/kernel/status/`,
         })
         const filtered = pickResponseFields(result, [
             'status',
@@ -210,7 +210,7 @@ const notebooksPartialUpdate = (): ToolBase<typeof NotebooksPartialUpdateSchema,
         }
         const result = await context.api.request<Schemas.Notebook>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
             body,
         })
         return await withInsightsUrl(context, result, `/notebooks/${result.short_id}`)
@@ -226,7 +226,7 @@ const notebooksRetrieve = (): ToolBase<typeof NotebooksRetrieveSchema, WithInsig
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.Notebook>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/`,
         })
         return await withInsightsUrl(context, result, `/notebooks/${result.short_id}`)
     },
@@ -244,7 +244,7 @@ const notebooksRunCellInterrupt = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.NotebookSQLV2InterruptResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/sql_v2/runs/${encodeURIComponent(String(params.run_id))}/interrupt/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/sql_v2/runs/${encodeURIComponent(String(params.run_id))}/interrupt/`,
         })
         return result
     },
@@ -262,7 +262,7 @@ const notebooksRunCellResult = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.NotebookSQLV2RunStatusResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/sql_v2/runs/${encodeURIComponent(String(params.run_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/notebooks/${encodeURIComponent(String(params.short_id))}/sql_v2/runs/${encodeURIComponent(String(params.run_id))}/`,
         })
         const filtered = omitResponseFields(result, ['result.media.*.data']) as typeof result
         return withInformationalResponse(

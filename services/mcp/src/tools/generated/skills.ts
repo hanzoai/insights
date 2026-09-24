@@ -37,7 +37,7 @@ const skillArchive = (): ToolBase<typeof SkillArchiveSchema, unknown> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/archive/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/archive/`,
         })
         return result
     },
@@ -80,7 +80,7 @@ const skillCreate = (): ToolBase<typeof SkillCreateSchema, Schemas.LLMSkill> => 
         }
         const result = await context.api.request<Schemas.LLMSkill>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/`,
             body,
         })
         return result
@@ -102,7 +102,7 @@ const skillDuplicate = (): ToolBase<typeof SkillDuplicateSchema, Schemas.LLMSkil
         }
         const result = await context.api.request<Schemas.LLMSkill>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/duplicate/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/duplicate/`,
             body,
         })
         return result
@@ -133,7 +133,7 @@ const skillFileCreate = (): ToolBase<typeof SkillFileCreateSchema, Schemas.LLMSk
         }
         const result = await context.api.request<Schemas.LLMSkill>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/files/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/files/`,
             body,
         })
         return result
@@ -151,7 +151,7 @@ const skillFileDelete = (): ToolBase<typeof SkillFileDeleteSchema, Schemas.LLMSk
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LLMSkill>({
             method: 'DELETE',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/files/${encodeURIComponent(String(params.file_path))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/files/${encodeURIComponent(String(params.file_path))}/`,
             query: {
                 base_version: params.base_version,
             },
@@ -171,7 +171,7 @@ const skillFileGet = (): ToolBase<typeof SkillFileGetSchema, Schemas.LLMSkillFil
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LLMSkillFile>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/files/${encodeURIComponent(String(params.file_path))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/files/${encodeURIComponent(String(params.file_path))}/`,
             query: {
                 version: params.version,
             },
@@ -201,7 +201,7 @@ const skillFileRename = (): ToolBase<typeof SkillFileRenameSchema, Schemas.LLMSk
         }
         const result = await context.api.request<Schemas.LLMSkill>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/files-rename/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/files-rename/`,
             body,
         })
         return result
@@ -219,7 +219,7 @@ const skillGet = (): ToolBase<typeof SkillGetSchema, Schemas.LLMSkill> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.LLMSkill>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/`,
             query: {
                 body_length: params.body_length,
                 body_offset: params.body_offset,
@@ -239,7 +239,7 @@ const skillList = (): ToolBase<typeof SkillListSchema, Schemas.PaginatedLLMSkill
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedLLMSkillListList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/`,
             query: {
                 category: params.category,
                 created_by_id: params.created_by_id,
@@ -272,7 +272,7 @@ const skillStoreInstallCommand = (): ToolBase<
         }
         const result = await context.api.request<Schemas.LLMSkillMarketplaceCommand>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/marketplace/install-command/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/marketplace/install-command/`,
             body,
         })
         return result
@@ -324,7 +324,7 @@ const skillUpdate = (): ToolBase<typeof SkillUpdateSchema, Schemas.LLMSkill> => 
         }
         const result = await context.api.request<Schemas.LLMSkill>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/llm_skills/name/${encodeURIComponent(String(params.skill_name))}/`,
             body,
         })
         return result

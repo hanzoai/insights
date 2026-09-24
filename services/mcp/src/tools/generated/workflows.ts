@@ -73,7 +73,7 @@ const workflowsCreate = (): ToolBase<typeof WorkflowsCreateSchema, WithInsightsU
             }
             const result = await context.api.request<Schemas.InsightsFlow>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/workflows/${result.id}/workflow`)
@@ -90,7 +90,7 @@ const workflowsDiscardDraft = (): ToolBase<typeof WorkflowsDiscardDraftSchema, S
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.InsightsFlow>({
                 method: 'POST',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/discard_draft/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/discard_draft/`,
             })
             return result
         },
@@ -106,7 +106,7 @@ const workflowsGet = (): ToolBase<typeof WorkflowsGetSchema, WithInsightsUrl<Sch
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.InsightsFlow>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/`,
             })
             return await withInsightsUrl(context, result, `/workflows/${result.id}/workflow`)
         },
@@ -124,7 +124,7 @@ const workflowsGetInvocation = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScriptInvocationResultDetail>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/invocation_results/${encodeURIComponent(String(params.invocation_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/invocation_results/${encodeURIComponent(String(params.invocation_id))}/`,
         })
         return result
     },
@@ -139,7 +139,7 @@ const workflowsGetRevision = (): ToolBase<typeof WorkflowsGetRevisionSchema, Sch
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.InsightsFlowRevision>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/revisions/${encodeURIComponent(String(params.version))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/revisions/${encodeURIComponent(String(params.version))}/`,
         })
         return result
     },
@@ -157,7 +157,7 @@ const workflowsGlobalStats = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.WorkflowStatsRow[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/metrics/global/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/metrics/global/`,
             query: {
                 after: params.after,
                 before: params.before,
@@ -177,7 +177,7 @@ const workflowsList = (): ToolBase<typeof WorkflowsListSchema, WithInsightsUrl<S
             const projectId = await context.stateManager.getProjectId()
             const result = await context.api.request<Schemas.PaginatedInsightsFlowMinimalList>({
                 method: 'GET',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/`,
                 query: {
                     created_at: params.created_at,
                     created_by: params.created_by,
@@ -205,7 +205,7 @@ const workflowsListBatchJobs = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.InsightsFlowBatchJob[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/batch_jobs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/batch_jobs/`,
         })
         return await withInsightsUrl(context, result, '/workflows')
     },
@@ -225,7 +225,7 @@ const workflowsListInvocations = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.ScriptInvocationResult[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/invocation_results/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/invocation_results/`,
             query: {
                 after: params.after,
                 before: params.before,
@@ -252,7 +252,7 @@ const workflowsListRevisions = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedInsightsFlowRevisionBasicList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/revisions/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/revisions/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -273,7 +273,7 @@ const workflowsLogs = (): ToolBase<typeof WorkflowsLogsSchema, unknown> => ({
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/logs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/logs/`,
             query: {
                 after: params.after,
                 before: params.before,
@@ -298,7 +298,7 @@ const workflowsPatchActionEmail = (): ToolBase<typeof WorkflowsPatchActionEmailS
         const { id, action_id, ...body } = parsedParams
         const result = await context.api.request<Schemas.InsightsFlow>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(id))}/actions/${encodeURIComponent(String(action_id))}/email/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(id))}/actions/${encodeURIComponent(String(action_id))}/email/`,
             body,
         })
         return result
@@ -316,7 +316,7 @@ const workflowsPatchGraph = (): ToolBase<typeof WorkflowsPatchGraphSchema, Schem
         const { id, ...body } = parsedParams
         const result = await context.api.request<Schemas.InsightsFlow>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(id))}/graph/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(id))}/graph/`,
             body,
         })
         return result
@@ -341,7 +341,7 @@ const workflowsPublish = (): ToolBase<typeof WorkflowsPublishSchema, Schemas.Ins
         }
         const result = await context.api.request<Schemas.InsightsFlowPublishResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/publish/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/publish/`,
             body,
         })
         return result
@@ -363,7 +363,7 @@ const workflowsRestoreRevision = (): ToolBase<typeof WorkflowsRestoreRevisionSch
         }
         const result = await context.api.request<Schemas.InsightsFlow>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/revisions/${encodeURIComponent(String(params.version))}/restore/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/revisions/${encodeURIComponent(String(params.version))}/restore/`,
             body,
         })
         return result
@@ -381,7 +381,7 @@ const workflowsStats = (): ToolBase<typeof WorkflowsStatsSchema, Schemas.AppMetr
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.AppMetricsResponse>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/metrics/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/metrics/`,
             query: {
                 after: params.after,
                 before: params.before,
@@ -420,7 +420,7 @@ const workflowsTestRun = (): ToolBase<typeof WorkflowsTestRunSchema, unknown> =>
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/invocations/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/invocations/`,
             body,
         })
         return result
@@ -458,7 +458,7 @@ const workflowsUpdate = (): ToolBase<typeof WorkflowsUpdateSchema, WithInsightsU
             }
             const result = await context.api.request<Schemas.InsightsFlow>({
                 method: 'PATCH',
-                path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/`,
+                path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/`,
                 body,
             })
             return await withInsightsUrl(context, result, `/workflows/${result.id}/workflow`)
@@ -489,7 +489,7 @@ const workflowsUpdateSchedule = (): ToolBase<typeof WorkflowsUpdateScheduleSchem
         }
         const result = await context.api.request<Schemas.InsightsFlowSchedule>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/schedules/${encodeURIComponent(String(params.schedule_id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.id))}/schedules/${encodeURIComponent(String(params.schedule_id))}/`,
             body,
         })
         return result

@@ -46,7 +46,7 @@ const resolvedIssue: ErrorIssueData = {
 
 const issueWithLinks: ErrorIssueData = {
     id: 'issue-3',
-    name: 'NetworkError: Failed to fetch /api/projects/1/insights',
+    name: 'NetworkError: Failed to fetch /v1/projects/1/insights',
     status: 'pending_release',
     first_seen: '2025-12-18T09:00:00Z',
     external_issues: [

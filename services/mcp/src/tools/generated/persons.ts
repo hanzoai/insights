@@ -42,7 +42,7 @@ const personsBulkDelete = (): ToolBase<typeof PersonsBulkDeleteSchema, unknown> 
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/persons/bulk_delete/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/persons/bulk_delete/`,
             body,
         })
         return result
@@ -58,7 +58,7 @@ const personsCohortsRetrieve = (): ToolBase<typeof PersonsCohortsRetrieveSchema,
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/persons/cohorts/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/persons/cohorts/`,
             query: {
                 person_id: params.person_id,
             },
@@ -79,7 +79,7 @@ const personsList = (): ToolBase<typeof PersonsListSchema, WithInsightsUrl<Schem
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedPersonRecordList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/persons/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/persons/`,
             query: {
                 distinct_id: params.distinct_id,
                 email: params.email,
@@ -124,7 +124,7 @@ const personsPropertyDelete = (): ToolBase<typeof PersonsPropertyDeleteSchema, u
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/persons/${encodeURIComponent(String(params.id))}/delete_property/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/persons/${encodeURIComponent(String(params.id))}/delete_property/`,
             body,
         })
         return result
@@ -149,7 +149,7 @@ const personsPropertySet = (): ToolBase<typeof PersonsPropertySetSchema, unknown
         }
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/persons/${encodeURIComponent(String(params.id))}/update_property/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/persons/${encodeURIComponent(String(params.id))}/update_property/`,
             body,
         })
         return result
@@ -165,7 +165,7 @@ const personsRetrieve = (): ToolBase<typeof PersonsRetrieveSchema, WithInsightsU
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PersonRecord>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/persons/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/persons/${encodeURIComponent(String(params.id))}/`,
         })
         const filtered = pickResponseFields(result, [
             'id',
@@ -189,7 +189,7 @@ const personsValuesRetrieve = (): ToolBase<typeof PersonsValuesRetrieveSchema, u
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<unknown>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/persons/values/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/persons/values/`,
             query: {
                 key: params.key,
                 value: params.value,

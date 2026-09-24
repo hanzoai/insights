@@ -30,7 +30,7 @@ const businessKnowledgeDocumentWindowRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.KnowledgeDocumentWindow[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/business_knowledge/documents/${encodeURIComponent(String(params.id))}/window/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/business_knowledge/documents/${encodeURIComponent(String(params.id))}/window/`,
             query: {
                 around_ordinal: params.around_ordinal,
                 radius: params.radius,
@@ -52,7 +52,7 @@ const businessKnowledgeDocumentsSearch = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.KnowledgeSearchResult[]>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/business_knowledge/documents/search/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/business_knowledge/documents/search/`,
             query: {
                 limit: params.limit,
                 query: params.query,
@@ -75,7 +75,7 @@ const businessKnowledgeSourcesList = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.PaginatedKnowledgeSourceList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/`,
             query: {
                 limit: params.limit,
                 offset: params.offset,
@@ -130,7 +130,7 @@ const businessKnowledgeSourcesPartialUpdate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.KnowledgeSource>({
             method: 'PATCH',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/${encodeURIComponent(String(params.id))}/`,
             body,
         })
         return result
@@ -149,7 +149,7 @@ const businessKnowledgeSourcesRetrieve = (): ToolBase<
         const projectId = await context.stateManager.getProjectId()
         const result = await context.api.request<Schemas.KnowledgeSource>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/${encodeURIComponent(String(params.id))}/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/${encodeURIComponent(String(params.id))}/`,
         })
         return result
     },
@@ -177,7 +177,7 @@ const businessKnowledgeSourcesTextCreate = (): ToolBase<
         }
         const result = await context.api.request<Schemas.KnowledgeSource>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/`,
             body,
         })
         return result
@@ -197,7 +197,7 @@ const businessKnowledgeSourcesUrlCreate = (): ToolBase<
         const parsedParams = BusinessKnowledgeSourcesUrlCreateSchema.parse(params)
         const result = await context.api.request<Schemas.KnowledgeSource>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/business_knowledge/sources/`,
             body: parsedParams,
         })
         return result

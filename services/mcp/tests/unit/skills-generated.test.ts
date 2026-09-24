@@ -37,7 +37,7 @@ describe('Generated skill-* tools', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'POST',
-            path: '/api/projects/17/llm_skills/name/skills-store/archive/',
+            path: '/v1/projects/17/llm_skills/name/skills-store/archive/',
         })
         expect(result).toBeUndefined()
     })
@@ -53,7 +53,7 @@ describe('Generated skill-* tools', () => {
         expect(requestMock).toHaveBeenCalledWith(
             expect.objectContaining({
                 method: 'GET',
-                path: '/api/projects/17/llm_skills/name/skills-store/',
+                path: '/v1/projects/17/llm_skills/name/skills-store/',
             })
         )
         expect(result.name).toBe('skills-store')
