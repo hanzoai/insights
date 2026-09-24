@@ -169,8 +169,13 @@ export function loadInsightsJS(): void {
         // own; only the subdomain is unregistered. Whoever holds that domain could
         // create it and execute arbitrary JS inside a logged-in admin session on
         // insights.hanzo.ai. Pinning our own origin closes that outright.
+        //
+        // The stub has no project here, so it asks for nothing: with flags disabled
+        // it loads no remote config (/array/fake_token/config.js) and requests no
+        // /flags/, both of which would only answer 404.
         insights.init('fake_token', {
             api_host: window.location.origin,
+            advanced_disable_flags: true,
             autocapture: false,
             loaded: function (ph) {
                 ph.opt_out_capturing()
