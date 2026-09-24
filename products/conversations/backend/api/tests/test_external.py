@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from insights.models import Team
+from insights.models.utils import generate_random_token_secret
 
 from products.conversations.backend.models import Ticket
 from products.conversations.backend.models.constants import Priority, Status
@@ -16,7 +17,8 @@ class TestExternalTicketAPI(BaseTest):
     def setUp(self):
         super().setUp()
         self.team.conversations_enabled = True
-        self.team.save(update_fields=["conversations_enabled"])
+        self.team.secret_api_token = generate_random_token_secret()
+        self.team.save(update_fields=["conversations_enabled", "secret_api_token"])
         self.client = APIClient()
         self.ticket = Ticket.objects.create_with_number(
             team=self.team,
@@ -28,9 +30,19 @@ class TestExternalTicketAPI(BaseTest):
         self.url = f"/v1/conversations/external/ticket/{self.ticket.id}"
 
     def _auth_headers(self, token=None):
-        return {"HTTP_AUTHORIZATION": f"Bearer {token or self.team.api_token}"}
+        return {"HTTP_AUTHORIZATION": f"Bearer {token or self.team.secret_api_token}"}
 
     # -- Authentication ---------------------------------------------------
+
+    def test_public_api_token_is_refused(self):
+        response = self.client.get(self.url, **self._auth_headers(token=self.team.api_token))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_backup_secret_token_is_accepted(self):
+        self.team.secret_api_token_backup = generate_random_token_secret()
+        self.team.save(update_fields=["secret_api_token_backup"])
+        response = self.client.get(self.url, **self._auth_headers(token=self.team.secret_api_token_backup))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_requires_auth(self):
         response = self.client.get(self.url)
@@ -85,8 +97,13 @@ class TestExternalTicketAPI(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_ticket_cross_team_isolation(self):
-        other_team = Team.objects.create(organization=self.organization, name="Other team", conversations_enabled=True)
-        response = self.client.get(self.url, **self._auth_headers(token=other_team.api_token))
+        other_team = Team.objects.create(
+            organization=self.organization,
+            name="Other team",
+            conversations_enabled=True,
+            secret_api_token=generate_random_token_secret(),
+        )
+        response = self.client.get(self.url, **self._auth_headers(token=other_team.secret_api_token))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # -- PATCH ticket -----------------------------------------------------
@@ -147,12 +164,17 @@ class TestExternalTicketAPI(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_patch_cross_team_isolation(self):
-        other_team = Team.objects.create(organization=self.organization, name="Other team", conversations_enabled=True)
+        other_team = Team.objects.create(
+            organization=self.organization,
+            name="Other team",
+            conversations_enabled=True,
+            secret_api_token=generate_random_token_secret(),
+        )
         response = self.client.patch(
             self.url,
             {"status": "resolved"},
             content_type="application/json",
-            **self._auth_headers(token=other_team.api_token),
+            **self._auth_headers(token=other_team.secret_api_token),
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.ticket.refresh_from_db()

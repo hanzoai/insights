@@ -3,10 +3,12 @@ External API endpoints for the Conversations product.
 
 These endpoints are used by the CDP worker for workflow actions and can be opened
 to third-party developers in the future.
-Authenticated via team API token passed as a Bearer token in the Authorization header.
+Authenticated via team secret API token passed as a Bearer token in the Authorization header.
 """
 
 import hashlib
+
+from django.db.models import Q
 
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny
@@ -23,7 +25,7 @@ from products.conversations.backend.models.constants import Priority, Status
 
 
 class _ExternalTicketThrottle(SimpleRateThrottle):
-    """Rate limit by Bearer token (team api_token)."""
+    """Rate limit by Bearer token (team secret_api_token)."""
 
     def get_cache_key(self, request, view):
         auth_header = request.headers.get("Authorization", "")
@@ -52,9 +54,14 @@ def _authenticate_team(request: Request) -> tuple[Team, None] | tuple[None, Resp
     if not api_key:
         return None, Response({"error": "Empty API key"}, status=status.HTTP_401_UNAUTHORIZED)
 
+    # The secret token, never api_token: api_token is the public project key
+    # every page that loads the SDK carries.
     try:
-        team = Team.objects.get(api_token=api_key, conversations_enabled=True)
-    except Team.DoesNotExist:
+        team = Team.objects.get(
+            Q(secret_api_token=api_key) | Q(secret_api_token_backup=api_key),
+            conversations_enabled=True,
+        )
+    except (Team.DoesNotExist, Team.MultipleObjectsReturned):
         return None, Response({"error": "Invalid API key"}, status=status.HTTP_401_UNAUTHORIZED)
 
     return team, None
@@ -70,7 +77,7 @@ class ExternalTicketView(APIView):
     GET /v1/conversations/external/ticket/<ticket_id>  — Fetch ticket data
     PATCH /v1/conversations/external/ticket/<ticket_id> — Update ticket fields
 
-    Authenticated via Bearer token (team api_token) in Authorization header.
+    Authenticated via Bearer token (team secret_api_token) in Authorization header.
     """
 
     authentication_classes = []
