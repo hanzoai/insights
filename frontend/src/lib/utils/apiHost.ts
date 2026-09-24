@@ -27,6 +27,11 @@ export function apiHostOrigin(): string {
     return appOrigin
 }
 
+/** Whether url is served by this app's own origin, relative paths included. */
+export function isSameOrigin(url: string): boolean {
+    return new URL(url, window.location.href).origin === window.location.origin
+}
+
 export function liveEventsHostOrigin(): string | null {
     const appOrigin = window.location.origin
     const appContext = getAppContext()

@@ -13,6 +13,7 @@ import { ActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'
 import { apiStatusLogic } from 'lib/logic/apiStatusLogic'
 import { getBackendHost, getStoredSession, isOAuthMode, refreshAccessToken } from 'lib/oauth/oauthClient'
 import { assertNotReadOnly } from 'lib/readOnlyGuard'
+import { isSameOrigin } from 'lib/utils/apiHost'
 import { objectClean } from 'lib/utils/objects'
 import { toParams } from 'lib/utils/url'
 import { CohortCalculationHistoryResponse } from 'scenes/cohorts/cohortCalculationHistorySceneLogic'
@@ -7316,12 +7317,14 @@ const api = {
         // If an external signal is provided, forward its abort to our controller
         signal?.addEventListener('abort', () => abortController.abort())
 
+        // The CSRF token and tracing headers are for Django. Another origin (the
+        // livestream) reads none of them, and its preflight does not allow them.
+        const django = isSameOrigin(url)
         await fetchEventSource(url, {
             method,
             headers: {
                 ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}),
-                'X-CSRFToken': getCookie('insights_csrftoken') || '',
-                ...tracingHeaders(),
+                ...(django ? { 'X-CSRFToken': getCookie('insights_csrftoken') || '', ...tracingHeaders() } : {}),
                 ...objectClean(headers ?? {}),
             },
             body: data !== undefined ? JSON.stringify(data) : undefined,
