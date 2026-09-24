@@ -40,7 +40,7 @@ describe('BatchExportInsightsFunctionService', () => {
     }
 
     const invocationUrl = () =>
-        `/api/projects/${team.id}/insights_functions/${insightsFunction.id}/batch_export_invocations`
+        `/v1/projects/${team.id}/insights_functions/${insightsFunction.id}/batch_export_invocations`
 
     const postInvocation = (body: any) => supertest(app).post(invocationUrl()).send(body)
 
@@ -135,7 +135,7 @@ describe('BatchExportInsightsFunctionService', () => {
     describe('resource lookup errors', () => {
         it('returns 404 for non-existent team', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/99999/insights_functions/${insightsFunction.id}/batch_export_invocations`)
+                .post(`/v1/projects/99999/insights_functions/${insightsFunction.id}/batch_export_invocations`)
                 .send({ datastore_event: datastoreEvent })
 
             expect(res.status).toEqual(404)
@@ -145,7 +145,7 @@ describe('BatchExportInsightsFunctionService', () => {
         it('returns 404 for non-existent script function', async () => {
             const fakeId = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_functions/${fakeId}/batch_export_invocations`)
+                .post(`/v1/projects/${team.id}/insights_functions/${fakeId}/batch_export_invocations`)
                 .send({ datastore_event: datastoreEvent })
 
             expect(res.status).toEqual(404)
@@ -161,7 +161,7 @@ describe('BatchExportInsightsFunctionService', () => {
             })
 
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_functions/${nonBatchFunction.id}/batch_export_invocations`)
+                .post(`/v1/projects/${team.id}/insights_functions/${nonBatchFunction.id}/batch_export_invocations`)
                 .send({ datastore_event: datastoreEvent })
 
             expect(res.status).toEqual(404)

@@ -21,7 +21,7 @@ describe('principal gate', () => {
     const build = (instance: Iam | null): express.Application => {
         const app = express()
         app.use(createPrincipalMiddleware(instance))
-        app.get('/api/projects/1/recordings/abc/block', (req, res) => {
+        app.get('/v1/projects/1/recordings/abc/block', (req, res) => {
             res.status(200).json({ org: principalOf(req)?.org ?? null })
         })
         app.get('/healthz', (_req, res) => {
@@ -48,7 +48,7 @@ describe('principal gate', () => {
         await iam.close()
     })
 
-    const path = '/api/projects/1/recordings/abc/block'
+    const path = '/v1/projects/1/recordings/abc/block'
 
     it('refuses a caller presenting nothing at all — the reproduced hole', async () => {
         await supertest(gated).get(path).expect(401)

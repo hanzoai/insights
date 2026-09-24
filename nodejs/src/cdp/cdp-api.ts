@@ -247,34 +247,34 @@ export class CdpApi {
                 fn(req, res).catch(next)
 
         // API routes (authentication handled globally by middleware)
-        router.post('/api/projects/:team_id/insights_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
-        router.post('/api/projects/:team_id/insights_flows/:id/invocations', asyncHandler(this.flowInvocation))
+        router.post('/v1/projects/:team_id/insights_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
+        router.post('/v1/projects/:team_id/insights_flows/:id/invocations', asyncHandler(this.flowInvocation))
         router.post(
-            '/api/projects/:team_id/insights_flows/:id/scheduled_invocations',
+            '/v1/projects/:team_id/insights_flows/:id/scheduled_invocations',
             asyncHandler(this.flowScheduledInvocation)
         )
         router.post(
-            '/api/projects/:team_id/insights_flows/:id/batch_invocations/:parent_run_id',
+            '/v1/projects/:team_id/insights_flows/:id/batch_invocations/:parent_run_id',
             asyncHandler(this.postFlowBatchInvocation)
         )
         router.post(
-            '/api/projects/:team_id/insights_functions/:id/rerun',
+            '/v1/projects/:team_id/insights_functions/:id/rerun',
             asyncHandler(this.postRerunInvocations('insights_function'))
         )
-        router.post('/api/projects/:team_id/insights_flows/:id/rerun', asyncHandler(this.postRerunInvocations('flow')))
-        router.get('/api/projects/:team_id/insights_flows/:id/in_flight_count', asyncHandler(this.getFlowInFlightCount))
+        router.post('/v1/projects/:team_id/insights_flows/:id/rerun', asyncHandler(this.postRerunInvocations('flow')))
+        router.get('/v1/projects/:team_id/insights_flows/:id/in_flight_count', asyncHandler(this.getFlowInFlightCount))
         router.post(
-            '/api/projects/:team_id/insights_flows/:id/reschedule_parked',
+            '/v1/projects/:team_id/insights_flows/:id/reschedule_parked',
             asyncHandler(this.postFlowRescheduleParked)
         )
-        router.get('/api/projects/:team_id/insights_functions/:id/status', asyncHandler(this.getFunctionStatus()))
-        router.patch('/api/projects/:team_id/insights_functions/:id/status', asyncHandler(this.patchFunctionStatus()))
-        router.get('/api/insights_functions/states', asyncHandler(this.getFunctionStates()))
-        router.get('/api/insights_function_templates', this.getInsightsFunctionTemplates)
-        router.post('/api/messaging/generate_preferences_token', asyncHandler(this.generatePreferencesToken()))
-        router.get('/api/messaging/validate_preferences_token/:token', asyncHandler(this.validatePreferencesToken()))
+        router.get('/v1/projects/:team_id/insights_functions/:id/status', asyncHandler(this.getFunctionStatus()))
+        router.patch('/v1/projects/:team_id/insights_functions/:id/status', asyncHandler(this.patchFunctionStatus()))
+        router.get('/v1/insights_functions/states', asyncHandler(this.getFunctionStates()))
+        router.get('/v1/insights_function_templates', this.getInsightsFunctionTemplates)
+        router.post('/v1/messaging/generate_preferences_token', asyncHandler(this.generatePreferencesToken()))
+        router.get('/v1/messaging/validate_preferences_token/:token', asyncHandler(this.validatePreferencesToken()))
         router.post(
-            '/api/projects/:team_id/insights_functions/:insights_function_id/batch_export_invocations',
+            '/v1/projects/:team_id/insights_functions/:insights_function_id/batch_export_invocations',
             asyncHandler(this.handleBatchExportInsightsFunction())
         )
 

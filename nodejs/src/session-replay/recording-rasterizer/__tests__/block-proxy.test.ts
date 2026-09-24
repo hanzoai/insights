@@ -54,7 +54,7 @@ describe('BlockProxy', () => {
             expect(count).toBe(2)
             expect(proxy.blockCount).toBe(2)
             expect(mockInternalFetch).toHaveBeenCalledWith(
-                'http://localhost:6738/api/projects/1/recordings/test-session-123/blocks',
+                'http://localhost:6738/v1/projects/1/recordings/test-session-123/blocks',
                 { headers: { 'X-Internal-Api-Secret': 'test-secret' } }
             )
         })
@@ -135,7 +135,7 @@ describe('BlockProxy', () => {
             await proxy.handleRequest(blockRequest as any, '/__blocks/0')
 
             expect(mockInternalFetch).toHaveBeenCalledWith(
-                expect.stringContaining('/api/projects/1/recordings/test-session-123/block?'),
+                expect.stringContaining('/v1/projects/1/recordings/test-session-123/block?'),
                 { headers: { 'X-Internal-Api-Secret': 'test-secret' } }
             )
             const fetchUrl = mockInternalFetch.mock.calls[0][0] as string

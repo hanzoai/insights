@@ -30,7 +30,7 @@ export class BlockProxy {
         this.teamId = input.team_id
         this.sessionId = input.session_id
 
-        const url = `${this.cfg.recordingApiBaseUrl}/api/projects/${input.team_id}/recordings/${input.session_id}/blocks`
+        const url = `${this.cfg.recordingApiBaseUrl}/v1/projects/${input.team_id}/recordings/${input.session_id}/blocks`
         const resp = await internalFetch(url, {
             headers: { 'X-Internal-Api-Secret': this.cfg.recordingApiSecret },
         })
@@ -69,7 +69,7 @@ export class BlockProxy {
                 end_byte: String(block.end_byte),
                 decompress: 'true',
             })
-            const apiBase = `${this.cfg.recordingApiBaseUrl}/api/projects`
+            const apiBase = `${this.cfg.recordingApiBaseUrl}/v1/projects`
             const url = `${apiBase}/${this.teamId}/recordings/${this.sessionId}/block?${params}`
             const resp = await internalFetch(url, {
                 headers: { 'X-Internal-Api-Secret': this.cfg.recordingApiSecret },

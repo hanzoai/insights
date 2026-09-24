@@ -30,7 +30,7 @@ export class ServerCommands {
             (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> =>
                 fn(req, res).catch(next)
 
-        router.post('/api/commands', asyncHandler(this.postCommand()))
+        router.post('/v1/commands', asyncHandler(this.postCommand()))
 
         return router
     }

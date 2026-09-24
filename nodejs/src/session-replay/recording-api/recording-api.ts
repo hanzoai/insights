@@ -182,13 +182,13 @@ export class RecordingApi {
             (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> =>
                 fn(req, res).catch(next)
 
-        const blockPath = '/api/projects/:team_id/recordings/:session_id/block'
+        const blockPath = '/v1/projects/:team_id/recordings/:session_id/block'
 
-        const blocksPath = '/api/projects/:team_id/recordings/:session_id/blocks'
+        const blocksPath = '/v1/projects/:team_id/recordings/:session_id/blocks'
 
         router.get(blockPath, asyncHandler(this.getBlock))
         router.get(blocksPath, asyncHandler(this.listBlocks))
-        router.post('/api/projects/:team_id/recordings/delete', asyncHandler(this.deleteRecordings))
+        router.post('/v1/projects/:team_id/recordings/delete', asyncHandler(this.deleteRecordings))
 
         return router
     }

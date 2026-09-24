@@ -229,7 +229,7 @@ describe('RecordingApi', () => {
         describe('request parsing', () => {
             it('should return 400 if key is missing', async () => {
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ start_byte: '0', end_byte: '100' })
 
                 expect(res.status).toBe(400)
@@ -238,7 +238,7 @@ describe('RecordingApi', () => {
 
             it('should return 400 if start_byte is missing', async () => {
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ key: validKey, end_byte: '100' })
 
                 expect(res.status).toBe(400)
@@ -247,7 +247,7 @@ describe('RecordingApi', () => {
 
             it('should return 400 if end_byte is missing', async () => {
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ key: validKey, start_byte: '0' })
 
                 expect(res.status).toBe(400)
@@ -260,7 +260,7 @@ describe('RecordingApi', () => {
                 ['-1', 'negative number'],
             ])('should return 400 for invalid team_id: %s (%s)', async (teamId) => {
                 const res = await supertest(app)
-                    .get(`/api/projects/${teamId}/recordings/session-123/block`)
+                    .get(`/v1/projects/${teamId}/recordings/session-123/block`)
                     .query({ key: validKey, start_byte: '0', end_byte: '100' })
 
                 expect(res.status).toBe(400)
@@ -269,7 +269,7 @@ describe('RecordingApi', () => {
 
             it('should return 400 when start_byte is greater than end_byte', async () => {
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ key: validKey, start_byte: '100', end_byte: '50' })
 
                 expect(res.status).toBe(400)
@@ -280,7 +280,7 @@ describe('RecordingApi', () => {
                 mockService.validateS3Key.mockReturnValue(false)
 
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ key: '../etc/passwd', start_byte: '0', end_byte: '100' })
 
                 expect(res.status).toBe(400)
@@ -295,7 +295,7 @@ describe('RecordingApi', () => {
 
                 try {
                     const res = await supertest(uninitializedApp)
-                        .get('/api/projects/1/recordings/session-123/block')
+                        .get('/v1/projects/1/recordings/session-123/block')
                         .query({ key: validKey, start_byte: '0', end_byte: '100' })
 
                     expect(res.status).toBe(503)
@@ -311,7 +311,7 @@ describe('RecordingApi', () => {
                 mockService.getBlock.mockResolvedValue({ ok: true, data: Buffer.from('decrypted data') })
 
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ key: validKey, start_byte: '0', end_byte: '100' })
                     .responseType('buffer')
 
@@ -326,7 +326,7 @@ describe('RecordingApi', () => {
                 mockService.getBlock.mockResolvedValue({ ok: false, error: 'not_found' })
 
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ key: validKey, start_byte: '0', end_byte: '100' })
 
                 expect(res.status).toBe(404)
@@ -342,7 +342,7 @@ describe('RecordingApi', () => {
                 })
 
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ key: validKey, start_byte: '0', end_byte: '100' })
 
                 expect(res.status).toBe(410)
@@ -357,7 +357,7 @@ describe('RecordingApi', () => {
                 mockService.getBlock.mockRejectedValue(new Error('S3 error'))
 
                 const res = await supertest(app)
-                    .get('/api/projects/1/recordings/session-123/block')
+                    .get('/v1/projects/1/recordings/session-123/block')
                     .query({ key: validKey, start_byte: '0', end_byte: '100' })
 
                 expect(res.status).toBe(500)
@@ -400,7 +400,7 @@ describe('RecordingApi', () => {
                 },
             ])
 
-            const res = await supertest(app).get('/api/projects/1/recordings/session-123/blocks')
+            const res = await supertest(app).get('/v1/projects/1/recordings/session-123/blocks')
 
             expect(res.status).toBe(200)
             expect(res.body).toEqual({
@@ -427,14 +427,14 @@ describe('RecordingApi', () => {
         it('should return empty blocks when session not found', async () => {
             mockService.listBlocks.mockResolvedValue([])
 
-            const res = await supertest(app).get('/api/projects/1/recordings/session-123/blocks')
+            const res = await supertest(app).get('/v1/projects/1/recordings/session-123/blocks')
 
             expect(res.status).toBe(200)
             expect(res.body).toEqual({ blocks: [] })
         })
 
         it('should return 400 for invalid team_id', async () => {
-            const res = await supertest(app).get('/api/projects/abc/recordings/session-123/blocks')
+            const res = await supertest(app).get('/v1/projects/abc/recordings/session-123/blocks')
 
             expect(res.status).toBe(400)
         })
@@ -442,7 +442,7 @@ describe('RecordingApi', () => {
         it('should return 500 when service throws', async () => {
             mockService.listBlocks.mockRejectedValue(new Error('Datastore error'))
 
-            const res = await supertest(app).get('/api/projects/1/recordings/session-123/blocks')
+            const res = await supertest(app).get('/v1/projects/1/recordings/session-123/blocks')
 
             expect(res.status).toBe(500)
             expect(res.body).toEqual({ error: 'Failed to list blocks' })
@@ -455,7 +455,7 @@ describe('RecordingApi', () => {
             const uninitializedServer = uninitializedApp.listen(0, () => {})
 
             try {
-                const res = await supertest(uninitializedApp).get('/api/projects/1/recordings/session-123/blocks')
+                const res = await supertest(uninitializedApp).get('/v1/projects/1/recordings/session-123/blocks')
 
                 expect(res.status).toBe(503)
                 expect(res.body).toEqual({ error: 'Service not initialized' })
@@ -489,7 +489,7 @@ describe('RecordingApi', () => {
                 ['-1', 'negative number'],
             ])('should return 400 for invalid team_id: %s (%s)', async (teamId) => {
                 const res = await supertest(app)
-                    .post(`/api/projects/${teamId}/recordings/delete`)
+                    .post(`/v1/projects/${teamId}/recordings/delete`)
                     .send({ session_ids: ['session-1'], deleted_by: 'user@example.com' })
 
                 expect(res.status).toBe(400)
@@ -498,7 +498,7 @@ describe('RecordingApi', () => {
 
             it('should return 400 when session_ids is empty', async () => {
                 const res = await supertest(app)
-                    .post('/api/projects/1/recordings/delete')
+                    .post('/v1/projects/1/recordings/delete')
                     .send({ session_ids: [], deleted_by: 'user@example.com' })
 
                 expect(res.status).toBe(400)
@@ -507,7 +507,7 @@ describe('RecordingApi', () => {
 
             it('should return 400 when session_ids is missing', async () => {
                 const res = await supertest(app)
-                    .post('/api/projects/1/recordings/delete')
+                    .post('/v1/projects/1/recordings/delete')
                     .send({ deleted_by: 'user@example.com' })
 
                 expect(res.status).toBe(400)
@@ -516,7 +516,7 @@ describe('RecordingApi', () => {
 
             it('should return 400 when deleted_by is missing', async () => {
                 const res = await supertest(app)
-                    .post('/api/projects/1/recordings/delete')
+                    .post('/v1/projects/1/recordings/delete')
                     .send({ session_ids: ['session-1'] })
 
                 expect(res.status).toBe(400)
@@ -526,7 +526,7 @@ describe('RecordingApi', () => {
                 const sessionIds = Array.from({ length: 101 }, (_, i) => `session-${i}`)
 
                 const res = await supertest(app)
-                    .post('/api/projects/1/recordings/delete')
+                    .post('/v1/projects/1/recordings/delete')
                     .send({ session_ids: sessionIds, deleted_by: 'user@example.com' })
 
                 expect(res.status).toBe(400)
@@ -542,7 +542,7 @@ describe('RecordingApi', () => {
 
                 try {
                     const res = await supertest(uninitializedApp)
-                        .post('/api/projects/1/recordings/delete')
+                        .post('/v1/projects/1/recordings/delete')
                         .send({ session_ids: ['session-1'], deleted_by: 'user@example.com' })
 
                     expect(res.status).toBe(503)
@@ -574,7 +574,7 @@ describe('RecordingApi', () => {
                 ])
 
                 const res = await supertest(app)
-                    .post('/api/projects/1/recordings/delete')
+                    .post('/v1/projects/1/recordings/delete')
                     .send({ session_ids: ['session-1', 'session-2', 'session-3'], deleted_by: 'user@example.com' })
 
                 expect(res.status).toBe(200)
@@ -606,7 +606,7 @@ describe('RecordingApi', () => {
                 mockService.deleteRecordings.mockRejectedValue(new Error('Unexpected error'))
 
                 const res = await supertest(app)
-                    .post('/api/projects/1/recordings/delete')
+                    .post('/v1/projects/1/recordings/delete')
                     .send({ session_ids: ['session-1'], deleted_by: 'user@example.com' })
 
                 expect(res.status).toBe(500)

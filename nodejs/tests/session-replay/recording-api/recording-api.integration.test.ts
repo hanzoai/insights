@@ -812,7 +812,7 @@ describe('Recording API encryption integration', () => {
                 })
 
                 const res = await supertest(app)
-                    .get(`/api/projects/${teamId}/recordings/${sessionId}/block`)
+                    .get(`/v1/projects/${teamId}/recordings/${sessionId}/block`)
                     .query({
                         key: 'session_recordings/30d/1764634738680-3cca0f5d3c7cc7ee',
                         start_byte: '0',
@@ -840,7 +840,7 @@ describe('Recording API encryption integration', () => {
                 })
 
                 const res = await supertest(app)
-                    .get(`/api/projects/${teamId}/recordings/${sessionId}/block`)
+                    .get(`/v1/projects/${teamId}/recordings/${sessionId}/block`)
                     .query({
                         key: 'session_recordings/30d/1764634738680-3cca0f5d3c7cc7ee',
                         start_byte: '0',
@@ -856,7 +856,7 @@ describe('Recording API encryption integration', () => {
             it('should return 404 when S3 returns no body', async () => {
                 mockS3Send.mockResolvedValue({ Body: null })
 
-                const res = await supertest(app).get('/api/projects/1/recordings/session-1/block').query({
+                const res = await supertest(app).get('/v1/projects/1/recordings/session-1/block').query({
                     key: 'session_recordings/30d/1764634738680-3cca0f5d3c7cc7ee',
                     start_byte: '0',
                     end_byte: '100',
@@ -883,7 +883,7 @@ describe('Recording API encryption integration', () => {
                 })
 
                 const res = await supertest(app)
-                    .get(`/api/projects/${teamId}/recordings/${sessionId}/block`)
+                    .get(`/v1/projects/${teamId}/recordings/${sessionId}/block`)
                     .query({
                         key: 'session_recordings/30d/1764634738680-3cca0f5d3c7cc7ee',
                         start_byte: '0',
@@ -915,7 +915,7 @@ describe('Recording API encryption integration', () => {
                 })
 
                 const res = await supertest(app)
-                    .get(`/api/projects/${teamId}/recordings/${sessionId}/block`)
+                    .get(`/v1/projects/${teamId}/recordings/${sessionId}/block`)
                     .query({
                         key: 'session_recordings/30d/1764634738680-3cca0f5d3c7cc7ee',
                         start_byte: '0',

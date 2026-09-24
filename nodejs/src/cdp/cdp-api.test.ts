@@ -138,7 +138,7 @@ describe('CDP API', () => {
 
     it('errors if missing script function', async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${new UUIDT().toString()}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${new UUIDT().toString()}/invocations`)
             .send({ globals })
 
         expect(res.status).toEqual(404)
@@ -146,7 +146,7 @@ describe('CDP API', () => {
 
     it('errors if missing team', async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${new UUIDT().toString()}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${new UUIDT().toString()}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals })
 
         expect(res.status).toEqual(404)
@@ -154,7 +154,7 @@ describe('CDP API', () => {
 
     it('errors if missing values', async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({})
 
         expect(res.status).toEqual(400)
@@ -165,7 +165,7 @@ describe('CDP API', () => {
 
     it("does not error if script function is 'new'", async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
             .send({ globals })
 
         expect(res.status).toEqual(400)
@@ -173,7 +173,7 @@ describe('CDP API', () => {
 
     it('can invoke a function via the API with mocks', async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
         expect(res.status).toEqual(200)
@@ -230,7 +230,7 @@ describe('CDP API', () => {
         )
 
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
         expect(res.status).toEqual(200)
@@ -268,7 +268,7 @@ describe('CDP API', () => {
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
         expect(res.status).toEqual(200)
@@ -298,7 +298,7 @@ describe('CDP API', () => {
         )
         const res = await supertest(app)
             .post(
-                `/api/projects/${insightsFunctionMultiFetch.team_id}/insights_functions/${insightsFunctionMultiFetch.id}/invocations`
+                `/v1/projects/${insightsFunctionMultiFetch.team_id}/insights_functions/${insightsFunctionMultiFetch.id}/invocations`
             )
             .send({ globals, mock_async_functions: false })
 
@@ -337,7 +337,7 @@ describe('CDP API', () => {
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
         expect(mockFetch).toHaveBeenCalledWith(
@@ -372,7 +372,7 @@ describe('CDP API', () => {
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
         expect(res.status).toEqual(200)
@@ -420,7 +420,7 @@ describe('CDP API', () => {
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
         expect(res.status).toEqual(200)
@@ -466,7 +466,7 @@ describe('CDP API', () => {
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+            .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
         expect(res.status).toEqual(200)
@@ -548,7 +548,7 @@ describe('CDP API', () => {
 
         const res = await supertest(app)
             .post(
-                `/api/projects/${insightsFunctionWithSecret.team_id}/insights_functions/${insightsFunctionWithSecret.id}/invocations`
+                `/v1/projects/${insightsFunctionWithSecret.team_id}/insights_functions/${insightsFunctionWithSecret.id}/invocations`
             )
             .send({ globals, mock_async_functions: true })
 
@@ -584,7 +584,7 @@ describe('CDP API', () => {
 
         it('processes transformations and returns the result if not null', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
+                .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration })
 
             expect(res.status).toEqual(200)
@@ -617,7 +617,7 @@ describe('CDP API', () => {
             globals.event!.event = 'drop me'
 
             const res = await supertest(app)
-                .post(`/api/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
+                .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration })
 
             expect(res.status).toEqual(200)
@@ -665,7 +665,7 @@ describe('CDP API', () => {
 
         it('transforms a mock log record', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
+                .post(`/v1/projects/${team.id}/insights_functions/new/invocations`)
                 .send({ globals: logRecordGlobals, configuration })
 
             expect(res.status).toEqual(200)
@@ -678,7 +678,7 @@ describe('CDP API', () => {
 
         it('returns null result when the record is dropped', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
+                .post(`/v1/projects/${team.id}/insights_functions/new/invocations`)
                 .send({
                     globals: { record: { ...logRecordGlobals.record, severity_text: 'debug' } },
                     configuration,
@@ -692,7 +692,7 @@ describe('CDP API', () => {
 
         it('returns 400 when the record global is missing', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
+                .post(`/v1/projects/${team.id}/insights_functions/new/invocations`)
                 .send({ globals: {}, configuration })
 
             expect(res.status).toEqual(400)
@@ -703,7 +703,7 @@ describe('CDP API', () => {
             // Returning a non-record, non-null value is a customer mistake the endpoint must surface
             const script = `return 42`
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
+                .post(`/v1/projects/${team.id}/insights_functions/new/invocations`)
                 .send({
                     globals: logRecordGlobals,
                     configuration: { ...configuration, script, bytecode: await compileScript(script) },
@@ -720,7 +720,7 @@ describe('CDP API', () => {
                 return record
             `
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
+                .post(`/v1/projects/${team.id}/insights_functions/new/invocations`)
                 .send({
                     globals: logRecordGlobals,
                     configuration: { ...configuration, script, bytecode: await compileScript(script) },
@@ -756,7 +756,7 @@ describe('CDP API', () => {
             await api['scriptWatcher'].forceStateChange(insightsFunction, ScriptWatcherState.degraded)
             await api['scriptWatcher'].forceStateChange(insightsFunctionMultiFetch, ScriptWatcherState.disabled)
 
-            const res = await supertest(app).get('/api/insights_functions/states')
+            const res = await supertest(app).get('/v1/insights_functions/states')
             expect(res.status).toEqual(200)
             expect(res.body).toEqual({
                 results: [
@@ -791,7 +791,7 @@ describe('CDP API', () => {
 
         it('accepts large payloads on script function invocations endpoint', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
+                .post(`/v1/projects/${insightsFunction.team_id}/insights_functions/${insightsFunction.id}/invocations`)
                 .send({ globals, mock_async_functions: true, configuration: { large_field: largePayload } })
 
             expect(res.status).toEqual(200)
@@ -799,7 +799,7 @@ describe('CDP API', () => {
 
         it('accepts large payloads on script flow invocations endpoint', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${insightsFunction.team_id}/insights_flows/new/invocations`)
+                .post(`/v1/projects/${insightsFunction.team_id}/insights_flows/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration: { large_field: largePayload } })
 
             // 400 from missing flow config, not 413/500 from body size
@@ -858,7 +858,7 @@ describe('CDP API', () => {
 
         it('resolves groups from the event when none are provided', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_flows/new/invocations`)
+                .post(`/v1/projects/${team.id}/insights_flows/new/invocations`)
                 .send({ globals: groupGlobals, mock_async_functions: true, configuration: {} })
 
             expect(res.status).toEqual(200)
@@ -878,7 +878,7 @@ describe('CDP API', () => {
                 organization: { ...resolvedGroup, id: 'org-provided', properties: { plan: 'startup' } },
             }
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_flows/new/invocations`)
+                .post(`/v1/projects/${team.id}/insights_flows/new/invocations`)
                 .send({
                     globals: { ...groupGlobals, groups: providedGroups },
                     mock_async_functions: true,
@@ -931,7 +931,7 @@ describe('CDP API', () => {
             ['non-matching', 'some_other_event', 'wait_node'],
         ])('a %s test event resolves the wait step correctly', async (_, eventName, expectedNextActionId) => {
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/insights_flows/new/invocations`)
+                .post(`/v1/projects/${team.id}/insights_flows/new/invocations`)
                 .send({
                     globals: { ...globals, event: { ...globals.event!, event: eventName } },
                     mock_async_functions: true,
@@ -982,7 +982,7 @@ describe('CDP API', () => {
             ],
         }
 
-        const res = await supertest(app).post(`/api/projects/${team.id}/insights_flows/new/invocations`).send({
+        const res = await supertest(app).post(`/v1/projects/${team.id}/insights_flows/new/invocations`).send({
             globals,
             mock_async_functions: true,
             configuration: flowConfiguration,
@@ -1027,7 +1027,7 @@ describe('CDP API', () => {
         it('errors if missing team', async () => {
             const nonExistentTeamId = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${nonExistentTeamId}/insights_flows/${batchFlow.id}/batch_invocations/job-123`)
+                .post(`/v1/projects/${nonExistentTeamId}/insights_flows/${batchFlow.id}/batch_invocations/job-123`)
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1037,7 +1037,7 @@ describe('CDP API', () => {
         it('errors if missing script flow', async () => {
             const nonExistentUuid = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${batchFlow.team_id}/insights_flows/${nonExistentUuid}/batch_invocations/job-123`)
+                .post(`/v1/projects/${batchFlow.team_id}/insights_flows/${nonExistentUuid}/batch_invocations/job-123`)
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1061,7 +1061,7 @@ describe('CDP API', () => {
 
             const res = await supertest(app)
                 .post(
-                    `/api/projects/${nonBatchFlow.team_id}/insights_flows/${nonBatchFlow.id}/batch_invocations/job-123`
+                    `/v1/projects/${nonBatchFlow.team_id}/insights_flows/${nonBatchFlow.id}/batch_invocations/job-123`
                 )
                 .send({})
 
@@ -1081,7 +1081,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${batchFlow.team_id}/insights_flows/${batchFlow.id}/batch_invocations/job-789`
+                        `/v1/projects/${batchFlow.team_id}/insights_flows/${batchFlow.id}/batch_invocations/job-789`
                     )
                     .send({
                         filters: { filter_test_accounts: true },
@@ -1139,7 +1139,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${batchFlow.team_id}/insights_flows/${batchFlow.id}/batch_invocations/job-791`
+                        `/v1/projects/${batchFlow.team_id}/insights_flows/${batchFlow.id}/batch_invocations/job-791`
                     )
                     .send({ filters: { properties: snapshotProperties } })
 
@@ -1199,7 +1199,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${emailFlow.team_id}/insights_flows/${emailFlow.id}/batch_invocations/job-790`
+                        `/v1/projects/${emailFlow.team_id}/insights_flows/${emailFlow.id}/batch_invocations/job-790`
                     )
                     .send({})
 
@@ -1261,7 +1261,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${emailFlow.team_id}/insights_flows/${emailFlow.id}/batch_invocations/job-791`
+                        `/v1/projects/${emailFlow.team_id}/insights_flows/${emailFlow.id}/batch_invocations/job-791`
                     )
                     .send({})
 
@@ -1300,7 +1300,7 @@ describe('CDP API', () => {
         it('errors if missing team', async () => {
             const nonExistentTeamId = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${nonExistentTeamId}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
+                .post(`/v1/projects/${nonExistentTeamId}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1310,7 +1310,7 @@ describe('CDP API', () => {
         it('errors if missing script flow', async () => {
             const nonExistentUuid = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleFlow.team_id}/insights_flows/${nonExistentUuid}/scheduled_invocations`)
+                .post(`/v1/projects/${scheduleFlow.team_id}/insights_flows/${nonExistentUuid}/scheduled_invocations`)
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1333,7 +1333,7 @@ describe('CDP API', () => {
             })
 
             const res = await supertest(app)
-                .post(`/api/projects/${eventFlow.team_id}/insights_flows/${eventFlow.id}/scheduled_invocations`)
+                .post(`/v1/projects/${eventFlow.team_id}/insights_flows/${eventFlow.id}/scheduled_invocations`)
                 .send({})
 
             expect(res.status).toEqual(400)
@@ -1342,7 +1342,7 @@ describe('CDP API', () => {
 
         it('queues invocation and returns queued status', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleFlow.team_id}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
+                .post(`/v1/projects/${scheduleFlow.team_id}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
                 .send({ variables: { greeting: 'Hello' } })
 
             expect(res.status).toEqual(200)
@@ -1353,7 +1353,7 @@ describe('CDP API', () => {
 
         it('queues invocation with empty variables when none provided', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleFlow.team_id}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
+                .post(`/v1/projects/${scheduleFlow.team_id}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
                 .send({})
 
             expect(res.status).toEqual(200)
@@ -1399,7 +1399,7 @@ describe('CDP API', () => {
 
         it('returns the in-flight job count for a workflow', async () => {
             const res = await supertest(app).get(
-                `/api/projects/${countFlow.team_id}/insights_flows/${countFlow.id}/in_flight_count`
+                `/v1/projects/${countFlow.team_id}/insights_flows/${countFlow.id}/in_flight_count`
             )
 
             expect(res.status).toEqual(200)
@@ -1409,7 +1409,7 @@ describe('CDP API', () => {
 
         it('errors if missing script flow', async () => {
             const res = await supertest(app).get(
-                `/api/projects/${countFlow.team_id}/insights_flows/${new UUIDT().toString()}/in_flight_count`
+                `/v1/projects/${countFlow.team_id}/insights_flows/${new UUIDT().toString()}/in_flight_count`
             )
 
             expect(res.status).toEqual(404)
@@ -1420,7 +1420,7 @@ describe('CDP API', () => {
             const otherTeamId = await createTeam(hub.postgres, team.organization_id)
 
             const res = await supertest(app).get(
-                `/api/projects/${otherTeamId}/insights_flows/${countFlow.id}/in_flight_count`
+                `/v1/projects/${otherTeamId}/insights_flows/${countFlow.id}/in_flight_count`
             )
 
             expect(res.status).toEqual(404)
@@ -1432,7 +1432,7 @@ describe('CDP API', () => {
             api['batchResolverProducer'] = null
 
             const res = await supertest(app).get(
-                `/api/projects/${countFlow.team_id}/insights_flows/${countFlow.id}/in_flight_count`
+                `/v1/projects/${countFlow.team_id}/insights_flows/${countFlow.id}/in_flight_count`
             )
 
             expect(res.status).toEqual(503)
@@ -1491,7 +1491,7 @@ describe('CDP API', () => {
 
         it('runs a sweep slice and returns the bounds for follow-up slices', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .post(`/v1/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
                 .set(authFor(rescheduleFlow.team_id, rescheduleFlow.id))
                 .send({ action_ids: ['delay_1', 'wait_1'] })
 
@@ -1514,7 +1514,7 @@ describe('CDP API', () => {
 
         it('parses passed-through bounds into dates', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .post(`/v1/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
                 .set(authFor(rescheduleFlow.team_id, rescheduleFlow.id))
                 .send({
                     action_ids: ['delay_1'],
@@ -1543,7 +1543,7 @@ describe('CDP API', () => {
             ],
         ])('rejects a bad body: %s', async (_desc, body) => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .post(`/v1/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
                 .set(authFor(rescheduleFlow.team_id, rescheduleFlow.id))
                 .send(body)
 
@@ -1555,7 +1555,7 @@ describe('CDP API', () => {
             const otherTeamId = await createTeam(hub.postgres, team.organization_id)
 
             const res = await supertest(app)
-                .post(`/api/projects/${otherTeamId}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .post(`/v1/projects/${otherTeamId}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
                 .set(authFor(otherTeamId, rescheduleFlow.id))
                 .send({ action_ids: ['delay_1'] })
 
@@ -1581,7 +1581,7 @@ describe('CDP API', () => {
             ],
         ])('rejects a request with %s', async (_desc, headers) => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .post(`/v1/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
                 .set(headers())
                 .send({ action_ids: ['delay_1'] })
 
@@ -1595,7 +1595,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`
+                        `/v1/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`
                     )
                     .set(authFor(rescheduleFlow.team_id, rescheduleFlow.id))
                     .send({ action_ids: ['delay_1'] })
@@ -1611,7 +1611,7 @@ describe('CDP API', () => {
             api['batchResolverProducer'] = null
 
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .post(`/v1/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
                 .send({ action_ids: ['delay_1'] })
 
             expect(res.status).toEqual(503)
@@ -1734,7 +1734,7 @@ describe('CDP API', () => {
         })
 
         it('sends the email inline via EmailService instead of routing to the email queue', async () => {
-            const res = await supertest(app).post(`/api/projects/${team.id}/insights_flows/${flowId}/invocations`).send({
+            const res = await supertest(app).post(`/v1/projects/${team.id}/insights_flows/${flowId}/invocations`).send({
                 globals,
                 configuration: {},
                 current_action_id: 'email_1',
