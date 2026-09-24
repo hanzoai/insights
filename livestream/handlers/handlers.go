@@ -92,6 +92,9 @@ func StatsHandler(stats *events.Stats, sessionStats *events.SessionStats, redisS
 
 var subID uint64 = 1
 
+// streamKeepAlive is shorter than the 100s an edge proxy lets a response sit silent.
+var streamKeepAlive = 30 * time.Second
+
 func StreamEventsHandler(log echo.Logger, subChan chan events.Subscription, unSubChan chan events.Subscription) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		log.Debugf("SSE client connected, ip: %v", c.RealIP())
@@ -160,6 +163,14 @@ func StreamEventsHandler(log echo.Logger, subChan chan events.Subscription, unSu
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
+		// Answer the connect now, not with the first event: a team with no traffic
+		// would otherwise hold the client with no response at all.
+		w.WriteHeader(http.StatusOK)
+		w.Flush()
+		// A comment line keeps an idle stream open through proxies that close a
+		// silent one. It carries no blank line, so no client dispatches a message.
+		keepAlive := time.NewTicker(streamKeepAlive)
+		defer keepAlive.Stop()
 		timeout := time.After(30 * time.Minute)
 		for {
 			select {
@@ -169,6 +180,11 @@ func StreamEventsHandler(log echo.Logger, subChan chan events.Subscription, unSu
 			case <-c.Request().Context().Done():
 				log.Debugf("SSE client disconnected, ip: %v", c.RealIP())
 				return nil
+			case <-keepAlive.C:
+				if _, err := w.Write([]byte(":\n")); err != nil {
+					return err
+				}
+				w.Flush()
 			case payload := <-subscription.EventChan:
 				jsonData, err := json.Marshal(payload)
 				if err != nil {

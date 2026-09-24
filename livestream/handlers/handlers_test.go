@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"maps"
@@ -146,6 +147,34 @@ func TestStreamEventsHandler_TokenAndTeamIDValidation(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestStreamEventsHandler_AnswersBeforeTheFirstEvent(t *testing.T) {
+	viper.Set("jwt.secret", "test-secret-for-handlers")
+	defer func(d time.Duration) { streamKeepAlive = d }(streamKeepAlive)
+	streamKeepAlive = 20 * time.Millisecond
+
+	e := echo.New()
+	e.GET("/events", StreamEventsHandler(e.Logger, make(chan events.Subscription, 1), make(chan events.Subscription, 1)))
+	srv := httptest.NewServer(e)
+	defer srv.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL+"/events", nil)
+	require.NoError(t, err)
+	req.Header.Set("Authorization", "Bearer "+createJWTToken(auth.ExpectedScope, jwt.MapClaims{"team_id": 7, "api_token": "valid-token"}))
+
+	// No event is ever sent, so the response and the keep-alive are all there is.
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "text/event-stream", resp.Header.Get("Content-Type"))
+
+	line, err := bufio.NewReader(resp.Body).ReadString('\n')
+	require.NoError(t, err)
+	assert.Equal(t, ":\n", line)
 }
 
 func createJWTToken(audience string, claims jwt.MapClaims) string {
