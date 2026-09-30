@@ -15,7 +15,6 @@ import structlog
 from asgiref.sync import sync_to_async
 from jwt import PyJWTError
 
-from insights.mount import canonical
 from insights.ph_client import ph_scoped_capture
 
 from products.insights_ai.backend.wire_types import is_turn_complete
@@ -467,9 +466,7 @@ def _get_bearer_token(scope: ASGIMessage) -> str | None:
 
 
 def _match_event_ingest_route(path: str) -> EventIngestRoute | None:
-    # This runs as an ASGI wrapper, above Django's middleware, so a sandbox still posting
-    # to /v1/ has not been rewritten yet — spell it the one way with the same function.
-    route_match = TASK_RUN_EVENT_INGEST_ROUTE.match(canonical(path))
+    route_match = TASK_RUN_EVENT_INGEST_ROUTE.match(path)
     if route_match is None:
         return None
     return EventIngestRoute(

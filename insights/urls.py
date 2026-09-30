@@ -536,9 +536,8 @@ urlpatterns = [
         csrf_exempt(StreamlitBridgeView.as_view()),
         name="streamlit_bridge_query",
     ),
-    # The API is mounted here and nowhere else. The host is already api.*, so `/v1/` on
-    # the path said the same thing twice; requests still arriving that way are rewritten
-    # to `/v1/` by insights.middleware.ApiRewriteMiddleware before anything routes.
+    # The API is mounted here and nowhere else: `/v1/`. `/api/` answers the JSON 404
+    # below, never a second address for the same route.
     path("v1/", include(router.urls)),
     path("v1/", include("products.insights_ai.backend.api.urls")),
     opt_slash_path("v1/user/prepare_toolbar_preloaded_flags", user.prepare_toolbar_preloaded_flags),
@@ -631,6 +630,9 @@ urlpatterns = [
         name="raycast-client-metadata",
     ),
     re_path(r"^v1.+", api_not_found),
+    # The API is /v1/ only. /api/ answers the JSON 404 an unknown API path gets rather
+    # than the SPA; the two OAuth client_id documents above are identifiers, not API.
+    re_path(r"^api(?:/|$)", api_not_found),
     # This deployment's own flag endpoint: the signed-in user's verdict, evaluated by
     # Hanzo cloud (`/v1/flags`, the native Go engine) and relayed over the session
     # the browser already has. Registered ahead of the SPA catch-all, which would

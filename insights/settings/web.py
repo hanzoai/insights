@@ -130,8 +130,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # First, so the resolver and every middleware below see one spelling of the API path.
-    "insights.middleware.ApiRewriteMiddleware",
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "insights.gzip_middleware.ScopedGZipMiddleware",
     "insights.middleware.per_request_logging_context_middleware",

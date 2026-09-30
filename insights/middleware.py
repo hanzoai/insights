@@ -51,7 +51,6 @@ from insights.models.activity_logging.utils import (
     activity_storage,
 )
 from insights.models.utils import KeyKind, generate_random_token, key_kind
-from insights.mount import canonical
 from insights.rbac.user_access_control import UserAccessControl
 from insights.settings import PROJECT_SWITCHING_TOKEN_ALLOWLIST, SITE_URL
 from insights.statsd import statsd
@@ -549,27 +548,6 @@ class ShortCircuitMiddleware:
     def __call__(self, request: HttpRequest):
         response: HttpResponse = self.get_response(request)
         return response
-
-
-class ApiRewriteMiddleware:
-    """Serves the older `/api/…` spelling through the `/v1/…` mount.
-
-    Runs first, so the URL resolver and every later middleware see one spelling. An
-    in-process rewrite rather than a redirect: many API clients (httpx, Guzzle, …) don't
-    follow redirects by default, and method, body, query string, and auth all stay on the
-    same request. Comes out when nothing calls `/api/` any more.
-    """
-
-    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
-        self.get_response = get_response
-
-    def __call__(self, request: HttpRequest) -> HttpResponse:
-        path = canonical(request.path)
-        if path != request.path:
-            request.path = path
-            request.path_info = path
-            request.META["PATH_INFO"] = path
-        return self.get_response(request)
 
 
 ENVIRONMENTS_PREFIX_REQUESTS = Counter(
@@ -1117,9 +1095,7 @@ class OAuthCoopMiddleware:
             response["Cross-Origin-Opener-Policy"] = "unsafe-none"
         elif request.path == "/login" or request.path == "/login/":
             next_url = request.GET.get("next", "")
-            # `next` comes off the query string, so ApiRewriteMiddleware never saw it —
-            # spell it the one way here before matching.
-            normalized = canonical(posixpath.normpath(next_url) if next_url.startswith("/") else next_url)
+            normalized = posixpath.normpath(next_url) if next_url.startswith("/") else next_url
             if self._matches_oauth_prefix(normalized, self.OAUTH_PATH_PREFIXES):
                 response["Cross-Origin-Opener-Policy"] = "unsafe-none"
         return response
