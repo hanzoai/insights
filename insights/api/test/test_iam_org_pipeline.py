@@ -99,7 +99,7 @@ def _projects(*projects):
 
 
 class TestIAMOrgPipelineCloudBinding(BaseTest):
-    """Sign-in points a new org's team at its cloud project's publishable key."""
+    """Sign-in keeps one team per cloud project, keyed by the project's publishable key."""
 
     def _login(self, user, owner, token="iam-access-token"):
         response = {"owner": owner}
@@ -111,27 +111,45 @@ class TestIAMOrgPipelineCloudBinding(BaseTest):
         return User.objects.create(email=email, first_name="T", distinct_id=email)
 
     @patch("insights.api.iam_org_pipeline.requests.get")
-    def test_binds_the_oldest_keyed_project_as_the_user(self, get):
+    def test_every_project_gets_a_team_the_oldest_takes_the_first(self, get):
         get.return_value = _projects(
             {"id": "p2", "org": "fresh", "slug": "later", "name": "later", "key": "pk-later-000000", "createdAt": 20},
             {"id": "p1", "org": "fresh", "slug": "site", "name": "site", "key": "pk-site-0000000", "createdAt": 10},
         )
         self._login(self._make_user("u@fresh.io"), "fresh")
 
-        team = Team.objects.get(organization__slug="fresh")
-        assert team.api_token == "pk-site-0000000"
-        assert team.name == "site"
+        teams = Team.objects.filter(organization__slug="fresh").order_by("id")
+        assert [(t.api_token, t.name) for t in teams] == [("pk-site-0000000", "site"), ("pk-later-000000", "later")]
         url = get.call_args.args[0]
         headers = get.call_args.kwargs["headers"]
         assert url.endswith("/v1/projects")
         assert headers == {"Authorization": "Bearer iam-access-token", "X-Org-Id": "fresh"}
 
     @patch("insights.api.iam_org_pipeline.requests.get")
-    def test_bound_org_asks_cloud_nothing(self, get):
-        get.return_value = _projects({"id": "p1", "org": "bound", "name": "a", "key": "pk-bound-000000"})
+    def test_every_sign_in_follows_the_projects(self, get):
+        get.return_value = _projects({"id": "p1", "org": "bound", "name": "a", "key": "pk-bound-000000", "createdAt": 1})
         self._login(self._make_user("a@bound.io"), "bound")
+        get.return_value = _projects(
+            {"id": "p1", "org": "bound", "name": "renamed", "key": "pk-bound-000000", "createdAt": 1},
+            {"id": "p3", "org": "bound", "name": "new", "key": "pk-bnew-0000000", "createdAt": 3},
+        )
         self._login(self._make_user("b@bound.io"), "bound")
-        assert get.call_count == 1
+        assert get.call_count == 2
+        names = dict(Team.objects.filter(organization__slug="bound").values_list("api_token", "name"))
+        assert names == {"pk-bound-000000": "renamed", "pk-bnew-0000000": "new"}
+
+    @patch("insights.api.iam_org_pipeline.requests.get")
+    def test_a_gone_project_retires_its_team(self, get):
+        get.return_value = _projects(
+            {"id": "p1", "org": "gone", "name": "keep", "key": "pk-keep-0000000", "createdAt": 1},
+            {"id": "p2", "org": "gone", "name": "drop", "key": "pk-drop-0000000", "createdAt": 2},
+        )
+        self._login(self._make_user("a@gone.io"), "gone")
+        get.return_value = _projects({"id": "p1", "org": "gone", "name": "keep", "key": "pk-keep-0000000", "createdAt": 1})
+        self._login(self._make_user("b@gone.io"), "gone")
+        dropped = Team.objects.get(organization__slug="gone", name="drop (retired)")
+        assert not dropped.api_token.startswith("pk-")
+        assert Team.objects.filter(api_token="pk-keep-0000000").exists()
 
     @patch("insights.api.iam_org_pipeline.requests.get")
     def test_no_token_no_call(self, get):

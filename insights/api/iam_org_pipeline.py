@@ -42,6 +42,7 @@ from social_django.strategy import DjangoStrategy
 
 from insights.models import Organization, OrganizationMembership, Team, User
 from insights.models.team.team_caching import set_team_in_cache
+from insights.models.utils import generate_random_token_project
 
 logger = structlog.get_logger(__name__)
 
@@ -131,12 +132,13 @@ def _ensure_default_team(org: Organization) -> Team:
     return team
 
 
-def _cloud_project(org_slug: str, access_token: str) -> Optional[dict]:
-    """The org's cloud project whose publishable key its events carry.
+def _cloud_projects(org_slug: str, access_token: str) -> Optional[list[dict]]:
+    """The org's cloud projects that carry a publishable key, oldest first. A draft
+    serves no site yet, so it has no team until it does.
 
-    The oldest project with a `pk-` key, so the choice is the same at every
-    sign-in. None when cloud does not answer or the org has no such project:
-    analytics binding never decides whether a sign-in succeeds.
+    None when cloud does not answer: syncing never decides whether a sign-in
+    succeeds. Only the asked org's projects count: a project of any other org is
+    never a key this org's teams may carry.
     """
     slug = _normalize_slug(org_slug)
     try:
@@ -156,8 +158,6 @@ def _cloud_project(org_slug: str, access_token: str) -> Optional[dict]:
         logger.warning("iam_org_pipeline_cloud_projects_malformed", org_slug=slug)
         return None
 
-    # Only the org that was asked about: a project of any other org is never
-    # a key this org's team may carry.
     keyed = [
         p
         for p in projects
@@ -165,54 +165,73 @@ def _cloud_project(org_slug: str, access_token: str) -> Optional[dict]:
         and str(p.get("org", "")).lower() == slug
         and isinstance(p.get("key"), str)
         and p["key"].startswith("pk-")
+        and p.get("status", "live") != "draft"
     ]
-    if not keyed:
-        return None
-    return min(keyed, key=lambda p: (p.get("createdAt") or 0, str(p.get("id", ""))))
+    return sorted(keyed, key=lambda p: (p.get("createdAt") or 0, str(p.get("id", ""))))
 
 
-def _bind_cloud_project(org: Organization, org_slug: str, access_token: Optional[str]) -> None:
-    """Give the org's first team its cloud project's key and name.
+_RETIRED = " (retired)"
 
-    Once any team of the org carries a `pk-` key this is one query and no call.
-    A key already held by another org's team is never moved.
+
+def _sync_cloud_projects(org: Organization, org_slug: str, access_token: Optional[str]) -> None:
+    """Make the org hold one team per cloud project, keyed by the project's key.
+
+    A cloud project is the one identity (site, key, website, pixel, error
+    project); a team is its projection here. Each sign-in reads the org's
+    projects: a project with no team gets one (the org's first, unkeyed team takes
+    the oldest project, as it always did), a renamed project renames its team, and
+    a team whose project is gone is retired: its key is replaced, so nothing files
+    under it, and its data stays. A key another org's team holds is never moved.
     """
     if not access_token:
         return
-    if Team.objects.filter(organization=org, api_token__startswith="pk-").exists():
+    projects = _cloud_projects(org_slug, access_token)
+    if projects is None:
         return
 
-    project = _cloud_project(org_slug, access_token)
-    if project is None:
-        return
+    keys = set()
+    for project in projects:
+        key = project["key"]
+        keys.add(key)
+        name = str(project.get("name") or project.get("slug") or key)[:200]
+        held = Team.objects.filter(api_token=key).first()
+        if held is not None:
+            if held.organization_id != org.id:
+                logger.warning(
+                    "iam_org_pipeline_cloud_key_held_elsewhere", org_id=str(org.id), project=project.get("slug")
+                )
+            elif held.name != name:
+                held.name = name
+                held.save(update_fields=["name"])
+            continue
 
-    key = project["key"]
-    if Team.objects.filter(api_token=key).exists():
-        logger.warning("iam_org_pipeline_cloud_key_held_elsewhere", org_id=str(org.id), project=project.get("slug"))
-        return
+        spare = None
+        if not Team.objects.filter(organization=org, api_token__startswith="pk-").exists():
+            spare = Team.objects.filter(organization=org).order_by("id").first()
+        try:
+            with transaction.atomic():
+                if spare is not None:
+                    old_token = spare.api_token
+                    spare.api_token, spare.name = key, name
+                    spare.save(update_fields=["api_token", "name"])
+                    set_team_in_cache(old_token, None)
+                    team = spare
+                else:
+                    team = Team.objects.create(organization=org, api_token=key, name=name)
+        except IntegrityError:
+            # Another org's team took the key between the check and the save.
+            logger.warning("iam_org_pipeline_cloud_key_held_elsewhere", org_id=str(org.id), project=project.get("slug"))
+            continue
+        logger.info("iam_org_pipeline_bound_cloud_project", org_id=str(org.id), team_id=team.id, project=project.get("slug"))
 
-    team = Team.objects.filter(organization=org).order_by("id").first()
-    if team is None:
-        return
-
-    old_token = team.api_token
-    team.api_token = key
-    if isinstance(project.get("name"), str) and project["name"]:
-        team.name = project["name"][:200]
-    try:
-        with transaction.atomic():
-            team.save(update_fields=["api_token", "name"])
-    except IntegrityError:
-        # Another org's team took the key between the check and the save.
-        logger.warning("iam_org_pipeline_cloud_key_held_elsewhere", org_id=str(org.id), project=project.get("slug"))
-        return
-    set_team_in_cache(old_token, None)
-    logger.info(
-        "iam_org_pipeline_bound_cloud_project",
-        org_id=str(org.id),
-        team_id=team.id,
-        project=project.get("slug"),
-    )
+    for team in Team.objects.filter(organization=org, api_token__startswith="pk-").exclude(api_token__in=keys):
+        old_token = team.api_token
+        team.api_token = generate_random_token_project()
+        if not team.name.endswith(_RETIRED):
+            team.name = (team.name[: 200 - len(_RETIRED)] + _RETIRED)
+        team.save(update_fields=["api_token", "name"])
+        set_team_in_cache(old_token, None)
+        logger.info("iam_org_pipeline_retired_cloud_project", org_id=str(org.id), team_id=team.id)
 
 
 def _membership_level(response: dict) -> int:
@@ -296,7 +315,11 @@ def iam_org_assign(
     try:
         org = _ensure_organization(org_slug)
         _ensure_default_team(org)
-        _bind_cloud_project(org, org_slug, response.get("access_token"))
+        try:
+            _sync_cloud_projects(org, org_slug, response.get("access_token"))
+        except Exception as e:
+            # Syncing never decides a sign-in; the next one tries again.
+            logger.warning("iam_org_pipeline_cloud_sync_failed", org_slug=org_slug, error=type(e).__name__)
         _ensure_membership(user, org, _membership_level(response))
 
         if user.current_organization_id != org.id:
