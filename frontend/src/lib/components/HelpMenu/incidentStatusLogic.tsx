@@ -1,6 +1,5 @@
 import { MakeLogicType, actions, afterMount, connect, kea, listeners, path, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import insights from 'insights-js'
 
 // eslint-disable-next-line import/no-cycle
 import { superpowersLogic } from 'lib/components/Superpowers/superpowersLogic'
@@ -70,15 +69,6 @@ export interface ComponentIncidentAlert {
 }
 
 const REFRESH_INTERVAL = 60 * 1000 * 5 // 5 minutes
-
-// A failed `fetch` to an external host throws a `TypeError` ("Failed to fetch", "NetworkError when
-// attempting to fetch resource", "Load failed", ...). These are expected and outside our control —
-// ad blockers, tracking-protection extensions, DNS hiccups, brief status-page outages — so they're
-// noise in error tracking rather than real defects. A genuine bug here would surface as a different
-// error type (e.g. a `SyntaxError` from `response.json()`), which we still want to capture.
-function isNetworkError(error: unknown): boolean {
-    return error instanceof TypeError
-}
 
 // incident.io component name for the Insights AI service. An incident is treated as affecting AI only
 // when it tags a component with this exact name under the current region's group (see getRelevantGroupName).
@@ -285,31 +275,11 @@ export const incidentStatusLogic = kea<incidentStatusLogicType>([
         summary: [
             null as Summary | null,
             {
-                loadSummary: async () => {
-                    // The incident.io status page is external (insightsstatus.com), so the fetch can fail
-                    // for reasons outside our control: ad blockers, tracking-protection extensions, DNS
-                    // hiccups, brief status-page outages. Swallow the failure (degrading to 'operational'
-                    // via the rawStatus selector). We report a reachable-but-erroring status page (non-2xx)
-                    // and unexpected errors, but skip the expected network-level failures so they don't
-                    // pollute error tracking as a recurring issue.
-                    try {
-                        const response = await fetch(`${STATUS_PAGE_BASE}/api/v1/summary`)
-                        if (!response.ok) {
-                            insights.captureException(
-                                new Error(`incident.io summary fetch returned ${response.status}`),
-                                { status: response.status, statusText: response.statusText }
-                            )
-                            return null
-                        }
-                        const data: Summary = await response.json()
-                        return data
-                    } catch (error) {
-                        if (!isNetworkError(error)) {
-                            insights.captureException(error)
-                        }
-                        return null
-                    }
-                },
+                // No status page serves this deployment: the upstream page is
+                // not ours and api.hanzo.ai has no /v1/summary. Asking either is
+                // a failed request on every page and every five minutes after, so
+                // the summary stays empty and the status reads operational.
+                loadSummary: async (): Promise<Summary | null> => null,
             },
         ],
     })),
