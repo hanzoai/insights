@@ -80,7 +80,7 @@ export const UpdateActionInputSchema = z.object({
 
 // List actions input schema
 // Note: The Insights Actions API does not support search filtering natively.
-// Search is available via the global /api/projects/{project_id}/search/?q=&entities=action endpoint
+// Search is available via the global /v1/projects/{project_id}/search/?q=&entities=action endpoint
 export const ListActionsInputSchema = z.object({
     limit: z.number().int().positive().optional().describe('Maximum number of actions to return'),
     offset: z.number().int().min(0).optional().describe('Number of actions to skip for pagination'),

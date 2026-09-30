@@ -16,11 +16,11 @@ type FetchInput = Parameters<Fetcher['fetch']>[0]
 describe('buildApiFetcher', () => {
     const mockConfig = {
         apiToken: 'test-token-123',
-        baseUrl: 'https://api.example.com',
+        baseUrl: 'https://v1.example.com',
     }
 
     const baseFetchInput: FetchInput = {
-        url: new URL('https://api.example.com/test'),
+        url: new URL('https://v1.example.com/test'),
         method: 'get',
         path: '/test',
     }
@@ -88,7 +88,7 @@ describe('buildApiFetcher', () => {
             vi.mocked(global.fetch).mockResolvedValueOnce(mockResponse)
 
             const fetcher = buildApiFetcher(mockConfig)
-            const url = new URL('https://api.example.com/test')
+            const url = new URL('https://v1.example.com/test')
             const urlSearchParams = new URLSearchParams({ foo: 'bar', baz: 'qux' })
 
             await fetcher.fetch({

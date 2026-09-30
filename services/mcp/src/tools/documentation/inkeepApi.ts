@@ -11,7 +11,7 @@ export async function docsSearch(apiKey: string, userQuery: string): Promise<str
         throw new Error('No API key provided')
     }
 
-    const response = await fetch('https://api.inkeep.com/v1/chat/completions', {
+    const response = await fetch('https://v1.inkeep.com/v1/chat/completions', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

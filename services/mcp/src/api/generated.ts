@@ -8736,7 +8736,7 @@ export namespace Endpoints {
 
     export type get_Environments_app_metrics_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/app_metrics/{id}/'
+        path: '/v1/environments/{project_id}/app_metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -8745,7 +8745,7 @@ export namespace Endpoints {
     }
     export type get_Environments_app_metrics_error_details_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/app_metrics/{id}/error_details/'
+        path: '/v1/environments/{project_id}/app_metrics/{id}/error_details/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -8754,7 +8754,7 @@ export namespace Endpoints {
     }
     export type get_Environments_app_metrics_historical_exports_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/app_metrics/{plugin_config_id}/historical_exports/'
+        path: '/v1/environments/{project_id}/app_metrics/{plugin_config_id}/historical_exports/'
         requestFormat: 'json'
         parameters: {
             path: { plugin_config_id: string; project_id: string }
@@ -8763,7 +8763,7 @@ export namespace Endpoints {
     }
     export type get_Environments_app_metrics_historical_exports_retrieve_2 = {
         method: 'GET'
-        path: '/api/environments/{project_id}/app_metrics/{plugin_config_id}/historical_exports/{id}/'
+        path: '/v1/environments/{project_id}/app_metrics/{plugin_config_id}/historical_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; plugin_config_id: string; project_id: string }
@@ -8772,7 +8772,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/'
+        path: '/v1/environments/{project_id}/batch_exports/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -8782,7 +8782,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/'
+        path: '/v1/environments/{project_id}/batch_exports/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -8793,7 +8793,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_backfills_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/backfills/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/backfills/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ cursor: string; ordering: string }>
@@ -8803,7 +8803,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_backfills_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/backfills/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/backfills/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; project_id: string }
@@ -8814,7 +8814,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_backfills_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -8823,7 +8823,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_backfills_cancel_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/cancel/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/cancel/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -8834,7 +8834,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_runs_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ cursor: string; ordering: string }>
@@ -8844,7 +8844,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_runs_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -8853,7 +8853,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_runs_cancel_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/cancel/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/cancel/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -8864,7 +8864,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_runs_logs_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/logs/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -8873,7 +8873,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_runs_retry_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/retry/'
+        path: '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/retry/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -8884,7 +8884,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/{id}/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8893,7 +8893,7 @@ export namespace Endpoints {
     }
     export type put_Environments_batch_exports_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/batch_exports/{id}/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8904,7 +8904,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_batch_exports_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/batch_exports/{id}/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8915,7 +8915,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_batch_exports_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/batch_exports/{id}/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8924,7 +8924,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_backfill_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/{id}/backfill/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/backfill/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8935,7 +8935,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_logs_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/{id}/logs/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8944,7 +8944,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_pause_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/{id}/pause/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/pause/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8955,7 +8955,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_run_test_step_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/{id}/run_test_step/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/run_test_step/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8966,7 +8966,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_unpause_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/{id}/unpause/'
+        path: '/v1/environments/{project_id}/batch_exports/{id}/unpause/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -8977,7 +8977,7 @@ export namespace Endpoints {
     }
     export type post_Environments_batch_exports_run_test_step_new_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/batch_exports/run_test_step_new/'
+        path: '/v1/environments/{project_id}/batch_exports/run_test_step_new/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -8988,7 +8988,7 @@ export namespace Endpoints {
     }
     export type get_Environments_batch_exports_test_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/batch_exports/test/'
+        path: '/v1/environments/{project_id}/batch_exports/test/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -8997,7 +8997,7 @@ export namespace Endpoints {
     }
     export type get_Environments_dashboards_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/dashboards/'
+        path: '/v1/environments/{project_id}/dashboards/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt'; limit: number; offset: number }>
@@ -9007,7 +9007,7 @@ export namespace Endpoints {
     }
     export type post_Environments_dashboards_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/dashboards/'
+        path: '/v1/environments/{project_id}/dashboards/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -9019,7 +9019,7 @@ export namespace Endpoints {
     }
     export type get_Environments_dashboards_collaborators_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/dashboards/{dashboard_id}/collaborators/'
+        path: '/v1/environments/{project_id}/dashboards/{dashboard_id}/collaborators/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -9028,7 +9028,7 @@ export namespace Endpoints {
     }
     export type post_Environments_dashboards_collaborators_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/dashboards/{dashboard_id}/collaborators/'
+        path: '/v1/environments/{project_id}/dashboards/{dashboard_id}/collaborators/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -9039,7 +9039,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_dashboards_collaborators_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/dashboards/{dashboard_id}/collaborators/{user__uuid}/'
+        path: '/v1/environments/{project_id}/dashboards/{dashboard_id}/collaborators/{user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string; user__uuid: string }
@@ -9048,7 +9048,7 @@ export namespace Endpoints {
     }
     export type get_Environments_dashboards_sharing_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/dashboards/{dashboard_id}/sharing/'
+        path: '/v1/environments/{project_id}/dashboards/{dashboard_id}/sharing/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -9057,7 +9057,7 @@ export namespace Endpoints {
     }
     export type post_Environments_dashboards_sharing_passwords_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/dashboards/{dashboard_id}/sharing/passwords/'
+        path: '/v1/environments/{project_id}/dashboards/{dashboard_id}/sharing/passwords/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -9068,7 +9068,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_dashboards_sharing_passwords_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/dashboards/{dashboard_id}/sharing/passwords/{password_id}/'
+        path: '/v1/environments/{project_id}/dashboards/{dashboard_id}/sharing/passwords/{password_id}/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; password_id: string; project_id: string }
@@ -9077,7 +9077,7 @@ export namespace Endpoints {
     }
     export type post_Environments_dashboards_sharing_refresh_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/dashboards/{dashboard_id}/sharing/refresh/'
+        path: '/v1/environments/{project_id}/dashboards/{dashboard_id}/sharing/refresh/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -9088,7 +9088,7 @@ export namespace Endpoints {
     }
     export type get_Environments_dashboards_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/dashboards/{id}/'
+        path: '/v1/environments/{project_id}/dashboards/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -9098,7 +9098,7 @@ export namespace Endpoints {
     }
     export type put_Environments_dashboards_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/dashboards/{id}/'
+        path: '/v1/environments/{project_id}/dashboards/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -9110,7 +9110,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_dashboards_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/dashboards/{id}/'
+        path: '/v1/environments/{project_id}/dashboards/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -9122,7 +9122,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_dashboards_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/dashboards/{id}/'
+        path: '/v1/environments/{project_id}/dashboards/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -9132,7 +9132,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_dashboards_move_tile_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/dashboards/{id}/move_tile/'
+        path: '/v1/environments/{project_id}/dashboards/{id}/move_tile/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -9144,7 +9144,7 @@ export namespace Endpoints {
     }
     export type get_Environments_dashboards_stream_tiles_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/dashboards/{id}/stream_tiles/'
+        path: '/v1/environments/{project_id}/dashboards/{id}/stream_tiles/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -9154,7 +9154,7 @@ export namespace Endpoints {
     }
     export type post_Environments_dashboards_create_from_template_json_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/dashboards/create_from_template_json/'
+        path: '/v1/environments/{project_id}/dashboards/create_from_template_json/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -9166,7 +9166,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_assignment_rules_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/assignment_rules/'
+        path: '/v1/environments/{project_id}/error_tracking/assignment_rules/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -9176,7 +9176,7 @@ export namespace Endpoints {
     }
     export type post_Environments_error_tracking_assignment_rules_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/error_tracking/assignment_rules/'
+        path: '/v1/environments/{project_id}/error_tracking/assignment_rules/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9187,7 +9187,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_assignment_rules_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/assignment_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/assignment_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9196,7 +9196,7 @@ export namespace Endpoints {
     }
     export type put_Environments_error_tracking_assignment_rules_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/error_tracking/assignment_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/assignment_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9207,7 +9207,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_error_tracking_assignment_rules_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/error_tracking/assignment_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/assignment_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9218,7 +9218,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_error_tracking_assignment_rules_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/error_tracking/assignment_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/assignment_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9227,7 +9227,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_error_tracking_assignment_rules_reorder_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/error_tracking/assignment_rules/reorder/'
+        path: '/v1/environments/{project_id}/error_tracking/assignment_rules/reorder/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9238,7 +9238,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_grouping_rules_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/grouping_rules/'
+        path: '/v1/environments/{project_id}/error_tracking/grouping_rules/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -9248,7 +9248,7 @@ export namespace Endpoints {
     }
     export type post_Environments_error_tracking_grouping_rules_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/error_tracking/grouping_rules/'
+        path: '/v1/environments/{project_id}/error_tracking/grouping_rules/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9259,7 +9259,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_grouping_rules_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/grouping_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/grouping_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9268,7 +9268,7 @@ export namespace Endpoints {
     }
     export type put_Environments_error_tracking_grouping_rules_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/error_tracking/grouping_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/grouping_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9279,7 +9279,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_error_tracking_grouping_rules_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/error_tracking/grouping_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/grouping_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9290,7 +9290,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_error_tracking_grouping_rules_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/error_tracking/grouping_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/grouping_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9299,7 +9299,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_error_tracking_grouping_rules_reorder_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/error_tracking/grouping_rules/reorder/'
+        path: '/v1/environments/{project_id}/error_tracking/grouping_rules/reorder/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9310,7 +9310,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_releases_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/releases/'
+        path: '/v1/environments/{project_id}/error_tracking/releases/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -9320,7 +9320,7 @@ export namespace Endpoints {
     }
     export type post_Environments_error_tracking_releases_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/error_tracking/releases/'
+        path: '/v1/environments/{project_id}/error_tracking/releases/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9331,7 +9331,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_releases_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/releases/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/releases/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9340,7 +9340,7 @@ export namespace Endpoints {
     }
     export type put_Environments_error_tracking_releases_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/error_tracking/releases/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/releases/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9351,7 +9351,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_error_tracking_releases_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/error_tracking/releases/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/releases/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9362,7 +9362,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_error_tracking_releases_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/error_tracking/releases/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/releases/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9371,7 +9371,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_suppression_rules_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/suppression_rules/'
+        path: '/v1/environments/{project_id}/error_tracking/suppression_rules/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -9381,7 +9381,7 @@ export namespace Endpoints {
     }
     export type post_Environments_error_tracking_suppression_rules_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/error_tracking/suppression_rules/'
+        path: '/v1/environments/{project_id}/error_tracking/suppression_rules/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9392,7 +9392,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_suppression_rules_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/suppression_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/suppression_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9401,7 +9401,7 @@ export namespace Endpoints {
     }
     export type put_Environments_error_tracking_suppression_rules_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/error_tracking/suppression_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/suppression_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9412,7 +9412,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_error_tracking_suppression_rules_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/error_tracking/suppression_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/suppression_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9423,7 +9423,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_error_tracking_suppression_rules_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/error_tracking/suppression_rules/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/suppression_rules/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9432,7 +9432,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_error_tracking_suppression_rules_reorder_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/error_tracking/suppression_rules/reorder/'
+        path: '/v1/environments/{project_id}/error_tracking/suppression_rules/reorder/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9443,7 +9443,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_symbol_sets_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -9453,7 +9453,7 @@ export namespace Endpoints {
     }
     export type post_Environments_error_tracking_symbol_sets_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/'
         requestFormat: 'form-data'
         parameters: {
             path: { project_id: string }
@@ -9464,7 +9464,7 @@ export namespace Endpoints {
     }
     export type get_Environments_error_tracking_symbol_sets_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9473,7 +9473,7 @@ export namespace Endpoints {
     }
     export type put_Environments_error_tracking_symbol_sets_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/'
         requestFormat: 'form-data'
         parameters: {
             path: { id: string; project_id: string }
@@ -9484,7 +9484,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_error_tracking_symbol_sets_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/'
         requestFormat: 'form-data'
         parameters: {
             path: { id: string; project_id: string }
@@ -9495,7 +9495,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_error_tracking_symbol_sets_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9504,7 +9504,7 @@ export namespace Endpoints {
     }
     export type put_Environments_error_tracking_symbol_sets_finish_upload_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/finish_upload/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/finish_upload/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9515,7 +9515,7 @@ export namespace Endpoints {
     }
     export type post_Environments_error_tracking_symbol_sets_bulk_finish_upload_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/bulk_finish_upload/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/bulk_finish_upload/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9526,7 +9526,7 @@ export namespace Endpoints {
     }
     export type post_Environments_error_tracking_symbol_sets_bulk_start_upload_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/bulk_start_upload/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/bulk_start_upload/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9537,7 +9537,7 @@ export namespace Endpoints {
     }
     export type post_Environments_error_tracking_symbol_sets_start_upload_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/error_tracking/symbol_sets/start_upload/'
+        path: '/v1/environments/{project_id}/error_tracking/symbol_sets/start_upload/'
         requestFormat: 'form-data'
         parameters: {
             path: { project_id: string }
@@ -9548,7 +9548,7 @@ export namespace Endpoints {
     }
     export type get_Environments_events_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/events/'
+        path: '/v1/environments/{project_id}/events/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -9570,7 +9570,7 @@ export namespace Endpoints {
     }
     export type get_Environments_events_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/events/{id}/'
+        path: '/v1/environments/{project_id}/events/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -9580,7 +9580,7 @@ export namespace Endpoints {
     }
     export type get_Environments_events_values_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/events/values/'
+        path: '/v1/environments/{project_id}/events/values/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -9590,7 +9590,7 @@ export namespace Endpoints {
     }
     export type get_Environments_explicit_members_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/explicit_members/'
+        path: '/v1/environments/{project_id}/explicit_members/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9599,7 +9599,7 @@ export namespace Endpoints {
     }
     export type post_Environments_explicit_members_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/explicit_members/'
+        path: '/v1/environments/{project_id}/explicit_members/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9610,7 +9610,7 @@ export namespace Endpoints {
     }
     export type get_Environments_explicit_members_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/'
+        path: '/v1/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { parent_membership__user__uuid: string; project_id: string }
@@ -9619,7 +9619,7 @@ export namespace Endpoints {
     }
     export type put_Environments_explicit_members_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/'
+        path: '/v1/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { parent_membership__user__uuid: string; project_id: string }
@@ -9630,7 +9630,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_explicit_members_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/'
+        path: '/v1/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { parent_membership__user__uuid: string; project_id: string }
@@ -9641,7 +9641,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_explicit_members_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/'
+        path: '/v1/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { parent_membership__user__uuid: string; project_id: string }
@@ -9650,7 +9650,7 @@ export namespace Endpoints {
     }
     export type get_Environments_exports_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/exports/'
+        path: '/v1/environments/{project_id}/exports/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -9660,7 +9660,7 @@ export namespace Endpoints {
     }
     export type post_Environments_exports_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/exports/'
+        path: '/v1/environments/{project_id}/exports/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9671,7 +9671,7 @@ export namespace Endpoints {
     }
     export type get_Environments_exports_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/exports/{id}/'
+        path: '/v1/environments/{project_id}/exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -9680,7 +9680,7 @@ export namespace Endpoints {
     }
     export type get_Environments_exports_content_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/exports/{id}/content/'
+        path: '/v1/environments/{project_id}/exports/{id}/content/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -9689,7 +9689,7 @@ export namespace Endpoints {
     }
     export type get_Environments_file_system_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/file_system/'
+        path: '/v1/environments/{project_id}/file_system/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number; search: string }>
@@ -9699,7 +9699,7 @@ export namespace Endpoints {
     }
     export type post_Environments_file_system_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/file_system/'
+        path: '/v1/environments/{project_id}/file_system/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9710,7 +9710,7 @@ export namespace Endpoints {
     }
     export type get_Environments_file_system_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/file_system/{id}/'
+        path: '/v1/environments/{project_id}/file_system/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9719,7 +9719,7 @@ export namespace Endpoints {
     }
     export type put_Environments_file_system_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/file_system/{id}/'
+        path: '/v1/environments/{project_id}/file_system/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9730,7 +9730,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_file_system_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/file_system/{id}/'
+        path: '/v1/environments/{project_id}/file_system/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9741,7 +9741,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_file_system_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/file_system/{id}/'
+        path: '/v1/environments/{project_id}/file_system/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9750,7 +9750,7 @@ export namespace Endpoints {
     }
     export type post_Environments_file_system_count_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/file_system/{id}/count/'
+        path: '/v1/environments/{project_id}/file_system/{id}/count/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9761,7 +9761,7 @@ export namespace Endpoints {
     }
     export type post_Environments_file_system_link_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/file_system/{id}/link/'
+        path: '/v1/environments/{project_id}/file_system/{id}/link/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9772,7 +9772,7 @@ export namespace Endpoints {
     }
     export type post_Environments_file_system_move_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/file_system/{id}/move/'
+        path: '/v1/environments/{project_id}/file_system/{id}/move/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9783,7 +9783,7 @@ export namespace Endpoints {
     }
     export type post_Environments_file_system_count_by_path_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/file_system/count_by_path/'
+        path: '/v1/environments/{project_id}/file_system/count_by_path/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9794,7 +9794,7 @@ export namespace Endpoints {
     }
     export type get_Environments_file_system_unfiled_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/file_system/unfiled/'
+        path: '/v1/environments/{project_id}/file_system/unfiled/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9803,7 +9803,7 @@ export namespace Endpoints {
     }
     export type get_Environments_file_system_shortcut_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/file_system_shortcut/'
+        path: '/v1/environments/{project_id}/file_system_shortcut/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -9813,7 +9813,7 @@ export namespace Endpoints {
     }
     export type post_Environments_file_system_shortcut_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/file_system_shortcut/'
+        path: '/v1/environments/{project_id}/file_system_shortcut/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9824,7 +9824,7 @@ export namespace Endpoints {
     }
     export type get_Environments_file_system_shortcut_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/file_system_shortcut/{id}/'
+        path: '/v1/environments/{project_id}/file_system_shortcut/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9833,7 +9833,7 @@ export namespace Endpoints {
     }
     export type put_Environments_file_system_shortcut_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/file_system_shortcut/{id}/'
+        path: '/v1/environments/{project_id}/file_system_shortcut/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9844,7 +9844,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_file_system_shortcut_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/file_system_shortcut/{id}/'
+        path: '/v1/environments/{project_id}/file_system_shortcut/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9855,7 +9855,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_file_system_shortcut_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/file_system_shortcut/{id}/'
+        path: '/v1/environments/{project_id}/file_system_shortcut/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9864,7 +9864,7 @@ export namespace Endpoints {
     }
     export type get_Environments_groups_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/groups/'
+        path: '/v1/environments/{project_id}/groups/'
         requestFormat: 'json'
         parameters: {
             query: { cursor?: string | undefined; group_type_index: number; search: string }
@@ -9874,7 +9874,7 @@ export namespace Endpoints {
     }
     export type post_Environments_groups_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/groups/'
+        path: '/v1/environments/{project_id}/groups/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9885,7 +9885,7 @@ export namespace Endpoints {
     }
     export type get_Environments_groups_activity_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/groups/activity/'
+        path: '/v1/environments/{project_id}/groups/activity/'
         requestFormat: 'json'
         parameters: {
             query: { group_type_index: number; id: string }
@@ -9895,7 +9895,7 @@ export namespace Endpoints {
     }
     export type post_Environments_groups_delete_property_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/groups/delete_property/'
+        path: '/v1/environments/{project_id}/groups/delete_property/'
         requestFormat: 'json'
         parameters: {
             query: { group_key: string; group_type_index: number }
@@ -9907,7 +9907,7 @@ export namespace Endpoints {
     }
     export type get_Environments_groups_find_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/groups/find/'
+        path: '/v1/environments/{project_id}/groups/find/'
         requestFormat: 'json'
         parameters: {
             query: { group_key: string; group_type_index: number }
@@ -9917,7 +9917,7 @@ export namespace Endpoints {
     }
     export type get_Environments_groups_property_definitions_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/groups/property_definitions/'
+        path: '/v1/environments/{project_id}/groups/property_definitions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9926,7 +9926,7 @@ export namespace Endpoints {
     }
     export type get_Environments_groups_property_values_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/groups/property_values/'
+        path: '/v1/environments/{project_id}/groups/property_values/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9935,7 +9935,7 @@ export namespace Endpoints {
     }
     export type get_Environments_groups_related_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/groups/related/'
+        path: '/v1/environments/{project_id}/groups/related/'
         requestFormat: 'json'
         parameters: {
             query: { group_type_index: number; id: string }
@@ -9945,7 +9945,7 @@ export namespace Endpoints {
     }
     export type post_Environments_groups_update_property_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/groups/update_property/'
+        path: '/v1/environments/{project_id}/groups/update_property/'
         requestFormat: 'json'
         parameters: {
             query: { group_key: string; group_type_index: number }
@@ -9957,7 +9957,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_functions_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights_functions/'
+        path: '/v1/environments/{project_id}/insights_functions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -9977,7 +9977,7 @@ export namespace Endpoints {
     }
     export type post_Environments_insights_functions_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/insights_functions/'
+        path: '/v1/environments/{project_id}/insights_functions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -9988,7 +9988,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_functions_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights_functions/{id}/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -9997,7 +9997,7 @@ export namespace Endpoints {
     }
     export type put_Environments_insights_functions_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/insights_functions/{id}/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10008,7 +10008,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_insights_functions_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/insights_functions/{id}/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10019,7 +10019,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_insights_functions_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/insights_functions/{id}/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10028,7 +10028,7 @@ export namespace Endpoints {
     }
     export type post_Environments_insights_functions_broadcast_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/insights_functions/{id}/broadcast/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/broadcast/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10039,7 +10039,7 @@ export namespace Endpoints {
     }
     export type post_Environments_insights_functions_invocations_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/insights_functions/{id}/invocations/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/invocations/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10050,7 +10050,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_functions_logs_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights_functions/{id}/logs/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10059,7 +10059,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_functions_metrics_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights_functions/{id}/metrics/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/metrics/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10068,7 +10068,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_functions_metrics_totals_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights_functions/{id}/metrics/totals/'
+        path: '/v1/environments/{project_id}/insights_functions/{id}/metrics/totals/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10077,7 +10077,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_functions_icon_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights_functions/icon/'
+        path: '/v1/environments/{project_id}/insights_functions/icon/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10086,7 +10086,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_functions_icons_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights_functions/icons/'
+        path: '/v1/environments/{project_id}/insights_functions/icons/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10095,7 +10095,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_insights_functions_rearrange_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/insights_functions/rearrange/'
+        path: '/v1/environments/{project_id}/insights_functions/rearrange/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10106,7 +10106,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights/'
+        path: '/v1/environments/{project_id}/insights/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -10131,7 +10131,7 @@ export namespace Endpoints {
     }
     export type post_Environments_insights_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/insights/'
+        path: '/v1/environments/{project_id}/insights/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10143,7 +10143,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_sharing_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights/{insight_id}/sharing/'
+        path: '/v1/environments/{project_id}/insights/{insight_id}/sharing/'
         requestFormat: 'json'
         parameters: {
             path: { insight_id: number; project_id: string }
@@ -10152,7 +10152,7 @@ export namespace Endpoints {
     }
     export type post_Environments_insights_sharing_passwords_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/insights/{insight_id}/sharing/passwords/'
+        path: '/v1/environments/{project_id}/insights/{insight_id}/sharing/passwords/'
         requestFormat: 'json'
         parameters: {
             path: { insight_id: number; project_id: string }
@@ -10163,7 +10163,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_insights_sharing_passwords_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/'
+        path: '/v1/environments/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/'
         requestFormat: 'json'
         parameters: {
             path: { insight_id: number; password_id: string; project_id: string }
@@ -10172,7 +10172,7 @@ export namespace Endpoints {
     }
     export type post_Environments_insights_sharing_refresh_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/insights/{insight_id}/sharing/refresh/'
+        path: '/v1/environments/{project_id}/insights/{insight_id}/sharing/refresh/'
         requestFormat: 'json'
         parameters: {
             path: { insight_id: number; project_id: string }
@@ -10183,7 +10183,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights/{id}/'
+        path: '/v1/environments/{project_id}/insights/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -10204,7 +10204,7 @@ export namespace Endpoints {
     }
     export type put_Environments_insights_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/insights/{id}/'
+        path: '/v1/environments/{project_id}/insights/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10216,7 +10216,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_insights_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/insights/{id}/'
+        path: '/v1/environments/{project_id}/insights/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10228,7 +10228,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_insights_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/insights/{id}/'
+        path: '/v1/environments/{project_id}/insights/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10238,7 +10238,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_activity_retrieve_2 = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights/{id}/activity/'
+        path: '/v1/environments/{project_id}/insights/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10248,7 +10248,7 @@ export namespace Endpoints {
     }
     export type post_Environments_insights_viewed_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/insights/{id}/viewed/'
+        path: '/v1/environments/{project_id}/insights/{id}/viewed/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10260,7 +10260,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_activity_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights/activity/'
+        path: '/v1/environments/{project_id}/insights/activity/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10270,7 +10270,7 @@ export namespace Endpoints {
     }
     export type post_Environments_insights_cancel_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/insights/cancel/'
+        path: '/v1/environments/{project_id}/insights/cancel/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10282,7 +10282,7 @@ export namespace Endpoints {
     }
     export type get_Environments_insights_my_last_viewed_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/insights/my_last_viewed/'
+        path: '/v1/environments/{project_id}/insights/my_last_viewed/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10292,7 +10292,7 @@ export namespace Endpoints {
     }
     export type get_Environments_logs_attributes_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/logs/attributes/'
+        path: '/v1/environments/{project_id}/logs/attributes/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10301,7 +10301,7 @@ export namespace Endpoints {
     }
     export type post_Environments_logs_query_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/logs/query/'
+        path: '/v1/environments/{project_id}/logs/query/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10310,7 +10310,7 @@ export namespace Endpoints {
     }
     export type post_Environments_logs_sparkline_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/logs/sparkline/'
+        path: '/v1/environments/{project_id}/logs/sparkline/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10319,7 +10319,7 @@ export namespace Endpoints {
     }
     export type get_Environments_logs_values_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/logs/values/'
+        path: '/v1/environments/{project_id}/logs/values/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10328,7 +10328,7 @@ export namespace Endpoints {
     }
     export type post_Environments_max_tools_create_and_query_insight_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/max_tools/create_and_query_insight/'
+        path: '/v1/environments/{project_id}/max_tools/create_and_query_insight/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10337,7 +10337,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persisted_folder_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persisted_folder/'
+        path: '/v1/environments/{project_id}/persisted_folder/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -10347,7 +10347,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persisted_folder_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persisted_folder/'
+        path: '/v1/environments/{project_id}/persisted_folder/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10358,7 +10358,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persisted_folder_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persisted_folder/{id}/'
+        path: '/v1/environments/{project_id}/persisted_folder/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10367,7 +10367,7 @@ export namespace Endpoints {
     }
     export type put_Environments_persisted_folder_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/persisted_folder/{id}/'
+        path: '/v1/environments/{project_id}/persisted_folder/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10378,7 +10378,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_persisted_folder_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/persisted_folder/{id}/'
+        path: '/v1/environments/{project_id}/persisted_folder/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10389,7 +10389,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_persisted_folder_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/persisted_folder/{id}/'
+        path: '/v1/environments/{project_id}/persisted_folder/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10398,7 +10398,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/'
+        path: '/v1/environments/{project_id}/persons/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -10416,7 +10416,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/{id}/'
+        path: '/v1/environments/{project_id}/persons/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10426,7 +10426,7 @@ export namespace Endpoints {
     }
     export type put_Environments_persons_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/persons/{id}/'
+        path: '/v1/environments/{project_id}/persons/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10438,7 +10438,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_persons_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/persons/{id}/'
+        path: '/v1/environments/{project_id}/persons/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10450,7 +10450,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_persons_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/persons/{id}/'
+        path: '/v1/environments/{project_id}/persons/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ delete_events: boolean; format: 'csv' | 'json' }>
@@ -10460,7 +10460,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_activity_retrieve_2 = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/{id}/activity/'
+        path: '/v1/environments/{project_id}/persons/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10470,7 +10470,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persons_delete_events_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persons/{id}/delete_events/'
+        path: '/v1/environments/{project_id}/persons/{id}/delete_events/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10482,7 +10482,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persons_delete_property_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persons/{id}/delete_property/'
+        path: '/v1/environments/{project_id}/persons/{id}/delete_property/'
         requestFormat: 'json'
         parameters: {
             query: { $unset: string; format?: ('csv' | 'json') | undefined }
@@ -10494,7 +10494,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_properties_timeline_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/{id}/properties_timeline/'
+        path: '/v1/environments/{project_id}/persons/{id}/properties_timeline/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10504,7 +10504,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persons_split_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persons/{id}/split/'
+        path: '/v1/environments/{project_id}/persons/{id}/split/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10516,7 +10516,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persons_update_property_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persons/{id}/update_property/'
+        path: '/v1/environments/{project_id}/persons/{id}/update_property/'
         requestFormat: 'json'
         parameters: {
             query: { format?: ('csv' | 'json') | undefined; key: string; value: unknown }
@@ -10528,7 +10528,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_activity_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/activity/'
+        path: '/v1/environments/{project_id}/persons/activity/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10538,7 +10538,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persons_bulk_delete_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persons/bulk_delete/'
+        path: '/v1/environments/{project_id}/persons/bulk_delete/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -10555,7 +10555,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_cohorts_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/cohorts/'
+        path: '/v1/environments/{project_id}/persons/cohorts/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10565,7 +10565,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_funnel_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/funnel/'
+        path: '/v1/environments/{project_id}/persons/funnel/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10575,7 +10575,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persons_funnel_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persons/funnel/'
+        path: '/v1/environments/{project_id}/persons/funnel/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10587,7 +10587,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_funnel_correlation_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/funnel/correlation/'
+        path: '/v1/environments/{project_id}/persons/funnel/correlation/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10597,7 +10597,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persons_funnel_correlation_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persons/funnel/correlation/'
+        path: '/v1/environments/{project_id}/persons/funnel/correlation/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10609,7 +10609,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_lifecycle_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/lifecycle/'
+        path: '/v1/environments/{project_id}/persons/lifecycle/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10619,7 +10619,7 @@ export namespace Endpoints {
     }
     export type post_Environments_persons_reset_person_distinct_id_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/persons/reset_person_distinct_id/'
+        path: '/v1/environments/{project_id}/persons/reset_person_distinct_id/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10631,7 +10631,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_stickiness_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/stickiness/'
+        path: '/v1/environments/{project_id}/persons/stickiness/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10641,7 +10641,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_trends_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/trends/'
+        path: '/v1/environments/{project_id}/persons/trends/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10651,7 +10651,7 @@ export namespace Endpoints {
     }
     export type get_Environments_persons_values_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/persons/values/'
+        path: '/v1/environments/{project_id}/persons/values/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -10661,7 +10661,7 @@ export namespace Endpoints {
     }
     export type get_Environments_plugin_configs_logs_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/plugin_configs/{plugin_config_id}/logs/'
+        path: '/v1/environments/{project_id}/plugin_configs/{plugin_config_id}/logs/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -10671,7 +10671,7 @@ export namespace Endpoints {
     }
     export type post_Environments_query_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/query/'
+        path: '/v1/environments/{project_id}/query/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10682,7 +10682,7 @@ export namespace Endpoints {
     }
     export type get_Environments_query_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/query/{id}/'
+        path: '/v1/environments/{project_id}/query/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10691,7 +10691,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_query_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/query/{id}/'
+        path: '/v1/environments/{project_id}/query/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10700,7 +10700,7 @@ export namespace Endpoints {
     }
     export type get_Environments_query_log_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/query/{id}/log/'
+        path: '/v1/environments/{project_id}/query/{id}/log/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10709,7 +10709,7 @@ export namespace Endpoints {
     }
     export type post_Environments_query_check_auth_for_async_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/query/check_auth_for_async/'
+        path: '/v1/environments/{project_id}/query/check_auth_for_async/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10718,7 +10718,7 @@ export namespace Endpoints {
     }
     export type get_Environments_query_draft_sql_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/query/draft_sql/'
+        path: '/v1/environments/{project_id}/query/draft_sql/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10727,7 +10727,7 @@ export namespace Endpoints {
     }
     export type post_Environments_query_upgrade_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/query/upgrade/'
+        path: '/v1/environments/{project_id}/query/upgrade/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10738,7 +10738,7 @@ export namespace Endpoints {
     }
     export type get_Environments_session_recording_playlists_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/session_recording_playlists/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ created_by: number; limit: number; offset: number; short_id: string }>
@@ -10748,7 +10748,7 @@ export namespace Endpoints {
     }
     export type post_Environments_session_recording_playlists_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/session_recording_playlists/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10759,7 +10759,7 @@ export namespace Endpoints {
     }
     export type get_Environments_session_recording_playlists_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/session_recording_playlists/{short_id}/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -10768,7 +10768,7 @@ export namespace Endpoints {
     }
     export type put_Environments_session_recording_playlists_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/session_recording_playlists/{short_id}/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -10779,7 +10779,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_session_recording_playlists_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/session_recording_playlists/{short_id}/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -10790,7 +10790,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_session_recording_playlists_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/session_recording_playlists/{short_id}/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -10799,7 +10799,7 @@ export namespace Endpoints {
     }
     export type get_Environments_session_recording_playlists_recordings_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/session_recording_playlists/{short_id}/recordings/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/{short_id}/recordings/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -10808,7 +10808,7 @@ export namespace Endpoints {
     }
     export type post_Environments_session_recording_playlists_recordings_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; session_recording_id: string; short_id: string }
@@ -10819,7 +10819,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_session_recording_playlists_recordings_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/'
+        path: '/v1/environments/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; session_recording_id: string; short_id: string }
@@ -10828,7 +10828,7 @@ export namespace Endpoints {
     }
     export type get_Environments_session_recordings_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/session_recordings/'
+        path: '/v1/environments/{project_id}/session_recordings/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -10838,7 +10838,7 @@ export namespace Endpoints {
     }
     export type get_Environments_session_recordings_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/session_recordings/{id}/'
+        path: '/v1/environments/{project_id}/session_recordings/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10847,7 +10847,7 @@ export namespace Endpoints {
     }
     export type put_Environments_session_recordings_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/session_recordings/{id}/'
+        path: '/v1/environments/{project_id}/session_recordings/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10858,7 +10858,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_session_recordings_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/session_recordings/{id}/'
+        path: '/v1/environments/{project_id}/session_recordings/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10869,7 +10869,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_session_recordings_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/session_recordings/{id}/'
+        path: '/v1/environments/{project_id}/session_recordings/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -10878,7 +10878,7 @@ export namespace Endpoints {
     }
     export type get_Environments_session_recordings_sharing_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/session_recordings/{recording_id}/sharing/'
+        path: '/v1/environments/{project_id}/session_recordings/{recording_id}/sharing/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; recording_id: string }
@@ -10887,7 +10887,7 @@ export namespace Endpoints {
     }
     export type post_Environments_session_recordings_sharing_passwords_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/session_recordings/{recording_id}/sharing/passwords/'
+        path: '/v1/environments/{project_id}/session_recordings/{recording_id}/sharing/passwords/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; recording_id: string }
@@ -10898,7 +10898,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_session_recordings_sharing_passwords_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/session_recordings/{recording_id}/sharing/passwords/{password_id}/'
+        path: '/v1/environments/{project_id}/session_recordings/{recording_id}/sharing/passwords/{password_id}/'
         requestFormat: 'json'
         parameters: {
             path: { password_id: string; project_id: string; recording_id: string }
@@ -10907,7 +10907,7 @@ export namespace Endpoints {
     }
     export type post_Environments_session_recordings_sharing_refresh_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/session_recordings/{recording_id}/sharing/refresh/'
+        path: '/v1/environments/{project_id}/session_recordings/{recording_id}/sharing/refresh/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; recording_id: string }
@@ -10918,7 +10918,7 @@ export namespace Endpoints {
     }
     export type post_Create_session_summaries = {
         method: 'POST'
-        path: '/api/environments/{project_id}/session_summaries/create_session_summaries/'
+        path: '/v1/environments/{project_id}/session_summaries/create_session_summaries/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10929,7 +10929,7 @@ export namespace Endpoints {
     }
     export type get_Environments_sessions_property_definitions_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/sessions/property_definitions/'
+        path: '/v1/environments/{project_id}/sessions/property_definitions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10938,7 +10938,7 @@ export namespace Endpoints {
     }
     export type get_Environments_sessions_values_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/sessions/values/'
+        path: '/v1/environments/{project_id}/sessions/values/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10947,7 +10947,7 @@ export namespace Endpoints {
     }
     export type get_Environments_subscriptions_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/subscriptions/'
+        path: '/v1/environments/{project_id}/subscriptions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -10957,7 +10957,7 @@ export namespace Endpoints {
     }
     export type post_Environments_subscriptions_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/subscriptions/'
+        path: '/v1/environments/{project_id}/subscriptions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -10968,7 +10968,7 @@ export namespace Endpoints {
     }
     export type get_Environments_subscriptions_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/subscriptions/{id}/'
+        path: '/v1/environments/{project_id}/subscriptions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -10977,7 +10977,7 @@ export namespace Endpoints {
     }
     export type put_Environments_subscriptions_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/subscriptions/{id}/'
+        path: '/v1/environments/{project_id}/subscriptions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -10988,7 +10988,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_subscriptions_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/subscriptions/{id}/'
+        path: '/v1/environments/{project_id}/subscriptions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -10999,7 +10999,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_subscriptions_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/subscriptions/{id}/'
+        path: '/v1/environments/{project_id}/subscriptions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -11008,7 +11008,7 @@ export namespace Endpoints {
     }
     export type get_Environments_user_interviews_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/user_interviews/'
+        path: '/v1/environments/{project_id}/user_interviews/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11018,7 +11018,7 @@ export namespace Endpoints {
     }
     export type post_Environments_user_interviews_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/user_interviews/'
+        path: '/v1/environments/{project_id}/user_interviews/'
         requestFormat: 'form-data'
         parameters: {
             path: { project_id: string }
@@ -11029,7 +11029,7 @@ export namespace Endpoints {
     }
     export type get_Environments_user_interviews_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/user_interviews/{id}/'
+        path: '/v1/environments/{project_id}/user_interviews/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11038,7 +11038,7 @@ export namespace Endpoints {
     }
     export type put_Environments_user_interviews_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/user_interviews/{id}/'
+        path: '/v1/environments/{project_id}/user_interviews/{id}/'
         requestFormat: 'form-data'
         parameters: {
             path: { id: string; project_id: string }
@@ -11049,7 +11049,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_user_interviews_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/user_interviews/{id}/'
+        path: '/v1/environments/{project_id}/user_interviews/{id}/'
         requestFormat: 'form-data'
         parameters: {
             path: { id: string; project_id: string }
@@ -11060,7 +11060,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_user_interviews_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/user_interviews/{id}/'
+        path: '/v1/environments/{project_id}/user_interviews/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11069,7 +11069,7 @@ export namespace Endpoints {
     }
     export type get_Environments_warehouse_saved_queries_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ page: number; search: string }>
@@ -11079,7 +11079,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_saved_queries_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -11090,7 +11090,7 @@ export namespace Endpoints {
     }
     export type get_Environments_warehouse_saved_queries_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11099,7 +11099,7 @@ export namespace Endpoints {
     }
     export type put_Environments_warehouse_saved_queries_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11110,7 +11110,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_warehouse_saved_queries_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11121,7 +11121,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_warehouse_saved_queries_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11130,7 +11130,7 @@ export namespace Endpoints {
     }
     export type get_Environments_warehouse_saved_queries_activity_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/activity/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11139,7 +11139,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_saved_queries_ancestors_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/ancestors/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/ancestors/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11150,7 +11150,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_saved_queries_cancel_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/cancel/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/cancel/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11161,7 +11161,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_saved_queries_descendants_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/descendants/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/descendants/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11172,7 +11172,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_saved_queries_revert_materialization_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/revert_materialization/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/revert_materialization/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11183,7 +11183,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_saved_queries_run_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_saved_queries/{id}/run/'
+        path: '/v1/environments/{project_id}/warehouse_saved_queries/{id}/run/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11194,7 +11194,7 @@ export namespace Endpoints {
     }
     export type get_Environments_warehouse_tables_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/warehouse_tables/'
+        path: '/v1/environments/{project_id}/warehouse_tables/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number; search: string }>
@@ -11204,7 +11204,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_tables_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_tables/'
+        path: '/v1/environments/{project_id}/warehouse_tables/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -11215,7 +11215,7 @@ export namespace Endpoints {
     }
     export type get_Environments_warehouse_tables_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/warehouse_tables/{id}/'
+        path: '/v1/environments/{project_id}/warehouse_tables/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11224,7 +11224,7 @@ export namespace Endpoints {
     }
     export type put_Environments_warehouse_tables_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/warehouse_tables/{id}/'
+        path: '/v1/environments/{project_id}/warehouse_tables/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11235,7 +11235,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_warehouse_tables_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/warehouse_tables/{id}/'
+        path: '/v1/environments/{project_id}/warehouse_tables/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11246,7 +11246,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_warehouse_tables_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/warehouse_tables/{id}/'
+        path: '/v1/environments/{project_id}/warehouse_tables/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11255,7 +11255,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_tables_refresh_schema_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_tables/{id}/refresh_schema/'
+        path: '/v1/environments/{project_id}/warehouse_tables/{id}/refresh_schema/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11266,7 +11266,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_tables_update_schema_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_tables/{id}/update_schema/'
+        path: '/v1/environments/{project_id}/warehouse_tables/{id}/update_schema/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -11277,7 +11277,7 @@ export namespace Endpoints {
     }
     export type post_Environments_warehouse_tables_file_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/warehouse_tables/file/'
+        path: '/v1/environments/{project_id}/warehouse_tables/file/'
         requestFormat: 'form-data'
         parameters: {
             path: { project_id: string }
@@ -11288,7 +11288,7 @@ export namespace Endpoints {
     }
     export type get_Environments_web_vitals_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/web_vitals/'
+        path: '/v1/environments/{project_id}/web_vitals/'
         requestFormat: 'json'
         parameters: {
             query: { pathname: string }
@@ -11298,7 +11298,7 @@ export namespace Endpoints {
     }
     export type get_List = {
         method: 'GET'
-        path: '/api/organizations/'
+        path: '/v1/organizations/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11307,7 +11307,7 @@ export namespace Endpoints {
     }
     export type post_Create = {
         method: 'POST'
-        path: '/api/organizations/'
+        path: '/v1/organizations/'
         requestFormat: 'json'
         parameters: {
             body: Schemas.Organization
@@ -11316,7 +11316,7 @@ export namespace Endpoints {
     }
     export type get_Retrieve = {
         method: 'GET'
-        path: '/api/organizations/{id}/'
+        path: '/v1/organizations/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string }
@@ -11325,7 +11325,7 @@ export namespace Endpoints {
     }
     export type put_Update = {
         method: 'PUT'
-        path: '/api/organizations/{id}/'
+        path: '/v1/organizations/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string }
@@ -11336,7 +11336,7 @@ export namespace Endpoints {
     }
     export type patch_Partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{id}/'
+        path: '/v1/organizations/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string }
@@ -11347,7 +11347,7 @@ export namespace Endpoints {
     }
     export type delete_Destroy = {
         method: 'DELETE'
-        path: '/api/organizations/{id}/'
+        path: '/v1/organizations/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string }
@@ -11356,7 +11356,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_list = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/batch_exports/'
+        path: '/v1/organizations/{organization_id}/batch_exports/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11366,7 +11366,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/batch_exports/'
+        path: '/v1/organizations/{organization_id}/batch_exports/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11377,7 +11377,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11386,7 +11386,7 @@ export namespace Endpoints {
     }
     export type put_Batch_exports_update = {
         method: 'PUT'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11397,7 +11397,7 @@ export namespace Endpoints {
     }
     export type patch_Batch_exports_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11408,7 +11408,7 @@ export namespace Endpoints {
     }
     export type delete_Batch_exports_destroy = {
         method: 'DELETE'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11417,7 +11417,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_backfill_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/backfill/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/backfill/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11428,7 +11428,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_logs_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/logs/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11437,7 +11437,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_pause_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/pause/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/pause/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11448,7 +11448,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_run_test_step_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/run_test_step/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/run_test_step/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11459,7 +11459,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_unpause_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/batch_exports/{id}/unpause/'
+        path: '/v1/organizations/{organization_id}/batch_exports/{id}/unpause/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11470,7 +11470,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_run_test_step_new_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/batch_exports/run_test_step_new/'
+        path: '/v1/organizations/{organization_id}/batch_exports/run_test_step_new/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11481,7 +11481,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_test_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/batch_exports/test/'
+        path: '/v1/organizations/{organization_id}/batch_exports/test/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11490,7 +11490,7 @@ export namespace Endpoints {
     }
     export type get_Domains_list = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/domains/'
+        path: '/v1/organizations/{organization_id}/domains/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11500,7 +11500,7 @@ export namespace Endpoints {
     }
     export type post_Domains_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/domains/'
+        path: '/v1/organizations/{organization_id}/domains/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11511,7 +11511,7 @@ export namespace Endpoints {
     }
     export type get_Domains_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/domains/{id}/'
+        path: '/v1/organizations/{organization_id}/domains/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11520,7 +11520,7 @@ export namespace Endpoints {
     }
     export type put_Domains_update = {
         method: 'PUT'
-        path: '/api/organizations/{organization_id}/domains/{id}/'
+        path: '/v1/organizations/{organization_id}/domains/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11531,7 +11531,7 @@ export namespace Endpoints {
     }
     export type patch_Domains_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/domains/{id}/'
+        path: '/v1/organizations/{organization_id}/domains/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11542,7 +11542,7 @@ export namespace Endpoints {
     }
     export type delete_Domains_destroy = {
         method: 'DELETE'
-        path: '/api/organizations/{organization_id}/domains/{id}/'
+        path: '/v1/organizations/{organization_id}/domains/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11551,7 +11551,7 @@ export namespace Endpoints {
     }
     export type post_Domains_verify_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/domains/{id}/verify/'
+        path: '/v1/organizations/{organization_id}/domains/{id}/verify/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11562,7 +11562,7 @@ export namespace Endpoints {
     }
     export type get_Invites_list = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/invites/'
+        path: '/v1/organizations/{organization_id}/invites/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11572,7 +11572,7 @@ export namespace Endpoints {
     }
     export type post_Invites_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/invites/'
+        path: '/v1/organizations/{organization_id}/invites/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11583,7 +11583,7 @@ export namespace Endpoints {
     }
     export type delete_Invites_destroy = {
         method: 'DELETE'
-        path: '/api/organizations/{organization_id}/invites/{id}/'
+        path: '/v1/organizations/{organization_id}/invites/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11592,7 +11592,7 @@ export namespace Endpoints {
     }
     export type post_Invites_bulk_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/invites/bulk/'
+        path: '/v1/organizations/{organization_id}/invites/bulk/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11603,7 +11603,7 @@ export namespace Endpoints {
     }
     export type get_Members_list = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/members/'
+        path: '/v1/organizations/{organization_id}/members/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11613,7 +11613,7 @@ export namespace Endpoints {
     }
     export type put_Members_update = {
         method: 'PUT'
-        path: '/api/organizations/{organization_id}/members/{user__uuid}/'
+        path: '/v1/organizations/{organization_id}/members/{user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string; user__uuid: string }
@@ -11624,7 +11624,7 @@ export namespace Endpoints {
     }
     export type patch_Members_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/members/{user__uuid}/'
+        path: '/v1/organizations/{organization_id}/members/{user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string; user__uuid: string }
@@ -11635,7 +11635,7 @@ export namespace Endpoints {
     }
     export type delete_Members_destroy = {
         method: 'DELETE'
-        path: '/api/organizations/{organization_id}/members/{user__uuid}/'
+        path: '/v1/organizations/{organization_id}/members/{user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string; user__uuid: string }
@@ -11644,7 +11644,7 @@ export namespace Endpoints {
     }
     export type get_Members_scoped_api_keys_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/members/{user__uuid}/scoped_api_keys/'
+        path: '/v1/organizations/{organization_id}/members/{user__uuid}/scoped_api_keys/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string; user__uuid: string }
@@ -11653,7 +11653,7 @@ export namespace Endpoints {
     }
     export type get_List_2 = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/projects/'
+        path: '/v1/organizations/{organization_id}/projects/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11663,7 +11663,7 @@ export namespace Endpoints {
     }
     export type post_Create_2 = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/projects/'
+        path: '/v1/organizations/{organization_id}/projects/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11674,7 +11674,7 @@ export namespace Endpoints {
     }
     export type get_Retrieve_2 = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/projects/{id}/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11683,7 +11683,7 @@ export namespace Endpoints {
     }
     export type put_Update_2 = {
         method: 'PUT'
-        path: '/api/organizations/{organization_id}/projects/{id}/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11694,7 +11694,7 @@ export namespace Endpoints {
     }
     export type patch_Partial_update_2 = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/projects/{id}/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11705,7 +11705,7 @@ export namespace Endpoints {
     }
     export type delete_Destroy_2 = {
         method: 'DELETE'
-        path: '/api/organizations/{organization_id}/projects/{id}/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11714,7 +11714,7 @@ export namespace Endpoints {
     }
     export type get_Activity_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/projects/{id}/activity/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11723,7 +11723,7 @@ export namespace Endpoints {
     }
     export type patch_Add_product_intent_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/projects/{id}/add_product_intent/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/add_product_intent/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11734,7 +11734,7 @@ export namespace Endpoints {
     }
     export type post_Change_organization_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/projects/{id}/change_organization/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/change_organization/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11745,7 +11745,7 @@ export namespace Endpoints {
     }
     export type patch_Complete_product_onboarding_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/projects/{id}/complete_product_onboarding/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/complete_product_onboarding/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11756,7 +11756,7 @@ export namespace Endpoints {
     }
     export type patch_Delete_secret_token_backup_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/projects/{id}/delete_secret_token_backup/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/delete_secret_token_backup/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11767,7 +11767,7 @@ export namespace Endpoints {
     }
     export type get_Is_generating_demo_data_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/projects/{id}/is_generating_demo_data/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/is_generating_demo_data/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11776,7 +11776,7 @@ export namespace Endpoints {
     }
     export type patch_Reset_token_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/projects/{id}/reset_token/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/reset_token/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11787,7 +11787,7 @@ export namespace Endpoints {
     }
     export type patch_Rotate_secret_token_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/projects/{id}/rotate_secret_token/'
+        path: '/v1/organizations/{organization_id}/projects/{id}/rotate_secret_token/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; organization_id: string }
@@ -11798,7 +11798,7 @@ export namespace Endpoints {
     }
     export type get_Proxy_records_list = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/proxy_records/'
+        path: '/v1/organizations/{organization_id}/proxy_records/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11808,7 +11808,7 @@ export namespace Endpoints {
     }
     export type post_Proxy_records_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/proxy_records/'
+        path: '/v1/organizations/{organization_id}/proxy_records/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11819,7 +11819,7 @@ export namespace Endpoints {
     }
     export type get_Proxy_records_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/proxy_records/{id}/'
+        path: '/v1/organizations/{organization_id}/proxy_records/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11828,7 +11828,7 @@ export namespace Endpoints {
     }
     export type put_Proxy_records_update = {
         method: 'PUT'
-        path: '/api/organizations/{organization_id}/proxy_records/{id}/'
+        path: '/v1/organizations/{organization_id}/proxy_records/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11839,7 +11839,7 @@ export namespace Endpoints {
     }
     export type patch_Proxy_records_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/proxy_records/{id}/'
+        path: '/v1/organizations/{organization_id}/proxy_records/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11850,7 +11850,7 @@ export namespace Endpoints {
     }
     export type delete_Proxy_records_destroy = {
         method: 'DELETE'
-        path: '/api/organizations/{organization_id}/proxy_records/{id}/'
+        path: '/v1/organizations/{organization_id}/proxy_records/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11859,7 +11859,7 @@ export namespace Endpoints {
     }
     export type get_Roles_list = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/roles/'
+        path: '/v1/organizations/{organization_id}/roles/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11869,7 +11869,7 @@ export namespace Endpoints {
     }
     export type post_Roles_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/roles/'
+        path: '/v1/organizations/{organization_id}/roles/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string }
@@ -11880,7 +11880,7 @@ export namespace Endpoints {
     }
     export type get_Roles_retrieve = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/roles/{id}/'
+        path: '/v1/organizations/{organization_id}/roles/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11889,7 +11889,7 @@ export namespace Endpoints {
     }
     export type put_Roles_update = {
         method: 'PUT'
-        path: '/api/organizations/{organization_id}/roles/{id}/'
+        path: '/v1/organizations/{organization_id}/roles/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11900,7 +11900,7 @@ export namespace Endpoints {
     }
     export type patch_Roles_partial_update = {
         method: 'PATCH'
-        path: '/api/organizations/{organization_id}/roles/{id}/'
+        path: '/v1/organizations/{organization_id}/roles/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11911,7 +11911,7 @@ export namespace Endpoints {
     }
     export type delete_Roles_destroy = {
         method: 'DELETE'
-        path: '/api/organizations/{organization_id}/roles/{id}/'
+        path: '/v1/organizations/{organization_id}/roles/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string }
@@ -11920,7 +11920,7 @@ export namespace Endpoints {
     }
     export type get_Roles_role_memberships_list = {
         method: 'GET'
-        path: '/api/organizations/{organization_id}/roles/{role_id}/role_memberships/'
+        path: '/v1/organizations/{organization_id}/roles/{role_id}/role_memberships/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -11930,7 +11930,7 @@ export namespace Endpoints {
     }
     export type post_Roles_role_memberships_create = {
         method: 'POST'
-        path: '/api/organizations/{organization_id}/roles/{role_id}/role_memberships/'
+        path: '/v1/organizations/{organization_id}/roles/{role_id}/role_memberships/'
         requestFormat: 'json'
         parameters: {
             path: { organization_id: string; role_id: string }
@@ -11941,7 +11941,7 @@ export namespace Endpoints {
     }
     export type delete_Roles_role_memberships_destroy = {
         method: 'DELETE'
-        path: '/api/organizations/{organization_id}/roles/{role_id}/role_memberships/{id}/'
+        path: '/v1/organizations/{organization_id}/roles/{role_id}/role_memberships/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; organization_id: string; role_id: string }
@@ -11950,7 +11950,7 @@ export namespace Endpoints {
     }
     export type get_Actions_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/actions/'
+        path: '/v1/projects/{project_id}/actions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json'; limit: number; offset: number }>
@@ -11960,7 +11960,7 @@ export namespace Endpoints {
     }
     export type post_Actions_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/actions/'
+        path: '/v1/projects/{project_id}/actions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -11972,7 +11972,7 @@ export namespace Endpoints {
     }
     export type get_Actions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/actions/{id}/'
+        path: '/v1/projects/{project_id}/actions/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -11982,7 +11982,7 @@ export namespace Endpoints {
     }
     export type put_Actions_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/actions/{id}/'
+        path: '/v1/projects/{project_id}/actions/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -11994,7 +11994,7 @@ export namespace Endpoints {
     }
     export type patch_Actions_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/actions/{id}/'
+        path: '/v1/projects/{project_id}/actions/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -12006,7 +12006,7 @@ export namespace Endpoints {
     }
     export type delete_Actions_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/actions/{id}/'
+        path: '/v1/projects/{project_id}/actions/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -12016,7 +12016,7 @@ export namespace Endpoints {
     }
     export type get_Activity_log_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/activity_log/'
+        path: '/v1/projects/{project_id}/activity_log/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12025,7 +12025,7 @@ export namespace Endpoints {
     }
     export type get_Annotations_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/annotations/'
+        path: '/v1/projects/{project_id}/annotations/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number; search: string }>
@@ -12035,7 +12035,7 @@ export namespace Endpoints {
     }
     export type post_Annotations_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/annotations/'
+        path: '/v1/projects/{project_id}/annotations/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12046,7 +12046,7 @@ export namespace Endpoints {
     }
     export type get_Annotations_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/annotations/{id}/'
+        path: '/v1/projects/{project_id}/annotations/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12055,7 +12055,7 @@ export namespace Endpoints {
     }
     export type put_Annotations_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/annotations/{id}/'
+        path: '/v1/projects/{project_id}/annotations/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12066,7 +12066,7 @@ export namespace Endpoints {
     }
     export type patch_Annotations_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/annotations/{id}/'
+        path: '/v1/projects/{project_id}/annotations/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12077,7 +12077,7 @@ export namespace Endpoints {
     }
     export type delete_Annotations_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/annotations/{id}/'
+        path: '/v1/projects/{project_id}/annotations/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12086,7 +12086,7 @@ export namespace Endpoints {
     }
     export type get_App_metrics_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/app_metrics/{id}/'
+        path: '/v1/projects/{project_id}/app_metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12095,7 +12095,7 @@ export namespace Endpoints {
     }
     export type get_App_metrics_error_details_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/app_metrics/{id}/error_details/'
+        path: '/v1/projects/{project_id}/app_metrics/{id}/error_details/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12104,7 +12104,7 @@ export namespace Endpoints {
     }
     export type get_App_metrics_historical_exports_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/app_metrics/{plugin_config_id}/historical_exports/'
+        path: '/v1/projects/{project_id}/app_metrics/{plugin_config_id}/historical_exports/'
         requestFormat: 'json'
         parameters: {
             path: { plugin_config_id: string; project_id: string }
@@ -12113,7 +12113,7 @@ export namespace Endpoints {
     }
     export type get_App_metrics_historical_exports_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/app_metrics/{plugin_config_id}/historical_exports/{id}/'
+        path: '/v1/projects/{project_id}/app_metrics/{plugin_config_id}/historical_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; plugin_config_id: string; project_id: string }
@@ -12122,7 +12122,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_list_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/'
+        path: '/v1/projects/{project_id}/batch_exports/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -12132,7 +12132,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_create_2 = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/'
+        path: '/v1/projects/{project_id}/batch_exports/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12143,7 +12143,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_backfills_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/backfills/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/backfills/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ cursor: string; ordering: string }>
@@ -12153,7 +12153,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_backfills_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/backfills/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/backfills/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; project_id: string }
@@ -12164,7 +12164,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_backfills_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -12173,7 +12173,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_backfills_cancel_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/cancel/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/cancel/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -12184,7 +12184,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_runs_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ cursor: string; ordering: string }>
@@ -12194,7 +12194,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_runs_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -12203,7 +12203,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_runs_cancel_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/cancel/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/cancel/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -12214,7 +12214,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_runs_logs_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/logs/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -12223,7 +12223,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_runs_retry_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/retry/'
+        path: '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/retry/'
         requestFormat: 'json'
         parameters: {
             path: { batch_export_id: string; id: string; project_id: string }
@@ -12234,7 +12234,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/{id}/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12243,7 +12243,7 @@ export namespace Endpoints {
     }
     export type put_Batch_exports_update_2 = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/batch_exports/{id}/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12254,7 +12254,7 @@ export namespace Endpoints {
     }
     export type patch_Batch_exports_partial_update_2 = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/batch_exports/{id}/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12265,7 +12265,7 @@ export namespace Endpoints {
     }
     export type delete_Batch_exports_destroy_2 = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/batch_exports/{id}/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12274,7 +12274,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_backfill_create_2 = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/{id}/backfill/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/backfill/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12285,7 +12285,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_logs_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/{id}/logs/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12294,7 +12294,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_pause_create_2 = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/{id}/pause/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/pause/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12305,7 +12305,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_run_test_step_create_2 = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/{id}/run_test_step/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/run_test_step/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12316,7 +12316,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_unpause_create_2 = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/{id}/unpause/'
+        path: '/v1/projects/{project_id}/batch_exports/{id}/unpause/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12327,7 +12327,7 @@ export namespace Endpoints {
     }
     export type post_Batch_exports_run_test_step_new_create_2 = {
         method: 'POST'
-        path: '/api/projects/{project_id}/batch_exports/run_test_step_new/'
+        path: '/v1/projects/{project_id}/batch_exports/run_test_step_new/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12338,7 +12338,7 @@ export namespace Endpoints {
     }
     export type get_Batch_exports_test_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/batch_exports/test/'
+        path: '/v1/projects/{project_id}/batch_exports/test/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12347,7 +12347,7 @@ export namespace Endpoints {
     }
     export type get_Cohorts_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/cohorts/'
+        path: '/v1/projects/{project_id}/cohorts/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -12357,7 +12357,7 @@ export namespace Endpoints {
     }
     export type post_Cohorts_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/cohorts/'
+        path: '/v1/projects/{project_id}/cohorts/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12368,7 +12368,7 @@ export namespace Endpoints {
     }
     export type get_Cohorts_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/cohorts/{id}/'
+        path: '/v1/projects/{project_id}/cohorts/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12377,7 +12377,7 @@ export namespace Endpoints {
     }
     export type put_Cohorts_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/cohorts/{id}/'
+        path: '/v1/projects/{project_id}/cohorts/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12388,7 +12388,7 @@ export namespace Endpoints {
     }
     export type patch_Cohorts_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/cohorts/{id}/'
+        path: '/v1/projects/{project_id}/cohorts/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12399,7 +12399,7 @@ export namespace Endpoints {
     }
     export type delete_Cohorts_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/cohorts/{id}/'
+        path: '/v1/projects/{project_id}/cohorts/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12408,7 +12408,7 @@ export namespace Endpoints {
     }
     export type get_Cohorts_activity_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/cohorts/{id}/activity/'
+        path: '/v1/projects/{project_id}/cohorts/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12417,7 +12417,7 @@ export namespace Endpoints {
     }
     export type patch_Cohorts_add_persons_to_static_cohort_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/cohorts/{id}/add_persons_to_static_cohort/'
+        path: '/v1/projects/{project_id}/cohorts/{id}/add_persons_to_static_cohort/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12428,7 +12428,7 @@ export namespace Endpoints {
     }
     export type get_Cohorts_persons_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/cohorts/{id}/persons/'
+        path: '/v1/projects/{project_id}/cohorts/{id}/persons/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -12438,7 +12438,7 @@ export namespace Endpoints {
     }
     export type get_Cohorts_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/cohorts/activity/'
+        path: '/v1/projects/{project_id}/cohorts/activity/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12447,7 +12447,7 @@ export namespace Endpoints {
     }
     export type get_Dashboard_templates_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/dashboard_templates/'
+        path: '/v1/projects/{project_id}/dashboard_templates/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -12457,7 +12457,7 @@ export namespace Endpoints {
     }
     export type post_Dashboard_templates_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/dashboard_templates/'
+        path: '/v1/projects/{project_id}/dashboard_templates/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12468,7 +12468,7 @@ export namespace Endpoints {
     }
     export type get_Dashboard_templates_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/dashboard_templates/{id}/'
+        path: '/v1/projects/{project_id}/dashboard_templates/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12477,7 +12477,7 @@ export namespace Endpoints {
     }
     export type put_Dashboard_templates_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/dashboard_templates/{id}/'
+        path: '/v1/projects/{project_id}/dashboard_templates/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12488,7 +12488,7 @@ export namespace Endpoints {
     }
     export type patch_Dashboard_templates_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/dashboard_templates/{id}/'
+        path: '/v1/projects/{project_id}/dashboard_templates/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12499,7 +12499,7 @@ export namespace Endpoints {
     }
     export type delete_Dashboard_templates_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/dashboard_templates/{id}/'
+        path: '/v1/projects/{project_id}/dashboard_templates/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12508,7 +12508,7 @@ export namespace Endpoints {
     }
     export type get_Dashboard_templates_json_schema_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/dashboard_templates/json_schema/'
+        path: '/v1/projects/{project_id}/dashboard_templates/json_schema/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12517,7 +12517,7 @@ export namespace Endpoints {
     }
     export type get_Dashboards_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/dashboards/'
+        path: '/v1/projects/{project_id}/dashboards/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt'; limit: number; offset: number }>
@@ -12527,7 +12527,7 @@ export namespace Endpoints {
     }
     export type post_Dashboards_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/dashboards/'
+        path: '/v1/projects/{project_id}/dashboards/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -12539,7 +12539,7 @@ export namespace Endpoints {
     }
     export type get_Dashboards_collaborators_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/dashboards/{dashboard_id}/collaborators/'
+        path: '/v1/projects/{project_id}/dashboards/{dashboard_id}/collaborators/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -12548,7 +12548,7 @@ export namespace Endpoints {
     }
     export type post_Dashboards_collaborators_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/dashboards/{dashboard_id}/collaborators/'
+        path: '/v1/projects/{project_id}/dashboards/{dashboard_id}/collaborators/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -12559,7 +12559,7 @@ export namespace Endpoints {
     }
     export type delete_Dashboards_collaborators_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/dashboards/{dashboard_id}/collaborators/{user__uuid}/'
+        path: '/v1/projects/{project_id}/dashboards/{dashboard_id}/collaborators/{user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string; user__uuid: string }
@@ -12568,7 +12568,7 @@ export namespace Endpoints {
     }
     export type get_Dashboards_sharing_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/dashboards/{dashboard_id}/sharing/'
+        path: '/v1/projects/{project_id}/dashboards/{dashboard_id}/sharing/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -12577,7 +12577,7 @@ export namespace Endpoints {
     }
     export type post_Dashboards_sharing_passwords_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/dashboards/{dashboard_id}/sharing/passwords/'
+        path: '/v1/projects/{project_id}/dashboards/{dashboard_id}/sharing/passwords/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -12588,7 +12588,7 @@ export namespace Endpoints {
     }
     export type delete_Dashboards_sharing_passwords_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/dashboards/{dashboard_id}/sharing/passwords/{password_id}/'
+        path: '/v1/projects/{project_id}/dashboards/{dashboard_id}/sharing/passwords/{password_id}/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; password_id: string; project_id: string }
@@ -12597,7 +12597,7 @@ export namespace Endpoints {
     }
     export type post_Dashboards_sharing_refresh_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/dashboards/{dashboard_id}/sharing/refresh/'
+        path: '/v1/projects/{project_id}/dashboards/{dashboard_id}/sharing/refresh/'
         requestFormat: 'json'
         parameters: {
             path: { dashboard_id: number; project_id: string }
@@ -12608,7 +12608,7 @@ export namespace Endpoints {
     }
     export type get_Dashboards_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/dashboards/{id}/'
+        path: '/v1/projects/{project_id}/dashboards/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -12618,7 +12618,7 @@ export namespace Endpoints {
     }
     export type put_Dashboards_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/dashboards/{id}/'
+        path: '/v1/projects/{project_id}/dashboards/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -12630,7 +12630,7 @@ export namespace Endpoints {
     }
     export type patch_Dashboards_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/dashboards/{id}/'
+        path: '/v1/projects/{project_id}/dashboards/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -12642,7 +12642,7 @@ export namespace Endpoints {
     }
     export type delete_Dashboards_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/dashboards/{id}/'
+        path: '/v1/projects/{project_id}/dashboards/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -12652,7 +12652,7 @@ export namespace Endpoints {
     }
     export type patch_Dashboards_move_tile_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/dashboards/{id}/move_tile/'
+        path: '/v1/projects/{project_id}/dashboards/{id}/move_tile/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -12664,7 +12664,7 @@ export namespace Endpoints {
     }
     export type get_Dashboards_stream_tiles_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/dashboards/{id}/stream_tiles/'
+        path: '/v1/projects/{project_id}/dashboards/{id}/stream_tiles/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -12674,7 +12674,7 @@ export namespace Endpoints {
     }
     export type post_Dashboards_create_from_template_json_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/dashboards/create_from_template_json/'
+        path: '/v1/projects/{project_id}/dashboards/create_from_template_json/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'json' | 'txt' }>
@@ -12686,7 +12686,7 @@ export namespace Endpoints {
     }
     export type get_Early_access_feature_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/early_access_feature/'
+        path: '/v1/projects/{project_id}/early_access_feature/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -12696,7 +12696,7 @@ export namespace Endpoints {
     }
     export type post_Early_access_feature_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/early_access_feature/'
+        path: '/v1/projects/{project_id}/early_access_feature/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12707,7 +12707,7 @@ export namespace Endpoints {
     }
     export type get_Early_access_feature_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/early_access_feature/{id}/'
+        path: '/v1/projects/{project_id}/early_access_feature/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12716,7 +12716,7 @@ export namespace Endpoints {
     }
     export type put_Early_access_feature_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/early_access_feature/{id}/'
+        path: '/v1/projects/{project_id}/early_access_feature/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12727,7 +12727,7 @@ export namespace Endpoints {
     }
     export type patch_Early_access_feature_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/early_access_feature/{id}/'
+        path: '/v1/projects/{project_id}/early_access_feature/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12738,7 +12738,7 @@ export namespace Endpoints {
     }
     export type delete_Early_access_feature_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/early_access_feature/{id}/'
+        path: '/v1/projects/{project_id}/early_access_feature/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12747,7 +12747,7 @@ export namespace Endpoints {
     }
     export type get_Environments_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/environments/'
+        path: '/v1/projects/{project_id}/environments/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -12757,7 +12757,7 @@ export namespace Endpoints {
     }
     export type post_Environments_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/environments/'
+        path: '/v1/projects/{project_id}/environments/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12768,7 +12768,7 @@ export namespace Endpoints {
     }
     export type get_Environments_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/environments/{id}/'
+        path: '/v1/projects/{project_id}/environments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12777,7 +12777,7 @@ export namespace Endpoints {
     }
     export type put_Environments_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/environments/{id}/'
+        path: '/v1/projects/{project_id}/environments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12788,7 +12788,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/environments/{id}/'
+        path: '/v1/projects/{project_id}/environments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12799,7 +12799,7 @@ export namespace Endpoints {
     }
     export type delete_Environments_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/environments/{id}/'
+        path: '/v1/projects/{project_id}/environments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12808,7 +12808,7 @@ export namespace Endpoints {
     }
     export type get_Environments_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/environments/{id}/activity/'
+        path: '/v1/projects/{project_id}/environments/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12817,7 +12817,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_add_product_intent_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/environments/{id}/add_product_intent/'
+        path: '/v1/projects/{project_id}/environments/{id}/add_product_intent/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12828,7 +12828,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_complete_product_onboarding_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/environments/{id}/complete_product_onboarding/'
+        path: '/v1/projects/{project_id}/environments/{id}/complete_product_onboarding/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12839,7 +12839,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_delete_secret_token_backup_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/environments/{id}/delete_secret_token_backup/'
+        path: '/v1/projects/{project_id}/environments/{id}/delete_secret_token_backup/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12850,7 +12850,7 @@ export namespace Endpoints {
     }
     export type get_Environments_event_ingestion_restrictions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/environments/{id}/event_ingestion_restrictions/'
+        path: '/v1/projects/{project_id}/environments/{id}/event_ingestion_restrictions/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12859,7 +12859,7 @@ export namespace Endpoints {
     }
     export type get_Environments_is_generating_demo_data_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/environments/{id}/is_generating_demo_data/'
+        path: '/v1/projects/{project_id}/environments/{id}/is_generating_demo_data/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12868,7 +12868,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_reset_token_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/environments/{id}/reset_token/'
+        path: '/v1/projects/{project_id}/environments/{id}/reset_token/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12879,7 +12879,7 @@ export namespace Endpoints {
     }
     export type patch_Environments_rotate_secret_token_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/environments/{id}/rotate_secret_token/'
+        path: '/v1/projects/{project_id}/environments/{id}/rotate_secret_token/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -12890,7 +12890,7 @@ export namespace Endpoints {
     }
     export type get_Event_definitions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/event_definitions/'
+        path: '/v1/projects/{project_id}/event_definitions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -12899,7 +12899,7 @@ export namespace Endpoints {
     }
     export type get_Event_definitions_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/event_definitions/{id}/'
+        path: '/v1/projects/{project_id}/event_definitions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12908,7 +12908,7 @@ export namespace Endpoints {
     }
     export type put_Event_definitions_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/event_definitions/{id}/'
+        path: '/v1/projects/{project_id}/event_definitions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12917,7 +12917,7 @@ export namespace Endpoints {
     }
     export type patch_Event_definitions_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/event_definitions/{id}/'
+        path: '/v1/projects/{project_id}/event_definitions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12926,7 +12926,7 @@ export namespace Endpoints {
     }
     export type delete_Event_definitions_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/event_definitions/{id}/'
+        path: '/v1/projects/{project_id}/event_definitions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12935,7 +12935,7 @@ export namespace Endpoints {
     }
     export type get_Event_definitions_metrics_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/event_definitions/{id}/metrics/'
+        path: '/v1/projects/{project_id}/event_definitions/{id}/metrics/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -12944,7 +12944,7 @@ export namespace Endpoints {
     }
     export type get_Events_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/events/'
+        path: '/v1/projects/{project_id}/events/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -12966,7 +12966,7 @@ export namespace Endpoints {
     }
     export type get_Events_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/events/{id}/'
+        path: '/v1/projects/{project_id}/events/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -12976,7 +12976,7 @@ export namespace Endpoints {
     }
     export type get_Events_values_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/events/values/'
+        path: '/v1/projects/{project_id}/events/values/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -12986,7 +12986,7 @@ export namespace Endpoints {
     }
     export type get_Experiment_holdouts_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/experiment_holdouts/'
+        path: '/v1/projects/{project_id}/experiment_holdouts/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -12996,7 +12996,7 @@ export namespace Endpoints {
     }
     export type post_Experiment_holdouts_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/experiment_holdouts/'
+        path: '/v1/projects/{project_id}/experiment_holdouts/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13007,7 +13007,7 @@ export namespace Endpoints {
     }
     export type get_Experiment_holdouts_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/experiment_holdouts/{id}/'
+        path: '/v1/projects/{project_id}/experiment_holdouts/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13016,7 +13016,7 @@ export namespace Endpoints {
     }
     export type put_Experiment_holdouts_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/experiment_holdouts/{id}/'
+        path: '/v1/projects/{project_id}/experiment_holdouts/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13027,7 +13027,7 @@ export namespace Endpoints {
     }
     export type patch_Experiment_holdouts_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/experiment_holdouts/{id}/'
+        path: '/v1/projects/{project_id}/experiment_holdouts/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13038,7 +13038,7 @@ export namespace Endpoints {
     }
     export type delete_Experiment_holdouts_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/experiment_holdouts/{id}/'
+        path: '/v1/projects/{project_id}/experiment_holdouts/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13047,7 +13047,7 @@ export namespace Endpoints {
     }
     export type get_Experiment_saved_metrics_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/experiment_saved_metrics/'
+        path: '/v1/projects/{project_id}/experiment_saved_metrics/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -13057,7 +13057,7 @@ export namespace Endpoints {
     }
     export type post_Experiment_saved_metrics_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/experiment_saved_metrics/'
+        path: '/v1/projects/{project_id}/experiment_saved_metrics/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13068,7 +13068,7 @@ export namespace Endpoints {
     }
     export type get_Experiment_saved_metrics_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/experiment_saved_metrics/{id}/'
+        path: '/v1/projects/{project_id}/experiment_saved_metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13077,7 +13077,7 @@ export namespace Endpoints {
     }
     export type put_Experiment_saved_metrics_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/experiment_saved_metrics/{id}/'
+        path: '/v1/projects/{project_id}/experiment_saved_metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13088,7 +13088,7 @@ export namespace Endpoints {
     }
     export type patch_Experiment_saved_metrics_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/experiment_saved_metrics/{id}/'
+        path: '/v1/projects/{project_id}/experiment_saved_metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13099,7 +13099,7 @@ export namespace Endpoints {
     }
     export type delete_Experiment_saved_metrics_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/experiment_saved_metrics/{id}/'
+        path: '/v1/projects/{project_id}/experiment_saved_metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13108,7 +13108,7 @@ export namespace Endpoints {
     }
     export type get_Experiments_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/experiments/'
+        path: '/v1/projects/{project_id}/experiments/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -13118,7 +13118,7 @@ export namespace Endpoints {
     }
     export type post_Experiments_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/experiments/'
+        path: '/v1/projects/{project_id}/experiments/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13129,7 +13129,7 @@ export namespace Endpoints {
     }
     export type get_Experiments_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/experiments/{id}/'
+        path: '/v1/projects/{project_id}/experiments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13138,7 +13138,7 @@ export namespace Endpoints {
     }
     export type put_Experiments_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/experiments/{id}/'
+        path: '/v1/projects/{project_id}/experiments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13149,7 +13149,7 @@ export namespace Endpoints {
     }
     export type patch_Experiments_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/experiments/{id}/'
+        path: '/v1/projects/{project_id}/experiments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13160,7 +13160,7 @@ export namespace Endpoints {
     }
     export type delete_Experiments_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/experiments/{id}/'
+        path: '/v1/projects/{project_id}/experiments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13169,7 +13169,7 @@ export namespace Endpoints {
     }
     export type post_Experiments_create_exposure_cohort_for_experiment_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/experiments/{id}/create_exposure_cohort_for_experiment/'
+        path: '/v1/projects/{project_id}/experiments/{id}/create_exposure_cohort_for_experiment/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13180,7 +13180,7 @@ export namespace Endpoints {
     }
     export type post_Experiments_duplicate_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/experiments/{id}/duplicate/'
+        path: '/v1/projects/{project_id}/experiments/{id}/duplicate/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13191,7 +13191,7 @@ export namespace Endpoints {
     }
     export type get_Experiments_requires_flag_implementation_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/experiments/requires_flag_implementation/'
+        path: '/v1/projects/{project_id}/experiments/requires_flag_implementation/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13200,7 +13200,7 @@ export namespace Endpoints {
     }
     export type get_Explicit_members_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/explicit_members/'
+        path: '/v1/projects/{project_id}/explicit_members/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13209,7 +13209,7 @@ export namespace Endpoints {
     }
     export type post_Explicit_members_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/explicit_members/'
+        path: '/v1/projects/{project_id}/explicit_members/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13220,7 +13220,7 @@ export namespace Endpoints {
     }
     export type get_Explicit_members_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/'
+        path: '/v1/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { parent_membership__user__uuid: string; project_id: string }
@@ -13229,7 +13229,7 @@ export namespace Endpoints {
     }
     export type put_Explicit_members_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/'
+        path: '/v1/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { parent_membership__user__uuid: string; project_id: string }
@@ -13240,7 +13240,7 @@ export namespace Endpoints {
     }
     export type patch_Explicit_members_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/'
+        path: '/v1/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { parent_membership__user__uuid: string; project_id: string }
@@ -13251,7 +13251,7 @@ export namespace Endpoints {
     }
     export type delete_Explicit_members_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/'
+        path: '/v1/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { parent_membership__user__uuid: string; project_id: string }
@@ -13260,7 +13260,7 @@ export namespace Endpoints {
     }
     export type get_Exports_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/exports/'
+        path: '/v1/projects/{project_id}/exports/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -13270,7 +13270,7 @@ export namespace Endpoints {
     }
     export type post_Exports_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/exports/'
+        path: '/v1/projects/{project_id}/exports/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13281,7 +13281,7 @@ export namespace Endpoints {
     }
     export type get_Exports_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/exports/{id}/'
+        path: '/v1/projects/{project_id}/exports/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13290,7 +13290,7 @@ export namespace Endpoints {
     }
     export type get_Exports_content_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/exports/{id}/content/'
+        path: '/v1/projects/{project_id}/exports/{id}/content/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13299,7 +13299,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/'
+        path: '/v1/projects/{project_id}/feature_flags/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -13318,7 +13318,7 @@ export namespace Endpoints {
     }
     export type post_Feature_flags_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/feature_flags/'
+        path: '/v1/projects/{project_id}/feature_flags/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13329,7 +13329,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_role_access_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/'
+        path: '/v1/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -13339,7 +13339,7 @@ export namespace Endpoints {
     }
     export type post_Feature_flags_role_access_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/'
+        path: '/v1/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/'
         requestFormat: 'json'
         parameters: {
             path: { feature_flag_id: number; project_id: string }
@@ -13350,7 +13350,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_role_access_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/{id}/'
+        path: '/v1/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { feature_flag_id: number; id: number; project_id: string }
@@ -13359,7 +13359,7 @@ export namespace Endpoints {
     }
     export type delete_Feature_flags_role_access_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/{id}/'
+        path: '/v1/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { feature_flag_id: number; id: number; project_id: string }
@@ -13368,7 +13368,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/{id}/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13377,7 +13377,7 @@ export namespace Endpoints {
     }
     export type put_Feature_flags_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/feature_flags/{id}/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13388,7 +13388,7 @@ export namespace Endpoints {
     }
     export type patch_Feature_flags_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/feature_flags/{id}/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13399,7 +13399,7 @@ export namespace Endpoints {
     }
     export type delete_Feature_flags_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/feature_flags/{id}/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13408,7 +13408,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_activity_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/{id}/activity/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13417,7 +13417,7 @@ export namespace Endpoints {
     }
     export type post_Feature_flags_create_static_cohort_for_flag_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/feature_flags/{id}/create_static_cohort_for_flag/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/create_static_cohort_for_flag/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13428,7 +13428,7 @@ export namespace Endpoints {
     }
     export type post_Feature_flags_dashboard_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/feature_flags/{id}/dashboard/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/dashboard/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13439,7 +13439,7 @@ export namespace Endpoints {
     }
     export type post_Feature_flags_enrich_usage_dashboard_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/feature_flags/{id}/enrich_usage_dashboard/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/enrich_usage_dashboard/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13450,7 +13450,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_remote_config_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/{id}/remote_config/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/remote_config/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13459,7 +13459,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_status_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/{id}/status/'
+        path: '/v1/projects/{project_id}/feature_flags/{id}/status/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -13468,7 +13468,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/activity/'
+        path: '/v1/projects/{project_id}/feature_flags/activity/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13477,7 +13477,7 @@ export namespace Endpoints {
     }
     export type post_Feature_flags_bulk_keys_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/feature_flags/bulk_keys/'
+        path: '/v1/projects/{project_id}/feature_flags/bulk_keys/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13488,7 +13488,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_evaluation_reasons_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/evaluation_reasons/'
+        path: '/v1/projects/{project_id}/feature_flags/evaluation_reasons/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13497,7 +13497,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_local_evaluation_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/local_evaluation/'
+        path: '/v1/projects/{project_id}/feature_flags/local_evaluation/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13506,7 +13506,7 @@ export namespace Endpoints {
     }
     export type get_Feature_flags_my_flags_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/feature_flags/my_flags/'
+        path: '/v1/projects/{project_id}/feature_flags/my_flags/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13515,7 +13515,7 @@ export namespace Endpoints {
     }
     export type post_Feature_flags_user_blast_radius_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/feature_flags/user_blast_radius/'
+        path: '/v1/projects/{project_id}/feature_flags/user_blast_radius/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13526,7 +13526,7 @@ export namespace Endpoints {
     }
     export type get_File_system_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/file_system/'
+        path: '/v1/projects/{project_id}/file_system/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number; search: string }>
@@ -13536,7 +13536,7 @@ export namespace Endpoints {
     }
     export type post_File_system_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/file_system/'
+        path: '/v1/projects/{project_id}/file_system/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13547,7 +13547,7 @@ export namespace Endpoints {
     }
     export type get_File_system_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/file_system/{id}/'
+        path: '/v1/projects/{project_id}/file_system/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13556,7 +13556,7 @@ export namespace Endpoints {
     }
     export type put_File_system_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/file_system/{id}/'
+        path: '/v1/projects/{project_id}/file_system/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13567,7 +13567,7 @@ export namespace Endpoints {
     }
     export type patch_File_system_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/file_system/{id}/'
+        path: '/v1/projects/{project_id}/file_system/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13578,7 +13578,7 @@ export namespace Endpoints {
     }
     export type delete_File_system_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/file_system/{id}/'
+        path: '/v1/projects/{project_id}/file_system/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13587,7 +13587,7 @@ export namespace Endpoints {
     }
     export type post_File_system_count_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/file_system/{id}/count/'
+        path: '/v1/projects/{project_id}/file_system/{id}/count/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13598,7 +13598,7 @@ export namespace Endpoints {
     }
     export type post_File_system_link_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/file_system/{id}/link/'
+        path: '/v1/projects/{project_id}/file_system/{id}/link/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13609,7 +13609,7 @@ export namespace Endpoints {
     }
     export type post_File_system_move_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/file_system/{id}/move/'
+        path: '/v1/projects/{project_id}/file_system/{id}/move/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13620,7 +13620,7 @@ export namespace Endpoints {
     }
     export type post_File_system_count_by_path_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/file_system/count_by_path/'
+        path: '/v1/projects/{project_id}/file_system/count_by_path/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13631,7 +13631,7 @@ export namespace Endpoints {
     }
     export type get_File_system_unfiled_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/file_system/unfiled/'
+        path: '/v1/projects/{project_id}/file_system/unfiled/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13640,7 +13640,7 @@ export namespace Endpoints {
     }
     export type get_File_system_shortcut_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/file_system_shortcut/'
+        path: '/v1/projects/{project_id}/file_system_shortcut/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -13650,7 +13650,7 @@ export namespace Endpoints {
     }
     export type post_File_system_shortcut_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/file_system_shortcut/'
+        path: '/v1/projects/{project_id}/file_system_shortcut/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13661,7 +13661,7 @@ export namespace Endpoints {
     }
     export type get_File_system_shortcut_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/file_system_shortcut/{id}/'
+        path: '/v1/projects/{project_id}/file_system_shortcut/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13670,7 +13670,7 @@ export namespace Endpoints {
     }
     export type put_File_system_shortcut_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/file_system_shortcut/{id}/'
+        path: '/v1/projects/{project_id}/file_system_shortcut/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13681,7 +13681,7 @@ export namespace Endpoints {
     }
     export type patch_File_system_shortcut_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/file_system_shortcut/{id}/'
+        path: '/v1/projects/{project_id}/file_system_shortcut/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13692,7 +13692,7 @@ export namespace Endpoints {
     }
     export type delete_File_system_shortcut_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/file_system_shortcut/{id}/'
+        path: '/v1/projects/{project_id}/file_system_shortcut/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13701,7 +13701,7 @@ export namespace Endpoints {
     }
     export type get_Flag_value_values_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/flag_value/values/'
+        path: '/v1/projects/{project_id}/flag_value/values/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13710,7 +13710,7 @@ export namespace Endpoints {
     }
     export type get_Groups_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups/'
+        path: '/v1/projects/{project_id}/groups/'
         requestFormat: 'json'
         parameters: {
             query: { cursor?: string | undefined; group_type_index: number; search: string }
@@ -13720,7 +13720,7 @@ export namespace Endpoints {
     }
     export type post_Groups_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/groups/'
+        path: '/v1/projects/{project_id}/groups/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13731,7 +13731,7 @@ export namespace Endpoints {
     }
     export type get_Groups_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups/activity/'
+        path: '/v1/projects/{project_id}/groups/activity/'
         requestFormat: 'json'
         parameters: {
             query: { group_type_index: number; id: string }
@@ -13741,7 +13741,7 @@ export namespace Endpoints {
     }
     export type post_Groups_delete_property_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/groups/delete_property/'
+        path: '/v1/projects/{project_id}/groups/delete_property/'
         requestFormat: 'json'
         parameters: {
             query: { group_key: string; group_type_index: number }
@@ -13753,7 +13753,7 @@ export namespace Endpoints {
     }
     export type get_Groups_find_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups/find/'
+        path: '/v1/projects/{project_id}/groups/find/'
         requestFormat: 'json'
         parameters: {
             query: { group_key: string; group_type_index: number }
@@ -13763,7 +13763,7 @@ export namespace Endpoints {
     }
     export type get_Groups_property_definitions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups/property_definitions/'
+        path: '/v1/projects/{project_id}/groups/property_definitions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13772,7 +13772,7 @@ export namespace Endpoints {
     }
     export type get_Groups_property_values_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups/property_values/'
+        path: '/v1/projects/{project_id}/groups/property_values/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13781,7 +13781,7 @@ export namespace Endpoints {
     }
     export type get_Groups_related_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups/related/'
+        path: '/v1/projects/{project_id}/groups/related/'
         requestFormat: 'json'
         parameters: {
             query: { group_type_index: number; id: string }
@@ -13791,7 +13791,7 @@ export namespace Endpoints {
     }
     export type post_Groups_update_property_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/groups/update_property/'
+        path: '/v1/projects/{project_id}/groups/update_property/'
         requestFormat: 'json'
         parameters: {
             query: { group_key: string; group_type_index: number }
@@ -13803,7 +13803,7 @@ export namespace Endpoints {
     }
     export type get_Groups_types_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups_types/'
+        path: '/v1/projects/{project_id}/groups_types/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13812,7 +13812,7 @@ export namespace Endpoints {
     }
     export type delete_Groups_types_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/groups_types/{group_type_index}/'
+        path: '/v1/projects/{project_id}/groups_types/{group_type_index}/'
         requestFormat: 'json'
         parameters: {
             path: { group_type_index: number; project_id: string }
@@ -13821,7 +13821,7 @@ export namespace Endpoints {
     }
     export type get_Groups_types_metrics_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/'
+        path: '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -13831,7 +13831,7 @@ export namespace Endpoints {
     }
     export type post_Groups_types_metrics_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/'
+        path: '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/'
         requestFormat: 'json'
         parameters: {
             path: { group_type_index: number; project_id: string }
@@ -13842,7 +13842,7 @@ export namespace Endpoints {
     }
     export type get_Groups_types_metrics_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/'
+        path: '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { group_type_index: number; id: string; project_id: string }
@@ -13851,7 +13851,7 @@ export namespace Endpoints {
     }
     export type put_Groups_types_metrics_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/'
+        path: '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { group_type_index: number; id: string; project_id: string }
@@ -13862,7 +13862,7 @@ export namespace Endpoints {
     }
     export type patch_Groups_types_metrics_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/'
+        path: '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { group_type_index: number; id: string; project_id: string }
@@ -13873,7 +13873,7 @@ export namespace Endpoints {
     }
     export type delete_Groups_types_metrics_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/'
+        path: '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { group_type_index: number; id: string; project_id: string }
@@ -13882,7 +13882,7 @@ export namespace Endpoints {
     }
     export type put_Groups_types_create_detail_dashboard_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/groups_types/create_detail_dashboard/'
+        path: '/v1/projects/{project_id}/groups_types/create_detail_dashboard/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13893,7 +13893,7 @@ export namespace Endpoints {
     }
     export type put_Groups_types_set_default_columns_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/groups_types/set_default_columns/'
+        path: '/v1/projects/{project_id}/groups_types/set_default_columns/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13904,7 +13904,7 @@ export namespace Endpoints {
     }
     export type patch_Groups_types_update_metadata_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/groups_types/update_metadata/'
+        path: '/v1/projects/{project_id}/groups_types/update_metadata/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13915,7 +13915,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights_functions/'
+        path: '/v1/projects/{project_id}/insights_functions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -13935,7 +13935,7 @@ export namespace Endpoints {
     }
     export type post_Custom_functions_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/insights_functions/'
+        path: '/v1/projects/{project_id}/insights_functions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -13946,7 +13946,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights_functions/{id}/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13955,7 +13955,7 @@ export namespace Endpoints {
     }
     export type put_Custom_functions_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/insights_functions/{id}/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13966,7 +13966,7 @@ export namespace Endpoints {
     }
     export type patch_Custom_functions_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/insights_functions/{id}/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13977,7 +13977,7 @@ export namespace Endpoints {
     }
     export type delete_Custom_functions_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/insights_functions/{id}/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13986,7 +13986,7 @@ export namespace Endpoints {
     }
     export type post_Custom_functions_broadcast_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/insights_functions/{id}/broadcast/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/broadcast/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -13997,7 +13997,7 @@ export namespace Endpoints {
     }
     export type post_Custom_functions_invocations_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/insights_functions/{id}/invocations/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/invocations/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14008,7 +14008,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_logs_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights_functions/{id}/logs/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14017,7 +14017,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_metrics_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights_functions/{id}/metrics/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/metrics/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14026,7 +14026,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_metrics_totals_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights_functions/{id}/metrics/totals/'
+        path: '/v1/projects/{project_id}/insights_functions/{id}/metrics/totals/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14035,7 +14035,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_icon_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights_functions/icon/'
+        path: '/v1/projects/{project_id}/insights_functions/icon/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14044,7 +14044,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_icons_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights_functions/icons/'
+        path: '/v1/projects/{project_id}/insights_functions/icons/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14053,7 +14053,7 @@ export namespace Endpoints {
     }
     export type patch_Custom_functions_rearrange_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/insights_functions/rearrange/'
+        path: '/v1/projects/{project_id}/insights_functions/rearrange/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14064,7 +14064,7 @@ export namespace Endpoints {
     }
     export type get_Insights_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights/'
+        path: '/v1/projects/{project_id}/insights/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -14089,7 +14089,7 @@ export namespace Endpoints {
     }
     export type post_Insights_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/insights/'
+        path: '/v1/projects/{project_id}/insights/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14101,7 +14101,7 @@ export namespace Endpoints {
     }
     export type get_Insights_sharing_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights/{insight_id}/sharing/'
+        path: '/v1/projects/{project_id}/insights/{insight_id}/sharing/'
         requestFormat: 'json'
         parameters: {
             path: { insight_id: number; project_id: string }
@@ -14110,7 +14110,7 @@ export namespace Endpoints {
     }
     export type post_Insights_sharing_passwords_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/insights/{insight_id}/sharing/passwords/'
+        path: '/v1/projects/{project_id}/insights/{insight_id}/sharing/passwords/'
         requestFormat: 'json'
         parameters: {
             path: { insight_id: number; project_id: string }
@@ -14121,7 +14121,7 @@ export namespace Endpoints {
     }
     export type delete_Insights_sharing_passwords_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/'
+        path: '/v1/projects/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/'
         requestFormat: 'json'
         parameters: {
             path: { insight_id: number; password_id: string; project_id: string }
@@ -14130,7 +14130,7 @@ export namespace Endpoints {
     }
     export type post_Insights_sharing_refresh_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/insights/{insight_id}/sharing/refresh/'
+        path: '/v1/projects/{project_id}/insights/{insight_id}/sharing/refresh/'
         requestFormat: 'json'
         parameters: {
             path: { insight_id: number; project_id: string }
@@ -14141,7 +14141,7 @@ export namespace Endpoints {
     }
     export type get_Insights_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights/{id}/'
+        path: '/v1/projects/{project_id}/insights/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -14162,7 +14162,7 @@ export namespace Endpoints {
     }
     export type put_Insights_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/insights/{id}/'
+        path: '/v1/projects/{project_id}/insights/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14174,7 +14174,7 @@ export namespace Endpoints {
     }
     export type patch_Insights_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/insights/{id}/'
+        path: '/v1/projects/{project_id}/insights/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14186,7 +14186,7 @@ export namespace Endpoints {
     }
     export type delete_Insights_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/insights/{id}/'
+        path: '/v1/projects/{project_id}/insights/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14196,7 +14196,7 @@ export namespace Endpoints {
     }
     export type get_Insights_activity_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights/{id}/activity/'
+        path: '/v1/projects/{project_id}/insights/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14206,7 +14206,7 @@ export namespace Endpoints {
     }
     export type post_Insights_viewed_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/insights/{id}/viewed/'
+        path: '/v1/projects/{project_id}/insights/{id}/viewed/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14218,7 +14218,7 @@ export namespace Endpoints {
     }
     export type get_Insights_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights/activity/'
+        path: '/v1/projects/{project_id}/insights/activity/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14228,7 +14228,7 @@ export namespace Endpoints {
     }
     export type post_Insights_cancel_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/insights/cancel/'
+        path: '/v1/projects/{project_id}/insights/cancel/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14240,7 +14240,7 @@ export namespace Endpoints {
     }
     export type get_Insights_my_last_viewed_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/insights/my_last_viewed/'
+        path: '/v1/projects/{project_id}/insights/my_last_viewed/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14250,7 +14250,7 @@ export namespace Endpoints {
     }
     export type get_Logs_attributes_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/logs/attributes/'
+        path: '/v1/projects/{project_id}/logs/attributes/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14259,7 +14259,7 @@ export namespace Endpoints {
     }
     export type post_Logs_query_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/logs/query/'
+        path: '/v1/projects/{project_id}/logs/query/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14268,7 +14268,7 @@ export namespace Endpoints {
     }
     export type post_Logs_sparkline_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/logs/sparkline/'
+        path: '/v1/projects/{project_id}/logs/sparkline/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14277,7 +14277,7 @@ export namespace Endpoints {
     }
     export type get_Logs_values_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/logs/values/'
+        path: '/v1/projects/{project_id}/logs/values/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14286,7 +14286,7 @@ export namespace Endpoints {
     }
     export type get_Notebooks_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/notebooks/'
+        path: '/v1/projects/{project_id}/notebooks/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -14304,7 +14304,7 @@ export namespace Endpoints {
     }
     export type post_Notebooks_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/notebooks/'
+        path: '/v1/projects/{project_id}/notebooks/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14315,7 +14315,7 @@ export namespace Endpoints {
     }
     export type get_Notebooks_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/notebooks/{short_id}/'
+        path: '/v1/projects/{project_id}/notebooks/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14324,7 +14324,7 @@ export namespace Endpoints {
     }
     export type put_Notebooks_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/notebooks/{short_id}/'
+        path: '/v1/projects/{project_id}/notebooks/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14335,7 +14335,7 @@ export namespace Endpoints {
     }
     export type patch_Notebooks_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/notebooks/{short_id}/'
+        path: '/v1/projects/{project_id}/notebooks/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14346,7 +14346,7 @@ export namespace Endpoints {
     }
     export type delete_Notebooks_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/notebooks/{short_id}/'
+        path: '/v1/projects/{project_id}/notebooks/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14355,7 +14355,7 @@ export namespace Endpoints {
     }
     export type get_Notebooks_activity_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/notebooks/{short_id}/activity/'
+        path: '/v1/projects/{project_id}/notebooks/{short_id}/activity/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14364,7 +14364,7 @@ export namespace Endpoints {
     }
     export type get_Notebooks_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/notebooks/activity/'
+        path: '/v1/projects/{project_id}/notebooks/activity/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14373,7 +14373,7 @@ export namespace Endpoints {
     }
     export type get_Notebooks_recording_comments_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/notebooks/recording_comments/'
+        path: '/v1/projects/{project_id}/notebooks/recording_comments/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14382,7 +14382,7 @@ export namespace Endpoints {
     }
     export type get_Persisted_folder_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persisted_folder/'
+        path: '/v1/projects/{project_id}/persisted_folder/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -14392,7 +14392,7 @@ export namespace Endpoints {
     }
     export type post_Persisted_folder_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persisted_folder/'
+        path: '/v1/projects/{project_id}/persisted_folder/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14403,7 +14403,7 @@ export namespace Endpoints {
     }
     export type get_Persisted_folder_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persisted_folder/{id}/'
+        path: '/v1/projects/{project_id}/persisted_folder/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14412,7 +14412,7 @@ export namespace Endpoints {
     }
     export type put_Persisted_folder_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/persisted_folder/{id}/'
+        path: '/v1/projects/{project_id}/persisted_folder/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14423,7 +14423,7 @@ export namespace Endpoints {
     }
     export type patch_Persisted_folder_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/persisted_folder/{id}/'
+        path: '/v1/projects/{project_id}/persisted_folder/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14434,7 +14434,7 @@ export namespace Endpoints {
     }
     export type delete_Persisted_folder_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/persisted_folder/{id}/'
+        path: '/v1/projects/{project_id}/persisted_folder/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14443,7 +14443,7 @@ export namespace Endpoints {
     }
     export type get_Persons_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/'
+        path: '/v1/projects/{project_id}/persons/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -14461,7 +14461,7 @@ export namespace Endpoints {
     }
     export type get_Persons_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/{id}/'
+        path: '/v1/projects/{project_id}/persons/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14471,7 +14471,7 @@ export namespace Endpoints {
     }
     export type put_Persons_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/persons/{id}/'
+        path: '/v1/projects/{project_id}/persons/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14483,7 +14483,7 @@ export namespace Endpoints {
     }
     export type patch_Persons_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/persons/{id}/'
+        path: '/v1/projects/{project_id}/persons/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14495,7 +14495,7 @@ export namespace Endpoints {
     }
     export type delete_Persons_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/persons/{id}/'
+        path: '/v1/projects/{project_id}/persons/{id}/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ delete_events: boolean; format: 'csv' | 'json' }>
@@ -14505,7 +14505,7 @@ export namespace Endpoints {
     }
     export type get_Persons_activity_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/{id}/activity/'
+        path: '/v1/projects/{project_id}/persons/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14515,7 +14515,7 @@ export namespace Endpoints {
     }
     export type post_Persons_delete_events_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persons/{id}/delete_events/'
+        path: '/v1/projects/{project_id}/persons/{id}/delete_events/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14527,7 +14527,7 @@ export namespace Endpoints {
     }
     export type post_Persons_delete_property_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persons/{id}/delete_property/'
+        path: '/v1/projects/{project_id}/persons/{id}/delete_property/'
         requestFormat: 'json'
         parameters: {
             query: { $unset: string; format?: ('csv' | 'json') | undefined }
@@ -14539,7 +14539,7 @@ export namespace Endpoints {
     }
     export type get_Persons_properties_timeline_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/{id}/properties_timeline/'
+        path: '/v1/projects/{project_id}/persons/{id}/properties_timeline/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14549,7 +14549,7 @@ export namespace Endpoints {
     }
     export type post_Persons_split_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persons/{id}/split/'
+        path: '/v1/projects/{project_id}/persons/{id}/split/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14561,7 +14561,7 @@ export namespace Endpoints {
     }
     export type post_Persons_update_property_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persons/{id}/update_property/'
+        path: '/v1/projects/{project_id}/persons/{id}/update_property/'
         requestFormat: 'json'
         parameters: {
             query: { format?: ('csv' | 'json') | undefined; key: string; value: unknown }
@@ -14573,7 +14573,7 @@ export namespace Endpoints {
     }
     export type get_Persons_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/activity/'
+        path: '/v1/projects/{project_id}/persons/activity/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14583,7 +14583,7 @@ export namespace Endpoints {
     }
     export type post_Persons_bulk_delete_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persons/bulk_delete/'
+        path: '/v1/projects/{project_id}/persons/bulk_delete/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -14600,7 +14600,7 @@ export namespace Endpoints {
     }
     export type get_Persons_cohorts_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/cohorts/'
+        path: '/v1/projects/{project_id}/persons/cohorts/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14610,7 +14610,7 @@ export namespace Endpoints {
     }
     export type get_Persons_funnel_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/funnel/'
+        path: '/v1/projects/{project_id}/persons/funnel/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14620,7 +14620,7 @@ export namespace Endpoints {
     }
     export type post_Persons_funnel_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persons/funnel/'
+        path: '/v1/projects/{project_id}/persons/funnel/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14632,7 +14632,7 @@ export namespace Endpoints {
     }
     export type get_Persons_funnel_correlation_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/funnel/correlation/'
+        path: '/v1/projects/{project_id}/persons/funnel/correlation/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14642,7 +14642,7 @@ export namespace Endpoints {
     }
     export type post_Persons_funnel_correlation_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persons/funnel/correlation/'
+        path: '/v1/projects/{project_id}/persons/funnel/correlation/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14654,7 +14654,7 @@ export namespace Endpoints {
     }
     export type get_Persons_lifecycle_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/lifecycle/'
+        path: '/v1/projects/{project_id}/persons/lifecycle/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14664,7 +14664,7 @@ export namespace Endpoints {
     }
     export type post_Persons_reset_person_distinct_id_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/persons/reset_person_distinct_id/'
+        path: '/v1/projects/{project_id}/persons/reset_person_distinct_id/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14676,7 +14676,7 @@ export namespace Endpoints {
     }
     export type get_Persons_stickiness_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/stickiness/'
+        path: '/v1/projects/{project_id}/persons/stickiness/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14686,7 +14686,7 @@ export namespace Endpoints {
     }
     export type get_Persons_trends_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/trends/'
+        path: '/v1/projects/{project_id}/persons/trends/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14696,7 +14696,7 @@ export namespace Endpoints {
     }
     export type get_Persons_values_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/persons/values/'
+        path: '/v1/projects/{project_id}/persons/values/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ format: 'csv' | 'json' }>
@@ -14706,7 +14706,7 @@ export namespace Endpoints {
     }
     export type get_Plugin_configs_logs_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/plugin_configs/{plugin_config_id}/logs/'
+        path: '/v1/projects/{project_id}/plugin_configs/{plugin_config_id}/logs/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -14716,7 +14716,7 @@ export namespace Endpoints {
     }
     export type get_Property_definitions_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/property_definitions/'
+        path: '/v1/projects/{project_id}/property_definitions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -14740,7 +14740,7 @@ export namespace Endpoints {
     }
     export type get_Property_definitions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/property_definitions/{id}/'
+        path: '/v1/projects/{project_id}/property_definitions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14749,7 +14749,7 @@ export namespace Endpoints {
     }
     export type put_Property_definitions_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/property_definitions/{id}/'
+        path: '/v1/projects/{project_id}/property_definitions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14760,7 +14760,7 @@ export namespace Endpoints {
     }
     export type patch_Property_definitions_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/property_definitions/{id}/'
+        path: '/v1/projects/{project_id}/property_definitions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14771,7 +14771,7 @@ export namespace Endpoints {
     }
     export type delete_Property_definitions_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/property_definitions/{id}/'
+        path: '/v1/projects/{project_id}/property_definitions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14780,7 +14780,7 @@ export namespace Endpoints {
     }
     export type get_Property_definitions_seen_together_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/property_definitions/seen_together/'
+        path: '/v1/projects/{project_id}/property_definitions/seen_together/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14789,7 +14789,7 @@ export namespace Endpoints {
     }
     export type post_Query_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/query/'
+        path: '/v1/projects/{project_id}/query/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14800,7 +14800,7 @@ export namespace Endpoints {
     }
     export type get_Query_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/query/{id}/'
+        path: '/v1/projects/{project_id}/query/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14809,7 +14809,7 @@ export namespace Endpoints {
     }
     export type delete_Query_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/query/{id}/'
+        path: '/v1/projects/{project_id}/query/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14818,7 +14818,7 @@ export namespace Endpoints {
     }
     export type get_Query_log_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/query/{id}/log/'
+        path: '/v1/projects/{project_id}/query/{id}/log/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14827,7 +14827,7 @@ export namespace Endpoints {
     }
     export type post_Query_check_auth_for_async_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/query/check_auth_for_async/'
+        path: '/v1/projects/{project_id}/query/check_auth_for_async/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14836,7 +14836,7 @@ export namespace Endpoints {
     }
     export type get_Query_draft_sql_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/query/draft_sql/'
+        path: '/v1/projects/{project_id}/query/draft_sql/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14845,7 +14845,7 @@ export namespace Endpoints {
     }
     export type post_Query_upgrade_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/query/upgrade/'
+        path: '/v1/projects/{project_id}/query/upgrade/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14856,7 +14856,7 @@ export namespace Endpoints {
     }
     export type get_Session_recording_playlists_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/session_recording_playlists/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ created_by: number; limit: number; offset: number; short_id: string }>
@@ -14866,7 +14866,7 @@ export namespace Endpoints {
     }
     export type post_Session_recording_playlists_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/session_recording_playlists/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14877,7 +14877,7 @@ export namespace Endpoints {
     }
     export type get_Session_recording_playlists_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/session_recording_playlists/{short_id}/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14886,7 +14886,7 @@ export namespace Endpoints {
     }
     export type put_Session_recording_playlists_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/session_recording_playlists/{short_id}/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14897,7 +14897,7 @@ export namespace Endpoints {
     }
     export type patch_Session_recording_playlists_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/session_recording_playlists/{short_id}/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14908,7 +14908,7 @@ export namespace Endpoints {
     }
     export type delete_Session_recording_playlists_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/session_recording_playlists/{short_id}/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/{short_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14917,7 +14917,7 @@ export namespace Endpoints {
     }
     export type get_Session_recording_playlists_recordings_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/session_recording_playlists/{short_id}/recordings/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/{short_id}/recordings/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; short_id: string }
@@ -14926,7 +14926,7 @@ export namespace Endpoints {
     }
     export type post_Session_recording_playlists_recordings_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; session_recording_id: string; short_id: string }
@@ -14937,7 +14937,7 @@ export namespace Endpoints {
     }
     export type delete_Session_recording_playlists_recordings_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/'
+        path: '/v1/projects/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; session_recording_id: string; short_id: string }
@@ -14946,7 +14946,7 @@ export namespace Endpoints {
     }
     export type get_Session_recordings_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/session_recordings/'
+        path: '/v1/projects/{project_id}/session_recordings/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -14956,7 +14956,7 @@ export namespace Endpoints {
     }
     export type get_Session_recordings_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/session_recordings/{id}/'
+        path: '/v1/projects/{project_id}/session_recordings/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14965,7 +14965,7 @@ export namespace Endpoints {
     }
     export type put_Session_recordings_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/session_recordings/{id}/'
+        path: '/v1/projects/{project_id}/session_recordings/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14976,7 +14976,7 @@ export namespace Endpoints {
     }
     export type patch_Session_recordings_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/session_recordings/{id}/'
+        path: '/v1/projects/{project_id}/session_recordings/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14987,7 +14987,7 @@ export namespace Endpoints {
     }
     export type delete_Session_recordings_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/session_recordings/{id}/'
+        path: '/v1/projects/{project_id}/session_recordings/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14996,7 +14996,7 @@ export namespace Endpoints {
     }
     export type get_Session_recordings_sharing_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/session_recordings/{recording_id}/sharing/'
+        path: '/v1/projects/{project_id}/session_recordings/{recording_id}/sharing/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; recording_id: string }
@@ -15005,7 +15005,7 @@ export namespace Endpoints {
     }
     export type post_Session_recordings_sharing_passwords_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/session_recordings/{recording_id}/sharing/passwords/'
+        path: '/v1/projects/{project_id}/session_recordings/{recording_id}/sharing/passwords/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; recording_id: string }
@@ -15016,7 +15016,7 @@ export namespace Endpoints {
     }
     export type delete_Session_recordings_sharing_passwords_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/session_recordings/{recording_id}/sharing/passwords/{password_id}/'
+        path: '/v1/projects/{project_id}/session_recordings/{recording_id}/sharing/passwords/{password_id}/'
         requestFormat: 'json'
         parameters: {
             path: { password_id: string; project_id: string; recording_id: string }
@@ -15025,7 +15025,7 @@ export namespace Endpoints {
     }
     export type post_Session_recordings_sharing_refresh_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/session_recordings/{recording_id}/sharing/refresh/'
+        path: '/v1/projects/{project_id}/session_recordings/{recording_id}/sharing/refresh/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string; recording_id: string }
@@ -15036,7 +15036,7 @@ export namespace Endpoints {
     }
     export type get_Sessions_property_definitions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/sessions/property_definitions/'
+        path: '/v1/projects/{project_id}/sessions/property_definitions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15045,7 +15045,7 @@ export namespace Endpoints {
     }
     export type get_Sessions_values_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/sessions/values/'
+        path: '/v1/projects/{project_id}/sessions/values/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15054,7 +15054,7 @@ export namespace Endpoints {
     }
     export type get_Subscriptions_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/subscriptions/'
+        path: '/v1/projects/{project_id}/subscriptions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -15064,7 +15064,7 @@ export namespace Endpoints {
     }
     export type post_Subscriptions_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/subscriptions/'
+        path: '/v1/projects/{project_id}/subscriptions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15075,7 +15075,7 @@ export namespace Endpoints {
     }
     export type get_Subscriptions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/subscriptions/{id}/'
+        path: '/v1/projects/{project_id}/subscriptions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -15084,7 +15084,7 @@ export namespace Endpoints {
     }
     export type put_Subscriptions_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/subscriptions/{id}/'
+        path: '/v1/projects/{project_id}/subscriptions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -15095,7 +15095,7 @@ export namespace Endpoints {
     }
     export type patch_Subscriptions_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/subscriptions/{id}/'
+        path: '/v1/projects/{project_id}/subscriptions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -15106,7 +15106,7 @@ export namespace Endpoints {
     }
     export type delete_Subscriptions_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/subscriptions/{id}/'
+        path: '/v1/projects/{project_id}/subscriptions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -15115,7 +15115,7 @@ export namespace Endpoints {
     }
     export type get_Surveys_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/surveys/'
+        path: '/v1/projects/{project_id}/surveys/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number; search: string }>
@@ -15125,7 +15125,7 @@ export namespace Endpoints {
     }
     export type post_Surveys_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/surveys/'
+        path: '/v1/projects/{project_id}/surveys/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15136,7 +15136,7 @@ export namespace Endpoints {
     }
     export type get_Surveys_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/surveys/{id}/'
+        path: '/v1/projects/{project_id}/surveys/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15145,7 +15145,7 @@ export namespace Endpoints {
     }
     export type put_Surveys_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/surveys/{id}/'
+        path: '/v1/projects/{project_id}/surveys/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15156,7 +15156,7 @@ export namespace Endpoints {
     }
     export type patch_Surveys_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/surveys/{id}/'
+        path: '/v1/projects/{project_id}/surveys/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15167,7 +15167,7 @@ export namespace Endpoints {
     }
     export type delete_Surveys_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/surveys/{id}/'
+        path: '/v1/projects/{project_id}/surveys/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15176,7 +15176,7 @@ export namespace Endpoints {
     }
     export type get_Surveys_activity_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/surveys/{id}/activity/'
+        path: '/v1/projects/{project_id}/surveys/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15185,7 +15185,7 @@ export namespace Endpoints {
     }
     export type get_Surveys_stats_retrieve_2 = {
         method: 'GET'
-        path: '/api/projects/{project_id}/surveys/{id}/stats/'
+        path: '/v1/projects/{project_id}/surveys/{id}/stats/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15194,7 +15194,7 @@ export namespace Endpoints {
     }
     export type post_Surveys_summarize_responses_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/surveys/{id}/summarize_responses/'
+        path: '/v1/projects/{project_id}/surveys/{id}/summarize_responses/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15205,7 +15205,7 @@ export namespace Endpoints {
     }
     export type get_Surveys_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/surveys/activity/'
+        path: '/v1/projects/{project_id}/surveys/activity/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15214,7 +15214,7 @@ export namespace Endpoints {
     }
     export type get_Surveys_responses_count_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/surveys/responses_count/'
+        path: '/v1/projects/{project_id}/surveys/responses_count/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15223,7 +15223,7 @@ export namespace Endpoints {
     }
     export type get_Surveys_stats_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/surveys/stats/'
+        path: '/v1/projects/{project_id}/surveys/stats/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15232,7 +15232,7 @@ export namespace Endpoints {
     }
     export type get_Warehouse_saved_queries_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ page: number; search: string }>
@@ -15242,7 +15242,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_saved_queries_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15253,7 +15253,7 @@ export namespace Endpoints {
     }
     export type get_Warehouse_saved_queries_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15262,7 +15262,7 @@ export namespace Endpoints {
     }
     export type put_Warehouse_saved_queries_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15273,7 +15273,7 @@ export namespace Endpoints {
     }
     export type patch_Warehouse_saved_queries_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15284,7 +15284,7 @@ export namespace Endpoints {
     }
     export type delete_Warehouse_saved_queries_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15293,7 +15293,7 @@ export namespace Endpoints {
     }
     export type get_Warehouse_saved_queries_activity_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/activity/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/activity/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15302,7 +15302,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_saved_queries_ancestors_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/ancestors/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/ancestors/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15313,7 +15313,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_saved_queries_cancel_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/cancel/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/cancel/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15324,7 +15324,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_saved_queries_descendants_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/descendants/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/descendants/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15335,7 +15335,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_saved_queries_revert_materialization_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/revert_materialization/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/revert_materialization/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15346,7 +15346,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_saved_queries_run_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_saved_queries/{id}/run/'
+        path: '/v1/projects/{project_id}/warehouse_saved_queries/{id}/run/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15357,7 +15357,7 @@ export namespace Endpoints {
     }
     export type get_Warehouse_tables_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/warehouse_tables/'
+        path: '/v1/projects/{project_id}/warehouse_tables/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number; search: string }>
@@ -15367,7 +15367,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_tables_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_tables/'
+        path: '/v1/projects/{project_id}/warehouse_tables/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15378,7 +15378,7 @@ export namespace Endpoints {
     }
     export type get_Warehouse_tables_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/warehouse_tables/{id}/'
+        path: '/v1/projects/{project_id}/warehouse_tables/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15387,7 +15387,7 @@ export namespace Endpoints {
     }
     export type put_Warehouse_tables_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/warehouse_tables/{id}/'
+        path: '/v1/projects/{project_id}/warehouse_tables/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15398,7 +15398,7 @@ export namespace Endpoints {
     }
     export type patch_Warehouse_tables_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/warehouse_tables/{id}/'
+        path: '/v1/projects/{project_id}/warehouse_tables/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15409,7 +15409,7 @@ export namespace Endpoints {
     }
     export type delete_Warehouse_tables_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/warehouse_tables/{id}/'
+        path: '/v1/projects/{project_id}/warehouse_tables/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15418,7 +15418,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_tables_refresh_schema_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_tables/{id}/refresh_schema/'
+        path: '/v1/projects/{project_id}/warehouse_tables/{id}/refresh_schema/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15429,7 +15429,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_tables_update_schema_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_tables/{id}/update_schema/'
+        path: '/v1/projects/{project_id}/warehouse_tables/{id}/update_schema/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -15440,7 +15440,7 @@ export namespace Endpoints {
     }
     export type post_Warehouse_tables_file_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/warehouse_tables/file/'
+        path: '/v1/projects/{project_id}/warehouse_tables/file/'
         requestFormat: 'form-data'
         parameters: {
             path: { project_id: string }
@@ -15451,7 +15451,7 @@ export namespace Endpoints {
     }
     export type get_Web_analytics_breakdown_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/web_analytics/breakdown/'
+        path: '/v1/projects/{project_id}/web_analytics/breakdown/'
         requestFormat: 'json'
         parameters: {
             query: {
@@ -15487,7 +15487,7 @@ export namespace Endpoints {
     }
     export type get_Web_analytics_overview_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/web_analytics/overview/'
+        path: '/v1/projects/{project_id}/web_analytics/overview/'
         requestFormat: 'json'
         parameters: {
             query: {
@@ -15502,7 +15502,7 @@ export namespace Endpoints {
     }
     export type get_Web_experiments_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/web_experiments/'
+        path: '/v1/projects/{project_id}/web_experiments/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ limit: number; offset: number }>
@@ -15512,7 +15512,7 @@ export namespace Endpoints {
     }
     export type post_Web_experiments_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/web_experiments/'
+        path: '/v1/projects/{project_id}/web_experiments/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -15523,7 +15523,7 @@ export namespace Endpoints {
     }
     export type get_Web_experiments_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/web_experiments/{id}/'
+        path: '/v1/projects/{project_id}/web_experiments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -15532,7 +15532,7 @@ export namespace Endpoints {
     }
     export type put_Web_experiments_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/web_experiments/{id}/'
+        path: '/v1/projects/{project_id}/web_experiments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -15543,7 +15543,7 @@ export namespace Endpoints {
     }
     export type patch_Web_experiments_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/web_experiments/{id}/'
+        path: '/v1/projects/{project_id}/web_experiments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -15554,7 +15554,7 @@ export namespace Endpoints {
     }
     export type delete_Web_experiments_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/web_experiments/{id}/'
+        path: '/v1/projects/{project_id}/web_experiments/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: number; project_id: string }
@@ -15563,7 +15563,7 @@ export namespace Endpoints {
     }
     export type get_Users_list = {
         method: 'GET'
-        path: '/api/users/'
+        path: '/v1/users/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{ email: string; is_staff: boolean; limit: number; offset: number }>
@@ -15572,7 +15572,7 @@ export namespace Endpoints {
     }
     export type get_Users_retrieve = {
         method: 'GET'
-        path: '/api/users/{uuid}/'
+        path: '/v1/users/{uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15581,7 +15581,7 @@ export namespace Endpoints {
     }
     export type put_Users_update = {
         method: 'PUT'
-        path: '/api/users/{uuid}/'
+        path: '/v1/users/{uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15592,7 +15592,7 @@ export namespace Endpoints {
     }
     export type patch_Users_partial_update = {
         method: 'PATCH'
-        path: '/api/users/{uuid}/'
+        path: '/v1/users/{uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15603,7 +15603,7 @@ export namespace Endpoints {
     }
     export type delete_Users_destroy = {
         method: 'DELETE'
-        path: '/api/users/{uuid}/'
+        path: '/v1/users/{uuid}/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15628,7 +15628,7 @@ export namespace Endpoints {
     }
     export type post_Users_scene_personalisation_create = {
         method: 'POST'
-        path: '/api/users/{uuid}/scene_personalisation/'
+        path: '/v1/users/{uuid}/scene_personalisation/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15639,7 +15639,7 @@ export namespace Endpoints {
     }
     export type get_Users_start_2fa_setup_retrieve = {
         method: 'GET'
-        path: '/api/users/{uuid}/start_2fa_setup/'
+        path: '/v1/users/{uuid}/start_2fa_setup/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15648,7 +15648,7 @@ export namespace Endpoints {
     }
     export type post_Users_two_factor_backup_codes_create = {
         method: 'POST'
-        path: '/api/users/{uuid}/two_factor_backup_codes/'
+        path: '/v1/users/{uuid}/two_factor_backup_codes/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15659,7 +15659,7 @@ export namespace Endpoints {
     }
     export type post_Users_two_factor_disable_create = {
         method: 'POST'
-        path: '/api/users/{uuid}/two_factor_disable/'
+        path: '/v1/users/{uuid}/two_factor_disable/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15670,7 +15670,7 @@ export namespace Endpoints {
     }
     export type get_Users_two_factor_start_setup_retrieve = {
         method: 'GET'
-        path: '/api/users/{uuid}/two_factor_start_setup/'
+        path: '/v1/users/{uuid}/two_factor_start_setup/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15679,7 +15679,7 @@ export namespace Endpoints {
     }
     export type get_Users_two_factor_status_retrieve = {
         method: 'GET'
-        path: '/api/users/{uuid}/two_factor_status/'
+        path: '/v1/users/{uuid}/two_factor_status/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15688,7 +15688,7 @@ export namespace Endpoints {
     }
     export type post_Users_two_factor_validate_create = {
         method: 'POST'
-        path: '/api/users/{uuid}/two_factor_validate/'
+        path: '/v1/users/{uuid}/two_factor_validate/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15699,7 +15699,7 @@ export namespace Endpoints {
     }
     export type post_Users_validate_2fa_create = {
         method: 'POST'
-        path: '/api/users/{uuid}/validate_2fa/'
+        path: '/v1/users/{uuid}/validate_2fa/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15710,7 +15710,7 @@ export namespace Endpoints {
     }
     export type patch_Users_cancel_email_change_request_partial_update = {
         method: 'PATCH'
-        path: '/api/users/cancel_email_change_request/'
+        path: '/v1/users/cancel_email_change_request/'
         requestFormat: 'json'
         parameters: {
             body: Schemas.PatchedUser
@@ -15719,7 +15719,7 @@ export namespace Endpoints {
     }
     export type post_Users_request_email_verification_create = {
         method: 'POST'
-        path: '/api/users/request_email_verification/'
+        path: '/v1/users/request_email_verification/'
         requestFormat: 'json'
         parameters: {
             body: Schemas.User
@@ -15728,7 +15728,7 @@ export namespace Endpoints {
     }
     export type post_Users_verify_email_create = {
         method: 'POST'
-        path: '/api/users/verify_email/'
+        path: '/v1/users/verify_email/'
         requestFormat: 'json'
         parameters: {
             body: Schemas.User
@@ -15742,682 +15742,682 @@ export namespace Endpoints {
 // <EndpointByMethod>
 export type EndpointByMethod = {
     get: {
-        '/api/environments/{project_id}/app_metrics/{id}/': Endpoints.get_Environments_app_metrics_retrieve
-        '/api/environments/{project_id}/app_metrics/{id}/error_details/': Endpoints.get_Environments_app_metrics_error_details_retrieve
-        '/api/environments/{project_id}/app_metrics/{plugin_config_id}/historical_exports/': Endpoints.get_Environments_app_metrics_historical_exports_retrieve
-        '/api/environments/{project_id}/app_metrics/{plugin_config_id}/historical_exports/{id}/': Endpoints.get_Environments_app_metrics_historical_exports_retrieve_2
-        '/api/environments/{project_id}/batch_exports/': Endpoints.get_Environments_batch_exports_list
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/backfills/': Endpoints.get_Environments_batch_exports_backfills_list
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/': Endpoints.get_Environments_batch_exports_backfills_retrieve
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/': Endpoints.get_Environments_batch_exports_runs_list
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/': Endpoints.get_Environments_batch_exports_runs_retrieve
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/logs/': Endpoints.get_Environments_batch_exports_runs_logs_retrieve
-        '/api/environments/{project_id}/batch_exports/{id}/': Endpoints.get_Environments_batch_exports_retrieve
-        '/api/environments/{project_id}/batch_exports/{id}/logs/': Endpoints.get_Environments_batch_exports_logs_retrieve
-        '/api/environments/{project_id}/batch_exports/test/': Endpoints.get_Environments_batch_exports_test_retrieve
-        '/api/environments/{project_id}/dashboards/': Endpoints.get_Environments_dashboards_list
-        '/api/environments/{project_id}/dashboards/{dashboard_id}/collaborators/': Endpoints.get_Environments_dashboards_collaborators_list
-        '/api/environments/{project_id}/dashboards/{dashboard_id}/sharing/': Endpoints.get_Environments_dashboards_sharing_list
-        '/api/environments/{project_id}/dashboards/{id}/': Endpoints.get_Environments_dashboards_retrieve
-        '/api/environments/{project_id}/dashboards/{id}/stream_tiles/': Endpoints.get_Environments_dashboards_stream_tiles_retrieve
-        '/api/environments/{project_id}/error_tracking/assignment_rules/': Endpoints.get_Environments_error_tracking_assignment_rules_list
-        '/api/environments/{project_id}/error_tracking/assignment_rules/{id}/': Endpoints.get_Environments_error_tracking_assignment_rules_retrieve
-        '/api/environments/{project_id}/error_tracking/grouping_rules/': Endpoints.get_Environments_error_tracking_grouping_rules_list
-        '/api/environments/{project_id}/error_tracking/grouping_rules/{id}/': Endpoints.get_Environments_error_tracking_grouping_rules_retrieve
-        '/api/environments/{project_id}/error_tracking/releases/': Endpoints.get_Environments_error_tracking_releases_list
-        '/api/environments/{project_id}/error_tracking/releases/{id}/': Endpoints.get_Environments_error_tracking_releases_retrieve
-        '/api/environments/{project_id}/error_tracking/suppression_rules/': Endpoints.get_Environments_error_tracking_suppression_rules_list
-        '/api/environments/{project_id}/error_tracking/suppression_rules/{id}/': Endpoints.get_Environments_error_tracking_suppression_rules_retrieve
-        '/api/environments/{project_id}/error_tracking/symbol_sets/': Endpoints.get_Environments_error_tracking_symbol_sets_list
-        '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/': Endpoints.get_Environments_error_tracking_symbol_sets_retrieve
-        '/api/environments/{project_id}/events/': Endpoints.get_Environments_events_list
-        '/api/environments/{project_id}/events/{id}/': Endpoints.get_Environments_events_retrieve
-        '/api/environments/{project_id}/events/values/': Endpoints.get_Environments_events_values_retrieve
-        '/api/environments/{project_id}/explicit_members/': Endpoints.get_Environments_explicit_members_list
-        '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.get_Environments_explicit_members_retrieve
-        '/api/environments/{project_id}/exports/': Endpoints.get_Environments_exports_list
-        '/api/environments/{project_id}/exports/{id}/': Endpoints.get_Environments_exports_retrieve
-        '/api/environments/{project_id}/exports/{id}/content/': Endpoints.get_Environments_exports_content_retrieve
-        '/api/environments/{project_id}/file_system/': Endpoints.get_Environments_file_system_list
-        '/api/environments/{project_id}/file_system/{id}/': Endpoints.get_Environments_file_system_retrieve
-        '/api/environments/{project_id}/file_system/unfiled/': Endpoints.get_Environments_file_system_unfiled_retrieve
-        '/api/environments/{project_id}/file_system_shortcut/': Endpoints.get_Environments_file_system_shortcut_list
-        '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.get_Environments_file_system_shortcut_retrieve
-        '/api/environments/{project_id}/groups/': Endpoints.get_Environments_groups_list
-        '/api/environments/{project_id}/groups/activity/': Endpoints.get_Environments_groups_activity_retrieve
-        '/api/environments/{project_id}/groups/find/': Endpoints.get_Environments_groups_find_retrieve
-        '/api/environments/{project_id}/groups/property_definitions/': Endpoints.get_Environments_groups_property_definitions_retrieve
-        '/api/environments/{project_id}/groups/property_values/': Endpoints.get_Environments_groups_property_values_retrieve
-        '/api/environments/{project_id}/groups/related/': Endpoints.get_Environments_groups_related_retrieve
-        '/api/environments/{project_id}/insights_functions/': Endpoints.get_Environments_insights_functions_list
-        '/api/environments/{project_id}/insights_functions/{id}/': Endpoints.get_Environments_insights_functions_retrieve
-        '/api/environments/{project_id}/insights_functions/{id}/logs/': Endpoints.get_Environments_insights_functions_logs_retrieve
-        '/api/environments/{project_id}/insights_functions/{id}/metrics/': Endpoints.get_Environments_insights_functions_metrics_retrieve
-        '/api/environments/{project_id}/insights_functions/{id}/metrics/totals/': Endpoints.get_Environments_insights_functions_metrics_totals_retrieve
-        '/api/environments/{project_id}/insights_functions/icon/': Endpoints.get_Environments_insights_functions_icon_retrieve
-        '/api/environments/{project_id}/insights_functions/icons/': Endpoints.get_Environments_insights_functions_icons_retrieve
-        '/api/environments/{project_id}/insights/': Endpoints.get_Environments_insights_list
-        '/api/environments/{project_id}/insights/{insight_id}/sharing/': Endpoints.get_Environments_insights_sharing_list
-        '/api/environments/{project_id}/insights/{id}/': Endpoints.get_Environments_insights_retrieve
-        '/api/environments/{project_id}/insights/{id}/activity/': Endpoints.get_Environments_insights_activity_retrieve_2
-        '/api/environments/{project_id}/insights/activity/': Endpoints.get_Environments_insights_activity_retrieve
-        '/api/environments/{project_id}/insights/my_last_viewed/': Endpoints.get_Environments_insights_my_last_viewed_retrieve
-        '/api/environments/{project_id}/logs/attributes/': Endpoints.get_Environments_logs_attributes_retrieve
-        '/api/environments/{project_id}/logs/values/': Endpoints.get_Environments_logs_values_retrieve
-        '/api/environments/{project_id}/persisted_folder/': Endpoints.get_Environments_persisted_folder_list
-        '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.get_Environments_persisted_folder_retrieve
-        '/api/environments/{project_id}/persons/': Endpoints.get_Environments_persons_list
-        '/api/environments/{project_id}/persons/{id}/': Endpoints.get_Environments_persons_retrieve
-        '/api/environments/{project_id}/persons/{id}/activity/': Endpoints.get_Environments_persons_activity_retrieve_2
-        '/api/environments/{project_id}/persons/{id}/properties_timeline/': Endpoints.get_Environments_persons_properties_timeline_retrieve
-        '/api/environments/{project_id}/persons/activity/': Endpoints.get_Environments_persons_activity_retrieve
-        '/api/environments/{project_id}/persons/cohorts/': Endpoints.get_Environments_persons_cohorts_retrieve
-        '/api/environments/{project_id}/persons/funnel/': Endpoints.get_Environments_persons_funnel_retrieve
-        '/api/environments/{project_id}/persons/funnel/correlation/': Endpoints.get_Environments_persons_funnel_correlation_retrieve
-        '/api/environments/{project_id}/persons/lifecycle/': Endpoints.get_Environments_persons_lifecycle_retrieve
-        '/api/environments/{project_id}/persons/stickiness/': Endpoints.get_Environments_persons_stickiness_retrieve
-        '/api/environments/{project_id}/persons/trends/': Endpoints.get_Environments_persons_trends_retrieve
-        '/api/environments/{project_id}/persons/values/': Endpoints.get_Environments_persons_values_retrieve
-        '/api/environments/{project_id}/plugin_configs/{plugin_config_id}/logs/': Endpoints.get_Environments_plugin_configs_logs_list
-        '/api/environments/{project_id}/query/{id}/': Endpoints.get_Environments_query_retrieve
-        '/api/environments/{project_id}/query/{id}/log/': Endpoints.get_Environments_query_log_retrieve
-        '/api/environments/{project_id}/query/draft_sql/': Endpoints.get_Environments_query_draft_sql_retrieve
-        '/api/environments/{project_id}/session_recording_playlists/': Endpoints.get_Environments_session_recording_playlists_list
-        '/api/environments/{project_id}/session_recording_playlists/{short_id}/': Endpoints.get_Environments_session_recording_playlists_retrieve
-        '/api/environments/{project_id}/session_recording_playlists/{short_id}/recordings/': Endpoints.get_Environments_session_recording_playlists_recordings_retrieve
-        '/api/environments/{project_id}/session_recordings/': Endpoints.get_Environments_session_recordings_list
-        '/api/environments/{project_id}/session_recordings/{id}/': Endpoints.get_Environments_session_recordings_retrieve
-        '/api/environments/{project_id}/session_recordings/{recording_id}/sharing/': Endpoints.get_Environments_session_recordings_sharing_list
-        '/api/environments/{project_id}/sessions/property_definitions/': Endpoints.get_Environments_sessions_property_definitions_retrieve
-        '/api/environments/{project_id}/sessions/values/': Endpoints.get_Environments_sessions_values_retrieve
-        '/api/environments/{project_id}/subscriptions/': Endpoints.get_Environments_subscriptions_list
-        '/api/environments/{project_id}/subscriptions/{id}/': Endpoints.get_Environments_subscriptions_retrieve
-        '/api/environments/{project_id}/user_interviews/': Endpoints.get_Environments_user_interviews_list
-        '/api/environments/{project_id}/user_interviews/{id}/': Endpoints.get_Environments_user_interviews_retrieve
-        '/api/environments/{project_id}/warehouse_saved_queries/': Endpoints.get_Environments_warehouse_saved_queries_list
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/': Endpoints.get_Environments_warehouse_saved_queries_retrieve
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/activity/': Endpoints.get_Environments_warehouse_saved_queries_activity_retrieve
-        '/api/environments/{project_id}/warehouse_tables/': Endpoints.get_Environments_warehouse_tables_list
-        '/api/environments/{project_id}/warehouse_tables/{id}/': Endpoints.get_Environments_warehouse_tables_retrieve
-        '/api/environments/{project_id}/web_vitals/': Endpoints.get_Environments_web_vitals_retrieve
-        '/api/organizations/': Endpoints.get_List
-        '/api/organizations/{id}/': Endpoints.get_Retrieve
-        '/api/organizations/{organization_id}/batch_exports/': Endpoints.get_Batch_exports_list
-        '/api/organizations/{organization_id}/batch_exports/{id}/': Endpoints.get_Batch_exports_retrieve
-        '/api/organizations/{organization_id}/batch_exports/{id}/logs/': Endpoints.get_Batch_exports_logs_retrieve
-        '/api/organizations/{organization_id}/batch_exports/test/': Endpoints.get_Batch_exports_test_retrieve
-        '/api/organizations/{organization_id}/domains/': Endpoints.get_Domains_list
-        '/api/organizations/{organization_id}/domains/{id}/': Endpoints.get_Domains_retrieve
-        '/api/organizations/{organization_id}/invites/': Endpoints.get_Invites_list
-        '/api/organizations/{organization_id}/members/': Endpoints.get_Members_list
-        '/api/organizations/{organization_id}/members/{user__uuid}/scoped_api_keys/': Endpoints.get_Members_scoped_api_keys_retrieve
-        '/api/organizations/{organization_id}/projects/': Endpoints.get_List_2
-        '/api/organizations/{organization_id}/projects/{id}/': Endpoints.get_Retrieve_2
-        '/api/organizations/{organization_id}/projects/{id}/activity/': Endpoints.get_Activity_retrieve
-        '/api/organizations/{organization_id}/projects/{id}/is_generating_demo_data/': Endpoints.get_Is_generating_demo_data_retrieve
-        '/api/organizations/{organization_id}/proxy_records/': Endpoints.get_Proxy_records_list
-        '/api/organizations/{organization_id}/proxy_records/{id}/': Endpoints.get_Proxy_records_retrieve
-        '/api/organizations/{organization_id}/roles/': Endpoints.get_Roles_list
-        '/api/organizations/{organization_id}/roles/{id}/': Endpoints.get_Roles_retrieve
-        '/api/organizations/{organization_id}/roles/{role_id}/role_memberships/': Endpoints.get_Roles_role_memberships_list
-        '/api/projects/{project_id}/actions/': Endpoints.get_Actions_list
-        '/api/projects/{project_id}/actions/{id}/': Endpoints.get_Actions_retrieve
-        '/api/projects/{project_id}/activity_log/': Endpoints.get_Activity_log_list
-        '/api/projects/{project_id}/annotations/': Endpoints.get_Annotations_list
-        '/api/projects/{project_id}/annotations/{id}/': Endpoints.get_Annotations_retrieve
-        '/api/projects/{project_id}/app_metrics/{id}/': Endpoints.get_App_metrics_retrieve
-        '/api/projects/{project_id}/app_metrics/{id}/error_details/': Endpoints.get_App_metrics_error_details_retrieve
-        '/api/projects/{project_id}/app_metrics/{plugin_config_id}/historical_exports/': Endpoints.get_App_metrics_historical_exports_retrieve
-        '/api/projects/{project_id}/app_metrics/{plugin_config_id}/historical_exports/{id}/': Endpoints.get_App_metrics_historical_exports_retrieve_2
-        '/api/projects/{project_id}/batch_exports/': Endpoints.get_Batch_exports_list_2
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/backfills/': Endpoints.get_Batch_exports_backfills_list
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/': Endpoints.get_Batch_exports_backfills_retrieve
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/': Endpoints.get_Batch_exports_runs_list
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/': Endpoints.get_Batch_exports_runs_retrieve
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/logs/': Endpoints.get_Batch_exports_runs_logs_retrieve
-        '/api/projects/{project_id}/batch_exports/{id}/': Endpoints.get_Batch_exports_retrieve_2
-        '/api/projects/{project_id}/batch_exports/{id}/logs/': Endpoints.get_Batch_exports_logs_retrieve_2
-        '/api/projects/{project_id}/batch_exports/test/': Endpoints.get_Batch_exports_test_retrieve_2
-        '/api/projects/{project_id}/cohorts/': Endpoints.get_Cohorts_list
-        '/api/projects/{project_id}/cohorts/{id}/': Endpoints.get_Cohorts_retrieve
-        '/api/projects/{project_id}/cohorts/{id}/activity/': Endpoints.get_Cohorts_activity_retrieve_2
-        '/api/projects/{project_id}/cohorts/{id}/persons/': Endpoints.get_Cohorts_persons_retrieve
-        '/api/projects/{project_id}/cohorts/activity/': Endpoints.get_Cohorts_activity_retrieve
-        '/api/projects/{project_id}/dashboard_templates/': Endpoints.get_Dashboard_templates_list
-        '/api/projects/{project_id}/dashboard_templates/{id}/': Endpoints.get_Dashboard_templates_retrieve
-        '/api/projects/{project_id}/dashboard_templates/json_schema/': Endpoints.get_Dashboard_templates_json_schema_retrieve
-        '/api/projects/{project_id}/dashboards/': Endpoints.get_Dashboards_list
-        '/api/projects/{project_id}/dashboards/{dashboard_id}/collaborators/': Endpoints.get_Dashboards_collaborators_list
-        '/api/projects/{project_id}/dashboards/{dashboard_id}/sharing/': Endpoints.get_Dashboards_sharing_list
-        '/api/projects/{project_id}/dashboards/{id}/': Endpoints.get_Dashboards_retrieve
-        '/api/projects/{project_id}/dashboards/{id}/stream_tiles/': Endpoints.get_Dashboards_stream_tiles_retrieve
-        '/api/projects/{project_id}/early_access_feature/': Endpoints.get_Early_access_feature_list
-        '/api/projects/{project_id}/early_access_feature/{id}/': Endpoints.get_Early_access_feature_retrieve
-        '/api/projects/{project_id}/environments/': Endpoints.get_Environments_list
-        '/api/projects/{project_id}/environments/{id}/': Endpoints.get_Environments_retrieve
-        '/api/projects/{project_id}/environments/{id}/activity/': Endpoints.get_Environments_activity_retrieve
-        '/api/projects/{project_id}/environments/{id}/event_ingestion_restrictions/': Endpoints.get_Environments_event_ingestion_restrictions_retrieve
-        '/api/projects/{project_id}/environments/{id}/is_generating_demo_data/': Endpoints.get_Environments_is_generating_demo_data_retrieve
-        '/api/projects/{project_id}/event_definitions/': Endpoints.get_Event_definitions_retrieve
-        '/api/projects/{project_id}/event_definitions/{id}/': Endpoints.get_Event_definitions_retrieve_2
-        '/api/projects/{project_id}/event_definitions/{id}/metrics/': Endpoints.get_Event_definitions_metrics_retrieve
-        '/api/projects/{project_id}/events/': Endpoints.get_Events_list
-        '/api/projects/{project_id}/events/{id}/': Endpoints.get_Events_retrieve
-        '/api/projects/{project_id}/events/values/': Endpoints.get_Events_values_retrieve
-        '/api/projects/{project_id}/experiment_holdouts/': Endpoints.get_Experiment_holdouts_list
-        '/api/projects/{project_id}/experiment_holdouts/{id}/': Endpoints.get_Experiment_holdouts_retrieve
-        '/api/projects/{project_id}/experiment_saved_metrics/': Endpoints.get_Experiment_saved_metrics_list
-        '/api/projects/{project_id}/experiment_saved_metrics/{id}/': Endpoints.get_Experiment_saved_metrics_retrieve
-        '/api/projects/{project_id}/experiments/': Endpoints.get_Experiments_list
-        '/api/projects/{project_id}/experiments/{id}/': Endpoints.get_Experiments_retrieve
-        '/api/projects/{project_id}/experiments/requires_flag_implementation/': Endpoints.get_Experiments_requires_flag_implementation_retrieve
-        '/api/projects/{project_id}/explicit_members/': Endpoints.get_Explicit_members_list
-        '/api/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.get_Explicit_members_retrieve
-        '/api/projects/{project_id}/exports/': Endpoints.get_Exports_list
-        '/api/projects/{project_id}/exports/{id}/': Endpoints.get_Exports_retrieve
-        '/api/projects/{project_id}/exports/{id}/content/': Endpoints.get_Exports_content_retrieve
-        '/api/projects/{project_id}/feature_flags/': Endpoints.get_Feature_flags_list
-        '/api/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/': Endpoints.get_Feature_flags_role_access_list
-        '/api/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/{id}/': Endpoints.get_Feature_flags_role_access_retrieve
-        '/api/projects/{project_id}/feature_flags/{id}/': Endpoints.get_Feature_flags_retrieve
-        '/api/projects/{project_id}/feature_flags/{id}/activity/': Endpoints.get_Feature_flags_activity_retrieve_2
-        '/api/projects/{project_id}/feature_flags/{id}/remote_config/': Endpoints.get_Feature_flags_remote_config_retrieve
-        '/api/projects/{project_id}/feature_flags/{id}/status/': Endpoints.get_Feature_flags_status_retrieve
-        '/api/projects/{project_id}/feature_flags/activity/': Endpoints.get_Feature_flags_activity_retrieve
-        '/api/projects/{project_id}/feature_flags/evaluation_reasons/': Endpoints.get_Feature_flags_evaluation_reasons_retrieve
-        '/api/projects/{project_id}/feature_flags/local_evaluation/': Endpoints.get_Feature_flags_local_evaluation_retrieve
-        '/api/projects/{project_id}/feature_flags/my_flags/': Endpoints.get_Feature_flags_my_flags_retrieve
-        '/api/projects/{project_id}/file_system/': Endpoints.get_File_system_list
-        '/api/projects/{project_id}/file_system/{id}/': Endpoints.get_File_system_retrieve
-        '/api/projects/{project_id}/file_system/unfiled/': Endpoints.get_File_system_unfiled_retrieve
-        '/api/projects/{project_id}/file_system_shortcut/': Endpoints.get_File_system_shortcut_list
-        '/api/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.get_File_system_shortcut_retrieve
-        '/api/projects/{project_id}/flag_value/values/': Endpoints.get_Flag_value_values_retrieve
-        '/api/projects/{project_id}/groups/': Endpoints.get_Groups_list
-        '/api/projects/{project_id}/groups/activity/': Endpoints.get_Groups_activity_retrieve
-        '/api/projects/{project_id}/groups/find/': Endpoints.get_Groups_find_retrieve
-        '/api/projects/{project_id}/groups/property_definitions/': Endpoints.get_Groups_property_definitions_retrieve
-        '/api/projects/{project_id}/groups/property_values/': Endpoints.get_Groups_property_values_retrieve
-        '/api/projects/{project_id}/groups/related/': Endpoints.get_Groups_related_retrieve
-        '/api/projects/{project_id}/groups_types/': Endpoints.get_Groups_types_list
-        '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/': Endpoints.get_Groups_types_metrics_list
-        '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.get_Groups_types_metrics_retrieve
-        '/api/projects/{project_id}/insights_functions/': Endpoints.get_Custom_functions_list
-        '/api/projects/{project_id}/insights_functions/{id}/': Endpoints.get_Custom_functions_retrieve
-        '/api/projects/{project_id}/insights_functions/{id}/logs/': Endpoints.get_Custom_functions_logs_retrieve
-        '/api/projects/{project_id}/insights_functions/{id}/metrics/': Endpoints.get_Custom_functions_metrics_retrieve
-        '/api/projects/{project_id}/insights_functions/{id}/metrics/totals/': Endpoints.get_Custom_functions_metrics_totals_retrieve
-        '/api/projects/{project_id}/insights_functions/icon/': Endpoints.get_Custom_functions_icon_retrieve
-        '/api/projects/{project_id}/insights_functions/icons/': Endpoints.get_Custom_functions_icons_retrieve
-        '/api/projects/{project_id}/insights/': Endpoints.get_Insights_list
-        '/api/projects/{project_id}/insights/{insight_id}/sharing/': Endpoints.get_Insights_sharing_list
-        '/api/projects/{project_id}/insights/{id}/': Endpoints.get_Insights_retrieve
-        '/api/projects/{project_id}/insights/{id}/activity/': Endpoints.get_Insights_activity_retrieve_2
-        '/api/projects/{project_id}/insights/activity/': Endpoints.get_Insights_activity_retrieve
-        '/api/projects/{project_id}/insights/my_last_viewed/': Endpoints.get_Insights_my_last_viewed_retrieve
-        '/api/projects/{project_id}/logs/attributes/': Endpoints.get_Logs_attributes_retrieve
-        '/api/projects/{project_id}/logs/values/': Endpoints.get_Logs_values_retrieve
-        '/api/projects/{project_id}/notebooks/': Endpoints.get_Notebooks_list
-        '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.get_Notebooks_retrieve
-        '/api/projects/{project_id}/notebooks/{short_id}/activity/': Endpoints.get_Notebooks_activity_retrieve_2
-        '/api/projects/{project_id}/notebooks/activity/': Endpoints.get_Notebooks_activity_retrieve
-        '/api/projects/{project_id}/notebooks/recording_comments/': Endpoints.get_Notebooks_recording_comments_retrieve
-        '/api/projects/{project_id}/persisted_folder/': Endpoints.get_Persisted_folder_list
-        '/api/projects/{project_id}/persisted_folder/{id}/': Endpoints.get_Persisted_folder_retrieve
-        '/api/projects/{project_id}/persons/': Endpoints.get_Persons_list
-        '/api/projects/{project_id}/persons/{id}/': Endpoints.get_Persons_retrieve
-        '/api/projects/{project_id}/persons/{id}/activity/': Endpoints.get_Persons_activity_retrieve_2
-        '/api/projects/{project_id}/persons/{id}/properties_timeline/': Endpoints.get_Persons_properties_timeline_retrieve
-        '/api/projects/{project_id}/persons/activity/': Endpoints.get_Persons_activity_retrieve
-        '/api/projects/{project_id}/persons/cohorts/': Endpoints.get_Persons_cohorts_retrieve
-        '/api/projects/{project_id}/persons/funnel/': Endpoints.get_Persons_funnel_retrieve
-        '/api/projects/{project_id}/persons/funnel/correlation/': Endpoints.get_Persons_funnel_correlation_retrieve
-        '/api/projects/{project_id}/persons/lifecycle/': Endpoints.get_Persons_lifecycle_retrieve
-        '/api/projects/{project_id}/persons/stickiness/': Endpoints.get_Persons_stickiness_retrieve
-        '/api/projects/{project_id}/persons/trends/': Endpoints.get_Persons_trends_retrieve
-        '/api/projects/{project_id}/persons/values/': Endpoints.get_Persons_values_retrieve
-        '/api/projects/{project_id}/plugin_configs/{plugin_config_id}/logs/': Endpoints.get_Plugin_configs_logs_list
-        '/api/projects/{project_id}/property_definitions/': Endpoints.get_Property_definitions_list
-        '/api/projects/{project_id}/property_definitions/{id}/': Endpoints.get_Property_definitions_retrieve
-        '/api/projects/{project_id}/property_definitions/seen_together/': Endpoints.get_Property_definitions_seen_together_retrieve
-        '/api/projects/{project_id}/query/{id}/': Endpoints.get_Query_retrieve
-        '/api/projects/{project_id}/query/{id}/log/': Endpoints.get_Query_log_retrieve
-        '/api/projects/{project_id}/query/draft_sql/': Endpoints.get_Query_draft_sql_retrieve
-        '/api/projects/{project_id}/session_recording_playlists/': Endpoints.get_Session_recording_playlists_list
-        '/api/projects/{project_id}/session_recording_playlists/{short_id}/': Endpoints.get_Session_recording_playlists_retrieve
-        '/api/projects/{project_id}/session_recording_playlists/{short_id}/recordings/': Endpoints.get_Session_recording_playlists_recordings_retrieve
-        '/api/projects/{project_id}/session_recordings/': Endpoints.get_Session_recordings_list
-        '/api/projects/{project_id}/session_recordings/{id}/': Endpoints.get_Session_recordings_retrieve
-        '/api/projects/{project_id}/session_recordings/{recording_id}/sharing/': Endpoints.get_Session_recordings_sharing_list
-        '/api/projects/{project_id}/sessions/property_definitions/': Endpoints.get_Sessions_property_definitions_retrieve
-        '/api/projects/{project_id}/sessions/values/': Endpoints.get_Sessions_values_retrieve
-        '/api/projects/{project_id}/subscriptions/': Endpoints.get_Subscriptions_list
-        '/api/projects/{project_id}/subscriptions/{id}/': Endpoints.get_Subscriptions_retrieve
-        '/api/projects/{project_id}/surveys/': Endpoints.get_Surveys_list
-        '/api/projects/{project_id}/surveys/{id}/': Endpoints.get_Surveys_retrieve
-        '/api/projects/{project_id}/surveys/{id}/activity/': Endpoints.get_Surveys_activity_retrieve_2
-        '/api/projects/{project_id}/surveys/{id}/stats/': Endpoints.get_Surveys_stats_retrieve_2
-        '/api/projects/{project_id}/surveys/activity/': Endpoints.get_Surveys_activity_retrieve
-        '/api/projects/{project_id}/surveys/responses_count/': Endpoints.get_Surveys_responses_count_retrieve
-        '/api/projects/{project_id}/surveys/stats/': Endpoints.get_Surveys_stats_retrieve
-        '/api/projects/{project_id}/warehouse_saved_queries/': Endpoints.get_Warehouse_saved_queries_list
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/': Endpoints.get_Warehouse_saved_queries_retrieve
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/activity/': Endpoints.get_Warehouse_saved_queries_activity_retrieve
-        '/api/projects/{project_id}/warehouse_tables/': Endpoints.get_Warehouse_tables_list
-        '/api/projects/{project_id}/warehouse_tables/{id}/': Endpoints.get_Warehouse_tables_retrieve
-        '/api/projects/{project_id}/web_analytics/breakdown/': Endpoints.get_Web_analytics_breakdown_retrieve
-        '/api/projects/{project_id}/web_analytics/overview/': Endpoints.get_Web_analytics_overview_retrieve
-        '/api/projects/{project_id}/web_experiments/': Endpoints.get_Web_experiments_list
-        '/api/projects/{project_id}/web_experiments/{id}/': Endpoints.get_Web_experiments_retrieve
-        '/api/users/': Endpoints.get_Users_list
-        '/api/users/{uuid}/': Endpoints.get_Users_retrieve
-        '/api/users/{uuid}/start_2fa_setup/': Endpoints.get_Users_start_2fa_setup_retrieve
-        '/api/users/{uuid}/two_factor_start_setup/': Endpoints.get_Users_two_factor_start_setup_retrieve
-        '/api/users/{uuid}/two_factor_status/': Endpoints.get_Users_two_factor_status_retrieve
+        '/v1/environments/{project_id}/app_metrics/{id}/': Endpoints.get_Environments_app_metrics_retrieve
+        '/v1/environments/{project_id}/app_metrics/{id}/error_details/': Endpoints.get_Environments_app_metrics_error_details_retrieve
+        '/v1/environments/{project_id}/app_metrics/{plugin_config_id}/historical_exports/': Endpoints.get_Environments_app_metrics_historical_exports_retrieve
+        '/v1/environments/{project_id}/app_metrics/{plugin_config_id}/historical_exports/{id}/': Endpoints.get_Environments_app_metrics_historical_exports_retrieve_2
+        '/v1/environments/{project_id}/batch_exports/': Endpoints.get_Environments_batch_exports_list
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/backfills/': Endpoints.get_Environments_batch_exports_backfills_list
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/': Endpoints.get_Environments_batch_exports_backfills_retrieve
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/': Endpoints.get_Environments_batch_exports_runs_list
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/': Endpoints.get_Environments_batch_exports_runs_retrieve
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/logs/': Endpoints.get_Environments_batch_exports_runs_logs_retrieve
+        '/v1/environments/{project_id}/batch_exports/{id}/': Endpoints.get_Environments_batch_exports_retrieve
+        '/v1/environments/{project_id}/batch_exports/{id}/logs/': Endpoints.get_Environments_batch_exports_logs_retrieve
+        '/v1/environments/{project_id}/batch_exports/test/': Endpoints.get_Environments_batch_exports_test_retrieve
+        '/v1/environments/{project_id}/dashboards/': Endpoints.get_Environments_dashboards_list
+        '/v1/environments/{project_id}/dashboards/{dashboard_id}/collaborators/': Endpoints.get_Environments_dashboards_collaborators_list
+        '/v1/environments/{project_id}/dashboards/{dashboard_id}/sharing/': Endpoints.get_Environments_dashboards_sharing_list
+        '/v1/environments/{project_id}/dashboards/{id}/': Endpoints.get_Environments_dashboards_retrieve
+        '/v1/environments/{project_id}/dashboards/{id}/stream_tiles/': Endpoints.get_Environments_dashboards_stream_tiles_retrieve
+        '/v1/environments/{project_id}/error_tracking/assignment_rules/': Endpoints.get_Environments_error_tracking_assignment_rules_list
+        '/v1/environments/{project_id}/error_tracking/assignment_rules/{id}/': Endpoints.get_Environments_error_tracking_assignment_rules_retrieve
+        '/v1/environments/{project_id}/error_tracking/grouping_rules/': Endpoints.get_Environments_error_tracking_grouping_rules_list
+        '/v1/environments/{project_id}/error_tracking/grouping_rules/{id}/': Endpoints.get_Environments_error_tracking_grouping_rules_retrieve
+        '/v1/environments/{project_id}/error_tracking/releases/': Endpoints.get_Environments_error_tracking_releases_list
+        '/v1/environments/{project_id}/error_tracking/releases/{id}/': Endpoints.get_Environments_error_tracking_releases_retrieve
+        '/v1/environments/{project_id}/error_tracking/suppression_rules/': Endpoints.get_Environments_error_tracking_suppression_rules_list
+        '/v1/environments/{project_id}/error_tracking/suppression_rules/{id}/': Endpoints.get_Environments_error_tracking_suppression_rules_retrieve
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/': Endpoints.get_Environments_error_tracking_symbol_sets_list
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/': Endpoints.get_Environments_error_tracking_symbol_sets_retrieve
+        '/v1/environments/{project_id}/events/': Endpoints.get_Environments_events_list
+        '/v1/environments/{project_id}/events/{id}/': Endpoints.get_Environments_events_retrieve
+        '/v1/environments/{project_id}/events/values/': Endpoints.get_Environments_events_values_retrieve
+        '/v1/environments/{project_id}/explicit_members/': Endpoints.get_Environments_explicit_members_list
+        '/v1/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.get_Environments_explicit_members_retrieve
+        '/v1/environments/{project_id}/exports/': Endpoints.get_Environments_exports_list
+        '/v1/environments/{project_id}/exports/{id}/': Endpoints.get_Environments_exports_retrieve
+        '/v1/environments/{project_id}/exports/{id}/content/': Endpoints.get_Environments_exports_content_retrieve
+        '/v1/environments/{project_id}/file_system/': Endpoints.get_Environments_file_system_list
+        '/v1/environments/{project_id}/file_system/{id}/': Endpoints.get_Environments_file_system_retrieve
+        '/v1/environments/{project_id}/file_system/unfiled/': Endpoints.get_Environments_file_system_unfiled_retrieve
+        '/v1/environments/{project_id}/file_system_shortcut/': Endpoints.get_Environments_file_system_shortcut_list
+        '/v1/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.get_Environments_file_system_shortcut_retrieve
+        '/v1/environments/{project_id}/groups/': Endpoints.get_Environments_groups_list
+        '/v1/environments/{project_id}/groups/activity/': Endpoints.get_Environments_groups_activity_retrieve
+        '/v1/environments/{project_id}/groups/find/': Endpoints.get_Environments_groups_find_retrieve
+        '/v1/environments/{project_id}/groups/property_definitions/': Endpoints.get_Environments_groups_property_definitions_retrieve
+        '/v1/environments/{project_id}/groups/property_values/': Endpoints.get_Environments_groups_property_values_retrieve
+        '/v1/environments/{project_id}/groups/related/': Endpoints.get_Environments_groups_related_retrieve
+        '/v1/environments/{project_id}/insights_functions/': Endpoints.get_Environments_insights_functions_list
+        '/v1/environments/{project_id}/insights_functions/{id}/': Endpoints.get_Environments_insights_functions_retrieve
+        '/v1/environments/{project_id}/insights_functions/{id}/logs/': Endpoints.get_Environments_insights_functions_logs_retrieve
+        '/v1/environments/{project_id}/insights_functions/{id}/metrics/': Endpoints.get_Environments_insights_functions_metrics_retrieve
+        '/v1/environments/{project_id}/insights_functions/{id}/metrics/totals/': Endpoints.get_Environments_insights_functions_metrics_totals_retrieve
+        '/v1/environments/{project_id}/insights_functions/icon/': Endpoints.get_Environments_insights_functions_icon_retrieve
+        '/v1/environments/{project_id}/insights_functions/icons/': Endpoints.get_Environments_insights_functions_icons_retrieve
+        '/v1/environments/{project_id}/insights/': Endpoints.get_Environments_insights_list
+        '/v1/environments/{project_id}/insights/{insight_id}/sharing/': Endpoints.get_Environments_insights_sharing_list
+        '/v1/environments/{project_id}/insights/{id}/': Endpoints.get_Environments_insights_retrieve
+        '/v1/environments/{project_id}/insights/{id}/activity/': Endpoints.get_Environments_insights_activity_retrieve_2
+        '/v1/environments/{project_id}/insights/activity/': Endpoints.get_Environments_insights_activity_retrieve
+        '/v1/environments/{project_id}/insights/my_last_viewed/': Endpoints.get_Environments_insights_my_last_viewed_retrieve
+        '/v1/environments/{project_id}/logs/attributes/': Endpoints.get_Environments_logs_attributes_retrieve
+        '/v1/environments/{project_id}/logs/values/': Endpoints.get_Environments_logs_values_retrieve
+        '/v1/environments/{project_id}/persisted_folder/': Endpoints.get_Environments_persisted_folder_list
+        '/v1/environments/{project_id}/persisted_folder/{id}/': Endpoints.get_Environments_persisted_folder_retrieve
+        '/v1/environments/{project_id}/persons/': Endpoints.get_Environments_persons_list
+        '/v1/environments/{project_id}/persons/{id}/': Endpoints.get_Environments_persons_retrieve
+        '/v1/environments/{project_id}/persons/{id}/activity/': Endpoints.get_Environments_persons_activity_retrieve_2
+        '/v1/environments/{project_id}/persons/{id}/properties_timeline/': Endpoints.get_Environments_persons_properties_timeline_retrieve
+        '/v1/environments/{project_id}/persons/activity/': Endpoints.get_Environments_persons_activity_retrieve
+        '/v1/environments/{project_id}/persons/cohorts/': Endpoints.get_Environments_persons_cohorts_retrieve
+        '/v1/environments/{project_id}/persons/funnel/': Endpoints.get_Environments_persons_funnel_retrieve
+        '/v1/environments/{project_id}/persons/funnel/correlation/': Endpoints.get_Environments_persons_funnel_correlation_retrieve
+        '/v1/environments/{project_id}/persons/lifecycle/': Endpoints.get_Environments_persons_lifecycle_retrieve
+        '/v1/environments/{project_id}/persons/stickiness/': Endpoints.get_Environments_persons_stickiness_retrieve
+        '/v1/environments/{project_id}/persons/trends/': Endpoints.get_Environments_persons_trends_retrieve
+        '/v1/environments/{project_id}/persons/values/': Endpoints.get_Environments_persons_values_retrieve
+        '/v1/environments/{project_id}/plugin_configs/{plugin_config_id}/logs/': Endpoints.get_Environments_plugin_configs_logs_list
+        '/v1/environments/{project_id}/query/{id}/': Endpoints.get_Environments_query_retrieve
+        '/v1/environments/{project_id}/query/{id}/log/': Endpoints.get_Environments_query_log_retrieve
+        '/v1/environments/{project_id}/query/draft_sql/': Endpoints.get_Environments_query_draft_sql_retrieve
+        '/v1/environments/{project_id}/session_recording_playlists/': Endpoints.get_Environments_session_recording_playlists_list
+        '/v1/environments/{project_id}/session_recording_playlists/{short_id}/': Endpoints.get_Environments_session_recording_playlists_retrieve
+        '/v1/environments/{project_id}/session_recording_playlists/{short_id}/recordings/': Endpoints.get_Environments_session_recording_playlists_recordings_retrieve
+        '/v1/environments/{project_id}/session_recordings/': Endpoints.get_Environments_session_recordings_list
+        '/v1/environments/{project_id}/session_recordings/{id}/': Endpoints.get_Environments_session_recordings_retrieve
+        '/v1/environments/{project_id}/session_recordings/{recording_id}/sharing/': Endpoints.get_Environments_session_recordings_sharing_list
+        '/v1/environments/{project_id}/sessions/property_definitions/': Endpoints.get_Environments_sessions_property_definitions_retrieve
+        '/v1/environments/{project_id}/sessions/values/': Endpoints.get_Environments_sessions_values_retrieve
+        '/v1/environments/{project_id}/subscriptions/': Endpoints.get_Environments_subscriptions_list
+        '/v1/environments/{project_id}/subscriptions/{id}/': Endpoints.get_Environments_subscriptions_retrieve
+        '/v1/environments/{project_id}/user_interviews/': Endpoints.get_Environments_user_interviews_list
+        '/v1/environments/{project_id}/user_interviews/{id}/': Endpoints.get_Environments_user_interviews_retrieve
+        '/v1/environments/{project_id}/warehouse_saved_queries/': Endpoints.get_Environments_warehouse_saved_queries_list
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/': Endpoints.get_Environments_warehouse_saved_queries_retrieve
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/activity/': Endpoints.get_Environments_warehouse_saved_queries_activity_retrieve
+        '/v1/environments/{project_id}/warehouse_tables/': Endpoints.get_Environments_warehouse_tables_list
+        '/v1/environments/{project_id}/warehouse_tables/{id}/': Endpoints.get_Environments_warehouse_tables_retrieve
+        '/v1/environments/{project_id}/web_vitals/': Endpoints.get_Environments_web_vitals_retrieve
+        '/v1/organizations/': Endpoints.get_List
+        '/v1/organizations/{id}/': Endpoints.get_Retrieve
+        '/v1/organizations/{organization_id}/batch_exports/': Endpoints.get_Batch_exports_list
+        '/v1/organizations/{organization_id}/batch_exports/{id}/': Endpoints.get_Batch_exports_retrieve
+        '/v1/organizations/{organization_id}/batch_exports/{id}/logs/': Endpoints.get_Batch_exports_logs_retrieve
+        '/v1/organizations/{organization_id}/batch_exports/test/': Endpoints.get_Batch_exports_test_retrieve
+        '/v1/organizations/{organization_id}/domains/': Endpoints.get_Domains_list
+        '/v1/organizations/{organization_id}/domains/{id}/': Endpoints.get_Domains_retrieve
+        '/v1/organizations/{organization_id}/invites/': Endpoints.get_Invites_list
+        '/v1/organizations/{organization_id}/members/': Endpoints.get_Members_list
+        '/v1/organizations/{organization_id}/members/{user__uuid}/scoped_api_keys/': Endpoints.get_Members_scoped_api_keys_retrieve
+        '/v1/organizations/{organization_id}/projects/': Endpoints.get_List_2
+        '/v1/organizations/{organization_id}/projects/{id}/': Endpoints.get_Retrieve_2
+        '/v1/organizations/{organization_id}/projects/{id}/activity/': Endpoints.get_Activity_retrieve
+        '/v1/organizations/{organization_id}/projects/{id}/is_generating_demo_data/': Endpoints.get_Is_generating_demo_data_retrieve
+        '/v1/organizations/{organization_id}/proxy_records/': Endpoints.get_Proxy_records_list
+        '/v1/organizations/{organization_id}/proxy_records/{id}/': Endpoints.get_Proxy_records_retrieve
+        '/v1/organizations/{organization_id}/roles/': Endpoints.get_Roles_list
+        '/v1/organizations/{organization_id}/roles/{id}/': Endpoints.get_Roles_retrieve
+        '/v1/organizations/{organization_id}/roles/{role_id}/role_memberships/': Endpoints.get_Roles_role_memberships_list
+        '/v1/projects/{project_id}/actions/': Endpoints.get_Actions_list
+        '/v1/projects/{project_id}/actions/{id}/': Endpoints.get_Actions_retrieve
+        '/v1/projects/{project_id}/activity_log/': Endpoints.get_Activity_log_list
+        '/v1/projects/{project_id}/annotations/': Endpoints.get_Annotations_list
+        '/v1/projects/{project_id}/annotations/{id}/': Endpoints.get_Annotations_retrieve
+        '/v1/projects/{project_id}/app_metrics/{id}/': Endpoints.get_App_metrics_retrieve
+        '/v1/projects/{project_id}/app_metrics/{id}/error_details/': Endpoints.get_App_metrics_error_details_retrieve
+        '/v1/projects/{project_id}/app_metrics/{plugin_config_id}/historical_exports/': Endpoints.get_App_metrics_historical_exports_retrieve
+        '/v1/projects/{project_id}/app_metrics/{plugin_config_id}/historical_exports/{id}/': Endpoints.get_App_metrics_historical_exports_retrieve_2
+        '/v1/projects/{project_id}/batch_exports/': Endpoints.get_Batch_exports_list_2
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/backfills/': Endpoints.get_Batch_exports_backfills_list
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/': Endpoints.get_Batch_exports_backfills_retrieve
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/': Endpoints.get_Batch_exports_runs_list
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/': Endpoints.get_Batch_exports_runs_retrieve
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/logs/': Endpoints.get_Batch_exports_runs_logs_retrieve
+        '/v1/projects/{project_id}/batch_exports/{id}/': Endpoints.get_Batch_exports_retrieve_2
+        '/v1/projects/{project_id}/batch_exports/{id}/logs/': Endpoints.get_Batch_exports_logs_retrieve_2
+        '/v1/projects/{project_id}/batch_exports/test/': Endpoints.get_Batch_exports_test_retrieve_2
+        '/v1/projects/{project_id}/cohorts/': Endpoints.get_Cohorts_list
+        '/v1/projects/{project_id}/cohorts/{id}/': Endpoints.get_Cohorts_retrieve
+        '/v1/projects/{project_id}/cohorts/{id}/activity/': Endpoints.get_Cohorts_activity_retrieve_2
+        '/v1/projects/{project_id}/cohorts/{id}/persons/': Endpoints.get_Cohorts_persons_retrieve
+        '/v1/projects/{project_id}/cohorts/activity/': Endpoints.get_Cohorts_activity_retrieve
+        '/v1/projects/{project_id}/dashboard_templates/': Endpoints.get_Dashboard_templates_list
+        '/v1/projects/{project_id}/dashboard_templates/{id}/': Endpoints.get_Dashboard_templates_retrieve
+        '/v1/projects/{project_id}/dashboard_templates/json_schema/': Endpoints.get_Dashboard_templates_json_schema_retrieve
+        '/v1/projects/{project_id}/dashboards/': Endpoints.get_Dashboards_list
+        '/v1/projects/{project_id}/dashboards/{dashboard_id}/collaborators/': Endpoints.get_Dashboards_collaborators_list
+        '/v1/projects/{project_id}/dashboards/{dashboard_id}/sharing/': Endpoints.get_Dashboards_sharing_list
+        '/v1/projects/{project_id}/dashboards/{id}/': Endpoints.get_Dashboards_retrieve
+        '/v1/projects/{project_id}/dashboards/{id}/stream_tiles/': Endpoints.get_Dashboards_stream_tiles_retrieve
+        '/v1/projects/{project_id}/early_access_feature/': Endpoints.get_Early_access_feature_list
+        '/v1/projects/{project_id}/early_access_feature/{id}/': Endpoints.get_Early_access_feature_retrieve
+        '/v1/projects/{project_id}/environments/': Endpoints.get_Environments_list
+        '/v1/projects/{project_id}/environments/{id}/': Endpoints.get_Environments_retrieve
+        '/v1/projects/{project_id}/environments/{id}/activity/': Endpoints.get_Environments_activity_retrieve
+        '/v1/projects/{project_id}/environments/{id}/event_ingestion_restrictions/': Endpoints.get_Environments_event_ingestion_restrictions_retrieve
+        '/v1/projects/{project_id}/environments/{id}/is_generating_demo_data/': Endpoints.get_Environments_is_generating_demo_data_retrieve
+        '/v1/projects/{project_id}/event_definitions/': Endpoints.get_Event_definitions_retrieve
+        '/v1/projects/{project_id}/event_definitions/{id}/': Endpoints.get_Event_definitions_retrieve_2
+        '/v1/projects/{project_id}/event_definitions/{id}/metrics/': Endpoints.get_Event_definitions_metrics_retrieve
+        '/v1/projects/{project_id}/events/': Endpoints.get_Events_list
+        '/v1/projects/{project_id}/events/{id}/': Endpoints.get_Events_retrieve
+        '/v1/projects/{project_id}/events/values/': Endpoints.get_Events_values_retrieve
+        '/v1/projects/{project_id}/experiment_holdouts/': Endpoints.get_Experiment_holdouts_list
+        '/v1/projects/{project_id}/experiment_holdouts/{id}/': Endpoints.get_Experiment_holdouts_retrieve
+        '/v1/projects/{project_id}/experiment_saved_metrics/': Endpoints.get_Experiment_saved_metrics_list
+        '/v1/projects/{project_id}/experiment_saved_metrics/{id}/': Endpoints.get_Experiment_saved_metrics_retrieve
+        '/v1/projects/{project_id}/experiments/': Endpoints.get_Experiments_list
+        '/v1/projects/{project_id}/experiments/{id}/': Endpoints.get_Experiments_retrieve
+        '/v1/projects/{project_id}/experiments/requires_flag_implementation/': Endpoints.get_Experiments_requires_flag_implementation_retrieve
+        '/v1/projects/{project_id}/explicit_members/': Endpoints.get_Explicit_members_list
+        '/v1/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.get_Explicit_members_retrieve
+        '/v1/projects/{project_id}/exports/': Endpoints.get_Exports_list
+        '/v1/projects/{project_id}/exports/{id}/': Endpoints.get_Exports_retrieve
+        '/v1/projects/{project_id}/exports/{id}/content/': Endpoints.get_Exports_content_retrieve
+        '/v1/projects/{project_id}/feature_flags/': Endpoints.get_Feature_flags_list
+        '/v1/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/': Endpoints.get_Feature_flags_role_access_list
+        '/v1/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/{id}/': Endpoints.get_Feature_flags_role_access_retrieve
+        '/v1/projects/{project_id}/feature_flags/{id}/': Endpoints.get_Feature_flags_retrieve
+        '/v1/projects/{project_id}/feature_flags/{id}/activity/': Endpoints.get_Feature_flags_activity_retrieve_2
+        '/v1/projects/{project_id}/feature_flags/{id}/remote_config/': Endpoints.get_Feature_flags_remote_config_retrieve
+        '/v1/projects/{project_id}/feature_flags/{id}/status/': Endpoints.get_Feature_flags_status_retrieve
+        '/v1/projects/{project_id}/feature_flags/activity/': Endpoints.get_Feature_flags_activity_retrieve
+        '/v1/projects/{project_id}/feature_flags/evaluation_reasons/': Endpoints.get_Feature_flags_evaluation_reasons_retrieve
+        '/v1/projects/{project_id}/feature_flags/local_evaluation/': Endpoints.get_Feature_flags_local_evaluation_retrieve
+        '/v1/projects/{project_id}/feature_flags/my_flags/': Endpoints.get_Feature_flags_my_flags_retrieve
+        '/v1/projects/{project_id}/file_system/': Endpoints.get_File_system_list
+        '/v1/projects/{project_id}/file_system/{id}/': Endpoints.get_File_system_retrieve
+        '/v1/projects/{project_id}/file_system/unfiled/': Endpoints.get_File_system_unfiled_retrieve
+        '/v1/projects/{project_id}/file_system_shortcut/': Endpoints.get_File_system_shortcut_list
+        '/v1/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.get_File_system_shortcut_retrieve
+        '/v1/projects/{project_id}/flag_value/values/': Endpoints.get_Flag_value_values_retrieve
+        '/v1/projects/{project_id}/groups/': Endpoints.get_Groups_list
+        '/v1/projects/{project_id}/groups/activity/': Endpoints.get_Groups_activity_retrieve
+        '/v1/projects/{project_id}/groups/find/': Endpoints.get_Groups_find_retrieve
+        '/v1/projects/{project_id}/groups/property_definitions/': Endpoints.get_Groups_property_definitions_retrieve
+        '/v1/projects/{project_id}/groups/property_values/': Endpoints.get_Groups_property_values_retrieve
+        '/v1/projects/{project_id}/groups/related/': Endpoints.get_Groups_related_retrieve
+        '/v1/projects/{project_id}/groups_types/': Endpoints.get_Groups_types_list
+        '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/': Endpoints.get_Groups_types_metrics_list
+        '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.get_Groups_types_metrics_retrieve
+        '/v1/projects/{project_id}/insights_functions/': Endpoints.get_Custom_functions_list
+        '/v1/projects/{project_id}/insights_functions/{id}/': Endpoints.get_Custom_functions_retrieve
+        '/v1/projects/{project_id}/insights_functions/{id}/logs/': Endpoints.get_Custom_functions_logs_retrieve
+        '/v1/projects/{project_id}/insights_functions/{id}/metrics/': Endpoints.get_Custom_functions_metrics_retrieve
+        '/v1/projects/{project_id}/insights_functions/{id}/metrics/totals/': Endpoints.get_Custom_functions_metrics_totals_retrieve
+        '/v1/projects/{project_id}/insights_functions/icon/': Endpoints.get_Custom_functions_icon_retrieve
+        '/v1/projects/{project_id}/insights_functions/icons/': Endpoints.get_Custom_functions_icons_retrieve
+        '/v1/projects/{project_id}/insights/': Endpoints.get_Insights_list
+        '/v1/projects/{project_id}/insights/{insight_id}/sharing/': Endpoints.get_Insights_sharing_list
+        '/v1/projects/{project_id}/insights/{id}/': Endpoints.get_Insights_retrieve
+        '/v1/projects/{project_id}/insights/{id}/activity/': Endpoints.get_Insights_activity_retrieve_2
+        '/v1/projects/{project_id}/insights/activity/': Endpoints.get_Insights_activity_retrieve
+        '/v1/projects/{project_id}/insights/my_last_viewed/': Endpoints.get_Insights_my_last_viewed_retrieve
+        '/v1/projects/{project_id}/logs/attributes/': Endpoints.get_Logs_attributes_retrieve
+        '/v1/projects/{project_id}/logs/values/': Endpoints.get_Logs_values_retrieve
+        '/v1/projects/{project_id}/notebooks/': Endpoints.get_Notebooks_list
+        '/v1/projects/{project_id}/notebooks/{short_id}/': Endpoints.get_Notebooks_retrieve
+        '/v1/projects/{project_id}/notebooks/{short_id}/activity/': Endpoints.get_Notebooks_activity_retrieve_2
+        '/v1/projects/{project_id}/notebooks/activity/': Endpoints.get_Notebooks_activity_retrieve
+        '/v1/projects/{project_id}/notebooks/recording_comments/': Endpoints.get_Notebooks_recording_comments_retrieve
+        '/v1/projects/{project_id}/persisted_folder/': Endpoints.get_Persisted_folder_list
+        '/v1/projects/{project_id}/persisted_folder/{id}/': Endpoints.get_Persisted_folder_retrieve
+        '/v1/projects/{project_id}/persons/': Endpoints.get_Persons_list
+        '/v1/projects/{project_id}/persons/{id}/': Endpoints.get_Persons_retrieve
+        '/v1/projects/{project_id}/persons/{id}/activity/': Endpoints.get_Persons_activity_retrieve_2
+        '/v1/projects/{project_id}/persons/{id}/properties_timeline/': Endpoints.get_Persons_properties_timeline_retrieve
+        '/v1/projects/{project_id}/persons/activity/': Endpoints.get_Persons_activity_retrieve
+        '/v1/projects/{project_id}/persons/cohorts/': Endpoints.get_Persons_cohorts_retrieve
+        '/v1/projects/{project_id}/persons/funnel/': Endpoints.get_Persons_funnel_retrieve
+        '/v1/projects/{project_id}/persons/funnel/correlation/': Endpoints.get_Persons_funnel_correlation_retrieve
+        '/v1/projects/{project_id}/persons/lifecycle/': Endpoints.get_Persons_lifecycle_retrieve
+        '/v1/projects/{project_id}/persons/stickiness/': Endpoints.get_Persons_stickiness_retrieve
+        '/v1/projects/{project_id}/persons/trends/': Endpoints.get_Persons_trends_retrieve
+        '/v1/projects/{project_id}/persons/values/': Endpoints.get_Persons_values_retrieve
+        '/v1/projects/{project_id}/plugin_configs/{plugin_config_id}/logs/': Endpoints.get_Plugin_configs_logs_list
+        '/v1/projects/{project_id}/property_definitions/': Endpoints.get_Property_definitions_list
+        '/v1/projects/{project_id}/property_definitions/{id}/': Endpoints.get_Property_definitions_retrieve
+        '/v1/projects/{project_id}/property_definitions/seen_together/': Endpoints.get_Property_definitions_seen_together_retrieve
+        '/v1/projects/{project_id}/query/{id}/': Endpoints.get_Query_retrieve
+        '/v1/projects/{project_id}/query/{id}/log/': Endpoints.get_Query_log_retrieve
+        '/v1/projects/{project_id}/query/draft_sql/': Endpoints.get_Query_draft_sql_retrieve
+        '/v1/projects/{project_id}/session_recording_playlists/': Endpoints.get_Session_recording_playlists_list
+        '/v1/projects/{project_id}/session_recording_playlists/{short_id}/': Endpoints.get_Session_recording_playlists_retrieve
+        '/v1/projects/{project_id}/session_recording_playlists/{short_id}/recordings/': Endpoints.get_Session_recording_playlists_recordings_retrieve
+        '/v1/projects/{project_id}/session_recordings/': Endpoints.get_Session_recordings_list
+        '/v1/projects/{project_id}/session_recordings/{id}/': Endpoints.get_Session_recordings_retrieve
+        '/v1/projects/{project_id}/session_recordings/{recording_id}/sharing/': Endpoints.get_Session_recordings_sharing_list
+        '/v1/projects/{project_id}/sessions/property_definitions/': Endpoints.get_Sessions_property_definitions_retrieve
+        '/v1/projects/{project_id}/sessions/values/': Endpoints.get_Sessions_values_retrieve
+        '/v1/projects/{project_id}/subscriptions/': Endpoints.get_Subscriptions_list
+        '/v1/projects/{project_id}/subscriptions/{id}/': Endpoints.get_Subscriptions_retrieve
+        '/v1/projects/{project_id}/surveys/': Endpoints.get_Surveys_list
+        '/v1/projects/{project_id}/surveys/{id}/': Endpoints.get_Surveys_retrieve
+        '/v1/projects/{project_id}/surveys/{id}/activity/': Endpoints.get_Surveys_activity_retrieve_2
+        '/v1/projects/{project_id}/surveys/{id}/stats/': Endpoints.get_Surveys_stats_retrieve_2
+        '/v1/projects/{project_id}/surveys/activity/': Endpoints.get_Surveys_activity_retrieve
+        '/v1/projects/{project_id}/surveys/responses_count/': Endpoints.get_Surveys_responses_count_retrieve
+        '/v1/projects/{project_id}/surveys/stats/': Endpoints.get_Surveys_stats_retrieve
+        '/v1/projects/{project_id}/warehouse_saved_queries/': Endpoints.get_Warehouse_saved_queries_list
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/': Endpoints.get_Warehouse_saved_queries_retrieve
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/activity/': Endpoints.get_Warehouse_saved_queries_activity_retrieve
+        '/v1/projects/{project_id}/warehouse_tables/': Endpoints.get_Warehouse_tables_list
+        '/v1/projects/{project_id}/warehouse_tables/{id}/': Endpoints.get_Warehouse_tables_retrieve
+        '/v1/projects/{project_id}/web_analytics/breakdown/': Endpoints.get_Web_analytics_breakdown_retrieve
+        '/v1/projects/{project_id}/web_analytics/overview/': Endpoints.get_Web_analytics_overview_retrieve
+        '/v1/projects/{project_id}/web_experiments/': Endpoints.get_Web_experiments_list
+        '/v1/projects/{project_id}/web_experiments/{id}/': Endpoints.get_Web_experiments_retrieve
+        '/v1/users/': Endpoints.get_Users_list
+        '/v1/users/{uuid}/': Endpoints.get_Users_retrieve
+        '/v1/users/{uuid}/start_2fa_setup/': Endpoints.get_Users_start_2fa_setup_retrieve
+        '/v1/users/{uuid}/two_factor_start_setup/': Endpoints.get_Users_two_factor_start_setup_retrieve
+        '/v1/users/{uuid}/two_factor_status/': Endpoints.get_Users_two_factor_status_retrieve
     }
     post: {
-        '/api/environments/{project_id}/batch_exports/': Endpoints.post_Environments_batch_exports_create
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/backfills/': Endpoints.post_Environments_batch_exports_backfills_create
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/cancel/': Endpoints.post_Environments_batch_exports_backfills_cancel_create
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/cancel/': Endpoints.post_Environments_batch_exports_runs_cancel_create
-        '/api/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/retry/': Endpoints.post_Environments_batch_exports_runs_retry_create
-        '/api/environments/{project_id}/batch_exports/{id}/backfill/': Endpoints.post_Environments_batch_exports_backfill_create
-        '/api/environments/{project_id}/batch_exports/{id}/pause/': Endpoints.post_Environments_batch_exports_pause_create
-        '/api/environments/{project_id}/batch_exports/{id}/run_test_step/': Endpoints.post_Environments_batch_exports_run_test_step_create
-        '/api/environments/{project_id}/batch_exports/{id}/unpause/': Endpoints.post_Environments_batch_exports_unpause_create
-        '/api/environments/{project_id}/batch_exports/run_test_step_new/': Endpoints.post_Environments_batch_exports_run_test_step_new_create
-        '/api/environments/{project_id}/dashboards/': Endpoints.post_Environments_dashboards_create
-        '/api/environments/{project_id}/dashboards/{dashboard_id}/collaborators/': Endpoints.post_Environments_dashboards_collaborators_create
-        '/api/environments/{project_id}/dashboards/{dashboard_id}/sharing/passwords/': Endpoints.post_Environments_dashboards_sharing_passwords_create
-        '/api/environments/{project_id}/dashboards/{dashboard_id}/sharing/refresh/': Endpoints.post_Environments_dashboards_sharing_refresh_create
-        '/api/environments/{project_id}/dashboards/create_from_template_json/': Endpoints.post_Environments_dashboards_create_from_template_json_create
-        '/api/environments/{project_id}/error_tracking/assignment_rules/': Endpoints.post_Environments_error_tracking_assignment_rules_create
-        '/api/environments/{project_id}/error_tracking/grouping_rules/': Endpoints.post_Environments_error_tracking_grouping_rules_create
-        '/api/environments/{project_id}/error_tracking/releases/': Endpoints.post_Environments_error_tracking_releases_create
-        '/api/environments/{project_id}/error_tracking/suppression_rules/': Endpoints.post_Environments_error_tracking_suppression_rules_create
-        '/api/environments/{project_id}/error_tracking/symbol_sets/': Endpoints.post_Environments_error_tracking_symbol_sets_create
-        '/api/environments/{project_id}/error_tracking/symbol_sets/bulk_finish_upload/': Endpoints.post_Environments_error_tracking_symbol_sets_bulk_finish_upload_create
-        '/api/environments/{project_id}/error_tracking/symbol_sets/bulk_start_upload/': Endpoints.post_Environments_error_tracking_symbol_sets_bulk_start_upload_create
-        '/api/environments/{project_id}/error_tracking/symbol_sets/start_upload/': Endpoints.post_Environments_error_tracking_symbol_sets_start_upload_create
-        '/api/environments/{project_id}/explicit_members/': Endpoints.post_Environments_explicit_members_create
-        '/api/environments/{project_id}/exports/': Endpoints.post_Environments_exports_create
-        '/api/environments/{project_id}/file_system/': Endpoints.post_Environments_file_system_create
-        '/api/environments/{project_id}/file_system/{id}/count/': Endpoints.post_Environments_file_system_count_create
-        '/api/environments/{project_id}/file_system/{id}/link/': Endpoints.post_Environments_file_system_link_create
-        '/api/environments/{project_id}/file_system/{id}/move/': Endpoints.post_Environments_file_system_move_create
-        '/api/environments/{project_id}/file_system/count_by_path/': Endpoints.post_Environments_file_system_count_by_path_create
-        '/api/environments/{project_id}/file_system_shortcut/': Endpoints.post_Environments_file_system_shortcut_create
-        '/api/environments/{project_id}/groups/': Endpoints.post_Environments_groups_create
-        '/api/environments/{project_id}/groups/delete_property/': Endpoints.post_Environments_groups_delete_property_create
-        '/api/environments/{project_id}/groups/update_property/': Endpoints.post_Environments_groups_update_property_create
-        '/api/environments/{project_id}/insights_functions/': Endpoints.post_Environments_insights_functions_create
-        '/api/environments/{project_id}/insights_functions/{id}/broadcast/': Endpoints.post_Environments_insights_functions_broadcast_create
-        '/api/environments/{project_id}/insights_functions/{id}/invocations/': Endpoints.post_Environments_insights_functions_invocations_create
-        '/api/environments/{project_id}/insights/': Endpoints.post_Environments_insights_create
-        '/api/environments/{project_id}/insights/{insight_id}/sharing/passwords/': Endpoints.post_Environments_insights_sharing_passwords_create
-        '/api/environments/{project_id}/insights/{insight_id}/sharing/refresh/': Endpoints.post_Environments_insights_sharing_refresh_create
-        '/api/environments/{project_id}/insights/{id}/viewed/': Endpoints.post_Environments_insights_viewed_create
-        '/api/environments/{project_id}/insights/cancel/': Endpoints.post_Environments_insights_cancel_create
-        '/api/environments/{project_id}/logs/query/': Endpoints.post_Environments_logs_query_create
-        '/api/environments/{project_id}/logs/sparkline/': Endpoints.post_Environments_logs_sparkline_create
-        '/api/environments/{project_id}/max_tools/create_and_query_insight/': Endpoints.post_Environments_max_tools_create_and_query_insight_create
-        '/api/environments/{project_id}/persisted_folder/': Endpoints.post_Environments_persisted_folder_create
-        '/api/environments/{project_id}/persons/{id}/delete_events/': Endpoints.post_Environments_persons_delete_events_create
-        '/api/environments/{project_id}/persons/{id}/delete_property/': Endpoints.post_Environments_persons_delete_property_create
-        '/api/environments/{project_id}/persons/{id}/split/': Endpoints.post_Environments_persons_split_create
-        '/api/environments/{project_id}/persons/{id}/update_property/': Endpoints.post_Environments_persons_update_property_create
-        '/api/environments/{project_id}/persons/bulk_delete/': Endpoints.post_Environments_persons_bulk_delete_create
-        '/api/environments/{project_id}/persons/funnel/': Endpoints.post_Environments_persons_funnel_create
-        '/api/environments/{project_id}/persons/funnel/correlation/': Endpoints.post_Environments_persons_funnel_correlation_create
-        '/api/environments/{project_id}/persons/reset_person_distinct_id/': Endpoints.post_Environments_persons_reset_person_distinct_id_create
-        '/api/environments/{project_id}/query/': Endpoints.post_Environments_query_create
-        '/api/environments/{project_id}/query/check_auth_for_async/': Endpoints.post_Environments_query_check_auth_for_async_create
-        '/api/environments/{project_id}/query/upgrade/': Endpoints.post_Environments_query_upgrade_create
-        '/api/environments/{project_id}/session_recording_playlists/': Endpoints.post_Environments_session_recording_playlists_create
-        '/api/environments/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/': Endpoints.post_Environments_session_recording_playlists_recordings_create
-        '/api/environments/{project_id}/session_recordings/{recording_id}/sharing/passwords/': Endpoints.post_Environments_session_recordings_sharing_passwords_create
-        '/api/environments/{project_id}/session_recordings/{recording_id}/sharing/refresh/': Endpoints.post_Environments_session_recordings_sharing_refresh_create
-        '/api/environments/{project_id}/session_summaries/create_session_summaries/': Endpoints.post_Create_session_summaries
-        '/api/environments/{project_id}/subscriptions/': Endpoints.post_Environments_subscriptions_create
-        '/api/environments/{project_id}/user_interviews/': Endpoints.post_Environments_user_interviews_create
-        '/api/environments/{project_id}/warehouse_saved_queries/': Endpoints.post_Environments_warehouse_saved_queries_create
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/ancestors/': Endpoints.post_Environments_warehouse_saved_queries_ancestors_create
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/cancel/': Endpoints.post_Environments_warehouse_saved_queries_cancel_create
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/descendants/': Endpoints.post_Environments_warehouse_saved_queries_descendants_create
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/revert_materialization/': Endpoints.post_Environments_warehouse_saved_queries_revert_materialization_create
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/run/': Endpoints.post_Environments_warehouse_saved_queries_run_create
-        '/api/environments/{project_id}/warehouse_tables/': Endpoints.post_Environments_warehouse_tables_create
-        '/api/environments/{project_id}/warehouse_tables/{id}/refresh_schema/': Endpoints.post_Environments_warehouse_tables_refresh_schema_create
-        '/api/environments/{project_id}/warehouse_tables/{id}/update_schema/': Endpoints.post_Environments_warehouse_tables_update_schema_create
-        '/api/environments/{project_id}/warehouse_tables/file/': Endpoints.post_Environments_warehouse_tables_file_create
-        '/api/organizations/': Endpoints.post_Create
-        '/api/organizations/{organization_id}/batch_exports/': Endpoints.post_Batch_exports_create
-        '/api/organizations/{organization_id}/batch_exports/{id}/backfill/': Endpoints.post_Batch_exports_backfill_create
-        '/api/organizations/{organization_id}/batch_exports/{id}/pause/': Endpoints.post_Batch_exports_pause_create
-        '/api/organizations/{organization_id}/batch_exports/{id}/run_test_step/': Endpoints.post_Batch_exports_run_test_step_create
-        '/api/organizations/{organization_id}/batch_exports/{id}/unpause/': Endpoints.post_Batch_exports_unpause_create
-        '/api/organizations/{organization_id}/batch_exports/run_test_step_new/': Endpoints.post_Batch_exports_run_test_step_new_create
-        '/api/organizations/{organization_id}/domains/': Endpoints.post_Domains_create
-        '/api/organizations/{organization_id}/domains/{id}/verify/': Endpoints.post_Domains_verify_create
-        '/api/organizations/{organization_id}/invites/': Endpoints.post_Invites_create
-        '/api/organizations/{organization_id}/invites/bulk/': Endpoints.post_Invites_bulk_create
-        '/api/organizations/{organization_id}/projects/': Endpoints.post_Create_2
-        '/api/organizations/{organization_id}/projects/{id}/change_organization/': Endpoints.post_Change_organization_create
-        '/api/organizations/{organization_id}/proxy_records/': Endpoints.post_Proxy_records_create
-        '/api/organizations/{organization_id}/roles/': Endpoints.post_Roles_create
-        '/api/organizations/{organization_id}/roles/{role_id}/role_memberships/': Endpoints.post_Roles_role_memberships_create
-        '/api/projects/{project_id}/actions/': Endpoints.post_Actions_create
-        '/api/projects/{project_id}/annotations/': Endpoints.post_Annotations_create
-        '/api/projects/{project_id}/batch_exports/': Endpoints.post_Batch_exports_create_2
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/backfills/': Endpoints.post_Batch_exports_backfills_create
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/cancel/': Endpoints.post_Batch_exports_backfills_cancel_create
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/cancel/': Endpoints.post_Batch_exports_runs_cancel_create
-        '/api/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/retry/': Endpoints.post_Batch_exports_runs_retry_create
-        '/api/projects/{project_id}/batch_exports/{id}/backfill/': Endpoints.post_Batch_exports_backfill_create_2
-        '/api/projects/{project_id}/batch_exports/{id}/pause/': Endpoints.post_Batch_exports_pause_create_2
-        '/api/projects/{project_id}/batch_exports/{id}/run_test_step/': Endpoints.post_Batch_exports_run_test_step_create_2
-        '/api/projects/{project_id}/batch_exports/{id}/unpause/': Endpoints.post_Batch_exports_unpause_create_2
-        '/api/projects/{project_id}/batch_exports/run_test_step_new/': Endpoints.post_Batch_exports_run_test_step_new_create_2
-        '/api/projects/{project_id}/cohorts/': Endpoints.post_Cohorts_create
-        '/api/projects/{project_id}/dashboard_templates/': Endpoints.post_Dashboard_templates_create
-        '/api/projects/{project_id}/dashboards/': Endpoints.post_Dashboards_create
-        '/api/projects/{project_id}/dashboards/{dashboard_id}/collaborators/': Endpoints.post_Dashboards_collaborators_create
-        '/api/projects/{project_id}/dashboards/{dashboard_id}/sharing/passwords/': Endpoints.post_Dashboards_sharing_passwords_create
-        '/api/projects/{project_id}/dashboards/{dashboard_id}/sharing/refresh/': Endpoints.post_Dashboards_sharing_refresh_create
-        '/api/projects/{project_id}/dashboards/create_from_template_json/': Endpoints.post_Dashboards_create_from_template_json_create
-        '/api/projects/{project_id}/early_access_feature/': Endpoints.post_Early_access_feature_create
-        '/api/projects/{project_id}/environments/': Endpoints.post_Environments_create
-        '/api/projects/{project_id}/experiment_holdouts/': Endpoints.post_Experiment_holdouts_create
-        '/api/projects/{project_id}/experiment_saved_metrics/': Endpoints.post_Experiment_saved_metrics_create
-        '/api/projects/{project_id}/experiments/': Endpoints.post_Experiments_create
-        '/api/projects/{project_id}/experiments/{id}/create_exposure_cohort_for_experiment/': Endpoints.post_Experiments_create_exposure_cohort_for_experiment_create
-        '/api/projects/{project_id}/experiments/{id}/duplicate/': Endpoints.post_Experiments_duplicate_create
-        '/api/projects/{project_id}/explicit_members/': Endpoints.post_Explicit_members_create
-        '/api/projects/{project_id}/exports/': Endpoints.post_Exports_create
-        '/api/projects/{project_id}/feature_flags/': Endpoints.post_Feature_flags_create
-        '/api/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/': Endpoints.post_Feature_flags_role_access_create
-        '/api/projects/{project_id}/feature_flags/{id}/create_static_cohort_for_flag/': Endpoints.post_Feature_flags_create_static_cohort_for_flag_create
-        '/api/projects/{project_id}/feature_flags/{id}/dashboard/': Endpoints.post_Feature_flags_dashboard_create
-        '/api/projects/{project_id}/feature_flags/{id}/enrich_usage_dashboard/': Endpoints.post_Feature_flags_enrich_usage_dashboard_create
-        '/api/projects/{project_id}/feature_flags/bulk_keys/': Endpoints.post_Feature_flags_bulk_keys_create
-        '/api/projects/{project_id}/feature_flags/user_blast_radius/': Endpoints.post_Feature_flags_user_blast_radius_create
-        '/api/projects/{project_id}/file_system/': Endpoints.post_File_system_create
-        '/api/projects/{project_id}/file_system/{id}/count/': Endpoints.post_File_system_count_create
-        '/api/projects/{project_id}/file_system/{id}/link/': Endpoints.post_File_system_link_create
-        '/api/projects/{project_id}/file_system/{id}/move/': Endpoints.post_File_system_move_create
-        '/api/projects/{project_id}/file_system/count_by_path/': Endpoints.post_File_system_count_by_path_create
-        '/api/projects/{project_id}/file_system_shortcut/': Endpoints.post_File_system_shortcut_create
-        '/api/projects/{project_id}/groups/': Endpoints.post_Groups_create
-        '/api/projects/{project_id}/groups/delete_property/': Endpoints.post_Groups_delete_property_create
-        '/api/projects/{project_id}/groups/update_property/': Endpoints.post_Groups_update_property_create
-        '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/': Endpoints.post_Groups_types_metrics_create
-        '/api/projects/{project_id}/insights_functions/': Endpoints.post_Custom_functions_create
-        '/api/projects/{project_id}/insights_functions/{id}/broadcast/': Endpoints.post_Custom_functions_broadcast_create
-        '/api/projects/{project_id}/insights_functions/{id}/invocations/': Endpoints.post_Custom_functions_invocations_create
-        '/api/projects/{project_id}/insights/': Endpoints.post_Insights_create
-        '/api/projects/{project_id}/insights/{insight_id}/sharing/passwords/': Endpoints.post_Insights_sharing_passwords_create
-        '/api/projects/{project_id}/insights/{insight_id}/sharing/refresh/': Endpoints.post_Insights_sharing_refresh_create
-        '/api/projects/{project_id}/insights/{id}/viewed/': Endpoints.post_Insights_viewed_create
-        '/api/projects/{project_id}/insights/cancel/': Endpoints.post_Insights_cancel_create
-        '/api/projects/{project_id}/logs/query/': Endpoints.post_Logs_query_create
-        '/api/projects/{project_id}/logs/sparkline/': Endpoints.post_Logs_sparkline_create
-        '/api/projects/{project_id}/notebooks/': Endpoints.post_Notebooks_create
-        '/api/projects/{project_id}/persisted_folder/': Endpoints.post_Persisted_folder_create
-        '/api/projects/{project_id}/persons/{id}/delete_events/': Endpoints.post_Persons_delete_events_create
-        '/api/projects/{project_id}/persons/{id}/delete_property/': Endpoints.post_Persons_delete_property_create
-        '/api/projects/{project_id}/persons/{id}/split/': Endpoints.post_Persons_split_create
-        '/api/projects/{project_id}/persons/{id}/update_property/': Endpoints.post_Persons_update_property_create
-        '/api/projects/{project_id}/persons/bulk_delete/': Endpoints.post_Persons_bulk_delete_create
-        '/api/projects/{project_id}/persons/funnel/': Endpoints.post_Persons_funnel_create
-        '/api/projects/{project_id}/persons/funnel/correlation/': Endpoints.post_Persons_funnel_correlation_create
-        '/api/projects/{project_id}/persons/reset_person_distinct_id/': Endpoints.post_Persons_reset_person_distinct_id_create
-        '/api/projects/{project_id}/query/': Endpoints.post_Query_create
-        '/api/projects/{project_id}/query/check_auth_for_async/': Endpoints.post_Query_check_auth_for_async_create
-        '/api/projects/{project_id}/query/upgrade/': Endpoints.post_Query_upgrade_create
-        '/api/projects/{project_id}/session_recording_playlists/': Endpoints.post_Session_recording_playlists_create
-        '/api/projects/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/': Endpoints.post_Session_recording_playlists_recordings_create
-        '/api/projects/{project_id}/session_recordings/{recording_id}/sharing/passwords/': Endpoints.post_Session_recordings_sharing_passwords_create
-        '/api/projects/{project_id}/session_recordings/{recording_id}/sharing/refresh/': Endpoints.post_Session_recordings_sharing_refresh_create
-        '/api/projects/{project_id}/subscriptions/': Endpoints.post_Subscriptions_create
-        '/api/projects/{project_id}/surveys/': Endpoints.post_Surveys_create
-        '/api/projects/{project_id}/surveys/{id}/summarize_responses/': Endpoints.post_Surveys_summarize_responses_create
-        '/api/projects/{project_id}/warehouse_saved_queries/': Endpoints.post_Warehouse_saved_queries_create
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/ancestors/': Endpoints.post_Warehouse_saved_queries_ancestors_create
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/cancel/': Endpoints.post_Warehouse_saved_queries_cancel_create
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/descendants/': Endpoints.post_Warehouse_saved_queries_descendants_create
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/revert_materialization/': Endpoints.post_Warehouse_saved_queries_revert_materialization_create
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/run/': Endpoints.post_Warehouse_saved_queries_run_create
-        '/api/projects/{project_id}/warehouse_tables/': Endpoints.post_Warehouse_tables_create
-        '/api/projects/{project_id}/warehouse_tables/{id}/refresh_schema/': Endpoints.post_Warehouse_tables_refresh_schema_create
-        '/api/projects/{project_id}/warehouse_tables/{id}/update_schema/': Endpoints.post_Warehouse_tables_update_schema_create
-        '/api/projects/{project_id}/warehouse_tables/file/': Endpoints.post_Warehouse_tables_file_create
-        '/api/projects/{project_id}/web_experiments/': Endpoints.post_Web_experiments_create
-        '/api/users/{uuid}/scene_personalisation/': Endpoints.post_Users_scene_personalisation_create
-        '/api/users/{uuid}/two_factor_backup_codes/': Endpoints.post_Users_two_factor_backup_codes_create
-        '/api/users/{uuid}/two_factor_disable/': Endpoints.post_Users_two_factor_disable_create
-        '/api/users/{uuid}/two_factor_validate/': Endpoints.post_Users_two_factor_validate_create
-        '/api/users/{uuid}/validate_2fa/': Endpoints.post_Users_validate_2fa_create
-        '/api/users/request_email_verification/': Endpoints.post_Users_request_email_verification_create
-        '/api/users/verify_email/': Endpoints.post_Users_verify_email_create
+        '/v1/environments/{project_id}/batch_exports/': Endpoints.post_Environments_batch_exports_create
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/backfills/': Endpoints.post_Environments_batch_exports_backfills_create
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/cancel/': Endpoints.post_Environments_batch_exports_backfills_cancel_create
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/cancel/': Endpoints.post_Environments_batch_exports_runs_cancel_create
+        '/v1/environments/{project_id}/batch_exports/{batch_export_id}/runs/{id}/retry/': Endpoints.post_Environments_batch_exports_runs_retry_create
+        '/v1/environments/{project_id}/batch_exports/{id}/backfill/': Endpoints.post_Environments_batch_exports_backfill_create
+        '/v1/environments/{project_id}/batch_exports/{id}/pause/': Endpoints.post_Environments_batch_exports_pause_create
+        '/v1/environments/{project_id}/batch_exports/{id}/run_test_step/': Endpoints.post_Environments_batch_exports_run_test_step_create
+        '/v1/environments/{project_id}/batch_exports/{id}/unpause/': Endpoints.post_Environments_batch_exports_unpause_create
+        '/v1/environments/{project_id}/batch_exports/run_test_step_new/': Endpoints.post_Environments_batch_exports_run_test_step_new_create
+        '/v1/environments/{project_id}/dashboards/': Endpoints.post_Environments_dashboards_create
+        '/v1/environments/{project_id}/dashboards/{dashboard_id}/collaborators/': Endpoints.post_Environments_dashboards_collaborators_create
+        '/v1/environments/{project_id}/dashboards/{dashboard_id}/sharing/passwords/': Endpoints.post_Environments_dashboards_sharing_passwords_create
+        '/v1/environments/{project_id}/dashboards/{dashboard_id}/sharing/refresh/': Endpoints.post_Environments_dashboards_sharing_refresh_create
+        '/v1/environments/{project_id}/dashboards/create_from_template_json/': Endpoints.post_Environments_dashboards_create_from_template_json_create
+        '/v1/environments/{project_id}/error_tracking/assignment_rules/': Endpoints.post_Environments_error_tracking_assignment_rules_create
+        '/v1/environments/{project_id}/error_tracking/grouping_rules/': Endpoints.post_Environments_error_tracking_grouping_rules_create
+        '/v1/environments/{project_id}/error_tracking/releases/': Endpoints.post_Environments_error_tracking_releases_create
+        '/v1/environments/{project_id}/error_tracking/suppression_rules/': Endpoints.post_Environments_error_tracking_suppression_rules_create
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/': Endpoints.post_Environments_error_tracking_symbol_sets_create
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/bulk_finish_upload/': Endpoints.post_Environments_error_tracking_symbol_sets_bulk_finish_upload_create
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/bulk_start_upload/': Endpoints.post_Environments_error_tracking_symbol_sets_bulk_start_upload_create
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/start_upload/': Endpoints.post_Environments_error_tracking_symbol_sets_start_upload_create
+        '/v1/environments/{project_id}/explicit_members/': Endpoints.post_Environments_explicit_members_create
+        '/v1/environments/{project_id}/exports/': Endpoints.post_Environments_exports_create
+        '/v1/environments/{project_id}/file_system/': Endpoints.post_Environments_file_system_create
+        '/v1/environments/{project_id}/file_system/{id}/count/': Endpoints.post_Environments_file_system_count_create
+        '/v1/environments/{project_id}/file_system/{id}/link/': Endpoints.post_Environments_file_system_link_create
+        '/v1/environments/{project_id}/file_system/{id}/move/': Endpoints.post_Environments_file_system_move_create
+        '/v1/environments/{project_id}/file_system/count_by_path/': Endpoints.post_Environments_file_system_count_by_path_create
+        '/v1/environments/{project_id}/file_system_shortcut/': Endpoints.post_Environments_file_system_shortcut_create
+        '/v1/environments/{project_id}/groups/': Endpoints.post_Environments_groups_create
+        '/v1/environments/{project_id}/groups/delete_property/': Endpoints.post_Environments_groups_delete_property_create
+        '/v1/environments/{project_id}/groups/update_property/': Endpoints.post_Environments_groups_update_property_create
+        '/v1/environments/{project_id}/insights_functions/': Endpoints.post_Environments_insights_functions_create
+        '/v1/environments/{project_id}/insights_functions/{id}/broadcast/': Endpoints.post_Environments_insights_functions_broadcast_create
+        '/v1/environments/{project_id}/insights_functions/{id}/invocations/': Endpoints.post_Environments_insights_functions_invocations_create
+        '/v1/environments/{project_id}/insights/': Endpoints.post_Environments_insights_create
+        '/v1/environments/{project_id}/insights/{insight_id}/sharing/passwords/': Endpoints.post_Environments_insights_sharing_passwords_create
+        '/v1/environments/{project_id}/insights/{insight_id}/sharing/refresh/': Endpoints.post_Environments_insights_sharing_refresh_create
+        '/v1/environments/{project_id}/insights/{id}/viewed/': Endpoints.post_Environments_insights_viewed_create
+        '/v1/environments/{project_id}/insights/cancel/': Endpoints.post_Environments_insights_cancel_create
+        '/v1/environments/{project_id}/logs/query/': Endpoints.post_Environments_logs_query_create
+        '/v1/environments/{project_id}/logs/sparkline/': Endpoints.post_Environments_logs_sparkline_create
+        '/v1/environments/{project_id}/max_tools/create_and_query_insight/': Endpoints.post_Environments_max_tools_create_and_query_insight_create
+        '/v1/environments/{project_id}/persisted_folder/': Endpoints.post_Environments_persisted_folder_create
+        '/v1/environments/{project_id}/persons/{id}/delete_events/': Endpoints.post_Environments_persons_delete_events_create
+        '/v1/environments/{project_id}/persons/{id}/delete_property/': Endpoints.post_Environments_persons_delete_property_create
+        '/v1/environments/{project_id}/persons/{id}/split/': Endpoints.post_Environments_persons_split_create
+        '/v1/environments/{project_id}/persons/{id}/update_property/': Endpoints.post_Environments_persons_update_property_create
+        '/v1/environments/{project_id}/persons/bulk_delete/': Endpoints.post_Environments_persons_bulk_delete_create
+        '/v1/environments/{project_id}/persons/funnel/': Endpoints.post_Environments_persons_funnel_create
+        '/v1/environments/{project_id}/persons/funnel/correlation/': Endpoints.post_Environments_persons_funnel_correlation_create
+        '/v1/environments/{project_id}/persons/reset_person_distinct_id/': Endpoints.post_Environments_persons_reset_person_distinct_id_create
+        '/v1/environments/{project_id}/query/': Endpoints.post_Environments_query_create
+        '/v1/environments/{project_id}/query/check_auth_for_async/': Endpoints.post_Environments_query_check_auth_for_async_create
+        '/v1/environments/{project_id}/query/upgrade/': Endpoints.post_Environments_query_upgrade_create
+        '/v1/environments/{project_id}/session_recording_playlists/': Endpoints.post_Environments_session_recording_playlists_create
+        '/v1/environments/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/': Endpoints.post_Environments_session_recording_playlists_recordings_create
+        '/v1/environments/{project_id}/session_recordings/{recording_id}/sharing/passwords/': Endpoints.post_Environments_session_recordings_sharing_passwords_create
+        '/v1/environments/{project_id}/session_recordings/{recording_id}/sharing/refresh/': Endpoints.post_Environments_session_recordings_sharing_refresh_create
+        '/v1/environments/{project_id}/session_summaries/create_session_summaries/': Endpoints.post_Create_session_summaries
+        '/v1/environments/{project_id}/subscriptions/': Endpoints.post_Environments_subscriptions_create
+        '/v1/environments/{project_id}/user_interviews/': Endpoints.post_Environments_user_interviews_create
+        '/v1/environments/{project_id}/warehouse_saved_queries/': Endpoints.post_Environments_warehouse_saved_queries_create
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/ancestors/': Endpoints.post_Environments_warehouse_saved_queries_ancestors_create
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/cancel/': Endpoints.post_Environments_warehouse_saved_queries_cancel_create
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/descendants/': Endpoints.post_Environments_warehouse_saved_queries_descendants_create
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/revert_materialization/': Endpoints.post_Environments_warehouse_saved_queries_revert_materialization_create
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/run/': Endpoints.post_Environments_warehouse_saved_queries_run_create
+        '/v1/environments/{project_id}/warehouse_tables/': Endpoints.post_Environments_warehouse_tables_create
+        '/v1/environments/{project_id}/warehouse_tables/{id}/refresh_schema/': Endpoints.post_Environments_warehouse_tables_refresh_schema_create
+        '/v1/environments/{project_id}/warehouse_tables/{id}/update_schema/': Endpoints.post_Environments_warehouse_tables_update_schema_create
+        '/v1/environments/{project_id}/warehouse_tables/file/': Endpoints.post_Environments_warehouse_tables_file_create
+        '/v1/organizations/': Endpoints.post_Create
+        '/v1/organizations/{organization_id}/batch_exports/': Endpoints.post_Batch_exports_create
+        '/v1/organizations/{organization_id}/batch_exports/{id}/backfill/': Endpoints.post_Batch_exports_backfill_create
+        '/v1/organizations/{organization_id}/batch_exports/{id}/pause/': Endpoints.post_Batch_exports_pause_create
+        '/v1/organizations/{organization_id}/batch_exports/{id}/run_test_step/': Endpoints.post_Batch_exports_run_test_step_create
+        '/v1/organizations/{organization_id}/batch_exports/{id}/unpause/': Endpoints.post_Batch_exports_unpause_create
+        '/v1/organizations/{organization_id}/batch_exports/run_test_step_new/': Endpoints.post_Batch_exports_run_test_step_new_create
+        '/v1/organizations/{organization_id}/domains/': Endpoints.post_Domains_create
+        '/v1/organizations/{organization_id}/domains/{id}/verify/': Endpoints.post_Domains_verify_create
+        '/v1/organizations/{organization_id}/invites/': Endpoints.post_Invites_create
+        '/v1/organizations/{organization_id}/invites/bulk/': Endpoints.post_Invites_bulk_create
+        '/v1/organizations/{organization_id}/projects/': Endpoints.post_Create_2
+        '/v1/organizations/{organization_id}/projects/{id}/change_organization/': Endpoints.post_Change_organization_create
+        '/v1/organizations/{organization_id}/proxy_records/': Endpoints.post_Proxy_records_create
+        '/v1/organizations/{organization_id}/roles/': Endpoints.post_Roles_create
+        '/v1/organizations/{organization_id}/roles/{role_id}/role_memberships/': Endpoints.post_Roles_role_memberships_create
+        '/v1/projects/{project_id}/actions/': Endpoints.post_Actions_create
+        '/v1/projects/{project_id}/annotations/': Endpoints.post_Annotations_create
+        '/v1/projects/{project_id}/batch_exports/': Endpoints.post_Batch_exports_create_2
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/backfills/': Endpoints.post_Batch_exports_backfills_create
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/backfills/{id}/cancel/': Endpoints.post_Batch_exports_backfills_cancel_create
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/cancel/': Endpoints.post_Batch_exports_runs_cancel_create
+        '/v1/projects/{project_id}/batch_exports/{batch_export_id}/runs/{id}/retry/': Endpoints.post_Batch_exports_runs_retry_create
+        '/v1/projects/{project_id}/batch_exports/{id}/backfill/': Endpoints.post_Batch_exports_backfill_create_2
+        '/v1/projects/{project_id}/batch_exports/{id}/pause/': Endpoints.post_Batch_exports_pause_create_2
+        '/v1/projects/{project_id}/batch_exports/{id}/run_test_step/': Endpoints.post_Batch_exports_run_test_step_create_2
+        '/v1/projects/{project_id}/batch_exports/{id}/unpause/': Endpoints.post_Batch_exports_unpause_create_2
+        '/v1/projects/{project_id}/batch_exports/run_test_step_new/': Endpoints.post_Batch_exports_run_test_step_new_create_2
+        '/v1/projects/{project_id}/cohorts/': Endpoints.post_Cohorts_create
+        '/v1/projects/{project_id}/dashboard_templates/': Endpoints.post_Dashboard_templates_create
+        '/v1/projects/{project_id}/dashboards/': Endpoints.post_Dashboards_create
+        '/v1/projects/{project_id}/dashboards/{dashboard_id}/collaborators/': Endpoints.post_Dashboards_collaborators_create
+        '/v1/projects/{project_id}/dashboards/{dashboard_id}/sharing/passwords/': Endpoints.post_Dashboards_sharing_passwords_create
+        '/v1/projects/{project_id}/dashboards/{dashboard_id}/sharing/refresh/': Endpoints.post_Dashboards_sharing_refresh_create
+        '/v1/projects/{project_id}/dashboards/create_from_template_json/': Endpoints.post_Dashboards_create_from_template_json_create
+        '/v1/projects/{project_id}/early_access_feature/': Endpoints.post_Early_access_feature_create
+        '/v1/projects/{project_id}/environments/': Endpoints.post_Environments_create
+        '/v1/projects/{project_id}/experiment_holdouts/': Endpoints.post_Experiment_holdouts_create
+        '/v1/projects/{project_id}/experiment_saved_metrics/': Endpoints.post_Experiment_saved_metrics_create
+        '/v1/projects/{project_id}/experiments/': Endpoints.post_Experiments_create
+        '/v1/projects/{project_id}/experiments/{id}/create_exposure_cohort_for_experiment/': Endpoints.post_Experiments_create_exposure_cohort_for_experiment_create
+        '/v1/projects/{project_id}/experiments/{id}/duplicate/': Endpoints.post_Experiments_duplicate_create
+        '/v1/projects/{project_id}/explicit_members/': Endpoints.post_Explicit_members_create
+        '/v1/projects/{project_id}/exports/': Endpoints.post_Exports_create
+        '/v1/projects/{project_id}/feature_flags/': Endpoints.post_Feature_flags_create
+        '/v1/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/': Endpoints.post_Feature_flags_role_access_create
+        '/v1/projects/{project_id}/feature_flags/{id}/create_static_cohort_for_flag/': Endpoints.post_Feature_flags_create_static_cohort_for_flag_create
+        '/v1/projects/{project_id}/feature_flags/{id}/dashboard/': Endpoints.post_Feature_flags_dashboard_create
+        '/v1/projects/{project_id}/feature_flags/{id}/enrich_usage_dashboard/': Endpoints.post_Feature_flags_enrich_usage_dashboard_create
+        '/v1/projects/{project_id}/feature_flags/bulk_keys/': Endpoints.post_Feature_flags_bulk_keys_create
+        '/v1/projects/{project_id}/feature_flags/user_blast_radius/': Endpoints.post_Feature_flags_user_blast_radius_create
+        '/v1/projects/{project_id}/file_system/': Endpoints.post_File_system_create
+        '/v1/projects/{project_id}/file_system/{id}/count/': Endpoints.post_File_system_count_create
+        '/v1/projects/{project_id}/file_system/{id}/link/': Endpoints.post_File_system_link_create
+        '/v1/projects/{project_id}/file_system/{id}/move/': Endpoints.post_File_system_move_create
+        '/v1/projects/{project_id}/file_system/count_by_path/': Endpoints.post_File_system_count_by_path_create
+        '/v1/projects/{project_id}/file_system_shortcut/': Endpoints.post_File_system_shortcut_create
+        '/v1/projects/{project_id}/groups/': Endpoints.post_Groups_create
+        '/v1/projects/{project_id}/groups/delete_property/': Endpoints.post_Groups_delete_property_create
+        '/v1/projects/{project_id}/groups/update_property/': Endpoints.post_Groups_update_property_create
+        '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/': Endpoints.post_Groups_types_metrics_create
+        '/v1/projects/{project_id}/insights_functions/': Endpoints.post_Custom_functions_create
+        '/v1/projects/{project_id}/insights_functions/{id}/broadcast/': Endpoints.post_Custom_functions_broadcast_create
+        '/v1/projects/{project_id}/insights_functions/{id}/invocations/': Endpoints.post_Custom_functions_invocations_create
+        '/v1/projects/{project_id}/insights/': Endpoints.post_Insights_create
+        '/v1/projects/{project_id}/insights/{insight_id}/sharing/passwords/': Endpoints.post_Insights_sharing_passwords_create
+        '/v1/projects/{project_id}/insights/{insight_id}/sharing/refresh/': Endpoints.post_Insights_sharing_refresh_create
+        '/v1/projects/{project_id}/insights/{id}/viewed/': Endpoints.post_Insights_viewed_create
+        '/v1/projects/{project_id}/insights/cancel/': Endpoints.post_Insights_cancel_create
+        '/v1/projects/{project_id}/logs/query/': Endpoints.post_Logs_query_create
+        '/v1/projects/{project_id}/logs/sparkline/': Endpoints.post_Logs_sparkline_create
+        '/v1/projects/{project_id}/notebooks/': Endpoints.post_Notebooks_create
+        '/v1/projects/{project_id}/persisted_folder/': Endpoints.post_Persisted_folder_create
+        '/v1/projects/{project_id}/persons/{id}/delete_events/': Endpoints.post_Persons_delete_events_create
+        '/v1/projects/{project_id}/persons/{id}/delete_property/': Endpoints.post_Persons_delete_property_create
+        '/v1/projects/{project_id}/persons/{id}/split/': Endpoints.post_Persons_split_create
+        '/v1/projects/{project_id}/persons/{id}/update_property/': Endpoints.post_Persons_update_property_create
+        '/v1/projects/{project_id}/persons/bulk_delete/': Endpoints.post_Persons_bulk_delete_create
+        '/v1/projects/{project_id}/persons/funnel/': Endpoints.post_Persons_funnel_create
+        '/v1/projects/{project_id}/persons/funnel/correlation/': Endpoints.post_Persons_funnel_correlation_create
+        '/v1/projects/{project_id}/persons/reset_person_distinct_id/': Endpoints.post_Persons_reset_person_distinct_id_create
+        '/v1/projects/{project_id}/query/': Endpoints.post_Query_create
+        '/v1/projects/{project_id}/query/check_auth_for_async/': Endpoints.post_Query_check_auth_for_async_create
+        '/v1/projects/{project_id}/query/upgrade/': Endpoints.post_Query_upgrade_create
+        '/v1/projects/{project_id}/session_recording_playlists/': Endpoints.post_Session_recording_playlists_create
+        '/v1/projects/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/': Endpoints.post_Session_recording_playlists_recordings_create
+        '/v1/projects/{project_id}/session_recordings/{recording_id}/sharing/passwords/': Endpoints.post_Session_recordings_sharing_passwords_create
+        '/v1/projects/{project_id}/session_recordings/{recording_id}/sharing/refresh/': Endpoints.post_Session_recordings_sharing_refresh_create
+        '/v1/projects/{project_id}/subscriptions/': Endpoints.post_Subscriptions_create
+        '/v1/projects/{project_id}/surveys/': Endpoints.post_Surveys_create
+        '/v1/projects/{project_id}/surveys/{id}/summarize_responses/': Endpoints.post_Surveys_summarize_responses_create
+        '/v1/projects/{project_id}/warehouse_saved_queries/': Endpoints.post_Warehouse_saved_queries_create
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/ancestors/': Endpoints.post_Warehouse_saved_queries_ancestors_create
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/cancel/': Endpoints.post_Warehouse_saved_queries_cancel_create
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/descendants/': Endpoints.post_Warehouse_saved_queries_descendants_create
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/revert_materialization/': Endpoints.post_Warehouse_saved_queries_revert_materialization_create
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/run/': Endpoints.post_Warehouse_saved_queries_run_create
+        '/v1/projects/{project_id}/warehouse_tables/': Endpoints.post_Warehouse_tables_create
+        '/v1/projects/{project_id}/warehouse_tables/{id}/refresh_schema/': Endpoints.post_Warehouse_tables_refresh_schema_create
+        '/v1/projects/{project_id}/warehouse_tables/{id}/update_schema/': Endpoints.post_Warehouse_tables_update_schema_create
+        '/v1/projects/{project_id}/warehouse_tables/file/': Endpoints.post_Warehouse_tables_file_create
+        '/v1/projects/{project_id}/web_experiments/': Endpoints.post_Web_experiments_create
+        '/v1/users/{uuid}/scene_personalisation/': Endpoints.post_Users_scene_personalisation_create
+        '/v1/users/{uuid}/two_factor_backup_codes/': Endpoints.post_Users_two_factor_backup_codes_create
+        '/v1/users/{uuid}/two_factor_disable/': Endpoints.post_Users_two_factor_disable_create
+        '/v1/users/{uuid}/two_factor_validate/': Endpoints.post_Users_two_factor_validate_create
+        '/v1/users/{uuid}/validate_2fa/': Endpoints.post_Users_validate_2fa_create
+        '/v1/users/request_email_verification/': Endpoints.post_Users_request_email_verification_create
+        '/v1/users/verify_email/': Endpoints.post_Users_verify_email_create
     }
     put: {
-        '/api/environments/{project_id}/batch_exports/{id}/': Endpoints.put_Environments_batch_exports_update
-        '/api/environments/{project_id}/dashboards/{id}/': Endpoints.put_Environments_dashboards_update
-        '/api/environments/{project_id}/error_tracking/assignment_rules/{id}/': Endpoints.put_Environments_error_tracking_assignment_rules_update
-        '/api/environments/{project_id}/error_tracking/grouping_rules/{id}/': Endpoints.put_Environments_error_tracking_grouping_rules_update
-        '/api/environments/{project_id}/error_tracking/releases/{id}/': Endpoints.put_Environments_error_tracking_releases_update
-        '/api/environments/{project_id}/error_tracking/suppression_rules/{id}/': Endpoints.put_Environments_error_tracking_suppression_rules_update
-        '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/': Endpoints.put_Environments_error_tracking_symbol_sets_update
-        '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/finish_upload/': Endpoints.put_Environments_error_tracking_symbol_sets_finish_upload_update
-        '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.put_Environments_explicit_members_update
-        '/api/environments/{project_id}/file_system/{id}/': Endpoints.put_Environments_file_system_update
-        '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.put_Environments_file_system_shortcut_update
-        '/api/environments/{project_id}/insights_functions/{id}/': Endpoints.put_Environments_insights_functions_update
-        '/api/environments/{project_id}/insights/{id}/': Endpoints.put_Environments_insights_update
-        '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.put_Environments_persisted_folder_update
-        '/api/environments/{project_id}/persons/{id}/': Endpoints.put_Environments_persons_update
-        '/api/environments/{project_id}/session_recording_playlists/{short_id}/': Endpoints.put_Environments_session_recording_playlists_update
-        '/api/environments/{project_id}/session_recordings/{id}/': Endpoints.put_Environments_session_recordings_update
-        '/api/environments/{project_id}/subscriptions/{id}/': Endpoints.put_Environments_subscriptions_update
-        '/api/environments/{project_id}/user_interviews/{id}/': Endpoints.put_Environments_user_interviews_update
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/': Endpoints.put_Environments_warehouse_saved_queries_update
-        '/api/environments/{project_id}/warehouse_tables/{id}/': Endpoints.put_Environments_warehouse_tables_update
-        '/api/organizations/{id}/': Endpoints.put_Update
-        '/api/organizations/{organization_id}/batch_exports/{id}/': Endpoints.put_Batch_exports_update
-        '/api/organizations/{organization_id}/domains/{id}/': Endpoints.put_Domains_update
-        '/api/organizations/{organization_id}/members/{user__uuid}/': Endpoints.put_Members_update
-        '/api/organizations/{organization_id}/projects/{id}/': Endpoints.put_Update_2
-        '/api/organizations/{organization_id}/proxy_records/{id}/': Endpoints.put_Proxy_records_update
-        '/api/organizations/{organization_id}/roles/{id}/': Endpoints.put_Roles_update
-        '/api/projects/{project_id}/actions/{id}/': Endpoints.put_Actions_update
-        '/api/projects/{project_id}/annotations/{id}/': Endpoints.put_Annotations_update
-        '/api/projects/{project_id}/batch_exports/{id}/': Endpoints.put_Batch_exports_update_2
-        '/api/projects/{project_id}/cohorts/{id}/': Endpoints.put_Cohorts_update
-        '/api/projects/{project_id}/dashboard_templates/{id}/': Endpoints.put_Dashboard_templates_update
-        '/api/projects/{project_id}/dashboards/{id}/': Endpoints.put_Dashboards_update
-        '/api/projects/{project_id}/early_access_feature/{id}/': Endpoints.put_Early_access_feature_update
-        '/api/projects/{project_id}/environments/{id}/': Endpoints.put_Environments_update
-        '/api/projects/{project_id}/event_definitions/{id}/': Endpoints.put_Event_definitions_update
-        '/api/projects/{project_id}/experiment_holdouts/{id}/': Endpoints.put_Experiment_holdouts_update
-        '/api/projects/{project_id}/experiment_saved_metrics/{id}/': Endpoints.put_Experiment_saved_metrics_update
-        '/api/projects/{project_id}/experiments/{id}/': Endpoints.put_Experiments_update
-        '/api/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.put_Explicit_members_update
-        '/api/projects/{project_id}/feature_flags/{id}/': Endpoints.put_Feature_flags_update
-        '/api/projects/{project_id}/file_system/{id}/': Endpoints.put_File_system_update
-        '/api/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.put_File_system_shortcut_update
-        '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.put_Groups_types_metrics_update
-        '/api/projects/{project_id}/groups_types/create_detail_dashboard/': Endpoints.put_Groups_types_create_detail_dashboard_update
-        '/api/projects/{project_id}/groups_types/set_default_columns/': Endpoints.put_Groups_types_set_default_columns_update
-        '/api/projects/{project_id}/insights_functions/{id}/': Endpoints.put_Custom_functions_update
-        '/api/projects/{project_id}/insights/{id}/': Endpoints.put_Insights_update
-        '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.put_Notebooks_update
-        '/api/projects/{project_id}/persisted_folder/{id}/': Endpoints.put_Persisted_folder_update
-        '/api/projects/{project_id}/persons/{id}/': Endpoints.put_Persons_update
-        '/api/projects/{project_id}/property_definitions/{id}/': Endpoints.put_Property_definitions_update
-        '/api/projects/{project_id}/session_recording_playlists/{short_id}/': Endpoints.put_Session_recording_playlists_update
-        '/api/projects/{project_id}/session_recordings/{id}/': Endpoints.put_Session_recordings_update
-        '/api/projects/{project_id}/subscriptions/{id}/': Endpoints.put_Subscriptions_update
-        '/api/projects/{project_id}/surveys/{id}/': Endpoints.put_Surveys_update
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/': Endpoints.put_Warehouse_saved_queries_update
-        '/api/projects/{project_id}/warehouse_tables/{id}/': Endpoints.put_Warehouse_tables_update
-        '/api/projects/{project_id}/web_experiments/{id}/': Endpoints.put_Web_experiments_update
-        '/api/users/{uuid}/': Endpoints.put_Users_update
+        '/v1/environments/{project_id}/batch_exports/{id}/': Endpoints.put_Environments_batch_exports_update
+        '/v1/environments/{project_id}/dashboards/{id}/': Endpoints.put_Environments_dashboards_update
+        '/v1/environments/{project_id}/error_tracking/assignment_rules/{id}/': Endpoints.put_Environments_error_tracking_assignment_rules_update
+        '/v1/environments/{project_id}/error_tracking/grouping_rules/{id}/': Endpoints.put_Environments_error_tracking_grouping_rules_update
+        '/v1/environments/{project_id}/error_tracking/releases/{id}/': Endpoints.put_Environments_error_tracking_releases_update
+        '/v1/environments/{project_id}/error_tracking/suppression_rules/{id}/': Endpoints.put_Environments_error_tracking_suppression_rules_update
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/': Endpoints.put_Environments_error_tracking_symbol_sets_update
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/finish_upload/': Endpoints.put_Environments_error_tracking_symbol_sets_finish_upload_update
+        '/v1/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.put_Environments_explicit_members_update
+        '/v1/environments/{project_id}/file_system/{id}/': Endpoints.put_Environments_file_system_update
+        '/v1/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.put_Environments_file_system_shortcut_update
+        '/v1/environments/{project_id}/insights_functions/{id}/': Endpoints.put_Environments_insights_functions_update
+        '/v1/environments/{project_id}/insights/{id}/': Endpoints.put_Environments_insights_update
+        '/v1/environments/{project_id}/persisted_folder/{id}/': Endpoints.put_Environments_persisted_folder_update
+        '/v1/environments/{project_id}/persons/{id}/': Endpoints.put_Environments_persons_update
+        '/v1/environments/{project_id}/session_recording_playlists/{short_id}/': Endpoints.put_Environments_session_recording_playlists_update
+        '/v1/environments/{project_id}/session_recordings/{id}/': Endpoints.put_Environments_session_recordings_update
+        '/v1/environments/{project_id}/subscriptions/{id}/': Endpoints.put_Environments_subscriptions_update
+        '/v1/environments/{project_id}/user_interviews/{id}/': Endpoints.put_Environments_user_interviews_update
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/': Endpoints.put_Environments_warehouse_saved_queries_update
+        '/v1/environments/{project_id}/warehouse_tables/{id}/': Endpoints.put_Environments_warehouse_tables_update
+        '/v1/organizations/{id}/': Endpoints.put_Update
+        '/v1/organizations/{organization_id}/batch_exports/{id}/': Endpoints.put_Batch_exports_update
+        '/v1/organizations/{organization_id}/domains/{id}/': Endpoints.put_Domains_update
+        '/v1/organizations/{organization_id}/members/{user__uuid}/': Endpoints.put_Members_update
+        '/v1/organizations/{organization_id}/projects/{id}/': Endpoints.put_Update_2
+        '/v1/organizations/{organization_id}/proxy_records/{id}/': Endpoints.put_Proxy_records_update
+        '/v1/organizations/{organization_id}/roles/{id}/': Endpoints.put_Roles_update
+        '/v1/projects/{project_id}/actions/{id}/': Endpoints.put_Actions_update
+        '/v1/projects/{project_id}/annotations/{id}/': Endpoints.put_Annotations_update
+        '/v1/projects/{project_id}/batch_exports/{id}/': Endpoints.put_Batch_exports_update_2
+        '/v1/projects/{project_id}/cohorts/{id}/': Endpoints.put_Cohorts_update
+        '/v1/projects/{project_id}/dashboard_templates/{id}/': Endpoints.put_Dashboard_templates_update
+        '/v1/projects/{project_id}/dashboards/{id}/': Endpoints.put_Dashboards_update
+        '/v1/projects/{project_id}/early_access_feature/{id}/': Endpoints.put_Early_access_feature_update
+        '/v1/projects/{project_id}/environments/{id}/': Endpoints.put_Environments_update
+        '/v1/projects/{project_id}/event_definitions/{id}/': Endpoints.put_Event_definitions_update
+        '/v1/projects/{project_id}/experiment_holdouts/{id}/': Endpoints.put_Experiment_holdouts_update
+        '/v1/projects/{project_id}/experiment_saved_metrics/{id}/': Endpoints.put_Experiment_saved_metrics_update
+        '/v1/projects/{project_id}/experiments/{id}/': Endpoints.put_Experiments_update
+        '/v1/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.put_Explicit_members_update
+        '/v1/projects/{project_id}/feature_flags/{id}/': Endpoints.put_Feature_flags_update
+        '/v1/projects/{project_id}/file_system/{id}/': Endpoints.put_File_system_update
+        '/v1/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.put_File_system_shortcut_update
+        '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.put_Groups_types_metrics_update
+        '/v1/projects/{project_id}/groups_types/create_detail_dashboard/': Endpoints.put_Groups_types_create_detail_dashboard_update
+        '/v1/projects/{project_id}/groups_types/set_default_columns/': Endpoints.put_Groups_types_set_default_columns_update
+        '/v1/projects/{project_id}/insights_functions/{id}/': Endpoints.put_Custom_functions_update
+        '/v1/projects/{project_id}/insights/{id}/': Endpoints.put_Insights_update
+        '/v1/projects/{project_id}/notebooks/{short_id}/': Endpoints.put_Notebooks_update
+        '/v1/projects/{project_id}/persisted_folder/{id}/': Endpoints.put_Persisted_folder_update
+        '/v1/projects/{project_id}/persons/{id}/': Endpoints.put_Persons_update
+        '/v1/projects/{project_id}/property_definitions/{id}/': Endpoints.put_Property_definitions_update
+        '/v1/projects/{project_id}/session_recording_playlists/{short_id}/': Endpoints.put_Session_recording_playlists_update
+        '/v1/projects/{project_id}/session_recordings/{id}/': Endpoints.put_Session_recordings_update
+        '/v1/projects/{project_id}/subscriptions/{id}/': Endpoints.put_Subscriptions_update
+        '/v1/projects/{project_id}/surveys/{id}/': Endpoints.put_Surveys_update
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/': Endpoints.put_Warehouse_saved_queries_update
+        '/v1/projects/{project_id}/warehouse_tables/{id}/': Endpoints.put_Warehouse_tables_update
+        '/v1/projects/{project_id}/web_experiments/{id}/': Endpoints.put_Web_experiments_update
+        '/v1/users/{uuid}/': Endpoints.put_Users_update
     }
     patch: {
-        '/api/environments/{project_id}/batch_exports/{id}/': Endpoints.patch_Environments_batch_exports_partial_update
-        '/api/environments/{project_id}/dashboards/{id}/': Endpoints.patch_Environments_dashboards_partial_update
-        '/api/environments/{project_id}/dashboards/{id}/move_tile/': Endpoints.patch_Environments_dashboards_move_tile_partial_update
-        '/api/environments/{project_id}/error_tracking/assignment_rules/{id}/': Endpoints.patch_Environments_error_tracking_assignment_rules_partial_update
-        '/api/environments/{project_id}/error_tracking/assignment_rules/reorder/': Endpoints.patch_Environments_error_tracking_assignment_rules_reorder_partial_update
-        '/api/environments/{project_id}/error_tracking/grouping_rules/{id}/': Endpoints.patch_Environments_error_tracking_grouping_rules_partial_update
-        '/api/environments/{project_id}/error_tracking/grouping_rules/reorder/': Endpoints.patch_Environments_error_tracking_grouping_rules_reorder_partial_update
-        '/api/environments/{project_id}/error_tracking/releases/{id}/': Endpoints.patch_Environments_error_tracking_releases_partial_update
-        '/api/environments/{project_id}/error_tracking/suppression_rules/{id}/': Endpoints.patch_Environments_error_tracking_suppression_rules_partial_update
-        '/api/environments/{project_id}/error_tracking/suppression_rules/reorder/': Endpoints.patch_Environments_error_tracking_suppression_rules_reorder_partial_update
-        '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/': Endpoints.patch_Environments_error_tracking_symbol_sets_partial_update
-        '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.patch_Environments_explicit_members_partial_update
-        '/api/environments/{project_id}/file_system/{id}/': Endpoints.patch_Environments_file_system_partial_update
-        '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.patch_Environments_file_system_shortcut_partial_update
-        '/api/environments/{project_id}/insights_functions/{id}/': Endpoints.patch_Environments_insights_functions_partial_update
-        '/api/environments/{project_id}/insights_functions/rearrange/': Endpoints.patch_Environments_insights_functions_rearrange_partial_update
-        '/api/environments/{project_id}/insights/{id}/': Endpoints.patch_Environments_insights_partial_update
-        '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.patch_Environments_persisted_folder_partial_update
-        '/api/environments/{project_id}/persons/{id}/': Endpoints.patch_Environments_persons_partial_update
-        '/api/environments/{project_id}/session_recording_playlists/{short_id}/': Endpoints.patch_Environments_session_recording_playlists_partial_update
-        '/api/environments/{project_id}/session_recordings/{id}/': Endpoints.patch_Environments_session_recordings_partial_update
-        '/api/environments/{project_id}/subscriptions/{id}/': Endpoints.patch_Environments_subscriptions_partial_update
-        '/api/environments/{project_id}/user_interviews/{id}/': Endpoints.patch_Environments_user_interviews_partial_update
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/': Endpoints.patch_Environments_warehouse_saved_queries_partial_update
-        '/api/environments/{project_id}/warehouse_tables/{id}/': Endpoints.patch_Environments_warehouse_tables_partial_update
-        '/api/organizations/{id}/': Endpoints.patch_Partial_update
-        '/api/organizations/{organization_id}/batch_exports/{id}/': Endpoints.patch_Batch_exports_partial_update
-        '/api/organizations/{organization_id}/domains/{id}/': Endpoints.patch_Domains_partial_update
-        '/api/organizations/{organization_id}/members/{user__uuid}/': Endpoints.patch_Members_partial_update
-        '/api/organizations/{organization_id}/projects/{id}/': Endpoints.patch_Partial_update_2
-        '/api/organizations/{organization_id}/projects/{id}/add_product_intent/': Endpoints.patch_Add_product_intent_partial_update
-        '/api/organizations/{organization_id}/projects/{id}/complete_product_onboarding/': Endpoints.patch_Complete_product_onboarding_partial_update
-        '/api/organizations/{organization_id}/projects/{id}/delete_secret_token_backup/': Endpoints.patch_Delete_secret_token_backup_partial_update
-        '/api/organizations/{organization_id}/projects/{id}/reset_token/': Endpoints.patch_Reset_token_partial_update
-        '/api/organizations/{organization_id}/projects/{id}/rotate_secret_token/': Endpoints.patch_Rotate_secret_token_partial_update
-        '/api/organizations/{organization_id}/proxy_records/{id}/': Endpoints.patch_Proxy_records_partial_update
-        '/api/organizations/{organization_id}/roles/{id}/': Endpoints.patch_Roles_partial_update
-        '/api/projects/{project_id}/actions/{id}/': Endpoints.patch_Actions_partial_update
-        '/api/projects/{project_id}/annotations/{id}/': Endpoints.patch_Annotations_partial_update
-        '/api/projects/{project_id}/batch_exports/{id}/': Endpoints.patch_Batch_exports_partial_update_2
-        '/api/projects/{project_id}/cohorts/{id}/': Endpoints.patch_Cohorts_partial_update
-        '/api/projects/{project_id}/cohorts/{id}/add_persons_to_static_cohort/': Endpoints.patch_Cohorts_add_persons_to_static_cohort_partial_update
-        '/api/projects/{project_id}/dashboard_templates/{id}/': Endpoints.patch_Dashboard_templates_partial_update
-        '/api/projects/{project_id}/dashboards/{id}/': Endpoints.patch_Dashboards_partial_update
-        '/api/projects/{project_id}/dashboards/{id}/move_tile/': Endpoints.patch_Dashboards_move_tile_partial_update
-        '/api/projects/{project_id}/early_access_feature/{id}/': Endpoints.patch_Early_access_feature_partial_update
-        '/api/projects/{project_id}/environments/{id}/': Endpoints.patch_Environments_partial_update
-        '/api/projects/{project_id}/environments/{id}/add_product_intent/': Endpoints.patch_Environments_add_product_intent_partial_update
-        '/api/projects/{project_id}/environments/{id}/complete_product_onboarding/': Endpoints.patch_Environments_complete_product_onboarding_partial_update
-        '/api/projects/{project_id}/environments/{id}/delete_secret_token_backup/': Endpoints.patch_Environments_delete_secret_token_backup_partial_update
-        '/api/projects/{project_id}/environments/{id}/reset_token/': Endpoints.patch_Environments_reset_token_partial_update
-        '/api/projects/{project_id}/environments/{id}/rotate_secret_token/': Endpoints.patch_Environments_rotate_secret_token_partial_update
-        '/api/projects/{project_id}/event_definitions/{id}/': Endpoints.patch_Event_definitions_partial_update
-        '/api/projects/{project_id}/experiment_holdouts/{id}/': Endpoints.patch_Experiment_holdouts_partial_update
-        '/api/projects/{project_id}/experiment_saved_metrics/{id}/': Endpoints.patch_Experiment_saved_metrics_partial_update
-        '/api/projects/{project_id}/experiments/{id}/': Endpoints.patch_Experiments_partial_update
-        '/api/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.patch_Explicit_members_partial_update
-        '/api/projects/{project_id}/feature_flags/{id}/': Endpoints.patch_Feature_flags_partial_update
-        '/api/projects/{project_id}/file_system/{id}/': Endpoints.patch_File_system_partial_update
-        '/api/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.patch_File_system_shortcut_partial_update
-        '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.patch_Groups_types_metrics_partial_update
-        '/api/projects/{project_id}/groups_types/update_metadata/': Endpoints.patch_Groups_types_update_metadata_partial_update
-        '/api/projects/{project_id}/insights_functions/{id}/': Endpoints.patch_Custom_functions_partial_update
-        '/api/projects/{project_id}/insights_functions/rearrange/': Endpoints.patch_Custom_functions_rearrange_partial_update
-        '/api/projects/{project_id}/insights/{id}/': Endpoints.patch_Insights_partial_update
-        '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.patch_Notebooks_partial_update
-        '/api/projects/{project_id}/persisted_folder/{id}/': Endpoints.patch_Persisted_folder_partial_update
-        '/api/projects/{project_id}/persons/{id}/': Endpoints.patch_Persons_partial_update
-        '/api/projects/{project_id}/property_definitions/{id}/': Endpoints.patch_Property_definitions_partial_update
-        '/api/projects/{project_id}/session_recording_playlists/{short_id}/': Endpoints.patch_Session_recording_playlists_partial_update
-        '/api/projects/{project_id}/session_recordings/{id}/': Endpoints.patch_Session_recordings_partial_update
-        '/api/projects/{project_id}/subscriptions/{id}/': Endpoints.patch_Subscriptions_partial_update
-        '/api/projects/{project_id}/surveys/{id}/': Endpoints.patch_Surveys_partial_update
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/': Endpoints.patch_Warehouse_saved_queries_partial_update
-        '/api/projects/{project_id}/warehouse_tables/{id}/': Endpoints.patch_Warehouse_tables_partial_update
-        '/api/projects/{project_id}/web_experiments/{id}/': Endpoints.patch_Web_experiments_partial_update
-        '/api/users/{uuid}/': Endpoints.patch_Users_partial_update
-        '/api/users/cancel_email_change_request/': Endpoints.patch_Users_cancel_email_change_request_partial_update
+        '/v1/environments/{project_id}/batch_exports/{id}/': Endpoints.patch_Environments_batch_exports_partial_update
+        '/v1/environments/{project_id}/dashboards/{id}/': Endpoints.patch_Environments_dashboards_partial_update
+        '/v1/environments/{project_id}/dashboards/{id}/move_tile/': Endpoints.patch_Environments_dashboards_move_tile_partial_update
+        '/v1/environments/{project_id}/error_tracking/assignment_rules/{id}/': Endpoints.patch_Environments_error_tracking_assignment_rules_partial_update
+        '/v1/environments/{project_id}/error_tracking/assignment_rules/reorder/': Endpoints.patch_Environments_error_tracking_assignment_rules_reorder_partial_update
+        '/v1/environments/{project_id}/error_tracking/grouping_rules/{id}/': Endpoints.patch_Environments_error_tracking_grouping_rules_partial_update
+        '/v1/environments/{project_id}/error_tracking/grouping_rules/reorder/': Endpoints.patch_Environments_error_tracking_grouping_rules_reorder_partial_update
+        '/v1/environments/{project_id}/error_tracking/releases/{id}/': Endpoints.patch_Environments_error_tracking_releases_partial_update
+        '/v1/environments/{project_id}/error_tracking/suppression_rules/{id}/': Endpoints.patch_Environments_error_tracking_suppression_rules_partial_update
+        '/v1/environments/{project_id}/error_tracking/suppression_rules/reorder/': Endpoints.patch_Environments_error_tracking_suppression_rules_reorder_partial_update
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/': Endpoints.patch_Environments_error_tracking_symbol_sets_partial_update
+        '/v1/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.patch_Environments_explicit_members_partial_update
+        '/v1/environments/{project_id}/file_system/{id}/': Endpoints.patch_Environments_file_system_partial_update
+        '/v1/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.patch_Environments_file_system_shortcut_partial_update
+        '/v1/environments/{project_id}/insights_functions/{id}/': Endpoints.patch_Environments_insights_functions_partial_update
+        '/v1/environments/{project_id}/insights_functions/rearrange/': Endpoints.patch_Environments_insights_functions_rearrange_partial_update
+        '/v1/environments/{project_id}/insights/{id}/': Endpoints.patch_Environments_insights_partial_update
+        '/v1/environments/{project_id}/persisted_folder/{id}/': Endpoints.patch_Environments_persisted_folder_partial_update
+        '/v1/environments/{project_id}/persons/{id}/': Endpoints.patch_Environments_persons_partial_update
+        '/v1/environments/{project_id}/session_recording_playlists/{short_id}/': Endpoints.patch_Environments_session_recording_playlists_partial_update
+        '/v1/environments/{project_id}/session_recordings/{id}/': Endpoints.patch_Environments_session_recordings_partial_update
+        '/v1/environments/{project_id}/subscriptions/{id}/': Endpoints.patch_Environments_subscriptions_partial_update
+        '/v1/environments/{project_id}/user_interviews/{id}/': Endpoints.patch_Environments_user_interviews_partial_update
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/': Endpoints.patch_Environments_warehouse_saved_queries_partial_update
+        '/v1/environments/{project_id}/warehouse_tables/{id}/': Endpoints.patch_Environments_warehouse_tables_partial_update
+        '/v1/organizations/{id}/': Endpoints.patch_Partial_update
+        '/v1/organizations/{organization_id}/batch_exports/{id}/': Endpoints.patch_Batch_exports_partial_update
+        '/v1/organizations/{organization_id}/domains/{id}/': Endpoints.patch_Domains_partial_update
+        '/v1/organizations/{organization_id}/members/{user__uuid}/': Endpoints.patch_Members_partial_update
+        '/v1/organizations/{organization_id}/projects/{id}/': Endpoints.patch_Partial_update_2
+        '/v1/organizations/{organization_id}/projects/{id}/add_product_intent/': Endpoints.patch_Add_product_intent_partial_update
+        '/v1/organizations/{organization_id}/projects/{id}/complete_product_onboarding/': Endpoints.patch_Complete_product_onboarding_partial_update
+        '/v1/organizations/{organization_id}/projects/{id}/delete_secret_token_backup/': Endpoints.patch_Delete_secret_token_backup_partial_update
+        '/v1/organizations/{organization_id}/projects/{id}/reset_token/': Endpoints.patch_Reset_token_partial_update
+        '/v1/organizations/{organization_id}/projects/{id}/rotate_secret_token/': Endpoints.patch_Rotate_secret_token_partial_update
+        '/v1/organizations/{organization_id}/proxy_records/{id}/': Endpoints.patch_Proxy_records_partial_update
+        '/v1/organizations/{organization_id}/roles/{id}/': Endpoints.patch_Roles_partial_update
+        '/v1/projects/{project_id}/actions/{id}/': Endpoints.patch_Actions_partial_update
+        '/v1/projects/{project_id}/annotations/{id}/': Endpoints.patch_Annotations_partial_update
+        '/v1/projects/{project_id}/batch_exports/{id}/': Endpoints.patch_Batch_exports_partial_update_2
+        '/v1/projects/{project_id}/cohorts/{id}/': Endpoints.patch_Cohorts_partial_update
+        '/v1/projects/{project_id}/cohorts/{id}/add_persons_to_static_cohort/': Endpoints.patch_Cohorts_add_persons_to_static_cohort_partial_update
+        '/v1/projects/{project_id}/dashboard_templates/{id}/': Endpoints.patch_Dashboard_templates_partial_update
+        '/v1/projects/{project_id}/dashboards/{id}/': Endpoints.patch_Dashboards_partial_update
+        '/v1/projects/{project_id}/dashboards/{id}/move_tile/': Endpoints.patch_Dashboards_move_tile_partial_update
+        '/v1/projects/{project_id}/early_access_feature/{id}/': Endpoints.patch_Early_access_feature_partial_update
+        '/v1/projects/{project_id}/environments/{id}/': Endpoints.patch_Environments_partial_update
+        '/v1/projects/{project_id}/environments/{id}/add_product_intent/': Endpoints.patch_Environments_add_product_intent_partial_update
+        '/v1/projects/{project_id}/environments/{id}/complete_product_onboarding/': Endpoints.patch_Environments_complete_product_onboarding_partial_update
+        '/v1/projects/{project_id}/environments/{id}/delete_secret_token_backup/': Endpoints.patch_Environments_delete_secret_token_backup_partial_update
+        '/v1/projects/{project_id}/environments/{id}/reset_token/': Endpoints.patch_Environments_reset_token_partial_update
+        '/v1/projects/{project_id}/environments/{id}/rotate_secret_token/': Endpoints.patch_Environments_rotate_secret_token_partial_update
+        '/v1/projects/{project_id}/event_definitions/{id}/': Endpoints.patch_Event_definitions_partial_update
+        '/v1/projects/{project_id}/experiment_holdouts/{id}/': Endpoints.patch_Experiment_holdouts_partial_update
+        '/v1/projects/{project_id}/experiment_saved_metrics/{id}/': Endpoints.patch_Experiment_saved_metrics_partial_update
+        '/v1/projects/{project_id}/experiments/{id}/': Endpoints.patch_Experiments_partial_update
+        '/v1/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.patch_Explicit_members_partial_update
+        '/v1/projects/{project_id}/feature_flags/{id}/': Endpoints.patch_Feature_flags_partial_update
+        '/v1/projects/{project_id}/file_system/{id}/': Endpoints.patch_File_system_partial_update
+        '/v1/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.patch_File_system_shortcut_partial_update
+        '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.patch_Groups_types_metrics_partial_update
+        '/v1/projects/{project_id}/groups_types/update_metadata/': Endpoints.patch_Groups_types_update_metadata_partial_update
+        '/v1/projects/{project_id}/insights_functions/{id}/': Endpoints.patch_Custom_functions_partial_update
+        '/v1/projects/{project_id}/insights_functions/rearrange/': Endpoints.patch_Custom_functions_rearrange_partial_update
+        '/v1/projects/{project_id}/insights/{id}/': Endpoints.patch_Insights_partial_update
+        '/v1/projects/{project_id}/notebooks/{short_id}/': Endpoints.patch_Notebooks_partial_update
+        '/v1/projects/{project_id}/persisted_folder/{id}/': Endpoints.patch_Persisted_folder_partial_update
+        '/v1/projects/{project_id}/persons/{id}/': Endpoints.patch_Persons_partial_update
+        '/v1/projects/{project_id}/property_definitions/{id}/': Endpoints.patch_Property_definitions_partial_update
+        '/v1/projects/{project_id}/session_recording_playlists/{short_id}/': Endpoints.patch_Session_recording_playlists_partial_update
+        '/v1/projects/{project_id}/session_recordings/{id}/': Endpoints.patch_Session_recordings_partial_update
+        '/v1/projects/{project_id}/subscriptions/{id}/': Endpoints.patch_Subscriptions_partial_update
+        '/v1/projects/{project_id}/surveys/{id}/': Endpoints.patch_Surveys_partial_update
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/': Endpoints.patch_Warehouse_saved_queries_partial_update
+        '/v1/projects/{project_id}/warehouse_tables/{id}/': Endpoints.patch_Warehouse_tables_partial_update
+        '/v1/projects/{project_id}/web_experiments/{id}/': Endpoints.patch_Web_experiments_partial_update
+        '/v1/users/{uuid}/': Endpoints.patch_Users_partial_update
+        '/v1/users/cancel_email_change_request/': Endpoints.patch_Users_cancel_email_change_request_partial_update
     }
     delete: {
-        '/api/environments/{project_id}/batch_exports/{id}/': Endpoints.delete_Environments_batch_exports_destroy
-        '/api/environments/{project_id}/dashboards/{dashboard_id}/collaborators/{user__uuid}/': Endpoints.delete_Environments_dashboards_collaborators_destroy
-        '/api/environments/{project_id}/dashboards/{dashboard_id}/sharing/passwords/{password_id}/': Endpoints.delete_Environments_dashboards_sharing_passwords_destroy
-        '/api/environments/{project_id}/dashboards/{id}/': Endpoints.delete_Environments_dashboards_destroy
-        '/api/environments/{project_id}/error_tracking/assignment_rules/{id}/': Endpoints.delete_Environments_error_tracking_assignment_rules_destroy
-        '/api/environments/{project_id}/error_tracking/grouping_rules/{id}/': Endpoints.delete_Environments_error_tracking_grouping_rules_destroy
-        '/api/environments/{project_id}/error_tracking/releases/{id}/': Endpoints.delete_Environments_error_tracking_releases_destroy
-        '/api/environments/{project_id}/error_tracking/suppression_rules/{id}/': Endpoints.delete_Environments_error_tracking_suppression_rules_destroy
-        '/api/environments/{project_id}/error_tracking/symbol_sets/{id}/': Endpoints.delete_Environments_error_tracking_symbol_sets_destroy
-        '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.delete_Environments_explicit_members_destroy
-        '/api/environments/{project_id}/file_system/{id}/': Endpoints.delete_Environments_file_system_destroy
-        '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.delete_Environments_file_system_shortcut_destroy
-        '/api/environments/{project_id}/insights_functions/{id}/': Endpoints.delete_Environments_insights_functions_destroy
-        '/api/environments/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/': Endpoints.delete_Environments_insights_sharing_passwords_destroy
-        '/api/environments/{project_id}/insights/{id}/': Endpoints.delete_Environments_insights_destroy
-        '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.delete_Environments_persisted_folder_destroy
-        '/api/environments/{project_id}/persons/{id}/': Endpoints.delete_Environments_persons_destroy
-        '/api/environments/{project_id}/query/{id}/': Endpoints.delete_Environments_query_destroy
-        '/api/environments/{project_id}/session_recording_playlists/{short_id}/': Endpoints.delete_Environments_session_recording_playlists_destroy
-        '/api/environments/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/': Endpoints.delete_Environments_session_recording_playlists_recordings_destroy
-        '/api/environments/{project_id}/session_recordings/{id}/': Endpoints.delete_Environments_session_recordings_destroy
-        '/api/environments/{project_id}/session_recordings/{recording_id}/sharing/passwords/{password_id}/': Endpoints.delete_Environments_session_recordings_sharing_passwords_destroy
-        '/api/environments/{project_id}/subscriptions/{id}/': Endpoints.delete_Environments_subscriptions_destroy
-        '/api/environments/{project_id}/user_interviews/{id}/': Endpoints.delete_Environments_user_interviews_destroy
-        '/api/environments/{project_id}/warehouse_saved_queries/{id}/': Endpoints.delete_Environments_warehouse_saved_queries_destroy
-        '/api/environments/{project_id}/warehouse_tables/{id}/': Endpoints.delete_Environments_warehouse_tables_destroy
-        '/api/organizations/{id}/': Endpoints.delete_Destroy
-        '/api/organizations/{organization_id}/batch_exports/{id}/': Endpoints.delete_Batch_exports_destroy
-        '/api/organizations/{organization_id}/domains/{id}/': Endpoints.delete_Domains_destroy
-        '/api/organizations/{organization_id}/invites/{id}/': Endpoints.delete_Invites_destroy
-        '/api/organizations/{organization_id}/members/{user__uuid}/': Endpoints.delete_Members_destroy
-        '/api/organizations/{organization_id}/projects/{id}/': Endpoints.delete_Destroy_2
-        '/api/organizations/{organization_id}/proxy_records/{id}/': Endpoints.delete_Proxy_records_destroy
-        '/api/organizations/{organization_id}/roles/{id}/': Endpoints.delete_Roles_destroy
-        '/api/organizations/{organization_id}/roles/{role_id}/role_memberships/{id}/': Endpoints.delete_Roles_role_memberships_destroy
-        '/api/projects/{project_id}/actions/{id}/': Endpoints.delete_Actions_destroy
-        '/api/projects/{project_id}/annotations/{id}/': Endpoints.delete_Annotations_destroy
-        '/api/projects/{project_id}/batch_exports/{id}/': Endpoints.delete_Batch_exports_destroy_2
-        '/api/projects/{project_id}/cohorts/{id}/': Endpoints.delete_Cohorts_destroy
-        '/api/projects/{project_id}/dashboard_templates/{id}/': Endpoints.delete_Dashboard_templates_destroy
-        '/api/projects/{project_id}/dashboards/{dashboard_id}/collaborators/{user__uuid}/': Endpoints.delete_Dashboards_collaborators_destroy
-        '/api/projects/{project_id}/dashboards/{dashboard_id}/sharing/passwords/{password_id}/': Endpoints.delete_Dashboards_sharing_passwords_destroy
-        '/api/projects/{project_id}/dashboards/{id}/': Endpoints.delete_Dashboards_destroy
-        '/api/projects/{project_id}/early_access_feature/{id}/': Endpoints.delete_Early_access_feature_destroy
-        '/api/projects/{project_id}/environments/{id}/': Endpoints.delete_Environments_destroy
-        '/api/projects/{project_id}/event_definitions/{id}/': Endpoints.delete_Event_definitions_destroy
-        '/api/projects/{project_id}/experiment_holdouts/{id}/': Endpoints.delete_Experiment_holdouts_destroy
-        '/api/projects/{project_id}/experiment_saved_metrics/{id}/': Endpoints.delete_Experiment_saved_metrics_destroy
-        '/api/projects/{project_id}/experiments/{id}/': Endpoints.delete_Experiments_destroy
-        '/api/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.delete_Explicit_members_destroy
-        '/api/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/{id}/': Endpoints.delete_Feature_flags_role_access_destroy
-        '/api/projects/{project_id}/feature_flags/{id}/': Endpoints.delete_Feature_flags_destroy
-        '/api/projects/{project_id}/file_system/{id}/': Endpoints.delete_File_system_destroy
-        '/api/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.delete_File_system_shortcut_destroy
-        '/api/projects/{project_id}/groups_types/{group_type_index}/': Endpoints.delete_Groups_types_destroy
-        '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.delete_Groups_types_metrics_destroy
-        '/api/projects/{project_id}/insights_functions/{id}/': Endpoints.delete_Custom_functions_destroy
-        '/api/projects/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/': Endpoints.delete_Insights_sharing_passwords_destroy
-        '/api/projects/{project_id}/insights/{id}/': Endpoints.delete_Insights_destroy
-        '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.delete_Notebooks_destroy
-        '/api/projects/{project_id}/persisted_folder/{id}/': Endpoints.delete_Persisted_folder_destroy
-        '/api/projects/{project_id}/persons/{id}/': Endpoints.delete_Persons_destroy
-        '/api/projects/{project_id}/property_definitions/{id}/': Endpoints.delete_Property_definitions_destroy
-        '/api/projects/{project_id}/query/{id}/': Endpoints.delete_Query_destroy
-        '/api/projects/{project_id}/session_recording_playlists/{short_id}/': Endpoints.delete_Session_recording_playlists_destroy
-        '/api/projects/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/': Endpoints.delete_Session_recording_playlists_recordings_destroy
-        '/api/projects/{project_id}/session_recordings/{id}/': Endpoints.delete_Session_recordings_destroy
-        '/api/projects/{project_id}/session_recordings/{recording_id}/sharing/passwords/{password_id}/': Endpoints.delete_Session_recordings_sharing_passwords_destroy
-        '/api/projects/{project_id}/subscriptions/{id}/': Endpoints.delete_Subscriptions_destroy
-        '/api/projects/{project_id}/surveys/{id}/': Endpoints.delete_Surveys_destroy
-        '/api/projects/{project_id}/warehouse_saved_queries/{id}/': Endpoints.delete_Warehouse_saved_queries_destroy
-        '/api/projects/{project_id}/warehouse_tables/{id}/': Endpoints.delete_Warehouse_tables_destroy
-        '/api/projects/{project_id}/web_experiments/{id}/': Endpoints.delete_Web_experiments_destroy
-        '/api/users/{uuid}/': Endpoints.delete_Users_destroy
+        '/v1/environments/{project_id}/batch_exports/{id}/': Endpoints.delete_Environments_batch_exports_destroy
+        '/v1/environments/{project_id}/dashboards/{dashboard_id}/collaborators/{user__uuid}/': Endpoints.delete_Environments_dashboards_collaborators_destroy
+        '/v1/environments/{project_id}/dashboards/{dashboard_id}/sharing/passwords/{password_id}/': Endpoints.delete_Environments_dashboards_sharing_passwords_destroy
+        '/v1/environments/{project_id}/dashboards/{id}/': Endpoints.delete_Environments_dashboards_destroy
+        '/v1/environments/{project_id}/error_tracking/assignment_rules/{id}/': Endpoints.delete_Environments_error_tracking_assignment_rules_destroy
+        '/v1/environments/{project_id}/error_tracking/grouping_rules/{id}/': Endpoints.delete_Environments_error_tracking_grouping_rules_destroy
+        '/v1/environments/{project_id}/error_tracking/releases/{id}/': Endpoints.delete_Environments_error_tracking_releases_destroy
+        '/v1/environments/{project_id}/error_tracking/suppression_rules/{id}/': Endpoints.delete_Environments_error_tracking_suppression_rules_destroy
+        '/v1/environments/{project_id}/error_tracking/symbol_sets/{id}/': Endpoints.delete_Environments_error_tracking_symbol_sets_destroy
+        '/v1/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.delete_Environments_explicit_members_destroy
+        '/v1/environments/{project_id}/file_system/{id}/': Endpoints.delete_Environments_file_system_destroy
+        '/v1/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.delete_Environments_file_system_shortcut_destroy
+        '/v1/environments/{project_id}/insights_functions/{id}/': Endpoints.delete_Environments_insights_functions_destroy
+        '/v1/environments/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/': Endpoints.delete_Environments_insights_sharing_passwords_destroy
+        '/v1/environments/{project_id}/insights/{id}/': Endpoints.delete_Environments_insights_destroy
+        '/v1/environments/{project_id}/persisted_folder/{id}/': Endpoints.delete_Environments_persisted_folder_destroy
+        '/v1/environments/{project_id}/persons/{id}/': Endpoints.delete_Environments_persons_destroy
+        '/v1/environments/{project_id}/query/{id}/': Endpoints.delete_Environments_query_destroy
+        '/v1/environments/{project_id}/session_recording_playlists/{short_id}/': Endpoints.delete_Environments_session_recording_playlists_destroy
+        '/v1/environments/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/': Endpoints.delete_Environments_session_recording_playlists_recordings_destroy
+        '/v1/environments/{project_id}/session_recordings/{id}/': Endpoints.delete_Environments_session_recordings_destroy
+        '/v1/environments/{project_id}/session_recordings/{recording_id}/sharing/passwords/{password_id}/': Endpoints.delete_Environments_session_recordings_sharing_passwords_destroy
+        '/v1/environments/{project_id}/subscriptions/{id}/': Endpoints.delete_Environments_subscriptions_destroy
+        '/v1/environments/{project_id}/user_interviews/{id}/': Endpoints.delete_Environments_user_interviews_destroy
+        '/v1/environments/{project_id}/warehouse_saved_queries/{id}/': Endpoints.delete_Environments_warehouse_saved_queries_destroy
+        '/v1/environments/{project_id}/warehouse_tables/{id}/': Endpoints.delete_Environments_warehouse_tables_destroy
+        '/v1/organizations/{id}/': Endpoints.delete_Destroy
+        '/v1/organizations/{organization_id}/batch_exports/{id}/': Endpoints.delete_Batch_exports_destroy
+        '/v1/organizations/{organization_id}/domains/{id}/': Endpoints.delete_Domains_destroy
+        '/v1/organizations/{organization_id}/invites/{id}/': Endpoints.delete_Invites_destroy
+        '/v1/organizations/{organization_id}/members/{user__uuid}/': Endpoints.delete_Members_destroy
+        '/v1/organizations/{organization_id}/projects/{id}/': Endpoints.delete_Destroy_2
+        '/v1/organizations/{organization_id}/proxy_records/{id}/': Endpoints.delete_Proxy_records_destroy
+        '/v1/organizations/{organization_id}/roles/{id}/': Endpoints.delete_Roles_destroy
+        '/v1/organizations/{organization_id}/roles/{role_id}/role_memberships/{id}/': Endpoints.delete_Roles_role_memberships_destroy
+        '/v1/projects/{project_id}/actions/{id}/': Endpoints.delete_Actions_destroy
+        '/v1/projects/{project_id}/annotations/{id}/': Endpoints.delete_Annotations_destroy
+        '/v1/projects/{project_id}/batch_exports/{id}/': Endpoints.delete_Batch_exports_destroy_2
+        '/v1/projects/{project_id}/cohorts/{id}/': Endpoints.delete_Cohorts_destroy
+        '/v1/projects/{project_id}/dashboard_templates/{id}/': Endpoints.delete_Dashboard_templates_destroy
+        '/v1/projects/{project_id}/dashboards/{dashboard_id}/collaborators/{user__uuid}/': Endpoints.delete_Dashboards_collaborators_destroy
+        '/v1/projects/{project_id}/dashboards/{dashboard_id}/sharing/passwords/{password_id}/': Endpoints.delete_Dashboards_sharing_passwords_destroy
+        '/v1/projects/{project_id}/dashboards/{id}/': Endpoints.delete_Dashboards_destroy
+        '/v1/projects/{project_id}/early_access_feature/{id}/': Endpoints.delete_Early_access_feature_destroy
+        '/v1/projects/{project_id}/environments/{id}/': Endpoints.delete_Environments_destroy
+        '/v1/projects/{project_id}/event_definitions/{id}/': Endpoints.delete_Event_definitions_destroy
+        '/v1/projects/{project_id}/experiment_holdouts/{id}/': Endpoints.delete_Experiment_holdouts_destroy
+        '/v1/projects/{project_id}/experiment_saved_metrics/{id}/': Endpoints.delete_Experiment_saved_metrics_destroy
+        '/v1/projects/{project_id}/experiments/{id}/': Endpoints.delete_Experiments_destroy
+        '/v1/projects/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.delete_Explicit_members_destroy
+        '/v1/projects/{project_id}/feature_flags/{feature_flag_id}/role_access/{id}/': Endpoints.delete_Feature_flags_role_access_destroy
+        '/v1/projects/{project_id}/feature_flags/{id}/': Endpoints.delete_Feature_flags_destroy
+        '/v1/projects/{project_id}/file_system/{id}/': Endpoints.delete_File_system_destroy
+        '/v1/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.delete_File_system_shortcut_destroy
+        '/v1/projects/{project_id}/groups_types/{group_type_index}/': Endpoints.delete_Groups_types_destroy
+        '/v1/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.delete_Groups_types_metrics_destroy
+        '/v1/projects/{project_id}/insights_functions/{id}/': Endpoints.delete_Custom_functions_destroy
+        '/v1/projects/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/': Endpoints.delete_Insights_sharing_passwords_destroy
+        '/v1/projects/{project_id}/insights/{id}/': Endpoints.delete_Insights_destroy
+        '/v1/projects/{project_id}/notebooks/{short_id}/': Endpoints.delete_Notebooks_destroy
+        '/v1/projects/{project_id}/persisted_folder/{id}/': Endpoints.delete_Persisted_folder_destroy
+        '/v1/projects/{project_id}/persons/{id}/': Endpoints.delete_Persons_destroy
+        '/v1/projects/{project_id}/property_definitions/{id}/': Endpoints.delete_Property_definitions_destroy
+        '/v1/projects/{project_id}/query/{id}/': Endpoints.delete_Query_destroy
+        '/v1/projects/{project_id}/session_recording_playlists/{short_id}/': Endpoints.delete_Session_recording_playlists_destroy
+        '/v1/projects/{project_id}/session_recording_playlists/{short_id}/recordings/{session_recording_id}/': Endpoints.delete_Session_recording_playlists_recordings_destroy
+        '/v1/projects/{project_id}/session_recordings/{id}/': Endpoints.delete_Session_recordings_destroy
+        '/v1/projects/{project_id}/session_recordings/{recording_id}/sharing/passwords/{password_id}/': Endpoints.delete_Session_recordings_sharing_passwords_destroy
+        '/v1/projects/{project_id}/subscriptions/{id}/': Endpoints.delete_Subscriptions_destroy
+        '/v1/projects/{project_id}/surveys/{id}/': Endpoints.delete_Surveys_destroy
+        '/v1/projects/{project_id}/warehouse_saved_queries/{id}/': Endpoints.delete_Warehouse_saved_queries_destroy
+        '/v1/projects/{project_id}/warehouse_tables/{id}/': Endpoints.delete_Warehouse_tables_destroy
+        '/v1/projects/{project_id}/web_experiments/{id}/': Endpoints.delete_Web_experiments_destroy
+        '/v1/users/{uuid}/': Endpoints.delete_Users_destroy
     }
 }
 

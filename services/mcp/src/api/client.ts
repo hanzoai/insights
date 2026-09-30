@@ -264,7 +264,7 @@ export class ApiClient {
                     results: z.array(OrganizationSchema),
                 })
 
-                const result = await this.fetchWithSchema(`${this.baseUrl}/api/organizations/`, responseSchema)
+                const result = await this.fetchWithSchema(`${this.baseUrl}/v1/organizations/`, responseSchema)
 
                 if (result.success) {
                     return { success: true, data: result.data.results }
@@ -273,7 +273,7 @@ export class ApiClient {
             },
 
             get: async ({ orgId }: { orgId: string }): Promise<Result<Organization>> => {
-                return this.fetchWithSchema(`${this.baseUrl}/api/organizations/${orgId}/`, OrganizationSchema)
+                return this.fetchWithSchema(`${this.baseUrl}/v1/organizations/${orgId}/`, OrganizationSchema)
             },
 
             projects: ({ orgId }: { orgId: string }) => {
@@ -284,7 +284,7 @@ export class ApiClient {
                         })
 
                         const result = await this.fetchWithSchema(
-                            `${this.baseUrl}/api/organizations/${orgId}/projects/`,
+                            `${this.baseUrl}/v1/organizations/${orgId}/projects/`,
                             responseSchema
                         )
 
@@ -302,7 +302,7 @@ export class ApiClient {
         return {
             current: async (): Promise<Result<ApiRedactedPersonalApiKey>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/personal_api_keys/@current`,
+                    `${this.baseUrl}/v1/personal_api_keys/@current`,
                     ApiRedactedPersonalApiKeySchema
                 )
             },
@@ -327,7 +327,7 @@ export class ApiClient {
     projects(): Endpoint {
         return {
             get: async ({ projectId }: { projectId: string }): Promise<Result<Project>> => {
-                return this.fetchWithSchema(`${this.baseUrl}/api/projects/${projectId}/`, ProjectSchema)
+                return this.fetchWithSchema(`${this.baseUrl}/v1/projects/${projectId}/`, ProjectSchema)
             },
 
             propertyDefinitions: async ({
@@ -363,7 +363,7 @@ export class ApiClient {
 
                     const searchParams = getSearchParamsFromRecord(params)
 
-                    const url = `${this.baseUrl}/api/projects/${projectId}/property_definitions/?${searchParams}`
+                    const url = `${this.baseUrl}/v1/projects/${projectId}/property_definitions/?${searchParams}`
 
                     const response = await fetch(url, {
                         headers: {
@@ -407,7 +407,7 @@ export class ApiClient {
                         offset: offset ?? 0,
                     })
 
-                    const requestUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/?${searchParams}`
+                    const requestUrl = `${this.baseUrl}/v1/projects/${projectId}/event_definitions/?${searchParams}`
 
                     const response = await fetch(requestUrl, {
                         headers: {
@@ -446,7 +446,7 @@ export class ApiClient {
                 try {
                     // Fetching the event definition by name to get its ID
                     const searchParams = new URLSearchParams({ name: eventName })
-                    const findUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/by_name/?${searchParams}`
+                    const findUrl = `${this.baseUrl}/v1/projects/${projectId}/event_definitions/by_name/?${searchParams}`
 
                     const findResponse = await fetch(findUrl, {
                         headers: {
@@ -469,7 +469,7 @@ export class ApiClient {
                     const parsedEventDef = ApiEventDefinitionSchema.parse(eventDef)
 
                     // Updating the event definition by ID
-                    const updateUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/${parsedEventDef.id}/`
+                    const updateUrl = `${this.baseUrl}/v1/projects/${projectId}/event_definitions/${parsedEventDef.id}/`
 
                     const updateResponse = await fetch(updateUrl, {
                         method: 'PATCH',
@@ -504,7 +504,7 @@ export class ApiClient {
                     const limit = params?.limit ?? 50
                     const offset = params?.offset ?? 0
 
-                    const response = await this.generated.get('/api/projects/{project_id}/experiments/', {
+                    const response = await this.generated.get('/v1/projects/{project_id}/experiments/', {
                         path: { project_id: projectId },
                         query: { limit, offset },
                     })
@@ -517,7 +517,7 @@ export class ApiClient {
 
             get: async ({ experimentId }: { experimentId: number }): Promise<Result<Experiment>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/experiments/${experimentId}/`,
                     ExperimentSchema
                 )
             },
@@ -582,7 +582,7 @@ export class ApiClient {
                 }
 
                 const result = await this.fetchWithSchema(
-                    `${this.baseUrl}/api/environments/${projectId}/query/`,
+                    `${this.baseUrl}/v1/environments/${projectId}/query/`,
                     ExperimentExposureQueryResponseSchema,
                     {
                         method: 'POST',
@@ -683,7 +683,7 @@ export class ApiClient {
                             }
 
                             const result = await this.fetchWithSchema(
-                                `${this.baseUrl}/api/environments/${projectId}/query/`,
+                                `${this.baseUrl}/v1/environments/${projectId}/query/`,
                                 z.any(),
                                 {
                                     method: 'POST',
@@ -714,7 +714,7 @@ export class ApiClient {
                             }
 
                             const result = await this.fetchWithSchema(
-                                `${this.baseUrl}/api/environments/${projectId}/query/`,
+                                `${this.baseUrl}/v1/environments/${projectId}/query/`,
                                 z.any(),
                                 {
                                     method: 'POST',
@@ -745,7 +745,7 @@ export class ApiClient {
                 const createBody = ExperimentCreatePayloadSchema.parse(experimentData)
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/experiments/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/experiments/`,
                     ExperimentSchema,
                     {
                         method: 'POST',
@@ -765,7 +765,7 @@ export class ApiClient {
                     const updateBody = ExperimentUpdateApiPayloadSchema.parse(updateData)
 
                     return this.fetchWithSchema(
-                        `${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
+                        `${this.baseUrl}/v1/projects/${projectId}/experiments/${experimentId}/`,
                         ExperimentSchema,
                         {
                             method: 'PATCH',
@@ -784,7 +784,7 @@ export class ApiClient {
             }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
                     const deleteResponse = await fetch(
-                        `${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
+                        `${this.baseUrl}/v1/projects/${projectId}/experiments/${experimentId}/`,
                         {
                             method: 'PATCH',
                             headers: this.buildHeaders(),
@@ -819,7 +819,7 @@ export class ApiClient {
                     const limit = params?.limit ?? 50
                     const offset = params?.offset ?? 0
 
-                    const response = await this.generated.get('/api/projects/{project_id}/feature_flags/', {
+                    const response = await this.generated.get('/v1/projects/{project_id}/feature_flags/', {
                         path: { project_id: projectId },
                         query: { limit, offset },
                     })
@@ -841,7 +841,7 @@ export class ApiClient {
 
             get: async ({ flagId }: { flagId: string | number }): Promise<Result<FeatureFlag>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/feature_flags/${flagId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/feature_flags/${flagId}/`,
                     FeatureFlagSchema
                 )
             },
@@ -880,7 +880,7 @@ export class ApiClient {
                 }
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/feature_flags/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/feature_flags/`,
                     FeatureFlagSchema,
                     {
                         method: 'POST',
@@ -919,7 +919,7 @@ export class ApiClient {
                 }
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/feature_flags/${findResult.data.id}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/feature_flags/${findResult.data.id}/`,
                     FeatureFlagSchema,
                     {
                         method: 'PATCH',
@@ -930,7 +930,7 @@ export class ApiClient {
 
             delete: async ({ flagId }: { flagId: number }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
-                    const response = await fetch(`${this.baseUrl}/api/projects/${projectId}/feature_flags/${flagId}/`, {
+                    const response = await fetch(`${this.baseUrl}/v1/projects/${projectId}/feature_flags/${flagId}/`, {
                         method: 'PATCH',
                         headers: this.buildHeaders(),
                         body: JSON.stringify({ deleted: true }),
@@ -958,7 +958,7 @@ export class ApiClient {
         return {
             list: async ({ params }: { params?: ListInsightsData } = {}): Promise<Result<Array<Schemas.Insight>>> => {
                 try {
-                    const response = await this.generated.get('/api/projects/{project_id}/insights/', {
+                    const response = await this.generated.get('/v1/projects/{project_id}/insights/', {
                         path: { project_id: projectId },
                         query: params
                             ? {
@@ -980,7 +980,7 @@ export class ApiClient {
                 const validatedInput = CreateInsightInputSchema.parse(data)
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/insights/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/insights/`,
                     SimpleInsightSchema,
                     {
                         method: 'POST',
@@ -994,7 +994,7 @@ export class ApiClient {
                 // Note: This won't work when we start creating insight id's with 8 digits. (We're at 7 currently)
                 if (isShortId(insightId)) {
                     const searchParams = new URLSearchParams({ short_id: insightId })
-                    const url = `${this.baseUrl}/api/projects/${projectId}/insights/?${searchParams}`
+                    const url = `${this.baseUrl}/v1/projects/${projectId}/insights/?${searchParams}`
 
                     const responseSchema = z.object({
                         results: z.array(SimpleInsightSchema),
@@ -1020,14 +1020,14 @@ export class ApiClient {
                 }
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/insights/${insightId}/`,
                     SimpleInsightSchema
                 )
             },
 
             update: async ({ insightId, data }: { insightId: number; data: any }): Promise<Result<SimpleInsight>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/insights/${insightId}/`,
                     SimpleInsightSchema,
                     {
                         method: 'PATCH',
@@ -1042,7 +1042,7 @@ export class ApiClient {
                 insightId: number
             }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
-                    const response = await fetch(`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`, {
+                    const response = await fetch(`${this.baseUrl}/v1/projects/${projectId}/insights/${insightId}/`, {
                         method: 'PATCH',
                         headers: this.buildHeaders(),
                         body: JSON.stringify({ deleted: true }),
@@ -1065,7 +1065,7 @@ export class ApiClient {
             },
 
             query: async ({ query }: { query: Record<string, any> }): Promise<Result<any>> => {
-                const url = `${this.baseUrl}/api/environments/${projectId}/query/`
+                const url = `${this.baseUrl}/v1/environments/${projectId}/query/`
 
                 const queryResponseSchema = z.object({
                     results: z.any(),
@@ -1087,7 +1087,7 @@ export class ApiClient {
                 const sqlResponseSchema = z.array(z.any())
 
                 const result = await this.fetchWithSchema(
-                    `${this.baseUrl}/api/environments/${projectId}/max_tools/create_and_query_insight/`,
+                    `${this.baseUrl}/v1/environments/${projectId}/max_tools/create_and_query_insight/`,
                     sqlResponseSchema,
                     {
                         method: 'POST',
@@ -1136,7 +1136,7 @@ export class ApiClient {
                     searchParams.append('search', validatedParams.search)
                 }
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/dashboards/${searchParams.toString() ? `?${searchParams}` : ''}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/dashboards/${searchParams.toString() ? `?${searchParams}` : ''}`
 
                 const simpleDashboardSchema = z.object({
                     id: z.number(),
@@ -1159,7 +1159,7 @@ export class ApiClient {
 
             get: async ({ dashboardId }: { dashboardId: number }): Promise<Result<SimpleDashboard>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/dashboards/${dashboardId}/`,
                     SimpleDashboardSchema
                 )
             },
@@ -1173,7 +1173,7 @@ export class ApiClient {
                 })
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/dashboards/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/dashboards/`,
                     createResponseSchema,
                     {
                         method: 'POST',
@@ -1195,7 +1195,7 @@ export class ApiClient {
                 })
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/dashboards/${dashboardId}/`,
                     updateResponseSchema,
                     {
                         method: 'PATCH',
@@ -1211,7 +1211,7 @@ export class ApiClient {
             }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
                     const response = await fetch(
-                        `${this.baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
+                        `${this.baseUrl}/v1/projects/${projectId}/dashboards/${dashboardId}/`,
                         {
                             method: 'PATCH',
                             headers: this.buildHeaders(),
@@ -1241,7 +1241,7 @@ export class ApiClient {
                 data: { insightId: number; dashboardId: number }
             }): Promise<Result<any>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/insights/${data.insightId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/insights/${data.insightId}/`,
                     z.any(),
                     {
                         method: 'PATCH',
@@ -1278,7 +1278,7 @@ export class ApiClient {
                 })
 
                 const result = await this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/dashboards/${dashboardId}/`,
                     z.object({
                         id: z.number(),
                         tiles: z.array(
@@ -1326,7 +1326,7 @@ export class ApiClient {
                     results: z.array(z.any()),
                 })
 
-                return this.fetchWithSchema(`${this.baseUrl}/api/environments/${projectId}/query/`, responseSchema, {
+                return this.fetchWithSchema(`${this.baseUrl}/v1/environments/${projectId}/query/`, responseSchema, {
                     method: 'POST',
                     body: JSON.stringify({ query: queryBody }),
                 })
@@ -1337,7 +1337,7 @@ export class ApiClient {
     users(): Endpoint {
         return {
             me: async (): Promise<Result<ApiUser>> => {
-                const result = await this.fetchWithSchema(`${this.baseUrl}/api/users/@me/`, ApiUserSchema)
+                const result = await this.fetchWithSchema(`${this.baseUrl}/v1/users/@me/`, ApiUserSchema)
 
                 if (!result.success) {
                     return result
@@ -1369,7 +1369,7 @@ export class ApiClient {
                     searchParams.append('search', validatedParams.search)
                 }
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${searchParams.toString() ? `?${searchParams}` : ''}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/surveys/${searchParams.toString() ? `?${searchParams}` : ''}`
 
                 const responseSchema = z.object({
                     results: z.array(SurveyListItemOutputSchema),
@@ -1386,7 +1386,7 @@ export class ApiClient {
 
             get: async ({ surveyId }: { surveyId: string }): Promise<Result<SurveyOutput>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/surveys/${surveyId}/`,
                     SurveyOutputSchema
                 )
             },
@@ -1394,7 +1394,7 @@ export class ApiClient {
             create: async ({ data }: { data: CreateSurveyInput }): Promise<Result<SurveyOutput>> => {
                 const validatedInput = CreateSurveyInputSchema.parse(data)
 
-                return this.fetchWithSchema(`${this.baseUrl}/api/projects/${projectId}/surveys/`, SurveyOutputSchema, {
+                return this.fetchWithSchema(`${this.baseUrl}/v1/projects/${projectId}/surveys/`, SurveyOutputSchema, {
                     method: 'POST',
                     body: JSON.stringify(validatedInput),
                 })
@@ -1410,7 +1410,7 @@ export class ApiClient {
                 const validatedInput = UpdateSurveyInputSchema.parse(data)
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/surveys/${surveyId}/`,
                     SurveyOutputSchema,
                     {
                         method: 'PATCH',
@@ -1437,7 +1437,7 @@ export class ApiClient {
                     }
 
                     const response = await fetch(
-                        `${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+                        `${this.baseUrl}/v1/projects/${projectId}/surveys/${surveyId}/`,
                         fetchOptions
                     )
 
@@ -1464,7 +1464,7 @@ export class ApiClient {
 
                 const searchParams = getSearchParamsFromRecord(validatedParams)
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/surveys/stats/${searchParams.toString() ? `?${searchParams}` : ''}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/surveys/stats/${searchParams.toString() ? `?${searchParams}` : ''}`
 
                 return this.fetchWithSchema(url, SurveyResponseStatsOutputSchema)
             },
@@ -1474,7 +1474,7 @@ export class ApiClient {
 
                 const searchParams = getSearchParamsFromRecord(validatedParams)
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${validatedParams.survey_id}/stats/${searchParams.toString() ? `?${searchParams}` : ''}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/surveys/${validatedParams.survey_id}/stats/${searchParams.toString() ? `?${searchParams}` : ''}`
 
                 return this.fetchWithSchema(url, SurveyResponseStatsOutputSchema)
             },
@@ -1501,7 +1501,7 @@ export class ApiClient {
                 }
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/logs/query/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/logs/query/`,
                     LogsQueryResponseSchema,
                     {
                         method: 'POST',
@@ -1522,7 +1522,7 @@ export class ApiClient {
                     offset: params?.offset ?? 0,
                 })
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/logs/attributes/?${searchParams}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/logs/attributes/?${searchParams}`
 
                 return this.fetchWithSchema(url, LogsListAttributesResponseSchema)
             },
@@ -1538,7 +1538,7 @@ export class ApiClient {
                     value: params.search,
                 })
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/logs/values/?${searchParams}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/logs/values/?${searchParams}`
 
                 return this.fetchWithSchema(url, z.array(LogAttributeValueSchema))
             },
@@ -1560,7 +1560,7 @@ export class ApiClient {
                     searchParams.append('offset', String(params.offset))
                 }
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/actions/${searchParams.toString() ? `?${searchParams}` : ''}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/actions/${searchParams.toString() ? `?${searchParams}` : ''}`
 
                 const responseSchema = z.object({
                     results: z.array(ActionResponseSchema),
@@ -1580,7 +1580,7 @@ export class ApiClient {
              */
             get: async ({ actionId }: { actionId: number }): Promise<Result<ActionResponse>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/actions/${actionId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/actions/${actionId}/`,
                     ActionResponseSchema
                 )
             },
@@ -1599,7 +1599,7 @@ export class ApiClient {
                 }
 
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/actions/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/actions/`,
                     ActionResponseSchema,
                     {
                         method: 'POST',
@@ -1619,7 +1619,7 @@ export class ApiClient {
                 data: UpdateActionInput
             }): Promise<Result<ActionResponse>> => {
                 return this.fetchWithSchema(
-                    `${this.baseUrl}/api/projects/${projectId}/actions/${actionId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/actions/${actionId}/`,
                     ActionResponseSchema,
                     {
                         method: 'PATCH',
@@ -1638,7 +1638,7 @@ export class ApiClient {
             }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
                     // First fetch the action to get its name (required by backend validation)
-                    const getResponse = await fetch(`${this.baseUrl}/api/projects/${projectId}/actions/${actionId}/`, {
+                    const getResponse = await fetch(`${this.baseUrl}/v1/projects/${projectId}/actions/${actionId}/`, {
                         method: 'GET',
                         headers: this.buildHeaders(),
                     })
@@ -1649,7 +1649,7 @@ export class ApiClient {
 
                     const action = (await getResponse.json()) as { name: string }
 
-                    const response = await fetch(`${this.baseUrl}/api/projects/${projectId}/actions/${actionId}/`, {
+                    const response = await fetch(`${this.baseUrl}/v1/projects/${projectId}/actions/${actionId}/`, {
                         method: 'PATCH',
                         headers: this.buildHeaders(),
                         body: JSON.stringify({ name: action.name, deleted: true }),
@@ -1702,7 +1702,7 @@ export class ApiClient {
                     }
                 }
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/search/${searchParams.toString() ? `?${searchParams}` : ''}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/search/${searchParams.toString() ? `?${searchParams}` : ''}`
 
                 return this.fetchWithSchema(url, SearchResponseSchema)
             },
