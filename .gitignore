@@ -249,3 +249,6 @@ CLAUDE.md
 AGENTS.md
 GEMINI.md
 QWEN.md
+
+# Written by nodejs/jest.setup-env.ts on every test run.
+nodejs/.tmp/

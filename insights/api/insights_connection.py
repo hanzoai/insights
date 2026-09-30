@@ -52,7 +52,7 @@ CONNECTION_MAX_RESPONSE_BYTES = 5 * 1024 * 1024
 CONNECTION_MARKER_HEADER = "X-Insights-Connection"
 _METHODS_WITH_BODY = ("POST", "PUT", "PATCH", "DELETE")
 _ALLOWED_METHODS = ("GET", *_METHODS_WITH_BODY)
-# A relative API path on the target, e.g. `api/projects/2/insights/`. The host comes from the fixed
+# A relative API path on the target, e.g. `v1/projects/2/insights/`. The host comes from the fixed
 # per-region base URL (never from here), so the netloc can't be changed; this just keeps the path a
 # well-formed relative path and blocks obvious traversal.
 _SAFE_PATH = re.compile(r"^[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$")
@@ -100,7 +100,7 @@ def _validate_target_path(path: str) -> str:
     # Reject a leading `//` (protocol-relative-looking) even though the fixed base URL already fixes
     # the host — it's never a legitimate API path, so refuse it rather than silently normalizing.
     if not stripped or raw.startswith("//") or "://" in stripped or ".." in stripped or not _SAFE_PATH.match(stripped):
-        raise ValidationError("path must be a relative target API path, e.g. `api/projects/2/insights/`.")
+        raise ValidationError("path must be a relative target API path, e.g. `v1/projects/2/insights/`.")
     return stripped
 
 
@@ -134,7 +134,7 @@ class InsightsConnectionForwardSerializer(serializers.Serializer):
         choices=list(_ALLOWED_METHODS), help_text="HTTP method to use against the target project's API."
     )
     path = serializers.CharField(
-        help_text="Relative target API path with no host or scheme, e.g. `api/projects/2/insights/`."
+        help_text="Relative target API path with no host or scheme, e.g. `v1/projects/2/insights/`."
     )
     query = serializers.DictField(
         required=False, child=serializers.CharField(), help_text="Query parameters to send to the target."
