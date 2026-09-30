@@ -28,8 +28,10 @@ Invariants, all of which are the difference between a login and a tenancy bug:
 
 from typing import Any, Optional, Union
 
+from django.conf import settings
 from django.db import IntegrityError, transaction
 
+import requests
 import structlog
 from social_core.exceptions import AuthFailed
 from social_django.strategy import DjangoStrategy
@@ -96,6 +98,53 @@ def _ensure_organization(org_slug: str) -> Organization:
         raise AuthFailed("hanzo-iam", f"Could not resolve organization for slug '{slug}'")
 
 
+# Sign-in waits on this call, so a slow cloud costs at most this much and the
+# lookup is retried at the next sign-in.
+_CLOUD_TIMEOUT_SECONDS = 5
+
+
+def _cloud_project(org_slug: str, access_token: str) -> Optional[dict]:
+    """The org's existing cloud project, whose key its sites already send events with.
+
+    Cloud forwards each event with the `pk-` key of the project that admitted it,
+    and ingestion keeps an event only when some team's `api_token` is that key, so
+    a new org's first team takes the key its events already carry rather than a
+    new project's. The oldest keyed project of THIS org, so every sign-in picks the
+    same one; a key another team already holds is never taken. None when cloud
+    does not answer or the org has none, and the caller mints one: this lookup
+    never decides whether a sign-in succeeds.
+    """
+    if not access_token:
+        return None
+    slug = _normalize_slug(org_slug)
+    try:
+        response = requests.get(
+            f"{settings.HANZO_API_URL}/v1/projects",
+            headers={"Authorization": f"Bearer {access_token}", "X-Org-Id": slug},
+            timeout=_CLOUD_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        projects = response.json()
+    except Exception as e:
+        # The body is not logged: an error can echo back the bearer.
+        logger.warning("iam_org_pipeline_cloud_projects_unavailable", org_slug=slug, error=type(e).__name__)
+        return None
+    if not isinstance(projects, list):
+        return None
+    keyed = [
+        p
+        for p in projects
+        if isinstance(p, dict)
+        and str(p.get("org", "")).lower() == slug
+        and isinstance(p.get("key"), str)
+        and p["key"].startswith("pk-")
+        and not Team.objects.filter(api_token=p["key"]).exists()
+    ]
+    if not keyed:
+        return None
+    return min(keyed, key=lambda p: (p.get("createdAt") or 0, str(p.get("id", ""))))
+
+
 def _ensure_default_team(org: Organization, user: User, access_token: str) -> Team:
     """Every organization needs one team, holding the ingest key cloud minted.
 
@@ -128,7 +177,12 @@ def _ensure_default_team(org: Organization, user: User, access_token: str) -> Te
     # called after its brand slugifies onto a reserved subdomain, which cloud
     # refuses, and a login is the worst place to discover that.
     name = f"{org.name} Default"
-    api_token = ingest.key(name=name, user=user, fresh=access_token)
+    project = _cloud_project(org.slug, access_token)
+    if project is not None:
+        api_token = project["key"]
+        name = (project.get("name") or name)[:200]
+    else:
+        api_token = ingest.key(name=name, user=user, fresh=access_token)
 
     if team:
         # Saved rather than written through the queryset, and narrowed to the one
