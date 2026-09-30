@@ -780,26 +780,48 @@ urlpatterns.append(
 )
 
 
-# Hanzo IAM is the only login, so /login goes straight to the OIDC handshake
-# rather than rendering the SPA's login scene. The scene exists to offer a
-# choice of providers; with one provider it renders a blank page while the
-# bundle loads and then redirects anyway.
-def _login_oidc_redirect(request: HttpRequest) -> HttpResponse:
-    """Bare `/login` is the handshake itself, unless it carries an error to show.
+# Hanzo IAM is the only login, so /login is IAM's form rather than the SPA's
+# login scene, which would render blank while the bundle loads.
+def login_page(request: HttpRequest) -> HttpResponse:
+    """`/login`: Hanzo IAM's sign-in, drawn on this origin.
+
+    The OIDC request is the one `/login/oidc/` makes (same state, nonce and
+    `next`, kept in this session), but the browser is not sent to the issuer's
+    page. The form posts the credential to this origin's `/v1/iam/login`, which
+    the ingress answers with IAM, and IAM returns an authorization code for that
+    request. The browser then completes at `/complete/oidc/`, where the code is
+    exchanged with the client secret exactly as before.
 
     `sso_login` reports a failed handshake by redirecting back to
-    `/login?error_code=...`. Sending that straight on to `/login/oidc/` retries
-    the failure that produced it, so the browser loops between the two paths and
-    never reaches the SPA's error copy. Rendering the scene instead terminates
-    the round trip on the message.
+    `/login?error_code=...`; that renders the message rather than retrying the
+    handshake that produced it.
     """
-    if request.GET.get("error_code"):
-        return home(request)
     next_url = request.GET.get("next", "/")
-    return HttpResponseRedirect("/login/oidc/?{}".format(urlencode({"next": next_url})))
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        next_url = "/"
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(next_url)
+    if "error_code" in request.GET:
+        return render(request, "login.html", {"error": request.GET["error_code"]}, status=400)
+    start = authentication.sso_login(request, "oidc")
+    authorize = urlparse(getattr(start, "url", ""))
+    if "state=" not in authorize.query:
+        return start
+    return render(
+        request,
+        "login.html",
+        {
+            "query": authorize.query,
+            "authorize_url": start.url,
+            "application": settings.SOCIAL_AUTH_OIDC_KEY,
+            "organization": settings.IAM_ORGANIZATION,
+            "issuer_url": f"/login/oidc/?{urlencode({'next': next_url})}",
+            "signup_url": "https://hanzo.ai/signup",
+        },
+    )
 
 
-urlpatterns.append(path("login", _login_oidc_redirect))
+urlpatterns.append(path("login", login_page))
 
 
 def _invite_signup_redirect(request: HttpRequest, invite_id: str) -> HttpResponse:

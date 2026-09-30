@@ -257,6 +257,8 @@ SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
 SOCIAL_AUTH_OIDC_IGNORE_DEFAULT_SCOPE: bool = True
 SOCIAL_AUTH_OIDC_REDIRECT_URI: str | None = os.getenv("SOCIAL_AUTH_OIDC_REDIRECT_URI")
 SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER: str | None = os.getenv("SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER")
+# The IAM organization this deployment's application signs people into.
+IAM_ORGANIZATION: str = os.getenv("IAM_ORGANIZATION", "hanzo")
 
 AUTH_USER_MODEL = "insights.User"
 

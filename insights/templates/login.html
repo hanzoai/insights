@@ -1,0 +1,201 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Log in to Hanzo Insights</title>
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/favicon-32x32.png' %}">
+<style nonce="{{ request.csp_nonce }}">
+@font-face {
+  font-family: 'Zen';
+  src: url('{% static "fonts/Zen-Variable.woff2" %}') format('woff2-variations');
+  font-weight: 100 900; font-style: normal; font-display: swap;
+}
+:root {
+  --ground: #f5f5f5; --raised: #fff; --ink: #111; --ink-dim: rgb(17 17 17 / 70%);
+  --edge: #e0e0e0; --solid: #111; --solid-ink: #fff; --wrong: #b42318; --radius: 0.625rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #000; --raised: #16161a; --ink: #fff; --ink-dim: rgb(255 255 255 / 70%);
+    --edge: #2c2c32; --solid: #fff; --solid-ink: #000; --wrong: #f97066;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1.5rem 1rem;
+  background: var(--ground); color: var(--ink);
+  font-family: 'Zen', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+main { width: 100%; max-width: 24rem; }
+.card { background: var(--raised); border: 1px solid var(--edge); border-radius: 0.75rem; padding: 2rem 1.5rem; }
+.brand { display: flex; align-items: center; gap: .5rem; margin: 0 0 1.25rem; font-weight: 600; }
+.brand svg { width: 20px; height: 20px; fill: currentColor; }
+h1 { font-size: 1.375rem; line-height: 1.25; margin: 0 0 1.25rem; letter-spacing: -0.02em; }
+label { display: block; font-size: .875rem; font-weight: 550; margin: 0 0 .375rem; }
+input {
+  width: 100%; font: inherit; color: inherit; background: transparent; margin: 0 0 1rem;
+  padding: .625rem .75rem; border: 1px solid var(--edge); border-radius: var(--radius);
+}
+input:focus-visible { outline: 2px solid var(--solid); outline-offset: 1px; }
+.btn {
+  display: flex; width: 100%; align-items: center; justify-content: center; gap: .5rem;
+  padding: .7rem 1rem; border-radius: var(--radius); border: 1px solid var(--edge);
+  background: transparent; color: var(--ink); font: inherit; font-weight: 550;
+  text-decoration: none; cursor: pointer; margin: 0 0 .625rem;
+}
+.btn svg { width: 16px; height: 16px; fill: currentColor; }
+.btn-solid { background: var(--solid); color: var(--solid-ink); border-color: var(--solid); }
+.btn[disabled] { opacity: .6; cursor: default; }
+.more { background: none; border: 0; padding: 0; font: inherit; font-size: .875rem; color: var(--ink-dim); text-decoration: underline; cursor: pointer; }
+.or { text-align: center; color: var(--ink-dim); font-size: .875rem; margin: .5rem 0 1rem; }
+.who { display: flex; align-items: center; gap: .5rem; margin: 0 0 1rem; color: var(--ink-dim); font-size: .9375rem; }
+.note { color: var(--ink-dim); font-size: .875rem; margin: 0 0 1rem; }
+.wrong { color: var(--wrong); font-size: .875rem; margin: 0 0 1rem; min-height: 0; }
+.else { text-align: center; color: var(--ink-dim); font-size: .875rem; margin: 1.25rem 0 0; }
+.else a { color: var(--ink); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <section class="card" aria-label="Log in">
+    <p class="brand"><svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M22.21 67V44.6369H0V67H22.21Z"/><path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"/><path d="M22.21 0H0V22.3184H22.21V0Z"/><path d="M66.7198 0H44.5098V22.3184H66.7198V0Z"/><path d="M66.7198 67V44.6369H44.5098V67H66.7198Z"/></svg>Hanzo Insights</p>
+    <h1>Log in to Hanzo Insights</h1>
+    {% if error %}
+    <p class="wrong" role="alert">Sign-in is not available right now ({{ error }}). Try again shortly.</p>
+    {% else %}
+    <div id="first">
+      <a class="btn" id="google" href="{{ authorize_url }}&amp;provider=provider-google"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 2.14-5.63 2.14-4.64 0-8.26-3.74-8.26-8.38s3.62-8.38 8.26-8.38c2.5 0 4.34.99 5.69 2.26l2.31-2.31C18.96 1.28 16.46 0 12.48 0 5.72 0 .04 5.5.04 12.28s5.68 12.28 12.44 12.28c3.65 0 6.4-1.2 8.55-3.44 2.21-2.21 2.9-5.32 2.9-7.83 0-.78-.06-1.5-.18-2.1z"/></svg>Continue with Google</a>
+      <a class="btn" id="github" href="{{ authorize_url }}&amp;provider=provider-github"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.2.8.8 1.3 1.9 1.3 3.1 0 4.6-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3z"/></svg>Continue with GitHub</a>
+      <p class="or">or</p>
+    </div>
+    <form id="form" novalidate>
+      <div id="step-email">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="username" placeholder="you@company.com" required autofocus>
+      </div>
+      <p class="who" id="who" hidden><button type="button" class="more" id="back">Use another email</button><span id="address"></span></p>
+      <div id="step-password" hidden>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password">
+      </div>
+      <div id="step-code" hidden>
+        <p class="note" id="sent"></p>
+        <label for="code">Code</label>
+        <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code">
+      </div>
+      <p class="wrong" id="wrong" role="alert" hidden></p>
+      <button type="submit" class="btn btn-solid" id="go">Continue</button>
+      <button type="button" class="more" id="by-code" hidden>Email me a code instead</button>
+    </form>
+    {% endif %}
+  </section>
+  <p class="else">New to Hanzo? <a href="{{ signup_url }}">Create an account</a></p>
+</main>
+{% if not error %}
+<script nonce="{{ request.csp_nonce }}">
+(() => {
+  // The OIDC request this session started (state, nonce, redirect_uri, scope).
+  const request = "{{ query|escapejs }}";
+  const application = "{{ application|escapejs }}";
+  const organization = "{{ organization|escapejs }}";
+  const issuer = "{{ issuer_url|escapejs }}";
+  const state = new URLSearchParams(request).get("state");
+  const $ = (id) => document.getElementById(id);
+  let step = "email";
+
+  const show = (next) => {
+    step = next;
+    $("step-email").hidden = next !== "email";
+    $("first").hidden = next !== "email";
+    $("who").hidden = next === "email";
+    $("step-password").hidden = next !== "password";
+    $("step-code").hidden = next !== "code";
+    $("by-code").hidden = next !== "password";
+    $("address").textContent = $("email").value.trim();
+    const focus = { email: "email", password: "password", code: "code" }[next];
+    $(focus).focus();
+  };
+  const wrong = (text) => {
+    $("wrong").textContent = text || "";
+    $("wrong").hidden = !text;
+  };
+  const busy = (on) => {
+    $("go").disabled = on;
+    $("go").textContent = on ? "One moment…" : "Continue";
+  };
+
+  // IAM answers these on this origin; the credential never leaves for another host.
+  async function signIn(fields) {
+    const res = await fetch(`/v1/iam/login?${request}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ type: "code", application, organization, autoSignin: true, ...fields }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || body.status === "error") throw new Error(body.msg || `Sign-in failed (${res.status}).`);
+    if (body.data === "NextMfa" || body.data === "RequiredMfa") {
+      // The second factor is held by the issuer, so that ceremony finishes there.
+      step = "done";
+      window.location.assign(issuer);
+      return;
+    }
+    if (typeof body.data !== "string" || !body.data) throw new Error("IAM did not return a code.");
+    step = "done";
+    window.location.assign(`/complete/oidc/?code=${encodeURIComponent(body.data)}&state=${encodeURIComponent(state)}`);
+  }
+
+  async function sendCode() {
+    const dest = $("email").value.trim();
+    const res = await fetch("/v1/iam/verification-codes", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+      body: new URLSearchParams({ applicationId: `admin/${application}`, dest, type: "email" }).toString(),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || body.status === "error") throw new Error(body.msg || "Could not send a code.");
+    $("sent").textContent = `We sent a code to ${dest}. It is good for a few minutes.`;
+    $("code").value = "";
+    show("code");
+  }
+
+  async function run(call) {
+    wrong("");
+    busy(true);
+    try {
+      await call();
+      if (step !== "done") busy(false);
+    } catch (err) {
+      wrong(err && err.message ? err.message : "Something went wrong. Try again.");
+      busy(false);
+    }
+  }
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = $("email").value.trim();
+    if (step === "email") {
+      if (!username.includes("@")) return wrong("Enter your email address.");
+      wrong("");
+      return show("password");
+    }
+    if (step === "password") {
+      return run(() => signIn({ username, password: $("password").value, signinMethod: "Password" }));
+    }
+    return run(() => signIn({ username, email: username, code: $("code").value.trim(), signinMethod: "Verification code" }));
+  });
+  $("by-code").addEventListener("click", () => run(sendCode));
+  $("back").addEventListener("click", () => {
+    $("password").value = "";
+    wrong("");
+    show("email");
+  });
+})();
+</script>
+{% endif %}
+</body>
+</html>
