@@ -7,12 +7,18 @@ const DEFAULT_API_KEY = 'sTMFPsFhdP1Ssg'
 
 const runningOnInsights = !!window.INSIGHTS_APP_CONTEXT
 const apiKey = runningOnInsights ? window.JS_INSIGHTS_API_KEY : DEFAULT_API_KEY
-const apiHost = runningOnInsights ? window.JS_INSIGHTS_HOST : 'https://internal-j.hanzo.ai'
+// Only a key this deployment handed out names a project here. Without one -- off
+// Insights, or on an Insights that serves no self-capture key -- the toolbar has
+// no telemetry destination of its own: its client points at the current origin
+// with flags disabled, so it makes no network calls at all.
+const hasProject = runningOnInsights && !!window.JS_INSIGHTS_API_KEY
+const apiHost = (runningOnInsights ? window.JS_INSIGHTS_HOST : '') || window.location.origin
 
 const initResult = insights.init(
     apiKey || DEFAULT_API_KEY,
     {
         api_host: apiHost,
+        advanced_disable_flags: !hasProject,
         opt_out_capturing_by_default: true, // must call .opt_in_capturing() before any events are sent
         persistence: 'memory', // We don't want to persist anything, all events are in-memory
         persistence_name: apiKey + '_toolbar', // We don't need this but it ensures we don't accidentally mess with the standard persistence
