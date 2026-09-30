@@ -15,7 +15,7 @@ It downloads `insights/user_scripts/latest_user_defined_function.xml` and deploy
 
 For revertible cloud deploys:
 
-1. Develop using the binary files at the top level of `user_scripts` (see section above), with schema defined in `docker/datastore/user_defined_function.xml`
+1. Develop using the binary files at the top level of `user_scripts` (see section above), with schema defined in `insights/user_scripts/user_defined_function.xml`
 2. When ready to deploy, increment the version in `insights/udf_versioner.py` and run it. This generates versioned binaries and `latest_user_defined_function.xml`
 3. Land a PR with the updated `user_scripts` folder — include both the new version folder (e.g. `v12/`) and the regenerated `latest_user_defined_function.xml`. **Do not** include the `UDF_VERSION` bump in this PR — that goes in a separate PR (step 5)
 4. The binaries and XML should be automatically deployed to Datastore on the next config run. Verify in metabase by running `SELECT aggregate_funnel_vXX()`. An "invalid arguments" error means the function is registered. An "unknown function" error means the deploy hasn't taken effect yet. **Make sure to do this for both EU and US**

@@ -830,7 +830,7 @@ jobs:
                   COMPOSE_PROFILES: temporal,azure
                   DATASTORE_SERVER_IMAGE: ${{ needs.get_datastore_versions.outputs.local_image }}
               run: |
-                  cp insights/user_scripts/latest_user_defined_function.xml docker/datastore/user_defined_function.xml
+                  cp insights/user_scripts/latest_user_defined_function.xml insights/user_scripts/user_defined_function.xml
                   # nohup detaches the launch so it survives Depot's step-shell teardown
                   # (which SIGHUPs a plain `&` subshell). Isolated here; bin/ci-wait-for-docker stays == master.
                   nohup bin/ci-wait-for-docker launch --background --down \
@@ -1635,7 +1635,7 @@ jobs:
                   WAIT_FOR_DOCKER_LAUNCH_RETRIES: 3
                   WAIT_FOR_DOCKER_LAUNCH_RETRY_DELAY: 5
               run: |
-                  cp insights/user_scripts/latest_user_defined_function.xml docker/datastore/user_defined_function.xml
+                  cp insights/user_scripts/latest_user_defined_function.xml insights/user_scripts/user_defined_function.xml
                   # nohup detaches the launch so it survives Depot's step-shell teardown
                   # (which SIGHUPs a plain `&` subshell). Isolated here; bin/ci-wait-for-docker stays == master.
                   nohup bin/ci-wait-for-docker launch --background --down-all-profiles \
