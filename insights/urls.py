@@ -1,5 +1,5 @@
 from typing import Any, cast
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseServerError
@@ -323,13 +323,42 @@ if settings.TEST:
         urlpatterns.append(path("decode", decode_payloads, name="temporal_decode"))
 
 
-# Redirect /login directly to OIDC SSO — bypasses React SPA (avoids blank page)
-def _login_oidc_redirect(request: HttpRequest) -> HttpResponseRedirect:
+def login_page(request: HttpRequest) -> HttpResponse:
+    """`/login`: Hanzo IAM's sign-in, drawn on this origin.
+
+    The OIDC request is the one `/login/oidc/` makes (same state, nonce and
+    `next`, kept in this session), but the browser is not sent to the issuer's
+    page. The form posts the credential to this origin's `/v1/iam/login`, which
+    the ingress answers with IAM, and IAM returns an authorization code for that
+    request. The browser then completes at `/complete/oidc/`, where the code is
+    exchanged with the client secret exactly as before.
+    """
     next_url = request.GET.get("next", "/")
-    return HttpResponseRedirect(f"/login/oidc/?next={next_url}")
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        next_url = "/"
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(next_url)
+    if "error_code" in request.GET:
+        return render(request, "login.html", {"error": request.GET["error_code"]}, status=400)
+    start = authentication.sso_login(request, "oidc")
+    authorize = urlparse(getattr(start, "url", ""))
+    if "state=" not in authorize.query:
+        return start
+    return render(
+        request,
+        "login.html",
+        {
+            "query": authorize.query,
+            "authorize_url": start.url,
+            "application": settings.SOCIAL_AUTH_OIDC_KEY,
+            "organization": settings.IAM_ORGANIZATION,
+            "issuer_url": f"/login/oidc/?{urlencode({'next': next_url})}",
+            "signup_url": "https://hanzo.ai/signup",
+        },
+    )
 
 
-urlpatterns.append(path("login", _login_oidc_redirect))
+urlpatterns.append(path("login", login_page))
 
 
 @ensure_csrf_cookie
