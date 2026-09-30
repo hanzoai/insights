@@ -797,7 +797,7 @@ describe('Script Executor', () => {
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/conversations/external/ticket/test-ticket-123`,
+                url: `${hub.SITE_URL}/v1/conversations/external/ticket/test-ticket-123`,
                 method: 'GET',
                 headers: { Authorization: 'Bearer test-api-token' },
             })
@@ -817,7 +817,7 @@ describe('Script Executor', () => {
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/conversations/external/ticket/test-ticket-456`,
+                url: `${hub.SITE_URL}/v1/conversations/external/ticket/test-ticket-456`,
                 method: 'PATCH',
                 body: JSON.stringify({ status: 'resolved', priority: 'high' }),
                 headers: {
