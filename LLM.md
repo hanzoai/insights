@@ -186,6 +186,14 @@ bearer path (`insights/auth.py` `_iam_jwk_client`) reads the same JWKS address; 
 used to read `<issuer>/.well-known/jwks.json`, which hanzo.id answers 404, so every
 IAM bearer failed closed with "IAM verification unavailable".
 
+A person new to Insights is created at sign-in (1.52.176, `social_create_user`,
+backend `oidc`) in no organization, and `iam_org_assign` places them in their
+IAM org's organization (made on first sign-in) or denies the sign-in. Before,
+upstream's organization-creation gate ran first and answered every new person
+`/login?error_code=no_new_organizations`: this deployment cannot create
+organizations (`get_can_create_org`), so only invited or JIT-domain addresses got
+in, whatever IAM said.
+
 A sign-out lands on `/login?from=logout` and a failed sign-in on
 `/login?error_code=…`; both draw `login.html` (a card and one "Sign in" link) and
 wait, because hanzo.ai keeps its own session and leaving at once would sign the

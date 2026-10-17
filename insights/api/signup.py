@@ -817,6 +817,16 @@ def social_create_user(
             backend_processor = "domain_whitelist"  # This is actually `jit_provisioning` (name kept for backwards-compatibility purposes)
             from_invite = True  # jit_provisioning means they're definitely not organization_first_user
 
+        if not user and backend.name == "oidc":
+            # Hanzo IAM proved who this is, and IAM decides where they belong:
+            # `iam_org_assign`, further down the pipeline, places the user in the
+            # organization of their IAM org (made on first sign-in) or denies the
+            # sign-in. Upstream's gate on making an organization is not ours to
+            # ask, so a person new to Insights is created here, in no organization.
+            user = User.objects.create_user(email=email, password=None, first_name=full_name, is_email_verified=True)
+            backend_processor = "hanzo_iam"
+            logger.info("social_create_user_hanzo_iam", user=user.id)
+
         if not user:
             logger.info(
                 f"social_create_user_jit_failed",
