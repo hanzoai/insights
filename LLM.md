@@ -164,6 +164,35 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
   selected by its image. Reading a pod mid-rollout returns the OLD build and
   makes a shipped fix look absent (or an absent one look shipped).
 
+## Sign-in: on hanzo.ai, with this deployment's own request (1.52.175)
+
+`/login` and `/signup` draw no form (`insights/urls.py` `_signin`). They start
+python-social-auth's OIDC request, `authentication.sso_login(request, "oidc")`:
+client `hanzo-insights`, callback `/complete/oidc/`, a state and a nonce kept in
+the session, and `next`. Its authorization address is
+`SOCIAL_AUTH_OIDC_AUTHORIZATION_URL`, `https://hanzo.ai/login`, so the browser goes
+there carrying the request (`/signup` swaps the path). hanzo.ai's page finishes it
+(@hanzo/iam >= 0.21.32 `asked`/`ask`, which takes a confidential client's request
+without PKCE and carries its nonce): a person signed in on hanzo.ai passes straight
+through, anyone else signs in there. The code comes back to `/complete/oidc/` and is
+exchanged with the client secret as before.
+
+The server asks IAM at `SOCIAL_AUTH_OIDC_OIDC_ENDPOINT` (universe:
+`https://api.hanzo.ai/v1/iam`): `settings/web.py` names the token, userinfo,
+revocation and JWKS addresses under it, and the token auth method, so social-core
+fetches no discovery document. The issuer `https://hanzo.id`
+(`SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER`) is checked in tokens and never fetched. The
+bearer path (`insights/auth.py` `_iam_jwk_client`) reads the same JWKS address; it
+used to read `<issuer>/.well-known/jwks.json`, which hanzo.id answers 404, so every
+IAM bearer failed closed with "IAM verification unavailable".
+
+A sign-out lands on `/login?from=logout` and a failed sign-in on
+`/login?error_code=…`; both draw `login.html` (a card and one "Sign in" link) and
+wait, because hanzo.ai keeps its own session and leaving at once would sign the
+person straight back in. `insights/test/test_signin.py` holds all of it, and that no
+source names hanzo.id. The invite sign-up (`/signup/<id>`) and `/reset` are still
+upstream's SPA scenes.
+
 ## Auth / tenancy
 
 Tenancy is the IAM `owner` claim = the org (one tenancy). All Go observability

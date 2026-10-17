@@ -385,23 +385,23 @@ class TemporaryTokenAuthentication(authentication.BaseAuthentication):
 
 @functools.lru_cache(maxsize=1)
 def _iam_jwk_client() -> Optional["jwt.PyJWKClient"]:
-    """The JWKS client for the Hanzo IAM issuer, or None when IAM is not configured.
+    """The JWKS client for Hanzo IAM's signing keys, or None when IAM is not configured.
 
+    The keys are read at the IAM API (`SOCIAL_AUTH_OIDC_JWKS_URI`), the same address
+    the sign-in verifies id tokens against; the issuer's host is never fetched.
     Cached because PyJWKClient keeps its own signing-key cache; rebuilding it per
     request would refetch JWKS on every call.
     """
     from django.conf import settings
 
-    issuer = getattr(settings, "SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER", None) or getattr(
-        settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT", None
-    )
-    if not issuer:
+    jwks = getattr(settings, "SOCIAL_AUTH_OIDC_JWKS_URI", None)
+    if not jwks:
         return None
-    return jwt.PyJWKClient(f"{str(issuer).rstrip('/')}/.well-known/jwks.json")
+    return jwt.PyJWKClient(str(jwks))
 
 
 class IamAuthentication(authentication.BaseAuthentication):
-    """Authenticate an API request with a Hanzo IAM bearer (hanzo.id OIDC).
+    """Authenticate an API request with a Hanzo IAM bearer.
 
     ONE auth system: IAM is the estate's single identity provider, so the API
     accepts the same token every other Hanzo service does instead of requiring a

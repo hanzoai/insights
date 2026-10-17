@@ -16,7 +16,7 @@ def clear_cache():
     iam._expires_at = 0.0
 
 
-ENDPOINT = "https://hanzo.id/v1/iam"
+ENDPOINT = "https://api.hanzo.ai/v1/iam"
 
 
 def _response(payload, status=200):

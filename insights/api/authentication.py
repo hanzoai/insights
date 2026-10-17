@@ -121,7 +121,9 @@ def logout(request):
         restore_original_login(request)
         return redirect(f"/admin/insights/user/{impersonated_user_pk}/change/")
 
-    response = auth_views.logout_then_login(request)
+    # The sign-out lands on /login?from=logout, which waits to be asked: hanzo.ai keeps
+    # its own session, and leaving for it at once would sign the person straight back in.
+    response = auth_views.logout_then_login(request, login_url="/login?from=logout")
     return response
 
 

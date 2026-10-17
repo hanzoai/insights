@@ -4,7 +4,7 @@ Hanzo IAM Organization Pipeline for Insights Social Auth.
 This pipeline function runs during OIDC/SSO login and ensures the user
 is assigned to the correct Insights Organization based on their IAM org claim.
 
-IAM (hanzo.id) provides the `owner` claim in userinfo which contains
+IAM provides the `owner` claim in userinfo which contains
 the organization slug (e.g., "hanzo", "lux", "zoo").
 
 Security invariants (RED H2/M2/M3/M7):
