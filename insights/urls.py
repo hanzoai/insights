@@ -782,48 +782,50 @@ urlpatterns.append(
 )
 
 
-# Hanzo IAM is the only login, so /login is IAM's form rather than the SPA's
-# login scene, which would render blank while the bundle loads.
-def login_page(request: HttpRequest) -> HttpResponse:
-    """`/login`: Hanzo IAM's sign-in, drawn on this origin.
+# Hanzo IAM is the only login, and people sign in on hanzo.ai, so /login and
+# /signup leave for it rather than drawing the SPA's login scene.
+def _signin(request: HttpRequest, page: str) -> HttpResponse:
+    """Sign in on hanzo.ai with this deployment's own OIDC request.
 
-    The OIDC request is the one `/login/oidc/` makes (same state, nonce and
-    `next`, kept in this session), but the browser is not sent to the issuer's
-    page. The form posts the credential to this origin's `/v1/iam/login`, which
-    the ingress answers with IAM, and IAM returns an authorization code for that
-    request. The browser then completes at `/complete/oidc/`, where the code is
-    exchanged with the client secret exactly as before.
-
-    `sso_login` reports a failed handshake by redirecting back to
-    `/login?error_code=...`; that renders the message rather than retrying the
-    handshake that produced it.
+    `/login/oidc/` (python-social-auth) makes the request: client `hanzo-insights`,
+    the callback `/complete/oidc/`, a state and a nonce kept in this session, and
+    `next`. Its authorization address is hanzo.ai's sign-in page
+    (`SOCIAL_AUTH_OIDC_AUTHORIZATION_URL`), so the browser goes there carrying the
+    request, to `/signup` for a new account. hanzo.ai finishes it ("Continue as",
+    or its own sign-in) and the code comes back to `/complete/oidc/`, where it is
+    exchanged with the client secret at the IAM API. A sign-in that failed, or the
+    page a sign-out lands on, draws `login.html` and waits to be asked again.
     """
     next_url = request.GET.get("next", "/")
     if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
         next_url = "/"
     if request.user.is_authenticated:
         return HttpResponseRedirect(next_url)
-    if "error_code" in request.GET:
-        return render(request, "login.html", {"error": request.GET["error_code"]}, status=400)
+    error = request.GET.get("error_code")
+    if error or request.GET.get("from") == "logout":
+        again = f"/{page}?{urlencode({'next': next_url})}" if next_url != "/" else f"/{page}"
+        return render(request, "login.html", {"error": error, "again": again}, status=400 if error else 200)
     start = authentication.sso_login(request, "oidc")
-    authorize = urlparse(getattr(start, "url", ""))
-    if "state=" not in authorize.query:
+    if page == "login":
         return start
-    return render(
-        request,
-        "login.html",
-        {
-            "query": authorize.query,
-            "authorize_url": start.url,
-            "application": settings.SOCIAL_AUTH_OIDC_KEY,
-            "organization": settings.IAM_ORGANIZATION,
-            "issuer_url": f"/login/oidc/?{urlencode({'next': next_url})}",
-            "signup_url": "https://hanzo.ai/signup",
-        },
-    )
+    to = urlparse(getattr(start, "url", ""))
+    if to.path.rstrip("/") != urlparse(settings.SOCIAL_AUTH_OIDC_AUTHORIZATION_URL).path.rstrip("/"):
+        return start
+    return HttpResponseRedirect(to._replace(path=f"/{page}").geturl())
+
+
+def login_page(request: HttpRequest) -> HttpResponse:
+    """`/login`: hanzo.ai/login, carrying this deployment's request."""
+    return _signin(request, "login")
+
+
+def signup_page(request: HttpRequest) -> HttpResponse:
+    """`/signup`: hanzo.ai/signup, carrying this deployment's request."""
+    return _signin(request, "signup")
 
 
 urlpatterns.append(path("login", login_page))
+urlpatterns.append(path("signup", signup_page))
 
 
 def _invite_signup_redirect(request: HttpRequest, invite_id: str) -> HttpResponse:

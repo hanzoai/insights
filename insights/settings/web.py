@@ -225,7 +225,7 @@ WSGI_APPLICATION = "insights.wsgi.application"
 # Authentication
 
 AUTHENTICATION_BACKENDS: list[str] = [
-    # Hanzo IAM (hanzo.id) is the single federated login. Upstream's per-vendor
+    # Hanzo IAM, signed in on hanzo.ai, is the single federated login. Upstream's per-vendor
     # OAuth backends are not wired: this deployment has one identity provider,
     # and a second one would be a second place to revoke an account from.
     "social_core.backends.open_id_connect.OpenIdConnectAuth",
@@ -255,6 +255,18 @@ SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
 SOCIAL_AUTH_OIDC_IGNORE_DEFAULT_SCOPE: bool = True
 SOCIAL_AUTH_OIDC_REDIRECT_URI: str | None = os.getenv("SOCIAL_AUTH_OIDC_REDIRECT_URI")
 SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER: str | None = os.getenv("SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER")
+# People sign in on hanzo.ai: the authorization address is its sign-in page, which
+# finishes this deployment's own request. IAM is asked at SOCIAL_AUTH_OIDC_OIDC_ENDPOINT
+# (https://api.hanzo.ai/v1/iam) for the token, userinfo, revocation and signing keys,
+# each named here so no discovery document is fetched. The issuer is checked, never
+# fetched.
+SOCIAL_AUTH_OIDC_AUTHORIZATION_URL: str = os.getenv("SOCIAL_AUTH_OIDC_AUTHORIZATION_URL", "https://hanzo.ai/login")
+_IAM_API = (SOCIAL_AUTH_OIDC_OIDC_ENDPOINT or "").rstrip("/")
+SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL: str = f"{_IAM_API}/oauth/token" if _IAM_API else ""
+SOCIAL_AUTH_OIDC_USERINFO_URL: str = f"{_IAM_API}/oauth/userinfo" if _IAM_API else ""
+SOCIAL_AUTH_OIDC_REVOKE_TOKEN_URL: str = f"{_IAM_API}/oauth/revoke" if _IAM_API else ""
+SOCIAL_AUTH_OIDC_JWKS_URI: str = f"{_IAM_API}/.well-known/jwks" if _IAM_API else ""
+SOCIAL_AUTH_OIDC_TOKEN_ENDPOINT_AUTH_METHOD = "client_secret_basic"
 # The IAM organization this deployment's application signs people into.
 IAM_ORGANIZATION: str = os.getenv("IAM_ORGANIZATION", "hanzo")
 

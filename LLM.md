@@ -39,8 +39,8 @@ imports; they are inert (not in INSTALLED_APPS).
 
 ## Production runs the 1.52.x release line, not main
 
-insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.168`
-(`sha256:de2921dc…`), built from tag `v1.52.168`: the 1.52.68 tree (`02e23ec`,
+insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.175`
+(digest pinned in universe), built from tag `v1.52.175`: the 1.52.68 tree (`02e23ec`,
 kept on GitHub under `refs/dr-backup/*`) plus the commits tagged on top of it.
 Main can't deploy there yet. Its product apps carry the upstream migration graph
 (~1000 migrations), while the prod DB was built from 1.52.68's squashed graph, and
@@ -431,6 +431,36 @@ declares `log_entries` as a MergeTree; production has it as a Distributed table
 with no CREATE anywhere in the tree. This is why `--live` exists and why `0230`
 deliberately does NOT move the MV's destination — that drift is real, is not a
 naming problem, and is not fixed here.
+
+## Sign-in: on hanzo.ai, with this deployment's own request (main and 1.52.175)
+
+`/login` and `/signup` draw no form (`insights/urls.py` `_signin`). They start
+python-social-auth's OIDC request, `authentication.sso_login(request, "oidc")`:
+client `hanzo-insights`, callback `/complete/oidc/`, a state and a nonce kept in
+the session, and `next`. Its authorization address is
+`SOCIAL_AUTH_OIDC_AUTHORIZATION_URL`, `https://hanzo.ai/login`, so the browser goes
+there carrying the request (`/signup` swaps the path). hanzo.ai's page finishes it
+(@hanzo/iam >= 0.21.32 `asked`/`ask`, which takes a confidential client's request
+without PKCE and carries its nonce): a person signed in on hanzo.ai passes straight
+through, anyone else signs in there. The code comes back to `/complete/oidc/` and is
+exchanged with the client secret as before.
+
+The server asks IAM at `SOCIAL_AUTH_OIDC_OIDC_ENDPOINT` (universe:
+`https://api.hanzo.ai/v1/iam`): `settings/web.py` names the token, userinfo,
+revocation and JWKS addresses under it, and the token auth method, so social-core
+fetches no discovery document. The issuer `https://hanzo.id`
+(`SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER`) is checked in tokens and never fetched. The
+bearer path (`insights/auth.py` `_iam_jwk_client`) reads the same JWKS address; it
+used to read `<issuer>/.well-known/jwks.json`, which hanzo.id answers 404, so every
+IAM bearer failed closed with "IAM verification unavailable".
+
+A sign-out lands on `/login?from=logout` and a failed sign-in on
+`/login?error_code=…`; both draw `login.html` (a card and one "Sign in" link) and
+wait, because hanzo.ai keeps its own session and leaving at once would sign the
+person straight back in. `insights/test/test_signin.py` holds all of it, and that no
+source names hanzo.id. On main an invite (`/signup/<id>`) starts the same request carrying the invite
+(`_invite_signup_redirect`), so it signs in on hanzo.ai too; on the 1.52 line it
+and `/reset` are still upstream's SPA scenes.
 
 ## Auth / tenancy
 

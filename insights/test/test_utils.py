@@ -1493,7 +1493,7 @@ class TestAvailableSSOProviders(SimpleTestCase):
     """
 
     @override_settings(
-        SOCIAL_AUTH_OIDC_KEY="k", SOCIAL_AUTH_OIDC_SECRET="s", SOCIAL_AUTH_OIDC_OIDC_ENDPOINT="https://hanzo.id"
+        SOCIAL_AUTH_OIDC_KEY="k", SOCIAL_AUTH_OIDC_SECRET="s", SOCIAL_AUTH_OIDC_OIDC_ENDPOINT="https://api.hanzo.ai/v1/iam"
     )
     def test_oidc_is_available_when_configured(self):
         assert get_instance_available_sso_providers().get("oidc") is True

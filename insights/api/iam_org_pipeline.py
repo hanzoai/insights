@@ -1,6 +1,6 @@
 """Scope an SSO login to its Hanzo IAM organization.
 
-Hanzo IAM (hanzo.id) is the single federated login, and it carries the tenant in
+Hanzo IAM is the single federated login, and it carries the tenant in
 the `owner` claim of userinfo -- the org slug, e.g. "hanzo". This pipeline step
 turns that claim into an Insights Organization, Team and Membership so a user
 lands in their own tenant and nobody else's.

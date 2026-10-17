@@ -40,7 +40,9 @@ def logout(request):
     if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
         return redirect_to_login(next_url, login_url=settings.LOGIN_URL)
 
-    return redirect(settings.LOGIN_URL)
+    # The sign-out lands on /login?from=logout, which waits to be asked: hanzo.ai keeps
+    # its own session, and leaving for it at once would sign the person straight back in.
+    return redirect(f"{settings.LOGIN_URL}?from=logout")
 
 
 def sso_login(request: HttpRequest, backend: str) -> HttpResponse:
