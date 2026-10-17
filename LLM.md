@@ -39,8 +39,8 @@ imports; they are inert (not in INSTALLED_APPS).
 
 ## Production runs the 1.52.x release line, not main
 
-insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.175`
-(digest pinned in universe), built from tag `v1.52.175`: the 1.52.68 tree (`02e23ec`,
+insights.hanzo.ai (AWS k3s, ns hanzo) runs `ghcr.io/hanzoai/insights:1.52.176`
+(digest pinned in universe), built from tag `v1.52.176`: the 1.52.68 tree (`02e23ec`,
 kept on GitHub under `refs/dr-backup/*`) plus the commits tagged on top of it.
 Main can't deploy there yet. Its product apps carry the upstream migration graph
 (~1000 migrations), while the prod DB was built from 1.52.68's squashed graph, and
@@ -453,6 +453,14 @@ fetches no discovery document. The issuer `https://hanzo.id`
 bearer path (`insights/auth.py` `_iam_jwk_client`) reads the same JWKS address; it
 used to read `<issuer>/.well-known/jwks.json`, which hanzo.id answers 404, so every
 IAM bearer failed closed with "IAM verification unavailable".
+
+A person new to Insights is created at sign-in (1.52.176, `social_create_user`,
+backend `oidc`) in no organization, and `iam_org_assign` places them in their
+IAM org's organization (made on first sign-in) or denies the sign-in. Before,
+upstream's organization-creation gate ran first and answered every new person
+`/login?error_code=no_new_organizations`: this deployment cannot create
+organizations (`get_can_create_org`), so only invited or JIT-domain addresses got
+in, whatever IAM said.
 
 A sign-out lands on `/login?from=logout` and a failed sign-in on
 `/login?error_code=…`; both draw `login.html` (a card and one "Sign in" link) and

@@ -93,3 +93,30 @@ def test_no_source_names_the_issuers_host():
                 if re.search(r"hanzo\.id(?![a-z])", line):
                     hits.append(f"{p.relative_to(ROOT)}:{i}")
     assert hits == []
+
+
+class TestANewPerson(APIBaseTest):
+    """Hanzo IAM decides where a person belongs, so one new to Insights is created
+    for `iam_org_assign` to place, rather than refused for want of an organization."""
+
+    def test_is_created_in_no_organization_for_iam_to_place(self):
+        from unittest.mock import MagicMock
+
+        from django.contrib.auth.models import AnonymousUser
+
+        from insights.api.signup import social_create_user
+
+        strategy = MagicMock()
+        strategy.session_get.return_value = None
+        backend = MagicMock()
+        backend.name = "oidc"
+        request = MagicMock()
+        request.user = AnonymousUser()
+        out = social_create_user.__wrapped__(
+            strategy, {"email": "new@iam.example", "fullname": "New Person"}, backend, request, user=None, response={}
+        )
+        assert out["is_new"] is True
+        user = out["user"]
+        assert user.email == "new@iam.example"
+        assert user.organization is None
+        assert not user.has_usable_password()
