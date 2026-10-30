@@ -55,7 +55,7 @@ class TestFetchBlockBytes:
         assert result == b"compressed-data"
         mock_session.get.assert_called_once_with(
             "http://localhost:6740/v1/projects/1/recordings/session-123/block",
-            params={"key": "key", "start": 0, "end": 100},
+            params={"key": "key", "start_byte": 0, "end_byte": 100},
         )
 
     @pytest.mark.asyncio

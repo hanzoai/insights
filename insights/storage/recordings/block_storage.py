@@ -197,7 +197,9 @@ class EncryptedBlockStorage:
         url = f"{self.base_url}/v1/projects/{team_id}/recordings/{session_id}/block"
 
         try:
-            async with self.session.get(url, params={"key": key, "start": start, "end": end}) as response:
+            # The names the Recording API validates (plugin GetBlockQuerySchema):
+            # start/end are refused with a 400, and every replay failed to play.
+            async with self.session.get(url, params={"key": key, "start_byte": start, "end_byte": end}) as response:
                 if response.status == 404:
                     raise BlockFetchError("Block not found")
                 if response.status == 410:
